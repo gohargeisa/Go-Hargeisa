@@ -39,12 +39,12 @@ export function Hero({ locale }: { locale: Locale }) {
   return (
     <section className="relative h-screen min-h-[820px] w-full overflow-hidden">
       <Image
-        src="/images/hargeisa-hero.png"
-        alt="Panoramic view of Hargeisa at golden hour"
-        fill
-        priority
-        className="object-cover"
-      />
+  src="/images/hero-bg.png"
+  alt="Panoramic view of Hargeisa at golden hour"
+  fill
+  priority
+  className="object-cover"
+/>
 
       <div className="absolute inset-0 bg-hero-gradient" />
 
