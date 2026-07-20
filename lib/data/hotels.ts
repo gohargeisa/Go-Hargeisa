@@ -14,23 +14,39 @@ export async function getHotels(options?: { q?: string; featuredOnly?: boolean }
     if (q) {
       const needle = q.toLowerCase();
       results = results.filter(
-        (h) => h.name.toLowerCase().includes(needle) || h.shortDescription.toLowerCase().includes(needle)
+        (h) =>
+          h.name.toLowerCase().includes(needle) ||
+          h.shortDescription.toLowerCase().includes(needle)
       );
     }
     return results;
   }
 
   const supabase = createPublicClient();
-  let query = supabase.from("hotels").select("*").eq("status", "published").order("featured", { ascending: false });
+  let query = supabase
+    .from("hotels")
+    .select("*")
+    .eq("status", "published")
+    .order("featured", { ascending: false });
+
   if (featuredOnly) query = query.eq("featured", true);
-  if (q) query = query.or(`name.ilike.%${q}%,short_description.ilike.%${q}%,address.ilike.%${q}%`);
+  if (q)
+    query = query.or(
+      `name.ilike.%${q}%,short_description.ilike.%${q}%,address.ilike.%${q}%`
+    );
 
   const { data, error } = await query;
+
   if (error) {
     console.error("getHotels:", error.message);
-    return [];
+    return mockHotels;
   }
-  return (data ?? []).map((row) => mapHotel(row));
+
+  if (!data || data.length === 0) {
+    return mockHotels;
+  }
+
+  return data.map((row) => mapHotel(row));
 }
 
 async function _getHotelBySlug(slug: string): Promise<Hotel | null> {
@@ -39,8 +55,15 @@ async function _getHotelBySlug(slug: string): Promise<Hotel | null> {
   }
 
   const supabase = createPublicClient();
-  const { data: hotel, error } = await supabase.from("hotels").select("*").eq("slug", slug).single();
-  if (error || !hotel) return null;
+  const { data: hotel, error } = await supabase
+    .from("hotels")
+    .select("*")
+    .eq("slug", slug)
+    .single();
+
+  if (error || !hotel) {
+    return mockHotels.find((h) => h.slug === slug) ?? null;
+  }
 
   const { data: reviewRows } = await supabase
     .from("reviews")
@@ -49,7 +72,10 @@ async function _getHotelBySlug(slug: string): Promise<Hotel | null> {
     .eq("listing_id", hotel.id)
     .order("created_at", { ascending: false });
 
-  const reviews = (reviewRows ?? []).map((r: any) => mapReview(r, r.profiles?.full_name ?? "Guest"));
+  const reviews = (reviewRows ?? []).map((r: any) =>
+    mapReview(r, r.profiles?.full_name ?? "Guest")
+  );
+
   return mapHotel(hotel, reviews);
 }
 
@@ -62,7 +88,9 @@ export async function getNearbyAttractionsForHotel(hotelId: string) {
 
   if (!isSupabaseConfigured()) {
     const hotel = mockHotels.find((h) => h.id === hotelId);
-    return mockAttractions.filter((a) => hotel?.nearbyAttractionIds.includes(a.id));
+    return mockAttractions.filter((a) =>
+      hotel?.nearbyAttractionIds.includes(a.id)
+    );
   }
 
   const supabase = createPublicClient();
@@ -70,16 +98,33 @@ export async function getNearbyAttractionsForHotel(hotelId: string) {
     .from("hotel_nearby_attractions" as any)
     .select("attraction_id")
     .eq("hotel_id", hotelId);
+
   const ids = (links ?? []).map((l: any) => l.attraction_id);
+
   if (ids.length === 0) return [];
 
-  const { data } = await supabase.from("attractions").select("*").in("id", ids);
+  const { data } = await supabase
+    .from("attractions")
+    .select("*")
+    .in("id", ids);
+
   return (data ?? []).map((row) => mapAttraction(row));
 }
 
 export async function getAllHotelSlugs(): Promise<string[]> {
-  if (!isSupabaseConfigured()) return mockHotels.map((h) => h.slug);
+  if (!isSupabaseConfigured()) {
+    return mockHotels.map((h) => h.slug);
+  }
+
   const supabase = createPublicClient();
-  const { data } = await supabase.from("hotels").select("slug").eq("status", "published");
-  return (data ?? []).map((row) => row.slug);
+  const { data } = await supabase
+    .from("hotels")
+    .select("slug")
+    .eq("status", "published");
+
+  if (!data || data.length === 0) {
+    return mockHotels.map((h) => h.slug);
+  }
+
+  return data.map((row) => row.slug);
 }
