@@ -14,18 +14,10 @@ import { useHeaderUser } from "./use-header-user";
 import { SignOutButton } from "@/components/shared/sign-out-button";
 
 const links = [
-  { key: "explore", href: "explore" },
   { key: "hotels", href: "hotels" },
   { key: "restaurants", href: "restaurants" },
   { key: "cafes", href: "cafes" },
-  { key: "attractions", href: "attractions" },
-  { key: "shopping", href: "shopping" },
   { key: "events", href: "events" },
-  { key: "travelGuide", href: "travel-guide" },
-  { key: "transportation", href: "transportation" },
-  { key: "blog", href: "blog" },
-  { key: "about", href: "about" },
-  { key: "contact", href: "contact" },
 ] as const;
 
 export function SiteHeader({ locale }: { locale: Locale }) {
@@ -64,7 +56,7 @@ export function SiteHeader({ locale }: { locale: Locale }) {
 </div>
 
         <nav className="hidden lg:flex flex-1 items-center justify-center gap-8">
-          {links.slice(0, 8).map((l) => (
+          {links.map((l) => (
             <Link
               key={l.key}
               href={`/${locale}/${l.href}`}
@@ -114,7 +106,7 @@ export function SiteHeader({ locale }: { locale: Locale }) {
           )}
         </div>
 
-        <div className="flex items-center gap-2 xl:hidden">
+        <div className="flex items-center gap-2 lg:hidden">
           <LanguageSwitcher locale={locale} />
           <ThemeToggle />
           <button
@@ -133,7 +125,7 @@ export function SiteHeader({ locale }: { locale: Locale }) {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="xl:hidden overflow-hidden glass border-t border-ink/5 dark:border-white/10"
+            className="lg:hidden overflow-hidden glass border-t border-ink/5 dark:border-white/10"
           >
             <div className="container-px mx-auto flex flex-col py-4">
               {links.map((l) => (
