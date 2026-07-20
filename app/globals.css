@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-sand text-ink dark:bg-ink dark:text-sand font-body antialiased;
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white/70 dark:bg-ink/60 backdrop-blur-xl border border-white/40 dark:border-white/10;
+  }
+
+  .glass-dark {
+    @apply bg-ink/50 backdrop-blur-xl border border-white/10;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .container-px {
+    @apply px-5 md:px-8 lg:px-12;
+  }
+}
+
+/* Accessible focus ring across the app */
+:focus-visible {
+  outline: 2px solid #0b5ed7;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Leaflet map container needs explicit height */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  border-radius: 1.25rem;
+  z-index: 0;
+}

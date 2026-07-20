@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type-check
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+        env:
+          # Intentionally left unset: leaving NEXT_PUBLIC_SUPABASE_URL /
+          # NEXT_PUBLIC_SUPABASE_ANON_KEY empty makes isSupabaseConfigured()
+          # return false, so every page falls back to lib/mock-data.ts during
+          # the build instead of attempting real (and here, nonexistent)
+          # Supabase calls during static generation. Add real secrets in the
+          # repo's Actions settings once you want CI to build against your
+          # actual Supabase project.
+          NEXT_PUBLIC_SITE_URL: "https://gohargeisa.com"
