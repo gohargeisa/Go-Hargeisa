@@ -71,10 +71,10 @@ export async function generateMetadata({
       description: "Your complete guide to Hargeisa, Somaliland.",
     },
     manifest: "/manifest.json",
-    icons: {
-      icon: "/icons/icon-192.png",
-      apple: "/icons/icon-192.png",
-    },
+icons: {
+  icon: "/icons/icon-192.png",
+  apple: "/apple-icon.png",
+},
   };
 }
 
