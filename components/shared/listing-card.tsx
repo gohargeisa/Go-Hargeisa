@@ -143,28 +143,47 @@ export function ListingCard({
           />
         </div>
 
-        {/* Hotel Features */}
-        <div className="mt-6 flex flex-wrap gap-2">
-          <span className="rounded-full bg-gray-100 dark:bg-zinc-800 px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-300">
-            📶 Free WiFi
-          </span>
+        {/* Features */}
+<div className="mt-6 flex flex-wrap gap-2">
+  {listingType === "hotel" && (
+    <>
+      <Feature text="📶 Free WiFi" />
+      <Feature text="🍳 Breakfast" />
+      <Feature text="🚗 Parking" />
+      <Feature text="🏊 Swimming Pool" />
+      <Feature text="🛏 Premium Rooms" />
+    </>
+  )}
 
-          <span className="rounded-full bg-gray-100 dark:bg-zinc-800 px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-300">
-            🍽 Restaurant
-          </span>
+  {listingType === "restaurant" && (
+    <>
+      <Feature text="🥩 Somali Cuisine" />
+      <Feature text="🔥 BBQ & Grill" />
+      <Feature text="🥗 Fresh Meals" />
+      <Feature text="👨‍👩‍👧 Family Friendly" />
+      <Feature text="🥤 Soft Drinks" />
+    </>
+  )}
 
-          <span className="rounded-full bg-gray-100 dark:bg-zinc-800 px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-300">
-            🚗 Parking
-          </span>
+  {listingType === "cafe" && (
+    <>
+      <Feature text="☕ Specialty Coffee" />
+      <Feature text="🥐 Fresh Bakery" />
+      <Feature text="📶 Free WiFi" />
+      <Feature text="💻 Work Friendly" />
+      <Feature text="🍰 Desserts" />
+    </>
+  )}
 
-          <span className="rounded-full bg-gray-100 dark:bg-zinc-800 px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-300">
-            🏢 Conference Room
-          </span>
-
-          <span className="rounded-full bg-gray-100 dark:bg-zinc-800 px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-300">
-            ☕ Breakfast
-          </span>
-        </div>
+  {listingType === "attraction" && (
+    <>
+      <Feature text="📸 Photography" />
+      <Feature text="🎟 Tourist Attraction" />
+      <Feature text="🗺 Guided Tours" />
+      <Feature text="🌍 Landmark" />
+    </>
+  )}
+</div>
 
         <div className="mt-7 border-t border-gray-200 dark:border-zinc-700 pt-6">
           <div className="flex justify-end">
@@ -179,5 +198,11 @@ export function ListingCard({
         </div>
       </div>
     </Link>
+  );
+}function Feature({ text }: { text: string }) {
+  return (
+    <span className="rounded-full border border-zinc-200 bg-gray-100 dark:bg-zinc-800 px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 transition-all duration-300 hover:bg-primary hover:text-white">
+      {text}
+    </span>
   );
 }

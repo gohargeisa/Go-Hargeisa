@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -66,9 +67,41 @@ export default async function RestaurantDetailPage({
             href: `/${locale}/restaurants/${restaurant.slug}`,
           },
         ]}
-      />
+      /><section className="relative h-[55vh] w-full overflow-hidden">
+  <Image
+  src={restaurant.coverImage}
+  alt={restaurant.name}
+  fill
+  priority
+  className="object-cover"
+/>
 
-      <div className="container-px mx-auto pt-6">
+  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+
+  <div className="absolute bottom-10 left-0 right-0 container-px mx-auto">
+    <div className="flex flex-wrap gap-2 mb-3">
+      {(restaurant.cuisine as string[]).map((c) => (
+        <span
+          key={c}
+          className="rounded-full bg-white/20 backdrop-blur px-3 py-1 text-sm text-white"
+        >
+          {c}
+        </span>
+      ))}
+    </div>
+
+    <h1 className="text-5xl font-bold text-white">
+      {restaurant.name}
+    </h1>
+
+    <p className="mt-3 flex items-center gap-2 text-white/90">
+      <MapPin size={18} />
+      {restaurant.address}
+    </p>
+  </div>
+</section>
+
+      <div className="container-px mx-auto -mt-20 relative z-20">
         <Gallery
           cover={restaurant.coverImage}
           images={restaurant.gallery}
@@ -78,42 +111,36 @@ export default async function RestaurantDetailPage({
 
       <div className="container-px mx-auto grid gap-10 py-10 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-10">
-          <div>
-            <div className="flex flex-wrap gap-2">
-              {(restaurant.cuisine as string[]).map((c: string) => (
-                <span
-                  key={c}
-                  className="rounded-full bg-secondary/10 px-3 py-1 text-xs font-semibold text-secondary-700"
-                >
-                  {c}
-                </span>
-              ))}
-            </div>
+          <div className="rounded-3xl bg-white dark:bg-zinc-900 p-8 shadow-xl border border-zinc-200 dark:border-zinc-800">
+  <div className="flex items-center gap-3 mb-5">
+    <RatingBadge
+      rating={restaurant.rating}
+      reviewCount={restaurant.reviewCount}
+      size="md"
+    />
+  </div>
 
-            <h1 className="mt-3 font-display text-3xl font-semibold">
-              {restaurant.name}
-            </h1>
+  <div className="grid grid-cols-3 gap-4 mb-8">
+    <div className="rounded-2xl bg-primary/10 p-4 text-center">
+      <p className="text-xs text-gray-500">Rating</p>
+      <p className="text-2xl font-bold">{restaurant.rating}</p>
+    </div>
 
-            <p className="mt-2 flex items-center gap-1.5 text-sm text-ink/60 dark:text-sand/60">
-              <MapPin size={14} /> {restaurant.address}
-            </p>
+    <div className="rounded-2xl bg-primary/10 p-4 text-center">
+      <p className="text-xs text-gray-500">Reviews</p>
+      <p className="text-2xl font-bold">{restaurant.reviewCount}</p>
+    </div>
 
-            <p className="mt-1 flex items-center gap-1.5 text-sm text-ink/60 dark:text-sand/60">
-              <Clock size={14} /> {restaurant.openingHours}
-            </p>
+    <div className="rounded-2xl bg-primary/10 p-4 text-center">
+      <p className="text-xs text-gray-500">Hours</p>
+      <p className="text-sm font-bold">{restaurant.openingHours}</p>
+    </div>
+  </div>
 
-            <div className="mt-3">
-              <RatingBadge
-                rating={restaurant.rating}
-                reviewCount={restaurant.reviewCount}
-                size="md"
-              />
-            </div>
-
-            <p className="mt-5 text-ink/75 dark:text-sand/75 leading-relaxed">
-              {restaurant.description}
-            </p>
-          </div>
+  <p className="leading-8 text-ink/75 dark:text-sand/75">
+    {restaurant.description}
+  </p>
+</div>
 
           {restaurant.menuHighlights.length > 0 && (
             <div>
@@ -187,12 +214,12 @@ export default async function RestaurantDetailPage({
           </div>
         </div>
 
-        <aside className="lg:sticky lg:top-24 h-fit space-y-4 rounded-xl3 border border-ink/8 dark:border-white/10 p-6 shadow-card">
-          <AddToTripButton
-            locale={locale}
-            listingType="restaurant"
-            listingId={restaurant.id}
-          />
+        <aside className="lg:sticky lg:top-24 h-fit rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-8 shadow-2xl space-y-6">
+  <AddToTripButton
+    locale={locale}
+    listingType="restaurant"
+    listingId={restaurant.id}
+  />
 
           <h3 className="font-display text-lg font-semibold">
             {t("openingHours")}
@@ -203,7 +230,7 @@ export default async function RestaurantDetailPage({
           </p>
 
           {restaurant.reservable && (
-            <button className="w-full rounded-full bg-secondary py-3 text-sm font-semibold text-white hover:bg-secondary-700 transition-colors">
+            <button className="w-full rounded-2xl bg-primary py-4 text-lg font-bold text-white transition-all duration-300 hover:scale-[1.02] hover:shadow-xl">
               {t("reserveTable")}
             </button>
           )}

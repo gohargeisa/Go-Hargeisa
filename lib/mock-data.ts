@@ -99,47 +99,87 @@ export const hotels: Hotel[] = [
 export const restaurants: Restaurant[] = [
   {
     id: "r1",
-    slug: "xafow-restaurant",
-    name: "Xafow Restaurant",
-    shortDescription: "Traditional Somali grill famous for camel meat and malawah.",
+    slug: "sultan-restaurant",
+    name: "Sultan Restaurant",
+
+    shortDescription:
+      "One of Hargeisa's most popular restaurants serving Somali, Arabic and seafood cuisine.",
+
     description:
-      "A beloved local institution serving classic Somali dishes — slow-grilled camel and goat meat, fragrant basmati bariis, and fresh malawah, in a lively communal setting.",
-    coverImage: placeholderImage("Xafow Restaurant"),
-    gallery: [{ url: placeholderImage("Xafow — Grilled Platter"), alt: "Grilled platter" }],
-    address: "26 June Street, Hargeisa",
-    location: { lat: 9.5578, lng: 44.0645 },
-    rating: 4.7,
-    reviewCount: 302,
-    reviews: [],
-    cuisine: ["Somali", "Grill"],
-    priceRange: "$$",
-    openingHours: "7:00 AM – 11:00 PM",
-    menuHighlights: [
-      { name: "Camel Suqaar", price: "$8", description: "Diced camel meat sautéed with onion and pepper" },
-      { name: "Bariis Iskukaris", price: "$6" },
+      "Sultan Restaurant is one of the best-known dining destinations in Hargeisa. It offers Somali, Arabic, grilled and seafood dishes in a modern and family-friendly atmosphere. The restaurant is popular with locals, business travelers and tourists visiting Somaliland.",
+
+    // ⬇️ ضعها هنا
+    coverImage: "/images/restaurants/sultan/hero.jpeg",
+
+    gallery: [
+      {
+        url: "/images/restaurants/sultan/1.jpeg",
+        alt: "Sultan Restaurant",
+      },
+      {
+        url: "/images/restaurants/sultan/2.jpeg",
+        alt: "Dining Area",
+      },
+      {
+        url: "/images/restaurants/sultan/3.jpeg",
+        alt: "Food",
+      },
+      {
+        url: "/images/restaurants/sultan/4.jpeg",
+        alt: "Outdoor Seating",
+      },
+      {
+        url: "/images/restaurants/sultan/5.jpeg",
+        alt: "Restaurant Interior",
+      },
+      {
+        url: "/images/restaurants/sultan/6.jpeg",
+        alt: "Signature Dishes",
+      },
     ],
-    reservable: true,
-    featured: true,
+
+    address: "Jigjiga Yar, Hargeisa, Somaliland",
+
+location: {
+  lat: 9.5624,
+  lng: 44.0659,
+},
+
+rating: 4.8,
+reviewCount: 250,
+
+reviews: [],
+
+cuisine: [
+  "Somali",
+  "Arabic",
+  "BBQ",
+  "Seafood"
+],
+
+priceRange: "$$",
+
+openingHours: "8:00 AM – 11:00 PM",
+
+menuHighlights: [
+  {
+    name: "Mixed Grill",
+    price: "$12",
+    description: "Mixed grilled meat with rice and fresh salad."
   },
   {
-    id: "r2",
-    slug: "sahafi-restaurant",
-    name: "Sahafi Hotel Restaurant",
-    shortDescription: "Comfortable dining spot with international and local menu.",
-    description:
-      "Set within the Sahafi Hotel, this restaurant offers a mix of grilled meats, pasta and fresh juices in a shaded outdoor courtyard popular with journalists and NGO staff.",
-    coverImage: placeholderImage("Sahafi Restaurant", { tone: "secondary" }),
-    gallery: [{ url: placeholderImage("Sahafi — Courtyard"), alt: "Courtyard seating" }],
-    address: "Sahafi Hotel, Hargeisa",
-    location: { lat: 9.5611, lng: 44.0668 },
-    rating: 4.4,
-    reviewCount: 121,
-    reviews: [],
-    cuisine: ["Somali", "International"],
-    priceRange: "$$",
-    openingHours: "6:30 AM – 10:30 PM",
-    menuHighlights: [{ name: "Grilled Fish", price: "$9" }],
-    reservable: true,
+    name: "Fish Fillet",
+    price: "$10"
+  },
+  {
+    name: "Chicken Steak",
+    price: "$9"
+  }
+],
+
+reservable: true,
+
+featured: true,
   },
 ];
 
@@ -297,7 +337,15 @@ export const articles: Article[] = [
 
 export const mapPoints: MapPoint[] = [
   { id: "m1", name: "Ambassador Hotel", category: "hotel", location: { lat: 9.5624, lng: 44.065 } },
-  { id: "m2", name: "Xafow Restaurant", category: "restaurant", location: { lat: 9.5578, lng: 44.0645 } },
+  {
+  id: "m2",
+  name: "Sultan Restaurant",
+  category: "restaurant",
+  location: {
+    lat: 9.5624,
+    lng: 44.0659
+  }
+},
   { id: "m3", name: "Hargeisa Group Hospital", category: "hospital", location: { lat: 9.5545, lng: 44.0631 } },
   { id: "m4", name: "Dahabshiil Bank HQ", category: "bank", location: { lat: 9.5599, lng: 44.0663 } },
   { id: "m5", name: "Jamia Mosque", category: "mosque", location: { lat: 9.5619, lng: 44.0678 } },
