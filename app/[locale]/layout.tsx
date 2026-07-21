@@ -48,12 +48,16 @@ export async function generateMetadata({
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gohargeisa.com";
 
   return {
-    metadataBase: new URL(siteUrl),
+  metadataBase: new URL(siteUrl),
+
+  verification: {
+    google: "lvWrni4Mn0_p_TuIQhwt5j73VIdu_Rgqadn0QdpLKU4",
+  },
 
     title: {
-      default: "Go Hargeisa | Official Tourism Guide to Hargeisa, Somaliland",
-      template: "%s | Go Hargeisa",
-    },
+    default: "Go Hargeisa | Official Tourism Guide to Hargeisa, Somaliland",
+    template: "%s | Go Hargeisa",
+  },
 
     description:
       "Explore Hargeisa with Go Hargeisa. Discover hotels, restaurants, cafés, attractions, events, and travel tips across Somaliland.",
