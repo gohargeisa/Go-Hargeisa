@@ -1,7 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { Facebook, Instagram, Twitter, Youtube } from "lucide-react";
+import { Facebook, Instagram, Youtube } from "lucide-react";
+import { FaTiktok } from "react-icons/fa6";
 import type { Locale } from "@/lib/i18n/config";
 
 export function SiteFooter({ locale }: { locale: Locale }) {
@@ -36,9 +37,9 @@ export function SiteFooter({ locale }: { locale: Locale }) {
     href: "https://instagram.com/go.hargeisa",
   },
   {
-    icon: Twitter,
-    href: "https://x.com/go.hargeisa",
-  },
+  icon: FaTiktok,
+  href: "https://www.tiktok.com/@gohargeisa",
+},
   {
     icon: Youtube,
     href: "https://youtube.com/@Go.Hargeisa",
