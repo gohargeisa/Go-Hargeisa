@@ -1,3 +1,5 @@
+import dotenv from "dotenv";
+dotenv.config({ path: ".env.local" });
 /**
  * Seeds a connected Supabase project with the same sample data used by the
  * mock-data fallback (lib/mock-data.ts), so the live site looks identical
