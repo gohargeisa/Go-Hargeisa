@@ -45,36 +45,106 @@ export async function generateMetadata({
 }: {
   params: { locale: string };
 }): Promise<Metadata> {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gohargeisa.com";
+
   return {
+    metadataBase: new URL(siteUrl),
+
     title: {
-      default: "Go Hargeisa — Official Tourism Guide to Hargeisa, Somaliland",
+      default: "Go Hargeisa | Official Tourism Guide to Hargeisa, Somaliland",
       template: "%s | Go Hargeisa",
     },
+
     description:
-      "Discover Hargeisa: hotels, restaurants, cafes, tourist attractions, events and a complete travel guide to the capital of Somaliland.",
-    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://gohargeisa.com"),
+      "Explore Hargeisa with Go Hargeisa. Discover hotels, restaurants, cafés, attractions, events, and travel tips across Somaliland.",
+
+    keywords: [
+      "Hargeisa",
+      "Go Hargeisa",
+      "Visit Hargeisa",
+      "Somaliland",
+      "Hotels in Hargeisa",
+      "Restaurants in Hargeisa",
+      "Cafes in Hargeisa",
+      "Tourism Somaliland",
+      "Travel Somaliland",
+      "Hargeisa Guide",
+    ],
+
+    authors: [
+      {
+        name: "Go Hargeisa",
+      },
+    ],
+
+    creator: "Go Hargeisa",
+
+    publisher: "Go Hargeisa",
+
+    category: "Travel",
+
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
+    },
+
     alternates: {
       canonical: `/${locale}`,
-      languages: { en: "/en", ar: "/ar", so: "/so" },
+      languages: {
+        en: "/en",
+        ar: "/ar",
+        so: "/so",
+      },
     },
+
     openGraph: {
       title: "Go Hargeisa",
-      description: "Your complete guide to Hargeisa, Somaliland.",
-      url: `https://gohargeisa.com/${locale}`,
+      description:
+        "The official tourism guide to Hargeisa, Somaliland.",
+
+      url: `${siteUrl}/${locale}`,
+
       siteName: "Go Hargeisa",
+
       locale,
+
       type: "website",
+
+      images: [
+  {
+    url: "/images/og-image.png",
+    width: 1200,
+    height: 630,
+    alt: "Go Hargeisa",
+  },
+],
     },
+
     twitter: {
-      card: "summary_large_image",
-      title: "Go Hargeisa",
-      description: "Your complete guide to Hargeisa, Somaliland.",
-    },
-    manifest: "/manifest.json",
-icons: {
-  icon: "/icons/icon-192.png",
-  apple: "/apple-icon.png",
+  card: "summary_large_image",
+  title: "Go Hargeisa",
+  description: "The official tourism guide to Hargeisa, Somaliland.",
+  images: ["/images/og-image.png"],
 },
+
+    manifest: "/manifest.json",
+
+    icons: {
+      icon: [
+        { url: "/favicon.ico" },
+        { url: "/icons/icon-192.png", sizes: "192x192" },
+        { url: "/icons/icon-512.png", sizes: "512x512" },
+      ],
+
+      apple: "/apple-icon.png",
+    },
   };
 }
 
