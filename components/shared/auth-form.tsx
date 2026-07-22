@@ -15,7 +15,8 @@ export function AuthForm({ mode, locale }: { mode: "login" | "register"; locale:
   const [checkEmail, setCheckEmail] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const next = searchParams.get("next") ?? `/${locale}/dashboard`;
+  const requestedNext = searchParams.get("next");
+  const next = requestedNext?.startsWith(`/${locale}/`) ? requestedNext : `/${locale}/dashboard`;
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();

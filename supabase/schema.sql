@@ -23,7 +23,6 @@ create table profiles (
   full_name text,
   avatar_url text,
   role user_role not null default 'user',
-  phone text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );

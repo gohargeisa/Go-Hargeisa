@@ -7,7 +7,10 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET(request: NextRequest, { params }: { params: { locale: string } }) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? `/${params.locale}/dashboard`;
+  const requestedNext = searchParams.get("next");
+  const next = requestedNext?.startsWith(`/${params.locale}/`)
+    ? requestedNext
+    : `/${params.locale}/dashboard`;
 
   if (code) {
     const supabase = await createClient();

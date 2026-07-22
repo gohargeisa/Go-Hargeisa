@@ -49,10 +49,10 @@ export const hotels: Hotel[] = [
   name: "Grand Haadi Hotel",
 
   shortDescription:
-    "Modern hotel in Hargeisa offering comfortable rooms, free WiFi and excellent hospitality.",
+    "A spacious Hargeisa stay with hotel rooms, villas, meeting spaces and a restaurant.",
 
   description:
-    "Grand Haadi Hotel is one of Hargeisa's well-known hotels, providing modern accommodation, conference facilities, a restaurant and convenient access to the city center.",
+    "Grand Haadi Hotel is located in Buurta Kala Jeexan, Hargeisa. Its published profile describes a 17-acre property with 57 hotel rooms, 10 villas, three banquet halls, three meeting rooms and a large restaurant.",
 
   coverImage: "/images/hotels/grand-haadi.jpg",
 
@@ -79,13 +79,7 @@ export const hotels: Hotel[] = [
 
   priceRange: "$$",
 
-  amenities: [
-    "Free WiFi",
-    "Restaurant",
-    "Parking",
-    "Airport Shuttle",
-    "Family Rooms",
-  ],
+  amenities: ["57 Hotel Rooms", "10 Villas", "Restaurant", "3 Banquet Halls", "3 Meeting Rooms", "Gym"],
 
   nearbyAttractionIds: ["a1"],
 

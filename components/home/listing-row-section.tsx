@@ -31,7 +31,7 @@ export function ListingRowSection({
   tone?: "sand" | "white";
 }) {
   return (
-    <section className={`py-16 md:py-20 ${tone === "white" ? "bg-white dark:bg-white/[0.03]" : ""}`}>
+    <section className={`py-14 md:py-20 ${tone === "white" ? "bg-white dark:bg-white/[0.03]" : ""}`}>
       <div className="container-px mx-auto">
         <SectionHeader
           eyebrow={eyebrow}

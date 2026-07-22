@@ -1,6 +1,4 @@
-import Script from "next/script";
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Plus_Jakarta_Sans } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -25,21 +23,6 @@ export const dynamic = "force-dynamic";
 // useHeaderUser() (components/layout/use-header-user.ts), which keeps this
 // layout — and therefore every public page — eligible for static
 // generation + ISR. See that file for the full rationale.
-
-const display = Fraunces({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
-  variable: "--font-display",
-  display: "swap",
-});
-
-const body = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-body",
-  display: "swap",
-});
 
 export async function generateMetadata({
   params: { locale },
@@ -159,10 +142,6 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export function generateStaticParams() {
-  return locales.map((locale) => ({ locale }));
-}
-
 export default async function LocaleLayout({
   children,
   params: { locale },
@@ -171,38 +150,20 @@ export default async function LocaleLayout({
   params: { locale: string };
 }) {
   if (!locales.includes(locale as Locale)) notFound();
+
+  const currentLocale = locale as Locale;
   const messages = await getMessages();
-  const dir = localeConfig[locale as Locale].dir;
 
-    return (
-    <html lang={locale} dir={dir} suppressHydrationWarning>
-      <body className={`${display.variable} ${body.variable}`}>
-        <NextIntlClientProvider messages={messages}>
-          <ThemeProvider>
-            <ServiceWorkerRegister />
-            <SiteHeader locale={locale as Locale} />
-            <main>{children}</main>
-            <SiteFooter locale={locale as Locale} />
-          </ThemeProvider>
-        </NextIntlClientProvider>
-
-        {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
-  <>
-    <Script
-      src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}`}
-      strategy="afterInteractive"
-    />
-    <Script id="google-analytics" strategy="afterInteractive">
-      {`
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', '${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}');
-      `}
-    </Script>
-  </>
-)}
-      </body>
-    </html>
+  return (
+    <NextIntlClientProvider messages={messages}>
+      <ThemeProvider>
+        <div lang={currentLocale} dir={localeConfig[currentLocale].dir} className="min-h-screen font-body">
+          <SiteHeader locale={currentLocale} />
+          <main>{children}</main>
+          <SiteFooter locale={currentLocale} />
+          <ServiceWorkerRegister />
+        </div>
+      </ThemeProvider>
+    </NextIntlClientProvider>
   );
 }
