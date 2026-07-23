@@ -68,6 +68,11 @@ export type Database = {
       attraction_nearby_restaurants: Table<{ attraction_id: string; restaurant_id: string }>;
       attraction_nearby_hotels: Table<{ attraction_id: string; hotel_id: string }>;
       hotel_nearby_attractions: Table<{ hotel_id: string; attraction_id: string }>;
+      activity_logs: Table<{ id: string; user_id: string | null; action: string; entity_type: string; entity_id: string | null; details: Json | null; ip_address: string | null; user_agent: string | null; created_at: string }>;
+      site_settings: Table<{ id: string; site_name: string; logo_url: string | null; favicon_url: string | null; contact_email: string | null; contact_phone: string | null; whatsapp_number: string | null; social_facebook: string | null; social_instagram: string | null; social_twitter: string | null; social_youtube: string | null; social_tiktok: string | null; footer_text: string | null; default_language: string; default_theme: string; map_center_lat: number | null; map_center_lng: number | null; map_zoom: number | null; features_reviews_enabled: boolean; features_ratings_enabled: boolean; features_favorites_enabled: boolean; features_trips_enabled: boolean; features_newsletter_enabled: boolean; seo_title: string | null; seo_description: string | null; seo_keywords: string | null; created_at: string; updated_at: string }>;
+      notifications: Table<{ id: string; user_id: string | null; title: string; message: string | null; type: string; action_url: string | null; is_read: boolean; created_at: string; read_at: string | null }>;
+      business_hours: Table<{ id: string; entity_type: string; entity_id: string; day_of_week: number; opens_at: string | null; closes_at: string | null; is_closed: boolean; special_note: string | null; created_at: string; updated_at: string }>;
+      amenity_categories: Table<{ id: string; name: string; icon: string | null; sort_order: number; created_at: string }>;
     } & Record<string, Table<Record<string, unknown>, Record<string, unknown>, Record<string, unknown>>>;
     Views: Record<string, never>;
     Functions: Record<string, never>;
