@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Facebook, Instagram, Youtube } from "lucide-react";
-import { FaTiktok } from "react-icons/fa6";
+import { FaTiktok, FaWhatsapp } from "react-icons/fa6";
 import type { Locale } from "@/lib/i18n/config";
 
 export function SiteFooter({ locale }: { locale: Locale }) {
@@ -29,20 +29,29 @@ export function SiteFooter({ locale }: { locale: Locale }) {
   ] as const;
   const socialLinks = [
   {
-    icon: Facebook,
-    href: "https://facebook.com/Go.Hargeisa",
+    icon: FaWhatsapp,
+    href: "https://wa.me/252656156752",
+    label: "WhatsApp",
   },
   {
     icon: Instagram,
     href: "https://instagram.com/go.hargeisa",
+    label: "Instagram",
   },
   {
-  icon: FaTiktok,
-  href: "https://www.tiktok.com/@gohargeisa",
-},
+    icon: FaTiktok,
+    href: "https://www.tiktok.com/@gohargeisa",
+    label: "TikTok",
+  },
+  {
+    icon: Facebook,
+    href: "https://facebook.com/Go.Hargeisa",
+    label: "Facebook",
+  },
   {
     icon: Youtube,
     href: "https://youtube.com/@Go.Hargeisa",
+    label: "YouTube",
   },
 ];
     
@@ -63,13 +72,13 @@ export function SiteFooter({ locale }: { locale: Locale }) {
   {t("tagline")}
 </p>
           <div className="mt-5 flex gap-3">
-  {socialLinks.map(({ icon: Icon, href }, i) => (
+  {socialLinks.map(({ icon: Icon, href, label }, i) => (
   <a
     key={i}
     href={href}
     target="_blank"
     rel="noopener noreferrer"
-    aria-label="Social link"
+    aria-label={label}
     className="flex h-10 w-10 items-center justify-center rounded-full border border-ink/10 dark:border-white/10 bg-white/5 transition-all duration-300 hover:-translate-y-1 hover:border-primary hover:bg-primary hover:text-white"
   >
     <Icon size={16} />
