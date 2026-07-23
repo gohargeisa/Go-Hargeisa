@@ -35,6 +35,13 @@ export default async function HotelsPage({
   const common = await getTranslations("common");
   const hotels = await getHotels({ q: searchParams.q });
 
+  // Sort: featured first, then by rating
+  const sortedHotels = hotels.sort((a, b) => {
+    if (a.featured && !b.featured) return -1;
+    if (!a.featured && b.featured) return 1;
+    return b.rating - a.rating;
+  });
+
   return (
     <>
       <PageHero
@@ -44,53 +51,96 @@ export default async function HotelsPage({
         image="/images/heroes/hotels-hero.png"
       />
 
-      <section className="container-px mx-auto py-14">
-        <SearchWithin
-          basePath={`/${locale}/hotels`}
-          placeholder="Search hotels by name or area…"
-          defaultValue={searchParams.q}
-        />
+      <section className="container-px mx-auto py-10 md:py-14">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="font-display text-2xl font-bold md:text-3xl">
+              {hotels.length} Hotels
+            </h2>
+            <p className="mt-1 text-sm text-ink/60 dark:text-sand/60">
+              {searchParams.q ? `Results for "${searchParams.q}"` : "Browse all hotels in Hargeisa"}
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-6">
+          <SearchWithin
+            basePath={`/${locale}/hotels`}
+            placeholder="Search hotels by name or area…"
+            defaultValue={searchParams.q}
+          />
+        </div>
 
         {hotels.length === 0 ? (
-          <p className="mt-10 text-center text-ink/50 dark:text-sand/50">
-            {common("noResults")}
-          </p>
+          <div className="mt-12 rounded-2xl border border-dashed border-ink/20 bg-ink/5 p-12 text-center dark:border-white/20 dark:bg-white/[0.02]">
+            <h3 className="font-display text-lg font-semibold">No hotels found</h3>
+            <p className="mt-2 text-sm text-ink/60 dark:text-sand/60">
+              {searchParams.q ? "Try adjusting your search" : "Check back soon for more hotels"}
+            </p>
+          </div>
         ) : (
-          <>
-            {/* Featured Header */}
-            <div className="mt-12 mb-10 text-center">
-              <span className="inline-flex items-center rounded-full bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
-                ⭐ Featured Hotel
-              </span>
+          <div className="mt-10">
+            {/* Featured Hotels Section */}
+            {sortedHotels.some((h) => h.featured) && (
+              <div className="mb-12">
+                <div className="mb-6">
+                  <h3 className="font-display text-xl font-bold">⭐ Featured Hotels</h3>
+                  <p className="mt-1 text-sm text-ink/60 dark:text-sand/60">Our top-rated properties</p>
+                </div>
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {sortedHotels
+                    .filter((h) => h.featured)
+                    .map((h) => (
+                      <ListingCard
+                        key={h.id}
+                        href={`/${locale}/hotels/${h.slug}`}
+                        image={h.coverImage}
+                        title={h.name}
+                        subtitle={h.address}
+                        rating={h.rating}
+                        reviewCount={h.reviewCount}
+                        listingType="hotel"
+                        listingId={h.id}
+                        locale={locale}
+                        priceRange={h.priceRange}
+                        tag="Featured"
+                      />
+                    ))}
+                </div>
+              </div>
+            )}
 
-              <h2 className="mt-4 font-display text-4xl font-bold text-ink dark:text-sand">
-                Our Verified Hotel Partner
-              </h2>
-
-              <p className="mt-3 text-lg text-ink/60 dark:text-sand/60">
-                Carefully selected accommodation for visitors to Hargeisa.
-              </p>
-            </div>
-
-            {/* Hotel Card */}
-            <div className="flex justify-center">
-              {hotels.map((h) => (
-                <ListingCard
-                  key={h.id}
-                  href={`/${locale}/hotels/${h.slug}`}
-                  image={h.coverImage}
-                  title={h.name}
-                  subtitle={h.address}
-                  rating={h.rating}
-                  reviewCount={h.reviewCount}
-                  listingType="hotel"
-                  listingId={h.id}
-                  locale={locale}
-                  priceRange={h.priceRange}
-                />
-              ))}
-            </div>
-          </>
+            {/* All Hotels Section */}
+            {sortedHotels.some((h) => !h.featured) && (
+              <div>
+                <div className="mb-6">
+                  <h3 className="font-display text-xl font-bold">All Hotels</h3>
+                  <p className="mt-1 text-sm text-ink/60 dark:text-sand/60">
+                    {sortedHotels.filter((h) => !h.featured).length} available properties
+                  </p>
+                </div>
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {sortedHotels
+                    .filter((h) => !h.featured)
+                    .map((h) => (
+                      <ListingCard
+                        key={h.id}
+                        href={`/${locale}/hotels/${h.slug}`}
+                        image={h.coverImage}
+                        title={h.name}
+                        subtitle={h.address}
+                        rating={h.rating}
+                        reviewCount={h.reviewCount}
+                        listingType="hotel"
+                        listingId={h.id}
+                        locale={locale}
+                        priceRange={h.priceRange}
+                      />
+                    ))}
+                </div>
+              </div>
+            )}
+          </div>
         )}
       </section>
     </>

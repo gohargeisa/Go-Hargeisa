@@ -33,6 +33,13 @@ export default async function RestaurantsPage({
   const common = await getTranslations("common");
   const restaurants = await getRestaurants({ q: searchParams.q });
 
+  // Sort: featured first, then by rating
+  const sortedRestaurants = restaurants.sort((a, b) => {
+    if (a.featured && !b.featured) return -1;
+    if (!a.featured && b.featured) return 1;
+    return b.rating - a.rating;
+  });
+
   return (
     <>
       <PageHero
@@ -41,55 +48,95 @@ export default async function RestaurantsPage({
         image="/images/restaurants/sultan/hero.jpeg"
       />
 
-      <section className="container-px mx-auto py-14">
-        <SearchWithin
-          basePath={`/${locale}/restaurants`}
-          placeholder="Search restaurants or cuisine..."
-          defaultValue={searchParams.q}
-        />
-
-        {restaurants.length > 0 && (
-          <div className="mt-12 mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div>
-              <h2 className="text-3xl font-bold tracking-tight">
-                Featured Restaurants
-              </h2>
-
-              <p className="mt-2 max-w-2xl text-muted-foreground">
-                Explore authentic Somali cuisine, grilled specialties,
-                international flavors and the highest-rated restaurants in
-                Hargeisa.
-              </p>
-            </div>
-
-            <div className="rounded-full bg-emerald-100 px-4 py-2 text-sm font-semibold text-emerald-700">
-              {restaurants.length} Restaurant
-              {restaurants.length > 1 ? "s" : ""}
-            </div>
+      <section className="container-px mx-auto py-10 md:py-14">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="font-display text-2xl font-bold md:text-3xl">
+              {restaurants.length} Restaurants
+            </h2>
+            <p className="mt-1 text-sm text-ink/60 dark:text-sand/60">
+              {searchParams.q ? `Results for "${searchParams.q}"` : "Browse all restaurants in Hargeisa"}
+            </p>
           </div>
-        )}
+        </div>
+
+        <div className="mt-6">
+          <SearchWithin
+            basePath={`/${locale}/restaurants`}
+            placeholder="Search restaurants or cuisine..."
+            defaultValue={searchParams.q}
+          />
+        </div>
 
         {restaurants.length === 0 ? (
-          <p className="mt-10 text-center text-ink/50 dark:text-sand/50">
-            {common("noResults")}
-          </p>
+          <div className="mt-12 rounded-2xl border border-dashed border-ink/20 bg-ink/5 p-12 text-center dark:border-white/20 dark:bg-white/[0.02]">
+            <h3 className="font-display text-lg font-semibold">No restaurants found</h3>
+            <p className="mt-2 text-sm text-ink/60 dark:text-sand/60">
+              {searchParams.q ? "Try adjusting your search" : "Check back soon for more restaurants"}
+            </p>
+          </div>
         ) : (
-          <div className="mt-8 grid gap-8 md:grid-cols-2 xl:grid-cols-3">
-            {restaurants.map((r) => (
-              <ListingCard
-                key={r.id}
-                href={`/${locale}/restaurants/${r.slug}`}
-                image={r.coverImage}
-                title={r.name}
-                subtitle={r.cuisine.join(" • ")}
-                rating={r.rating}
-                reviewCount={r.reviewCount}
-                listingType="restaurant"
-                listingId={r.id}
-                locale={locale}
-                priceRange={r.priceRange}
-              />
-            ))}
+          <div className="mt-10">
+            {/* Featured Restaurants Section */}
+            {sortedRestaurants.some((r) => r.featured) && (
+              <div className="mb-12">
+                <div className="mb-6">
+                  <h3 className="font-display text-xl font-bold">⭐ Featured Restaurants</h3>
+                  <p className="mt-1 text-sm text-ink/60 dark:text-sand/60">Our top-rated dining experiences</p>
+                </div>
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {sortedRestaurants
+                    .filter((r) => r.featured)
+                    .map((r) => (
+                      <ListingCard
+                        key={r.id}
+                        href={`/${locale}/restaurants/${r.slug}`}
+                        image={r.coverImage}
+                        title={r.name}
+                        subtitle={r.cuisine.join(" • ")}
+                        rating={r.rating}
+                        reviewCount={r.reviewCount}
+                        listingType="restaurant"
+                        listingId={r.id}
+                        locale={locale}
+                        priceRange={r.priceRange}
+                        tag="Featured"
+                      />
+                    ))}
+                </div>
+              </div>
+            )}
+
+            {/* All Restaurants Section */}
+            {sortedRestaurants.some((r) => !r.featured) && (
+              <div>
+                <div className="mb-6">
+                  <h3 className="font-display text-xl font-bold">All Restaurants</h3>
+                  <p className="mt-1 text-sm text-ink/60 dark:text-sand/60">
+                    {sortedRestaurants.filter((r) => !r.featured).length} available restaurants
+                  </p>
+                </div>
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {sortedRestaurants
+                    .filter((r) => !r.featured)
+                    .map((r) => (
+                      <ListingCard
+                        key={r.id}
+                        href={`/${locale}/restaurants/${r.slug}`}
+                        image={r.coverImage}
+                        title={r.name}
+                        subtitle={r.cuisine.join(" • ")}
+                        rating={r.rating}
+                        reviewCount={r.reviewCount}
+                        listingType="restaurant"
+                        listingId={r.id}
+                        locale={locale}
+                        priceRange={r.priceRange}
+                      />
+                    ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </section>
