@@ -34,7 +34,7 @@ export async function getRestaurants(options?: { q?: string; featuredOnly?: bool
 
   const { data, error } = await query;
   if (error) {
-    console.error("getRestaurants:", error.message);
+    if (process.env.NODE_ENV === "development") console.error("getRestaurants:", error.message);
     return [];
   }
   return (data ?? []).map((row) => mapRestaurant(row));

@@ -50,7 +50,7 @@ type AttractionRow = ListingBase & {
 export type Database = {
   public: {
     Tables: {
-      profiles: Table<{ id: string; full_name: string | null; avatar_url: string | null; role: "user" | "business_owner" | "admin"; phone: string | null; created_at: string; updated_at: string }>;
+      profiles: Table<{ id: string; full_name: string | null; avatar_url: string | null; role: "user" | "business_owner" | "owner"; phone: string | null; created_at: string; updated_at: string }>;
       hotels: Table<HotelRow>;
       restaurants: Table<RestaurantRow>;
       cafes: Table<CafeRow>;
@@ -71,7 +71,7 @@ export type Database = {
     } & Record<string, Table<Record<string, unknown>, Record<string, unknown>, Record<string, unknown>>>;
     Views: Record<string, never>;
     Functions: Record<string, never>;
-    Enums: { user_role: "user" | "business_owner" | "admin"; price_range: "$" | "$$" | "$$$" | "$$$$"; attraction_category: "landmark" | "museum" | "market" | "nature" | "religious"; event_category: "cultural" | "national" | "business" | "sports" | "concert"; content_status: "draft" | "published" | "archived"; listing_type: "hotel" | "restaurant" | "cafe" | "attraction"; };
+    Enums: { user_role: "user" | "business_owner" | "owner"; price_range: "$" | "$$" | "$$$" | "$$$$"; attraction_category: "landmark" | "museum" | "market" | "nature" | "religious"; event_category: "cultural" | "national" | "business" | "sports" | "concert"; content_status: "draft" | "published" | "archived"; listing_type: "hotel" | "restaurant" | "cafe" | "attraction"; };
     CompositeTypes: Record<string, never>;
   };
 };

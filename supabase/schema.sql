@@ -9,7 +9,7 @@ create extension if not exists "pgcrypto";
 -- ----------------------------------------------------------------------------
 -- ENUMS
 -- ----------------------------------------------------------------------------
-create type user_role as enum ('user', 'business_owner', 'admin');
+create type user_role as enum ('user', 'business_owner', 'owner');
 create type price_range as enum ('$', '$$', '$$$', '$$$$');
 create type attraction_category as enum ('landmark', 'museum', 'market', 'nature', 'religious');
 create type event_category as enum ('cultural', 'national', 'business', 'sports', 'concert');

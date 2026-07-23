@@ -9,7 +9,7 @@ export async function getDestinations(): Promise<Destination[]> {
   const supabase = createPublicClient();
   const { data, error } = await supabase.from("destinations").select("*").order("place_count", { ascending: false });
   if (error) {
-    console.error("getDestinations:", error.message);
+    if (process.env.NODE_ENV === "development") console.error("getDestinations:", error.message);
     return [];
   }
   return (data ?? []).map((row) => ({

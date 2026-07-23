@@ -31,7 +31,7 @@ export async function getAttractions(options?: { q?: string; category?: string }
 
   const { data, error } = await query;
   if (error) {
-    console.error("getAttractions:", error.message);
+    if (process.env.NODE_ENV === "development") console.error("getAttractions:", error.message);
     return [];
   }
   return (data ?? []).map((row) => mapAttraction(row));

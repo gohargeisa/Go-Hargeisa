@@ -9,7 +9,7 @@ export async function subscribeToNewsletter(email: string, locale: string): Prom
   if (!email || !email.includes("@")) return { ok: false, error: "Enter a valid email address." };
 
   if (!isSupabaseConfigured()) {
-    console.log(`[newsletter] (Supabase not connected — logging only) ${email} / ${locale}`);
+    // Supabase not configured - newsletter subscription simulated
     return { ok: true };
   }
 
@@ -25,7 +25,7 @@ export async function subscribeToNewsletter(email: string, locale: string): Prom
   ]);
   // Unique-violation on the email column just means they're already subscribed — treat as success.
   if (error && error.code !== "23505") {
-    console.error("subscribeToNewsletter:", error.message);
+    if (process.env.NODE_ENV === "development") console.error("subscribeToNewsletter:", error.message);
     return { ok: false, error: "Something went wrong. Please try again." };
   }
   return { ok: true };
@@ -42,14 +42,14 @@ export async function sendContactMessage(input: {
   }
 
   if (!isSupabaseConfigured()) {
-    console.log("[contact] (Supabase not connected — logging only)", input);
+    // Supabase not configured - contact form submission simulated
     return { ok: true };
   }
 
   const supabase = await createClient();
   const { error } = await supabase.from("contact_messages").insert(input);
   if (error) {
-    console.error("sendContactMessage:", error.message);
+    if (process.env.NODE_ENV === "development") console.error("sendContactMessage:", error.message);
     return { ok: false, error: "Something went wrong. Please try again." };
   }
   return { ok: true };
@@ -86,7 +86,7 @@ export async function submitReview(input: {
   });
 
   if (error) {
-    console.error("submitReview:", error.message);
+    if (process.env.NODE_ENV === "development") console.error("submitReview:", error.message);
     return { ok: false, error: "Could not submit your review. Please try again." };
   }
 

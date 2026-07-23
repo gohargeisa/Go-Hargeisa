@@ -27,7 +27,7 @@ export async function getCafes(options?: { q?: string; featuredOnly?: boolean })
 
   const { data, error } = await query;
   if (error) {
-    console.error("getCafes:", error.message);
+    if (process.env.NODE_ENV === "development") console.error("getCafes:", error.message);
     return [];
   }
   return (data ?? []).map((row) => mapCafe(row));

@@ -12,12 +12,12 @@ export function RoleSelect({
 }: {
   locale: Locale;
   userId: string;
-  role: "user" | "business_owner" | "admin";
+  role: "user" | "business_owner" | "owner";
 }) {
   const [isPending, startTransition] = useTransition();
 
   function onChange(e: React.ChangeEvent<HTMLSelectElement>) {
-    const next = e.target.value as "user" | "business_owner" | "admin";
+    const next = e.target.value as "user" | "business_owner" | "owner";
     startTransition(async () => {
       const result = await updateUserRole(locale, userId, next);
       if (!result.ok) alert(result.error ?? "Could not update role.");
@@ -34,7 +34,7 @@ export function RoleSelect({
       >
         <option value="user">User</option>
         <option value="business_owner">Business Owner</option>
-        <option value="admin">Admin</option>
+        <option value="owner">Owner</option>
       </select>
       {isPending && <Loader2 size={13} className="animate-spin text-ink/40" />}
     </div>

@@ -16,7 +16,7 @@ export async function getArticles(): Promise<Article[]> {
     .order("published_at", { ascending: false });
 
   if (error) {
-    console.error("getArticles:", error.message);
+    if (process.env.NODE_ENV === "development") console.error("getArticles:", error.message);
     return [];
   }
   return (data ?? []).map((row: any) => mapArticle(row, row.profiles?.full_name ?? "Go Hargeisa Editorial"));
