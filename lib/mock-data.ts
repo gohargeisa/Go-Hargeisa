@@ -43,48 +43,7 @@ export const destinations: Destination[] = [
 ];
 
 export const hotels: Hotel[] = [
-  {
-  id: "h0",
-  slug: "grand-haadi-hotel",
-  name: "Grand Haadi Hotel",
-
-  shortDescription:
-    "A spacious Hargeisa stay with hotel rooms, villas, meeting spaces and a restaurant.",
-
-  description:
-    "Grand Haadi Hotel is located in Buurta Kala Jeexan, Hargeisa. Its published profile describes a 17-acre property with 57 hotel rooms, 10 villas, three banquet halls, three meeting rooms and a large restaurant.",
-
-  coverImage: "/images/hotels/grand-haadi.jpg",
-
-  gallery: [
-    {
-      url: "/images/hotels/grand-haadi.jpg",
-      alt: "Grand Haadi Hotel",
-    },
-  ],
-
-  address: "Buurta Kala Jeexan, Hargeisa, Somaliland",
-
-  location: {
-    lat: 9.56,
-    lng: 44.07,
-  },
-
-  rating: 4.2,
-  reviewCount: 156,
-
-  reviews: [],
-
-  phone: "+252 63 4622117",
-
-  priceRange: "$$",
-
-  amenities: ["57 Hotel Rooms", "10 Villas", "Restaurant", "3 Banquet Halls", "3 Meeting Rooms", "Gym"],
-
-  nearbyAttractionIds: ["a1"],
-
-  featured: true,
-},
+  
   
   
   
