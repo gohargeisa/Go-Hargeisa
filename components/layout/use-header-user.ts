@@ -6,7 +6,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 
 export interface HeaderUser {
   name: string;
-  isAdmin: boolean;
+  isOwner: boolean;
   avatarUrl?: string;
 }
 
@@ -63,7 +63,7 @@ export function useHeaderUser(): { user: HeaderUser | null; loading: boolean } {
       if (active) {
         setUser({
           name: profile?.full_name ?? authUser.email?.split("@")[0] ?? "Account",
-          isAdmin: profile?.role === "admin",
+          isOwner: profile?.role === "owner",
           avatarUrl: profile?.avatar_url ?? undefined,
         });
 

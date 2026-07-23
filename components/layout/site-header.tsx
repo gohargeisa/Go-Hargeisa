@@ -83,7 +83,7 @@ export function SiteHeader({ locale }: { locale: Locale }) {
           {loading ? (
             <div className="h-9 w-24 rounded-full bg-ink/5 dark:bg-white/10 animate-pulse" aria-hidden />
           ) : user ? (
-            <UserMenu locale={locale} name={user.name} isAdmin={user.isAdmin} avatarUrl={user.avatarUrl} />
+            <UserMenu locale={locale} name={user.name} isOwner={user.isOwner} avatarUrl={user.avatarUrl} />
           ) : (
             <>
               <Link
@@ -147,7 +147,7 @@ export function SiteHeader({ locale }: { locale: Locale }) {
                   >
                     My Dashboard
                   </Link>
-                  {user.isAdmin && (
+                  {user.isOwner && (
                     <Link
                       href={`/${locale}/admin`}
                       onClick={() => setOpen(false)}

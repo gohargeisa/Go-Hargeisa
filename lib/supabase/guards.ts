@@ -28,10 +28,10 @@ export async function requireUser(locale: Locale, redirectTo: string) {
 }
 
 /**
- * Requires a signed-in user with role = 'admin' in `profiles`. Redirects
- * non-admins to the homepage and signed-out visitors to /auth/login.
+ * Requires a signed-in user with role = 'owner' in `profiles`. Redirects
+ * non-owners to the homepage and signed-out visitors to /auth/login.
  */
-export async function requireAdmin(locale: Locale, redirectTo: string) {
+export async function requireOwner(locale: Locale, redirectTo: string) {
   if (!isSupabaseConfigured()) return null;
 
   const supabase = await createClient();
@@ -45,9 +45,16 @@ export async function requireAdmin(locale: Locale, redirectTo: string) {
 
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
 
-  if (profile?.role !== "admin") {
+  if (profile?.role !== "owner") {
     redirect(`/${locale}`);
   }
 
   return user;
+}
+
+/**
+ * @deprecated Use requireOwner instead. Admin role has been renamed to owner.
+ */
+export async function requireAdmin(locale: Locale, redirectTo: string) {
+  return requireOwner(locale, redirectTo);
 }

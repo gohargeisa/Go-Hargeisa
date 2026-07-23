@@ -38,7 +38,7 @@ export async function getHotels(options?: { q?: string; featuredOnly?: boolean }
   const { data, error } = await query;
 
   if (error) {
-    console.error("getHotels:", error.message);
+    if (process.env.NODE_ENV === "development") console.error("getHotels:", error.message);
     return mockHotels;
   }
 

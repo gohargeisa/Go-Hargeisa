@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Facebook, Instagram, Youtube } from "lucide-react";
-import { FaTiktok, FaWhatsapp } from "react-icons/fa6";
+import { FaWhatsapp, FaTiktok, FaXTwitter } from "react-icons/fa6";
 import type { Locale } from "@/lib/i18n/config";
 
 export function SiteFooter({ locale }: { locale: Locale }) {
@@ -34,23 +34,28 @@ export function SiteFooter({ locale }: { locale: Locale }) {
     label: "WhatsApp",
   },
   {
-    icon: Instagram,
-    href: "https://instagram.com/go.hargeisa",
-    label: "Instagram",
-  },
-  {
-    icon: FaTiktok,
-    href: "https://www.tiktok.com/@gohargeisa",
-    label: "TikTok",
-  },
-  {
     icon: Facebook,
     href: "https://facebook.com/Go.Hargeisa",
     label: "Facebook",
   },
   {
+    icon: Instagram,
+    href: "https://instagram.com/go_hargeisa",
+    label: "Instagram",
+  },
+  {
+    icon: FaXTwitter,
+    href: "https://x.com/go_hargeisa",
+    label: "X",
+  },
+  {
+    icon: FaTiktok,
+    href: "https://www.tiktok.com/@go_hargeisa",
+    label: "TikTok",
+  },
+  {
     icon: Youtube,
-    href: "https://youtube.com/@Go.Hargeisa",
+    href: "https://youtube.com/@go_hargeisa",
     label: "YouTube",
   },
 ];

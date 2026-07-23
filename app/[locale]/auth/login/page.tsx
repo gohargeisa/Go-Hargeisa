@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import type { Locale } from "@/lib/i18n/config";
 import { AuthForm } from "@/components/shared/auth-form";
+import { OAuth } from "@/components/shared/oauth";
 
 export const metadata: Metadata = {
   title: "Sign In — Go Hargeisa",
@@ -24,9 +25,13 @@ export default function LoginPage({
           Sign in with your email address to continue.
         </p>
 
-        <div className="mt-8">
+        <div className="mt-8 space-y-6">
           <Suspense fallback={<div className="h-[240px]" />}>
             <AuthForm mode="login" locale={locale} />
+          </Suspense>
+
+          <Suspense fallback={<div className="h-[160px]" />}>
+            <OAuth mode="login" locale={locale} />
           </Suspense>
         </div>
 

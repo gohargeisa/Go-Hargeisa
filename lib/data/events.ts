@@ -18,7 +18,7 @@ export async function getEvents(options?: { category?: string }): Promise<EventI
 
   const { data, error } = await query;
   if (error) {
-    console.error("getEvents:", error.message);
+    if (process.env.NODE_ENV === "development") console.error("getEvents:", error.message);
     return [];
   }
   return (data ?? []).map(mapEvent);

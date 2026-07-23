@@ -10,12 +10,12 @@ import { SignOutButton } from "@/components/shared/sign-out-button";
 export function UserMenu({
   locale,
   name,
-  isAdmin,
+  isOwner,
   avatarUrl,
 }: {
   locale: Locale;
   name: string;
-  isAdmin: boolean;
+  isOwner: boolean;
   avatarUrl?: string;
 }) {
   const [open, setOpen] = useState(false);
@@ -65,7 +65,7 @@ export function UserMenu({
           >
             <LayoutDashboard size={15} /> My Dashboard
           </Link>
-          {isAdmin && (
+          {isOwner && (
             <Link
               href={`/${locale}/admin`}
               onClick={() => setOpen(false)}

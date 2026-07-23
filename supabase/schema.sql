@@ -9,7 +9,7 @@ create extension if not exists "pgcrypto";
 -- ----------------------------------------------------------------------------
 -- ENUMS
 -- ----------------------------------------------------------------------------
-create type user_role as enum ('user', 'business_owner', 'admin');
+create type user_role as enum ('user', 'business_owner', 'owner');
 create type price_range as enum ('$', '$$', '$$$', '$$$$');
 create type attraction_category as enum ('landmark', 'museum', 'market', 'nature', 'religious');
 create type event_category as enum ('cultural', 'national', 'business', 'sports', 'concert');
@@ -244,9 +244,9 @@ create table destinations (
 
 alter table destinations enable row level security;
 create policy "Public can read destinations" on destinations for select using (true);
-create policy "Admins manage destinations" on destinations for all
-  using (exists (select 1 from profiles where id = auth.uid() and role = 'admin'))
-  with check (exists (select 1 from profiles where id = auth.uid() and role = 'admin'));
+create policy "Owners manage destinations" on destinations for all
+  using (exists (select 1 from profiles where id = auth.uid() and role = 'owner'))
+  with check (exists (select 1 from profiles where id = auth.uid() and role = 'owner'));
 
 -- ----------------------------------------------------------------------------
 -- MAP POINTS (categories with no dedicated listing table: hospitals, banks,
@@ -265,9 +265,9 @@ create table map_points (
 
 alter table map_points enable row level security;
 create policy "Public can read map points" on map_points for select using (true);
-create policy "Admins manage map points" on map_points for all
-  using (exists (select 1 from profiles where id = auth.uid() and role = 'admin'))
-  with check (exists (select 1 from profiles where id = auth.uid() and role = 'admin'));
+create policy "Owners manage map points" on map_points for all
+  using (exists (select 1 from profiles where id = auth.uid() and role = 'owner'))
+  with check (exists (select 1 from profiles where id = auth.uid() and role = 'owner'));
 
 -- ----------------------------------------------------------------------------
 -- POLYMORPHIC REVIEWS (works across hotels/restaurants/cafes/attractions)
@@ -372,25 +372,25 @@ create policy "Public can read published events" on events for select using (sta
 create policy "Public can read published articles" on articles for select using (status = 'published');
 create policy "Public can read reviews" on reviews for select using (true);
 
--- Admin-only writes (checks profiles.role via a helper subquery)
-create policy "Admins manage hotels" on hotels for all
-  using (exists (select 1 from profiles where id = auth.uid() and role = 'admin'))
-  with check (exists (select 1 from profiles where id = auth.uid() and role = 'admin'));
-create policy "Admins manage restaurants" on restaurants for all
-  using (exists (select 1 from profiles where id = auth.uid() and role = 'admin'))
-  with check (exists (select 1 from profiles where id = auth.uid() and role = 'admin'));
-create policy "Admins manage cafes" on cafes for all
-  using (exists (select 1 from profiles where id = auth.uid() and role = 'admin'))
-  with check (exists (select 1 from profiles where id = auth.uid() and role = 'admin'));
-create policy "Admins manage attractions" on attractions for all
-  using (exists (select 1 from profiles where id = auth.uid() and role = 'admin'))
-  with check (exists (select 1 from profiles where id = auth.uid() and role = 'admin'));
-create policy "Admins manage events" on events for all
-  using (exists (select 1 from profiles where id = auth.uid() and role = 'admin'))
-  with check (exists (select 1 from profiles where id = auth.uid() and role = 'admin'));
-create policy "Admins manage articles" on articles for all
-  using (exists (select 1 from profiles where id = auth.uid() and role = 'admin'))
-  with check (exists (select 1 from profiles where id = auth.uid() and role = 'admin'));
+-- Owner-only writes (checks profiles.role via a helper subquery)
+create policy "Owners manage hotels" on hotels for all
+  using (exists (select 1 from profiles where id = auth.uid() and role = 'owner'))
+  with check (exists (select 1 from profiles where id = auth.uid() and role = 'owner'));
+create policy "Owners manage restaurants" on restaurants for all
+  using (exists (select 1 from profiles where id = auth.uid() and role = 'owner'))
+  with check (exists (select 1 from profiles where id = auth.uid() and role = 'owner'));
+create policy "Owners manage cafes" on cafes for all
+  using (exists (select 1 from profiles where id = auth.uid() and role = 'owner'))
+  with check (exists (select 1 from profiles where id = auth.uid() and role = 'owner'));
+create policy "Owners manage attractions" on attractions for all
+  using (exists (select 1 from profiles where id = auth.uid() and role = 'owner'))
+  with check (exists (select 1 from profiles where id = auth.uid() and role = 'owner'));
+create policy "Owners manage events" on events for all
+  using (exists (select 1 from profiles where id = auth.uid() and role = 'owner'))
+  with check (exists (select 1 from profiles where id = auth.uid() and role = 'owner'));
+create policy "Owners manage articles" on articles for all
+  using (exists (select 1 from profiles where id = auth.uid() and role = 'owner'))
+  with check (exists (select 1 from profiles where id = auth.uid() and role = 'owner'));
 
 -- Business owners can manage their own listings
 create policy "Owners manage their hotels" on hotels for update
@@ -417,12 +417,12 @@ create policy "Users manage own trip items" on saved_trip_items for all
 
 -- Anyone can subscribe / send a message; nobody can read others' rows except admins
 create policy "Anyone can subscribe to newsletter" on newsletter_subscribers for insert with check (true);
-create policy "Admins read newsletter subscribers" on newsletter_subscribers for select
-  using (exists (select 1 from profiles where id = auth.uid() and role = 'admin'));
+create policy "Owners read newsletter subscribers" on newsletter_subscribers for select
+  using (exists (select 1 from profiles where id = auth.uid() and role = 'owner'));
 
 create policy "Anyone can send a contact message" on contact_messages for insert with check (true);
-create policy "Admins read contact messages" on contact_messages for select
-  using (exists (select 1 from profiles where id = auth.uid() and role = 'admin'));
+create policy "Owners read contact messages" on contact_messages for select
+  using (exists (select 1 from profiles where id = auth.uid() and role = 'owner'));
 
 -- ----------------------------------------------------------------------------
 -- FUNCTION: keep rating / review_count in sync when a review is added
@@ -465,22 +465,22 @@ on conflict (id) do nothing;
 create policy "Public can view listing images" on storage.objects
   for select using (bucket_id = 'listing-images');
 
-create policy "Admins can upload listing images" on storage.objects
+create policy "Owners can upload listing images" on storage.objects
   for insert with check (
     bucket_id = 'listing-images'
-    and exists (select 1 from profiles where id = auth.uid() and role = 'admin')
+    and exists (select 1 from profiles where id = auth.uid() and role = 'owner')
   );
 
-create policy "Admins can update listing images" on storage.objects
+create policy "Owners can update listing images" on storage.objects
   for update using (
     bucket_id = 'listing-images'
-    and exists (select 1 from profiles where id = auth.uid() and role = 'admin')
+    and exists (select 1 from profiles where id = auth.uid() and role = 'owner')
   );
 
-create policy "Admins can delete listing images" on storage.objects
+create policy "Owners can delete listing images" on storage.objects
   for delete using (
     bucket_id = 'listing-images'
-    and exists (select 1 from profiles where id = auth.uid() and role = 'admin')
+    and exists (select 1 from profiles where id = auth.uid() and role = 'owner')
   );
 
 -- ----------------------------------------------------------------------------

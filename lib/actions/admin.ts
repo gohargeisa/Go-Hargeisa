@@ -9,7 +9,7 @@ export type AllowedTable = (typeof ALLOWED_TABLES)[number];
 
 const TABLES_WITH_UPDATED_AT = new Set(["hotels", "restaurants", "cafes", "attractions"]);
 
-async function assertAdmin() {
+async function assertOwner() {
   const supabase = await createClient();
   const {
     data: { user },
@@ -24,7 +24,7 @@ async function assertAdmin() {
 
 const userProfile = profile as { role: string } | null;
 
-if (userProfile?.role !== "admin") {
+if (userProfile?.role !== "owner") {
   throw new Error("Not authorized.");
 }
   
@@ -41,7 +41,7 @@ export async function deleteListing(
     throw new Error("Invalid table.");
   }
 
-  const supabase = await assertAdmin();
+  const supabase = await assertOwner();
 
   let error = null;
 
@@ -88,7 +88,7 @@ export async function createRecord(
     throw new Error("Invalid table.");
   }
 
-  const supabase = await assertAdmin();
+  const supabase = await assertOwner();
 
   const payload = {
     ...data,
@@ -139,7 +139,7 @@ export async function updateRecord(
     throw new Error("Invalid table.");
   }
 
-  const supabase = await assertAdmin();
+  const supabase = await assertOwner();
 
   const payload = TABLES_WITH_UPDATED_AT.has(table)
     ? {
