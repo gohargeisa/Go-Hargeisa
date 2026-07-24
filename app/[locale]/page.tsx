@@ -105,16 +105,7 @@ export default async function HomePage({
           </div>
         </div>
 
-        {/* Google Sign-In Explanation */}
-        <div className="mx-auto mt-16 max-w-5xl rounded-3xl border border-emerald-200 bg-emerald-50 p-10 text-center">
-          <h3 className="text-3xl font-bold text-slate-900">
-            {t("googleTitle")}
-          </h3>
-
-          <p className="mt-6 text-lg leading-8 text-slate-700">
-            {t("googleDescription")}
-          </p>
-        </div>
+        
       </section>
 
 <ListingRowSection
