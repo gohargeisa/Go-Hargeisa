@@ -40,7 +40,7 @@ export function SiteFooter({ locale }: { locale: Locale }) {
   },
   {
     icon: Instagram,
-    href: "https://instagram.com/go_hargeisa",
+    href: "https://instagram.com/go.hargeisa",
     label: "Instagram",
   },
   {
@@ -50,12 +50,12 @@ export function SiteFooter({ locale }: { locale: Locale }) {
   },
   {
     icon: FaTiktok,
-    href: "https://www.tiktok.com/@go_hargeisa",
+    href: "https://www.tiktok.com/@gohargeisa",
     label: "TikTok",
   },
   {
     icon: Youtube,
-    href: "https://youtube.com/@go_hargeisa",
+    href: "https://youtube.com/@go.hargeisa",
     label: "YouTube",
   },
 ];

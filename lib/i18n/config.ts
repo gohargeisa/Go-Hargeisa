@@ -26,7 +26,7 @@ export const localeConfig: Record<Locale, LocaleMeta> = {
     flagSrc: "/flags/uae.png",
   },
   so: {
-    label: "Soomaali",
+    label: "Somaliland",
     dir: "ltr",
     flagSrc: "/flags/somaliland.png",
   },
