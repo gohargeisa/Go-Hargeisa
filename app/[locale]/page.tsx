@@ -48,24 +48,22 @@ export default async function HomePage({
       <TrustBar />
 
       {/* About Go Hargeisa */}
-      <section className="mx-auto max-w-7xl px-6 py-20">
-        <div className="mx-auto max-w-4xl text-center">
-          <span className="inline-flex rounded-full bg-emerald-100 px-4 py-1 text-sm font-semibold text-emerald-700">
-            {t("aboutBadge")}
-          </span>
+<section className="mx-auto max-w-7xl px-6 py-20">
+  <div className="mx-auto max-w-4xl text-center">
+    <span className="inline-flex rounded-full bg-emerald-100 px-4 py-1 text-sm font-semibold text-emerald-700">
+      {t("aboutBadge")}
+    </span>
 
-          <h2 className="mt-6 text-4xl font-bold tracking-tight text-slate-900 md:text-5xl">
-            {t("aboutTitle")}
-          </h2>
+    <h2 className="mt-6 text-4xl font-bold tracking-tight text-white md:text-5xl">
+      {t("aboutTitle")}
+    </h2>
 
-          <p className="mt-8 text-lg leading-8 text-slate-600">
-            {t("aboutDescription1")}
-          </p>
+    <p className="mt-8 text-lg leading-8 text-white/80">
+      {t("aboutDescription1")}
+    </p>
+  </div>
 
-          
-        </div>
-
-        <div className="mt-16 grid gap-8 md:grid-cols-3">
+  <div className="mt-16 grid gap-8 md:grid-cols-3">
           <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm transition hover:shadow-lg">
             <div className="mb-4 text-4xl">🏨</div>
 
