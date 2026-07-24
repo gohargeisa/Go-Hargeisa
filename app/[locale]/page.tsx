@@ -49,10 +49,10 @@ export default async function HomePage({
 
       {/* About Go Hargeisa */}
 <section className="mx-auto max-w-7xl px-6 py-24">
-  <div className="mx-auto max-w-5xl rounded-[32px] border border-white/10 bg-slate-900 p-12 shadow-2xl">
+  <div className="mx-auto max-w-5xl rounded-[32px] border border-orange-400/20 bg-gradient-to-r from-[#F59E0B] via-[#D97706] to-[#374151] p-12 shadow-2xl">
 
     <div className="text-center">
-      <span className="inline-flex rounded-full bg-emerald-500/20 px-5 py-2 text-sm font-semibold text-emerald-300 border border-emerald-500/20">
+      <span className="inline-flex rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm font-semibold text-white backdrop-blur-sm">
         {t("aboutBadge")}
       </span>
 
@@ -60,7 +60,7 @@ export default async function HomePage({
         {t("aboutTitle")}
       </h2>
 
-      <p className="mx-auto mt-8 max-w-3xl text-lg leading-9 text-slate-300">
+      <p className="mx-auto mt-8 max-w-3xl text-lg leading-9 text-white/90">
         {t("aboutDescription1")}
       </p>
     </div>
