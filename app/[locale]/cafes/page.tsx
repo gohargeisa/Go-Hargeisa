@@ -4,7 +4,7 @@ import type { Locale } from "@/lib/i18n/config";
 import { getCafes } from "@/lib/data/cafes";
 import { PageHero } from "@/components/shared/page-hero";
 import { CafesPageClient } from "@/components/pages/cafes-page-client";
-import { placeholderImage } from "@/lib/placeholder-image";
+
 
 // Public content changes infrequently; revalidate hourly instead of
 // rendering on every request (this page no longer reads cookies, so
@@ -36,10 +36,10 @@ export default async function CafesPage({
   return (
     <>
       <PageHero
-        eyebrow="Sip"
-        title={t("cafesTitle")}
-        image={placeholderImage("Cafes in Hargeisa", { tone: "accent" })}
-      />
+  eyebrow="☕ Cafes"
+  title={t("cafesTitle")}
+  image="/images/cafes/hero.png"
+/>
       
       <CafesPageClient locale={locale} initialCafes={cafes} searchParams={searchParams} />
     </>
