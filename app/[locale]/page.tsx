@@ -48,56 +48,67 @@ export default async function HomePage({
       <TrustBar />
 
       {/* About Go Hargeisa */}
-<section className="mx-auto max-w-7xl px-6 py-20">
-  <div className="mx-auto max-w-4xl text-center">
-    <span className="inline-flex rounded-full bg-emerald-100 px-4 py-1 text-sm font-semibold text-emerald-700">
-      {t("aboutBadge")}
-    </span>
+<section className="mx-auto max-w-7xl px-6 py-24">
+  <div className="mx-auto max-w-5xl rounded-[32px] border border-white/10 bg-slate-900 p-12 shadow-2xl">
 
-    <h2 className="mt-6 text-4xl font-extrabold tracking-tight text-white md:text-5xl">
-      {t("aboutTitle")}
-    </h2>
+    <div className="text-center">
+      <span className="inline-flex rounded-full bg-emerald-500/20 px-5 py-2 text-sm font-semibold text-emerald-300 border border-emerald-500/20">
+        {t("aboutBadge")}
+      </span>
 
-    <p className="mt-8 text-lg leading-9 text-white/80">
-      {t("aboutDescription1")}
-    </p>
-  </div>
+      <h2 className="mt-6 text-4xl font-extrabold tracking-tight text-white md:text-5xl">
+        {t("aboutTitle")}
+      </h2>
 
-  <div className="mt-16 grid gap-8 md:grid-cols-3">
-    <div className="rounded-3xl border border-white/10 bg-white p-8 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
-      <div className="mb-4 text-5xl">🏨</div>
-
-      <h3 className="text-xl font-bold text-slate-900">
-        {t("exploreTitle")}
-      </h3>
-
-      <p className="mt-4 leading-7 text-slate-600">
-        {t("exploreDescription")}
+      <p className="mx-auto mt-8 max-w-3xl text-lg leading-9 text-slate-300">
+        {t("aboutDescription1")}
       </p>
     </div>
 
-    <div className="rounded-3xl border border-white/10 bg-white p-8 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
-      <div className="mb-4 text-5xl">❤️</div>
+    <div className="mt-14 grid gap-6 md:grid-cols-3">
 
-      <h3 className="text-xl font-bold text-slate-900">
-        {t("saveTitle")}
-      </h3>
+      <div className="rounded-3xl bg-white p-8 shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl">
+        <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100 text-3xl">
+          🏨
+        </div>
 
-      <p className="mt-4 leading-7 text-slate-600">
-        {t("saveDescription")}
-      </p>
-    </div>
+        <h3 className="text-xl font-bold text-slate-900">
+          {t("exploreTitle")}
+        </h3>
 
-    <div className="rounded-3xl border border-white/10 bg-white p-8 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
-      <div className="mb-4 text-5xl">⭐</div>
+        <p className="mt-4 leading-7 text-slate-600">
+          {t("exploreDescription")}
+        </p>
+      </div>
 
-      <h3 className="text-xl font-bold text-slate-900">
-        {t("shareTitle")}
-      </h3>
+      <div className="rounded-3xl bg-white p-8 shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl">
+        <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-red-100 text-3xl">
+          ❤️
+        </div>
 
-      <p className="mt-4 leading-7 text-slate-600">
-        {t("shareDescription")}
-      </p>
+        <h3 className="text-xl font-bold text-slate-900">
+          {t("saveTitle")}
+        </h3>
+
+        <p className="mt-4 leading-7 text-slate-600">
+          {t("saveDescription")}
+        </p>
+      </div>
+
+      <div className="rounded-3xl bg-white p-8 shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl">
+        <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-yellow-100 text-3xl">
+          ⭐
+        </div>
+
+        <h3 className="text-xl font-bold text-slate-900">
+          {t("shareTitle")}
+        </h3>
+
+        <p className="mt-4 leading-7 text-slate-600">
+          {t("shareDescription")}
+        </p>
+      </div>
+
     </div>
   </div>
 </section>
