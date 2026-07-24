@@ -21,10 +21,8 @@ interface Profile {
  *
  * This intentionally does NOT run on the server: the layout that renders
  * <SiteHeader> must stay free of cookies()/auth calls so public pages can
- * be statically generated and revalidated on a schedule (see each page's
- * `export const revalidate`) instead of being forced into full dynamic SSR
- * on every request. The trade-off is a brief "signed out" flash on first
- * paint for returning visitors, which is standard for this pattern.
+ * be statically generated and revalidated on a schedule instead of being
+ * forced into full dynamic SSR on every request.
  */
 export function useHeaderUser(): { user: HeaderUser | null; loading: boolean } {
   const [user, setUser] = useState<HeaderUser | null>(null);
@@ -42,7 +40,11 @@ export function useHeaderUser(): { user: HeaderUser | null; loading: boolean } {
     async function load() {
       const {
         data: { user: authUser },
+        error: authError,
       } = await supabase.auth.getUser();
+
+      console.log("AUTH USER:", authUser);
+      console.log("AUTH ERROR:", authError);
 
       if (!authUser) {
         if (active) {
@@ -52,11 +54,14 @@ export function useHeaderUser(): { user: HeaderUser | null; loading: boolean } {
         return;
       }
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("profiles")
         .select("full_name, role, avatar_url")
         .eq("id", authUser.id)
         .single();
+
+      console.log("PROFILE:", data);
+      console.log("PROFILE ERROR:", error);
 
       const profile = data as Profile | null;
 
@@ -71,8 +76,10 @@ export function useHeaderUser(): { user: HeaderUser | null; loading: boolean } {
       }
     }
 
+    // تحميل المستخدم عند فتح الموقع
     load();
 
+    // تحديث تلقائي عند تسجيل الدخول أو الخروج
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(() => {
