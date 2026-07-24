@@ -26,9 +26,9 @@ export default function ContactPage() {
       />
       <section className="container-px mx-auto grid gap-10 py-14 lg:grid-cols-3">
         <div className="space-y-6">
-          <ContactRow icon={Mail} label="Email" value="info@gohargeisa.com" />
+          <ContactRow icon={Mail} label="Email" value="gohargeisa@gmail.com" />
           <ContactRow icon={Phone} label="Phone" value="+252 65 6156 752" />
-          <ContactRow icon={MapPin} label="Office" value="Maroodi Jeex, Hargeisa, Somaliland" />
+          <ContactRow icon={MapPin} label="Office" value="Hargeisa, Somaliland" />
         </div>
         <div className="lg:col-span-2">
           <ContactForm />
