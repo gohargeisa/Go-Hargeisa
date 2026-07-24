@@ -54,55 +54,53 @@ export default async function HomePage({
       {t("aboutBadge")}
     </span>
 
-    <h2 className="mt-6 text-4xl font-bold tracking-tight text-white md:text-5xl">
+    <h2 className="mt-6 text-4xl font-extrabold tracking-tight text-white md:text-5xl">
       {t("aboutTitle")}
     </h2>
 
-    <p className="mt-8 text-lg leading-8 text-white/80">
+    <p className="mt-8 text-lg leading-9 text-white/80">
       {t("aboutDescription1")}
     </p>
   </div>
 
   <div className="mt-16 grid gap-8 md:grid-cols-3">
-          <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm transition hover:shadow-lg">
-            <div className="mb-4 text-4xl">🏨</div>
+    <div className="rounded-3xl border border-white/10 bg-white p-8 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
+      <div className="mb-4 text-5xl">🏨</div>
 
-            <h3 className="text-xl font-semibold">
-              {t("exploreTitle")}
-            </h3>
+      <h3 className="text-xl font-bold text-slate-900">
+        {t("exploreTitle")}
+      </h3>
 
-            <p className="mt-4 leading-7 text-slate-600">
-              {t("exploreDescription")}
-            </p>
-          </div>
+      <p className="mt-4 leading-7 text-slate-600">
+        {t("exploreDescription")}
+      </p>
+    </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm transition hover:shadow-lg">
-            <div className="mb-4 text-4xl">❤️</div>
+    <div className="rounded-3xl border border-white/10 bg-white p-8 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
+      <div className="mb-4 text-5xl">❤️</div>
 
-            <h3 className="text-xl font-semibold">
-              {t("saveTitle")}
-            </h3>
+      <h3 className="text-xl font-bold text-slate-900">
+        {t("saveTitle")}
+      </h3>
 
-            <p className="mt-4 leading-7 text-slate-600">
-              {t("saveDescription")}
-            </p>
-          </div>
+      <p className="mt-4 leading-7 text-slate-600">
+        {t("saveDescription")}
+      </p>
+    </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm transition hover:shadow-lg">
-            <div className="mb-4 text-4xl">⭐</div>
+    <div className="rounded-3xl border border-white/10 bg-white p-8 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
+      <div className="mb-4 text-5xl">⭐</div>
 
-            <h3 className="text-xl font-semibold">
-              {t("shareTitle")}
-            </h3>
+      <h3 className="text-xl font-bold text-slate-900">
+        {t("shareTitle")}
+      </h3>
 
-            <p className="mt-4 leading-7 text-slate-600">
-              {t("shareDescription")}
-            </p>
-          </div>
-        </div>
-
-        
-      </section>
+      <p className="mt-4 leading-7 text-slate-600">
+        {t("shareDescription")}
+      </p>
+    </div>
+  </div>
+</section>
 
 <ListingRowSection
   eyebrow="Stay"
