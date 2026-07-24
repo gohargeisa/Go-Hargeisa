@@ -38,7 +38,7 @@ export default async function HotelsPage({
   return (
     <>
       <PageHero
-        eyebrow="Stay"
+        eyebrow="Hotels"
         title={t("hotelsTitle")}
         subtitle={t("hotelsSubtitle")}
         image="/images/heroes/hotels-hero.png"
