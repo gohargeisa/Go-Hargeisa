@@ -62,9 +62,7 @@ export default async function HomePage({
             {t("aboutDescription1")}
           </p>
 
-          <p className="mt-6 text-lg leading-8 text-slate-600">
-            {t("aboutDescription2")}
-          </p>
+          
         </div>
 
         <div className="mt-16 grid gap-8 md:grid-cols-3">
