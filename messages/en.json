@@ -20,12 +20,32 @@
     "eyebrow": "The Capital of Somaliland",
     "title": "Discover Hargeisa",
     "subtitle": "Ancient trade routes, warm hospitality, and a city rebuilding itself into one of the Horn of Africa's most compelling destinations.",
-    "searchPlaceholder": "Search hotels, restaurants, places to visit\u2026",
+    "searchPlaceholder": "Search hotels, restaurants, places to visit…",
     "searchButton": "Search"
   },
   "home": {
     "destinationsTitle": "Popular Destinations",
     "destinationsSubtitle": "Neighborhoods and landmarks worth your time",
+
+    "aboutBadge": "About Go Hargeisa",
+    "aboutTitle": "Discover the Best of Hargeisa",
+
+    "aboutDescription1": "Go Hargeisa is a modern travel and city guide platform dedicated to Hargeisa, Somaliland. Whether you are a visitor or a local resident, our mission is to help you discover trusted hotels, restaurants, cafés, tourist attractions, shopping destinations and local businesses through one easy-to-use platform.",
+
+    "aboutDescription2": "Create a free account to save your favourite places, write reviews, manage your profile and personalize your travel experience. Google Sign-In is used only for secure authentication and to keep your saved information synchronized across your devices.",
+
+    "exploreTitle": "Explore",
+    "exploreDescription": "Browse trusted hotels, restaurants, cafés, tourist attractions, shopping destinations and local experiences across Hargeisa.",
+
+    "saveTitle": "Save",
+    "saveDescription": "Sign in securely with Google to save your favourite places, manage your travel list and access your account from any device.",
+
+    "shareTitle": "Share",
+    "shareDescription": "Share your experiences by writing reviews and help other visitors discover the best places in Hargeisa.",
+
+    "googleTitle": "Why Sign in with Google?",
+    "googleDescription": "Google Sign-In is used only for secure authentication. It allows users to create an account, save favourite places, write reviews, manage their travel profile and synchronize their data across devices. Go Hargeisa does not access your Gmail, Google Drive, Contacts or any other personal Google data.",
+
     "hotelsTitle": "Where to Stay",
     "hotelsSubtitle": "Handpicked hotels across every budget",
     "restaurantsTitle": "Where to Eat",
@@ -43,7 +63,7 @@
     "viewAll": "View all"
   },
   "footer": {
-    "tagline": "Your trusted guide to Hargeisa \u2014 hotels, food, culture and everything in between.",
+    "tagline": "Your trusted guide to Hargeisa — hotels, food, culture and everything in between.",
     "explore": "Explore",
     "company": "Company",
     "support": "Support",
@@ -70,7 +90,7 @@
     "bestTimeToVisit": "Best Time to Visit",
     "visitorTips": "Visitor Tips",
     "history": "History",
-    "loading": "Loading\u2026",
+    "loading": "Loading…",
     "noResults": "No results found."
   }
 }
