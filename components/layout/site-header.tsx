@@ -36,24 +36,24 @@ export function SiteHeader({ locale }: { locale: Locale }) {
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-  scrolled
-    ? "bg-white/95 backdrop-blur-xl shadow-lg"
-    : "bg-gradient-to-b from-black/35 to-transparent backdrop-blur-md"
-}`}
+        scrolled
+          ? "bg-white/95 backdrop-blur-xl shadow-lg"
+          : "bg-gradient-to-b from-black/35 to-transparent backdrop-blur-md"
+      }`}
     >
       <div className="container-px mx-auto flex h-20 items-center gap-8">
         <div className="flex shrink-0 items-center">
-  <Link href={`/${locale}`}>
-    <Image
-      src="/images/logo.png"
-      alt="Go Hargeisa"
-      width={520}
-      height={180}
-      priority
-      className="h-20 md:h-24 w-auto object-contain"
-    />
-  </Link>
-</div>
+          <Link href={`/${locale}`}>
+            <Image
+              src="/images/logo.png"
+              alt="Go Hargeisa"
+              width={520}
+              height={180}
+              priority
+              className="h-20 md:h-24 w-auto object-contain"
+            />
+          </Link>
+        </div>
 
         <nav className="hidden lg:flex flex-1 items-center justify-center gap-8">
           {links.map((l) => (
@@ -61,10 +61,10 @@ export function SiteHeader({ locale }: { locale: Locale }) {
               key={l.key}
               href={`/${locale}/${l.href}`}
               className={`rounded-full px-4 py-2 text-[15px] font-medium transition-all duration-300 ${
-  scrolled
-    ? "text-gray-800 hover:text-primary hover:bg-primary/10"
-    : "text-white hover:text-primary hover:bg-white/10"
-}`}
+                scrolled
+                  ? "text-gray-800 hover:text-primary hover:bg-primary/10"
+                  : "text-white hover:text-primary hover:bg-white/10"
+              }`}
             >
               {t(l.key)}
             </Link>
@@ -73,36 +73,34 @@ export function SiteHeader({ locale }: { locale: Locale }) {
 
         <div className="hidden lg:flex shrink-0 items-center gap-3 ml-auto">
           <div
-  className={`flex items-center gap-2 ${
-    scrolled ? "text-gray-900" : "text-white"
-  }`}
->
-  <LanguageSwitcher locale={locale} />
-  <ThemeToggle />
-</div>
+            className={`flex items-center gap-2 ${
+              scrolled ? "text-gray-900" : "text-white"
+            }`}
+          >
+            <LanguageSwitcher locale={locale} />
+            <ThemeToggle />
+          </div>
+
           {loading ? (
-            <div className="h-9 w-24 rounded-full bg-ink/5 dark:bg-white/10 animate-pulse" aria-hidden />
+            <div className="h-9 w-24 rounded-full bg-ink/5 dark:bg-white/10 animate-pulse" />
           ) : user ? (
-            <UserMenu locale={locale} name={user.name} isOwner={user.isOwner} avatarUrl={user.avatarUrl} />
+            <UserMenu
+              locale={locale}
+              name={user.name}
+              isOwner={user.isOwner}
+              avatarUrl={user.avatarUrl}
+            />
           ) : (
-            <>
-              <Link
-                href={`/${locale}/auth/login`}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition-all duration-300 ${
-  scrolled
-    ? "text-gray-900 hover:text-primary"
-    : "text-white hover:bg-white/10"
-}`}
-              >
-                {t("signIn")}
-              </Link>
-              <Link
-                href={`/${locale}/auth/register`}
-                className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white shadow-card hover:bg-primary-700 transition-colors"
-              >
-                {t("signUp")}
-              </Link>
-            </>
+            <Link
+              href={`/${locale}/auth/login`}
+              className={`rounded-full px-4 py-2 text-sm font-semibold transition-all duration-300 ${
+                scrolled
+                  ? "text-gray-900 hover:text-primary"
+                  : "text-white hover:bg-white/10"
+              }`}
+            >
+              {t("signIn")}
+            </Link>
           )}
         </div>
 
@@ -138,6 +136,7 @@ export function SiteHeader({ locale }: { locale: Locale }) {
                   {t(l.key)}
                 </Link>
               ))}
+
               {user ? (
                 <div className="mt-2 space-y-2 px-3">
                   <Link
@@ -147,6 +146,7 @@ export function SiteHeader({ locale }: { locale: Locale }) {
                   >
                     My Dashboard
                   </Link>
+
                   {user.isOwner && (
                     <Link
                       href={`/${locale}/admin`}
@@ -156,22 +156,17 @@ export function SiteHeader({ locale }: { locale: Locale }) {
                       Admin Dashboard
                     </Link>
                   )}
+
                   <SignOutButton className="w-full flex items-center justify-center gap-2 rounded-full bg-primary py-2.5 text-sm font-semibold text-white" />
                 </div>
               ) : (
                 !loading && (
-                  <div className="mt-2 flex gap-2 px-3">
+                  <div className="mt-2 px-3">
                     <Link
                       href={`/${locale}/auth/login`}
-                      className="flex-1 rounded-full border border-ink/15 dark:border-white/20 py-2.5 text-center text-sm font-semibold"
+                      className="block rounded-full border border-ink/15 dark:border-white/20 py-2.5 text-center text-sm font-semibold"
                     >
                       {t("signIn")}
-                    </Link>
-                    <Link
-                      href={`/${locale}/auth/register`}
-                      className="flex-1 rounded-full bg-primary py-2.5 text-center text-sm font-semibold text-white"
-                    >
-                      {t("signUp")}
                     </Link>
                   </div>
                 )
