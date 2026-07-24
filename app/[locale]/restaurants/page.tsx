@@ -34,10 +34,10 @@ export default async function RestaurantsPage({
   return (
     <>
       <PageHero
-        eyebrow="🍽 Restaurants"
-        title="Discover Hargeisa's Best Restaurants"
-        image="/images/restaurants/sultan/hero.jpeg"
-      />
+  eyebrow="🍽 Restaurants"
+  title="Discover Hargeisa's Best Restaurants"
+  image="/images/restaurants/sultan/hero.png"
+/>
 
       <RestaurantsPageClient locale={locale} initialRestaurants={restaurants} searchParams={searchParams} />
     </>
