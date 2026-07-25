@@ -14,7 +14,12 @@ export async function GET(request: NextRequest, { params }: { params: { locale: 
 
   if (code) {
     const supabase = await createClient();
-    await supabase.auth.exchangeCodeForSession(code);
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    if (error) {
+      return NextResponse.redirect(
+        `${origin}/${params.locale}/auth/login?error=auth_callback_failed`
+      );
+    }
   }
 
   return NextResponse.redirect(`${origin}${next}`);

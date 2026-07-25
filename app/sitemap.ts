@@ -4,7 +4,6 @@ import { getAllHotelSlugs } from "@/lib/data/hotels";
 import { getAllRestaurantSlugs } from "@/lib/data/restaurants";
 import { getAllCafeSlugs } from "@/lib/data/cafes";
 import { getAllAttractionSlugs } from "@/lib/data/attractions";
-import { getAllEventSlugs } from "@/lib/data/events";
 import { getAllArticleSlugs } from "@/lib/data/articles";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gohargeisa.com";
@@ -17,7 +16,6 @@ const staticRoutes = [
   "cafes",
   "attractions",
   "shopping",
-  "events",
   "travel-guide",
   "transportation",
   "blog",
@@ -26,12 +24,11 @@ const staticRoutes = [
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [hotelSlugs, restaurantSlugs, cafeSlugs, attractionSlugs, eventSlugs, articleSlugs] = await Promise.all([
+  const [hotelSlugs, restaurantSlugs, cafeSlugs, attractionSlugs, articleSlugs] = await Promise.all([
     getAllHotelSlugs(),
     getAllRestaurantSlugs(),
     getAllCafeSlugs(),
     getAllAttractionSlugs(),
-    getAllEventSlugs(),
     getAllArticleSlugs(),
   ]);
 
@@ -51,7 +48,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     for (const slug of restaurantSlugs) entries.push(url(`${locale}/restaurants/${slug}`));
     for (const slug of cafeSlugs) entries.push(url(`${locale}/cafes/${slug}`));
     for (const slug of attractionSlugs) entries.push(url(`${locale}/attractions/${slug}`));
-    for (const slug of eventSlugs) entries.push(url(`${locale}/events/${slug}`));
     for (const slug of articleSlugs) entries.push(url(`${locale}/blog/${slug}`));
   }
 
