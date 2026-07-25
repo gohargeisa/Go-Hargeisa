@@ -21,7 +21,16 @@
     "title": "Soo Sahami Hargeysa",
     "subtitle": "Waddooyin ganacsi oo taariikhi ah, soo dhoweyn diirran, iyo magaalo si degdeg ah u kobcaysa oo noqotay mid ka mid ah meelaha ugu soo jiidashada badan Geeska Afrika.",
     "searchPlaceholder": "Raadi hudheello, maqaayado, goobo aad booqato…",
-    "searchButton": "Raadi"
+    "searchButton": "Raadi",
+
+    "hotelCardTitle": "Hudheello",
+    "hotelCardDescription": "Ka hel hudheellada ugu wanaagsan ee Hargeysa.",
+
+    "restaurantCardTitle": "Maqaayado",
+    "restaurantCardDescription": "Ku raaxayso cuntooyinka maxalliga ah iyo kuwa caalamiga ah.",
+
+    "cafeCardTitle": "Kafateeriyo",
+    "cafeCardDescription": "Nasasho ku qaado kafateeriyada ugu wanaagsan ee Hargeysa."
   },
   "home": {
     "destinationsTitle": "Goobaha Caanka ah",
@@ -43,8 +52,6 @@
     "shareTitle": "La wadaag",
     "shareDescription": "La wadaag khibradahaaga adigoo qoraya faallooyin si aad uga caawiso dadka kale inay helaan meelaha ugu fiican ee Hargeysa.",
 
-    
-
     "hotelsTitle": "Halka Aad Degi Karto",
     "hotelsSubtitle": "Hudheello si taxaddar leh loo doortay oo ku habboon miisaaniyad kasta",
     "restaurantsTitle": "Halka Aad Wax Ka Cuni Karto",
@@ -62,7 +69,7 @@
     "viewAll": "Dhammaan Arag"
   },
   "footer": {
-    "tagline": "Hagaha aad ku kalsoon tahay ee Hargeysa — hudheello, maqaayado, kafateeriyo, dalxiis iyo wax kasta oo aad u baahan tahay.",
+    "tagline": "Hagaha aad ku kalsoon tahay ee Hargeysa — hudheellada ugu fiican, maqaayadaha, kafateeriyada iyo meelaha ugu muhiimsan ee magaalada.",
     "explore": "Sahami",
     "company": "Shirkadda",
     "support": "Taageero",

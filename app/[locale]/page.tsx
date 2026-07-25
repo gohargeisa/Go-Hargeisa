@@ -4,12 +4,11 @@ import type { Locale } from "@/lib/i18n/config";
 import { getHotels } from "@/lib/data/hotels";
 import { getRestaurants } from "@/lib/data/restaurants";
 import { getCafes } from "@/lib/data/cafes";
-import { getEvents } from "@/lib/data/events";
+
 
 import { Hero } from "@/components/home/hero";
 import { TrustBar } from "@/components/home/trust-bar";
 import { ListingRowSection } from "@/components/home/listing-row-section";
-import { EventsSection } from "@/components/home/events-section";
 import { NewsletterSection } from "@/components/home/newsletter-section";
 
 export const revalidate = 3600;
@@ -21,12 +20,11 @@ export default async function HomePage({
 }) {
   const t = await getTranslations("home");
   
-  const [hotels, restaurants, cafes, events] = await Promise.all([
-    getHotels(),
-    getRestaurants(),
-    getCafes(),
-    getEvents(),
-  ]);
+  const [hotels, restaurants, cafes] = await Promise.all([
+  getHotels(),
+  getRestaurants(),
+  getCafes(),
+]);
 
   return (
     <>
@@ -163,10 +161,7 @@ export default async function HomePage({
         }))}
       />
 
-      <EventsSection
-        events={events}
-        locale={locale}
-      />
+      
 
       <NewsletterSection locale={locale} />
     </>

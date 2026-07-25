@@ -40,7 +40,7 @@ export default async function ExplorePage({ params: { locale } }: { params: { lo
             <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/10 to-transparent" />
             <div className="absolute inset-x-0 bottom-0 p-6 text-white">
               <h2 className="font-display text-xl font-semibold">{d.name}</h2>
-              <p className="mt-1 text-sm text-white/80 line-clamp-2">{d.description}</p>
+              <p className="mt-1 text-sm text-white/70 line-clamp-2">{d.description}</p>
             </div>
           </Link>
         ))}

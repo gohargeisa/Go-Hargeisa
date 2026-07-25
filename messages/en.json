@@ -21,7 +21,16 @@
     "title": "Discover Hargeisa",
     "subtitle": "Ancient trade routes, warm hospitality, and a city rebuilding itself into one of the Horn of Africa's most compelling destinations.",
     "searchPlaceholder": "Search hotels, restaurants, places to visit…",
-    "searchButton": "Search"
+    "searchButton": "Search",
+
+    "hotelCardTitle": "Hotels",
+    "hotelCardDescription": "Stay at trusted hotels across Hargeisa.",
+
+    "restaurantCardTitle": "Restaurants",
+    "restaurantCardDescription": "Enjoy authentic local and international dining.",
+
+    "cafeCardTitle": "Cafés",
+    "cafeCardDescription": "Relax at Hargeisa's favorite coffee spots."
   },
   "home": {
     "destinationsTitle": "Popular Destinations",
@@ -42,8 +51,6 @@
 
     "shareTitle": "Share",
     "shareDescription": "Share your experiences by writing reviews and help other visitors discover the best places in Hargeisa.",
-
-    
 
     "hotelsTitle": "Where to Stay",
     "hotelsSubtitle": "Handpicked hotels across every budget",
