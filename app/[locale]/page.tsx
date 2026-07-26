@@ -9,13 +9,13 @@ import { getAttractions } from "@/lib/data/attractions";
 
 import { Hero } from "@/components/home/hero";
 import { TrustBar } from "@/components/home/trust-bar";
-import { ListingRowSection } from "@/components/home/listing-row-section";
 import { CafesComingSoonSection } from "@/components/home/cafes-coming-soon-section";
 import { NewsletterSection } from "@/components/home/newsletter-section";
 import { Reveal } from "@/components/home/reveal";
 import { ScrollRow } from "@/components/shared/scroll-row";
 import { PremiumHotelCard } from "@/components/home/premium-hotel-card";
 import { PremiumRestaurantCard } from "@/components/home/premium-restaurant-card";
+import { PremiumAttractionCard } from "@/components/home/premium-attraction-card";
 
 export const revalidate = 3600;
 
@@ -199,20 +199,51 @@ export default async function HomePage({
 
       <CafesComingSoonSection locale={locale} />
 
-      <ListingRowSection
-        eyebrow="Discover"
-        title={t("attractionsTitle")}
-        viewAllHref={`/${locale}/attractions`}
-        viewAllLabel={t("viewAll")}
-        items={attractions.map((a) => ({
-          href: `/${locale}/attractions/${a.slug}`,
-          image: a.coverImage,
-          title: a.name,
-          subtitle: a.address,
-          rating: a.rating,
-          reviewCount: a.reviewCount,
-        }))}
-      />
+      {attractions.length > 0 && (
+        <section className="py-16 md:py-24">
+          <div className="container-px mx-auto">
+            <Reveal>
+              <div className="mb-10 flex flex-col gap-5 md:mb-14 md:flex-row md:items-end md:justify-between">
+                <div>
+                  <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary">
+                    Discover
+                  </span>
+                  <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">
+                    {t("attractionsTitle")}
+                  </h2>
+                </div>
+                <Link
+                  href={`/${locale}/attractions`}
+                  className="inline-flex items-center gap-2 self-start rounded-full border border-ink/15 px-5 py-2.5 text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5 hover:border-primary hover:bg-primary/5 hover:text-primary dark:border-white/20 dark:hover:border-primary dark:hover:bg-primary/10 md:self-auto"
+                >
+                  {t("viewAll")}
+                  <ArrowUpRight size={16} aria-hidden="true" />
+                </Link>
+              </div>
+            </Reveal>
+            <Reveal delay={0.1}>
+              <ScrollRow>
+                {attractions.map((a) => (
+                  <PremiumAttractionCard
+                    key={a.id}
+                    href={`/${locale}/attractions/${a.slug}`}
+                    image={a.coverImage}
+                    name={a.name}
+                    address={a.address}
+                    rating={a.rating}
+                    reviewCount={a.reviewCount}
+                    category={a.category}
+                    shortDescription={a.shortDescription}
+                    featured={a.featured}
+                    attractionId={a.id}
+                    locale={locale}
+                  />
+                ))}
+              </ScrollRow>
+            </Reveal>
+          </div>
+        </section>
+      )}
 
       <NewsletterSection locale={locale} />
     </>
