@@ -194,14 +194,15 @@ Two Supabase clients exist on purpose:
   user's identity actually matters: favorites, saved trips, review history, profile, admin
   writes, auth guards. These routes are correctly dynamic (personalized), and that's fine.
 
-**The layout does not check auth server-side.** `app/[locale]/layout.tsx` used to fetch the
-signed-in user via the cookie-aware client to show the right header state — but since a layout
-wraps every page, that one call forced the *entire site* into full SSR on every request,
-defeating ISR everywhere. The header now resolves auth state client-side
-(`components/layout/use-header-user.ts`), trading a brief "signed out" flash on first paint for
-static/ISR-eligible public pages. If you'd rather have the header always correct on first paint
-at the cost of full dynamic rendering site-wide, revert `layout.tsx` to fetch server-side — but
-know that's the trade-off.
+**The layout resolves auth server-side.** `app/[locale]/layout.tsx` already sets `export const
+dynamic = "force-dynamic"` (next-intl's request-based APIs require it in the installed version),
+so the whole route tree renders dynamically on every request regardless of what the layout does.
+Given that, `getHeaderUser()` (`lib/supabase/guards.ts`) reads the cookie-aware client once per
+request and passes the result into `<SiteHeader initialUser={...}>` — the header is correct on
+first paint, with no "signed out" flash and no client/server mismatch. A client-side subscription
+in `components/layout/use-header-user.ts` keeps it live after sign-in/sign-out without a full page
+reload. Public listing/detail pages still get their own ISR via `export const revalidate = 3600`
+on the page itself — only the shared layout wrapping them is forced dynamic.
 
 `getXBySlug` functions in `lib/data/*.ts` are wrapped in React's `cache()`, so a detail page's
 `generateMetadata` and the page component itself (which both call the same function) only hit

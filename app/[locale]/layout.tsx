@@ -7,22 +7,19 @@ import { ThemeProvider } from "@/components/layout/theme-provider";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { ServiceWorkerRegister } from "@/components/shared/service-worker-register";
+import { getHeaderUser } from "@/lib/supabase/guards";
 
 // next-intl's request-based APIs read headers in the installed version, so
 // these locale routes must render dynamically instead of being prerendered.
 export const dynamic = "force-dynamic";
 
-// NOTE: This layout intentionally does NOT read cookies or check auth state
-// server-side (no `createClient()` from lib/supabase/server here). Doing so
-// would force every page in the app into full dynamic SSR on every request,
-// since Next.js treats any cookies() call anywhere in a route's layout tree
-// as a signal the whole route must be dynamic — even if the page itself
-// only reads public data and sets `export const revalidate`.
-//
-// Instead, SiteHeader resolves the signed-in user client-side via
-// useHeaderUser() (components/layout/use-header-user.ts), which keeps this
-// layout — and therefore every public page — eligible for static
-// generation + ISR. See that file for the full rationale.
+// Since the line above already forces this whole route tree to render
+// dynamically on every request, resolving the signed-in user here too
+// (via getHeaderUser()) costs nothing extra — and it means <SiteHeader>
+// renders with the correct auth state on first paint instead of a brief
+// "signed out" flash. A client-side subscription in
+// components/layout/use-header-user.ts still keeps it live after
+// sign-in/sign-out without a full page reload.
 
 export async function generateMetadata({
   params: { locale },
@@ -151,13 +148,13 @@ export default async function LocaleLayout({
   if (!locales.includes(locale as Locale)) notFound();
 
   const currentLocale = locale as Locale;
-  const messages = await getMessages();
+  const [messages, initialUser] = await Promise.all([getMessages(), getHeaderUser()]);
 
   return (
     <NextIntlClientProvider messages={messages}>
       <ThemeProvider>
         <div lang={currentLocale} dir={localeConfig[currentLocale].dir} className="min-h-screen font-body">
-          <SiteHeader locale={currentLocale} />
+          <SiteHeader locale={currentLocale} initialUser={initialUser} />
           <main>{children}</main>
           <SiteFooter locale={currentLocale} />
           <ServiceWorkerRegister />

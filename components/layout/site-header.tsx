@@ -11,6 +11,7 @@ import { LanguageSwitcher } from "./language-switcher";
 import { ThemeToggle } from "./theme-toggle";
 import { UserMenu } from "./user-menu";
 import { useHeaderUser } from "./use-header-user";
+import type { HeaderUser } from "@/lib/supabase/header-user";
 import { SignOutButton } from "@/components/shared/sign-out-button";
 
 const links = [
@@ -19,12 +20,12 @@ const links = [
   { key: "cafes", href: "cafes" },
 ] as const;
 
-export function SiteHeader({ locale }: { locale: Locale }) {
+export function SiteHeader({ locale, initialUser }: { locale: Locale; initialUser: HeaderUser | null }) {
   const t = useTranslations("nav");
   const td = useTranslations("dashboard");
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
-  const { user, loading } = useHeaderUser();
+  const { user } = useHeaderUser(initialUser);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -81,9 +82,7 @@ export function SiteHeader({ locale }: { locale: Locale }) {
             <ThemeToggle />
           </div>
 
-          {loading ? (
-            <div className="h-9 w-24 rounded-full bg-ink/5 dark:bg-white/10 animate-pulse" />
-          ) : user ? (
+          {user ? (
             <UserMenu
               locale={locale}
               name={user.name}
@@ -148,6 +147,22 @@ export function SiteHeader({ locale }: { locale: Locale }) {
                     {td("myDashboard")}
                   </Link>
 
+                  <Link
+                    href={`/${locale}/dashboard?tab=profile`}
+                    onClick={() => setOpen(false)}
+                    className="block rounded-full border border-ink/15 dark:border-white/20 py-2.5 text-center text-sm font-semibold"
+                  >
+                    {td("tabProfile")}
+                  </Link>
+
+                  <Link
+                    href={`/${locale}/dashboard?tab=profile`}
+                    onClick={() => setOpen(false)}
+                    className="block rounded-full border border-ink/15 dark:border-white/20 py-2.5 text-center text-sm font-semibold"
+                  >
+                    {td("settings")}
+                  </Link>
+
                   {(user.isOwner || user.isBusinessOwner) && (
                     <Link
                       href={`/${locale}/admin${user.isOwner ? "" : "/hotels"}`}
@@ -161,16 +176,14 @@ export function SiteHeader({ locale }: { locale: Locale }) {
                   <SignOutButton locale={locale} className="w-full flex items-center justify-center gap-2 rounded-full bg-primary py-2.5 text-sm font-semibold text-white" />
                 </div>
               ) : (
-                !loading && (
-                  <div className="mt-2 px-3">
-                    <Link
-                      href={`/${locale}/auth/login`}
-                      className="block rounded-full border border-ink/15 dark:border-white/20 py-2.5 text-center text-sm font-semibold"
-                    >
-                      {t("signIn")}
-                    </Link>
-                  </div>
-                )
+                <div className="mt-2 px-3">
+                  <Link
+                    href={`/${locale}/auth/login`}
+                    className="block rounded-full border border-ink/15 dark:border-white/20 py-2.5 text-center text-sm font-semibold"
+                  >
+                    {t("signIn")}
+                  </Link>
+                </div>
               )}
             </div>
           </motion.nav>

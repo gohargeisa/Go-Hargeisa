@@ -224,7 +224,8 @@
     "emptyNotificationsDescription": "Marka talooyin maxalli ah iyo cusboonaysiinta safarrada la heli karo, halkan ayay ka soo muuqan doonaan.",
     "myDashboard": "Dashboard-kayga",
     "adminDashboard": "Dashboard-ka Maamulka",
-    "manageListings": "Maamul Liistooyinka"
+    "manageListings": "Maamul Liistooyinka",
+    "settings": "Dejinta"
   },
   "errors": {
     "title": "Wax baa qaldamay",

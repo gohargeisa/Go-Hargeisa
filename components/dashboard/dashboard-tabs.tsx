@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Bell, Compass, Heart, MapIcon, MessageSquare, Sparkles, User } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
@@ -19,13 +20,30 @@ const tabs = [
   { key: "reviews", icon: MessageSquare }, { key: "profile", icon: User }, { key: "notifications", icon: Bell },
 ] as const;
 type TabKey = (typeof tabs)[number]["key"];
+const tabKeys: readonly string[] = tabs.map((tab) => tab.key);
+function isTabKey(value: string | null): value is TabKey {
+  return !!value && tabKeys.includes(value);
+}
 
 export function DashboardTabs({ locale, userId, email, favorites, trips, reviews, userName, avatarUrl }: {
   locale: Locale; userId: string; email: string; favorites: FavoriteEntry[]; trips: SavedTrip[];
   reviews: MyReview[]; userName: string; avatarUrl: string;
 }) {
   const t = useTranslations("dashboard");
-  const [active, setActive] = useState<TabKey>("favorites");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  // Lets the header's Profile/Settings dropdown links (?tab=profile) open
+  // straight to that tab instead of always landing on Favorites.
+  const [active, setActive] = useState<TabKey>(() => {
+    const requested = searchParams.get("tab");
+    return isTabKey(requested) ? requested : "favorites";
+  });
+
+  function selectTab(key: TabKey) {
+    setActive(key);
+    router.replace(key === "favorites" ? pathname : `${pathname}?tab=${key}`, { scroll: false });
+  }
   const tabLabels: Record<TabKey, string> = {
     favorites: t("tabFavorites"),
     trips: t("tabTrips"),
@@ -54,7 +72,7 @@ export function DashboardTabs({ locale, userId, email, favorites, trips, reviews
       <div className="mt-6 grid gap-6 lg:grid-cols-[230px_minmax(0,1fr)]">
         <nav className="flex gap-1.5 overflow-x-auto rounded-2xl border border-ink/8 bg-white p-2 shadow-sm dark:border-white/10 dark:bg-white/[0.03] lg:flex-col lg:self-start" aria-label={t("sectionsAriaLabel")}>
           {tabs.map(({ key, icon: Icon }) => (
-            <button key={key} type="button" onClick={() => setActive(key)} aria-current={active === key ? "page" : undefined}
+            <button key={key} type="button" onClick={() => selectTab(key)} aria-current={active === key ? "page" : undefined}
               className={`flex shrink-0 items-center gap-3 rounded-xl px-3.5 py-3 text-start text-sm font-semibold transition-all ${active === key ? "bg-primary text-white shadow-sm" : "text-ink/65 hover:bg-primary/5 hover:text-primary dark:text-sand/65 dark:hover:bg-white/5"}`}>
               <Icon size={17} /> {tabLabels[key]}
             </button>

@@ -1,7 +1,41 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
+import { toHeaderUser, type HeaderUser } from "@/lib/supabase/header-user";
 import type { Locale } from "@/lib/i18n/config";
+
+/**
+ * Resolves the signed-in user's header info (name, role, avatar) server-side
+ * for app/[locale]/layout.tsx to pass into <SiteHeader> as its initial
+ * state. Never redirects — every page, signed in or not, renders this
+ * layout, so it just returns null for a signed-out visitor.
+ *
+ * app/[locale]/layout.tsx already sets `export const dynamic =
+ * "force-dynamic"` (next-intl's request-based APIs require it), so the
+ * whole route tree is dynamically rendered on every request regardless —
+ * resolving auth here costs nothing extra and removes the client-only
+ * "signed out" flash on first paint that a purely client-side check has.
+ * A client-side subscription (components/layout/use-header-user.ts) still
+ * keeps the header live after sign-in/sign-out without a full reload.
+ */
+export async function getHeaderUser(): Promise<HeaderUser | null> {
+  if (!isSupabaseConfigured()) return null;
+
+  const supabase = await createClient();
+  const {
+    data: { user: authUser },
+  } = await supabase.auth.getUser();
+
+  if (!authUser) return null;
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name, role, avatar_url")
+    .eq("id", authUser.id)
+    .single();
+
+  return toHeaderUser(authUser, profile);
+}
 
 /**
  * Requires a signed-in user. Redirects to /auth/login (preserving a

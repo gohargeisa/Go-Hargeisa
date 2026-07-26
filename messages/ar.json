@@ -224,7 +224,8 @@
     "emptyNotificationsDescription": "عند توفر توصيات محلية وتحديثات على رحلاتك، ستظهر هنا.",
     "myDashboard": "لوحتي",
     "adminDashboard": "لوحة الإدارة",
-    "manageListings": "إدارة القوائم"
+    "manageListings": "إدارة القوائم",
+    "settings": "الإعدادات"
   },
   "errors": {
     "title": "حدث خطأ ما",

@@ -224,7 +224,8 @@
     "emptyNotificationsDescription": "When local recommendations and trip updates are available, they will appear here.",
     "myDashboard": "My Dashboard",
     "adminDashboard": "Admin Dashboard",
-    "manageListings": "Manage Listings"
+    "manageListings": "Manage Listings",
+    "settings": "Settings"
   },
   "errors": {
     "title": "Something went wrong",
