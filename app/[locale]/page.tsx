@@ -15,6 +15,7 @@ import { NewsletterSection } from "@/components/home/newsletter-section";
 import { Reveal } from "@/components/home/reveal";
 import { ScrollRow } from "@/components/shared/scroll-row";
 import { PremiumHotelCard } from "@/components/home/premium-hotel-card";
+import { PremiumRestaurantCard } from "@/components/home/premium-restaurant-card";
 
 export const revalidate = 3600;
 
@@ -147,21 +148,54 @@ export default async function HomePage({
         </section>
       )}
 
-      <ListingRowSection
-        eyebrow="Eat"
-        title={t("restaurantsTitle")}
-        viewAllHref={`/${locale}/restaurants`}
-        viewAllLabel={t("viewAll")}
-        items={restaurants.map((r) => ({
-          href: `/${locale}/restaurants/${r.slug}`,
-          image: r.coverImage,
-          title: r.name,
-          subtitle: r.cuisine.join(" · "),
-          rating: r.rating,
-          reviewCount: r.reviewCount,
-          priceRange: r.priceRange,
-        }))}
-      />
+      {restaurants.length > 0 && (
+        <section className="py-16 md:py-24">
+          <div className="container-px mx-auto">
+            <Reveal>
+              <div className="mb-10 flex flex-col gap-5 md:mb-14 md:flex-row md:items-end md:justify-between">
+                <div>
+                  <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary">
+                    Eat
+                  </span>
+                  <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">
+                    {t("restaurantsTitle")}
+                  </h2>
+                </div>
+                <Link
+                  href={`/${locale}/restaurants`}
+                  className="inline-flex items-center gap-2 self-start rounded-full border border-ink/15 px-5 py-2.5 text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5 hover:border-primary hover:bg-primary/5 hover:text-primary dark:border-white/20 dark:hover:border-primary dark:hover:bg-primary/10 md:self-auto"
+                >
+                  {t("viewAll")}
+                  <ArrowUpRight size={16} aria-hidden="true" />
+                </Link>
+              </div>
+            </Reveal>
+            <Reveal delay={0.1}>
+              <ScrollRow>
+                {restaurants.map((r) => (
+                  <PremiumRestaurantCard
+                    key={r.id}
+                    href={`/${locale}/restaurants/${r.slug}`}
+                    image={r.coverImage}
+                    name={r.name}
+                    address={r.address}
+                    rating={r.rating}
+                    reviewCount={r.reviewCount}
+                    priceRange={r.priceRange}
+                    cuisine={r.cuisine}
+                    featured={r.featured}
+                    reservable={r.reservable}
+                    restaurantId={r.id}
+                    locale={locale}
+                    website={r.website}
+                    phone={r.phone}
+                  />
+                ))}
+              </ScrollRow>
+            </Reveal>
+          </div>
+        </section>
+      )}
 
       <CafesComingSoonSection locale={locale} />
 
