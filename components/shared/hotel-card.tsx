@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import {
   ArrowUpRight,
   Bell,
+  Building2,
   Car,
   CheckCircle2,
   Coffee,
@@ -17,6 +18,7 @@ import {
   Plane,
   Snowflake,
   Sparkles,
+  Star,
   Trees,
   UtensilsCrossed,
   Users,
@@ -25,7 +27,6 @@ import {
   Wine,
   Zap,
 } from "lucide-react";
-import { RatingBadge } from "./rating-badge";
 import { toggleFavoriteAction } from "@/lib/actions/favorites";
 
 const AMENITY_ICONS: { match: RegExp; icon: typeof Wifi }[] = [
@@ -101,32 +102,57 @@ export function HotelCard({
 
   const visibleAmenities = amenities.slice(0, MAX_VISIBLE_AMENITIES);
   const extraAmenityCount = amenities.length - visibleAmenities.length;
+  // coverImage is always a non-empty string (real photo or a generic brand
+  // placeholder URL from lib/placeholder-image.ts) — treat the generic
+  // placeholder the same as "no photo yet" and show an elegant in-card
+  // fallback instead of the flat blue placehold.co image.
+  const hasRealImage = Boolean(image) && !image.includes("placehold.co");
 
   return (
-    <div className="group flex h-full w-full min-w-[280px] flex-col overflow-hidden rounded-3xl border border-ink/8 bg-white shadow-[0_10px_30px_rgba(20,30,45,0.08)] transition-all duration-300 hover:-translate-y-1.5 hover:border-primary/25 hover:shadow-[0_24px_55px_rgba(20,30,45,0.18)] dark:border-white/10 dark:bg-white/[0.04] dark:hover:shadow-[0_24px_55px_rgba(0,0,0,0.45)]">
+    <div className="group flex h-full w-full min-w-[280px] flex-col overflow-hidden rounded-3xl border border-ink/8 bg-white shadow-[0_6px_20px_rgba(20,30,45,0.06)] transition-all duration-300 ease-out hover:-translate-y-1 hover:border-primary/25 hover:shadow-[0_20px_45px_rgba(20,30,45,0.14)] dark:border-white/10 dark:bg-white/[0.04] dark:hover:shadow-[0_20px_45px_rgba(0,0,0,0.4)]">
       {/* Image */}
       <div className="relative h-56 shrink-0 overflow-hidden rounded-t-3xl sm:h-60">
-        <Link href={href} className="absolute inset-0 z-0" aria-label={name}>
-          <Image
-            src={image}
-            alt={name}
-            fill
-            sizes="(max-width: 767px) 84vw, (max-width: 1024px) 45vw, 320px"
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-          />
-        </Link>
-
-        <div
-          className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-transparent"
-          aria-hidden="true"
-        />
+        {hasRealImage ? (
+          <>
+            <Link href={href} className="absolute inset-0 z-0" aria-label={name}>
+              <Image
+                src={image}
+                alt={`${name} — hotel exterior`}
+                fill
+                sizes="(max-width: 767px) 84vw, (max-width: 1024px) 45vw, 320px"
+                className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+              />
+            </Link>
+            <div
+              className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent"
+              aria-hidden="true"
+            />
+          </>
+        ) : (
+          <Link
+            href={href}
+            aria-label={name}
+            className="absolute inset-0 z-0 flex items-center justify-center bg-gradient-to-br from-primary/15 via-secondary/10 to-primary/5 transition-transform duration-500 ease-out group-hover:scale-105 dark:from-primary/20 dark:via-secondary/20 dark:to-white/5"
+          >
+            <Building2 size={40} strokeWidth={1.5} className="text-primary/40" aria-hidden="true" />
+          </Link>
+        )}
 
         {featured && (
-          <span className="absolute start-3 top-3 z-10 inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-white shadow-sm">
-            <Sparkles size={12} aria-hidden="true" />
+          <span className="absolute start-3 top-3 z-10 inline-flex items-center gap-1 rounded-full bg-primary/95 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm backdrop-blur-sm">
+            <Sparkles size={10} aria-hidden="true" />
             Featured
           </span>
         )}
+
+        {/* Rating badge — top-end, over the image */}
+        <div className="absolute end-3 top-3 z-10 inline-flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-xs font-bold text-ink shadow-sm backdrop-blur-sm dark:bg-ink/90 dark:text-white">
+          <Star size={12} fill="currentColor" className="text-primary" aria-hidden="true" />
+          {rating.toFixed(1)}
+          {reviewCount > 0 && (
+            <span className="font-normal text-ink/50 dark:text-sand/50">({reviewCount})</span>
+          )}
+        </div>
 
         {hotelId && (
           <button
@@ -134,7 +160,7 @@ export function HotelCard({
             onClick={onToggleFavorite}
             disabled={isPending}
             aria-label={favorited ? `Remove ${name} from favorites` : `Add ${name} to favorites`}
-            className="absolute end-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-ink shadow-sm transition-transform hover:scale-105 disabled:opacity-60"
+            className="absolute end-3 bottom-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-ink shadow-sm transition-transform hover:scale-105 disabled:opacity-60 dark:bg-ink/90 dark:text-white"
           >
             {isPending ? (
               <Loader2 size={17} className="animate-spin" aria-hidden="true" />
@@ -142,7 +168,7 @@ export function HotelCard({
               <Heart
                 size={17}
                 fill={favorited ? "#F4B400" : "none"}
-                color={favorited ? "#F4B400" : "#444"}
+                color={favorited ? "#F4B400" : "currentColor"}
                 aria-hidden="true"
               />
             )}
@@ -151,22 +177,18 @@ export function HotelCard({
       </div>
 
       {/* Body */}
-      <div className="flex flex-1 flex-col gap-3 p-5 sm:p-6">
-        <div className="flex items-start justify-between gap-3">
-          <Link href={href} className="min-w-0">
-            <h3 className="truncate font-display text-lg font-bold text-ink transition-colors group-hover:text-primary dark:text-white sm:text-xl">
+      <div className="flex flex-1 flex-col gap-4 p-5 sm:p-6">
+        <div>
+          <Link href={href}>
+            <h3 className="line-clamp-1 font-display text-xl font-bold text-ink transition-colors group-hover:text-primary dark:text-white sm:text-[1.375rem]">
               {name}
             </h3>
           </Link>
-          <div className="shrink-0">
-            <RatingBadge rating={rating} reviewCount={reviewCount} />
-          </div>
+          <p className="mt-1.5 flex items-center gap-1.5 text-sm text-ink/60 dark:text-sand/60">
+            <MapPin size={15} className="shrink-0 text-primary" aria-hidden="true" />
+            <span className="line-clamp-1">{address}</span>
+          </p>
         </div>
-
-        <p className="flex items-center gap-1.5 text-sm text-ink/60 dark:text-sand/60">
-          <MapPin size={15} className="shrink-0 text-primary" aria-hidden="true" />
-          <span className="line-clamp-1">{address}</span>
-        </p>
 
         {visibleAmenities.length > 0 && (
           <ul className="flex flex-wrap gap-1.5" aria-label="Amenities">
@@ -175,7 +197,7 @@ export function HotelCard({
               return (
                 <li
                   key={amenity}
-                  className="inline-flex items-center gap-1 rounded-full bg-ink/5 px-2.5 py-1 text-xs font-medium text-ink/70 dark:bg-white/10 dark:text-sand/70"
+                  className="inline-flex items-center gap-1 rounded-full bg-ink/5 px-2.5 py-1 text-[11px] font-medium text-ink/70 dark:bg-white/10 dark:text-sand/70"
                 >
                   <Icon size={12} aria-hidden="true" />
                   {amenity}
@@ -183,27 +205,34 @@ export function HotelCard({
               );
             })}
             {extraAmenityCount > 0 && (
-              <li className="inline-flex items-center rounded-full bg-ink/5 px-2.5 py-1 text-xs font-medium text-ink/50 dark:bg-white/10 dark:text-sand/50">
+              <li className="inline-flex items-center rounded-full bg-ink/5 px-2.5 py-1 text-[11px] font-medium text-ink/50 dark:bg-white/10 dark:text-sand/50">
                 +{extraAmenityCount}
               </li>
             )}
           </ul>
         )}
 
-        <div className="mt-auto space-y-3 border-t border-ink/8 pt-4 dark:border-white/10">
-          {priceRange && (
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-ink/45 dark:text-sand/45">
-                Starting from
+        <div className="mt-auto flex flex-col gap-4 border-t border-ink/8 pt-4 dark:border-white/10">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-ink/45 dark:text-sand/45">
+              Starting from
+            </p>
+            {priceRange ? (
+              <p className="font-display text-xl font-bold text-primary">
+                {priceRange}
+                <span className="ms-1 text-sm font-medium text-ink/50 dark:text-sand/50">/night</span>
               </p>
-              <p className="font-display text-xl font-bold text-primary">{priceRange}</p>
-            </div>
-          )}
+            ) : (
+              <p className="font-display text-base font-semibold text-ink/35 dark:text-sand/40">
+                Price on request
+              </p>
+            )}
+          </div>
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-3">
             <Link
               href={href}
-              className="inline-flex items-center justify-center rounded-full border border-ink/15 px-3 py-2.5 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white dark:hover:border-primary"
+              className="inline-flex h-11 items-center justify-center rounded-full border border-ink/15 px-3 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white dark:hover:border-primary"
             >
               View Details
             </Link>
@@ -213,7 +242,7 @@ export function HotelCard({
                 href={website}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-1 rounded-full bg-primary px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-700"
+                className="inline-flex h-11 items-center justify-center gap-1 rounded-full bg-primary px-3 text-sm font-semibold text-white transition-colors hover:bg-primary-700"
               >
                 Book Now
                 <ArrowUpRight size={14} aria-hidden="true" />
@@ -222,7 +251,7 @@ export function HotelCard({
             ) : (
               <Link
                 href={href}
-                className="inline-flex items-center justify-center rounded-full bg-primary px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-700"
+                className="inline-flex h-11 items-center justify-center rounded-full bg-primary px-3 text-sm font-semibold text-white transition-colors hover:bg-primary-700"
               >
                 Book Now
               </Link>
