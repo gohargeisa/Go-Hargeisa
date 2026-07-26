@@ -22,31 +22,31 @@ export function ComingSoonSection({
   return (
     <section className="container-px mx-auto py-16 md:py-24">
       <Reveal>
-        <div className="relative mx-auto max-w-3xl overflow-hidden rounded-xl3 border border-white/10 bg-gradient-to-br from-ink via-secondary-800 to-ink px-6 py-14 text-center shadow-2xl sm:px-10 md:px-16 md:py-16">
+        <div className="relative mx-auto max-w-3xl overflow-hidden rounded-xl3 border border-ink/8 bg-gradient-to-br from-primary/[0.07] via-white to-secondary/[0.06] px-6 py-14 text-center shadow-card sm:px-10 md:px-16 md:py-16">
           <div
-            className="absolute -top-20 -end-16 h-72 w-72 rounded-full bg-primary/20 blur-3xl"
+            className="absolute -top-20 -end-16 h-72 w-72 rounded-full bg-primary/15 blur-3xl"
             aria-hidden="true"
           />
           <div
-            className="absolute -bottom-24 -start-16 h-64 w-64 rounded-full bg-accent/15 blur-3xl"
+            className="absolute -bottom-24 -start-16 h-64 w-64 rounded-full bg-accent/10 blur-3xl"
             aria-hidden="true"
           />
 
           <div className="relative mx-auto max-w-xl">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-white backdrop-blur-sm">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
               <Sparkles size={13} aria-hidden="true" />
               {t("badge")}
             </span>
 
-            <div className="mx-auto mt-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-white">
+            <div className="mx-auto mt-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
               <Icon size={28} strokeWidth={1.75} aria-hidden="true" />
             </div>
 
-            <h2 className="mt-6 text-balance font-display text-3xl font-bold text-white sm:text-4xl">
+            <h2 className="mt-6 text-balance font-display text-3xl font-bold text-ink sm:text-4xl">
               {title}
             </h2>
 
-            <p className="mx-auto mt-5 max-w-lg text-balance leading-7 text-white/75 md:text-lg">
+            <p className="mx-auto mt-5 max-w-lg text-balance leading-7 text-ink/60 md:text-lg">
               {description}
             </p>
 
@@ -60,7 +60,7 @@ export function ComingSoonSection({
               </Link>
               <Link
                 href={`/${locale}/contact`}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/25 bg-white/5 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/15 sm:w-auto"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-ink/15 bg-white px-6 py-3 text-sm font-semibold text-ink transition-colors hover:border-primary/40 hover:text-primary sm:w-auto"
               >
                 <Mail size={16} aria-hidden="true" />
                 {t("contactButton")}

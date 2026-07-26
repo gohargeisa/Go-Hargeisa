@@ -46,7 +46,7 @@ export function LanguageSwitcher({ locale }: { locale: Locale }) {
       {open && (
         <ul
           role="listbox"
-          className="absolute end-0 mt-2 w-44 overflow-hidden rounded-2xl border border-white/10 bg-slate-900 shadow-2xl z-50"
+          className="absolute end-0 mt-2 w-44 overflow-hidden rounded-2xl border border-ink/10 dark:border-white/10 bg-white dark:bg-ink shadow-card z-50"
         >
           {locales.map((l) => (
             <li key={l}>
@@ -55,15 +55,15 @@ export function LanguageSwitcher({ locale }: { locale: Locale }) {
                 role="option"
                 aria-selected={l === locale}
                 onClick={() => switchTo(l)}
-                className="flex w-full items-center justify-between px-4 py-3 text-sm text-white transition-colors hover:bg-slate-800"
+                className="flex w-full items-center justify-between px-4 py-3 text-sm text-ink transition-colors hover:bg-ink/5 dark:text-white dark:hover:bg-white/10"
               >
-                <span className="flex items-center gap-3 font-medium text-white">
+                <span className="flex items-center gap-3 font-medium text-ink dark:text-white">
                   <FlagIcon locale={l} size={16} />
                   {localeConfig[l].label}
                 </span>
 
                 {l === locale && (
-                  <Check size={16} className="text-amber-400" />
+                  <Check size={16} className="text-primary" />
                 )}
               </button>
             </li>

@@ -1,21 +1,17 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useTheme } from "next-themes";
 import {
   AlertTriangle,
   Check,
   Globe,
-  Laptop,
   LogOut,
   Loader2,
   Mail,
-  Moon,
   ShieldCheck,
-  Sun,
   Trash2,
 } from "lucide-react";
 import { locales, localeConfig, type Locale } from "@/lib/i18n/config";
@@ -79,10 +75,6 @@ export function SettingsPanel({
 
       <SettingsSection icon={Globe} title={t("languagePreferencesTitle")}>
         <LanguageOptions locale={locale} />
-      </SettingsSection>
-
-      <SettingsSection icon={Sun} title={t("themeTitle")}>
-        <ThemeOptions />
       </SettingsSection>
 
       <SettingsSection icon={Check} title={t("notificationPreferencesTitle")}>
@@ -188,44 +180,6 @@ function LanguageOptions({ locale }: { locale: Locale }) {
           {l === locale && <Check size={14} />}
         </button>
       ))}
-    </div>
-  );
-}
-
-function ThemeOptions() {
-  const t = useTranslations("dashboard");
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-  // next-themes only knows the real theme after mount (it reads
-  // localStorage/matchMedia client-side) — rendering its value before that
-  // would mismatch the server-rendered markup.
-  useEffect(() => setMounted(true), []);
-
-  const options: { value: "light" | "dark" | "system"; label: string; icon: typeof Sun }[] = [
-    { value: "light", label: t("themeLight"), icon: Sun },
-    { value: "dark", label: t("themeDark"), icon: Moon },
-    { value: "system", label: t("themeSystem"), icon: Laptop },
-  ];
-
-  return (
-    <div className="flex flex-wrap gap-2">
-      {options.map(({ value, label, icon: Icon }) => {
-        const active = mounted && theme === value;
-        return (
-          <button
-            key={value}
-            type="button"
-            onClick={() => setTheme(value)}
-            aria-pressed={active}
-            className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
-              active ? "border-primary bg-primary/10 text-primary" : "border-ink/12 dark:border-white/15 hover:border-primary/40"
-            }`}
-          >
-            <Icon size={15} />
-            {label}
-          </button>
-        );
-      })}
     </div>
   );
 }

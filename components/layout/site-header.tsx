@@ -8,7 +8,6 @@ import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Locale } from "@/lib/i18n/config";
 import { LanguageSwitcher } from "./language-switcher";
-import { ThemeToggle } from "./theme-toggle";
 import { UserMenu } from "./user-menu";
 import { useHeaderUser } from "./use-header-user";
 import type { HeaderUser } from "@/lib/supabase/header-user";
@@ -79,7 +78,6 @@ export function SiteHeader({ locale, initialUser }: { locale: Locale; initialUse
             }`}
           >
             <LanguageSwitcher locale={locale} />
-            <ThemeToggle />
           </div>
 
           {user ? (
@@ -106,7 +104,6 @@ export function SiteHeader({ locale, initialUser }: { locale: Locale; initialUse
 
         <div className="ms-auto flex shrink-0 items-center gap-1.5 sm:gap-2 lg:hidden">
           <LanguageSwitcher locale={locale} />
-          <ThemeToggle />
           <button
             aria-label="Toggle menu"
             onClick={() => setOpen((o) => !o)}
