@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/config";
 
@@ -11,9 +13,8 @@ import { ListingRowSection } from "@/components/home/listing-row-section";
 import { CafesComingSoonSection } from "@/components/home/cafes-coming-soon-section";
 import { NewsletterSection } from "@/components/home/newsletter-section";
 import { Reveal } from "@/components/home/reveal";
-import { SectionHeader } from "@/components/shared/section-header";
 import { ScrollRow } from "@/components/shared/scroll-row";
-import { HotelCard } from "@/components/shared/hotel-card";
+import { PremiumHotelCard } from "@/components/home/premium-hotel-card";
 
 export const revalidate = 3600;
 
@@ -102,18 +103,29 @@ export default async function HomePage({
         <section className="bg-white py-16 dark:bg-white/[0.03] md:py-24">
           <div className="container-px mx-auto">
             <Reveal>
-              <SectionHeader
-                eyebrow="Stay"
-                title={t("hotelsTitle")}
-                subtitle={t("hotelsSubtitle")}
-                viewAllHref={`/${locale}/hotels`}
-                viewAllLabel={t("viewAll")}
-              />
+              <div className="mb-10 flex flex-col gap-5 md:mb-14 md:flex-row md:items-end md:justify-between">
+                <div>
+                  <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary">
+                    Stay
+                  </span>
+                  <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">
+                    {t("hotelsTitle")}
+                  </h2>
+                  <p className="mt-2 max-w-xl text-ink/60 dark:text-sand/60">{t("hotelsSubtitle")}</p>
+                </div>
+                <Link
+                  href={`/${locale}/hotels`}
+                  className="inline-flex items-center gap-2 self-start rounded-full border border-ink/15 px-5 py-2.5 text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5 hover:border-primary hover:bg-primary/5 hover:text-primary dark:border-white/20 dark:hover:border-primary dark:hover:bg-primary/10 md:self-auto"
+                >
+                  {t("viewAll")}
+                  <ArrowUpRight size={16} aria-hidden="true" />
+                </Link>
+              </div>
             </Reveal>
             <Reveal delay={0.1}>
               <ScrollRow>
                 {hotels.map((h) => (
-                  <HotelCard
+                  <PremiumHotelCard
                     key={h.id}
                     href={`/${locale}/hotels/${h.slug}`}
                     image={h.coverImage}
