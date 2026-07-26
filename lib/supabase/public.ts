@@ -1,4 +1,5 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { getPublicSupabaseAnonKey } from "@/lib/supabase/is-configured";
 
 /**
  * A Supabase client that does NOT read cookies (unlike lib/supabase/server.ts).
@@ -22,7 +23,7 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 export function createPublicClient() {
   return createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    getPublicSupabaseAnonKey(),
     { auth: { persistSession: false, autoRefreshToken: false } }
   );
 }

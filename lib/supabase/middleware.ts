@@ -1,6 +1,7 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { User } from "@supabase/supabase-js";
+import { getPublicSupabaseAnonKey } from "@/lib/supabase/is-configured";
 
 /**
  * Refreshes the Supabase auth session and writes any updated cookies onto
@@ -22,7 +23,7 @@ export async function refreshSupabaseSession(
 ): Promise<{ user: User | null; supabase: ReturnType<typeof createServerClient> }> {
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    getPublicSupabaseAnonKey(),
     {
       cookies: {
         get(name: string) {
