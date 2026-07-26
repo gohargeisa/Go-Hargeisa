@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import type { Locale } from "@/lib/i18n/config";
-import { ListingCard } from "@/components/shared/listing-card";
+import { HotelCard } from "@/components/shared/hotel-card";
 import { SearchWithin } from "@/components/shared/search-within";
 import { ListingFilters, type FilterOptions } from "@/components/shared/listing-filters";
 import { filterListings } from "@/lib/utils/filter-listings";
@@ -16,6 +16,8 @@ interface Hotel {
   rating: number;
   reviewCount: number;
   priceRange?: string;
+  amenities?: string[];
+  website?: string;
   featured?: boolean;
   createdAt?: string;
 }
@@ -94,19 +96,20 @@ export function HotelsPageClient({
                 </div>
                 <div className="grid gap-6 sm:grid-cols-2">
                   {filteredHotels.featured.map((h) => (
-                    <ListingCard
+                    <HotelCard
                       key={h.id}
                       href={`/${locale}/hotels/${h.slug}`}
                       image={h.coverImage}
-                      title={h.name}
-                      subtitle={h.address}
+                      name={h.name}
+                      address={h.address}
                       rating={h.rating}
                       reviewCount={h.reviewCount}
-                      listingType="hotel"
-                      listingId={h.id}
-                      locale={locale}
                       priceRange={h.priceRange}
-                      tag="Featured"
+                      amenities={h.amenities}
+                      featured
+                      hotelId={h.id}
+                      locale={locale}
+                      website={h.website}
                     />
                   ))}
                 </div>
@@ -124,18 +127,19 @@ export function HotelsPageClient({
                 </div>
                 <div className="grid gap-6 sm:grid-cols-2">
                   {filteredHotels.nonFeatured.map((h) => (
-                    <ListingCard
+                    <HotelCard
                       key={h.id}
                       href={`/${locale}/hotels/${h.slug}`}
                       image={h.coverImage}
-                      title={h.name}
-                      subtitle={h.address}
+                      name={h.name}
+                      address={h.address}
                       rating={h.rating}
                       reviewCount={h.reviewCount}
-                      listingType="hotel"
-                      listingId={h.id}
-                      locale={locale}
                       priceRange={h.priceRange}
+                      amenities={h.amenities}
+                      hotelId={h.id}
+                      locale={locale}
+                      website={h.website}
                     />
                   ))}
                 </div>

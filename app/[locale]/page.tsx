@@ -11,6 +11,9 @@ import { ListingRowSection } from "@/components/home/listing-row-section";
 import { CafesComingSoonSection } from "@/components/home/cafes-coming-soon-section";
 import { NewsletterSection } from "@/components/home/newsletter-section";
 import { Reveal } from "@/components/home/reveal";
+import { SectionHeader } from "@/components/shared/section-header";
+import { ScrollRow } from "@/components/shared/scroll-row";
+import { HotelCard } from "@/components/shared/hotel-card";
 
 export const revalidate = 3600;
 
@@ -95,23 +98,42 @@ export default async function HomePage({
         </Reveal>
       </section>
 
-      <ListingRowSection
-        eyebrow="Stay"
-        title={t("hotelsTitle")}
-        subtitle={t("hotelsSubtitle")}
-        viewAllHref={`/${locale}/hotels`}
-        viewAllLabel={t("viewAll")}
-        tone="white"
-        items={hotels.map((h) => ({
-          href: `/${locale}/hotels/${h.slug}`,
-          image: h.coverImage,
-          title: h.name,
-          subtitle: h.address,
-          rating: h.rating,
-          reviewCount: h.reviewCount,
-          priceRange: h.priceRange,
-        }))}
-      />
+      {hotels.length > 0 && (
+        <section className="bg-white py-16 dark:bg-white/[0.03] md:py-24">
+          <div className="container-px mx-auto">
+            <Reveal>
+              <SectionHeader
+                eyebrow="Stay"
+                title={t("hotelsTitle")}
+                subtitle={t("hotelsSubtitle")}
+                viewAllHref={`/${locale}/hotels`}
+                viewAllLabel={t("viewAll")}
+              />
+            </Reveal>
+            <Reveal delay={0.1}>
+              <ScrollRow>
+                {hotels.map((h) => (
+                  <HotelCard
+                    key={h.id}
+                    href={`/${locale}/hotels/${h.slug}`}
+                    image={h.coverImage}
+                    name={h.name}
+                    address={h.address}
+                    rating={h.rating}
+                    reviewCount={h.reviewCount}
+                    priceRange={h.priceRange}
+                    amenities={h.amenities}
+                    featured={h.featured}
+                    hotelId={h.id}
+                    locale={locale}
+                    website={h.website}
+                  />
+                ))}
+              </ScrollRow>
+            </Reveal>
+          </div>
+        </section>
+      )}
 
       <ListingRowSection
         eyebrow="Eat"

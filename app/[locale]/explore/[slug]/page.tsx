@@ -5,6 +5,7 @@ import { getHotels } from "@/lib/data/hotels";
 import { getRestaurants } from "@/lib/data/restaurants";
 import { getAttractions } from "@/lib/data/attractions";
 import { ListingCard } from "@/components/shared/listing-card";
+import { HotelCard } from "@/components/shared/hotel-card";
 
 // Public content changes infrequently; revalidate hourly instead of
 // rendering on every request (this page no longer reads cookies, so
@@ -46,7 +47,21 @@ export default async function DestinationDetailPage({
           <h2 className="font-display text-xl font-semibold mb-4">Hotels nearby</h2>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {hotels.slice(0, 3).map((h) => (
-              <ListingCard key={h.id} href={`/${locale}/hotels/${h.slug}`} image={h.coverImage} title={h.name} subtitle={h.address} rating={h.rating} reviewCount={h.reviewCount} priceRange={h.priceRange} />
+              <HotelCard
+                key={h.id}
+                href={`/${locale}/hotels/${h.slug}`}
+                image={h.coverImage}
+                name={h.name}
+                address={h.address}
+                rating={h.rating}
+                reviewCount={h.reviewCount}
+                priceRange={h.priceRange}
+                amenities={h.amenities}
+                featured={h.featured}
+                hotelId={h.id}
+                locale={locale}
+                website={h.website}
+              />
             ))}
           </div>
         </div>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Bell, Compass, Heart, MapIcon, MessageSquare, Sparkles, User } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { ListingCard } from "@/components/shared/listing-card";
+import { HotelCard } from "@/components/shared/hotel-card";
 import { SavedTripsPanel } from "@/components/dashboard/saved-trips-panel";
 import { ReviewsPanel } from "@/components/dashboard/reviews-panel";
 import { ProfilePanel } from "@/components/dashboard/profile-panel";
@@ -54,7 +55,7 @@ export function DashboardTabs({ locale, userId, email, favorites, trips, reviews
         <section className="min-h-[360px] rounded-2xl border border-ink/8 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-white/[0.03] md:p-7">
           {active === "favorites" && <div>
             <div className="mb-6 flex items-center justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Your collection</p><h2 className="mt-1 font-display text-2xl font-semibold">Favorite places</h2></div><Heart size={22} className="text-primary" /></div>
-            {favorites.length === 0 ? <EmptyState icon={Compass} title="Start your collection" description="Save hotels, restaurants, cafes, and attractions to return to them whenever you are planning." /> : <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{favorites.map(({ kind, item }) => <ListingCard key={item.id} href={`/${locale}/${hrefKind[kind]}/${item.slug}`} image={item.coverImage} title={item.name} subtitle={item.address} rating={item.rating} reviewCount={item.reviewCount} listingType={kind} listingId={item.id} initiallyFavorited locale={locale} />)}</div>}
+            {favorites.length === 0 ? <EmptyState icon={Compass} title="Start your collection" description="Save hotels, restaurants, cafes, and attractions to return to them whenever you are planning." /> : <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{favorites.map(({ kind, item }) => kind === "hotel" ? <HotelCard key={item.id} href={`/${locale}/hotels/${item.slug}`} image={item.coverImage} name={item.name} address={item.address} rating={item.rating} reviewCount={item.reviewCount} hotelId={item.id} initiallyFavorited locale={locale} /> : <ListingCard key={item.id} href={`/${locale}/${hrefKind[kind]}/${item.slug}`} image={item.coverImage} title={item.name} subtitle={item.address} rating={item.rating} reviewCount={item.reviewCount} listingType={kind} listingId={item.id} initiallyFavorited locale={locale} />)}</div>}
           </div>}
           {active === "trips" && <SavedTripsPanel locale={locale} trips={trips} />}
           {active === "reviews" && <ReviewsPanel locale={locale} reviews={reviews} />}
