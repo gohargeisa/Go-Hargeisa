@@ -65,7 +65,7 @@ export function Hero({ locale }: { locale: Locale }) {
   const initial = reduceMotion ? "show" : "hidden";
 
   return (
-    <section className="relative flex min-h-[720px] h-[92vh] max-h-[980px] items-center overflow-hidden md:h-screen">
+    <section className="relative flex min-h-[720px] h-auto items-start overflow-hidden pb-12 md:h-screen md:max-h-[980px] md:pb-0 md:items-center">
       <Image
         src="/images/hero-bg.png"
         alt="Panoramic view of Hargeisa at golden hour"
@@ -78,7 +78,7 @@ export function Hero({ locale }: { locale: Locale }) {
       <div className="absolute inset-0 bg-hero-gradient" />
       <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-ink/10" />
 
-      <div className="container-px relative z-10 mx-auto flex w-full flex-col items-center pt-20 text-center text-white sm:pt-16">
+      <div className="container-px relative z-10 mx-auto flex w-full flex-col items-center pt-24 text-center text-white sm:pt-28 md:pt-16">
         <motion.span
           custom={0}
           initial={initial}
