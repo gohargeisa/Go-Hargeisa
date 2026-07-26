@@ -56,6 +56,16 @@
     "hotelsSubtitle": "Hudheello si taxaddar leh loo doortay oo ku habboon miisaaniyad kasta",
     "restaurantsTitle": "Halka Aad Wax Ka Cuni Karto",
     "cafesTitle": "Dhaqanka Qaxwada iyo Kafateeriyada",
+    "cafesComingSoonBadge": "Dhawaan",
+    "cafesComingSoonTitle": "Soo Ogow Kafateeriyada Ugu Fiican ee Hargeysa",
+    "cafesComingSoonDescription": "Waxaan hadda la shaqaynaynaa kafateeriyada ugu fiican ee Hargeysa si aan idiin keeno liisas la xaqiijiyay, sawirro qurux badan, iyo talooyin la aamini karo.",
+    "cafesComingSoonPartnerButton": "Nala Noqo Shariig",
+    "cafesComingSoonExploreButton": "Sahami Hudheellada",
+    "cafesComingSoonViewDetails": "Fiiri Faahfaahinta",
+    "cafesComingSoonCardText": "Faahfaahin la xaqiijiyay, sawirro, iyo faallooyin ayaa soo socda.",
+    "cafesComingSoonCard1Label": "Qaxwo Gaar ah",
+    "cafesComingSoonCard2Label": "Jawi Diiran",
+    "cafesComingSoonCard3Label": "Duban Maxalli ah",
     "attractionsTitle": "Goobaha Dalxiiska",
     "eventsTitle": "Dhacdooyinka Soo Socda",
     "experiencesTitle": "Waayo-aragnimooyin Maxalli ah",
@@ -67,6 +77,15 @@
     "newsletterPlaceholder": "Cinwaanka iimaylkaaga",
     "newsletterButton": "Isdiiwaangeli",
     "viewAll": "Dhammaan Arag"
+  },
+  "comingSoon": {
+    "badge": "Dhawaan",
+    "partnerButton": "Nala Noqo Shariig",
+    "contactButton": "Nala Soo Xiriir",
+    "restaurantsTitle": "Soo Ogow Maqaayadaha Ugu Fiican ee Hargeysa",
+    "restaurantsDescription": "Waxaan hadda la shaqaynaynaa maqaayadaha ugu fiican ee Hargeysa si aan idiin keeno liisas la xaqiijiyay, sawirro qurux badan, iyo talooyin la aamini karo.",
+    "cafesTitle": "Soo Ogow Kafateeriyada Ugu Fiican ee Hargeysa",
+    "cafesDescription": "Waxaan hadda la shaqaynaynaa kafateeriyada ugu fiican ee Hargeysa si aan idiin keeno liisas la xaqiijiyay, sawirro qurux badan, iyo talooyin la aamini karo."
   },
   "footer": {
     "tagline": "Hagaha aad ku kalsoon tahay ee Hargeysa — hudheellada ugu fiican, maqaayadaha, kafateeriyada iyo meelaha ugu muhiimsan ee magaalada.",

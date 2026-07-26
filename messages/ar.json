@@ -56,6 +56,16 @@
     "hotelsSubtitle": "فنادق مختارة بعناية لكل ميزانية",
     "restaurantsTitle": "أين تأكل",
     "cafesTitle": "ثقافة القهوة والمقاهي",
+    "cafesComingSoonBadge": "قريبًا",
+    "cafesComingSoonTitle": "اكتشف أفضل مقاهي هرجيسا",
+    "cafesComingSoonDescription": "نعمل حاليًا مع أفضل المقاهي في هرجيسا لنقدّم لكم قوائم موثوقة وصورًا جميلة وتوصيات يمكن الوثوق بها.",
+    "cafesComingSoonPartnerButton": "كن شريكًا معنا",
+    "cafesComingSoonExploreButton": "استكشف الفنادق",
+    "cafesComingSoonViewDetails": "عرض التفاصيل",
+    "cafesComingSoonCardText": "التفاصيل الموثقة والصور والتقييمات قادمة قريبًا.",
+    "cafesComingSoonCard1Label": "قهوة مختصة",
+    "cafesComingSoonCard2Label": "أجواء دافئة",
+    "cafesComingSoonCard3Label": "تحميص محلي",
     "attractionsTitle": "الأماكن السياحية",
     "eventsTitle": "الفعاليات القادمة",
     "experiencesTitle": "تجارب محلية",
@@ -67,6 +77,15 @@
     "newsletterPlaceholder": "بريدك الإلكتروني",
     "newsletterButton": "اشترك",
     "viewAll": "عرض الكل"
+  },
+  "comingSoon": {
+    "badge": "قريبًا",
+    "partnerButton": "كن شريكًا معنا",
+    "contactButton": "تواصل معنا",
+    "restaurantsTitle": "اكتشف أفضل مطاعم هرجيسا",
+    "restaurantsDescription": "نعمل حاليًا مع أفضل المطاعم في هرجيسا لنقدّم لكم قوائم موثوقة وصورًا جميلة وتوصيات يمكن الوثوق بها.",
+    "cafesTitle": "اكتشف أفضل مقاهي هرجيسا",
+    "cafesDescription": "نعمل حاليًا مع أفضل المقاهي في هرجيسا لنقدّم لكم قوائم موثوقة وصورًا جميلة وتوصيات يمكن الوثوق بها."
   },
   "footer": {
     "tagline": "دليلك الموثوق لاكتشاف هرجيسا — أفضل الفنادق، المطاعم، المقاهي، وأهم الأماكن في المدينة.",

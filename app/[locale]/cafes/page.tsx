@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/config";
-import { getCafes } from "@/lib/data/cafes";
 import { PageHero } from "@/components/shared/page-hero";
-import { CafesPageClient } from "@/components/pages/cafes-page-client";
+import { ComingSoonSection } from "@/components/shared/coming-soon-section";
 
 
 // Public content changes infrequently; revalidate hourly instead of
@@ -25,23 +23,21 @@ export async function generateMetadata({
 
 export default async function CafesPage({
   params: { locale },
-  searchParams,
 }: {
   params: { locale: Locale };
-  searchParams: { q?: string; minPrice?: string; maxPrice?: string; minRating?: string; sortBy?: string };
 }) {
-  const t = await getTranslations("home");
-  const cafes = await getCafes({ q: searchParams.q });
-
+  // Cafes are not yet open for public listings under the current business
+  // policy — no cafe data is queried or rendered here, real or mock.
   return (
     <>
       <PageHero
   eyebrow="☕ Cafes"
-  title={t("cafesTitle")}
+  title="Discover Hargeisa's Best Cafés"
+  subtitle="We're partnering with Hargeisa's leading cafés to bring verified listings, beautiful photography, trusted recommendations, and premium coffee experiences soon."
   image="/images/cafes/hero.png"
 />
-      
-      <CafesPageClient locale={locale} initialCafes={cafes} searchParams={searchParams} />
+
+      <ComingSoonSection type="cafe" locale={locale} />
     </>
   );
 }
