@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 import { ImageUploader } from "@/components/shared/image-uploader";
 import { Field, TagInput, inputClass } from "@/components/admin/form-shared";
 import { createRecord, updateRecord } from "@/lib/actions/admin";
+import { useUnsavedChangesWarning } from "@/lib/hooks/use-unsaved-changes-warning";
 import type { Locale } from "@/lib/i18n/config";
 
 export interface CafeFormInput {
@@ -58,8 +59,12 @@ export function CafeForm({
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  const [dirty, setDirty] = useState(false);
+  useUnsavedChangesWarning(dirty);
+
   function update<K extends keyof CafeFormInput>(key: K, value: CafeFormInput[K]) {
     setForm((f) => ({ ...f, [key]: value }));
+    setDirty(true);
   }
 
   function onSubmit(e: React.FormEvent) {

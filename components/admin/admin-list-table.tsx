@@ -57,7 +57,7 @@ export function AdminListTable({
               <td className="px-5 py-3">
                 <div className="flex items-center gap-3">
                   <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg">
-                    <Image src={row.image} alt="" fill className="object-cover" />
+                    <Image src={row.image} alt={row.title} fill sizes="40px" className="object-cover" />
                   </div>
                   <div className="min-w-0">
                     <p className="font-medium truncate">{row.title}</p>

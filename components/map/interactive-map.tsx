@@ -5,6 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import type { MapPoint } from "@/types";
 import { HARGEISA_CENTER } from "@/lib/mock-data";
+import { MapResizeHandler } from "@/components/map/map-resize-handler";
 
 const CATEGORY_META: Record<MapPoint["category"], { label: string; color: string }> = {
   hotel: { label: "Hotels", color: "#0B5ED7" },
@@ -74,6 +75,7 @@ export function InteractiveMap({ points }: { points: MapPoint[] }) {
           scrollWheelZoom={false}
           style={{ height: "100%", width: "100%" }}
         >
+          <MapResizeHandler />
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

@@ -3,6 +3,7 @@
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import type { Coordinates } from "@/types";
+import { MapResizeHandler } from "@/components/map/map-resize-handler";
 
 const icon = L.divIcon({
   className: "",
@@ -20,6 +21,7 @@ export function SingleLocationMap({ location, label }: { location: Coordinates; 
         scrollWheelZoom={false}
         style={{ height: "100%", width: "100%" }}
       >
+        <MapResizeHandler />
         <TileLayer
           attribution='&copy; OpenStreetMap contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

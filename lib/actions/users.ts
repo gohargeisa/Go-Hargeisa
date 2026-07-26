@@ -21,8 +21,10 @@ export async function updateUserRole(
     return { ok: false, error: "You can't remove your own owner access." };
   }
 
-  const { error } = await supabase.from("profiles").update({ role }).eq("id", userId);
-  if (error) return { ok: false, error: error.message };
+  const { data, error } = await supabase.from("profiles").update({ role }).eq("id", userId).select("id").single();
+  if (error || !data) {
+    return { ok: false, error: error?.message ?? "Update failed — no matching user was updated." };
+  }
 
   revalidatePath(`/${locale}/admin/users`);
   return { ok: true };

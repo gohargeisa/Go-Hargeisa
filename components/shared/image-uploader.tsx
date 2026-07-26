@@ -46,7 +46,7 @@ export function ImageUploader({
       <div className="flex items-center gap-4">
         <div className={`relative h-24 w-24 shrink-0 overflow-hidden ${rounded} border border-ink/10 dark:border-white/15 bg-ink/5 dark:bg-white/5`}>
           {value ? (
-            <Image src={value} alt="Preview" fill className="object-cover" />
+            <Image src={value} alt="Preview" fill sizes="96px" className="object-cover" />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-ink/30">
               <ImageIcon size={22} />

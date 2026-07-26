@@ -28,7 +28,7 @@ export function EventsSection({ events, locale }: { events: EventItem[]; locale:
               className="group flex gap-4 rounded-xl2 border border-ink/8 dark:border-white/10 bg-white dark:bg-white/5 p-4 shadow-card hover:-translate-y-0.5 transition-transform"
             >
               <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl">
-                <Image src={e.coverImage} alt={e.title} fill className="object-cover" />
+                <Image src={e.coverImage} alt={e.title} fill sizes="96px" className="object-cover" />
               </div>
               <div className="min-w-0">
                 <span className="text-xs font-semibold uppercase tracking-wide text-secondary">

@@ -145,7 +145,7 @@ export function SavedTripsPanel({ locale, trips }: { locale: Locale; trips: Save
                         {trip.items.map((item) => (
                           <div key={item.id} className="flex items-center gap-3 rounded-xl border border-ink/8 dark:border-white/10 p-2.5">
                             <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-ink/5">
-                              {item.image && <Image src={item.image} alt={item.name} fill className="object-cover" />}
+                              {item.image && <Image src={item.image} alt={item.name} fill sizes="48px" className="object-cover" />}
                             </div>
                             <Link href={`/${locale}${item.href}`} className="flex-1 min-w-0">
                               <p className="text-sm font-medium truncate">{item.name}</p>

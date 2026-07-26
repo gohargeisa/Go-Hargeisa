@@ -8,6 +8,7 @@ import { useTheme } from "next-themes";
 import type { CityServicePoint } from "@/types";
 import { CATEGORY_CONFIG } from "@/components/city-map/category-config";
 import { HARGEISA_CENTER } from "@/lib/mock-data";
+import { MapResizeHandler } from "@/components/map/map-resize-handler";
 
 const MIXED_CLUSTER_COLOR = "#F59E0B";
 
@@ -135,6 +136,7 @@ export function CityMap({
         scrollWheelZoom
         style={{ height: "100%", width: "100%" }}
       >
+        <MapResizeHandler />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

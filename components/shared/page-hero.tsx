@@ -18,6 +18,7 @@ export function PageHero({
         alt={title}
         fill
         priority
+        sizes="100vw"
         className="object-cover"
       />
 

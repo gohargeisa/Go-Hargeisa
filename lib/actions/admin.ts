@@ -9,6 +9,29 @@ export type AllowedTable = (typeof ALLOWED_TABLES)[number];
 
 const TABLES_WITH_UPDATED_AT = new Set(["hotels", "restaurants", "cafes", "attractions"]);
 
+// Public detail-page path segment per table (articles live under /blog, not
+// /articles). Used to also revalidate the individual listing's own detail
+// page after a write — every admin form's revalidatePaths only ever listed
+// the admin list + the public INDEX page, never the slug-specific detail
+// page the write actually changed, so that page kept serving stale ISR
+// content until its next scheduled revalidation.
+const TABLE_DETAIL_SEGMENT: Record<AllowedTable, string> = {
+  hotels: "hotels",
+  restaurants: "restaurants",
+  cafes: "cafes",
+  attractions: "attractions",
+  events: "events",
+  articles: "blog",
+};
+
+// Every admin form builds revalidatePaths[0] as `/${locale}/admin/${table}`
+// (verified across all 6 form components) — extracting it here means every
+// caller gets the detail-page revalidation below for free, without having
+// to remember to list it themselves.
+function localeFromRevalidatePaths(revalidatePaths: string[]): string | null {
+  return revalidatePaths[0]?.match(/^\/([a-z]{2})\//)?.[1] ?? null;
+}
+
 // Business owners may only ever touch these three tables — matches the
 // "Owners manage their {hotels,restaurants,cafes}" RLS policies in
 // supabase/schema.sql, which are UPDATE-only (no insert/delete) and
@@ -73,30 +96,39 @@ export async function deleteListing(
 
   const supabase = await assertOwner();
 
+  // .delete() alone returns no error when RLS silently blocks the delete or
+  // `id` doesn't match any row — it just deletes zero rows and reports
+  // success. .select().single() forces PostgREST to return the deleted row,
+  // which throws a real (surfaceable) error when nothing was actually
+  // deleted, so callers stop getting a false "deleted" toast for a listing
+  // that's still in the database.
   let error = null;
+  let data: { id: string } | null = null;
 
   switch (table) {
     case "hotels":
-      ({ error } = await supabase.from("hotels").delete().eq("id", id));
+      ({ data, error } = await supabase.from("hotels").delete().eq("id", id).select("id").single());
       break;
     case "restaurants":
-      ({ error } = await supabase.from("restaurants").delete().eq("id", id));
+      ({ data, error } = await supabase.from("restaurants").delete().eq("id", id).select("id").single());
       break;
     case "cafes":
-      ({ error } = await supabase.from("cafes").delete().eq("id", id));
+      ({ data, error } = await supabase.from("cafes").delete().eq("id", id).select("id").single());
       break;
     case "attractions":
-      ({ error } = await supabase.from("attractions").delete().eq("id", id));
+      ({ data, error } = await supabase.from("attractions").delete().eq("id", id).select("id").single());
       break;
     case "events":
-      ({ error } = await supabase.from("events").delete().eq("id", id));
+      ({ data, error } = await supabase.from("events").delete().eq("id", id).select("id").single());
       break;
     case "articles":
-      ({ error } = await supabase.from("articles").delete().eq("id", id));
+      ({ data, error } = await supabase.from("articles").delete().eq("id", id).select("id").single());
       break;
   }
 
-  if (error) return { ok: false, error: error.message };
+  if (error || !data) {
+    return { ok: false, error: error?.message ?? "Delete failed — the listing may already be gone or you may not have permission." };
+  }
 
   revalidatePath(revalidate);
   return { ok: true };
@@ -125,33 +157,45 @@ export async function createRecord(
     status: "published",
   };
 
+  // .insert() alone doesn't error just because RLS silently rejected the
+  // row — .select().single() forces the insert's RETURNING result back,
+  // which fails loudly (instead of reporting success for a row that was
+  // never created) if RLS blocked it.
   let error = null;
+  let inserted: { slug?: string } | null = null;
 
   switch (table) {
     case "hotels":
-      ({ error } = await supabase.from("hotels").insert(payload as never));
+      ({ data: inserted, error } = await supabase.from("hotels").insert(payload as never).select("slug").single());
       break;
     case "restaurants":
-      ({ error } = await supabase.from("restaurants").insert(payload as never));
+      ({ data: inserted, error } = await supabase.from("restaurants").insert(payload as never).select("slug").single());
       break;
     case "cafes":
-      ({ error } = await supabase.from("cafes").insert(payload as never));
+      ({ data: inserted, error } = await supabase.from("cafes").insert(payload as never).select("slug").single());
       break;
     case "attractions":
-      ({ error } = await supabase.from("attractions").insert(payload as never));
+      ({ data: inserted, error } = await supabase.from("attractions").insert(payload as never).select("slug").single());
       break;
     case "events":
-      ({ error } = await supabase.from("events").insert(payload as never));
+      ({ data: inserted, error } = await supabase.from("events").insert(payload as never).select("slug").single());
       break;
     case "articles":
-      ({ error } = await supabase.from("articles").insert(payload as never));
+      ({ data: inserted, error } = await supabase.from("articles").insert(payload as never).select("slug").single());
       break;
   }
 
-  if (error) return { ok: false, error: error.message };
+  if (error || !inserted) {
+    return { ok: false, error: error?.message ?? "Create failed — the record was not saved." };
+  }
 
   for (const path of revalidatePaths) {
     revalidatePath(path);
+  }
+
+  const locale = localeFromRevalidatePaths(revalidatePaths);
+  if (locale && inserted.slug) {
+    revalidatePath(`/${locale}/${TABLE_DETAIL_SEGMENT[table]}/${inserted.slug}`);
   }
 
   redirect(redirectTo);
@@ -171,6 +215,13 @@ export async function updateRecord(
 
   const supabase = await assertOwnerOrBusinessOwner(table);
 
+  // Captured before the write so the OLD slug's detail page can also be
+  // revalidated below if this update changes the slug — otherwise the
+  // listing's previous URL would keep serving stale ISR content forever
+  // (nothing else ever revalidates a slug that no longer exists on the row).
+  const { data: existing } = await supabase.from(table).select("slug").eq("id", id).single();
+  const previousSlug = (existing as { slug?: string } | null)?.slug;
+
   const payload = TABLES_WITH_UPDATED_AT.has(table)
     ? {
         ...data,
@@ -178,35 +229,50 @@ export async function updateRecord(
       }
     : data;
 
+  // .update() alone doesn't error when RLS silently blocks the write or
+  // `id` doesn't match any row — it just affects zero rows and reports
+  // success. .select().single() forces PostgREST to return the updated
+  // row, which fails loudly instead of letting a no-op look like success.
   let error = null;
+  let updated: { slug?: string } | null = null;
 
   switch (table) {
     case "hotels":
-      ({ error } = await supabase.from("hotels").update(payload as never).eq("id", id));
+      ({ data: updated, error } = await supabase.from("hotels").update(payload as never).eq("id", id).select("slug").single());
       break;
     case "restaurants":
-      ({ error } = await supabase.from("restaurants").update(payload as never).eq("id", id));
+      ({ data: updated, error } = await supabase.from("restaurants").update(payload as never).eq("id", id).select("slug").single());
       break;
     case "cafes":
-      ({ error } = await supabase.from("cafes").update(payload as never).eq("id", id));
+      ({ data: updated, error } = await supabase.from("cafes").update(payload as never).eq("id", id).select("slug").single());
       break;
     case "attractions":
-      ({ error } = await supabase.from("attractions").update(payload as never).eq("id", id));
+      ({ data: updated, error } = await supabase.from("attractions").update(payload as never).eq("id", id).select("slug").single());
       break;
     case "events":
-      ({ error } = await supabase.from("events").update(payload as never).eq("id", id));
+      ({ data: updated, error } = await supabase.from("events").update(payload as never).eq("id", id).select("slug").single());
       break;
     case "articles":
-      ({ error } = await supabase.from("articles").update(payload as never).eq("id", id));
+      ({ data: updated, error } = await supabase.from("articles").update(payload as never).eq("id", id).select("slug").single());
       break;
   }
 
-  if (error) {
-    return { ok: false, error: error.message };
+  if (error || !updated) {
+    return {
+      ok: false,
+      error: error?.message ?? "Update failed — no matching record was updated. You may not have permission to edit this listing.",
+    };
   }
 
   for (const path of revalidatePaths) {
     revalidatePath(path);
+  }
+
+  const locale = localeFromRevalidatePaths(revalidatePaths);
+  if (locale) {
+    const segment = TABLE_DETAIL_SEGMENT[table];
+    if (updated.slug) revalidatePath(`/${locale}/${segment}/${updated.slug}`);
+    if (previousSlug && previousSlug !== updated.slug) revalidatePath(`/${locale}/${segment}/${previousSlug}`);
   }
 
   redirect(redirectTo);

@@ -2,7 +2,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { BadgeCheck } from "lucide-react";
-import type { Locale } from "@/lib/i18n/config";
 import { RatingBadge } from "@/components/shared/rating-badge";
 
 interface FeaturedItem {
@@ -14,7 +13,7 @@ interface FeaturedItem {
   reviewCount: number;
 }
 
-export function FeaturedSection({ items, locale }: { items: FeaturedItem[]; locale: Locale }) {
+export function FeaturedSection({ items }: { items: FeaturedItem[] }) {
   const t = useTranslations("home");
 
   return (
@@ -33,7 +32,7 @@ export function FeaturedSection({ items, locale }: { items: FeaturedItem[]; loca
             className="group relative flex items-center gap-4 overflow-hidden rounded-xl2 border border-ink/8 dark:border-white/10 bg-gradient-to-br from-primary/5 to-secondary/5 p-4"
           >
             <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full ring-2 ring-white dark:ring-ink">
-              <Image src={item.image} alt={item.name} fill className="object-cover" />
+              <Image src={item.image} alt={item.name} fill sizes="64px" className="object-cover" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-1">

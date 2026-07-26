@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Loader2, Check } from "lucide-react";
 import { ImageUploader } from "@/components/shared/image-uploader";
 import { updateProfile } from "@/lib/actions/profile";
+import { useUnsavedChangesWarning } from "@/lib/hooks/use-unsaved-changes-warning";
 import type { Locale } from "@/lib/i18n/config";
 
 export function ProfilePanel({
@@ -24,8 +25,22 @@ export function ProfilePanel({
   const [fullName, setFullName] = useState(initialName);
   const [avatarUrl, setAvatarUrl] = useState(initialAvatar);
   const [saved, setSaved] = useState(false);
+  const [dirty, setDirty] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  useUnsavedChangesWarning(dirty);
+
+  function updateFullName(value: string) {
+    setFullName(value);
+    setSaved(false);
+    setDirty(true);
+  }
+
+  function updateAvatarUrl(value: string) {
+    setAvatarUrl(value);
+    setSaved(false);
+    setDirty(true);
+  }
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -35,6 +50,7 @@ export function ProfilePanel({
       const result = await updateProfile(locale, { fullName, avatarUrl });
       if (result.ok) {
         setSaved(true);
+        setDirty(false);
       } else {
         setError(result.error ?? t("genericError"));
       }
@@ -49,7 +65,7 @@ export function ProfilePanel({
           bucket="avatars"
           folder={userId}
           value={avatarUrl}
-          onChange={setAvatarUrl}
+          onChange={updateAvatarUrl}
           label={t("profilePhotoLabel")}
           rounded="rounded-full"
         />
@@ -59,7 +75,7 @@ export function ProfilePanel({
           <input
             required
             value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
+            onChange={(e) => updateFullName(e.target.value)}
             className="w-full rounded-xl border border-ink/12 dark:border-white/15 bg-transparent px-4 py-2.5 text-sm outline-none focus:border-primary"
           />
         </div>
