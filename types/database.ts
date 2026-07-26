@@ -50,7 +50,7 @@ type AttractionRow = ListingBase & {
 export type Database = {
   public: {
     Tables: {
-      profiles: Table<{ id: string; full_name: string | null; avatar_url: string | null; role: "user" | "business_owner" | "owner"; phone: string | null; created_at: string; updated_at: string }>;
+      profiles: Table<{ id: string; full_name: string | null; avatar_url: string | null; role: "user" | "business_owner" | "owner"; phone: string | null; bio: string | null; notify_activity: boolean; notify_marketing: boolean; created_at: string; updated_at: string }>;
       hotels: Table<HotelRow>;
       restaurants: Table<RestaurantRow>;
       cafes: Table<CafeRow>;

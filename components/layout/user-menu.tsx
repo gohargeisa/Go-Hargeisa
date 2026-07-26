@@ -77,7 +77,7 @@ export function UserMenu({
             <User size={15} /> {t("tabProfile")}
           </Link>
           <Link
-            href={`/${locale}/dashboard?tab=profile`}
+            href={`/${locale}/dashboard?tab=settings`}
             onClick={() => setOpen(false)}
             className="flex items-center gap-2.5 px-4 py-3 text-sm hover:bg-ink/5 dark:hover:bg-white/10"
           >

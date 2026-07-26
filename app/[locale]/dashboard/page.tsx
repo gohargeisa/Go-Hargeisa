@@ -27,7 +27,7 @@ export default async function DashboardPage({
 
     const { data, error } = await supabase
       .from("profiles")
-      .select("full_name, avatar_url")
+      .select("full_name, avatar_url, phone, bio, notify_activity, notify_marketing")
       .eq("id", user.id)
       .single();
 
@@ -49,6 +49,12 @@ export default async function DashboardPage({
     profile?.full_name || user?.email?.split("@")[0] || "there";
 
   const avatarUrl = profile?.avatar_url ?? "";
+  const phone = profile?.phone ?? "";
+  const bio = profile?.bio ?? "";
+  const notifyActivity = profile?.notify_activity ?? true;
+  const notifyMarketing = profile?.notify_marketing ?? false;
+  const hasPassword = user?.identities?.some((identity) => identity.provider === "email") ?? false;
+  const memberSince = user?.created_at ?? new Date().toISOString();
 
   return (
     <section className="container-px mx-auto py-10 md:py-14">
@@ -70,6 +76,12 @@ export default async function DashboardPage({
         reviews={reviews}
         userName={userName}
         avatarUrl={avatarUrl}
+        phone={phone}
+        bio={bio}
+        hasPassword={hasPassword}
+        memberSince={memberSince}
+        notifyActivity={notifyActivity}
+        notifyMarketing={notifyMarketing}
       />
     </section>
   );

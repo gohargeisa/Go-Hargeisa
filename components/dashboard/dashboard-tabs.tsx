@@ -3,13 +3,14 @@
 import { useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Bell, Compass, Heart, MapIcon, MessageSquare, Sparkles, User } from "lucide-react";
+import { Bell, Compass, Heart, MapIcon, MessageSquare, Settings as SettingsIcon, Sparkles, User } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { ListingCard } from "@/components/shared/listing-card";
 import { HotelCard } from "@/components/shared/hotel-card";
 import { SavedTripsPanel } from "@/components/dashboard/saved-trips-panel";
 import { ReviewsPanel } from "@/components/dashboard/reviews-panel";
 import { ProfilePanel } from "@/components/dashboard/profile-panel";
+import { SettingsPanel } from "@/components/dashboard/settings-panel";
 import type { SavedTrip } from "@/lib/data/saved-trips";
 import type { MyReview } from "@/lib/data/reviews";
 
@@ -17,7 +18,8 @@ type FavoriteEntry = { kind: "hotel" | "restaurant" | "cafe" | "attraction"; ite
 const hrefKind: Record<FavoriteEntry["kind"], string> = { hotel: "hotels", restaurant: "restaurants", cafe: "cafes", attraction: "attractions" };
 const tabs = [
   { key: "favorites", icon: Heart }, { key: "trips", icon: MapIcon },
-  { key: "reviews", icon: MessageSquare }, { key: "profile", icon: User }, { key: "notifications", icon: Bell },
+  { key: "reviews", icon: MessageSquare }, { key: "profile", icon: User },
+  { key: "settings", icon: SettingsIcon }, { key: "notifications", icon: Bell },
 ] as const;
 type TabKey = (typeof tabs)[number]["key"];
 const tabKeys: readonly string[] = tabs.map((tab) => tab.key);
@@ -25,9 +27,14 @@ function isTabKey(value: string | null): value is TabKey {
   return !!value && tabKeys.includes(value);
 }
 
-export function DashboardTabs({ locale, userId, email, favorites, trips, reviews, userName, avatarUrl }: {
+export function DashboardTabs({
+  locale, userId, email, favorites, trips, reviews, userName, avatarUrl,
+  phone, bio, hasPassword, memberSince, notifyActivity, notifyMarketing,
+}: {
   locale: Locale; userId: string; email: string; favorites: FavoriteEntry[]; trips: SavedTrip[];
   reviews: MyReview[]; userName: string; avatarUrl: string;
+  phone: string; bio: string; hasPassword: boolean; memberSince: string;
+  notifyActivity: boolean; notifyMarketing: boolean;
 }) {
   const t = useTranslations("dashboard");
   const router = useRouter();
@@ -49,6 +56,7 @@ export function DashboardTabs({ locale, userId, email, favorites, trips, reviews
     trips: t("tabTrips"),
     reviews: t("tabReviews"),
     profile: t("tabProfile"),
+    settings: t("settings"),
     notifications: t("tabNotifications"),
   };
   const stats = [
@@ -86,7 +94,28 @@ export function DashboardTabs({ locale, userId, email, favorites, trips, reviews
           </div>}
           {active === "trips" && <SavedTripsPanel locale={locale} trips={trips} />}
           {active === "reviews" && <ReviewsPanel locale={locale} reviews={reviews} />}
-          {active === "profile" && <ProfilePanel locale={locale} userId={userId} email={email} initialName={userName} initialAvatar={avatarUrl} />}
+          {active === "profile" && (
+            <ProfilePanel
+              locale={locale}
+              userId={userId}
+              email={email}
+              initialName={userName}
+              initialAvatar={avatarUrl}
+              initialPhone={phone}
+              initialBio={bio}
+              hasPassword={hasPassword}
+            />
+          )}
+          {active === "settings" && (
+            <SettingsPanel
+              locale={locale}
+              email={email}
+              memberSince={memberSince}
+              hasPassword={hasPassword}
+              initialNotifyActivity={notifyActivity}
+              initialNotifyMarketing={notifyMarketing}
+            />
+          )}
           {active === "notifications" && <div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{t("notificationsEyebrow")}</p><h2 className="mt-1 font-display text-2xl font-semibold">{t("notificationsTitle")}</h2><div className="mt-6"><EmptyState icon={Sparkles} title={t("emptyNotificationsTitle")} description={t("emptyNotificationsDescription")} /></div></div>}
         </section>
       </div>

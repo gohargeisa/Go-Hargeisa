@@ -22,7 +22,16 @@ create table profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   full_name text,
   avatar_url text,
+  phone text,
+  bio text,
   role user_role not null default 'user',
+  -- Real, persisted preferences shown on the dashboard Settings page —
+  -- deliberately NOT storing a theme preference here: theme is read from
+  -- localStorage via next-themes (components/layout/theme-provider.tsx) so
+  -- it can render with zero flash-of-wrong-theme before any network round
+  -- trip completes, which a database-sourced value can't do.
+  notify_activity boolean not null default true,
+  notify_marketing boolean not null default false,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -537,3 +546,16 @@ create policy "Users update own profile" on profiles for update
 create policy "Owners manage all profiles" on profiles for update
   using (exists (select 1 from profiles p where p.id = auth.uid() and p.role = 'owner'))
   with check (exists (select 1 from profiles p where p.id = auth.uid() and p.role = 'owner'));
+
+-- ============================================================================
+-- FIX: redesigned dashboard Profile/Settings pages need bio + notification
+-- preference columns that didn't exist yet (phone already did, on the live
+-- project, despite never being listed in the CREATE TABLE above — added
+-- there now too so a fresh project matches). `if not exists` makes this
+-- safe to (re)run against any already-provisioned project.
+-- ============================================================================
+alter table profiles
+  add column if not exists phone text,
+  add column if not exists bio text,
+  add column if not exists notify_activity boolean not null default true,
+  add column if not exists notify_marketing boolean not null default false;

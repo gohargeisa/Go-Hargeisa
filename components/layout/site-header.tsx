@@ -156,7 +156,7 @@ export function SiteHeader({ locale, initialUser }: { locale: Locale; initialUse
                   </Link>
 
                   <Link
-                    href={`/${locale}/dashboard?tab=profile`}
+                    href={`/${locale}/dashboard?tab=settings`}
                     onClick={() => setOpen(false)}
                     className="block rounded-full border border-ink/15 dark:border-white/20 py-2.5 text-center text-sm font-semibold"
                   >
