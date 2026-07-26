@@ -288,7 +288,8 @@
     "deleteAccountConfirmPrompt": "Type DELETE to confirm — this cannot be undone.",
     "deleteAccountConfirmButton": "Permanently delete account",
     "accountDeletedToast": "Your account has been deleted.",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "signOutAllDevices": "Sign out all devices"
   },
   "errors": {
     "title": "Something went wrong",

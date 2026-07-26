@@ -5,6 +5,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChevronUp, X } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { RestaurantBookingCard } from "@/components/shared/restaurant-booking-card";
+import { hasMeaningfulPrice } from "@/lib/utils/price-range";
 
 export function RestaurantMobileBookingBar({
   restaurantId,
@@ -41,7 +42,9 @@ export function RestaurantMobileBookingBar({
           <p className="text-[10px] font-semibold uppercase tracking-wide text-ink/45 dark:text-sand/45">
             {priceLabel}
           </p>
-          <p className="truncate font-display text-lg font-bold text-primary">{priceRange || "—"}</p>
+          <p className="truncate font-display text-lg font-bold text-primary">
+            {hasMeaningfulPrice(priceRange) ? priceRange : "Contact for pricing"}
+          </p>
         </div>
         <button
           type="button"

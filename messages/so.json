@@ -288,7 +288,8 @@
     "deleteAccountConfirmPrompt": "Qor DELETE si aad u xaqiijiso — tan lama noqon karo.",
     "deleteAccountConfirmButton": "Si joogto ah Tirtir Akoonka",
     "accountDeletedToast": "Akoonkaaga waa la tirtiray.",
-    "cancel": "Jooji"
+    "cancel": "Jooji",
+    "signOutAllDevices": "Ka bax dhammaan qalabyada"
   },
   "errors": {
     "title": "Wax baa qaldamay",

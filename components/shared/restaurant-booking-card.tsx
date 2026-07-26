@@ -2,6 +2,8 @@ import { ArrowUpRight, Clock, Globe, Phone } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { AddToTripButton } from "@/components/shared/add-to-trip-button";
 import { ShareButton } from "@/components/shared/share-button";
+import { normalizeExternalUrl } from "@/lib/utils/normalize-url";
+import { hasMeaningfulPrice } from "@/lib/utils/price-range";
 
 export function RestaurantBookingCard({
   restaurantId,
@@ -28,9 +30,11 @@ export function RestaurantBookingCard({
   website?: string;
   locale: Locale;
 }) {
+  const websiteHref = website ? normalizeExternalUrl(website) : undefined;
+
   return (
     <div className="space-y-5">
-      {priceRange && (
+      {hasMeaningfulPrice(priceRange) && (
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-wide text-ink/45 dark:text-sand/45">
             {priceLabel}
@@ -52,9 +56,9 @@ export function RestaurantBookingCard({
       )}
 
       {reservable &&
-        (website ? (
+        (websiteHref ? (
           <a
-            href={website}
+            href={websiteHref}
             target="_blank"
             rel="noopener noreferrer"
             className="flex h-12 w-full items-center justify-center gap-1.5 rounded-full bg-primary text-sm font-semibold text-white transition-colors hover:bg-primary-700"
@@ -90,9 +94,9 @@ export function RestaurantBookingCard({
               <Phone size={15} className="shrink-0" aria-hidden="true" /> {phone}
             </a>
           )}
-          {website && (
+          {websiteHref && (
             <a
-              href={website}
+              href={websiteHref}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2.5 text-sm transition-colors hover:text-primary"

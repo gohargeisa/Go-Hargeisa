@@ -288,7 +288,8 @@
     "deleteAccountConfirmPrompt": "اكتب DELETE للتأكيد — لا يمكن التراجع عن هذا الإجراء.",
     "deleteAccountConfirmButton": "حذف الحساب نهائيًا",
     "accountDeletedToast": "تم حذف حسابك.",
-    "cancel": "إلغاء"
+    "cancel": "إلغاء",
+    "signOutAllDevices": "تسجيل الخروج من جميع الأجهزة"
   },
   "errors": {
     "title": "حدث خطأ ما",

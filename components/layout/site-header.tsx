@@ -42,7 +42,7 @@ export function SiteHeader({ locale, initialUser }: { locale: Locale; initialUse
           : "bg-gradient-to-b from-black/35 to-transparent backdrop-blur-md"
       }`}
     >
-      <div className="container-px mx-auto flex h-20 items-center gap-8">
+      <div className="container-px mx-auto flex h-20 items-center gap-3 md:gap-6 lg:gap-8">
         <div className="flex shrink-0 items-center">
           <Link href={`/${locale}`}>
             <Image
@@ -51,7 +51,7 @@ export function SiteHeader({ locale, initialUser }: { locale: Locale; initialUse
               width={520}
               height={180}
               priority
-              className="h-20 md:h-24 w-auto object-contain"
+              className="h-12 sm:h-20 md:h-24 w-auto object-contain"
             />
           </Link>
         </div>
@@ -104,7 +104,7 @@ export function SiteHeader({ locale, initialUser }: { locale: Locale; initialUse
           )}
         </div>
 
-        <div className="flex items-center gap-2 lg:hidden">
+        <div className="ms-auto flex shrink-0 items-center gap-1.5 sm:gap-2 lg:hidden">
           <LanguageSwitcher locale={locale} />
           <ThemeToggle />
           <button

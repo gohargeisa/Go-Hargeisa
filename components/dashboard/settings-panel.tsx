@@ -10,6 +10,7 @@ import {
   Check,
   Globe,
   Laptop,
+  LogOut,
   Loader2,
   Mail,
   Moon,
@@ -111,8 +112,9 @@ export function SettingsPanel({
             {t("privacyPolicyLink")}
           </Link>
         </p>
-        <div className="mt-4">
+        <div className="mt-4 flex flex-wrap gap-3">
           <SignOutButton locale={locale} className="inline-flex items-center gap-2 rounded-full border border-ink/15 dark:border-white/20 px-5 py-2.5 text-sm font-semibold hover:border-primary hover:text-primary transition-colors" />
+          <SignOutAllDevicesButton locale={locale} />
         </div>
       </SettingsSection>
 
@@ -401,5 +403,34 @@ function DeleteAccountSection({
         </div>
       )}
     </div>
+  );
+}
+
+function SignOutAllDevicesButton({ locale }: { locale: Locale }) {
+  const t = useTranslations("dashboard");
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+
+  function onClick() {
+    startTransition(async () => {
+      // scope: "global" revokes every refresh token for this user, not just
+      // the current browser's session — the "sign out all devices" case
+      // regular sign-out (scope: "local", the default) doesn't cover.
+      await createClient().auth.signOut({ scope: "global" });
+      router.push(`/${locale}`);
+      router.refresh();
+    });
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={isPending}
+      className="inline-flex items-center gap-2 rounded-full border border-ink/15 dark:border-white/20 px-5 py-2.5 text-sm font-semibold hover:border-primary hover:text-primary transition-colors disabled:opacity-70"
+    >
+      {isPending ? <Loader2 size={14} className="animate-spin" /> : <LogOut size={14} />}
+      {t("signOutAllDevices")}
+    </button>
   );
 }
