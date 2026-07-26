@@ -59,3 +59,9 @@ body {
   border-radius: 1.25rem;
   z-index: 0;
 }
+
+/* Smart City Map dark mode: invert OSM tiles only, leave markers/popups
+   untouched. Scoped to .city-map-dark so it never affects other maps. */
+.city-map-dark .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9);
+}

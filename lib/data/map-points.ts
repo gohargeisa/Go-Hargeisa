@@ -1,7 +1,7 @@
 import { createPublicClient } from "@/lib/supabase/public";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { mapPoints as mockMapPoints } from "@/lib/mock-data";
-import type { MapPoint } from "@/types";
+import type { CityServiceCategory, CityServicePoint, MapPoint } from "@/types";
 
 export async function getMapPoints(): Promise<MapPoint[]> {
   if (!isSupabaseConfigured()) return mockMapPoints;
@@ -24,4 +24,48 @@ export async function getMapPoints(): Promise<MapPoint[]> {
   ];
 
   return points;
+}
+
+// The `map_points` table's `category` column is constrained to a fixed set
+// (see supabase/schema.sql). Only these overlap with the Smart City Map's
+// category taxonomy — the rest (pharmacy, gas_station, police, government,
+// school, university, airport, parking) have no matching column value yet,
+// so they render as empty categories in the UI rather than fake points.
+const CITY_SERVICE_DB_CATEGORY: Partial<Record<CityServiceCategory, string>> = {
+  hospital: "hospital",
+  atm: "atm",
+  mosque: "mosque",
+  supermarket: "shopping",
+};
+
+function toCityServiceCategory(dbCategory: string): CityServiceCategory | null {
+  const entry = Object.entries(CITY_SERVICE_DB_CATEGORY).find(([, v]) => v === dbCategory);
+  return (entry?.[0] as CityServiceCategory) ?? null;
+}
+
+/** Smart City Map data — deliberately separate from getMapPoints() above,
+ * which mixes in hotels/restaurants/attractions for the listings map. */
+export async function getCityServicePoints(): Promise<CityServicePoint[]> {
+  const source = isSupabaseConfigured() ? null : mockMapPoints;
+
+  if (source) {
+    return source.flatMap((p) => {
+      const category = toCityServiceCategory(p.category);
+      return category ? [{ id: p.id, name: p.name, category, location: p.location }] : [];
+    });
+  }
+
+  const supabase = createPublicClient();
+  const { data, error } = await supabase.from("map_points").select("id, name, category, lat, lng");
+  if (error || !data) {
+    if (process.env.NODE_ENV === "development" && error) console.error("getCityServicePoints:", error.message);
+    return [];
+  }
+
+  return data.flatMap((row) => {
+    const category = toCityServiceCategory(row.category);
+    return category
+      ? [{ id: row.id, name: row.name, category, location: { lat: row.lat, lng: row.lng } }]
+      : [];
+  });
 }

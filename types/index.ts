@@ -156,3 +156,31 @@ export interface Article {
   readMinutes: number;
   category: string;
 }
+
+/**
+ * Smart City Map — a separate city-services map (hospitals, pharmacies,
+ * mosques, etc.) from the Hotels/Restaurants/Cafes/Attractions map.
+ * Backed by the existing `map_points` table; categories without a match
+ * in that table's schema simply render with zero points (see
+ * lib/data/map-points.ts getCityServicePoints for the mapping).
+ */
+export type CityServiceCategory =
+  | "hospital"
+  | "pharmacy"
+  | "gas_station"
+  | "atm"
+  | "mosque"
+  | "supermarket"
+  | "police"
+  | "government"
+  | "school"
+  | "university"
+  | "airport"
+  | "parking";
+
+export interface CityServicePoint {
+  id: string;
+  name: string;
+  category: CityServiceCategory;
+  location: Coordinates;
+}
