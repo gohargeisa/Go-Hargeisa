@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { MapPin } from "lucide-react";
 import type { CityServiceCategory, CityServicePoint } from "@/types";
 import { CATEGORY_ORDER } from "@/components/city-map/category-config";
@@ -11,8 +12,18 @@ import { CityMapEmptyState } from "@/components/city-map/empty-state";
 import { CityMapLoader } from "@/components/map/city-map-loader";
 import { BottomSheet } from "@/components/shared/bottom-sheet";
 
+function isCityServiceCategory(value: string | null): value is CityServiceCategory {
+  return !!value && (CATEGORY_ORDER as string[]).includes(value);
+}
+
 export function CityMapExperience({ points }: { points: CityServicePoint[] }) {
-  const [active, setActive] = useState<Set<CityServiceCategory>>(new Set(CATEGORY_ORDER));
+  const searchParams = useSearchParams();
+  // Lets homepage category cards (?category=hospital) land pre-filtered
+  // instead of always showing every category.
+  const [active, setActive] = useState<Set<CityServiceCategory>>(() => {
+    const requested = searchParams.get("category");
+    return isCityServiceCategory(requested) ? new Set([requested]) : new Set(CATEGORY_ORDER);
+  });
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<CityServicePoint | null>(null);
 

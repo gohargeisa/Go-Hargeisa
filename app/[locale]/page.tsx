@@ -6,10 +6,12 @@ import type { Locale } from "@/lib/i18n/config";
 import { getHotels } from "@/lib/data/hotels";
 import { getRestaurants } from "@/lib/data/restaurants";
 import { getAttractions } from "@/lib/data/attractions";
+import { getCityServicePoints } from "@/lib/data/map-points";
 
 import { Hero } from "@/components/home/hero";
 import { TrustBar } from "@/components/home/trust-bar";
 import { CafesComingSoonSection } from "@/components/home/cafes-coming-soon-section";
+import { ExploreHargeisaSection } from "@/components/home/explore-hargeisa-section";
 import { NewsletterSection } from "@/components/home/newsletter-section";
 import { Reveal } from "@/components/home/reveal";
 import { ScrollRow } from "@/components/shared/scroll-row";
@@ -26,10 +28,11 @@ export default async function HomePage({
 }) {
   const t = await getTranslations("home");
 
-  const [hotels, restaurants, attractions] = await Promise.all([
+  const [hotels, restaurants, attractions, cityServicePoints] = await Promise.all([
     getHotels(),
     getRestaurants(),
     getAttractions(),
+    getCityServicePoints(),
   ]);
 
   return (
@@ -244,6 +247,8 @@ export default async function HomePage({
           </div>
         </section>
       )}
+
+      <ExploreHargeisaSection locale={locale} points={cityServicePoints} />
 
       <NewsletterSection locale={locale} />
     </>
