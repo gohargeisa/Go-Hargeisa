@@ -32,13 +32,22 @@ export function RestaurantsPageClient({
 }) {
   const t = useTranslations("listings");
   // Parse filter params from URL
-  const filters: FilterOptions = {
-    minPrice: searchParams.minPrice ? parseInt(searchParams.minPrice) : undefined,
-    maxPrice: searchParams.maxPrice ? parseInt(searchParams.maxPrice) : undefined,
-    minRating: searchParams.minRating ? parseInt(searchParams.minRating) : undefined,
-    sortBy: (searchParams.sortBy as any) || "rating",
-    cuisine: searchParams.cuisine ? searchParams.cuisine.split(",") : undefined,
-  };
+  const filters: FilterOptions = useMemo(
+    () => ({
+      minPrice: searchParams.minPrice ? parseInt(searchParams.minPrice) : undefined,
+      maxPrice: searchParams.maxPrice ? parseInt(searchParams.maxPrice) : undefined,
+      minRating: searchParams.minRating ? parseInt(searchParams.minRating) : undefined,
+      sortBy: (searchParams.sortBy as any) || "rating",
+      cuisine: searchParams.cuisine ? searchParams.cuisine.split(",") : undefined,
+    }),
+    [
+      searchParams.minPrice,
+      searchParams.maxPrice,
+      searchParams.minRating,
+      searchParams.sortBy,
+      searchParams.cuisine,
+    ]
+  );
 
   // Get unique cuisines for filter options
   const cuisineOptions = useMemo(

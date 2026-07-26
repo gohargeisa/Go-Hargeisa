@@ -1,5 +1,6 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import type { User } from "@supabase/supabase-js";
 
 /**
  * Refreshes the Supabase auth session and writes any updated cookies onto
@@ -9,8 +10,16 @@ import { NextResponse, type NextRequest } from "next/server";
  * middleware.ts kept returning the next-intl response instead — meaning the
  * refreshed session cookies were silently discarded. This version mutates a
  * response passed in by the caller so both concerns share one response.
+ *
+ * Also returns the resolved user (and the client used to fetch it) so
+ * middleware.ts can gate /dashboard and /admin here — see the comment above
+ * that route-protection block for why it can't be left to page-level
+ * `redirect()` calls alone.
  */
-export async function refreshSupabaseSession(request: NextRequest, response: NextResponse) {
+export async function refreshSupabaseSession(
+  request: NextRequest,
+  response: NextResponse
+): Promise<{ user: User | null; supabase: ReturnType<typeof createServerClient> }> {
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -31,7 +40,9 @@ export async function refreshSupabaseSession(request: NextRequest, response: Nex
 
   // Touching getUser() refreshes the token if it's expired and triggers the
   // `set`/`remove` callbacks above, which now write onto `response` directly.
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  return response;
+  return { user, supabase };
 }

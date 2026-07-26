@@ -34,21 +34,24 @@ export function HotelsPageClient({
 }) {
   const t = useTranslations("listings");
   // Parse filter params from URL
-  const filters: FilterOptions = {
-    minPrice: searchParams.minPrice ? parseInt(searchParams.minPrice) : undefined,
-    maxPrice: searchParams.maxPrice ? parseInt(searchParams.maxPrice) : undefined,
-    minRating: searchParams.minRating ? parseInt(searchParams.minRating) : undefined,
-    sortBy: (searchParams.sortBy as any) || "rating",
-  };
+  const filters: FilterOptions = useMemo(
+    () => ({
+      minPrice: searchParams.minPrice ? parseInt(searchParams.minPrice) : undefined,
+      maxPrice: searchParams.maxPrice ? parseInt(searchParams.maxPrice) : undefined,
+      minRating: searchParams.minRating ? parseInt(searchParams.minRating) : undefined,
+      sortBy: (searchParams.sortBy as any) || "rating",
+    }),
+    [searchParams.minPrice, searchParams.maxPrice, searchParams.minRating, searchParams.sortBy]
+  );
 
   // Apply filters
   const filteredHotels = useMemo(() => {
     const filtered = filterListings(initialHotels, filters);
-    
+
     // Separate featured and non-featured
     const featured = filtered.filter((h) => h.featured);
     const nonFeatured = filtered.filter((h) => !h.featured);
-    
+
     return { featured, nonFeatured, total: filtered.length };
   }, [initialHotels, filters]);
 
