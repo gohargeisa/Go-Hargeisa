@@ -1,3 +1,11 @@
+/* Leaflet's own stylesheet — required for tiles/panes/markers to be
+   absolutely positioned into their grid. Without it, tiles stack in normal
+   document flow instead, so only the first tile (a tiny corner) is ever
+   visible inside a map's overflow-hidden container. This was never
+   imported anywhere in the app; the `.leaflet-container` rules below only
+   ever set the container's own size, not its internal tile layout. */
+@import "leaflet/dist/leaflet.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

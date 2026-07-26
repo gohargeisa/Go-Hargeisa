@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { Building2, MapPin, Sparkles, Star } from "lucide-react";
 import { Reveal } from "@/components/home/reveal";
+import { hasMeaningfulPrice } from "@/lib/utils/price-range";
 
 export function HotelHero({
   image,
@@ -64,7 +65,7 @@ export function HotelHero({
               <MapPin size={16} className="shrink-0" aria-hidden="true" />
               {address}
             </span>
-            {priceRange && (
+            {hasMeaningfulPrice(priceRange) && (
               <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold backdrop-blur-sm sm:text-sm">
                 {priceRange}
               </span>

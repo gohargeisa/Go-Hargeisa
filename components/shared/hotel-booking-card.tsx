@@ -2,6 +2,8 @@ import { ArrowUpRight, Globe, Phone } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { AddToTripButton } from "@/components/shared/add-to-trip-button";
 import { ShareButton } from "@/components/shared/share-button";
+import { normalizeExternalUrl } from "@/lib/utils/normalize-url";
+import { hasMeaningfulPrice } from "@/lib/utils/price-range";
 
 export function HotelBookingCard({
   hotelId,
@@ -18,25 +20,27 @@ export function HotelBookingCard({
   website?: string;
   locale: Locale;
 }) {
+  const websiteHref = website ? normalizeExternalUrl(website) : undefined;
+
   return (
     <div className="space-y-5">
       <div>
         <p className="text-[11px] font-semibold uppercase tracking-wide text-ink/45 dark:text-sand/45">
           Starting from
         </p>
-        {priceRange ? (
+        {hasMeaningfulPrice(priceRange) ? (
           <p className="font-display text-2xl font-bold text-primary">
             {priceRange}
             <span className="ms-1 text-sm font-medium text-ink/50 dark:text-sand/50">/night</span>
           </p>
         ) : (
-          <p className="font-display text-lg font-semibold text-ink/35 dark:text-sand/40">Price on request</p>
+          <p className="font-display text-lg font-semibold text-ink/35 dark:text-sand/40">Contact for pricing</p>
         )}
       </div>
 
-      {website ? (
+      {websiteHref ? (
         <a
-          href={website}
+          href={websiteHref}
           target="_blank"
           rel="noopener noreferrer"
           className="flex h-12 w-full items-center justify-center gap-1.5 rounded-full bg-primary text-sm font-semibold text-white transition-colors hover:bg-primary-700"
@@ -72,9 +76,9 @@ export function HotelBookingCard({
               <Phone size={15} className="shrink-0" aria-hidden="true" /> {phone}
             </a>
           )}
-          {website && (
+          {websiteHref && (
             <a
-              href={website}
+              href={websiteHref}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2.5 text-sm transition-colors hover:text-primary"

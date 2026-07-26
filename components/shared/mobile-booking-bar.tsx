@@ -5,6 +5,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChevronUp, X } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { HotelBookingCard } from "@/components/shared/hotel-booking-card";
+import { hasMeaningfulPrice } from "@/lib/utils/price-range";
 
 export function MobileBookingBar({
   hotelId,
@@ -30,7 +31,7 @@ export function MobileBookingBar({
         <div className="min-w-0">
           <p className="text-[10px] font-semibold uppercase tracking-wide text-ink/45 dark:text-sand/45">From</p>
           <p className="truncate font-display text-lg font-bold text-primary">
-            {priceRange ? `${priceRange}/night` : "Contact for price"}
+            {hasMeaningfulPrice(priceRange) ? `${priceRange}/night` : "Contact for pricing"}
           </p>
         </div>
         <button
