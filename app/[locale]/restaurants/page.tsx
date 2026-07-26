@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/config";
 import { getRestaurants } from "@/lib/data/restaurants";
+import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { PageHero } from "@/components/shared/page-hero";
+import { ComingSoonSection } from "@/components/shared/coming-soon-section";
 import { RestaurantsPageClient } from "@/components/pages/restaurants-page-client";
 
 export const revalidate = 3600;
@@ -29,7 +31,10 @@ export default async function RestaurantsPage({
   params: { locale: Locale };
   searchParams: { q?: string; minPrice?: string; maxPrice?: string; minRating?: string; sortBy?: string; cuisine?: string };
 }) {
-  const restaurants = await getRestaurants({ q: searchParams.q });
+  // Never show mock/seed restaurants to visitors — only real, published
+  // partner listings. When Supabase isn't connected there is no real data,
+  // so the page renders the "Coming Soon" state instead of sample content.
+  const restaurants = isSupabaseConfigured() ? await getRestaurants({ q: searchParams.q }) : [];
 
   return (
     <>
@@ -39,7 +44,11 @@ export default async function RestaurantsPage({
   image="/images/restaurants/sultan/hero.png"
 />
 
-      <RestaurantsPageClient locale={locale} initialRestaurants={restaurants} searchParams={searchParams} />
+      {restaurants.length === 0 ? (
+        <ComingSoonSection type="restaurant" locale={locale} />
+      ) : (
+        <RestaurantsPageClient locale={locale} initialRestaurants={restaurants} searchParams={searchParams} />
+      )}
     </>
   );
 }

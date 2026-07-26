@@ -9,17 +9,25 @@ const stats = [
 
 export function TrustBar() {
   return (
-    <div className="relative z-10 -mt-10 md:-mt-14">
+    <div className="relative z-10 -mt-12 md:-mt-16">
       <div className="container-px mx-auto">
-        <div className="grid grid-cols-2 gap-3 rounded-xl3 border border-ink/8 dark:border-white/10 bg-white/95 dark:bg-ink/90 backdrop-blur-xl p-5 shadow-glass sm:grid-cols-4 md:p-6">
+        <div
+          className="animate-fadeUp grid grid-cols-2 gap-px overflow-hidden rounded-xl3 border border-ink/8 bg-ink/8 shadow-glass backdrop-blur-xl dark:border-white/10 dark:bg-white/10 sm:grid-cols-4"
+          style={{ animationDelay: "150ms", animationFillMode: "backwards" }}
+        >
           {stats.map(({ icon: Icon, value, label }) => (
-            <div key={label} className="flex items-center gap-3">
+            <div
+              key={label}
+              className="flex items-center gap-3 bg-white/95 p-5 transition-colors duration-300 hover:bg-primary/5 dark:bg-ink/95 dark:hover:bg-primary/10 md:p-6"
+            >
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <Icon size={18} />
+                <Icon size={18} aria-hidden="true" />
               </span>
-              <div className="leading-tight">
+              <div className="min-w-0 leading-tight">
                 <p className="font-display text-lg font-semibold">{value}</p>
-                <p className="text-xs text-ink/55 dark:text-sand/55">{label}</p>
+                <p className="truncate text-xs text-ink/55 dark:text-sand/55">
+                  {label}
+                </p>
               </div>
             </div>
           ))}
