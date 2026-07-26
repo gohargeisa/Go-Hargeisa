@@ -3,17 +3,20 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { Phone, Globe, MapPin } from "lucide-react";
+import { ExternalLink, MapPin } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
-import { getHotelBySlug, getAllHotelSlugs, getNearbyAttractionsForHotel } from "@/lib/data/hotels";
-import { Gallery } from "@/components/shared/gallery";
+import { getHotelBySlug, getAllHotelSlugs, getNearbyAttractionsForHotel, getHotels } from "@/lib/data/hotels";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
-import { RatingBadge } from "@/components/shared/rating-badge";
-import { AmenitiesGrid } from "@/components/shared/amenities-grid";
+import { HotelHero } from "@/components/shared/hotel-hero";
+import { HotelGallery } from "@/components/shared/hotel-gallery";
+import { HotelAmenities } from "@/components/shared/hotel-amenities";
+import { HotelBookingCard } from "@/components/shared/hotel-booking-card";
+import { MobileBookingBar } from "@/components/shared/mobile-booking-bar";
+import { HotelCard } from "@/components/shared/hotel-card";
 import { ReviewsSection } from "@/components/shared/reviews-section";
 import { ReviewForm } from "@/components/shared/review-form";
-import { AddToTripButton } from "@/components/shared/add-to-trip-button";
 import { SingleLocationMapLoader } from "@/components/map/single-location-map-loader";
+import { Reveal } from "@/components/home/reveal";
 
 // Public content changes infrequently; revalidate hourly instead of
 // rendering on every request (this page no longer reads cookies, so
@@ -48,7 +51,16 @@ export default async function HotelDetailPage({
   const hotel = await getHotelBySlug(slug);
   if (!hotel) notFound();
   const t = await getTranslations("common");
-  const nearby = await getNearbyAttractionsForHotel(hotel.id);
+  const [nearby, allHotels] = await Promise.all([
+    getNearbyAttractionsForHotel(hotel.id),
+    getHotels(),
+  ]);
+  const similarHotels = allHotels.filter((h) => h.id !== hotel.id).slice(0, 4);
+
+  const hasCoordinates = Number.isFinite(hotel.location?.lat) && Number.isFinite(hotel.location?.lng);
+  const googleMapsHref = hasCoordinates
+    ? `https://www.google.com/maps/search/?api=1&query=${hotel.location.lat},${hotel.location.lng}`
+    : undefined;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -69,6 +81,7 @@ export default async function HotelDetailPage({
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+
       <Breadcrumbs
         items={[
           { label: "Hotels", href: `/${locale}/hotels` },
@@ -76,99 +89,175 @@ export default async function HotelDetailPage({
         ]}
       />
 
+      <HotelHero
+        image={hotel.coverImage}
+        name={hotel.name}
+        address={hotel.address}
+        rating={hotel.rating}
+        reviewCount={hotel.reviewCount}
+        priceRange={hotel.priceRange}
+        featured={hotel.featured}
+      />
 
-      <div className="container-px mx-auto pt-6">
-        <Gallery cover={hotel.coverImage} images={hotel.gallery} alt={hotel.name} />
-      </div>
+      <HotelGallery cover={hotel.coverImage} images={hotel.gallery} alt={hotel.name} />
 
-      <div className="container-px mx-auto grid gap-10 py-10 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-10">
-          <div>
-            <div className="flex flex-wrap items-center gap-3">
-              <h1 className="font-display text-3xl font-semibold">{hotel.name}</h1>
-              <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-                {hotel.priceRange}
-              </span>
-            </div>
-            <p className="mt-2 flex items-center gap-1.5 text-sm text-ink/60 dark:text-sand/60">
-              <MapPin size={14} /> {hotel.address}
-            </p>
-            <div className="mt-3">
-              <RatingBadge rating={hotel.rating} reviewCount={hotel.reviewCount} size="md" />
-            </div>
-            <p className="mt-5 text-ink/75 dark:text-sand/75 leading-relaxed">{hotel.description}</p>
-          </div>
+      <div className="container-px mx-auto grid gap-10 pb-28 pt-10 lg:grid-cols-3 lg:pb-10">
+        <div className="space-y-12 lg:col-span-2">
+          <Reveal>
+            <section aria-labelledby="overview-heading">
+              <h2 id="overview-heading" className="font-display text-2xl font-semibold">
+                Overview
+              </h2>
+              <p className="mt-4 leading-relaxed text-ink/75 dark:text-sand/75">{hotel.description}</p>
+            </section>
+          </Reveal>
 
-          <div>
-            <h2 className="font-display text-xl font-semibold mb-4">{t("amenities")}</h2>
-            <AmenitiesGrid amenities={hotel.amenities} />
-          </div>
+          <Reveal>
+            <section aria-labelledby="amenities-heading">
+              <h2 id="amenities-heading" className="mb-5 font-display text-2xl font-semibold">
+                {t("amenities")}
+              </h2>
+              <HotelAmenities amenities={hotel.amenities} />
+            </section>
+          </Reveal>
 
-          <div>
-            <h2 className="font-display text-xl font-semibold mb-4">{t("viewOnMap")}</h2>
-            <SingleLocationMapLoader location={hotel.location} label={hotel.name} />
-          </div>
+          <Reveal>
+            <section aria-labelledby="location-heading">
+              <h2 id="location-heading" className="mb-5 font-display text-2xl font-semibold">
+                Location
+              </h2>
+              <div className="overflow-hidden rounded-xl3 border border-ink/8 dark:border-white/10">
+                <SingleLocationMapLoader location={hotel.location} label={hotel.name} />
+                <div className="flex flex-col gap-3 border-t border-ink/8 p-5 dark:border-white/10 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="flex items-center gap-2 text-sm text-ink/70 dark:text-sand/70">
+                    <MapPin size={16} className="shrink-0 text-primary" aria-hidden="true" />
+                    {hotel.address}
+                  </p>
+                  {googleMapsHref && (
+                    <a
+                      href={googleMapsHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-1.5 rounded-full border border-ink/15 px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
+                    >
+                      Open in Google Maps
+                      <ExternalLink size={14} aria-hidden="true" />
+                    </a>
+                  )}
+                </div>
+              </div>
+            </section>
+          </Reveal>
 
-          <div>
-            <h2 className="font-display text-xl font-semibold mb-4">{t("reviews")}</h2>
-            <ReviewsSection rating={hotel.rating} reviewCount={hotel.reviewCount} reviews={hotel.reviews} />
-            <div className="mt-6">
-              <ReviewForm
-                listingType="hotel"
-                listingId={hotel.id}
-                locale={locale}
-                pathToRevalidate={`/${locale}/hotels/${hotel.slug}`}
-              />
-            </div>
-          </div>
+          <Reveal>
+            <section aria-labelledby="policies-heading">
+              <h2 id="policies-heading" className="mb-4 font-display text-2xl font-semibold">
+                Policies
+              </h2>
+              <div className="rounded-xl2 border border-ink/8 bg-ink/[0.02] p-5 text-sm leading-relaxed text-ink/70 dark:border-white/10 dark:bg-white/[0.02] dark:text-sand/70">
+                Check-in/check-out times, cancellation terms and house rules can vary by property. Contact{" "}
+                {hotel.name} directly using the details in the booking panel to confirm policies before you book.
+              </div>
+            </section>
+          </Reveal>
+
+          <Reveal>
+            <section aria-labelledby="reviews-heading">
+              <h2 id="reviews-heading" className="mb-5 font-display text-2xl font-semibold">
+                {t("reviews")}
+              </h2>
+              <ReviewsSection rating={hotel.rating} reviewCount={hotel.reviewCount} reviews={hotel.reviews} />
+              <div className="mt-6">
+                <ReviewForm
+                  listingType="hotel"
+                  listingId={hotel.id}
+                  locale={locale}
+                  pathToRevalidate={`/${locale}/hotels/${hotel.slug}`}
+                />
+              </div>
+            </section>
+          </Reveal>
 
           {nearby.length > 0 && (
-            <div>
-              <h2 className="font-display text-xl font-semibold mb-4">{t("nearbyAttractions")}</h2>
-              <div className="grid gap-4 sm:grid-cols-2">
-                {nearby.map((a) => (
-                  <Link
-                    key={a.id}
-                    href={`/${locale}/attractions/${a.slug}`}
-                    className="flex gap-3 rounded-xl2 border border-ink/8 dark:border-white/10 p-3 hover:border-primary/40 transition-colors"
-                  >
-                    <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl">
-                      <Image src={a.coverImage} alt={a.name} fill className="object-cover" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold">{a.name}</p>
-                      <p className="text-xs text-ink/55 dark:text-sand/55 line-clamp-2">{a.shortDescription}</p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
+            <Reveal>
+              <section aria-labelledby="nearby-heading">
+                <h2 id="nearby-heading" className="mb-5 font-display text-2xl font-semibold">
+                  {t("nearbyAttractions")}
+                </h2>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {nearby.map((a) => (
+                    <Link
+                      key={a.id}
+                      href={`/${locale}/attractions/${a.slug}`}
+                      className="flex gap-3 rounded-xl2 border border-ink/8 p-3 transition-colors hover:border-primary/40 dark:border-white/10"
+                    >
+                      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl">
+                        <Image src={a.coverImage} alt={a.name} fill sizes="64px" className="object-cover" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold">{a.name}</p>
+                        <p className="line-clamp-2 text-xs text-ink/55 dark:text-sand/55">{a.shortDescription}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            </Reveal>
           )}
         </div>
 
-        <aside className="lg:sticky lg:top-24 h-fit space-y-4 rounded-xl3 border border-ink/8 dark:border-white/10 p-6 shadow-card">
-          <AddToTripButton locale={locale} listingType="hotel" listingId={hotel.id} />
-          <h3 className="font-display text-lg font-semibold">Contact this hotel</h3>
-          {hotel.phone && (
-            <a href={`tel:${hotel.phone}`} className="flex items-center gap-3 text-sm hover:text-primary">
-              <Phone size={16} /> {hotel.phone}
-            </a>
-          )}
-          {hotel.website && (
-            <a
-              href={hotel.website}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3 text-sm hover:text-primary"
-            >
-              <Globe size={16} /> Visit website
-            </a>
-          )}
-          <button className="w-full rounded-full bg-primary py-3 text-sm font-semibold text-white hover:bg-primary-700 transition-colors">
-            {t("bookNow")}
-          </button>
+        <aside className="hidden h-fit rounded-xl3 border border-ink/8 p-6 shadow-card dark:border-white/10 lg:sticky lg:top-24 lg:block">
+          <HotelBookingCard
+            hotelId={hotel.id}
+            name={hotel.name}
+            priceRange={hotel.priceRange}
+            phone={hotel.phone}
+            website={hotel.website}
+            locale={locale}
+          />
         </aside>
       </div>
+
+      {similarHotels.length > 0 && (
+        <section className="border-t border-ink/8 bg-white py-14 dark:border-white/10 dark:bg-white/[0.03] sm:py-20">
+          <div className="container-px mx-auto">
+            <Reveal>
+              <h2 className="mb-6 font-display text-2xl font-semibold sm:text-3xl">You may also like</h2>
+            </Reveal>
+            <Reveal delay={0.1}>
+              <div className="flex gap-5 overflow-x-auto pb-2 scrollbar-none sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-4">
+                {similarHotels.map((h) => (
+                  <div key={h.id} className="min-w-[280px] sm:min-w-0">
+                    <HotelCard
+                      href={`/${locale}/hotels/${h.slug}`}
+                      image={h.coverImage}
+                      name={h.name}
+                      address={h.address}
+                      rating={h.rating}
+                      reviewCount={h.reviewCount}
+                      priceRange={h.priceRange}
+                      amenities={h.amenities}
+                      featured={h.featured}
+                      hotelId={h.id}
+                      locale={locale}
+                      website={h.website}
+                    />
+                  </div>
+                ))}
+              </div>
+            </Reveal>
+          </div>
+        </section>
+      )}
+
+      <MobileBookingBar
+        hotelId={hotel.id}
+        name={hotel.name}
+        priceRange={hotel.priceRange}
+        phone={hotel.phone}
+        website={hotel.website}
+        locale={locale}
+      />
     </>
   );
 }
