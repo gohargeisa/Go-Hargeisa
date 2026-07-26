@@ -41,7 +41,7 @@ export function NewsletterSection({ locale }: { locale: Locale }) {
             aria-hidden="true"
           />
 
-          <span className="relative mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
+          <span className="relative mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/25 backdrop-blur-sm">
             <Mail size={26} aria-hidden="true" />
           </span>
           <h2 className="relative mt-6 font-display text-2xl font-semibold md:text-3xl">
@@ -58,7 +58,7 @@ export function NewsletterSection({ locale }: { locale: Locale }) {
           ) : (
             <form
               onSubmit={onSubmit}
-              className="relative mx-auto mt-7 flex max-w-md flex-col gap-2 sm:flex-row"
+              className="relative mx-auto mt-7 flex max-w-md flex-col gap-2.5 sm:flex-row"
             >
               <label htmlFor={emailId} className="sr-only">
                 {t("newsletterPlaceholder")}
@@ -70,12 +70,12 @@ export function NewsletterSection({ locale }: { locale: Locale }) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={t("newsletterPlaceholder")}
-                className="flex-1 rounded-full px-5 py-3 text-sm text-ink outline-none focus-visible:ring-2 focus-visible:ring-white"
+                className="h-12 flex-1 rounded-full px-5 text-sm text-ink outline-none ring-1 ring-transparent transition-shadow focus-visible:ring-2 focus-visible:ring-white"
               />
               <button
                 type="submit"
                 disabled={isPending}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-semibold text-ink transition-colors hover:bg-accent-400 disabled:opacity-70"
+                className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-full bg-accent px-7 text-sm font-semibold text-ink shadow-[0_10px_25px_rgba(0,0,0,0.2)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-accent-400 hover:shadow-[0_14px_30px_rgba(0,0,0,0.28)] disabled:opacity-70 disabled:hover:translate-y-0"
               >
                 {isPending && <Loader2 size={14} aria-hidden="true" className="animate-spin" />}
                 {t("newsletterButton")}

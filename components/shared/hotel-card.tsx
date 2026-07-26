@@ -42,6 +42,7 @@ export function HotelCard({
 }) {
   const [favorited, setFavorited] = useState(initiallyFavorited);
   const [isPending, startTransition] = useTransition();
+  const [loaded, setLoaded] = useState(false);
   const router = useRouter();
 
   function onToggleFavorite() {
@@ -72,13 +73,19 @@ export function HotelCard({
       <div className="relative h-56 shrink-0 overflow-hidden rounded-t-3xl sm:h-60">
         {hasRealImage ? (
           <>
+            {!loaded && (
+              <div className="absolute inset-0 animate-pulse bg-ink/10 dark:bg-white/10" aria-hidden="true" />
+            )}
             <Link href={href} className="absolute inset-0 z-0" aria-label={name}>
               <Image
                 src={image}
                 alt={`${name} — hotel exterior`}
                 fill
                 sizes="(max-width: 767px) 84vw, (max-width: 1024px) 45vw, 320px"
-                className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                onLoad={() => setLoaded(true)}
+                className={`object-cover transition-all duration-500 ease-out group-hover:scale-105 ${
+                  loaded ? "opacity-100" : "opacity-0"
+                }`}
               />
             </Link>
             <div

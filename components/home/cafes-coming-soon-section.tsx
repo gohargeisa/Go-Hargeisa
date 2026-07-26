@@ -44,14 +44,14 @@ export function CafesComingSoonSection({ locale }: { locale: Locale }) {
               <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
                 <Link
                   href={`/${locale}/contact`}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-700 sm:w-auto"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary-700 hover:shadow-[0_12px_28px_rgba(245,158,11,0.35)] sm:w-auto"
                 >
                   <Handshake size={16} aria-hidden="true" />
                   {t("cafesComingSoonPartnerButton")}
                 </Link>
                 <Link
                   href={`/${locale}/hotels`}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/25 bg-white/5 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/15 sm:w-auto"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/25 bg-white/5 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/15 sm:w-auto"
                 >
                   {t("cafesComingSoonExploreButton")}
                   <ArrowRight size={16} aria-hidden="true" />
@@ -74,7 +74,7 @@ export function CafesComingSoonSection({ locale }: { locale: Locale }) {
                         aria-hidden="true"
                       />
                     </div>
-                    <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-white backdrop-blur-sm">
+                    <span className="absolute start-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-white backdrop-blur-sm">
                       {t("cafesComingSoonBadge")}
                     </span>
                   </div>

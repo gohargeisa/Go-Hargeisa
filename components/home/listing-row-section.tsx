@@ -1,6 +1,6 @@
 import { SectionHeader } from "@/components/shared/section-header";
 import { ScrollRow } from "@/components/shared/scroll-row";
-import { ListingCard } from "@/components/shared/listing-card";
+import { PremiumCard } from "@/components/home/premium-card";
 import { Reveal } from "@/components/home/reveal";
 
 export interface ListingRowItem {
@@ -48,7 +48,7 @@ export function ListingRowSection({
         <Reveal delay={0.1}>
           <ScrollRow>
             {items.map((item) => (
-              <ListingCard key={item.href} {...item} />
+              <PremiumCard key={item.href} {...item} />
             ))}
           </ScrollRow>
         </Reveal>

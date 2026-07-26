@@ -62,7 +62,7 @@ export function SiteFooter({ locale }: { locale: Locale }) {
 
   return (
     <footer className="mt-24 border-t border-ink/10 dark:border-white/10 bg-gradient-to-b from-white to-slate-50 dark:from-[#071321] dark:to-[#020817]">
-      <div className="container-px mx-auto grid grid-cols-2 gap-10 py-16 md:grid-cols-5">
+      <div className="container-px mx-auto grid grid-cols-2 gap-x-8 gap-y-12 py-16 md:grid-cols-5 md:gap-x-10 lg:gap-x-12 lg:py-20">
         <div className="col-span-2">
           <Image
   src="/images/logo.png"
@@ -75,7 +75,7 @@ export function SiteFooter({ locale }: { locale: Locale }) {
           <p className="max-w-sm leading-7 text-sm text-ink/60 dark:text-sand/60">
   {t("tagline")}
 </p>
-          <div className="mt-5 flex gap-3">
+          <div className="mt-6 flex flex-wrap gap-2.5">
   {socialLinks.map(({ icon: Icon, href, label }, i) => (
   <a
     key={i}
@@ -83,9 +83,9 @@ export function SiteFooter({ locale }: { locale: Locale }) {
     target="_blank"
     rel="noopener noreferrer"
     aria-label={label}
-    className="flex h-10 w-10 items-center justify-center rounded-full border border-ink/10 dark:border-white/10 bg-white/5 transition-all duration-300 hover:-translate-y-1 hover:border-primary hover:bg-primary hover:text-white"
+    className="flex h-11 w-11 items-center justify-center rounded-full border border-ink/10 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary hover:bg-primary hover:text-white hover:shadow-[0_10px_20px_rgba(245,158,11,0.3)] dark:border-white/10 dark:bg-white/5"
   >
-    <Icon size={16} />
+    <Icon size={17} />
   </a>
 ))}
 </div>
@@ -99,18 +99,18 @@ export function SiteFooter({ locale }: { locale: Locale }) {
       </div>
 
       <div className="border-t border-ink/10 dark:border-white/10">
-  <div className="container-px mx-auto flex flex-col items-center gap-4 py-6 md:flex-row md:justify-between">
+  <div className="container-px mx-auto flex flex-col items-center gap-4 py-7 md:flex-row md:justify-between">
 
     <p className="text-xs text-ink/50 dark:text-sand/50">
       &copy; {new Date().getFullYear()} Go Hargeisa. {t("rights")}
     </p>
 
-    <div className="flex gap-5 text-xs text-ink/50 dark:text-sand/50">
-      <Link href={`/${locale}/privacy`}>
+    <div className="flex gap-6 text-xs text-ink/50 dark:text-sand/50">
+      <Link href={`/${locale}/privacy`} className="transition-colors hover:text-primary">
         {t("privacy")}
       </Link>
 
-      <Link href={`/${locale}/terms`}>
+      <Link href={`/${locale}/terms`} className="transition-colors hover:text-primary">
         {t("terms")}
       </Link>
     </div>
@@ -126,8 +126,8 @@ export function SiteFooter({ locale }: { locale: Locale }) {
 </p>
   </div>
 </div>
-        
-      
+
+
     </footer>
   );
 }
@@ -145,8 +145,8 @@ function FooterCol({
 }) {
   return (
     <div>
-      <h4 className="font-display text-base font-bold uppercase tracking-wide text-ink/80 dark:text-sand/80">{title}</h4>
-      <ul className="mt-4 space-y-2.5">
+      <h4 className="font-display text-sm font-bold uppercase tracking-[0.1em] text-ink/80 dark:text-sand/80">{title}</h4>
+      <ul className="mt-5 space-y-3">
         {links.map(([key, href]) => (
           <li key={key}>
             <Link

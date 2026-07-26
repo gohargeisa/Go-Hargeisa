@@ -78,7 +78,7 @@ export function Hero({ locale }: { locale: Locale }) {
       <div className="absolute inset-0 bg-hero-gradient" />
       <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-ink/10" />
 
-      <div className="container-px relative z-10 mx-auto flex w-full flex-col items-center pt-16 text-center text-white">
+      <div className="container-px relative z-10 mx-auto flex w-full flex-col items-center pt-20 text-center text-white sm:pt-16">
         <motion.span
           custom={0}
           initial={initial}
@@ -95,7 +95,7 @@ export function Hero({ locale }: { locale: Locale }) {
           initial={initial}
           animate="show"
           variants={fadeUp}
-          className="mt-6 max-w-3xl text-balance font-display text-4xl font-semibold leading-[1.08] md:text-6xl lg:text-[5.25rem] lg:leading-[1.03]"
+          className="mt-6 max-w-3xl text-balance font-display text-4xl font-semibold leading-[1.08] sm:text-5xl md:text-6xl lg:text-[5.25rem] lg:leading-[1.03]"
         >
           {t("title")}
         </motion.h1>
@@ -118,12 +118,12 @@ export function Hero({ locale }: { locale: Locale }) {
           onSubmit={onSearch}
           role="search"
           aria-label={t("searchButton")}
-          className="mt-9 w-full max-w-2xl rounded-2xl p-2 shadow-glass glass md:rounded-full"
+          className="glass mt-8 w-full max-w-2xl rounded-2xl p-2 shadow-[0_20px_60px_rgba(0,0,0,0.25)] ring-1 ring-white/15 backdrop-saturate-150 sm:mt-9 md:rounded-full"
         >
           <div className="flex flex-col gap-2 md:flex-row">
-            <div className="flex flex-1 items-center gap-2 rounded-full bg-white/90 px-4 py-3 dark:bg-ink/70">
+            <div className="flex flex-1 items-center gap-2.5 rounded-full bg-white/95 px-5 py-3.5 dark:bg-ink/70">
               <Search
-                size={18}
+                size={19}
                 aria-hidden="true"
                 className="shrink-0 text-ink/50 dark:text-sand/50"
               />
@@ -136,13 +136,13 @@ export function Hero({ locale }: { locale: Locale }) {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={t("searchPlaceholder")}
-                className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-ink/45 dark:text-sand dark:placeholder:text-sand/45"
+                className="w-full bg-transparent text-[15px] text-ink outline-none placeholder:text-ink/45 dark:text-sand dark:placeholder:text-sand/45"
               />
             </div>
 
             <button
               type="submit"
-              className="shrink-0 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="shrink-0 rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(245,158,11,0.35)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary-700 hover:shadow-[0_12px_28px_rgba(245,158,11,0.45)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               {t("searchButton")}
             </button>
@@ -154,7 +154,7 @@ export function Hero({ locale }: { locale: Locale }) {
           initial={initial}
           animate="show"
           variants={fadeUp}
-          className="mt-10 grid w-full max-w-4xl grid-cols-1 gap-4 md:grid-cols-3"
+          className="mt-10 grid w-full max-w-4xl grid-cols-1 gap-4 md:mt-12 md:grid-cols-3"
         >
           {categoryCards.map(
             ({ key, icon: Icon, titleKey, descriptionKey }) => {
