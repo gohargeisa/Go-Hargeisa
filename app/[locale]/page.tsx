@@ -6,7 +6,6 @@ import type { Locale } from "@/lib/i18n/config";
 import { getHotels } from "@/lib/data/hotels";
 import { getRestaurants } from "@/lib/data/restaurants";
 import { getAttractions } from "@/lib/data/attractions";
-import { getCityServicePoints } from "@/lib/data/map-points";
 
 import { Hero } from "@/components/home/hero";
 import { TrustBar } from "@/components/home/trust-bar";
@@ -28,11 +27,10 @@ export default async function HomePage({
 }) {
   const t = await getTranslations("home");
 
-  const [hotels, restaurants, attractions, cityServicePoints] = await Promise.all([
+  const [hotels, restaurants, attractions] = await Promise.all([
     getHotels(),
     getRestaurants(),
     getAttractions(),
-    getCityServicePoints(),
   ]);
 
   return (
@@ -248,7 +246,7 @@ export default async function HomePage({
         </section>
       )}
 
-      <ExploreHargeisaSection locale={locale} points={cityServicePoints} />
+      <ExploreHargeisaSection />
 
       <NewsletterSection locale={locale} />
     </>

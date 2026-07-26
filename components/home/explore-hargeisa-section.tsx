@@ -1,67 +1,79 @@
 "use client";
 
-import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, Fuel, MoonStar, Pill, ShoppingCart, Stethoscope, type LucideIcon } from "lucide-react";
-import type { Locale } from "@/lib/i18n/config";
-import type { CityServicePoint } from "@/types";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { Fuel, MoonStar, Pill, ShoppingCart, Sparkles, Stethoscope, X, type LucideIcon } from "lucide-react";
 import { Reveal } from "@/components/home/reveal";
-import { CityMapLoader } from "@/components/map/city-map-loader";
+
+const TOAST_DURATION_MS = 4500;
 
 const CARDS: {
   category: string;
   icon: LucideIcon;
   titleKey: string;
   descriptionKey: string;
-  tone: string;
+  gradient: string;
 }[] = [
   {
     category: "hospital",
     icon: Stethoscope,
     titleKey: "exploreHargeisaHospitalsTitle",
     descriptionKey: "exploreHargeisaHospitalsDescription",
-    tone: "bg-red-100 text-red-600 dark:bg-red-400/15 dark:text-red-300",
+    gradient: "from-red-600/70 via-red-900/60 to-ink",
   },
   {
     category: "pharmacy",
     icon: Pill,
     titleKey: "exploreHargeisaPharmaciesTitle",
     descriptionKey: "exploreHargeisaPharmaciesDescription",
-    tone: "bg-pink-100 text-pink-600 dark:bg-pink-400/15 dark:text-pink-300",
+    gradient: "from-pink-600/70 via-fuchsia-900/60 to-ink",
   },
   {
     category: "gas_station",
     icon: Fuel,
     titleKey: "exploreHargeisaGasStationsTitle",
     descriptionKey: "exploreHargeisaGasStationsDescription",
-    tone: "bg-orange-100 text-orange-600 dark:bg-orange-400/15 dark:text-orange-300",
+    gradient: "from-orange-600/70 via-amber-900/60 to-ink",
   },
   {
     category: "supermarket",
     icon: ShoppingCart,
     titleKey: "exploreHargeisaSupermarketsTitle",
     descriptionKey: "exploreHargeisaSupermarketsDescription",
-    tone: "bg-violet-100 text-violet-600 dark:bg-violet-400/15 dark:text-violet-300",
+    gradient: "from-violet-600/70 via-purple-900/60 to-ink",
   },
   {
     category: "mosque",
     icon: MoonStar,
     titleKey: "exploreHargeisaMosquesTitle",
     descriptionKey: "exploreHargeisaMosquesDescription",
-    tone: "bg-teal-100 text-teal-600 dark:bg-teal-400/15 dark:text-teal-300",
+    gradient: "from-teal-600/70 via-emerald-900/60 to-ink",
   },
 ];
 
-export function ExploreHargeisaSection({
-  locale,
-  points,
-}: {
-  locale: Locale;
-  points: CityServicePoint[];
-}) {
+export function ExploreHargeisaSection() {
   const t = useTranslations("home");
   const reduceMotion = useReducedMotion();
+  const [toastOpen, setToastOpen] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  function openToast() {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setToastOpen(true);
+    timeoutRef.current = setTimeout(() => setToastOpen(false), TOAST_DURATION_MS);
+  }
+
+  function closeToast() {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setToastOpen(false);
+  }
 
   return (
     <section className="py-16 md:py-24">
@@ -80,67 +92,77 @@ export function ExploreHargeisaSection({
 
         <Reveal delay={0.1}>
           <div className="mt-10 grid grid-cols-2 gap-5 sm:grid-cols-3 md:mt-14 lg:grid-cols-5">
-            {CARDS.map(({ category, icon: Icon, titleKey, descriptionKey, tone }) => (
-              <motion.div
+            {CARDS.map(({ category, icon: Icon, titleKey, descriptionKey, gradient }) => (
+              <motion.button
                 key={category}
+                type="button"
+                onClick={openToast}
                 whileHover={reduceMotion ? undefined : { y: -8 }}
                 transition={{ type: "spring", stiffness: 300, damping: 24 }}
-                className="h-full"
+                className="group flex h-full w-full flex-col overflow-hidden rounded-[28px] border border-ink/8 bg-white text-start shadow-[0_8px_24px_rgba(20,30,45,0.07)] transition-shadow duration-300 hover:border-primary/25 hover:shadow-[0_28px_60px_rgba(20,30,45,0.16)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:border-white/10 dark:bg-white/[0.04] dark:hover:shadow-[0_28px_60px_rgba(0,0,0,0.45)]"
               >
-                <Link
-                  href={`/${locale}/city-map?category=${category}`}
-                  className="group flex h-full flex-col rounded-[28px] border border-ink/8 bg-white p-6 shadow-[0_8px_24px_rgba(20,30,45,0.07)] transition-shadow duration-300 hover:border-primary/25 hover:shadow-[0_28px_60px_rgba(20,30,45,0.16)] dark:border-white/10 dark:bg-white/[0.04] dark:hover:shadow-[0_28px_60px_rgba(0,0,0,0.45)]"
-                >
+                <div className="relative h-64 shrink-0 overflow-hidden rounded-t-[28px] sm:h-[17rem]">
                   <div
-                    className={`flex h-14 w-14 items-center justify-center rounded-2xl ${tone}`}
+                    className={`absolute inset-0 bg-gradient-to-br ${gradient} transition-transform duration-700 ease-out group-hover:scale-110`}
                     aria-hidden="true"
-                  >
-                    <Icon size={26} strokeWidth={1.75} />
-                  </div>
-
-                  <h3 className="mt-5 font-display text-lg font-bold text-ink dark:text-white">
-                    {t(titleKey)}
-                  </h3>
-
-                  <p className="mt-2 flex-1 text-sm leading-relaxed text-ink/60 dark:text-sand/60">
-                    {t(descriptionKey)}
-                  </p>
-
-                  <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
-                    {t("exploreHargeisaExplore")}
-                    <ArrowRight
-                      size={15}
-                      className="transition-transform duration-300 group-hover:translate-x-1"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Icon
+                      size={52}
+                      strokeWidth={1.5}
+                      className="text-white/30 transition-transform duration-700 ease-out group-hover:scale-110"
                       aria-hidden="true"
                     />
+                  </div>
+                  <div
+                    className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent"
+                    aria-hidden="true"
+                  />
+                  <span className="absolute start-3.5 top-3.5 z-10 inline-flex items-center gap-1 rounded-full bg-primary/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-[0_4px_14px_rgba(245,158,11,0.45)] ring-1 ring-white/30 backdrop-blur-md">
+                    <Sparkles size={10} aria-hidden="true" />
+                    {t("exploreHargeisaComingSoonBadge")}
                   </span>
-                </Link>
-              </motion.div>
+                </div>
+
+                <div className="flex flex-1 flex-col gap-2 p-6 sm:p-7">
+                  <h3 className="font-display text-lg font-bold text-ink dark:text-white">{t(titleKey)}</h3>
+                  <p className="flex-1 text-sm leading-relaxed text-ink/60 dark:text-sand/60">
+                    {t(descriptionKey)}
+                  </p>
+                </div>
+              </motion.button>
             ))}
           </div>
         </Reveal>
+      </div>
 
-        <Reveal delay={0.15}>
-          <div className="mt-14 md:mt-20">
-            <h3 className="text-center font-display text-2xl font-bold md:text-3xl">
-              {t("exploreHargeisaMapTitle")}
-            </h3>
-
-            <div className="mx-auto mt-6 h-[420px] w-full overflow-hidden rounded-xl3 border border-ink/8 shadow-card dark:border-white/10">
-              <CityMapLoader points={points} onSelectPoint={() => {}} />
-            </div>
-
-            <div className="mt-8 flex justify-center">
-              <Link
-                href={`/${locale}/city-map`}
-                className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(245,158,11,0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary-700 hover:shadow-[0_14px_30px_rgba(245,158,11,0.4)]"
+      <div
+        aria-live="polite"
+        className="pointer-events-none fixed inset-x-0 bottom-6 z-[100] flex justify-center px-4"
+      >
+        <AnimatePresence>
+          {toastOpen && (
+            <motion.div
+              role="status"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 16 }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              className="pointer-events-auto flex max-w-sm items-start gap-3 rounded-2xl border border-white/10 bg-ink px-5 py-4 text-sm text-white shadow-2xl dark:border-white/15 dark:bg-white dark:text-ink"
+            >
+              <Sparkles size={18} className="mt-0.5 shrink-0 text-primary" aria-hidden="true" />
+              <p className="flex-1 leading-relaxed">{t("exploreHargeisaComingSoonToast")}</p>
+              <button
+                type="button"
+                onClick={closeToast}
+                aria-label={t("exploreHargeisaComingSoonDismiss")}
+                className="shrink-0 rounded-full p-1 text-white/60 transition-colors hover:bg-white/10 hover:text-white dark:text-ink/50 dark:hover:bg-ink/10 dark:hover:text-ink"
               >
-                {t("exploreHargeisaOpenMap")}
-                <ArrowRight size={16} aria-hidden="true" />
-              </Link>
-            </div>
-          </div>
-        </Reveal>
+                <X size={15} aria-hidden="true" />
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </section>
   );
