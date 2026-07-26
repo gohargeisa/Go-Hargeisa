@@ -1,20 +1,19 @@
-import Image from "next/image";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { Clock, MapPin } from "lucide-react";
+import { ExternalLink, MapPin } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
-import {
-  getRestaurantBySlug,
-  getAllRestaurantSlugs,
-} from "@/lib/data/restaurants";
-import { Gallery } from "@/components/shared/gallery";
+import { getRestaurantBySlug, getAllRestaurantSlugs, getRestaurants } from "@/lib/data/restaurants";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
-import { RatingBadge } from "@/components/shared/rating-badge";
+import { RestaurantHero } from "@/components/shared/restaurant-hero";
+import { HotelGallery as DetailGallery } from "@/components/shared/hotel-gallery";
+import { RestaurantBookingCard } from "@/components/shared/restaurant-booking-card";
+import { RestaurantMobileBookingBar } from "@/components/shared/restaurant-mobile-booking-bar";
+import { ListingCard } from "@/components/shared/listing-card";
 import { ReviewsSection } from "@/components/shared/reviews-section";
 import { ReviewForm } from "@/components/shared/review-form";
-import { AddToTripButton } from "@/components/shared/add-to-trip-button";
 import { SingleLocationMapLoader } from "@/components/map/single-location-map-loader";
+import { Reveal } from "@/components/home/reveal";
 
 // Public content changes infrequently; revalidate hourly instead of
 // rendering on every request (this page no longer reads cookies, so
@@ -32,17 +31,11 @@ export async function generateMetadata({
   params: { locale: Locale; slug: string };
 }): Promise<Metadata> {
   const r = await getRestaurantBySlug(slug);
-
-  if (!r) {
-    return {};
-  }
-
+  if (!r) return {};
   return {
     title: `${r.name} — Restaurant in Hargeisa`,
     description: r.shortDescription,
-    alternates: {
-      canonical: `/${locale}/restaurants/${r.slug}`,
-    },
+    alternates: { canonical: `/${locale}/restaurants/${r.slug}` },
   };
 }
 
@@ -52,190 +45,183 @@ export default async function RestaurantDetailPage({
   params: { locale: Locale; slug: string };
 }) {
   const restaurant = await getRestaurantBySlug(slug);
-
   if (!restaurant) notFound();
-
   const t = await getTranslations("common");
+  const allRestaurants = await getRestaurants();
+  const similarRestaurants = allRestaurants.filter((r) => r.id !== restaurant.id).slice(0, 4);
+
+  const hasCoordinates =
+    Number.isFinite(restaurant.location?.lat) && Number.isFinite(restaurant.location?.lng);
+  const googleMapsHref = hasCoordinates
+    ? `https://www.google.com/maps/search/?api=1&query=${restaurant.location.lat},${restaurant.location.lng}`
+    : undefined;
 
   return (
     <>
       <Breadcrumbs
         items={[
           { label: "Restaurants", href: `/${locale}/restaurants` },
-          {
-            label: restaurant.name,
-            href: `/${locale}/restaurants/${restaurant.slug}`,
-          },
+          { label: restaurant.name, href: `/${locale}/restaurants/${restaurant.slug}` },
         ]}
-      /><section className="relative h-[55vh] w-full overflow-hidden">
-  <Image
-  src={restaurant.coverImage}
-  alt={restaurant.name}
-  fill
-  priority
-  className="object-cover"
-/>
+      />
 
-  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+      <RestaurantHero
+        image={restaurant.coverImage}
+        name={restaurant.name}
+        address={restaurant.address}
+        rating={restaurant.rating}
+        reviewCount={restaurant.reviewCount}
+        priceRange={restaurant.priceRange}
+        cuisine={restaurant.cuisine}
+        featured={restaurant.featured}
+      />
 
-  <div className="absolute bottom-10 left-0 right-0 container-px mx-auto">
-    <div className="flex flex-wrap gap-2 mb-3">
-      {(restaurant.cuisine as string[]).map((c) => (
-        <span
-          key={c}
-          className="rounded-full bg-white/20 backdrop-blur px-3 py-1 text-sm text-white"
-        >
-          {c}
-        </span>
-      ))}
-    </div>
+      <DetailGallery cover={restaurant.coverImage} images={restaurant.gallery} alt={restaurant.name} />
 
-    <h1 className="text-5xl font-bold text-white">
-      {restaurant.name}
-    </h1>
-
-    <p className="mt-3 flex items-center gap-2 text-white/90">
-      <MapPin size={18} />
-      {restaurant.address}
-    </p>
-  </div>
-</section>
-
-      <div className="container-px mx-auto -mt-20 relative z-20">
-        <Gallery
-          cover={restaurant.coverImage}
-          images={restaurant.gallery}
-          alt={restaurant.name}
-        />
-      </div>
-
-      <div className="container-px mx-auto grid gap-10 py-10 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-10">
-          <div className="rounded-3xl bg-white dark:bg-zinc-900 p-8 shadow-xl border border-zinc-200 dark:border-zinc-800">
-  <div className="flex items-center gap-3 mb-5">
-    <RatingBadge
-      rating={restaurant.rating}
-      reviewCount={restaurant.reviewCount}
-      size="md"
-    />
-  </div>
-
-  <div className="grid grid-cols-3 gap-4 mb-8">
-    <div className="rounded-2xl bg-primary/10 p-4 text-center">
-      <p className="text-xs text-gray-500">Rating</p>
-      <p className="text-2xl font-bold">{restaurant.rating}</p>
-    </div>
-
-    <div className="rounded-2xl bg-primary/10 p-4 text-center">
-      <p className="text-xs text-gray-500">Reviews</p>
-      <p className="text-2xl font-bold">{restaurant.reviewCount}</p>
-    </div>
-
-    <div className="rounded-2xl bg-primary/10 p-4 text-center">
-      <p className="text-xs text-gray-500">Hours</p>
-      <p className="text-sm font-bold">{restaurant.openingHours}</p>
-    </div>
-  </div>
-
-  <p className="leading-8 text-ink/75 dark:text-sand/75">
-    {restaurant.description}
-  </p>
-</div>
+      <div className="container-px mx-auto grid gap-10 pb-28 pt-10 lg:grid-cols-3 lg:pb-10">
+        <div className="space-y-12 lg:col-span-2">
+          <Reveal>
+            <section aria-labelledby="overview-heading">
+              <h2 id="overview-heading" className="font-display text-2xl font-semibold">
+                Overview
+              </h2>
+              <p className="mt-4 leading-relaxed text-ink/75 dark:text-sand/75">{restaurant.description}</p>
+            </section>
+          </Reveal>
 
           {restaurant.menuHighlights.length > 0 && (
-            <div>
-              <h2 className="font-display text-xl font-semibold mb-4">
-                Menu Highlights
-              </h2>
-
-              <div className="divide-y divide-ink/8 dark:divide-white/10 rounded-xl2 border border-ink/8 dark:border-white/10">
-                {restaurant.menuHighlights.map(
-                  (
-                    item: {
-                      name: string;
-                      price: string;
-                      description?: string;
-                    }
-                  ) => (
-                    <div
-                      key={item.name}
-                      className="flex items-center justify-between p-4"
-                    >
-                      <div>
-                        <p className="text-sm font-semibold">{item.name}</p>
-
+            <Reveal>
+              <section aria-labelledby="menu-heading">
+                <h2 id="menu-heading" className="mb-5 font-display text-2xl font-semibold">
+                  Menu Highlights
+                </h2>
+                <div className="divide-y divide-ink/8 overflow-hidden rounded-xl2 border border-ink/8 dark:divide-white/10 dark:border-white/10">
+                  {restaurant.menuHighlights.map((item) => (
+                    <div key={item.name} className="flex items-center justify-between gap-4 p-4 sm:p-5">
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold sm:text-base">{item.name}</p>
                         {item.description && (
-                          <p className="text-xs text-ink/55 dark:text-sand/55">
+                          <p className="mt-1 text-xs text-ink/55 dark:text-sand/55 sm:text-sm">
                             {item.description}
                           </p>
                         )}
                       </div>
-
-                      <span className="text-sm font-semibold text-primary">
+                      <span className="shrink-0 font-display text-sm font-bold text-primary sm:text-base">
                         {item.price}
                       </span>
                     </div>
-                  )
-                )}
-              </div>
-            </div>
+                  ))}
+                </div>
+              </section>
+            </Reveal>
           )}
 
-          <div>
-            <h2 className="font-display text-xl font-semibold mb-4">
-              {t("viewOnMap")}
-            </h2>
+          <Reveal>
+            <section aria-labelledby="location-heading">
+              <h2 id="location-heading" className="mb-5 font-display text-2xl font-semibold">
+                Location
+              </h2>
+              <div className="overflow-hidden rounded-xl3 border border-ink/8 dark:border-white/10">
+                <SingleLocationMapLoader location={restaurant.location} label={restaurant.name} />
+                <div className="flex flex-col gap-3 border-t border-ink/8 p-5 dark:border-white/10 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="flex items-center gap-2 text-sm text-ink/70 dark:text-sand/70">
+                    <MapPin size={16} className="shrink-0 text-primary" aria-hidden="true" />
+                    {restaurant.address}
+                  </p>
+                  {googleMapsHref && (
+                    <a
+                      href={googleMapsHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-1.5 rounded-full border border-ink/15 px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
+                    >
+                      Open in Google Maps
+                      <ExternalLink size={14} aria-hidden="true" />
+                    </a>
+                  )}
+                </div>
+              </div>
+            </section>
+          </Reveal>
 
-            <SingleLocationMapLoader
-              location={restaurant.location}
-              label={restaurant.name}
-            />
-          </div>
-
-          <div>
-            <h2 className="font-display text-xl font-semibold mb-4">
-              {t("reviews")}
-            </h2>
-
-            <ReviewsSection
-              rating={restaurant.rating}
-              reviewCount={restaurant.reviewCount}
-              reviews={restaurant.reviews}
-            />
-
-            <div className="mt-6">
-              <ReviewForm
-                listingType="restaurant"
-                listingId={restaurant.id}
-                locale={locale}
-                pathToRevalidate={`/${locale}/restaurants/${restaurant.slug}`}
-              />
-            </div>
-          </div>
+          <Reveal>
+            <section aria-labelledby="reviews-heading">
+              <h2 id="reviews-heading" className="mb-5 font-display text-2xl font-semibold">
+                {t("reviews")}
+              </h2>
+              <ReviewsSection rating={restaurant.rating} reviewCount={restaurant.reviewCount} reviews={restaurant.reviews} />
+              <div className="mt-6">
+                <ReviewForm
+                  listingType="restaurant"
+                  listingId={restaurant.id}
+                  locale={locale}
+                  pathToRevalidate={`/${locale}/restaurants/${restaurant.slug}`}
+                />
+              </div>
+            </section>
+          </Reveal>
         </div>
 
-        <aside className="lg:sticky lg:top-24 h-fit rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-8 shadow-2xl space-y-6">
-  <AddToTripButton
-    locale={locale}
-    listingType="restaurant"
-    listingId={restaurant.id}
-  />
-
-          <h3 className="font-display text-lg font-semibold">
-            {t("openingHours")}
-          </h3>
-
-          <p className="text-sm text-ink/70 dark:text-sand/70">
-            {restaurant.openingHours}
-          </p>
-
-          {restaurant.reservable && (
-            <button className="w-full rounded-2xl bg-primary py-4 text-lg font-bold text-white transition-all duration-300 hover:scale-[1.02] hover:shadow-xl">
-              {t("reserveTable")}
-            </button>
-          )}
+        <aside className="hidden h-fit rounded-xl3 border border-ink/8 p-6 shadow-card dark:border-white/10 lg:sticky lg:top-24 lg:block">
+          <RestaurantBookingCard
+            restaurantId={restaurant.id}
+            name={restaurant.name}
+            priceRange={restaurant.priceRange}
+            priceLabel={t("priceRange")}
+            openingHours={restaurant.openingHours}
+            hoursLabel={t("openingHours")}
+            reservable={restaurant.reservable}
+            reserveLabel={t("reserveTable")}
+            phone={restaurant.phone}
+            website={restaurant.website}
+            locale={locale}
+          />
         </aside>
       </div>
+
+      {similarRestaurants.length > 0 && (
+        <section className="border-t border-ink/8 bg-white py-14 dark:border-white/10 dark:bg-white/[0.03] sm:py-20">
+          <div className="container-px mx-auto">
+            <Reveal>
+              <h2 className="mb-6 font-display text-2xl font-semibold sm:text-3xl">You may also like</h2>
+            </Reveal>
+            <Reveal delay={0.1}>
+              <div className="flex gap-5 overflow-x-auto pb-2 scrollbar-none sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-4">
+                {similarRestaurants.map((r) => (
+                  <div key={r.id} className="min-w-[272px] sm:min-w-0">
+                    <ListingCard
+                      href={`/${locale}/restaurants/${r.slug}`}
+                      image={r.coverImage}
+                      title={r.name}
+                      subtitle={r.cuisine.join(" · ")}
+                      rating={r.rating}
+                      reviewCount={r.reviewCount}
+                      priceRange={r.priceRange}
+                      listingType="restaurant"
+                      listingId={r.id}
+                      locale={locale}
+                    />
+                  </div>
+                ))}
+              </div>
+            </Reveal>
+          </div>
+        </section>
+      )}
+
+      <RestaurantMobileBookingBar
+        restaurantId={restaurant.id}
+        name={restaurant.name}
+        priceRange={restaurant.priceRange}
+        priceLabel={t("priceRange")}
+        openingHours={restaurant.openingHours}
+        hoursLabel={t("openingHours")}
+        reservable={restaurant.reservable}
+        reserveLabel={t("reserveTable")}
+        phone={restaurant.phone}
+        website={restaurant.website}
+        locale={locale}
+      />
     </>
   );
 }
