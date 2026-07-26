@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { ChevronDown, X } from "lucide-react";
 
 export interface FilterOptions {
@@ -25,6 +26,7 @@ export function ListingFilters({
   cuisineOptions?: string[];
   locale: string;
 }) {
+  const t = useTranslations("listings");
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
@@ -117,7 +119,7 @@ export function ListingFilters({
   return (
     <div className="rounded-2xl border border-ink/8 dark:border-white/10 bg-white dark:bg-white/[0.03] p-6">
       <div className="mb-6 flex items-center justify-between">
-        <h3 className="font-display text-lg font-semibold">Filters</h3>
+        <h3 className="font-display text-lg font-semibold">{t("filtersTitle")}</h3>
         {hasActiveFilters && (
           <button
             onClick={resetFilters}
@@ -125,7 +127,7 @@ export function ListingFilters({
             className="flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary-700 disabled:opacity-60"
           >
             <X size={14} />
-            Clear all
+            {t("clearAll")}
           </button>
         )}
       </div>
@@ -133,16 +135,16 @@ export function ListingFilters({
       <div className="space-y-6">
         {/* Sort By */}
         <div>
-          <label className="text-sm font-semibold text-ink dark:text-white">Sort by</label>
+          <label className="text-sm font-semibold text-ink dark:text-white">{t("sortByLabel")}</label>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as FilterOptions["sortBy"])}
             className="mt-2 w-full rounded-lg border border-ink/12 dark:border-white/15 bg-white dark:bg-white/5 px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"
           >
-            <option value="rating">Highest Rating</option>
-            <option value="price-low">Price: Low to High</option>
-            <option value="price-high">Price: High to Low</option>
-            <option value="newest">Newest First</option>
+            <option value="rating">{t("sortRating")}</option>
+            <option value="price-low">{t("sortPriceLow")}</option>
+            <option value="price-high">{t("sortPriceHigh")}</option>
+            <option value="newest">{t("sortNewest")}</option>
           </select>
         </div>
 
@@ -150,10 +152,10 @@ export function ListingFilters({
         <div>
           <div className="flex items-center justify-between">
             <label className="text-sm font-semibold text-ink dark:text-white">
-              Minimum Rating
+              {t("minRatingLabel")}
             </label>
             <span className="text-xs text-ink/60 dark:text-white/60">
-              {minRating > 0 ? `${minRating.toFixed(1)}+` : "All"}
+              {minRating > 0 ? `${minRating.toFixed(1)}+` : t("allRatingsShort")}
             </span>
           </div>
           <div className="mt-3 space-y-2">
@@ -168,7 +170,7 @@ export function ListingFilters({
                   className="h-4 w-4 cursor-pointer"
                 />
                 <span className="text-sm">
-                  {rating === 0 ? "All Ratings" : `${rating.toFixed(1)} & up`}
+                  {rating === 0 ? t("allRatingsOption") : t("ratingAndUp", { rating: rating.toFixed(1) })}
                 </span>
               </label>
             ))}
@@ -179,7 +181,7 @@ export function ListingFilters({
         <div>
           <div className="flex items-center justify-between">
             <label className="text-sm font-semibold text-ink dark:text-white">
-              Price Range
+              {t("priceRangeLabel")}
             </label>
             <span className="text-xs text-ink/60 dark:text-white/60">
               ${minPrice} - ${maxPrice2}
@@ -187,7 +189,7 @@ export function ListingFilters({
           </div>
           <div className="mt-4 space-y-3">
             <div>
-              <label className="text-xs text-ink/60 dark:text-white/60">Min Price</label>
+              <label className="text-xs text-ink/60 dark:text-white/60">{t("minPriceLabel")}</label>
               <input
                 type="range"
                 min="0"
@@ -198,7 +200,7 @@ export function ListingFilters({
               />
             </div>
             <div>
-              <label className="text-xs text-ink/60 dark:text-white/60">Max Price</label>
+              <label className="text-xs text-ink/60 dark:text-white/60">{t("maxPriceLabel")}</label>
               <input
                 type="range"
                 min="0"
@@ -222,8 +224,8 @@ export function ListingFilters({
               >
                 <span>
                   {selectedCuisines.size > 0
-                    ? `${selectedCuisines.size} selected`
-                    : "All Cuisines"}
+                    ? t("cuisineSelected", { count: selectedCuisines.size })
+                    : t("allCuisines")}
                 </span>
                 <ChevronDown
                   size={16}
@@ -261,7 +263,7 @@ export function ListingFilters({
           disabled={isPending}
           className="w-full rounded-lg bg-primary py-2.5 text-sm font-semibold text-white hover:bg-primary-700 transition-colors disabled:opacity-60"
         >
-          {isPending ? "Applying..." : "Apply Filters"}
+          {isPending ? t("applying") : t("applyFilters")}
         </button>
       </div>
     </div>

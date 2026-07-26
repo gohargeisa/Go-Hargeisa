@@ -21,6 +21,7 @@ const links = [
 
 export function SiteHeader({ locale }: { locale: Locale }) {
   const t = useTranslations("nav");
+  const td = useTranslations("dashboard");
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const { user, loading } = useHeaderUser();
@@ -70,7 +71,7 @@ export function SiteHeader({ locale }: { locale: Locale }) {
           ))}
         </nav>
 
-        <div className="hidden lg:flex shrink-0 items-center gap-3 ml-auto">
+        <div className="hidden lg:flex shrink-0 items-center gap-3 ms-auto">
           <div
             className={`flex items-center gap-2 ${
               scrolled ? "text-gray-900" : "text-white"
@@ -87,6 +88,7 @@ export function SiteHeader({ locale }: { locale: Locale }) {
               locale={locale}
               name={user.name}
               isOwner={user.isOwner}
+              isBusinessOwner={user.isBusinessOwner}
               avatarUrl={user.avatarUrl}
             />
           ) : (
@@ -143,20 +145,20 @@ export function SiteHeader({ locale }: { locale: Locale }) {
                     onClick={() => setOpen(false)}
                     className="block rounded-full border border-ink/15 dark:border-white/20 py-2.5 text-center text-sm font-semibold"
                   >
-                    My Dashboard
+                    {td("myDashboard")}
                   </Link>
 
-                  {user.isOwner && (
+                  {(user.isOwner || user.isBusinessOwner) && (
                     <Link
-                      href={`/${locale}/admin`}
+                      href={`/${locale}/admin${user.isOwner ? "" : "/hotels"}`}
                       onClick={() => setOpen(false)}
                       className="block rounded-full border border-ink/15 dark:border-white/20 py-2.5 text-center text-sm font-semibold"
                     >
-                      Admin Dashboard
+                      {user.isOwner ? td("adminDashboard") : td("manageListings")}
                     </Link>
                   )}
 
-                  <SignOutButton className="w-full flex items-center justify-center gap-2 rounded-full bg-primary py-2.5 text-sm font-semibold text-white" />
+                  <SignOutButton locale={locale} className="w-full flex items-center justify-center gap-2 rounded-full bg-primary py-2.5 text-sm font-semibold text-white" />
                 </div>
               ) : (
                 !loading && (

@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { LayoutDashboard, ShieldCheck, ChevronDown } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { SignOutButton } from "@/components/shared/sign-out-button";
@@ -11,13 +12,16 @@ export function UserMenu({
   locale,
   name,
   isOwner,
+  isBusinessOwner = false,
   avatarUrl,
 }: {
   locale: Locale;
   name: string;
   isOwner: boolean;
+  isBusinessOwner?: boolean;
   avatarUrl?: string;
 }) {
+  const t = useTranslations("dashboard");
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -63,19 +67,19 @@ export function UserMenu({
             onClick={() => setOpen(false)}
             className="flex items-center gap-2.5 px-4 py-3 text-sm hover:bg-ink/5 dark:hover:bg-white/10"
           >
-            <LayoutDashboard size={15} /> My Dashboard
+            <LayoutDashboard size={15} /> {t("myDashboard")}
           </Link>
-          {isOwner && (
+          {(isOwner || isBusinessOwner) && (
             <Link
-              href={`/${locale}/admin`}
+              href={`/${locale}/admin${isOwner ? "" : "/hotels"}`}
               onClick={() => setOpen(false)}
               className="flex items-center gap-2.5 px-4 py-3 text-sm hover:bg-ink/5 dark:hover:bg-white/10"
             >
-              <ShieldCheck size={15} /> Admin Dashboard
+              <ShieldCheck size={15} /> {isOwner ? t("adminDashboard") : t("manageListings")}
             </Link>
           )}
           <div className="border-t border-ink/8 dark:border-white/10 px-4 py-3">
-            <SignOutButton />
+            <SignOutButton locale={locale} />
           </div>
         </div>
       )}

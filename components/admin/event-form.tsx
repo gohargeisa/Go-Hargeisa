@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 import { ImageUploader } from "@/components/shared/image-uploader";
 import { Field, inputClass } from "@/components/admin/form-shared";
@@ -30,6 +31,7 @@ export function EventForm({
   eventId?: string;
   initial?: Partial<EventFormInput>;
 }) {
+  const t = useTranslations("admin");
   const [form, setForm] = useState<EventFormInput>({
     slug: initial?.slug ?? "",
     title: initial?.title ?? "",
@@ -52,11 +54,11 @@ export function EventForm({
     e.preventDefault();
     setError(null);
     if (!form.coverImage) {
-      setError("Please upload a cover image.");
+      setError(t("uploadCoverImageError"));
       return;
     }
     if (!form.startDate || !form.endDate) {
-      setError("Please set a start and end date.");
+      setError(t("pleaseSetDates"));
       return;
     }
 
@@ -79,7 +81,7 @@ export function EventForm({
         mode === "create"
           ? await createRecord("events", payload, revalidatePaths, redirectTo)
           : await updateRecord("events", eventId!, payload, revalidatePaths, redirectTo);
-      if (result && !result.ok) setError(result.error ?? "Something went wrong.");
+      if (result && !result.ok) setError(result.error ?? t("somethingWentWrong"));
     });
   }
 
@@ -88,43 +90,43 @@ export function EventForm({
       <ImageUploader folder="events" value={form.coverImage} onChange={(url) => update("coverImage", url)} />
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Event title">
+        <Field label={t("eventTitleLabel")}>
           <input required value={form.title} onChange={(e) => update("title", e.target.value)} className={inputClass} />
         </Field>
-        <Field label="URL slug">
+        <Field label={t("urlSlugLabel")}>
           <input required value={form.slug} onChange={(e) => update("slug", e.target.value)} className={inputClass} placeholder="hargeisa-book-fair" />
         </Field>
       </div>
 
-      <Field label="Description">
+      <Field label={t("fullDescriptionLabel")}>
         <textarea required rows={4} value={form.description} onChange={(e) => update("description", e.target.value)} className={inputClass} />
       </Field>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Start date">
+        <Field label={t("startDateLabel")}>
           <input required type="date" value={form.startDate} onChange={(e) => update("startDate", e.target.value)} className={inputClass} />
         </Field>
-        <Field label="End date">
+        <Field label={t("endDateLabel")}>
           <input required type="date" value={form.endDate} onChange={(e) => update("endDate", e.target.value)} className={inputClass} />
         </Field>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Location">
+        <Field label={t("locationLabel")}>
           <input required value={form.location} onChange={(e) => update("location", e.target.value)} className={inputClass} placeholder="Freedom Park" />
         </Field>
-        <Field label="Category">
+        <Field label={t("categoryLabel")}>
           <select value={form.category} onChange={(e) => update("category", e.target.value as EventFormInput["category"])} className={inputClass}>
-            <option value="cultural">Cultural</option>
-            <option value="national">National</option>
-            <option value="business">Business</option>
-            <option value="sports">Sports</option>
-            <option value="concert">Concert</option>
+            <option value="cultural">{t("categoryCultural")}</option>
+            <option value="national">{t("categoryNational")}</option>
+            <option value="business">{t("categoryBusiness")}</option>
+            <option value="sports">{t("categorySports")}</option>
+            <option value="concert">{t("categoryConcert")}</option>
           </select>
         </Field>
       </div>
 
-      <Field label="Ticket info" hint="Optional — price, link, or 'Free entry'">
+      <Field label={t("ticketInfoLabel")} hint={t("ticketInfoHint")}>
         <input value={form.ticketInfo} onChange={(e) => update("ticketInfo", e.target.value)} className={inputClass} />
       </Field>
 
@@ -136,7 +138,7 @@ export function EventForm({
         className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary-700 transition-colors disabled:opacity-70"
       >
         {isPending && <Loader2 size={14} className="animate-spin" />}
-        {mode === "create" ? "Publish Event" : "Save Changes"}
+        {mode === "create" ? t("publishEvent") : t("saveChanges")}
       </button>
     </form>
   );

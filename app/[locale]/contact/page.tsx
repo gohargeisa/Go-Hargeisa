@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Mail, Phone, MapPin } from "lucide-react";
+import type { Locale } from "@/lib/i18n/config";
 import { PageHero } from "@/components/shared/page-hero";
 import { ContactForm } from "@/components/shared/contact-form";
 import { placeholderImage } from "@/lib/placeholder-image";
@@ -16,19 +18,25 @@ export async function generateMetadata({
   };
 }
 
-export default function ContactPage() {
+export default async function ContactPage({
+  params: { locale },
+}: {
+  params: { locale: Locale };
+}) {
+  const t = await getTranslations({ locale, namespace: "contact" });
+
   return (
     <>
       <PageHero
-        eyebrow="Get in Touch"
-        title="Contact Us"
+        eyebrow={t("eyebrow")}
+        title={t("title")}
         image={placeholderImage("Contact Go Hargeisa", { tone: "secondary" })}
       />
       <section className="container-px mx-auto grid gap-10 py-14 lg:grid-cols-3">
         <div className="space-y-6">
-          <ContactRow icon={Mail} label="Email" value="gohargeisa@gmail.com" />
-          <ContactRow icon={Phone} label="Phone" value="+252 65 6156 752" />
-          <ContactRow icon={MapPin} label="Office" value="Hargeisa, Somaliland" />
+          <ContactRow icon={Mail} label={t("emailLabel")} value="info@gohargeisa.com" />
+          <ContactRow icon={Phone} label={t("phoneLabel")} value="+252 65 6156 752" />
+          <ContactRow icon={MapPin} label={t("officeLabel")} value={t("officeValue")} />
         </div>
         <div className="lg:col-span-2">
           <ContactForm />

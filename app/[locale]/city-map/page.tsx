@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/config";
 import { getCityServicePoints } from "@/lib/data/map-points";
 import { PageHero } from "@/components/shared/page-hero";
@@ -22,15 +23,20 @@ export async function generateMetadata({
   };
 }
 
-export default async function CityMapPage() {
+export default async function CityMapPage({
+  params: { locale },
+}: {
+  params: { locale: Locale };
+}) {
   const points = await getCityServicePoints();
+  const t = await getTranslations({ locale, namespace: "cityMap" });
 
   return (
     <>
       <PageHero
-        eyebrow="🗺 Smart City Map"
-        title="Essential Services Around Hargeisa"
-        subtitle="Hospitals, pharmacies, mosques, ATMs, schools and more — find what you need, wherever you are."
+        eyebrow={t("eyebrow")}
+        title={t("title")}
+        subtitle={t("subtitle")}
         image="/images/hero-bg.png"
       />
 

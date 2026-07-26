@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 import { ImageUploader } from "@/components/shared/image-uploader";
 import { Field, inputClass } from "@/components/admin/form-shared";
@@ -30,6 +31,7 @@ export function ArticleForm({
   articleId?: string;
   initial?: Partial<ArticleFormInput>;
 }) {
+  const t = useTranslations("admin");
   const [form, setForm] = useState<ArticleFormInput>({
     slug: initial?.slug ?? "",
     title: initial?.title ?? "",
@@ -50,7 +52,7 @@ export function ArticleForm({
     e.preventDefault();
     setError(null);
     if (!form.coverImage) {
-      setError("Please upload a cover image.");
+      setError(t("uploadCoverImageError"));
       return;
     }
 
@@ -72,7 +74,7 @@ export function ArticleForm({
         mode === "create"
           ? await createRecord("articles", payload, revalidatePaths, redirectTo)
           : await updateRecord("articles", articleId!, payload, revalidatePaths, redirectTo);
-      if (result && !result.ok) setError(result.error ?? "Something went wrong.");
+      if (result && !result.ok) setError(result.error ?? t("somethingWentWrong"));
     });
   }
 
@@ -81,24 +83,24 @@ export function ArticleForm({
       <ImageUploader folder="articles" value={form.coverImage} onChange={(url) => update("coverImage", url)} />
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Article title">
+        <Field label={t("articleTitleLabel")}>
           <input required value={form.title} onChange={(e) => update("title", e.target.value)} className={inputClass} />
         </Field>
-        <Field label="URL slug">
+        <Field label={t("urlSlugLabel")}>
           <input required value={form.slug} onChange={(e) => update("slug", e.target.value)} className={inputClass} placeholder="top-10-things-to-do-in-hargeisa" />
         </Field>
       </div>
 
-      <Field label="Excerpt" hint="A one- or two-sentence summary shown on the blog index">
+      <Field label={t("excerptLabel")} hint={t("excerptHint")}>
         <textarea required rows={2} value={form.excerpt} onChange={(e) => update("excerpt", e.target.value)} className={inputClass} />
       </Field>
 
-      <Field label="Body" hint="Plain Markdown — paragraphs separated by a blank line">
+      <Field label={t("bodyLabel")} hint={t("bodyHint")}>
         <textarea required rows={10} value={form.body} onChange={(e) => update("body", e.target.value)} className={`${inputClass} font-mono text-xs`} />
       </Field>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Category">
+        <Field label={t("categoryLabel")}>
           <input
             required
             list="article-categories"
@@ -112,7 +114,7 @@ export function ArticleForm({
             ))}
           </datalist>
         </Field>
-        <Field label="Read time (minutes)">
+        <Field label={t("readTimeLabel")}>
           <input
             required
             type="number"
@@ -132,7 +134,7 @@ export function ArticleForm({
         className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary-700 transition-colors disabled:opacity-70"
       >
         {isPending && <Loader2 size={14} className="animate-spin" />}
-        {mode === "create" ? "Publish Article" : "Save Changes"}
+        {mode === "create" ? t("publishArticle") : t("saveChanges")}
       </button>
     </form>
   );

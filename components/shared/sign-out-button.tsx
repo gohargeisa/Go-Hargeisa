@@ -2,10 +2,13 @@
 
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { LogOut, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import type { Locale } from "@/lib/i18n/config";
 
-export function SignOutButton({ className }: { className?: string }) {
+export function SignOutButton({ locale, className }: { locale: Locale; className?: string }) {
+  const t = useTranslations("nav");
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
@@ -13,7 +16,7 @@ export function SignOutButton({ className }: { className?: string }) {
     startTransition(async () => {
       const supabase = createClient();
       await supabase.auth.signOut();
-      router.push("/");
+      router.push(`/${locale}`);
       router.refresh();
     });
   }
@@ -26,7 +29,7 @@ export function SignOutButton({ className }: { className?: string }) {
       className={className ?? "flex items-center gap-2 text-sm font-medium text-ink/70 dark:text-sand/70 hover:text-red-500"}
     >
       {isPending ? <Loader2 size={15} className="animate-spin" /> : <LogOut size={15} />}
-      Sign Out
+      {t("signOut")}
     </button>
   );
 }

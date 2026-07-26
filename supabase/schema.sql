@@ -513,3 +513,27 @@ create policy "Users delete their own avatar" on storage.objects
     bucket_id = 'avatars'
     and (storage.foldername(name))[1] = auth.uid()::text
   );
+
+-- ============================================================================
+-- FIX: profiles had RLS enabled with only a SELECT policy — no UPDATE
+-- policy existed at all, so both self-service profile edits (dashboard
+-- "Profile" tab, lib/actions/profile.ts updateProfile) and owner-driven
+-- role changes (admin "Manage Users", lib/actions/users.ts
+-- updateUserRole) were being silently rejected by RLS regardless of any
+-- application-level check. Run this block in the Supabase SQL editor on
+-- an already-provisioned project — editing this file alone has no effect
+-- on a live database.
+-- ============================================================================
+
+-- Any signed-in user may update their own row, but the WITH CHECK
+-- subquery pins `role` to its current stored value so this policy can
+-- never be used to self-promote — role changes must go through the
+-- owner-only policy below instead.
+create policy "Users update own profile" on profiles for update
+  using (auth.uid() = id)
+  with check (auth.uid() = id and role = (select p.role from profiles p where p.id = auth.uid()));
+
+-- Owners may update any profile, including role.
+create policy "Owners manage all profiles" on profiles for update
+  using (exists (select 1 from profiles p where p.id = auth.uid() and p.role = 'owner'))
+  with check (exists (select 1 from profiles p where p.id = auth.uid() and p.role = 'owner'));

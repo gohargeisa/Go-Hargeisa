@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+import type { Locale } from "@/lib/i18n/config";
 
 export async function generateMetadata({
   params: { locale },
@@ -11,29 +13,29 @@ export async function generateMetadata({
   };
 }
 
-export default function PrivacyPage() {
+export default async function PrivacyPage({
+  params: { locale },
+}: {
+  params: { locale: Locale };
+}) {
+  const t = await getTranslations({ locale, namespace: "privacy" });
+
   return (
     <section className="container-px mx-auto max-w-3xl py-14 prose prose-neutral dark:prose-invert">
-      <h1>Privacy Policy</h1>
-      <p>Last updated: July 2026</p>
-      <p>
-        Go Hargeisa ("we", "our") respects your privacy. This page explains what information we collect
-        when you use this website and how it is used.
-      </p>
-      <h2>Information we collect</h2>
+      <h1>{t("title")}</h1>
+      <p>{t("lastUpdated")}</p>
+      <p>{t("intro")}</p>
+      <h2>{t("infoTitle")}</h2>
       <ul>
-        <li>Account information (name, email) when you sign up.</li>
-        <li>Reviews, favorites and saved trips you create while signed in.</li>
-        <li>Newsletter subscription email addresses.</li>
-        <li>Basic usage analytics to help us improve the site.</li>
+        <li>{t("infoItem1")}</li>
+        <li>{t("infoItem2")}</li>
+        <li>{t("infoItem3")}</li>
+        <li>{t("infoItem4")}</li>
       </ul>
-      <h2>How we use it</h2>
-      <p>
-        We use your information solely to operate Go Hargeisa — personalizing your dashboard, sending the
-        newsletter you opted into, and responding to contact form submissions. We do not sell personal data.
-      </p>
-      <h2>Contact</h2>
-      <p>Questions about this policy can be sent to hello@gohargeisa.com.</p>
+      <h2>{t("useTitle")}</h2>
+      <p>{t("useText")}</p>
+      <h2>{t("contactTitle")}</h2>
+      <p>{t("contactText")}</p>
     </section>
   );
 }

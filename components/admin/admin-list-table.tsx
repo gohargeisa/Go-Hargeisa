@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { Pencil } from "lucide-react";
 import { DeleteListingButton } from "@/components/shared/delete-listing-button";
 
@@ -19,13 +20,18 @@ export function AdminListTable({
   metaLabel,
   editHrefBase,
   emptyLabel,
+  allowDelete = true,
 }: {
   table: AdminTable;
   rows: AdminRow[];
   metaLabel: string;
   editHrefBase: string;
   emptyLabel: string;
+  /** Business owners can edit their own listings but not delete them (no RLS delete policy for them). */
+  allowDelete?: boolean;
 }) {
+  const t = useTranslations("admin");
+
   if (rows.length === 0) {
     return (
       <p className="rounded-xl2 border border-dashed border-ink/15 dark:border-white/15 p-10 text-center text-sm text-ink/50 dark:text-sand/50">
@@ -39,10 +45,10 @@ export function AdminListTable({
       <table className="w-full text-sm">
         <thead className="bg-ink/[0.03] dark:bg-white/5">
           <tr>
-            <th className="px-5 py-3 text-start font-semibold">Name</th>
+            <th className="px-5 py-3 text-start font-semibold">{t("colName")}</th>
             <th className="px-5 py-3 text-start font-semibold">{metaLabel}</th>
-            <th className="px-5 py-3 text-start font-semibold">Status</th>
-            <th className="px-5 py-3 text-end font-semibold">Actions</th>
+            <th className="px-5 py-3 text-start font-semibold">{t("colStatus")}</th>
+            <th className="px-5 py-3 text-end font-semibold">{t("colActions")}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-ink/8 dark:divide-white/10">
@@ -62,19 +68,19 @@ export function AdminListTable({
               <td className="px-5 py-3 whitespace-nowrap">{row.meta}</td>
               <td className="px-5 py-3">
                 <span className="rounded-full bg-secondary/10 px-2.5 py-1 text-xs font-semibold text-secondary-700">
-                  Published
+                  {t("published")}
                 </span>
               </td>
               <td className="px-5 py-3">
                 <div className="flex justify-end gap-2">
                   <Link
                     href={`${editHrefBase}/${row.id}/edit`}
-                    aria-label={`Edit ${row.title}`}
+                    aria-label={t("editAriaLabel", { name: row.title })}
                     className="flex h-8 w-8 items-center justify-center rounded-lg border border-ink/10 dark:border-white/15 hover:border-primary hover:text-primary"
                   >
                     <Pencil size={13} />
                   </Link>
-                  <DeleteListingButton table={table} id={row.id} name={row.title} />
+                  {allowDelete && <DeleteListingButton table={table} id={row.id} name={row.title} />}
                 </div>
               </td>
             </tr>

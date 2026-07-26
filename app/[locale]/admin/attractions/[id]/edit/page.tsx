@@ -1,6 +1,7 @@
 import type { Database } from "@/types/database";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/config";
 import { requireAdmin } from "@/lib/supabase/guards";
 import { createClient } from "@/lib/supabase/server";
@@ -15,12 +16,13 @@ export default async function EditAttractionPage({
   params: { locale: Locale; id: string };
 }) {
   await requireAdmin(locale, `/${locale}/admin/attractions/${id}/edit`);
+  const t = await getTranslations({ locale, namespace: "admin" });
 
   if (!isSupabaseConfigured()) {
     return (
       <section className="container-px mx-auto py-14">
         <p className="rounded-xl2 border border-ink/8 dark:border-white/10 p-6 text-sm text-ink/60 dark:text-sand/60">
-          Editing requires a connected Supabase project. See the README to connect one.
+          {t("editingRequiresSupabaseShort")}
         </p>
       </section>
     );
@@ -41,7 +43,7 @@ export default async function EditAttractionPage({
 
   return (
     <section className="container-px mx-auto py-14">
-      <h1 className="font-display text-2xl font-semibold mb-8">Edit Attraction</h1>
+      <h1 className="font-display text-2xl font-semibold mb-8">{t("editAttractionTitle")}</h1>
       <AttractionForm
         locale={locale}
         mode="edit"

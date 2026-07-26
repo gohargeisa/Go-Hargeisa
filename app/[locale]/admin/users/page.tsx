@@ -1,5 +1,6 @@
 import type { Database } from "@/types/database";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/config";
 import { requireAdmin } from "@/lib/supabase/guards";
 import { createClient } from "@/lib/supabase/server";
@@ -14,16 +15,16 @@ export default async function AdminUsersPage({
   params: { locale: Locale };
 }) {
   await requireAdmin(locale, `/${locale}/admin/users`);
+  const t = await getTranslations({ locale, namespace: "admin" });
 
   if (!isSupabaseConfigured()) {
     return (
       <section className="container-px mx-auto py-14">
         <h1 className="font-display text-2xl font-semibold mb-8">
-          Manage Users
+          {t("manageUsers")}
         </h1>
         <p className="rounded-xl2 border border-ink/8 dark:border-white/10 p-6 text-sm text-ink/60 dark:text-sand/60">
-          Connect a Supabase project to manage real users. See the README to
-          get started.
+          {t("connectSupabaseUsers")}
         </p>
       </section>
     );
@@ -44,20 +45,20 @@ export default async function AdminUsersPage({
   return (
     <section className="container-px mx-auto py-14">
       <h1 className="font-display text-2xl font-semibold mb-2">
-        Manage Users
+        {t("manageUsers")}
       </h1>
 
       <p className="mb-8 text-sm text-ink/60 dark:text-sand/60">
-        {profiles.length} registered users
+        {t("registeredUsers", { count: profiles.length })}
       </p>
 
       <div className="overflow-x-auto rounded-xl2 border border-ink/8 dark:border-white/10">
         <table className="w-full text-sm">
           <thead className="bg-ink/[0.03] dark:bg-white/5">
             <tr>
-              <th className="px-5 py-3 text-start font-semibold">Name</th>
-              <th className="px-5 py-3 text-start font-semibold">Joined</th>
-              <th className="px-5 py-3 text-start font-semibold">Role</th>
+              <th className="px-5 py-3 text-start font-semibold">{t("colName")}</th>
+              <th className="px-5 py-3 text-start font-semibold">{t("colJoined")}</th>
+              <th className="px-5 py-3 text-start font-semibold">{t("colRole")}</th>
             </tr>
           </thead>
 

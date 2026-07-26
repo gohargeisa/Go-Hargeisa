@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/config";
 import { PageHero } from "@/components/shared/page-hero";
 import { ComingSoonSection } from "@/components/shared/coming-soon-section";
@@ -28,12 +29,15 @@ export default async function CafesPage({
 }) {
   // Cafes are not yet open for public listings under the current business
   // policy — no cafe data is queried or rendered here, real or mock.
+  const t = await getTranslations({ locale, namespace: "comingSoon" });
+  const tNav = await getTranslations({ locale, namespace: "nav" });
+
   return (
     <>
       <PageHero
-  eyebrow="☕ Cafes"
-  title="Discover Hargeisa's Best Cafés"
-  subtitle="We're partnering with Hargeisa's leading cafés to bring verified listings, beautiful photography, trusted recommendations, and premium coffee experiences soon."
+  eyebrow={`☕ ${tNav("cafes")}`}
+  title={t("cafesTitle")}
+  subtitle={t("cafesDescription")}
   image="/images/cafes/hero.png"
 />
 

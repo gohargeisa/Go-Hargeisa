@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
+import { getTranslations } from "next-intl/server";
 import { getArticles } from "@/lib/data/articles";
 import { PageHero } from "@/components/shared/page-hero";
 import { placeholderImage } from "@/lib/placeholder-image";
@@ -24,18 +25,19 @@ export async function generateMetadata({
 
 export default async function BlogPage({ params: { locale } }: { params: { locale: string } }) {
   const articles = await getArticles();
+  const t = await getTranslations({ locale, namespace: "blog" });
 
   return (
     <>
       <PageHero
-        eyebrow="The Journal"
-        title="Hargeisa Travel Blog"
-        subtitle="Stories, guides and tips from people who know the city."
+        eyebrow={t("eyebrow")}
+        title={t("title")}
+        subtitle={t("subtitle")}
         image={placeholderImage("Go Hargeisa Journal", { tone: "accent" })}
       />
       <section className="container-px mx-auto py-14">
         {articles.length === 0 ? (
-          <p className="text-center text-ink/50 dark:text-sand/50">No articles published yet.</p>
+          <p className="text-center text-ink/50 dark:text-sand/50">{t("emptyState")}</p>
         ) : (
           <div className="grid gap-8 md:grid-cols-3">
             {articles.map((a) => (
@@ -51,7 +53,7 @@ export default async function BlogPage({ params: { locale } }: { params: { local
                 </h2>
                 <p className="mt-1.5 text-sm text-ink/60 dark:text-sand/60 line-clamp-2">{a.excerpt}</p>
                 <p className="mt-2 text-xs font-medium text-ink/45 dark:text-sand/45">
-                  {a.author} · {a.readMinutes} min read
+                  {a.author} · {t("minRead", { minutes: a.readMinutes })}
                 </p>
               </Link>
             ))}

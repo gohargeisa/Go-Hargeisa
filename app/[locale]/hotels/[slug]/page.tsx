@@ -51,6 +51,8 @@ export default async function HotelDetailPage({
   const hotel = await getHotelBySlug(slug);
   if (!hotel) notFound();
   const t = await getTranslations("common");
+  const tNav = await getTranslations("nav");
+  const td = await getTranslations("detail");
   const [nearby, allHotels] = await Promise.all([
     getNearbyAttractionsForHotel(hotel.id),
     getHotels(),
@@ -84,7 +86,7 @@ export default async function HotelDetailPage({
 
       <Breadcrumbs
         items={[
-          { label: "Hotels", href: `/${locale}/hotels` },
+          { label: tNav("hotels"), href: `/${locale}/hotels` },
           { label: hotel.name, href: `/${locale}/hotels/${hotel.slug}` },
         ]}
       />
@@ -106,7 +108,7 @@ export default async function HotelDetailPage({
           <Reveal>
             <section aria-labelledby="overview-heading">
               <h2 id="overview-heading" className="font-display text-2xl font-semibold">
-                Overview
+                {td("overview")}
               </h2>
               <p className="mt-4 leading-relaxed text-ink/75 dark:text-sand/75">{hotel.description}</p>
             </section>
@@ -124,7 +126,7 @@ export default async function HotelDetailPage({
           <Reveal>
             <section aria-labelledby="location-heading">
               <h2 id="location-heading" className="mb-5 font-display text-2xl font-semibold">
-                Location
+                {td("location")}
               </h2>
               <div className="overflow-hidden rounded-xl3 border border-ink/8 dark:border-white/10">
                 <SingleLocationMapLoader location={hotel.location} label={hotel.name} />
@@ -140,7 +142,7 @@ export default async function HotelDetailPage({
                       rel="noopener noreferrer"
                       className="inline-flex items-center justify-center gap-1.5 rounded-full border border-ink/15 px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
                     >
-                      Open in Google Maps
+                      {td("openInGoogleMaps")}
                       <ExternalLink size={14} aria-hidden="true" />
                     </a>
                   )}
@@ -152,11 +154,10 @@ export default async function HotelDetailPage({
           <Reveal>
             <section aria-labelledby="policies-heading">
               <h2 id="policies-heading" className="mb-4 font-display text-2xl font-semibold">
-                Policies
+                {td("policies")}
               </h2>
               <div className="rounded-xl2 border border-ink/8 bg-ink/[0.02] p-5 text-sm leading-relaxed text-ink/70 dark:border-white/10 dark:bg-white/[0.02] dark:text-sand/70">
-                Check-in/check-out times, cancellation terms and house rules can vary by property. Contact{" "}
-                {hotel.name} directly using the details in the booking panel to confirm policies before you book.
+                {td("policiesText", { name: hotel.name })}
               </div>
             </section>
           </Reveal>
@@ -222,7 +223,7 @@ export default async function HotelDetailPage({
         <section className="border-t border-ink/8 bg-white py-14 dark:border-white/10 dark:bg-white/[0.03] sm:py-20">
           <div className="container-px mx-auto">
             <Reveal>
-              <h2 className="mb-6 font-display text-2xl font-semibold sm:text-3xl">You may also like</h2>
+              <h2 className="mb-6 font-display text-2xl font-semibold sm:text-3xl">{td("youMayAlsoLike")}</h2>
             </Reveal>
             <Reveal delay={0.1}>
               <div className="flex gap-5 overflow-x-auto pb-2 scrollbar-none sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-4">

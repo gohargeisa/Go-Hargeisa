@@ -14,7 +14,13 @@ export async function GET(request: NextRequest, { params }: { params: { locale: 
 
   if (code) {
     const supabase = await createClient();
-    await supabase.auth.exchangeCodeForSession(code);
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    if (error) {
+      const loginUrl = new URL(`${origin}/${params.locale}/auth/login`);
+      loginUrl.searchParams.set("error", "auth_failed");
+      if (requestedNext) loginUrl.searchParams.set("next", requestedNext);
+      return NextResponse.redirect(loginUrl);
+    }
   }
 
   return NextResponse.redirect(`${origin}${next}`);

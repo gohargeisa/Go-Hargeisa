@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { Loader2 } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
@@ -12,6 +13,7 @@ export function OAuth({
   locale: Locale;
   mode: "login" | "register";
 }) {
+  const t = useTranslations("auth");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -44,9 +46,7 @@ export function OAuth({
         window.location.href = data.url;
       }
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to sign in with Google"
-      );
+      setError(err instanceof Error ? err.message : t("errorGoogleSignIn"));
     } finally {
       setLoading(false);
     }
@@ -89,7 +89,7 @@ export function OAuth({
           </svg>
         )}
 
-        {loading ? "Signing in..." : "Continue with Google"}
+        {loading ? t("signingIn") : t("continueWithGoogle")}
       </button>
     </div>
 );

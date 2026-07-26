@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages } from "next-intl/server";
+import { getMessages, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { locales, localeConfig, type Locale } from "@/lib/i18n/config";
 import { ThemeProvider } from "@/components/layout/theme-provider";
@@ -30,6 +30,7 @@ export async function generateMetadata({
   params: { locale: string };
 }): Promise<Metadata> {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gohargeisa.com";
+  const t = await getTranslations({ locale, namespace: "siteMetadata" });
 
   return {
   metadataBase: new URL(siteUrl),
@@ -39,12 +40,11 @@ export async function generateMetadata({
   },
 
     title: {
-    default: "Go Hargeisa | Official Tourism Guide to Hargeisa, Somaliland",
-    template: "%s | Go Hargeisa",
+    default: t("titleDefault"),
+    template: t("titleTemplate"),
   },
 
-    description:
-      "Explore Hargeisa with Go Hargeisa. Discover hotels, restaurants, cafés, attractions, events, and travel tips across Somaliland.",
+    description: t("description"),
 
     keywords: [
       "Hargeisa",
@@ -94,8 +94,7 @@ export async function generateMetadata({
 
     openGraph: {
       title: "Go Hargeisa",
-      description:
-        "The official tourism guide to Hargeisa, Somaliland.",
+      description: t("ogDescription"),
 
       url: `${siteUrl}/${locale}`,
 
@@ -118,7 +117,7 @@ export async function generateMetadata({
     twitter: {
   card: "summary_large_image",
   title: "Go Hargeisa",
-  description: "The official tourism guide to Hargeisa, Somaliland.",
+  description: t("ogDescription"),
   images: ["/images/og-image.png"],
 },
 

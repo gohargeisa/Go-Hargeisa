@@ -47,6 +47,8 @@ export default async function CafeDetailPage({
   const cafe = await getCafeBySlug(slug);
   if (!cafe) notFound();
   const t = await getTranslations("common");
+  const tNav = await getTranslations("nav");
+  const td = await getTranslations("detail");
   const allCafes = await getCafes();
   const similarCafes = allCafes.filter((c) => c.id !== cafe.id).slice(0, 4);
 
@@ -60,7 +62,7 @@ export default async function CafeDetailPage({
     <>
       <Breadcrumbs
         items={[
-          { label: "Cafes", href: `/${locale}/cafes` },
+          { label: tNav("cafes"), href: `/${locale}/cafes` },
           { label: cafe.name, href: `/${locale}/cafes/${cafe.slug}` },
         ]}
       />
@@ -83,7 +85,7 @@ export default async function CafeDetailPage({
           <Reveal>
             <section aria-labelledby="overview-heading">
               <h2 id="overview-heading" className="font-display text-2xl font-semibold">
-                Overview
+                {td("overview")}
               </h2>
               <p className="mt-4 leading-relaxed text-ink/75 dark:text-sand/75">{cafe.description}</p>
             </section>
@@ -93,7 +95,7 @@ export default async function CafeDetailPage({
             <Reveal>
               <section aria-labelledby="specialties-heading">
                 <h2 id="specialties-heading" className="mb-5 font-display text-2xl font-semibold">
-                  Coffee Specialties
+                  {td("coffeeSpecialties")}
                 </h2>
                 <ul className="flex flex-wrap gap-2.5">
                   {cafe.specialDrinks.map((drink) => (
@@ -119,13 +121,13 @@ export default async function CafeDetailPage({
                   {cafe.wifi && (
                     <li className="inline-flex items-center gap-2 rounded-xl2 border border-ink/8 bg-white px-3.5 py-2.5 text-sm font-medium text-ink dark:border-white/10 dark:bg-white/[0.03] dark:text-sand">
                       <Wifi size={16} className="shrink-0 text-primary" aria-hidden="true" />
-                      Free WiFi
+                      {td("freeWifi")}
                     </li>
                   )}
                   {cafe.workingSpace && (
                     <li className="inline-flex items-center gap-2 rounded-xl2 border border-ink/8 bg-white px-3.5 py-2.5 text-sm font-medium text-ink dark:border-white/10 dark:bg-white/[0.03] dark:text-sand">
                       <Laptop size={16} className="shrink-0 text-primary" aria-hidden="true" />
-                      Working Space
+                      {td("workingSpace")}
                     </li>
                   )}
                 </ul>
@@ -136,7 +138,7 @@ export default async function CafeDetailPage({
           <Reveal>
             <section aria-labelledby="location-heading">
               <h2 id="location-heading" className="mb-5 font-display text-2xl font-semibold">
-                Location
+                {td("location")}
               </h2>
               <div className="overflow-hidden rounded-xl3 border border-ink/8 dark:border-white/10">
                 <SingleLocationMapLoader location={cafe.location} label={cafe.name} />
@@ -152,7 +154,7 @@ export default async function CafeDetailPage({
                       rel="noopener noreferrer"
                       className="inline-flex items-center justify-center gap-1.5 rounded-full border border-ink/15 px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
                     >
-                      Open in Google Maps
+                      {td("openInGoogleMaps")}
                       <ExternalLink size={14} aria-hidden="true" />
                     </a>
                   )}
@@ -195,7 +197,7 @@ export default async function CafeDetailPage({
         <section className="border-t border-ink/8 bg-white py-14 dark:border-white/10 dark:bg-white/[0.03] sm:py-20">
           <div className="container-px mx-auto">
             <Reveal>
-              <h2 className="mb-6 font-display text-2xl font-semibold sm:text-3xl">You may also like</h2>
+              <h2 className="mb-6 font-display text-2xl font-semibold sm:text-3xl">{td("youMayAlsoLike")}</h2>
             </Reveal>
             <Reveal delay={0.1}>
               <div className="flex gap-5 overflow-x-auto pb-2 scrollbar-none sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-4">
@@ -211,7 +213,7 @@ export default async function CafeDetailPage({
                       listingType="cafe"
                       listingId={c.id}
                       locale={locale}
-                      tag={c.wifi ? "Free WiFi" : undefined}
+                      tag={c.wifi ? td("freeWifi") : undefined}
                     />
                   </div>
                 ))}

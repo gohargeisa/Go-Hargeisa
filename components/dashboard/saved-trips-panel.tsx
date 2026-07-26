@@ -3,12 +3,14 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { Plus, Trash2, MapPin, ChevronDown, Loader2, Map } from "lucide-react";
 import { createTrip, deleteTrip, removeTripItem } from "@/lib/actions/trips";
 import type { SavedTrip } from "@/lib/data/saved-trips";
 import type { Locale } from "@/lib/i18n/config";
 
 export function SavedTripsPanel({ locale, trips }: { locale: Locale; trips: SavedTrip[] }) {
+  const t = useTranslations("dashboard");
   const [creating, setCreating] = useState(false);
   const [title, setTitle] = useState("");
   const [notes, setNotes] = useState("");
@@ -27,13 +29,13 @@ export function SavedTripsPanel({ locale, trips }: { locale: Locale; trips: Save
         setCreating(false);
         if (result.tripId) setOpenTrip(result.tripId);
       } else {
-        setError(result.error ?? "Something went wrong.");
+        setError(result.error ?? t("genericError"));
       }
     });
   }
 
   function onDeleteTrip(tripId: string) {
-    if (!confirm("Delete this trip and all its saved places?")) return;
+    if (!confirm(t("deleteTripConfirm"))) return;
     startTransition(async () => {
       await deleteTrip(locale, tripId);
     });
@@ -49,15 +51,15 @@ export function SavedTripsPanel({ locale, trips }: { locale: Locale; trips: Save
     <div>
       <div className="mb-6 flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Plan ahead</p>
-          <h2 className="mt-1 font-display text-2xl font-semibold">Saved trips</h2>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{t("tripsEyebrow")}</p>
+          <h2 className="mt-1 font-display text-2xl font-semibold">{t("tripsTitle")}</h2>
         </div>
         <button
           type="button"
           onClick={() => setCreating((c) => !c)}
           className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-primary-700"
         >
-          <Plus size={14} /> New Trip
+          <Plus size={14} /> {t("newTrip")}
         </button>
       </div>
 
@@ -67,13 +69,13 @@ export function SavedTripsPanel({ locale, trips }: { locale: Locale; trips: Save
             required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Trip name — e.g. 'Weekend in Hargeisa'"
+            placeholder={t("tripNamePlaceholder")}
             className="w-full rounded-xl border border-ink/12 dark:border-white/15 bg-transparent px-4 py-2.5 text-sm outline-none focus:border-primary"
           />
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Notes (optional)"
+            placeholder={t("notesPlaceholder")}
             rows={2}
             className="w-full rounded-xl border border-ink/12 dark:border-white/15 bg-transparent px-4 py-2.5 text-sm outline-none focus:border-primary"
           />
@@ -84,13 +86,13 @@ export function SavedTripsPanel({ locale, trips }: { locale: Locale; trips: Save
             className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-white disabled:opacity-70"
           >
             {isPending && <Loader2 size={13} className="animate-spin" />}
-            Create Trip
+            {t("createTrip")}
           </button>
         </form>
       )}
 
       {trips.length === 0 && !creating ? (
-        <div className="flex min-h-56 flex-col items-center justify-center rounded-2xl border border-dashed border-primary/25 bg-primary/[0.035] px-6 text-center dark:bg-primary/[0.08]"><span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-primary shadow-sm dark:bg-ink"><Map size={22} /></span><h3 className="mt-4 font-display text-xl font-semibold">Plan your next day out</h3><p className="mt-2 max-w-sm text-sm leading-6 text-ink/55 dark:text-sand/60">Create a trip, then add places from hotel, restaurant, cafe, and attraction pages.</p></div>
+        <div className="flex min-h-56 flex-col items-center justify-center rounded-2xl border border-dashed border-primary/25 bg-primary/[0.035] px-6 text-center dark:bg-primary/[0.08]"><span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-primary shadow-sm dark:bg-ink"><Map size={22} /></span><h3 className="mt-4 font-display text-xl font-semibold">{t("emptyTripsTitle")}</h3><p className="mt-2 max-w-sm text-sm leading-6 text-ink/55 dark:text-sand/60">{t("emptyTripsDescription")}</p></div>
       ) : (
         <div className="space-y-3">
           {trips.map((trip) => {
@@ -100,12 +102,12 @@ export function SavedTripsPanel({ locale, trips }: { locale: Locale; trips: Save
                 <button
                   type="button"
                   onClick={() => setOpenTrip(open ? null : trip.id)}
-                  className="flex w-full items-center justify-between px-4 py-4 text-left"
+                  className="flex w-full items-center justify-between px-4 py-4 text-start"
                 >
                   <div className="text-start">
                     <p className="text-sm font-semibold">{trip.title}</p>
                     <p className="text-xs text-ink/50 dark:text-sand/50">
-                      {trip.items.length} {trip.items.length === 1 ? "place" : "places"}
+                      {trip.items.length} {trip.items.length === 1 ? t("placesSingular") : t("placesPlural")}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -116,8 +118,14 @@ export function SavedTripsPanel({ locale, trips }: { locale: Locale; trips: Save
                         e.stopPropagation();
                         onDeleteTrip(trip.id);
                       }}
-                      aria-label={`Delete ${trip.title}`}
-                      className="flex h-7 w-7 items-center justify-center rounded-lg text-ink/40 hover:text-red-500"
+                      onKeyDown={(e) => {
+                        if (e.key !== "Enter" && e.key !== " ") return;
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onDeleteTrip(trip.id);
+                      }}
+                      aria-label={t("deleteTripAriaLabel", { title: trip.title })}
+                      className="flex h-7 w-7 items-center justify-center rounded-lg text-ink/40 hover:text-red-500 focus-visible:text-red-500"
                     >
                       <Trash2 size={14} />
                     </span>
@@ -130,7 +138,7 @@ export function SavedTripsPanel({ locale, trips }: { locale: Locale; trips: Save
                     {trip.notes && <p className="mb-3 text-sm text-ink/60 dark:text-sand/60">{trip.notes}</p>}
                     {trip.items.length === 0 ? (
                       <p className="text-sm text-ink/45 dark:text-sand/45">
-                        No places saved yet — look for "Add to trip" on any listing page.
+                        {t("noPlacesSaved")}
                       </p>
                     ) : (
                       <div className="space-y-2">
@@ -148,7 +156,7 @@ export function SavedTripsPanel({ locale, trips }: { locale: Locale; trips: Save
                             <button
                               type="button"
                               onClick={() => onRemoveItem(item.id)}
-                              aria-label={`Remove ${item.name} from trip`}
+                              aria-label={t("removeItemAriaLabel", { name: item.name })}
                               className="shrink-0 text-ink/40 hover:text-red-500"
                             >
                               <Trash2 size={14} />

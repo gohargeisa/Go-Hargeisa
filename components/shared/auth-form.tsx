@@ -2,13 +2,17 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { Loader2, Eye, EyeOff, Check, X } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 
-function getPasswordStrength(password: string): { score: number; label: string; color: string } {
+function getPasswordStrength(
+  password: string,
+  t: ReturnType<typeof useTranslations>
+): { score: number; label: string; color: string } {
   if (!password) return { score: 0, label: "", color: "" };
-  
+
   let score = 0;
   if (password.length >= 8) score++;
   if (password.length >= 12) score++;
@@ -16,20 +20,14 @@ function getPasswordStrength(password: string): { score: number; label: string; 
   if (/\d/.test(password)) score++;
   if (/[^a-zA-Z\d]/.test(password)) score++;
 
-  if (score <= 1) return { score, label: "Weak", color: "text-red-600" };
-  if (score <= 2) return { score, label: "Fair", color: "text-amber-600" };
-  if (score <= 3) return { score, label: "Good", color: "text-blue-600" };
-  return { score, label: "Strong", color: "text-green-600" };
+  if (score <= 1) return { score, label: t("strengthWeak"), color: "text-red-600" };
+  if (score <= 2) return { score, label: t("strengthFair"), color: "text-amber-600" };
+  if (score <= 3) return { score, label: t("strengthGood"), color: "text-blue-600" };
+  return { score, label: t("strengthStrong"), color: "text-green-600" };
 }
 
-const passwordRequirements = [
-  { label: "At least 8 characters", check: (p: string) => p.length >= 8 },
-  { label: "Uppercase & lowercase letters", check: (p: string) => /[a-z]/.test(p) && /[A-Z]/.test(p) },
-  { label: "At least one number", check: (p: string) => /\d/.test(p) },
-  { label: "At least one special character", check: (p: string) => /[^a-zA-Z\d]/.test(p) },
-];
-
 export function AuthForm({ mode, locale }: { mode: "login" | "register"; locale: Locale }) {
+  const t = useTranslations("auth");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -42,7 +40,14 @@ export function AuthForm({ mode, locale }: { mode: "login" | "register"; locale:
   const requestedNext = searchParams.get("next");
   const next = requestedNext?.startsWith(`/${locale}/`) ? requestedNext : `/${locale}/dashboard`;
 
-  const passwordStrength = getPasswordStrength(password);
+  const passwordRequirements = [
+    { label: t("reqLength"), check: (p: string) => p.length >= 8 },
+    { label: t("reqCase"), check: (p: string) => /[a-z]/.test(p) && /[A-Z]/.test(p) },
+    { label: t("reqNumber"), check: (p: string) => /\d/.test(p) },
+    { label: t("reqSpecial"), check: (p: string) => /[^a-zA-Z\d]/.test(p) },
+  ];
+
+  const passwordStrength = getPasswordStrength(password, t);
   const isPasswordValid = password.length >= 8;
 
   async function onSubmit(e: React.FormEvent) {
@@ -55,11 +60,10 @@ export function AuthForm({ mode, locale }: { mode: "login" | "register"; locale:
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       setLoading(false);
       if (error) {
-        // Better error messages
         if (error.message.includes("Invalid login credentials")) {
-          setError("Email or password is incorrect.");
+          setError(t("errorInvalidCredentials"));
         } else if (error.message.includes("Email not confirmed")) {
-          setError("Please confirm your email address first.");
+          setError(t("errorEmailNotConfirmed"));
         } else {
           setError(error.message);
         }
@@ -72,7 +76,7 @@ export function AuthForm({ mode, locale }: { mode: "login" | "register"; locale:
 
     // Register mode
     if (!isPasswordValid) {
-      setError("Password must be at least 8 characters.");
+      setError(t("passwordMinLength"));
       setLoading(false);
       return;
     }
@@ -89,7 +93,7 @@ export function AuthForm({ mode, locale }: { mode: "login" | "register"; locale:
     setLoading(false);
     if (error) {
       if (error.message.includes("already registered")) {
-        setError("This email is already registered. Try signing in instead.");
+        setError(t("errorAlreadyRegistered"));
       } else {
         setError(error.message);
       }
@@ -108,16 +112,16 @@ export function AuthForm({ mode, locale }: { mode: "login" | "register"; locale:
   if (checkEmail) {
     return (
       <div className="rounded-2xl border border-secondary/30 bg-secondary/5 p-6 text-sm">
-        <p className="font-semibold text-secondary-700">Check your email</p>
+        <p className="font-semibold text-secondary-700">{t("checkEmailTitle")}</p>
         <p className="mt-2 text-secondary-600">
-          We sent a confirmation link to <strong>{email}</strong>. Click it to verify your account and sign in.
+          {t("checkEmailDescription", { email })}
         </p>
       </div>
     );
   }
 
-  const nameError = mode === "register" && !name.trim() ? "Name is required" : "";
-  const emailError = !email.includes("@") && email ? "Invalid email address" : "";
+  const nameError = mode === "register" && !name.trim() ? t("nameRequired") : "";
+  const emailError = !email.includes("@") && email ? t("invalidEmail") : "";
 
   return (
     <form onSubmit={onSubmit} className="space-y-5">
@@ -133,7 +137,7 @@ export function AuthForm({ mode, locale }: { mode: "login" | "register"; locale:
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Full name"
+            placeholder={t("fullNamePlaceholder")}
             className="w-full rounded-lg border border-ink/12 dark:border-white/15 bg-transparent px-4 py-3 text-sm outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/20"
           />
           {nameError && <p className="mt-2 text-xs text-red-600">{nameError}</p>}
@@ -146,7 +150,7 @@ export function AuthForm({ mode, locale }: { mode: "login" | "register"; locale:
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email address"
+          placeholder={t("emailPlaceholder")}
           className="w-full rounded-lg border border-ink/12 dark:border-white/15 bg-transparent px-4 py-3 text-sm outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/20"
         />
         {emailError && <p className="mt-2 text-xs text-red-600">{emailError}</p>}
@@ -160,14 +164,14 @@ export function AuthForm({ mode, locale }: { mode: "login" | "register"; locale:
             minLength={8}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder={mode === "register" ? "Create a strong password" : "Password"}
-            className="w-full rounded-lg border border-ink/12 dark:border-white/15 bg-transparent px-4 py-3 pr-10 text-sm outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/20"
+            placeholder={mode === "register" ? t("createPasswordPlaceholder") : t("passwordPlaceholder")}
+            className="w-full rounded-lg border border-ink/12 dark:border-white/15 bg-transparent px-4 py-3 pe-10 text-sm outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/20"
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-ink/40 hover:text-ink/60 dark:hover:text-white/60 transition-colors"
-            aria-label={showPassword ? "Hide password" : "Show password"}
+            className="absolute end-3 top-1/2 -translate-y-1/2 text-ink/40 hover:text-ink/60 dark:hover:text-white/60 transition-colors"
+            aria-label={showPassword ? t("hidePassword") : t("showPassword")}
           >
             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
@@ -194,7 +198,7 @@ export function AuthForm({ mode, locale }: { mode: "login" | "register"; locale:
 
             {password && (
               <div className="mt-3 flex items-center gap-2 text-xs">
-                <span className="text-ink/60 dark:text-white/60">Strength:</span>
+                <span className="text-ink/60 dark:text-white/60">{t("strengthLabel")}</span>
                 <span className={`font-semibold ${passwordStrength.color}`}>{passwordStrength.label}</span>
                 <div className="flex gap-1">
                   {[...Array(5)].map((_, i) => (
@@ -218,7 +222,7 @@ export function AuthForm({ mode, locale }: { mode: "login" | "register"; locale:
         className="w-full rounded-lg bg-primary py-3 text-sm font-semibold text-white hover:bg-primary-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
         {loading && <Loader2 size={14} className="animate-spin" />}
-        {loading ? "Please wait…" : mode === "login" ? "Sign In" : "Create Account"}
+        {loading ? t("pleaseWait") : mode === "login" ? t("submitSignIn") : t("submitCreateAccount")}
       </button>
     </form>
   );

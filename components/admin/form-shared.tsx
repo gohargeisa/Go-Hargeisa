@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 
 export function Field({ label, children, hint }: { label: string; children: React.ReactNode; hint?: string }) {
@@ -34,6 +35,7 @@ export function TagInput({
   placeholder?: string;
   suggestions?: string[];
 }) {
+  const t = useTranslations("admin");
   const [draft, setDraft] = useState("");
 
   function commit(raw: string) {
@@ -60,7 +62,7 @@ export function TagInput({
             className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary"
           >
             {v}
-            <button type="button" onClick={() => onChange(values.filter((x) => x !== v))} aria-label={`Remove ${v}`}>
+            <button type="button" onClick={() => onChange(values.filter((x) => x !== v))} aria-label={t("removeTagAriaLabel", { value: v })}>
               <X size={11} />
             </button>
           </span>

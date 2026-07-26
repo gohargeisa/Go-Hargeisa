@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Search, X } from "lucide-react";
 
 export function SearchWithin({
@@ -13,6 +14,7 @@ export function SearchWithin({
   placeholder: string;
   defaultValue?: string;
 }) {
+  const t = useTranslations("listings");
   const [value, setValue] = useState(defaultValue ?? "");
   const router = useRouter();
 
@@ -37,7 +39,7 @@ export function SearchWithin({
           className="w-full bg-transparent text-sm outline-none placeholder:text-ink/40 dark:placeholder:text-sand/40"
         />
         {value && (
-          <button type="button" onClick={clear} aria-label="Clear search" className="text-ink/40 hover:text-ink">
+          <button type="button" onClick={clear} aria-label={t("clearSearchAriaLabel")} className="text-ink/40 hover:text-ink">
             <X size={14} />
           </button>
         )}
@@ -46,7 +48,7 @@ export function SearchWithin({
         type="submit"
         className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-700 transition-colors"
       >
-        Search
+        {t("searchButton")}
       </button>
     </form>
   );

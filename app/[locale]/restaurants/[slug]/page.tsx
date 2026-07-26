@@ -47,6 +47,8 @@ export default async function RestaurantDetailPage({
   const restaurant = await getRestaurantBySlug(slug);
   if (!restaurant) notFound();
   const t = await getTranslations("common");
+  const tNav = await getTranslations("nav");
+  const td = await getTranslations("detail");
   const allRestaurants = await getRestaurants();
   const similarRestaurants = allRestaurants.filter((r) => r.id !== restaurant.id).slice(0, 4);
 
@@ -60,7 +62,7 @@ export default async function RestaurantDetailPage({
     <>
       <Breadcrumbs
         items={[
-          { label: "Restaurants", href: `/${locale}/restaurants` },
+          { label: tNav("restaurants"), href: `/${locale}/restaurants` },
           { label: restaurant.name, href: `/${locale}/restaurants/${restaurant.slug}` },
         ]}
       />
@@ -83,7 +85,7 @@ export default async function RestaurantDetailPage({
           <Reveal>
             <section aria-labelledby="overview-heading">
               <h2 id="overview-heading" className="font-display text-2xl font-semibold">
-                Overview
+                {td("overview")}
               </h2>
               <p className="mt-4 leading-relaxed text-ink/75 dark:text-sand/75">{restaurant.description}</p>
             </section>
@@ -93,7 +95,7 @@ export default async function RestaurantDetailPage({
             <Reveal>
               <section aria-labelledby="menu-heading">
                 <h2 id="menu-heading" className="mb-5 font-display text-2xl font-semibold">
-                  Menu Highlights
+                  {td("menuHighlights")}
                 </h2>
                 <div className="divide-y divide-ink/8 overflow-hidden rounded-xl2 border border-ink/8 dark:divide-white/10 dark:border-white/10">
                   {restaurant.menuHighlights.map((item) => (
@@ -119,7 +121,7 @@ export default async function RestaurantDetailPage({
           <Reveal>
             <section aria-labelledby="location-heading">
               <h2 id="location-heading" className="mb-5 font-display text-2xl font-semibold">
-                Location
+                {td("location")}
               </h2>
               <div className="overflow-hidden rounded-xl3 border border-ink/8 dark:border-white/10">
                 <SingleLocationMapLoader location={restaurant.location} label={restaurant.name} />
@@ -135,7 +137,7 @@ export default async function RestaurantDetailPage({
                       rel="noopener noreferrer"
                       className="inline-flex items-center justify-center gap-1.5 rounded-full border border-ink/15 px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
                     >
-                      Open in Google Maps
+                      {td("openInGoogleMaps")}
                       <ExternalLink size={14} aria-hidden="true" />
                     </a>
                   )}
@@ -183,7 +185,7 @@ export default async function RestaurantDetailPage({
         <section className="border-t border-ink/8 bg-white py-14 dark:border-white/10 dark:bg-white/[0.03] sm:py-20">
           <div className="container-px mx-auto">
             <Reveal>
-              <h2 className="mb-6 font-display text-2xl font-semibold sm:text-3xl">You may also like</h2>
+              <h2 className="mb-6 font-display text-2xl font-semibold sm:text-3xl">{td("youMayAlsoLike")}</h2>
             </Reveal>
             <Reveal delay={0.1}>
               <div className="flex gap-5 overflow-x-auto pb-2 scrollbar-none sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-4">

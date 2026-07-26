@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import type { Locale } from "@/lib/i18n/config";
 import { HotelCard } from "@/components/shared/hotel-card";
 import { SearchWithin } from "@/components/shared/search-within";
@@ -31,6 +32,7 @@ export function HotelsPageClient({
   initialHotels: Hotel[];
   searchParams: Record<string, string | undefined>;
 }) {
+  const t = useTranslations("listings");
   // Parse filter params from URL
   const filters: FilterOptions = {
     minPrice: searchParams.minPrice ? parseInt(searchParams.minPrice) : undefined,
@@ -55,10 +57,10 @@ export function HotelsPageClient({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div>
           <h2 className="font-display text-2xl font-bold md:text-3xl">
-            {filteredHotels.total} Hotels
+            {t("hotelsCount", { count: filteredHotels.total })}
           </h2>
           <p className="mt-1 text-sm text-ink/60 dark:text-sand/60">
-            {searchParams.q ? `Results for "${searchParams.q}"` : "Browse all hotels in Hargeisa"}
+            {searchParams.q ? t("resultsFor", { query: searchParams.q }) : t("browseAllHotels")}
           </p>
         </div>
       </div>
@@ -66,16 +68,16 @@ export function HotelsPageClient({
       <div className="mb-6">
         <SearchWithin
           basePath={`/${locale}/hotels`}
-          placeholder="Search hotels by name or area…"
+          placeholder={t("searchHotelsPlaceholder")}
           defaultValue={searchParams.q}
         />
       </div>
 
       {filteredHotels.total === 0 ? (
         <div className="mt-12 rounded-2xl border border-dashed border-ink/20 bg-ink/5 p-12 text-center dark:border-white/20 dark:bg-white/[0.02]">
-          <h3 className="font-display text-lg font-semibold">No hotels match your filters</h3>
+          <h3 className="font-display text-lg font-semibold">{t("noHotelsMatch")}</h3>
           <p className="mt-2 text-sm text-ink/60 dark:text-sand/60">
-            Try adjusting your search or filter criteria
+            {t("adjustFilters")}
           </p>
         </div>
       ) : (
@@ -91,8 +93,8 @@ export function HotelsPageClient({
             {filteredHotels.featured.length > 0 && (
               <div className="mb-12">
                 <div className="mb-6">
-                  <h3 className="font-display text-xl font-bold">⭐ Featured Hotels</h3>
-                  <p className="mt-1 text-sm text-ink/60 dark:text-sand/60">Our top-rated properties</p>
+                  <h3 className="font-display text-xl font-bold">{t("featuredHotels")}</h3>
+                  <p className="mt-1 text-sm text-ink/60 dark:text-sand/60">{t("featuredHotelsSubtitle")}</p>
                 </div>
                 <div className="grid gap-6 sm:grid-cols-2">
                   {filteredHotels.featured.map((h) => (
@@ -120,9 +122,9 @@ export function HotelsPageClient({
             {filteredHotels.nonFeatured.length > 0 && (
               <div>
                 <div className="mb-6">
-                  <h3 className="font-display text-xl font-bold">All Hotels</h3>
+                  <h3 className="font-display text-xl font-bold">{t("allHotels")}</h3>
                   <p className="mt-1 text-sm text-ink/60 dark:text-sand/60">
-                    {filteredHotels.nonFeatured.length} available properties
+                    {t("availableProperties", { count: filteredHotels.nonFeatured.length })}
                   </p>
                 </div>
                 <div className="grid gap-6 sm:grid-cols-2">

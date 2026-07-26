@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+import type { Locale } from "@/lib/i18n/config";
 import { PageHero } from "@/components/shared/page-hero";
 import { placeholderImage } from "@/lib/placeholder-image";
 
@@ -14,27 +16,27 @@ export async function generateMetadata({
   };
 }
 
-export default function AboutPage() {
+export default async function AboutPage({
+  params: { locale },
+}: {
+  params: { locale: Locale };
+}) {
+  const t = await getTranslations({ locale, namespace: "about" });
+
   return (
     <>
       <PageHero
-        eyebrow="Our Story"
-        title="About Go Hargeisa"
+        eyebrow={t("eyebrow")}
+        title={t("title")}
         image={placeholderImage("About Go Hargeisa", { tone: "primary" })}
       />
       <section className="container-px mx-auto max-w-3xl py-14 prose prose-neutral dark:prose-invert">
+        <p>{t("paragraph1")}</p>
+        <p>{t("paragraph2")}</p>
         <p>
-          Go Hargeisa is an independent tourism guide built to introduce Hargeisa — the capital of
-          Somaliland — to international visitors, business travelers, and the global Somali diaspora.
-        </p>
-        <p>
-          We work with local hotels, restaurants, guides and cultural institutions to keep our listings
-          accurate, current and genuinely useful, whether you're planning a first visit or looking for a new
-          favorite cafe close to home.
-        </p>
-        <p>
-          Have a business you'd like listed, or spotted something out of date? Reach out through our{" "}
-          <a href="../contact">contact page</a> — we'd love to hear from you.
+          {t.rich("paragraph3", {
+            link: (chunks) => <a href="../contact">{chunks}</a>,
+          })}
         </p>
       </section>
     </>

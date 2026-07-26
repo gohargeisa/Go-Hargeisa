@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { ArrowUpRight, Building2, Heart, Loader2, MapPin, Sparkles, Star } from "lucide-react";
 import { toggleFavoriteAction } from "@/lib/actions/favorites";
 import { amenityIcon } from "@/lib/utils/amenity-icon";
@@ -40,6 +41,7 @@ export function HotelCard({
   /** Real hotel website, if on file — used for the "Book Now" CTA. Falls back to the detail page. */
   website?: string;
 }) {
+  const t = useTranslations("listings");
   const [favorited, setFavorited] = useState(initiallyFavorited);
   const [isPending, startTransition] = useTransition();
   const [loaded, setLoaded] = useState(false);
@@ -106,7 +108,7 @@ export function HotelCard({
         {featured && (
           <span className="absolute start-3 top-3 z-10 inline-flex items-center gap-1 rounded-full bg-primary/95 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm backdrop-blur-sm">
             <Sparkles size={10} aria-hidden="true" />
-            Featured
+            {t("featuredBadge")}
           </span>
         )}
 
@@ -124,7 +126,7 @@ export function HotelCard({
             type="button"
             onClick={onToggleFavorite}
             disabled={isPending}
-            aria-label={favorited ? `Remove ${name} from favorites` : `Add ${name} to favorites`}
+            aria-label={favorited ? t("removeFromFavorites", { name }) : t("addToFavorites", { name })}
             className="absolute end-3 bottom-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-ink shadow-sm transition-transform hover:scale-105 disabled:opacity-60 dark:bg-ink/90 dark:text-white"
           >
             {isPending ? (
@@ -156,7 +158,7 @@ export function HotelCard({
         </div>
 
         {visibleAmenities.length > 0 && (
-          <ul className="flex flex-wrap gap-1.5" aria-label="Amenities">
+          <ul className="flex flex-wrap gap-1.5" aria-label={t("amenitiesAriaLabel")}>
             {visibleAmenities.map((amenity) => {
               const Icon = amenityIcon(amenity);
               return (
@@ -180,16 +182,16 @@ export function HotelCard({
         <div className="mt-auto flex flex-col gap-4 border-t border-ink/8 pt-4 dark:border-white/10">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-wide text-ink/45 dark:text-sand/45">
-              Starting from
+              {t("startingFrom")}
             </p>
             {priceRange ? (
               <p className="font-display text-xl font-bold text-primary">
                 {priceRange}
-                <span className="ms-1 text-sm font-medium text-ink/50 dark:text-sand/50">/night</span>
+                <span className="ms-1 text-sm font-medium text-ink/50 dark:text-sand/50">{t("perNight")}</span>
               </p>
             ) : (
               <p className="font-display text-base font-semibold text-ink/35 dark:text-sand/40">
-                Price on request
+                {t("priceOnRequest")}
               </p>
             )}
           </div>
@@ -199,7 +201,7 @@ export function HotelCard({
               href={href}
               className="inline-flex h-11 items-center justify-center rounded-full border border-ink/15 px-3 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white dark:hover:border-primary"
             >
-              View Details
+              {t("viewDetails")}
             </Link>
 
             {website ? (
@@ -209,16 +211,16 @@ export function HotelCard({
                 rel="noopener noreferrer"
                 className="inline-flex h-11 items-center justify-center gap-1 rounded-full bg-primary px-3 text-sm font-semibold text-white transition-colors hover:bg-primary-700"
               >
-                Book Now
+                {t("bookNow")}
                 <ArrowUpRight size={14} aria-hidden="true" />
-                <span className="sr-only">(opens in a new tab)</span>
+                <span className="sr-only">{t("opensInNewTab")}</span>
               </a>
             ) : (
               <Link
                 href={href}
                 className="inline-flex h-11 items-center justify-center rounded-full bg-primary px-3 text-sm font-semibold text-white transition-colors hover:bg-primary-700"
               >
-                Book Now
+                {t("bookNow")}
               </Link>
             )}
           </div>

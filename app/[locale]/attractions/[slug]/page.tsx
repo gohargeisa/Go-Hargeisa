@@ -52,13 +52,15 @@ export default async function AttractionDetailPage({
   const attraction = await getAttractionBySlug(slug);
   if (!attraction) notFound();
   const t = await getTranslations("common");
+  const tNav = await getTranslations("nav");
+  const td = await getTranslations("detail");
   const { restaurants: nearbyRestaurants, hotels: nearbyHotels } = await getNearbyForAttraction(attraction.id);
 
   return (
     <>
       <Breadcrumbs
         items={[
-          { label: "Attractions", href: `/${locale}/attractions` },
+          { label: tNav("attractions"), href: `/${locale}/attractions` },
           { label: attraction.name, href: `/${locale}/attractions/${attraction.slug}` },
         ]}
       />
@@ -171,7 +173,7 @@ export default async function AttractionDetailPage({
 
         <aside className="lg:sticky lg:top-24 h-fit space-y-3 rounded-xl3 border border-ink/8 dark:border-white/10 p-6 shadow-card">
           <AddToTripButton locale={locale} listingType="attraction" listingId={attraction.id} />
-          <h3 className="font-display text-lg font-semibold">Plan your visit</h3>
+          <h3 className="font-display text-lg font-semibold">{td("planYourVisit")}</h3>
           <p className="text-sm text-ink/70 dark:text-sand/70">
             <strong>{t("entryFee")}:</strong> {attraction.entryFee}
           </p>

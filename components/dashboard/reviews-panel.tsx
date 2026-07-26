@@ -2,16 +2,18 @@
 
 import { useTransition } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Star, Trash2, Loader2, MessageSquareText } from "lucide-react";
 import { deleteReview } from "@/lib/actions/content";
 import type { MyReview } from "@/lib/data/reviews";
 import type { Locale } from "@/lib/i18n/config";
 
 export function ReviewsPanel({ locale, reviews }: { locale: Locale; reviews: MyReview[] }) {
+  const t = useTranslations("dashboard");
   const [isPending, startTransition] = useTransition();
 
   function onDelete(id: string) {
-    if (!confirm("Delete this review?")) return;
+    if (!confirm(t("deleteReviewConfirm"))) return;
     startTransition(async () => {
       await deleteReview(locale, id);
     });
@@ -19,9 +21,9 @@ export function ReviewsPanel({ locale, reviews }: { locale: Locale; reviews: MyR
 
   return (
     <div>
-      <div className="mb-6"><p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Your perspective</p><h2 className="mt-1 font-display text-2xl font-semibold">My reviews</h2></div>
+      <div className="mb-6"><p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{t("reviewsEyebrow")}</p><h2 className="mt-1 font-display text-2xl font-semibold">{t("reviewsTitle")}</h2></div>
       {reviews.length === 0 ? (
-        <div className="flex min-h-56 flex-col items-center justify-center rounded-2xl border border-dashed border-primary/25 bg-primary/[0.035] px-6 text-center dark:bg-primary/[0.08]"><span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-primary shadow-sm dark:bg-ink"><MessageSquareText size={22} /></span><h3 className="mt-4 font-display text-xl font-semibold">Share your local knowledge</h3><p className="mt-2 max-w-sm text-sm leading-6 text-ink/55 dark:text-sand/60">Visit a hotel, restaurant, cafe, or attraction to leave a helpful review.</p></div>
+        <div className="flex min-h-56 flex-col items-center justify-center rounded-2xl border border-dashed border-primary/25 bg-primary/[0.035] px-6 text-center dark:bg-primary/[0.08]"><span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-primary shadow-sm dark:bg-ink"><MessageSquareText size={22} /></span><h3 className="mt-4 font-display text-xl font-semibold">{t("emptyReviewsTitle")}</h3><p className="mt-2 max-w-sm text-sm leading-6 text-ink/55 dark:text-sand/60">{t("emptyReviewsDescription")}</p></div>
       ) : (
         <div className="space-y-3">
           {reviews.map((r) => (
@@ -41,7 +43,7 @@ export function ReviewsPanel({ locale, reviews }: { locale: Locale; reviews: MyR
                   type="button"
                   onClick={() => onDelete(r.id)}
                   disabled={isPending}
-                  aria-label={`Delete review of ${r.listingName}`}
+                  aria-label={t("deleteReviewAriaLabel", { name: r.listingName })}
                   className="shrink-0 text-ink/40 hover:text-red-500"
                 >
                   {isPending ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}

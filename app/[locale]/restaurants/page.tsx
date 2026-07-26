@@ -35,12 +35,14 @@ export default async function RestaurantsPage({
   // partner listings. When Supabase isn't connected there is no real data,
   // so the page renders the "Coming Soon" state instead of sample content.
   const restaurants = isSupabaseConfigured() ? await getRestaurants({ q: searchParams.q }) : [];
+  const t = await getTranslations({ locale, namespace: "comingSoon" });
+  const tNav = await getTranslations({ locale, namespace: "nav" });
 
   return (
     <>
       <PageHero
-  eyebrow="🍽 Restaurants"
-  title="Discover Hargeisa's Best Restaurants"
+  eyebrow={`🍽 ${tNav("restaurants")}`}
+  title={t("restaurantsTitle")}
   image="/images/restaurants/sultan/hero.png"
 />
 

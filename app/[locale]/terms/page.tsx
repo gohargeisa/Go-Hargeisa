@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+import type { Locale } from "@/lib/i18n/config";
 
 export async function generateMetadata({
   params: { locale },
@@ -11,32 +13,26 @@ export async function generateMetadata({
   };
 }
 
-export default function TermsPage() {
+export default async function TermsPage({
+  params: { locale },
+}: {
+  params: { locale: Locale };
+}) {
+  const t = await getTranslations({ locale, namespace: "terms" });
+
   return (
     <section className="container-px mx-auto max-w-3xl py-14 prose prose-neutral dark:prose-invert">
-      <h1>Terms of Service</h1>
-      <p>Last updated: July 2026</p>
-      <p>
-        By using Go Hargeisa, you agree to the following terms. Please read them carefully.
-      </p>
-      <h2>Use of content</h2>
-      <p>
-        Listing information (hotels, restaurants, attractions, events) is provided for general travel
-        planning purposes. Prices, hours and availability should be confirmed directly with the business
-        before booking.
-      </p>
-      <h2>User accounts</h2>
-      <p>
-        You are responsible for maintaining the confidentiality of your account credentials and for any
-        activity under your account. Reviews you submit must be honest and based on genuine experience.
-      </p>
-      <h2>Limitation of liability</h2>
-      <p>
-        Go Hargeisa is provided "as is" without warranties of any kind. We are not liable for losses
-        arising from reliance on information found on this site.
-      </p>
-      <h2>Contact</h2>
-      <p>Questions about these terms can be sent to hello@gohargeisa.com.</p>
+      <h1>{t("title")}</h1>
+      <p>{t("lastUpdated")}</p>
+      <p>{t("intro")}</p>
+      <h2>{t("useOfContentTitle")}</h2>
+      <p>{t("useOfContentText")}</p>
+      <h2>{t("userAccountsTitle")}</h2>
+      <p>{t("userAccountsText")}</p>
+      <h2>{t("liabilityTitle")}</h2>
+      <p>{t("liabilityText")}</p>
+      <h2>{t("contactTitle")}</h2>
+      <p>{t("contactText")}</p>
     </section>
   );
 }

@@ -9,6 +9,13 @@ export type AllowedTable = (typeof ALLOWED_TABLES)[number];
 
 const TABLES_WITH_UPDATED_AT = new Set(["hotels", "restaurants", "cafes", "attractions"]);
 
+// Business owners may only ever touch these three tables — matches the
+// "Owners manage their {hotels,restaurants,cafes}" RLS policies in
+// supabase/schema.sql, which are UPDATE-only (no insert/delete) and
+// scoped to rows where owner_id = auth.uid(). Attractions/events/articles
+// and every table's create/delete stay owner-only.
+const BUSINESS_OWNER_TABLES = new Set<AllowedTable>(["hotels", "restaurants", "cafes"]);
+
 async function assertOwner() {
   const supabase = await createClient();
   const {
@@ -27,9 +34,32 @@ const userProfile = profile as { role: string } | null;
 if (userProfile?.role !== "owner") {
   throw new Error("Not authorized.");
 }
-  
+
 
   return supabase;
+}
+
+/**
+ * Same door as assertOwner, but also lets a business_owner through for
+ * the three tables they're allowed to edit. This only decides whether the
+ * request is allowed to reach the database — RLS (owner_id = auth.uid())
+ * is what actually stops a business_owner from touching a listing they
+ * don't own, so it stays authoritative even if this check is ever wrong.
+ */
+async function assertOwnerOrBusinessOwner(table: AllowedTable) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not signed in.");
+
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  const role = (profile as { role: string } | null)?.role;
+
+  if (role === "owner") return supabase;
+  if (role === "business_owner" && BUSINESS_OWNER_TABLES.has(table)) return supabase;
+
+  throw new Error("Not authorized.");
 }
 
 export async function deleteListing(
@@ -139,7 +169,7 @@ export async function updateRecord(
     throw new Error("Invalid table.");
   }
 
-  const supabase = await assertOwner();
+  const supabase = await assertOwnerOrBusinessOwner(table);
 
   const payload = TABLES_WITH_UPDATED_AT.has(table)
     ? {

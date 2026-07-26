@@ -7,6 +7,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 export interface HeaderUser {
   name: string;
   isOwner: boolean;
+  isBusinessOwner: boolean;
   avatarUrl?: string;
 }
 
@@ -40,11 +41,7 @@ export function useHeaderUser(): { user: HeaderUser | null; loading: boolean } {
     async function load() {
       const {
         data: { user: authUser },
-        error: authError,
       } = await supabase.auth.getUser();
-
-      console.log("AUTH USER:", authUser);
-      console.log("AUTH ERROR:", authError);
 
       if (!authUser) {
         if (active) {
@@ -54,14 +51,11 @@ export function useHeaderUser(): { user: HeaderUser | null; loading: boolean } {
         return;
       }
 
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("profiles")
         .select("full_name, role, avatar_url")
         .eq("id", authUser.id)
         .single();
-
-      console.log("PROFILE:", data);
-      console.log("PROFILE ERROR:", error);
 
       const profile = data as Profile | null;
 
@@ -69,6 +63,7 @@ export function useHeaderUser(): { user: HeaderUser | null; loading: boolean } {
         setUser({
           name: profile?.full_name ?? authUser.email?.split("@")[0] ?? "Account",
           isOwner: profile?.role === "owner",
+          isBusinessOwner: profile?.role === "business_owner",
           avatarUrl: profile?.avatar_url ?? undefined,
         });
 
@@ -76,10 +71,9 @@ export function useHeaderUser(): { user: HeaderUser | null; loading: boolean } {
       }
     }
 
-    // تحميل المستخدم عند فتح الموقع
     load();
 
-    // تحديث تلقائي عند تسجيل الدخول أو الخروج
+    // Re-resolve whenever auth state changes (sign in, sign out, token refresh).
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(() => {

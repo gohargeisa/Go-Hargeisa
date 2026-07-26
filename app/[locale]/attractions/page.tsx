@@ -34,12 +34,13 @@ export default async function AttractionsPage({
 }) {
   const t = await getTranslations("home");
   const common = await getTranslations("common");
+  const tl = await getTranslations("listings");
   const attractions = await getAttractions({ q: searchParams.q });
 
   return (
     <>
       <PageHero
-        eyebrow="See"
+        eyebrow={t("attractionsEyebrow")}
         title={t("attractionsTitle")}
         image={placeholderImage("Attractions in Hargeisa", {
           tone: "secondary",
@@ -49,7 +50,7 @@ export default async function AttractionsPage({
       <section className="container-px mx-auto py-14">
         <SearchWithin
           basePath={`/${locale}/attractions`}
-          placeholder="Search attractions…"
+          placeholder={tl("searchAttractionsPlaceholder")}
           defaultValue={searchParams.q}
         />
 
@@ -73,7 +74,7 @@ export default async function AttractionsPage({
                 locale={locale}
                 tag={
                   a.entryFee === "Free"
-                    ? "Free entry"
+                    ? tl("freeEntry")
                     : a.entryFee ?? undefined
                 }
               />

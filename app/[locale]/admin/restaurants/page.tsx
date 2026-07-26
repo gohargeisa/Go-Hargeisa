@@ -1,44 +1,75 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { Plus } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
-import { requireAdmin } from "@/lib/supabase/guards";
+import { requireListingsAccess } from "@/lib/supabase/guards";
+import { createClient } from "@/lib/supabase/server";
+import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { getRestaurants } from "@/lib/data/restaurants";
 import { AdminListTable } from "@/components/admin/admin-list-table";
 
 export const metadata: Metadata = { title: "Manage Restaurants — Admin" };
 
 export default async function AdminRestaurantsPage({ params: { locale } }: { params: { locale: Locale } }) {
-  await requireAdmin(locale, `/${locale}/admin/restaurants`);
-  const restaurants = await getRestaurants();
+  const access = await requireListingsAccess(locale, `/${locale}/admin/restaurants`);
+  const t = await getTranslations({ locale, namespace: "admin" });
+
+  let restaurants: { id: string; name: string; address: string; cover_image: string; cuisine: string[] | null }[] = [];
+  if (access && isSupabaseConfigured()) {
+    const supabase = await createClient();
+    let query = supabase.from("restaurants").select("id, name, address, cover_image, cuisine");
+    if (access.role === "business_owner") query = query.eq("owner_id", access.userId);
+    const { data } = await query;
+    restaurants = data ?? [];
+  } else if (!access) {
+    restaurants = (await getRestaurants()).map((r) => ({
+      id: r.id,
+      name: r.name,
+      address: r.address,
+      cover_image: r.coverImage,
+      cuisine: r.cuisine,
+    }));
+  }
+
+  const canCreate = !access || access.role === "owner";
 
   return (
     <section className="container-px mx-auto py-14">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-2xl font-semibold">Manage Restaurants</h1>
-          <p className="mt-1 text-sm text-ink/60 dark:text-sand/60">{restaurants.length} restaurants published</p>
+          <h1 className="font-display text-2xl font-semibold">{t("manageRestaurants")}</h1>
+          <p className="mt-1 text-sm text-ink/60 dark:text-sand/60">
+            {restaurants.length} {access?.role === "business_owner" ? t("ofYourRestaurants") : t("restaurantsPublished")}
+          </p>
         </div>
-        <Link
-          href={`/${locale}/admin/restaurants/new`}
-          className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-700 transition-colors"
-        >
-          <Plus size={16} /> Add Restaurant
-        </Link>
+        {canCreate && (
+          <Link
+            href={`/${locale}/admin/restaurants/new`}
+            className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-700 transition-colors"
+          >
+            <Plus size={16} /> {t("addRestaurant")}
+          </Link>
+        )}
       </div>
 
       <div className="mt-8">
         <AdminListTable
           table="restaurants"
-          metaLabel="Cuisine"
+          metaLabel={t("cuisineMetaLabel")}
           editHrefBase={`/${locale}/admin/restaurants`}
-          emptyLabel="No restaurants yet — add your first one to get started."
+          emptyLabel={
+            access?.role === "business_owner"
+              ? t("noRestaurantsAssigned")
+              : t("noRestaurantsYet")
+          }
+          allowDelete={canCreate}
           rows={restaurants.map((r) => ({
             id: r.id,
-            image: r.coverImage,
+            image: r.cover_image,
             title: r.name,
             subtitle: r.address,
-            meta: r.cuisine.join(", ") || "—",
+            meta: r.cuisine?.join(", ") || "—",
           }))}
         />
       </div>

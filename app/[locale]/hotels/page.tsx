@@ -33,12 +33,13 @@ export default async function HotelsPage({
   searchParams: { q?: string; minPrice?: string; maxPrice?: string; minRating?: string; sortBy?: string };
 }) {
   const t = await getTranslations("home");
+  const tNav = await getTranslations("nav");
   const hotels = await getHotels({ q: searchParams.q });
 
   return (
     <>
       <PageHero
-        eyebrow="Hotels"
+        eyebrow={tNav("hotels")}
         title={t("hotelsTitle")}
         subtitle={t("hotelsSubtitle")}
         image="/images/heroes/hotels-hero.png"

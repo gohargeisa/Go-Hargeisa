@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 import { ImageUploader } from "@/components/shared/image-uploader";
 import { Field, TagInput, inputClass } from "@/components/admin/form-shared";
@@ -37,6 +38,7 @@ export function CafeForm({
   cafeId?: string;
   initial?: Partial<CafeFormInput>;
 }) {
+  const t = useTranslations("admin");
   const [form, setForm] = useState<CafeFormInput>({
     slug: initial?.slug ?? "",
     name: initial?.name ?? "",
@@ -64,7 +66,7 @@ export function CafeForm({
     e.preventDefault();
     setError(null);
     if (!form.coverImage) {
-      setError("Please upload a cover image.");
+      setError(t("uploadCoverImageError"));
       return;
     }
 
@@ -93,7 +95,7 @@ export function CafeForm({
         mode === "create"
           ? await createRecord("cafes", payload, revalidatePaths, redirectTo)
           : await updateRecord("cafes", cafeId!, payload, revalidatePaths, redirectTo);
-      if (result && !result.ok) setError(result.error ?? "Something went wrong.");
+      if (result && !result.ok) setError(result.error ?? t("somethingWentWrong"));
     });
   }
 
@@ -102,58 +104,58 @@ export function CafeForm({
       <ImageUploader folder="cafes" value={form.coverImage} onChange={(url) => update("coverImage", url)} />
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Cafe name">
+        <Field label={t("cafeNameLabel")}>
           <input required value={form.name} onChange={(e) => update("name", e.target.value)} className={inputClass} />
         </Field>
-        <Field label="URL slug">
+        <Field label={t("urlSlugLabel")}>
           <input required value={form.slug} onChange={(e) => update("slug", e.target.value)} className={inputClass} placeholder="kob-cafe" />
         </Field>
       </div>
 
-      <Field label="Short description">
+      <Field label={t("shortDescriptionLabel")}>
         <input required value={form.shortDescription} onChange={(e) => update("shortDescription", e.target.value)} className={inputClass} />
       </Field>
 
-      <Field label="Full description">
+      <Field label={t("fullDescriptionLabel")}>
         <textarea required rows={4} value={form.description} onChange={(e) => update("description", e.target.value)} className={inputClass} />
       </Field>
 
-      <Field label="Address">
+      <Field label={t("addressLabel")}>
         <input required value={form.address} onChange={(e) => update("address", e.target.value)} className={inputClass} />
       </Field>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Latitude">
+        <Field label={t("latitudeLabel")}>
           <input required type="number" step="0.0001" value={form.lat} onChange={(e) => update("lat", Number(e.target.value))} className={inputClass} />
         </Field>
-        <Field label="Longitude">
+        <Field label={t("longitudeLabel")}>
           <input required type="number" step="0.0001" value={form.lng} onChange={(e) => update("lng", Number(e.target.value))} className={inputClass} />
         </Field>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Phone">
+        <Field label={t("phoneLabel")}>
           <input value={form.phone} onChange={(e) => update("phone", e.target.value)} className={inputClass} />
         </Field>
-        <Field label="Opening hours">
+        <Field label={t("openingHoursLabel")}>
           <input value={form.openingHours} onChange={(e) => update("openingHours", e.target.value)} className={inputClass} placeholder="6:00 AM – 9:00 PM" />
         </Field>
       </div>
 
-      <TagInput label="Special drinks" values={form.specialDrinks} onChange={(v) => update("specialDrinks", v)} placeholder="Type and press Enter…" suggestions={DRINK_SUGGESTIONS} />
+      <TagInput label={t("specialDrinksLabel")} values={form.specialDrinks} onChange={(v) => update("specialDrinks", v)} placeholder={t("tagInputPlaceholder")} suggestions={DRINK_SUGGESTIONS} />
 
       <div className="flex flex-wrap gap-6">
         <label className="flex items-center gap-2 text-sm font-medium">
           <input type="checkbox" checked={form.wifi} onChange={(e) => update("wifi", e.target.checked)} />
-          Free WiFi
+          {t("freeWifi")}
         </label>
         <label className="flex items-center gap-2 text-sm font-medium">
           <input type="checkbox" checked={form.workingSpace} onChange={(e) => update("workingSpace", e.target.checked)} />
-          Good working space
+          {t("goodWorkingSpace")}
         </label>
         <label className="flex items-center gap-2 text-sm font-medium">
           <input type="checkbox" checked={form.featured} onChange={(e) => update("featured", e.target.checked)} />
-          Feature on homepage
+          {t("featureOnHomepage")}
         </label>
       </div>
 
@@ -165,7 +167,7 @@ export function CafeForm({
         className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary-700 transition-colors disabled:opacity-70"
       >
         {isPending && <Loader2 size={14} className="animate-spin" />}
-        {mode === "create" ? "Publish Cafe" : "Save Changes"}
+        {mode === "create" ? t("publishCafe") : t("saveChanges")}
       </button>
     </form>
   );

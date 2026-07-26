@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Bell, Compass, Heart, MapIcon, MessageSquare, Sparkles, User } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { ListingCard } from "@/components/shared/listing-card";
@@ -14,8 +15,8 @@ import type { MyReview } from "@/lib/data/reviews";
 type FavoriteEntry = { kind: "hotel" | "restaurant" | "cafe" | "attraction"; item: { id: string; slug: string; name: string; address: string; coverImage: string; rating: number; reviewCount: number } };
 const hrefKind: Record<FavoriteEntry["kind"], string> = { hotel: "hotels", restaurant: "restaurants", cafe: "cafes", attraction: "attractions" };
 const tabs = [
-  { key: "favorites", icon: Heart, label: "Favorite Places" }, { key: "trips", icon: MapIcon, label: "Saved Trips" },
-  { key: "reviews", icon: MessageSquare, label: "My Reviews" }, { key: "profile", icon: User, label: "Profile" }, { key: "notifications", icon: Bell, label: "Notifications" },
+  { key: "favorites", icon: Heart }, { key: "trips", icon: MapIcon },
+  { key: "reviews", icon: MessageSquare }, { key: "profile", icon: User }, { key: "notifications", icon: Bell },
 ] as const;
 type TabKey = (typeof tabs)[number]["key"];
 
@@ -23,11 +24,19 @@ export function DashboardTabs({ locale, userId, email, favorites, trips, reviews
   locale: Locale; userId: string; email: string; favorites: FavoriteEntry[]; trips: SavedTrip[];
   reviews: MyReview[]; userName: string; avatarUrl: string;
 }) {
+  const t = useTranslations("dashboard");
   const [active, setActive] = useState<TabKey>("favorites");
+  const tabLabels: Record<TabKey, string> = {
+    favorites: t("tabFavorites"),
+    trips: t("tabTrips"),
+    reviews: t("tabReviews"),
+    profile: t("tabProfile"),
+    notifications: t("tabNotifications"),
+  };
   const stats = [
-    { label: "Saved places", value: favorites.length, icon: Heart, tone: "text-rose-500 bg-rose-500/10" },
-    { label: "Planned trips", value: trips.length, icon: MapIcon, tone: "text-primary bg-primary/10" },
-    { label: "Local reviews", value: reviews.length, icon: MessageSquare, tone: "text-secondary-700 bg-secondary/15" },
+    { label: t("statsSavedPlaces"), value: favorites.length, icon: Heart, tone: "text-rose-500 bg-rose-500/10" },
+    { label: t("statsPlannedTrips"), value: trips.length, icon: MapIcon, tone: "text-primary bg-primary/10" },
+    { label: t("statsLocalReviews"), value: reviews.length, icon: MessageSquare, tone: "text-secondary-700 bg-secondary/15" },
   ];
 
   return (
@@ -43,24 +52,24 @@ export function DashboardTabs({ locale, userId, email, favorites, trips, reviews
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[230px_minmax(0,1fr)]">
-        <nav className="flex gap-1.5 overflow-x-auto rounded-2xl border border-ink/8 bg-white p-2 shadow-sm dark:border-white/10 dark:bg-white/[0.03] lg:flex-col lg:self-start" aria-label="Dashboard sections">
-          {tabs.map(({ key, icon: Icon, label }) => (
+        <nav className="flex gap-1.5 overflow-x-auto rounded-2xl border border-ink/8 bg-white p-2 shadow-sm dark:border-white/10 dark:bg-white/[0.03] lg:flex-col lg:self-start" aria-label={t("sectionsAriaLabel")}>
+          {tabs.map(({ key, icon: Icon }) => (
             <button key={key} type="button" onClick={() => setActive(key)} aria-current={active === key ? "page" : undefined}
-              className={`flex shrink-0 items-center gap-3 rounded-xl px-3.5 py-3 text-left text-sm font-semibold transition-all ${active === key ? "bg-primary text-white shadow-sm" : "text-ink/65 hover:bg-primary/5 hover:text-primary dark:text-sand/65 dark:hover:bg-white/5"}`}>
-              <Icon size={17} /> {label}
+              className={`flex shrink-0 items-center gap-3 rounded-xl px-3.5 py-3 text-start text-sm font-semibold transition-all ${active === key ? "bg-primary text-white shadow-sm" : "text-ink/65 hover:bg-primary/5 hover:text-primary dark:text-sand/65 dark:hover:bg-white/5"}`}>
+              <Icon size={17} /> {tabLabels[key]}
             </button>
           ))}
         </nav>
 
         <section className="min-h-[360px] rounded-2xl border border-ink/8 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-white/[0.03] md:p-7">
           {active === "favorites" && <div>
-            <div className="mb-6 flex items-center justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Your collection</p><h2 className="mt-1 font-display text-2xl font-semibold">Favorite places</h2></div><Heart size={22} className="text-primary" /></div>
-            {favorites.length === 0 ? <EmptyState icon={Compass} title="Start your collection" description="Save hotels, restaurants, cafes, and attractions to return to them whenever you are planning." /> : <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{favorites.map(({ kind, item }) => kind === "hotel" ? <HotelCard key={item.id} href={`/${locale}/hotels/${item.slug}`} image={item.coverImage} name={item.name} address={item.address} rating={item.rating} reviewCount={item.reviewCount} hotelId={item.id} initiallyFavorited locale={locale} /> : <ListingCard key={item.id} href={`/${locale}/${hrefKind[kind]}/${item.slug}`} image={item.coverImage} title={item.name} subtitle={item.address} rating={item.rating} reviewCount={item.reviewCount} listingType={kind} listingId={item.id} initiallyFavorited locale={locale} />)}</div>}
+            <div className="mb-6 flex items-center justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{t("favoritesEyebrow")}</p><h2 className="mt-1 font-display text-2xl font-semibold">{t("favoritesTitle")}</h2></div><Heart size={22} className="text-primary" /></div>
+            {favorites.length === 0 ? <EmptyState icon={Compass} title={t("emptyFavoritesTitle")} description={t("emptyFavoritesDescription")} /> : <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{favorites.map(({ kind, item }) => kind === "hotel" ? <HotelCard key={item.id} href={`/${locale}/hotels/${item.slug}`} image={item.coverImage} name={item.name} address={item.address} rating={item.rating} reviewCount={item.reviewCount} hotelId={item.id} initiallyFavorited locale={locale} /> : <ListingCard key={item.id} href={`/${locale}/${hrefKind[kind]}/${item.slug}`} image={item.coverImage} title={item.name} subtitle={item.address} rating={item.rating} reviewCount={item.reviewCount} listingType={kind} listingId={item.id} initiallyFavorited locale={locale} />)}</div>}
           </div>}
           {active === "trips" && <SavedTripsPanel locale={locale} trips={trips} />}
           {active === "reviews" && <ReviewsPanel locale={locale} reviews={reviews} />}
           {active === "profile" && <ProfilePanel locale={locale} userId={userId} email={email} initialName={userName} initialAvatar={avatarUrl} />}
-          {active === "notifications" && <div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Updates</p><h2 className="mt-1 font-display text-2xl font-semibold">Notifications</h2><div className="mt-6"><EmptyState icon={Sparkles} title="You’re all caught up" description="When local recommendations and trip updates are available, they will appear here." /></div></div>}
+          {active === "notifications" && <div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{t("notificationsEyebrow")}</p><h2 className="mt-1 font-display text-2xl font-semibold">{t("notificationsTitle")}</h2><div className="mt-6"><EmptyState icon={Sparkles} title={t("emptyNotificationsTitle")} description={t("emptyNotificationsDescription")} /></div></div>}
         </section>
       </div>
     </div>

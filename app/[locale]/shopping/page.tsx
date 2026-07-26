@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { PageHero } from "@/components/shared/page-hero";
 import { ListingCard } from "@/components/shared/listing-card";
 import { getAttractions } from "@/lib/data/attractions";
@@ -23,18 +24,19 @@ export async function generateMetadata({
 
 export default async function ShoppingPage({ params: { locale } }: { params: { locale: string } }) {
   const shoppingSpots = await getAttractions({ category: "market" });
+  const t = await getTranslations({ locale, namespace: "shopping" });
 
   return (
     <>
       <PageHero
-        eyebrow="Shop"
-        title="Shopping in Hargeisa"
-        subtitle="From the historic Waheen Market to modern shopping centers"
+        eyebrow={t("eyebrow")}
+        title={t("title")}
+        subtitle={t("subtitle")}
         image={placeholderImage("Shopping in Hargeisa", { tone: "accent" })}
       />
       <section className="container-px mx-auto py-14">
         {shoppingSpots.length === 0 ? (
-          <p className="text-center text-ink/50 dark:text-sand/50">No shopping listings yet — check back soon.</p>
+          <p className="text-center text-ink/50 dark:text-sand/50">{t("emptyState")}</p>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {shoppingSpots.map((s) => (

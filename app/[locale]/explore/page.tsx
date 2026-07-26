@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
+import { getTranslations } from "next-intl/server";
 import { getDestinations } from "@/lib/data/destinations";
 import { PageHero } from "@/components/shared/page-hero";
 import { placeholderImage } from "@/lib/placeholder-image";
@@ -24,13 +25,14 @@ export async function generateMetadata({
 
 export default async function ExplorePage({ params: { locale } }: { params: { locale: string } }) {
   const destinations = await getDestinations();
+  const t = await getTranslations({ locale, namespace: "explore" });
 
   return (
     <>
       <PageHero
-        eyebrow="Explore"
-        title="Explore Hargeisa"
-        subtitle="Neighborhood by neighborhood"
+        eyebrow={t("eyebrow")}
+        title={t("title")}
+        subtitle={t("subtitle")}
         image={placeholderImage("Explore Hargeisa", { tone: "primary" })}
       />
       <section className="container-px mx-auto py-14 grid gap-5 md:grid-cols-3">

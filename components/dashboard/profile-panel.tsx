@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { Loader2, Check } from "lucide-react";
 import { ImageUploader } from "@/components/shared/image-uploader";
 import { updateProfile } from "@/lib/actions/profile";
@@ -19,6 +20,7 @@ export function ProfilePanel({
   initialName: string;
   initialAvatar: string;
 }) {
+  const t = useTranslations("dashboard");
   const [fullName, setFullName] = useState(initialName);
   const [avatarUrl, setAvatarUrl] = useState(initialAvatar);
   const [saved, setSaved] = useState(false);
@@ -34,26 +36,26 @@ export function ProfilePanel({
       if (result.ok) {
         setSaved(true);
       } else {
-        setError(result.error ?? "Something went wrong.");
+        setError(result.error ?? t("genericError"));
       }
     });
   }
 
   return (
     <div>
-      <h2 className="font-display text-lg font-semibold mb-4">Profile</h2>
+      <h2 className="font-display text-lg font-semibold mb-4">{t("profileTitle")}</h2>
       <form onSubmit={onSubmit} className="max-w-sm space-y-5">
         <ImageUploader
           bucket="avatars"
           folder={userId}
           value={avatarUrl}
           onChange={setAvatarUrl}
-          label="Profile photo"
+          label={t("profilePhotoLabel")}
           rounded="rounded-full"
         />
 
         <div>
-          <label className="mb-1.5 block text-sm font-semibold">Full name</label>
+          <label className="mb-1.5 block text-sm font-semibold">{t("fullNameLabel")}</label>
           <input
             required
             value={fullName}
@@ -63,14 +65,14 @@ export function ProfilePanel({
         </div>
 
         <div>
-          <label className="mb-1.5 block text-sm font-semibold">Email</label>
+          <label className="mb-1.5 block text-sm font-semibold">{t("emailLabel")}</label>
           <input
             disabled
             value={email}
             className="w-full rounded-xl border border-ink/12 dark:border-white/15 bg-ink/5 dark:bg-white/5 px-4 py-2.5 text-sm text-ink/50 dark:text-sand/50"
           />
           <p className="mt-1 text-xs text-ink/40 dark:text-sand/40">
-            Contact support to change your account email.
+            {t("emailHint")}
           </p>
         </div>
 
@@ -82,7 +84,7 @@ export function ProfilePanel({
           className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-white hover:bg-primary-700 transition-colors disabled:opacity-70"
         >
           {isPending ? <Loader2 size={14} className="animate-spin" /> : saved ? <Check size={14} /> : null}
-          {isPending ? "Saving…" : saved ? "Saved" : "Save Changes"}
+          {isPending ? t("saving") : saved ? t("savedLabel") : t("saveChanges")}
         </button>
       </form>
     </div>

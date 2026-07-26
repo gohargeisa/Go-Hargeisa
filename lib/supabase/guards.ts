@@ -58,3 +58,40 @@ export async function requireOwner(locale: Locale, redirectTo: string) {
 export async function requireAdmin(locale: Locale, redirectTo: string) {
   return requireOwner(locale, redirectTo);
 }
+
+/**
+ * Requires a signed-in user with role = 'owner' OR 'business_owner'.
+ * Used only by the hotels/restaurants/cafes admin sections, where
+ * business owners may manage their own listings (see the "Owners manage
+ * their {hotels,restaurants,cafes}" RLS policies in supabase/schema.sql,
+ * which only grant business owners UPDATE on rows where owner_id matches
+ * their own id — no insert/delete). Callers must still scope any list
+ * query and hide create/delete UI for business_owner themselves; this
+ * guard only decides who gets past the door.
+ *
+ * Redirects non-owners/non-business-owners to the homepage and
+ * signed-out visitors to /auth/login.
+ */
+export async function requireListingsAccess(
+  locale: Locale,
+  redirectTo: string
+): Promise<{ userId: string; role: "owner" | "business_owner" } | null> {
+  if (!isSupabaseConfigured()) return null;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect(`/${locale}/auth/login?next=${encodeURIComponent(redirectTo)}`);
+  }
+
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+
+  if (profile?.role !== "owner" && profile?.role !== "business_owner") {
+    redirect(`/${locale}`);
+  }
+
+  return { userId: user.id, role: profile.role };
+}

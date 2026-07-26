@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 import { ImageUploader } from "@/components/shared/image-uploader";
 import { Field, TagInput, inputClass } from "@/components/admin/form-shared";
@@ -39,6 +40,7 @@ export function HotelForm({
   hotelId?: string;
   initial?: Partial<HotelFormInput>;
 }) {
+  const t = useTranslations("admin");
   const [form, setForm] = useState<HotelFormInput>({
     slug: initial?.slug ?? "",
     name: initial?.name ?? "",
@@ -65,7 +67,7 @@ export function HotelForm({
     e.preventDefault();
     setError(null);
     if (!form.coverImage) {
-      setError("Please upload a cover image.");
+      setError(t("uploadCoverImageError"));
       return;
     }
 
@@ -94,7 +96,7 @@ export function HotelForm({
           ? await createRecord("hotels", payload, revalidatePaths, redirectTo)
           : await updateRecord("hotels", hotelId!, payload, revalidatePaths, redirectTo);
       // On success the action redirects server-side and never returns here.
-      if (result && !result.ok) setError(result.error ?? "Something went wrong.");
+      if (result && !result.ok) setError(result.error ?? t("somethingWentWrong"));
     });
   }
 
@@ -103,43 +105,43 @@ export function HotelForm({
       <ImageUploader folder="hotels" value={form.coverImage} onChange={(url) => update("coverImage", url)} />
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Hotel name">
+        <Field label={t("hotelNameLabel")}>
           <input required value={form.name} onChange={(e) => update("name", e.target.value)} className={inputClass} />
         </Field>
-        <Field label="URL slug">
+        <Field label={t("urlSlugLabel")}>
           <input required value={form.slug} onChange={(e) => update("slug", e.target.value)} className={inputClass} placeholder="ambassador-hotel-hargeisa" />
         </Field>
       </div>
 
-      <Field label="Short description">
+      <Field label={t("shortDescriptionLabel")}>
         <input required value={form.shortDescription} onChange={(e) => update("shortDescription", e.target.value)} className={inputClass} />
       </Field>
 
-      <Field label="Full description">
+      <Field label={t("fullDescriptionLabel")}>
         <textarea required rows={4} value={form.description} onChange={(e) => update("description", e.target.value)} className={inputClass} />
       </Field>
 
-      <Field label="Address">
+      <Field label={t("addressLabel")}>
         <input required value={form.address} onChange={(e) => update("address", e.target.value)} className={inputClass} />
       </Field>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Latitude">
+        <Field label={t("latitudeLabel")}>
           <input required type="number" step="0.0001" value={form.lat} onChange={(e) => update("lat", Number(e.target.value))} className={inputClass} />
         </Field>
-        <Field label="Longitude">
+        <Field label={t("longitudeLabel")}>
           <input required type="number" step="0.0001" value={form.lng} onChange={(e) => update("lng", Number(e.target.value))} className={inputClass} />
         </Field>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <Field label="Phone">
+        <Field label={t("phoneLabel")}>
           <input value={form.phone} onChange={(e) => update("phone", e.target.value)} className={inputClass} />
         </Field>
-        <Field label="Website">
+        <Field label={t("websiteLabel")}>
           <input value={form.website} onChange={(e) => update("website", e.target.value)} className={inputClass} />
         </Field>
-        <Field label="Price range">
+        <Field label={t("priceRangeLabel")}>
           <select value={form.priceRange} onChange={(e) => update("priceRange", e.target.value as HotelFormInput["priceRange"])} className={inputClass}>
             <option value="$">$</option>
             <option value="$$">$$</option>
@@ -149,11 +151,11 @@ export function HotelForm({
         </Field>
       </div>
 
-      <TagInput label="Amenities" values={form.amenities} onChange={(v) => update("amenities", v)} placeholder="Type and press Enter…" suggestions={AMENITY_SUGGESTIONS} />
+      <TagInput label={t("amenitiesLabel")} values={form.amenities} onChange={(v) => update("amenities", v)} placeholder={t("tagInputPlaceholder")} suggestions={AMENITY_SUGGESTIONS} />
 
       <label className="flex items-center gap-2 text-sm font-medium">
         <input type="checkbox" checked={form.featured} onChange={(e) => update("featured", e.target.checked)} />
-        Feature on homepage
+        {t("featureOnHomepage")}
       </label>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
@@ -164,7 +166,7 @@ export function HotelForm({
         className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary-700 transition-colors disabled:opacity-70"
       >
         {isPending && <Loader2 size={14} className="animate-spin" />}
-        {mode === "create" ? "Publish Hotel" : "Save Changes"}
+        {mode === "create" ? t("publishHotel") : t("saveChanges")}
       </button>
     </form>
   );

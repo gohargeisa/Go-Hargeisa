@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Plane, Car, Bus, ParkingCircle } from "lucide-react";
+import type { Locale } from "@/lib/i18n/config";
 import { PageHero } from "@/components/shared/page-hero";
 import { placeholderImage } from "@/lib/placeholder-image";
 
@@ -15,20 +17,26 @@ export async function generateMetadata({
   };
 }
 
-const options = [
-  { icon: Plane, title: "Airport Transfers", body: "Egal International Airport (HGA) is roughly 5 km from downtown. Most hotels can arrange a pickup; airport taxis are also readily available." },
-  { icon: Car, title: "Private Taxis", body: "The most common way to get around. Agree on the fare before you get in, or ask your hotel to book a trusted driver." },
-  { icon: Bus, title: "Shared Minibuses", title2: "", body: "Shared minibuses run fixed routes across the city and are the cheapest option, though schedules are informal." },
-  { icon: ParkingCircle, title: "Car Rental & Drivers", body: "Self-drive rentals are uncommon; most visitors hire a car with a driver for day trips outside the city, arranged through hotels or tour operators." },
-];
+export default async function TransportationPage({
+  params: { locale },
+}: {
+  params: { locale: Locale };
+}) {
+  const t = await getTranslations({ locale, namespace: "transportation" });
 
-export default function TransportationPage() {
+  const options = [
+    { icon: Plane, title: t("airportTransfersTitle"), body: t("airportTransfersBody") },
+    { icon: Car, title: t("taxisTitle"), body: t("taxisBody") },
+    { icon: Bus, title: t("minibusesTitle"), body: t("minibusesBody") },
+    { icon: ParkingCircle, title: t("rentalTitle"), body: t("rentalBody") },
+  ];
+
   return (
     <>
       <PageHero
-        eyebrow="Getting Around"
-        title="Transportation"
-        subtitle="How to move around Hargeisa comfortably and safely"
+        eyebrow={t("eyebrow")}
+        title={t("title")}
+        subtitle={t("subtitle")}
         image={placeholderImage("Transportation in Hargeisa", { tone: "primary" })}
       />
       <section className="container-px mx-auto py-14 grid gap-5 sm:grid-cols-2">

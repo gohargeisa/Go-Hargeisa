@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Star, Loader2 } from "lucide-react";
 import { submitReview } from "@/lib/actions/content";
 import type { Locale } from "@/lib/i18n/config";
@@ -19,6 +20,7 @@ export function ReviewForm({
   locale: Locale;
   pathToRevalidate: string;
 }) {
+  const t = useTranslations("review");
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +36,7 @@ export function ReviewForm({
         setSuccess(true);
         setComment("");
       } else {
-        setError(result.error ?? "Something went wrong.");
+        setError(result.error ?? t("somethingWentWrong"));
       }
     });
   }
@@ -42,21 +44,21 @@ export function ReviewForm({
   if (success) {
     return (
       <p className="rounded-xl2 border border-secondary/30 bg-secondary/5 p-4 text-sm text-secondary-700">
-        Thanks for your review — it's now live.
+        {t("thanksReview")}
       </p>
     );
   }
 
   return (
     <form onSubmit={onSubmit} className="rounded-xl2 border border-ink/8 dark:border-white/10 p-5">
-      <p className="text-sm font-semibold mb-3">Leave a review</p>
+      <p className="text-sm font-semibold mb-3">{t("leaveReview")}</p>
       <div className="flex gap-1 mb-3">
         {Array.from({ length: 5 }).map((_, i) => (
           <button
             key={i}
             type="button"
             onClick={() => setRating(i + 1)}
-            aria-label={`Rate ${i + 1} stars`}
+            aria-label={t("ratingAriaLabel", { stars: i + 1 })}
             className="text-accent"
           >
             <Star size={20} fill={i < rating ? "currentColor" : "none"} strokeWidth={1.5} />
@@ -68,7 +70,7 @@ export function ReviewForm({
         onChange={(e) => setComment(e.target.value)}
         required
         rows={3}
-        placeholder="Share details of your own experience…"
+        placeholder={t("commentPlaceholder")}
         className="w-full rounded-xl border border-ink/12 dark:border-white/15 bg-transparent px-4 py-3 text-sm outline-none focus:border-primary"
       />
       {error && (
@@ -76,7 +78,7 @@ export function ReviewForm({
           {error}{" "}
           {error.includes("sign in") && (
             <Link href={`/${locale}/auth/login`} className="font-semibold underline">
-              Sign in
+              {t("signIn")}
             </Link>
           )}
         </p>
@@ -87,7 +89,7 @@ export function ReviewForm({
         className="mt-3 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-700 transition-colors disabled:opacity-70"
       >
         {isPending && <Loader2 size={14} className="animate-spin" />}
-        Submit Review
+        {t("submitReview")}
       </button>
     </form>
   );
