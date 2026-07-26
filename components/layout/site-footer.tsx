@@ -14,7 +14,6 @@ export function SiteFooter({ locale }: { locale: Locale }) {
     ["restaurants", "restaurants"],
     ["cafes", "cafes"],
     ["attractions", "attractions"],
-    ["events", "events"],
   ] as const;
 
   const companyLinks = [
