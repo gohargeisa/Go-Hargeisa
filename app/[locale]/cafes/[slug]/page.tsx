@@ -1,16 +1,19 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { Wifi, Laptop, Clock, MapPin } from "lucide-react";
+import { ExternalLink, Laptop, MapPin, Wifi } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
-import { getCafeBySlug, getAllCafeSlugs } from "@/lib/data/cafes";
-import { Gallery } from "@/components/shared/gallery";
+import { getCafeBySlug, getAllCafeSlugs, getCafes } from "@/lib/data/cafes";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
-import { RatingBadge } from "@/components/shared/rating-badge";
+import { CafeHero } from "@/components/shared/cafe-hero";
+import { HotelGallery as DetailGallery } from "@/components/shared/hotel-gallery";
+import { CafeActionCard } from "@/components/shared/cafe-action-card";
+import { CafeMobileActionBar } from "@/components/shared/cafe-mobile-action-bar";
+import { ListingCard } from "@/components/shared/listing-card";
 import { ReviewsSection } from "@/components/shared/reviews-section";
 import { ReviewForm } from "@/components/shared/review-form";
-import { AddToTripButton } from "@/components/shared/add-to-trip-button";
 import { SingleLocationMapLoader } from "@/components/map/single-location-map-loader";
+import { Reveal } from "@/components/home/reveal";
 
 // Public content changes infrequently; revalidate hourly instead of
 // rendering on every request (this page no longer reads cookies, so
@@ -28,17 +31,11 @@ export async function generateMetadata({
   params: { locale: string; slug: string };
 }): Promise<Metadata> {
   const cafe = await getCafeBySlug(slug);
-
-  if (!cafe) {
-    return {};
-  }
-
+  if (!cafe) return {};
   return {
     title: `${cafe.name} — Cafe in Hargeisa`,
     description: cafe.shortDescription,
-    alternates: {
-      canonical: `/${locale}/cafes/${cafe.slug}`,
-    },
+    alternates: { canonical: `/${locale}/cafes/${cafe.slug}` },
   };
 }
 
@@ -48,10 +45,16 @@ export default async function CafeDetailPage({
   params: { locale: Locale; slug: string };
 }) {
   const cafe = await getCafeBySlug(slug);
-
   if (!cafe) notFound();
-
   const t = await getTranslations("common");
+  const allCafes = await getCafes();
+  const similarCafes = allCafes.filter((c) => c.id !== cafe.id).slice(0, 4);
+
+  const hasCoordinates = Number.isFinite(cafe.location?.lat) && Number.isFinite(cafe.location?.lng);
+  const googleMapsHref = hasCoordinates
+    ? `https://www.google.com/maps/search/?api=1&query=${cafe.location.lat},${cafe.location.lng}`
+    : undefined;
+  const hasAmenities = cafe.wifi || cafe.workingSpace;
 
   return (
     <>
@@ -62,118 +65,170 @@ export default async function CafeDetailPage({
         ]}
       />
 
-      <div className="container-px mx-auto pt-6">
-        <Gallery
-          cover={cafe.coverImage}
-          images={cafe.gallery}
-          alt={cafe.name}
-        />
-      </div>
+      <CafeHero
+        image={cafe.coverImage}
+        name={cafe.name}
+        address={cafe.address}
+        rating={cafe.rating}
+        reviewCount={cafe.reviewCount}
+        wifi={cafe.wifi}
+        workingSpace={cafe.workingSpace}
+        featured={cafe.featured}
+      />
 
-      <div className="container-px mx-auto grid gap-10 py-10 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-10">
-          <div>
-            <h1 className="font-display text-3xl font-semibold">
-              {cafe.name}
-            </h1>
+      <DetailGallery cover={cafe.coverImage} images={cafe.gallery} alt={cafe.name} />
 
-            <p className="mt-2 flex items-center gap-1.5 text-sm text-ink/60 dark:text-sand/60">
-              <MapPin size={14} /> {cafe.address}
-            </p>
-
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              <RatingBadge
-                rating={cafe.rating}
-                reviewCount={cafe.reviewCount}
-                size="md"
-              />
-
-              {cafe.wifi && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-                  <Wifi size={12} /> Free WiFi
-                </span>
-              )}
-
-              {cafe.workingSpace && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-secondary/10 px-3 py-1 text-xs font-semibold text-secondary-700">
-                  <Laptop size={12} /> Working Space
-                </span>
-              )}
-            </div>
-
-            <p className="mt-5 text-ink/75 dark:text-sand/75 leading-relaxed">
-              {cafe.description}
-            </p>
-          </div>
+      <div className="container-px mx-auto grid gap-10 pb-28 pt-10 lg:grid-cols-3 lg:pb-10">
+        <div className="space-y-12 lg:col-span-2">
+          <Reveal>
+            <section aria-labelledby="overview-heading">
+              <h2 id="overview-heading" className="font-display text-2xl font-semibold">
+                Overview
+              </h2>
+              <p className="mt-4 leading-relaxed text-ink/75 dark:text-sand/75">{cafe.description}</p>
+            </section>
+          </Reveal>
 
           {cafe.specialDrinks.length > 0 && (
-            <div>
-              <h2 className="font-display text-xl font-semibold mb-4">
-                Special Drinks
-              </h2>
-
-              <div className="flex flex-wrap gap-2">
-                {(cafe.specialDrinks as string[]).map((d: string) => (
-                  <span
-                    key={d}
-                    className="rounded-full border border-ink/10 dark:border-white/15 px-4 py-2 text-sm"
-                  >
-                    {d}
-                  </span>
-                ))}
-              </div>
-            </div>
+            <Reveal>
+              <section aria-labelledby="specialties-heading">
+                <h2 id="specialties-heading" className="mb-5 font-display text-2xl font-semibold">
+                  Coffee Specialties
+                </h2>
+                <ul className="flex flex-wrap gap-2.5">
+                  {cafe.specialDrinks.map((drink) => (
+                    <li
+                      key={drink}
+                      className="inline-flex items-center gap-2 rounded-xl2 border border-ink/8 bg-white px-4 py-2.5 text-sm font-medium text-ink transition-colors hover:border-primary/30 dark:border-white/10 dark:bg-white/[0.03] dark:text-sand"
+                    >
+                      {drink}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            </Reveal>
           )}
 
-          <div>
-            <h2 className="font-display text-xl font-semibold mb-4">
-              {t("viewOnMap")}
-            </h2>
+          {hasAmenities && (
+            <Reveal>
+              <section aria-labelledby="amenities-heading">
+                <h2 id="amenities-heading" className="mb-5 font-display text-2xl font-semibold">
+                  {t("amenities")}
+                </h2>
+                <ul className="flex flex-wrap gap-2.5">
+                  {cafe.wifi && (
+                    <li className="inline-flex items-center gap-2 rounded-xl2 border border-ink/8 bg-white px-3.5 py-2.5 text-sm font-medium text-ink dark:border-white/10 dark:bg-white/[0.03] dark:text-sand">
+                      <Wifi size={16} className="shrink-0 text-primary" aria-hidden="true" />
+                      Free WiFi
+                    </li>
+                  )}
+                  {cafe.workingSpace && (
+                    <li className="inline-flex items-center gap-2 rounded-xl2 border border-ink/8 bg-white px-3.5 py-2.5 text-sm font-medium text-ink dark:border-white/10 dark:bg-white/[0.03] dark:text-sand">
+                      <Laptop size={16} className="shrink-0 text-primary" aria-hidden="true" />
+                      Working Space
+                    </li>
+                  )}
+                </ul>
+              </section>
+            </Reveal>
+          )}
 
-            <SingleLocationMapLoader
-              location={cafe.location}
-              label={cafe.name}
-            />
-          </div>
+          <Reveal>
+            <section aria-labelledby="location-heading">
+              <h2 id="location-heading" className="mb-5 font-display text-2xl font-semibold">
+                Location
+              </h2>
+              <div className="overflow-hidden rounded-xl3 border border-ink/8 dark:border-white/10">
+                <SingleLocationMapLoader location={cafe.location} label={cafe.name} />
+                <div className="flex flex-col gap-3 border-t border-ink/8 p-5 dark:border-white/10 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="flex items-center gap-2 text-sm text-ink/70 dark:text-sand/70">
+                    <MapPin size={16} className="shrink-0 text-primary" aria-hidden="true" />
+                    {cafe.address}
+                  </p>
+                  {googleMapsHref && (
+                    <a
+                      href={googleMapsHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-1.5 rounded-full border border-ink/15 px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
+                    >
+                      Open in Google Maps
+                      <ExternalLink size={14} aria-hidden="true" />
+                    </a>
+                  )}
+                </div>
+              </div>
+            </section>
+          </Reveal>
 
-          <div>
-            <h2 className="font-display text-xl font-semibold mb-4">
-              {t("reviews")}
-            </h2>
-
-            <ReviewsSection
-              rating={cafe.rating}
-              reviewCount={cafe.reviewCount}
-              reviews={cafe.reviews}
-            />
-
-            <div className="mt-6">
-              <ReviewForm
-                listingType="cafe"
-                listingId={cafe.id}
-                locale={locale}
-                pathToRevalidate={`/${locale}/cafes/${cafe.slug}`}
-              />
-            </div>
-          </div>
+          <Reveal>
+            <section aria-labelledby="reviews-heading">
+              <h2 id="reviews-heading" className="mb-5 font-display text-2xl font-semibold">
+                {t("reviews")}
+              </h2>
+              <ReviewsSection rating={cafe.rating} reviewCount={cafe.reviewCount} reviews={cafe.reviews} />
+              <div className="mt-6">
+                <ReviewForm
+                  listingType="cafe"
+                  listingId={cafe.id}
+                  locale={locale}
+                  pathToRevalidate={`/${locale}/cafes/${cafe.slug}`}
+                />
+              </div>
+            </section>
+          </Reveal>
         </div>
 
-        <aside className="lg:sticky lg:top-24 h-fit space-y-4 rounded-xl3 border border-ink/8 dark:border-white/10 p-6 shadow-card">
-          <AddToTripButton
+        <aside className="hidden h-fit rounded-xl3 border border-ink/8 p-6 shadow-card dark:border-white/10 lg:sticky lg:top-24 lg:block">
+          <CafeActionCard
+            cafeId={cafe.id}
+            name={cafe.name}
+            openingHours={cafe.openingHours}
+            hoursLabel={t("openingHours")}
+            phone={cafe.phone}
             locale={locale}
-            listingType="cafe"
-            listingId={cafe.id}
           />
-
-          <h3 className="font-display text-lg font-semibold flex items-center gap-2">
-            <Clock size={16} /> {t("openingHours")}
-          </h3>
-
-          <p className="text-sm text-ink/70 dark:text-sand/70">
-            {cafe.openingHours}
-          </p>
         </aside>
       </div>
+
+      {similarCafes.length > 0 && (
+        <section className="border-t border-ink/8 bg-white py-14 dark:border-white/10 dark:bg-white/[0.03] sm:py-20">
+          <div className="container-px mx-auto">
+            <Reveal>
+              <h2 className="mb-6 font-display text-2xl font-semibold sm:text-3xl">You may also like</h2>
+            </Reveal>
+            <Reveal delay={0.1}>
+              <div className="flex gap-5 overflow-x-auto pb-2 scrollbar-none sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-4">
+                {similarCafes.map((c) => (
+                  <div key={c.id} className="min-w-[272px] sm:min-w-0">
+                    <ListingCard
+                      href={`/${locale}/cafes/${c.slug}`}
+                      image={c.coverImage}
+                      title={c.name}
+                      subtitle={c.address}
+                      rating={c.rating}
+                      reviewCount={c.reviewCount}
+                      listingType="cafe"
+                      listingId={c.id}
+                      locale={locale}
+                      tag={c.wifi ? "Free WiFi" : undefined}
+                    />
+                  </div>
+                ))}
+              </div>
+            </Reveal>
+          </div>
+        </section>
+      )}
+
+      <CafeMobileActionBar
+        cafeId={cafe.id}
+        name={cafe.name}
+        openingHours={cafe.openingHours}
+        hoursLabel={t("openingHours")}
+        phone={cafe.phone}
+        locale={locale}
+      />
     </>
   );
 }
