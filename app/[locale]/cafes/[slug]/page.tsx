@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { ExternalLink, Laptop, MapPin, Wifi } from "lucide-react";
+import { ExternalLink, FileText, Laptop, MapPin, Wifi } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { getCafeBySlug, getAllCafeSlugs, getCafes } from "@/lib/data/cafes";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { CafeHero } from "@/components/shared/cafe-hero";
 import { HotelGallery as DetailGallery } from "@/components/shared/hotel-gallery";
+import { BusinessPhotoGallery } from "@/components/shared/business-photo-gallery";
+import { CAFE_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import { CafeActionCard } from "@/components/shared/cafe-action-card";
 import { CafeMobileActionBar } from "@/components/shared/cafe-mobile-action-bar";
 import { ListingCard } from "@/components/shared/listing-card";
@@ -69,6 +71,7 @@ export default async function CafeDetailPage({
 
       <CafeHero
         image={cafe.coverImage}
+        logo={cafe.logo}
         name={cafe.name}
         address={cafe.address}
         rating={cafe.rating}
@@ -107,6 +110,59 @@ export default async function CafeDetailPage({
                     </li>
                   ))}
                 </ul>
+              </section>
+            </Reveal>
+          )}
+
+          {(cafe.menuHighlights.length > 0 || cafe.menuPdfUrl) && (
+            <Reveal>
+              <section aria-labelledby="menu-heading">
+                <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+                  <h2 id="menu-heading" className="font-display text-2xl font-semibold">
+                    Menu
+                  </h2>
+                  {cafe.menuPdfUrl && (
+                    <a
+                      href={cafe.menuPdfUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-ink/15 px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
+                    >
+                      <FileText size={14} aria-hidden="true" />
+                      Download PDF Menu
+                    </a>
+                  )}
+                </div>
+                {cafe.menuHighlights.length > 0 && (
+                  <div className="divide-y divide-ink/8 overflow-hidden rounded-xl2 border border-ink/8 dark:divide-white/10 dark:border-white/10">
+                    {cafe.menuHighlights.map((item) => (
+                      <div key={item.name} className="flex items-center justify-between gap-4 p-4 sm:p-5">
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold sm:text-base">{item.name}</p>
+                          {item.description && (
+                            <p className="mt-1 text-xs text-ink/55 dark:text-sand/55 sm:text-sm">
+                              {item.description}
+                            </p>
+                          )}
+                        </div>
+                        <span className="shrink-0 font-display text-sm font-bold text-primary sm:text-base">
+                          {item.price}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            </Reveal>
+          )}
+
+          {cafe.gallery.length > 0 && (
+            <Reveal>
+              <section aria-labelledby="photo-gallery-heading">
+                <h2 id="photo-gallery-heading" className="mb-5 font-display text-2xl font-semibold">
+                  Photo Gallery
+                </h2>
+                <BusinessPhotoGallery images={cafe.gallery} alt={cafe.name} categories={CAFE_GALLERY_CATEGORIES} />
               </section>
             </Reveal>
           )}

@@ -1,7 +1,8 @@
 import type { Database } from "@/types/database";
-import type { Hotel, Restaurant, Cafe, Attraction, EventItem, Article, GalleryImage, Review } from "@/types";
+import type { Hotel, HotelRoom, Restaurant, Cafe, Attraction, EventItem, Article, GalleryImage, Review } from "@/types";
 
 type HotelRow = Database["public"]["Tables"]["hotels"]["Row"];
+type HotelRoomRow = Database["public"]["Tables"]["hotel_rooms"]["Row"];
 type RestaurantRow = Database["public"]["Tables"]["restaurants"]["Row"];
 type CafeRow = Database["public"]["Tables"]["cafes"]["Row"];
 type AttractionRow = Database["public"]["Tables"]["attractions"]["Row"];
@@ -12,8 +13,12 @@ type ReviewRow = Database["public"]["Tables"]["reviews"]["Row"];
 function toGallery(json: unknown): GalleryImage[] {
   if (!Array.isArray(json)) return [];
   return json
-    .filter((g): g is { url: string; alt?: string } => !!g && typeof g === "object" && "url" in g)
-    .map((g) => ({ url: g.url, alt: g.alt ?? "" }));
+    .filter((g): g is { url: string; alt?: string; category?: string } => !!g && typeof g === "object" && "url" in g)
+    .map((g) => ({
+      url: g.url,
+      alt: g.alt ?? "",
+      category: (g.category as GalleryImage["category"]) ?? undefined,
+    }));
 }
 
 export function mapReview(row: ReviewRow, authorName = "Guest"): Review {
@@ -23,10 +28,28 @@ export function mapReview(row: ReviewRow, authorName = "Guest"): Review {
     rating: row.rating,
     comment: row.comment ?? "",
     createdAt: row.created_at,
+    photos: toGallery((row as { photos?: unknown }).photos),
   };
 }
 
-export function mapHotel(row: HotelRow, reviews: Review[] = []): Hotel {
+export function mapHotelRoom(row: HotelRoomRow): HotelRoom {
+  return {
+    id: row.id,
+    name: row.name,
+    image: row.image ?? undefined,
+    sizeSqm: row.size_sqm ?? undefined,
+    maxGuests: row.max_guests,
+    bedType: row.bed_type ?? undefined,
+    features: row.features ?? [],
+    pricePerNight: row.price_per_night != null ? Number(row.price_per_night) : undefined,
+  };
+}
+
+export function mapHotel(
+  row: HotelRow,
+  extras: { reviews?: Review[]; rooms?: HotelRoom[]; restaurant?: Restaurant | null; cafe?: Cafe | null } = {}
+): Hotel {
+  const { reviews = [], rooms = [], restaurant = null, cafe = null } = extras;
   return {
     id: row.id,
     slug: row.slug,
@@ -46,6 +69,13 @@ export function mapHotel(row: HotelRow, reviews: Review[] = []): Hotel {
     amenities: row.amenities ?? [],
     nearbyAttractionIds: [],
     featured: row.featured,
+    logo: row.logo_url ?? undefined,
+    checkInTime: row.check_in_time ?? undefined,
+    checkOutTime: row.check_out_time ?? undefined,
+    languages: row.languages ?? [],
+    rooms,
+    restaurant,
+    cafe,
   };
 }
 
@@ -72,10 +102,13 @@ export function mapRestaurant(row: RestaurantRow, reviews: Review[] = []): Resta
     menuHighlights: menu,
     reservable: row.reservable,
     featured: row.featured,
+    logo: row.logo_url ?? undefined,
+    menuPdfUrl: row.menu_pdf_url ?? undefined,
   };
 }
 
 export function mapCafe(row: CafeRow, reviews: Review[] = []): Cafe {
+  const menu = Array.isArray(row.menu) ? (row.menu as { name: string; price: string; description?: string }[]) : [];
   return {
     id: row.id,
     slug: row.slug,
@@ -95,6 +128,9 @@ export function mapCafe(row: CafeRow, reviews: Review[] = []): Cafe {
     workingSpace: row.working_space,
     openingHours: row.opening_hours ?? "",
     featured: row.featured,
+    logo: row.logo_url ?? undefined,
+    menuHighlights: menu,
+    menuPdfUrl: row.menu_pdf_url ?? undefined,
   };
 }
 

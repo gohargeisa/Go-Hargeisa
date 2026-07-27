@@ -5,6 +5,7 @@ import { hasMeaningfulPrice } from "@/lib/utils/price-range";
 
 export function RestaurantHero({
   image,
+  logo,
   name,
   address,
   rating,
@@ -14,6 +15,7 @@ export function RestaurantHero({
   featured,
 }: {
   image: string;
+  logo?: string;
   name: string;
   address: string;
   rating: number;
@@ -72,9 +74,16 @@ export function RestaurantHero({
             </div>
           )}
 
-          <h1 className="text-balance font-display text-3xl font-bold drop-shadow-sm sm:text-4xl lg:text-5xl">
-            {name}
-          </h1>
+          <div className="flex items-center gap-3">
+            {logo && (
+              <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full border-2 border-white/70 shadow-sm sm:h-14 sm:w-14">
+                <Image src={logo} alt={`${name} logo`} fill sizes="56px" className="object-cover" />
+              </span>
+            )}
+            <h1 className="text-balance font-display text-3xl font-bold drop-shadow-sm sm:text-4xl lg:text-5xl">
+              {name}
+            </h1>
+          </div>
           <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-white/90 sm:text-base">
             <span className="flex items-center gap-1.5">
               <MapPin size={16} className="shrink-0" aria-hidden="true" />

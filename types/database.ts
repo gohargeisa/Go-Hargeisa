@@ -33,14 +33,24 @@ type ListingBase = {
 type HotelRow = ListingBase & {
   description_ar: string | null; description_so: string | null; phone: string | null;
   website: string | null; price_range: "$" | "$$" | "$$$" | "$$$$"; amenities: string[]; owner_id: string | null;
+  logo_url: string | null; check_in_time: string | null; check_out_time: string | null; languages: string[];
+  restaurant_id: string | null; cafe_id: string | null;
+};
+
+type HotelRoomRow = {
+  id: string; hotel_id: string; name: string; image: string | null; size_sqm: number | null;
+  max_guests: number; bed_type: string | null; features: string[]; price_per_night: number | null;
+  sort_order: number; created_at: string; updated_at: string;
 };
 type RestaurantRow = ListingBase & {
   phone: string | null; website: string | null; cuisine: string[]; price_range: "$" | "$$" | "$$$" | "$$$$";
   opening_hours: string | null; menu: Json; reservable: boolean; owner_id: string | null;
+  logo_url: string | null; menu_pdf_url: string | null;
 };
 type CafeRow = ListingBase & {
   phone: string | null; special_drinks: string[]; wifi: boolean; working_space: boolean;
   opening_hours: string | null; owner_id: string | null;
+  logo_url: string | null; menu: Json; menu_pdf_url: string | null;
 };
 type AttractionRow = ListingBase & {
   history: string | null; best_time_to_visit: string | null; entry_fee: string; visitor_tips: string[];
@@ -59,7 +69,8 @@ export type Database = {
       articles: Table<{ id: string; slug: string; title: string; title_ar: string | null; title_so: string | null; excerpt: string; body: string; cover_image: string; category: string; author_id: string | null; read_minutes: number; status: "draft" | "published" | "archived"; published_at: string | null; created_at: string }>;
       destinations: Table<{ id: string; slug: string; name: string; description: string; image: string; place_count: number; created_at: string }>;
       map_points: Table<{ id: string; name: string; category: string; lat: number; lng: number; created_at: string }>;
-      reviews: Table<{ id: string; listing_type: "hotel" | "restaurant" | "cafe" | "attraction"; listing_id: string; user_id: string | null; rating: number; comment: string | null; created_at: string }>;
+      reviews: Table<{ id: string; listing_type: "hotel" | "restaurant" | "cafe" | "attraction"; listing_id: string; user_id: string | null; rating: number; comment: string | null; photos: Json; created_at: string }>;
+      hotel_rooms: Table<HotelRoomRow>;
       favorites: Table<{ id: string; user_id: string | null; listing_type: "hotel" | "restaurant" | "cafe" | "attraction"; listing_id: string; created_at: string }>;
       saved_trips: Table<{ id: string; user_id: string | null; title: string; notes: string | null; created_at: string }>;
       saved_trip_items: Table<{ id: string; trip_id: string | null; listing_type: "hotel" | "restaurant" | "cafe" | "attraction"; listing_id: string; day_number: number | null; sort_order: number | null }>;

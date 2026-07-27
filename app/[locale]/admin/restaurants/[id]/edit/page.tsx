@@ -47,6 +47,10 @@ export default async function EditRestaurantPage({
     notFound();
   }
 
+  const gallery = Array.isArray(restaurant.gallery)
+    ? (restaurant.gallery as unknown as { url: string; alt?: string; category?: string }[])
+    : [];
+
   return (
     <section className="container-px mx-auto py-14">
       <h1 className="font-display text-2xl font-semibold mb-8">
@@ -63,6 +67,8 @@ export default async function EditRestaurantPage({
           shortDescription: restaurant.short_description,
           description: restaurant.description,
           coverImage: restaurant.cover_image,
+          logo: restaurant.logo_url ?? "",
+          gallery: gallery as any,
           address: restaurant.address,
           lat: restaurant.lat,
           lng: restaurant.lng,
@@ -81,6 +87,7 @@ export default async function EditRestaurantPage({
                 description?: string;
               }[])
             : [],
+          menuPdfUrl: restaurant.menu_pdf_url ?? "",
           reservable: restaurant.reservable,
           featured: restaurant.featured,
         }}

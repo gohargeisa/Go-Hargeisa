@@ -1,4 +1,9 @@
+"use client";
+
+import { useState } from "react";
+import Image from "next/image";
 import { Star, User } from "lucide-react";
+import { Lightbox, type LightboxSlide } from "@/components/shared/lightbox";
 import type { Review } from "@/types";
 
 export function ReviewsSection({
@@ -10,6 +15,12 @@ export function ReviewsSection({
   reviewCount: number;
   reviews: Review[];
 }) {
+  // Photo Reviews: reviews from every listing type carry an optional
+  // `photos` array now, but only the hotel review form currently lets
+  // guests attach any — this renders a no-op (no thumbnails shown) on
+  // restaurant/cafe/attraction pages where photos is always empty.
+  const [lightbox, setLightbox] = useState<{ slides: LightboxSlide[]; index: number } | null>(null);
+
   return (
     <div>
       <div className="flex items-center gap-4">
@@ -46,9 +57,39 @@ export function ReviewsSection({
               </div>
             </div>
             <p className="mt-3 text-sm text-ink/70 dark:text-sand/70">{r.comment}</p>
+
+            {r.photos && r.photos.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {r.photos.map((photo, i) => (
+                  <button
+                    key={`${photo.url}-${i}`}
+                    type="button"
+                    onClick={() =>
+                      setLightbox({
+                        slides: r.photos!.map((p, pi) => ({ url: p.url, alt: p.alt || `Review photo ${pi + 1}` })),
+                        index: i,
+                      })
+                    }
+                    className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                    aria-label={`View review photo ${i + 1}`}
+                  >
+                    <Image src={photo.url} alt={photo.alt || ""} fill sizes="64px" className="object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         ))}
       </div>
+
+      {lightbox && (
+        <Lightbox
+          slides={lightbox.slides}
+          index={lightbox.index}
+          onClose={() => setLightbox(null)}
+          onIndexChange={(i) => setLightbox((l) => (l ? { ...l, index: i } : l))}
+        />
+      )}
     </div>
   );
 }

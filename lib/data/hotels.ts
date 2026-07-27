@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { createPublicClient } from "@/lib/supabase/public";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
-import { mapHotel, mapReview } from "./mappers";
+import { mapHotel, mapReview, mapHotelRoom, mapRestaurant, mapCafe } from "./mappers";
 import { hotels as mockHotels } from "@/lib/mock-data";
 import type { Hotel } from "@/types";
 
@@ -65,18 +65,37 @@ async function _getHotelBySlug(slug: string): Promise<Hotel | null> {
     return mockHotels.find((h) => h.slug === slug) ?? null;
   }
 
-  const { data: reviewRows } = await supabase
-    .from("reviews")
-    .select("*, profiles(full_name)")
-    .eq("listing_type", "hotel")
-    .eq("listing_id", hotel.id)
-    .order("created_at", { ascending: false });
+  const [{ data: reviewRows }, { data: roomRows }, restaurantRow, cafeRow] = await Promise.all([
+    supabase
+      .from("reviews")
+      .select("*, profiles(full_name)")
+      .eq("listing_type", "hotel")
+      .eq("listing_id", hotel.id)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("hotel_rooms" as any)
+      .select("*")
+      .eq("hotel_id", hotel.id)
+      .order("sort_order", { ascending: true }),
+    hotel.restaurant_id
+      ? supabase.from("restaurants").select("*").eq("id", hotel.restaurant_id).single().then((r) => r.data)
+      : Promise.resolve(null),
+    hotel.cafe_id
+      ? supabase.from("cafes").select("*").eq("id", hotel.cafe_id).single().then((r) => r.data)
+      : Promise.resolve(null),
+  ]);
 
   const reviews = (reviewRows ?? []).map((r: any) =>
     mapReview(r, r.profiles?.full_name ?? "Guest")
   );
+  const rooms = (roomRows ?? []).map((r: any) => mapHotelRoom(r));
 
-  return mapHotel(hotel, reviews);
+  return mapHotel(hotel, {
+    reviews,
+    rooms,
+    restaurant: restaurantRow ? mapRestaurant(restaurantRow as any) : null,
+    cafe: cafeRow ? mapCafe(cafeRow as any) : null,
+  });
 }
 
 /** Cached per-request: dedupes calls from generateMetadata + the page itself. */

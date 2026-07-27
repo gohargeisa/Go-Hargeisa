@@ -45,6 +45,10 @@ export default async function EditCafePage({
     notFound();
   }
 
+  const gallery = Array.isArray(cafe.gallery)
+    ? (cafe.gallery as unknown as { url: string; alt?: string; category?: string }[])
+    : [];
+
   return (
     <section className="container-px mx-auto py-14">
       <h1 className="font-display text-2xl font-semibold mb-8">{t("editCafeTitle")}</h1>
@@ -58,6 +62,8 @@ export default async function EditCafePage({
           shortDescription: cafe.short_description,
           description: cafe.description,
           coverImage: cafe.cover_image,
+          logo: cafe.logo_url ?? "",
+          gallery: gallery as any,
           address: cafe.address,
           lat: cafe.lat,
           lng: cafe.lng,
@@ -66,6 +72,10 @@ export default async function EditCafePage({
           wifi: cafe.wifi,
           workingSpace: cafe.working_space,
           openingHours: cafe.opening_hours ?? "",
+          menuHighlights: Array.isArray(cafe.menu)
+            ? (cafe.menu as unknown as { name: string; price: string; description?: string }[])
+            : [],
+          menuPdfUrl: cafe.menu_pdf_url ?? "",
           featured: cafe.featured,
         }}
       />

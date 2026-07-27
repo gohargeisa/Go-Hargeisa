@@ -4,10 +4,14 @@ import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { Loader2, Plus, X } from "lucide-react";
 import { ImageUploader } from "@/components/shared/image-uploader";
+import { GalleryManager } from "@/components/admin/gallery-manager";
+import { PdfUploader } from "@/components/admin/pdf-uploader";
 import { Field, TagInput, inputClass } from "@/components/admin/form-shared";
 import { createRecord, updateRecord } from "@/lib/actions/admin";
 import { useUnsavedChangesWarning } from "@/lib/hooks/use-unsaved-changes-warning";
+import { RESTAURANT_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import type { Locale } from "@/lib/i18n/config";
+import type { GalleryImage } from "@/types";
 
 export interface RestaurantFormInput {
   slug: string;
@@ -15,6 +19,8 @@ export interface RestaurantFormInput {
   shortDescription: string;
   description: string;
   coverImage: string;
+  logo: string;
+  gallery: GalleryImage[];
   address: string;
   lat: number;
   lng: number;
@@ -24,6 +30,7 @@ export interface RestaurantFormInput {
   priceRange: "$" | "$$" | "$$$";
   openingHours: string;
   menuHighlights: { name: string; price: string; description?: string }[];
+  menuPdfUrl: string;
   reservable: boolean;
   featured: boolean;
 }
@@ -48,6 +55,8 @@ export function RestaurantForm({
     shortDescription: initial?.shortDescription ?? "",
     description: initial?.description ?? "",
     coverImage: initial?.coverImage ?? "",
+    logo: initial?.logo ?? "",
+    gallery: initial?.gallery ?? [],
     address: initial?.address ?? "",
     lat: initial?.lat ?? 9.5624,
     lng: initial?.lng ?? 44.065,
@@ -57,6 +66,7 @@ export function RestaurantForm({
     priceRange: initial?.priceRange ?? "$$",
     openingHours: initial?.openingHours ?? "",
     menuHighlights: initial?.menuHighlights ?? [],
+    menuPdfUrl: initial?.menuPdfUrl ?? "",
     reservable: initial?.reservable ?? false,
     featured: initial?.featured ?? false,
   });
@@ -98,7 +108,8 @@ export function RestaurantForm({
       short_description: form.shortDescription,
       description: form.description,
       cover_image: form.coverImage,
-      gallery: [],
+      logo_url: form.logo || null,
+      gallery: form.gallery,
       address: form.address,
       lat: form.lat,
       lng: form.lng,
@@ -108,6 +119,7 @@ export function RestaurantForm({
       price_range: form.priceRange,
       opening_hours: form.openingHours,
       menu: form.menuHighlights,
+      menu_pdf_url: form.menuPdfUrl || null,
       reservable: form.reservable,
       featured: form.featured,
     };
@@ -125,7 +137,17 @@ export function RestaurantForm({
 
   return (
     <form onSubmit={onSubmit} className="max-w-2xl space-y-6">
-      <ImageUploader folder="restaurants" value={form.coverImage} onChange={(url) => update("coverImage", url)} />
+      <div className="grid gap-6 sm:grid-cols-2">
+        <ImageUploader folder="restaurants" value={form.coverImage} onChange={(url) => update("coverImage", url)} label="Cover image" />
+        <ImageUploader folder="restaurants/logos" value={form.logo} onChange={(url) => update("logo", url)} label="Restaurant logo" rounded="rounded-full" />
+      </div>
+
+      <GalleryManager
+        folder="restaurants/gallery"
+        value={form.gallery}
+        onChange={(v) => update("gallery", v)}
+        categories={RESTAURANT_GALLERY_CATEGORIES}
+      />
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label={t("restaurantNameLabel")}>
@@ -194,6 +216,13 @@ export function RestaurantForm({
           ))}
         </div>
       </div>
+
+      <PdfUploader
+        folder="restaurants/menus"
+        value={form.menuPdfUrl}
+        onChange={(url) => update("menuPdfUrl", url)}
+        label="PDF menu (optional, shown alongside the interactive menu)"
+      />
 
       <div className="flex flex-wrap gap-6">
         <label className="flex items-center gap-2 text-sm font-medium">

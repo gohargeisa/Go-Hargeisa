@@ -3,12 +3,22 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { ExternalLink, MapPin } from "lucide-react";
+import { ExternalLink, MapPin, Navigation } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { getHotelBySlug, getAllHotelSlugs, getNearbyAttractionsForHotel, getHotels } from "@/lib/data/hotels";
+import { getSiteSettings } from "@/lib/actions/settings";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
-import { HotelHero } from "@/components/shared/hotel-hero";
-import { HotelGallery } from "@/components/shared/hotel-gallery";
+import { HotelHeaderTop } from "@/components/shared/hotel-header-top";
+import { HotelActionBar } from "@/components/shared/hotel-action-bar";
+import { HotelQuickInfoCards } from "@/components/shared/hotel-quick-info-cards";
+import { HotelGallerySlider } from "@/components/shared/hotel-gallery-slider";
+import { HotelNavTabs, type HotelNavTab } from "@/components/shared/hotel-nav-tabs";
+import { HotelOverview } from "@/components/shared/hotel-overview";
+import { HotelRoomsSection } from "@/components/shared/hotel-rooms-section";
+import { BusinessPhotoGallery } from "@/components/shared/business-photo-gallery";
+import { HOTEL_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
+import { HotelOnsiteRestaurantCard } from "@/components/shared/hotel-onsite-restaurant-card";
+import { HotelOnsiteCafeCard } from "@/components/shared/hotel-onsite-cafe-card";
 import { HotelAmenities } from "@/components/shared/hotel-amenities";
 import { HotelBookingCard } from "@/components/shared/hotel-booking-card";
 import { MobileBookingBar } from "@/components/shared/mobile-booking-bar";
@@ -53,15 +63,30 @@ export default async function HotelDetailPage({
   const t = await getTranslations("common");
   const tNav = await getTranslations("nav");
   const td = await getTranslations("detail");
-  const [nearby, allHotels] = await Promise.all([
+  const th = await getTranslations("hotelDetail");
+  const [nearby, allHotels, siteSettings] = await Promise.all([
     getNearbyAttractionsForHotel(hotel.id),
     getHotels(),
+    getSiteSettings(),
   ]);
   const similarHotels = allHotels.filter((h) => h.id !== hotel.id).slice(0, 4);
+  const whatsappFallback = (siteSettings as { whatsapp_number?: string } | null)?.whatsapp_number ?? undefined;
+
+  const navTabs: HotelNavTab[] = [
+    { id: "overview", label: td("overview") },
+    ...(hotel.rooms.length > 0 ? [{ id: "rooms", label: th("rooms") }] : []),
+    ...(hotel.gallery.length > 0 ? [{ id: "gallery", label: t("gallery") }] : []),
+    { id: "amenities", label: t("amenities") },
+    { id: "reviews", label: t("reviews") },
+    { id: "location", label: td("location") },
+  ];
 
   const hasCoordinates = Number.isFinite(hotel.location?.lat) && Number.isFinite(hotel.location?.lng);
   const googleMapsHref = hasCoordinates
     ? `https://www.google.com/maps/search/?api=1&query=${hotel.location.lat},${hotel.location.lng}`
+    : undefined;
+  const directionsHref = hasCoordinates
+    ? `https://www.google.com/maps/dir/?api=1&destination=${hotel.location.lat},${hotel.location.lng}`
     : undefined;
 
   const jsonLd = {
@@ -70,6 +95,7 @@ export default async function HotelDetailPage({
     name: hotel.name,
     description: hotel.shortDescription,
     image: hotel.coverImage,
+    logo: hotel.logo,
     address: { "@type": "PostalAddress", streetAddress: hotel.address, addressLocality: "Hargeisa" },
     telephone: hotel.phone,
     aggregateRating: {
@@ -91,31 +117,94 @@ export default async function HotelDetailPage({
         ]}
       />
 
-      <HotelHero
-        image={hotel.coverImage}
+      <HotelHeaderTop
+        logo={hotel.logo}
         name={hotel.name}
-        address={hotel.address}
         rating={hotel.rating}
         reviewCount={hotel.reviewCount}
         priceRange={hotel.priceRange}
-        featured={hotel.featured}
       />
 
-      <HotelGallery cover={hotel.coverImage} images={hotel.gallery} alt={hotel.name} />
+      <HotelActionBar name={hotel.name} phone={hotel.phone} website={hotel.website} whatsappFallback={whatsappFallback} />
 
-      <div className="container-px mx-auto grid gap-10 pb-28 pt-10 lg:grid-cols-3 lg:pb-10">
-        <div className="space-y-12 lg:col-span-2">
+      <HotelQuickInfoCards
+        rating={hotel.rating}
+        priceRange={hotel.priceRange}
+        checkInTime={hotel.checkInTime}
+        checkOutTime={hotel.checkOutTime}
+        languages={hotel.languages}
+        amenities={hotel.amenities}
+      />
+
+      <HotelGallerySlider cover={hotel.coverImage} images={hotel.gallery} alt={hotel.name} />
+
+      <div className="mt-8">
+        <HotelNavTabs tabs={navTabs} />
+      </div>
+
+      <div className="container-px mx-auto grid gap-10 pb-28 pt-10 lg:grid-cols-3 lg:gap-12 lg:pb-10">
+        <div className="space-y-14 lg:col-span-2">
           <Reveal>
-            <section aria-labelledby="overview-heading">
-              <h2 id="overview-heading" className="font-display text-2xl font-semibold">
+            <section id="overview" aria-labelledby="overview-heading" className="scroll-mt-36">
+              <h2 id="overview-heading" className="mb-5 font-display text-2xl font-semibold">
                 {td("overview")}
               </h2>
-              <p className="mt-4 leading-relaxed text-ink/75 dark:text-sand/75">{hotel.description}</p>
+              <HotelOverview
+                description={hotel.description}
+                checkInTime={hotel.checkInTime}
+                checkOutTime={hotel.checkOutTime}
+                languages={hotel.languages}
+                amenities={hotel.amenities}
+              />
             </section>
           </Reveal>
 
+          {hotel.rooms.length > 0 && (
+            <Reveal>
+              <section id="rooms" aria-labelledby="rooms-heading" className="scroll-mt-36">
+                <h2 id="rooms-heading" className="mb-5 font-display text-2xl font-semibold">
+                  {th("rooms")}
+                </h2>
+                <HotelRoomsSection rooms={hotel.rooms} website={hotel.website} phone={hotel.phone} />
+              </section>
+            </Reveal>
+          )}
+
+          {hotel.gallery.length > 0 && (
+            <Reveal>
+              <section id="gallery" aria-labelledby="photo-gallery-heading" className="scroll-mt-36">
+                <h2 id="photo-gallery-heading" className="mb-5 font-display text-2xl font-semibold">
+                  {th("photoGallery")}
+                </h2>
+                <BusinessPhotoGallery images={hotel.gallery} alt={hotel.name} categories={HOTEL_GALLERY_CATEGORIES} />
+              </section>
+            </Reveal>
+          )}
+
+          {hotel.restaurant && (
+            <Reveal>
+              <section aria-labelledby="restaurant-heading">
+                <h2 id="restaurant-heading" className="mb-5 font-display text-2xl font-semibold">
+                  {th("onsiteRestaurant")}
+                </h2>
+                <HotelOnsiteRestaurantCard restaurant={hotel.restaurant} locale={locale} viewLabel={th("viewRestaurant")} />
+              </section>
+            </Reveal>
+          )}
+
+          {hotel.cafe && (
+            <Reveal>
+              <section aria-labelledby="cafe-heading">
+                <h2 id="cafe-heading" className="mb-5 font-display text-2xl font-semibold">
+                  {th("onsiteCafe")}
+                </h2>
+                <HotelOnsiteCafeCard cafe={hotel.cafe} locale={locale} viewLabel={th("viewCafe")} />
+              </section>
+            </Reveal>
+          )}
+
           <Reveal>
-            <section aria-labelledby="amenities-heading">
+            <section id="amenities" aria-labelledby="amenities-heading" className="scroll-mt-36">
               <h2 id="amenities-heading" className="mb-5 font-display text-2xl font-semibold">
                 {t("amenities")}
               </h2>
@@ -124,7 +213,7 @@ export default async function HotelDetailPage({
           </Reveal>
 
           <Reveal>
-            <section aria-labelledby="location-heading">
+            <section id="location" aria-labelledby="location-heading" className="scroll-mt-36">
               <h2 id="location-heading" className="mb-5 font-display text-2xl font-semibold">
                 {td("location")}
               </h2>
@@ -135,17 +224,30 @@ export default async function HotelDetailPage({
                     <MapPin size={16} className="shrink-0 text-primary" aria-hidden="true" />
                     {hotel.address}
                   </p>
-                  {googleMapsHref && (
-                    <a
-                      href={googleMapsHref}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center gap-1.5 rounded-full border border-ink/15 px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
-                    >
-                      {td("openInGoogleMaps")}
-                      <ExternalLink size={14} aria-hidden="true" />
-                    </a>
-                  )}
+                  <div className="flex flex-wrap gap-2.5">
+                    {directionsHref && (
+                      <a
+                        href={directionsHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-700"
+                      >
+                        <Navigation size={14} aria-hidden="true" />
+                        {th("directions")}
+                      </a>
+                    )}
+                    {googleMapsHref && (
+                      <a
+                        href={googleMapsHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center gap-1.5 rounded-full border border-ink/15 px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
+                      >
+                        {td("openInGoogleMaps")}
+                        <ExternalLink size={14} aria-hidden="true" />
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
             </section>
@@ -163,7 +265,7 @@ export default async function HotelDetailPage({
           </Reveal>
 
           <Reveal>
-            <section aria-labelledby="reviews-heading">
+            <section id="reviews" aria-labelledby="reviews-heading" className="scroll-mt-36">
               <h2 id="reviews-heading" className="mb-5 font-display text-2xl font-semibold">
                 {t("reviews")}
               </h2>
@@ -174,6 +276,7 @@ export default async function HotelDetailPage({
                   listingId={hotel.id}
                   locale={locale}
                   pathToRevalidate={`/${locale}/hotels/${hotel.slug}`}
+                  allowPhotos
                 />
               </div>
             </section>
@@ -254,9 +357,9 @@ export default async function HotelDetailPage({
       <MobileBookingBar
         hotelId={hotel.id}
         name={hotel.name}
-        priceRange={hotel.priceRange}
         phone={hotel.phone}
         website={hotel.website}
+        whatsappFallback={whatsappFallback}
         locale={locale}
       />
     </>

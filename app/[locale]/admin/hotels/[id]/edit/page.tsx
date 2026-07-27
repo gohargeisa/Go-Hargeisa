@@ -7,6 +7,8 @@ import { requireListingsAccess } from "@/lib/supabase/guards";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { HotelForm } from "@/components/admin/hotel-form";
+import { getRestaurants } from "@/lib/data/restaurants";
+import { getCafes } from "@/lib/data/cafes";
 
 export const metadata: Metadata = { title: "Edit Hotel — Admin" };
 
@@ -48,6 +50,16 @@ export default async function EditHotelPage({
     notFound();
   }
 
+  const [restaurants, cafes, { data: roomRows }] = await Promise.all([
+    getRestaurants(),
+    getCafes(),
+    supabase.from("hotel_rooms" as any).select("*").eq("hotel_id", hotel.id).order("sort_order", { ascending: true }),
+  ]);
+
+  const gallery = Array.isArray(hotel.gallery)
+    ? (hotel.gallery as unknown as { url: string; alt?: string; category?: string }[])
+    : [];
+
   return (
     <section className="container-px mx-auto py-14">
       <h1 className="font-display text-2xl font-semibold mb-8">{t("editHotelTitle")}</h1>
@@ -55,12 +67,26 @@ export default async function EditHotelPage({
         locale={locale}
         mode="edit"
         hotelId={hotel.id}
+        restaurantOptions={restaurants.map((r) => ({ id: r.id, name: r.name }))}
+        cafeOptions={cafes.map((c) => ({ id: c.id, name: c.name }))}
+        initialRooms={(roomRows ?? []).map((r: any) => ({
+          id: r.id,
+          name: r.name,
+          image: r.image ?? "",
+          sizeSqm: r.size_sqm ?? undefined,
+          maxGuests: r.max_guests,
+          bedType: r.bed_type ?? "",
+          features: r.features ?? [],
+          pricePerNight: r.price_per_night != null ? Number(r.price_per_night) : undefined,
+        }))}
         initial={{
           slug: hotel.slug,
           name: hotel.name,
           shortDescription: hotel.short_description,
           description: hotel.description,
           coverImage: hotel.cover_image,
+          logo: hotel.logo_url ?? "",
+          gallery: gallery as any,
           address: hotel.address,
           lat: hotel.lat,
           lng: hotel.lng,
@@ -68,6 +94,11 @@ export default async function EditHotelPage({
           website: hotel.website ?? "",
           priceRange: hotel.price_range,
           amenities: hotel.amenities ?? [],
+          checkInTime: hotel.check_in_time ?? "",
+          checkOutTime: hotel.check_out_time ?? "",
+          languages: hotel.languages ?? [],
+          restaurantId: hotel.restaurant_id ?? "",
+          cafeId: hotel.cafe_id ?? "",
           featured: hotel.featured,
         }}
       />

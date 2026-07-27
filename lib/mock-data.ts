@@ -156,6 +156,7 @@ export const cafes: Cafe[] = [
     workingSpace: true,
     openingHours: "6:00 AM – 9:00 PM",
     featured: true,
+    menuHighlights: [],
   },
   {
     id: "c2",
@@ -175,6 +176,7 @@ export const cafes: Cafe[] = [
     wifi: true,
     workingSpace: false,
     openingHours: "7:00 AM – 11:00 PM",
+    menuHighlights: [],
   },
 ];
 

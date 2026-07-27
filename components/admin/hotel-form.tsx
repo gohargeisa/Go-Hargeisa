@@ -4,10 +4,14 @@ import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 import { ImageUploader } from "@/components/shared/image-uploader";
+import { GalleryManager } from "@/components/admin/gallery-manager";
+import { HOTEL_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
+import { HotelRoomsManager, type HotelRoomManagerRow } from "@/components/admin/hotel-rooms-manager";
 import { Field, TagInput, inputClass } from "@/components/admin/form-shared";
 import { createRecord, updateRecord } from "@/lib/actions/admin";
 import { useUnsavedChangesWarning } from "@/lib/hooks/use-unsaved-changes-warning";
 import type { Locale } from "@/lib/i18n/config";
+import type { GalleryImage } from "@/types";
 
 export interface HotelFormInput {
   slug: string;
@@ -15,6 +19,8 @@ export interface HotelFormInput {
   shortDescription: string;
   description: string;
   coverImage: string;
+  logo: string;
+  gallery: GalleryImage[];
   address: string;
   lat: number;
   lng: number;
@@ -22,6 +28,11 @@ export interface HotelFormInput {
   website?: string;
   priceRange: "$" | "$$" | "$$$" | "$$$$";
   amenities: string[];
+  checkInTime: string;
+  checkOutTime: string;
+  languages: string[];
+  restaurantId: string;
+  cafeId: string;
   featured: boolean;
 }
 
@@ -30,16 +41,24 @@ const AMENITY_SUGGESTIONS = [
   "Room Service", "Air Conditioning", "Gym", "Garden", "Airport Shuttle",
 ];
 
+const LANGUAGE_SUGGESTIONS = ["English", "Somali", "Arabic"];
+
 export function HotelForm({
   locale,
   mode,
   hotelId,
   initial,
+  restaurantOptions = [],
+  cafeOptions = [],
+  initialRooms = [],
 }: {
   locale: Locale;
   mode: "create" | "edit";
   hotelId?: string;
   initial?: Partial<HotelFormInput>;
+  restaurantOptions?: { id: string; name: string }[];
+  cafeOptions?: { id: string; name: string }[];
+  initialRooms?: HotelRoomManagerRow[];
 }) {
   const t = useTranslations("admin");
   const [form, setForm] = useState<HotelFormInput>({
@@ -48,6 +67,8 @@ export function HotelForm({
     shortDescription: initial?.shortDescription ?? "",
     description: initial?.description ?? "",
     coverImage: initial?.coverImage ?? "",
+    logo: initial?.logo ?? "",
+    gallery: initial?.gallery ?? [],
     address: initial?.address ?? "",
     lat: initial?.lat ?? 9.5624,
     lng: initial?.lng ?? 44.065,
@@ -55,6 +76,11 @@ export function HotelForm({
     website: initial?.website ?? "",
     priceRange: initial?.priceRange ?? "$$",
     amenities: initial?.amenities ?? [],
+    checkInTime: initial?.checkInTime ?? "",
+    checkOutTime: initial?.checkOutTime ?? "",
+    languages: initial?.languages ?? [],
+    restaurantId: initial?.restaurantId ?? "",
+    cafeId: initial?.cafeId ?? "",
     featured: initial?.featured ?? false,
   });
   const [error, setError] = useState<string | null>(null);
@@ -81,7 +107,8 @@ export function HotelForm({
       short_description: form.shortDescription,
       description: form.description,
       cover_image: form.coverImage,
-      gallery: [],
+      logo_url: form.logo || null,
+      gallery: form.gallery,
       address: form.address,
       lat: form.lat,
       lng: form.lng,
@@ -89,6 +116,11 @@ export function HotelForm({
       website: form.website || null,
       price_range: form.priceRange,
       amenities: form.amenities,
+      check_in_time: form.checkInTime || null,
+      check_out_time: form.checkOutTime || null,
+      languages: form.languages,
+      restaurant_id: form.restaurantId || null,
+      cafe_id: form.cafeId || null,
       featured: form.featured,
     };
     const revalidatePaths = [`/${locale}/admin/hotels`, `/${locale}/hotels`, `/${locale}`];
@@ -105,73 +137,123 @@ export function HotelForm({
   }
 
   return (
-    <form onSubmit={onSubmit} className="max-w-2xl space-y-6">
-      <ImageUploader folder="hotels" value={form.coverImage} onChange={(url) => update("coverImage", url)} />
+    <div className="max-w-2xl space-y-10">
+      <form onSubmit={onSubmit} className="space-y-6">
+        <div className="grid gap-6 sm:grid-cols-2">
+          <ImageUploader folder="hotels" value={form.coverImage} onChange={(url) => update("coverImage", url)} label="Cover image" />
+          <ImageUploader folder="hotels/logos" value={form.logo} onChange={(url) => update("logo", url)} label="Hotel logo" rounded="rounded-full" />
+        </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field label={t("hotelNameLabel")}>
-          <input required value={form.name} onChange={(e) => update("name", e.target.value)} className={inputClass} />
+        <GalleryManager
+          folder="hotels/gallery"
+          value={form.gallery}
+          onChange={(v) => update("gallery", v)}
+          categories={HOTEL_GALLERY_CATEGORIES}
+        />
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label={t("hotelNameLabel")}>
+            <input required value={form.name} onChange={(e) => update("name", e.target.value)} className={inputClass} />
+          </Field>
+          <Field label={t("urlSlugLabel")}>
+            <input required value={form.slug} onChange={(e) => update("slug", e.target.value)} className={inputClass} placeholder="ambassador-hotel-hargeisa" />
+          </Field>
+        </div>
+
+        <Field label={t("shortDescriptionLabel")}>
+          <input required value={form.shortDescription} onChange={(e) => update("shortDescription", e.target.value)} className={inputClass} />
         </Field>
-        <Field label={t("urlSlugLabel")}>
-          <input required value={form.slug} onChange={(e) => update("slug", e.target.value)} className={inputClass} placeholder="ambassador-hotel-hargeisa" />
+
+        <Field label={t("fullDescriptionLabel")}>
+          <textarea required rows={4} value={form.description} onChange={(e) => update("description", e.target.value)} className={inputClass} />
         </Field>
-      </div>
 
-      <Field label={t("shortDescriptionLabel")}>
-        <input required value={form.shortDescription} onChange={(e) => update("shortDescription", e.target.value)} className={inputClass} />
-      </Field>
-
-      <Field label={t("fullDescriptionLabel")}>
-        <textarea required rows={4} value={form.description} onChange={(e) => update("description", e.target.value)} className={inputClass} />
-      </Field>
-
-      <Field label={t("addressLabel")}>
-        <input required value={form.address} onChange={(e) => update("address", e.target.value)} className={inputClass} />
-      </Field>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field label={t("latitudeLabel")}>
-          <input required type="number" step="0.0001" value={form.lat} onChange={(e) => update("lat", Number(e.target.value))} className={inputClass} />
+        <Field label={t("addressLabel")}>
+          <input required value={form.address} onChange={(e) => update("address", e.target.value)} className={inputClass} />
         </Field>
-        <Field label={t("longitudeLabel")}>
-          <input required type="number" step="0.0001" value={form.lng} onChange={(e) => update("lng", Number(e.target.value))} className={inputClass} />
-        </Field>
-      </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Field label={t("phoneLabel")}>
-          <input value={form.phone} onChange={(e) => update("phone", e.target.value)} className={inputClass} />
-        </Field>
-        <Field label={t("websiteLabel")}>
-          <input value={form.website} onChange={(e) => update("website", e.target.value)} className={inputClass} />
-        </Field>
-        <Field label={t("priceRangeLabel")}>
-          <select value={form.priceRange} onChange={(e) => update("priceRange", e.target.value as HotelFormInput["priceRange"])} className={inputClass}>
-            <option value="$">$</option>
-            <option value="$$">$$</option>
-            <option value="$$$">$$$</option>
-            <option value="$$$$">$$$$</option>
-          </select>
-        </Field>
-      </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label={t("latitudeLabel")}>
+            <input required type="number" step="0.0001" value={form.lat} onChange={(e) => update("lat", Number(e.target.value))} className={inputClass} />
+          </Field>
+          <Field label={t("longitudeLabel")}>
+            <input required type="number" step="0.0001" value={form.lng} onChange={(e) => update("lng", Number(e.target.value))} className={inputClass} />
+          </Field>
+        </div>
 
-      <TagInput label={t("amenitiesLabel")} values={form.amenities} onChange={(v) => update("amenities", v)} placeholder={t("tagInputPlaceholder")} suggestions={AMENITY_SUGGESTIONS} />
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Field label={t("phoneLabel")}>
+            <input value={form.phone} onChange={(e) => update("phone", e.target.value)} className={inputClass} />
+          </Field>
+          <Field label={t("websiteLabel")}>
+            <input value={form.website} onChange={(e) => update("website", e.target.value)} className={inputClass} />
+          </Field>
+          <Field label={t("priceRangeLabel")}>
+            <select value={form.priceRange} onChange={(e) => update("priceRange", e.target.value as HotelFormInput["priceRange"])} className={inputClass}>
+              <option value="$">$</option>
+              <option value="$$">$$</option>
+              <option value="$$$">$$$</option>
+              <option value="$$$$">$$$$</option>
+            </select>
+          </Field>
+        </div>
 
-      <label className="flex items-center gap-2 text-sm font-medium">
-        <input type="checkbox" checked={form.featured} onChange={(e) => update("featured", e.target.checked)} />
-        {t("featureOnHomepage")}
-      </label>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Check-in time" hint="e.g. 14:00 or 2:00 PM">
+            <input value={form.checkInTime} onChange={(e) => update("checkInTime", e.target.value)} className={inputClass} placeholder="14:00" />
+          </Field>
+          <Field label="Check-out time" hint="e.g. 12:00 or noon">
+            <input value={form.checkOutTime} onChange={(e) => update("checkOutTime", e.target.value)} className={inputClass} placeholder="12:00" />
+          </Field>
+        </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+        <TagInput label="Languages spoken" values={form.languages} onChange={(v) => update("languages", v)} placeholder="English, Somali, Arabic…" suggestions={LANGUAGE_SUGGESTIONS} />
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary-700 transition-colors disabled:opacity-70"
-      >
-        {isPending && <Loader2 size={14} className="animate-spin" />}
-        {mode === "create" ? t("publishHotel") : t("saveChanges")}
-      </button>
-    </form>
+        <TagInput label={t("amenitiesLabel")} values={form.amenities} onChange={(v) => update("amenities", v)} placeholder={t("tagInputPlaceholder")} suggestions={AMENITY_SUGGESTIONS} />
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="On-site restaurant" hint="Optional — links to an existing restaurant listing">
+            <select value={form.restaurantId} onChange={(e) => update("restaurantId", e.target.value)} className={inputClass}>
+              <option value="">None</option>
+              {restaurantOptions.map((r) => (
+                <option key={r.id} value={r.id}>{r.name}</option>
+              ))}
+            </select>
+          </Field>
+          <Field label="On-site cafe" hint="Optional — links to an existing cafe listing">
+            <select value={form.cafeId} onChange={(e) => update("cafeId", e.target.value)} className={inputClass}>
+              <option value="">None</option>
+              {cafeOptions.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          </Field>
+        </div>
+
+        <label className="flex items-center gap-2 text-sm font-medium">
+          <input type="checkbox" checked={form.featured} onChange={(e) => update("featured", e.target.checked)} />
+          {t("featureOnHomepage")}
+        </label>
+
+        {error && <p className="text-sm text-red-600">{error}</p>}
+
+        <button
+          type="submit"
+          disabled={isPending}
+          className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary-700 transition-colors disabled:opacity-70"
+        >
+          {isPending && <Loader2 size={14} className="animate-spin" />}
+          {mode === "create" ? t("publishHotel") : t("saveChanges")}
+        </button>
+      </form>
+
+      {mode === "edit" && hotelId && (
+        <HotelRoomsManager
+          hotelId={hotelId}
+          initialRooms={initialRooms}
+          revalidatePaths={[`/${locale}/hotels/${form.slug}`, `/${locale}/admin/hotels/${hotelId}/edit`]}
+        />
+      )}
+    </div>
   );
 }

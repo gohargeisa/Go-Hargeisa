@@ -2,12 +2,16 @@
 
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { Loader2 } from "lucide-react";
+import { Loader2, Plus, X } from "lucide-react";
 import { ImageUploader } from "@/components/shared/image-uploader";
+import { GalleryManager } from "@/components/admin/gallery-manager";
+import { PdfUploader } from "@/components/admin/pdf-uploader";
 import { Field, TagInput, inputClass } from "@/components/admin/form-shared";
 import { createRecord, updateRecord } from "@/lib/actions/admin";
 import { useUnsavedChangesWarning } from "@/lib/hooks/use-unsaved-changes-warning";
+import { CAFE_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import type { Locale } from "@/lib/i18n/config";
+import type { GalleryImage } from "@/types";
 
 export interface CafeFormInput {
   slug: string;
@@ -15,6 +19,8 @@ export interface CafeFormInput {
   shortDescription: string;
   description: string;
   coverImage: string;
+  logo: string;
+  gallery: GalleryImage[];
   address: string;
   lat: number;
   lng: number;
@@ -23,6 +29,8 @@ export interface CafeFormInput {
   wifi: boolean;
   workingSpace: boolean;
   openingHours: string;
+  menuHighlights: { name: string; price: string; description?: string }[];
+  menuPdfUrl: string;
   featured: boolean;
 }
 
@@ -46,6 +54,8 @@ export function CafeForm({
     shortDescription: initial?.shortDescription ?? "",
     description: initial?.description ?? "",
     coverImage: initial?.coverImage ?? "",
+    logo: initial?.logo ?? "",
+    gallery: initial?.gallery ?? [],
     address: initial?.address ?? "",
     lat: initial?.lat ?? 9.5624,
     lng: initial?.lng ?? 44.065,
@@ -54,6 +64,8 @@ export function CafeForm({
     wifi: initial?.wifi ?? true,
     workingSpace: initial?.workingSpace ?? false,
     openingHours: initial?.openingHours ?? "",
+    menuHighlights: initial?.menuHighlights ?? [],
+    menuPdfUrl: initial?.menuPdfUrl ?? "",
     featured: initial?.featured ?? false,
   });
   const [error, setError] = useState<string | null>(null);
@@ -65,6 +77,19 @@ export function CafeForm({
   function update<K extends keyof CafeFormInput>(key: K, value: CafeFormInput[K]) {
     setForm((f) => ({ ...f, [key]: value }));
     setDirty(true);
+  }
+
+  function addMenuItem() {
+    update("menuHighlights", [...form.menuHighlights, { name: "", price: "" }]);
+  }
+  function updateMenuItem(i: number, patch: Partial<{ name: string; price: string; description?: string }>) {
+    update(
+      "menuHighlights",
+      form.menuHighlights.map((item, idx) => (idx === i ? { ...item, ...patch } : item))
+    );
+  }
+  function removeMenuItem(i: number) {
+    update("menuHighlights", form.menuHighlights.filter((_, idx) => idx !== i));
   }
 
   function onSubmit(e: React.FormEvent) {
@@ -81,7 +106,8 @@ export function CafeForm({
       short_description: form.shortDescription,
       description: form.description,
       cover_image: form.coverImage,
-      gallery: [],
+      logo_url: form.logo || null,
+      gallery: form.gallery,
       address: form.address,
       lat: form.lat,
       lng: form.lng,
@@ -90,6 +116,8 @@ export function CafeForm({
       wifi: form.wifi,
       working_space: form.workingSpace,
       opening_hours: form.openingHours,
+      menu: form.menuHighlights,
+      menu_pdf_url: form.menuPdfUrl || null,
       featured: form.featured,
     };
     const revalidatePaths = [`/${locale}/admin/cafes`, `/${locale}/cafes`, `/${locale}`];
@@ -106,7 +134,17 @@ export function CafeForm({
 
   return (
     <form onSubmit={onSubmit} className="max-w-2xl space-y-6">
-      <ImageUploader folder="cafes" value={form.coverImage} onChange={(url) => update("coverImage", url)} />
+      <div className="grid gap-6 sm:grid-cols-2">
+        <ImageUploader folder="cafes" value={form.coverImage} onChange={(url) => update("coverImage", url)} label="Cover image" />
+        <ImageUploader folder="cafes/logos" value={form.logo} onChange={(url) => update("logo", url)} label="Cafe logo" rounded="rounded-full" />
+      </div>
+
+      <GalleryManager
+        folder="cafes/gallery"
+        value={form.gallery}
+        onChange={(v) => update("gallery", v)}
+        categories={CAFE_GALLERY_CATEGORIES}
+      />
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label={t("cafeNameLabel")}>
@@ -148,6 +186,33 @@ export function CafeForm({
       </div>
 
       <TagInput label={t("specialDrinksLabel")} values={form.specialDrinks} onChange={(v) => update("specialDrinks", v)} placeholder={t("tagInputPlaceholder")} suggestions={DRINK_SUGGESTIONS} />
+
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <label className="text-sm font-semibold">{t("menuHighlightsLabel")}</label>
+          <button type="button" onClick={addMenuItem} className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
+            <Plus size={13} /> {t("addItemLabel")}
+          </button>
+        </div>
+        <div className="space-y-2">
+          {form.menuHighlights.map((item, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <input value={item.name} onChange={(e) => updateMenuItem(i, { name: e.target.value })} placeholder={t("dishNamePlaceholder")} className={inputClass} />
+              <input value={item.price} onChange={(e) => updateMenuItem(i, { price: e.target.value })} placeholder="$4" className={`${inputClass} w-24 shrink-0`} />
+              <button type="button" onClick={() => removeMenuItem(i)} aria-label={t("removeMenuItemAriaLabel")} className="shrink-0 text-ink/40 hover:text-red-500">
+                <X size={16} />
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <PdfUploader
+        folder="cafes/menus"
+        value={form.menuPdfUrl}
+        onChange={(url) => update("menuPdfUrl", url)}
+        label="PDF menu (optional, shown alongside the interactive menu)"
+      />
 
       <div className="flex flex-wrap gap-6">
         <label className="flex items-center gap-2 text-sm font-medium">

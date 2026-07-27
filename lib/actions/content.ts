@@ -64,6 +64,7 @@ export async function submitReview(input: {
   comment: string;
   locale: string;
   pathToRevalidate: string;
+  photos?: string[];
 }): Promise<{ ok: boolean; error?: string }> {
   if (!isSupabaseConfigured()) {
     return { ok: false, error: "Reviews require a connected Supabase project." };
@@ -83,7 +84,8 @@ export async function submitReview(input: {
     user_id: user.id,
     rating: input.rating,
     comment: input.comment,
-  });
+    photos: (input.photos ?? []).map((url) => ({ url })),
+  } as never);
 
   if (error) {
     if (process.env.NODE_ENV === "development") console.error("submitReview:", error.message);

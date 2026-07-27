@@ -1,6 +1,13 @@
+/**
+ * Free-form category tag for gallery photos — hotels, restaurants, and
+ * cafes each have their own category vocabulary (see
+ * lib/utils/gallery-categories.ts), so this stays a plain string rather
+ * than a shared union.
+ */
 export interface GalleryImage {
   url: string;
   alt?: string;
+  category?: string;
 }
 
 export interface Review {
@@ -9,6 +16,7 @@ export interface Review {
   rating: number;
   comment: string;
   createdAt: string;
+  photos?: GalleryImage[];
 }
 
 export interface Coordinates {
@@ -38,6 +46,17 @@ export interface Destination {
   highlights?: string[];
 }
 
+export interface HotelRoom {
+  id: string;
+  name: string;
+  image?: string;
+  sizeSqm?: number;
+  maxGuests: number;
+  bedType?: string;
+  features: string[];
+  pricePerNight?: number;
+}
+
 export interface Hotel {
   id: string;
   slug: string;
@@ -57,6 +76,13 @@ export interface Hotel {
   amenities: string[];
   nearbyAttractionIds: string[];
   featured?: boolean;
+  logo?: string;
+  checkInTime?: string;
+  checkOutTime?: string;
+  languages: string[];
+  rooms: HotelRoom[];
+  restaurant?: Restaurant | null;
+  cafe?: Cafe | null;
 }
 
 export interface RestaurantMenuItem {
@@ -86,6 +112,8 @@ export interface Restaurant {
   menuHighlights: RestaurantMenuItem[];
   reservable: boolean;
   featured?: boolean;
+  logo?: string;
+  menuPdfUrl?: string;
 }
 
 export interface Cafe {
@@ -107,6 +135,9 @@ export interface Cafe {
   workingSpace: boolean;
   openingHours: string;
   featured?: boolean;
+  logo?: string;
+  menuHighlights: RestaurantMenuItem[];
+  menuPdfUrl?: string;
 }
 
 export interface Attraction {

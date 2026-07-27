@@ -31,26 +31,28 @@ export function HotelAmenities({ amenities }: { amenities: string[] }) {
   const orderedCategories = CATEGORIES.map((c) => c.label).filter((label) => groups.has(label));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-7">
       {orderedCategories.map((category) => (
         <div key={category}>
           <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-ink/45 dark:text-sand/45">
             {category}
           </h3>
-          <ul className="mt-3 flex flex-wrap gap-2.5">
+          <div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4">
             {groups.get(category)!.map((amenity) => {
               const Icon = amenityIcon(amenity);
               return (
-                <li
+                <div
                   key={amenity}
-                  className="inline-flex items-center gap-2 rounded-xl2 border border-ink/8 bg-white px-3.5 py-2.5 text-sm font-medium text-ink transition-colors hover:border-primary/30 dark:border-white/10 dark:bg-white/[0.03] dark:text-sand"
+                  className="flex items-center gap-3 rounded-xl2 border border-ink/8 bg-white px-4 py-3.5 text-sm font-medium text-ink transition-colors hover:border-primary/30 dark:border-white/10 dark:bg-white/[0.03] dark:text-sand"
                 >
-                  <Icon size={16} className="shrink-0 text-primary" aria-hidden="true" />
-                  {amenity}
-                </li>
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                    <Icon size={17} className="text-primary" aria-hidden="true" />
+                  </span>
+                  <span className="truncate">{amenity}</span>
+                </div>
               );
             })}
-          </ul>
+          </div>
         </div>
       ))}
     </div>

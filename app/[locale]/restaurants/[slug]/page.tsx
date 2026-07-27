@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { ExternalLink, MapPin } from "lucide-react";
+import { ExternalLink, FileText, MapPin } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { getRestaurantBySlug, getAllRestaurantSlugs, getRestaurants } from "@/lib/data/restaurants";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { RestaurantHero } from "@/components/shared/restaurant-hero";
 import { HotelGallery as DetailGallery } from "@/components/shared/hotel-gallery";
+import { BusinessPhotoGallery } from "@/components/shared/business-photo-gallery";
+import { RESTAURANT_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import { RestaurantBookingCard } from "@/components/shared/restaurant-booking-card";
 import { RestaurantMobileBookingBar } from "@/components/shared/restaurant-mobile-booking-bar";
 import { ListingCard } from "@/components/shared/listing-card";
@@ -69,6 +71,7 @@ export default async function RestaurantDetailPage({
 
       <RestaurantHero
         image={restaurant.coverImage}
+        logo={restaurant.logo}
         name={restaurant.name}
         address={restaurant.address}
         rating={restaurant.rating}
@@ -91,29 +94,59 @@ export default async function RestaurantDetailPage({
             </section>
           </Reveal>
 
-          {restaurant.menuHighlights.length > 0 && (
+          {(restaurant.menuHighlights.length > 0 || restaurant.menuPdfUrl) && (
             <Reveal>
               <section aria-labelledby="menu-heading">
-                <h2 id="menu-heading" className="mb-5 font-display text-2xl font-semibold">
-                  {td("menuHighlights")}
-                </h2>
-                <div className="divide-y divide-ink/8 overflow-hidden rounded-xl2 border border-ink/8 dark:divide-white/10 dark:border-white/10">
-                  {restaurant.menuHighlights.map((item) => (
-                    <div key={item.name} className="flex items-center justify-between gap-4 p-4 sm:p-5">
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold sm:text-base">{item.name}</p>
-                        {item.description && (
-                          <p className="mt-1 text-xs text-ink/55 dark:text-sand/55 sm:text-sm">
-                            {item.description}
-                          </p>
-                        )}
-                      </div>
-                      <span className="shrink-0 font-display text-sm font-bold text-primary sm:text-base">
-                        {item.price}
-                      </span>
-                    </div>
-                  ))}
+                <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+                  <h2 id="menu-heading" className="font-display text-2xl font-semibold">
+                    {td("menuHighlights")}
+                  </h2>
+                  {restaurant.menuPdfUrl && (
+                    <a
+                      href={restaurant.menuPdfUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-ink/15 px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
+                    >
+                      <FileText size={14} aria-hidden="true" />
+                      Download PDF Menu
+                    </a>
+                  )}
                 </div>
+                {restaurant.menuHighlights.length > 0 && (
+                  <div className="divide-y divide-ink/8 overflow-hidden rounded-xl2 border border-ink/8 dark:divide-white/10 dark:border-white/10">
+                    {restaurant.menuHighlights.map((item) => (
+                      <div key={item.name} className="flex items-center justify-between gap-4 p-4 sm:p-5">
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold sm:text-base">{item.name}</p>
+                          {item.description && (
+                            <p className="mt-1 text-xs text-ink/55 dark:text-sand/55 sm:text-sm">
+                              {item.description}
+                            </p>
+                          )}
+                        </div>
+                        <span className="shrink-0 font-display text-sm font-bold text-primary sm:text-base">
+                          {item.price}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            </Reveal>
+          )}
+
+          {restaurant.gallery.length > 0 && (
+            <Reveal>
+              <section aria-labelledby="photo-gallery-heading">
+                <h2 id="photo-gallery-heading" className="mb-5 font-display text-2xl font-semibold">
+                  Photo Gallery
+                </h2>
+                <BusinessPhotoGallery
+                  images={restaurant.gallery}
+                  alt={restaurant.name}
+                  categories={RESTAURANT_GALLERY_CATEGORIES}
+                />
               </section>
             </Reveal>
           )}
