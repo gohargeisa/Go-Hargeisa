@@ -18,11 +18,19 @@
     "signOut": "تسجيل الخروج"
   },
   "hero": {
+    "premiumBadge": "الأول من نوعه",
     "eyebrow": "عاصمة صوماليلاند",
     "title": "اكتشف هرجيسا",
+    "positioning": "أول منصة سياحية شاملة لهرجيسا",
     "subtitle": "طرق تجارية عريقة، وضيافة دافئة، ومدينة تعيد بناء نفسها لتصبح واحدة من أكثر وجهات القرن الأفريقي جاذبية.",
     "searchPlaceholder": "ابحث عن فنادق، مطاعم، أماكن للزيارة…",
     "searchButton": "بحث",
+
+    "highlightHotels": "فنادق",
+    "highlightRestaurants": "مطاعم",
+    "highlightCafes": "مقاهي",
+    "highlightAttractions": "معالم",
+    "highlightEvents": "فعاليات",
 
     "hotelCardTitle": "الفنادق",
     "hotelCardDescription": "اعثر على أفضل الفنادق للإقامة في هرجيسا.",

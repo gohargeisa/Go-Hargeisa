@@ -10,14 +10,16 @@ import { toWhatsAppHref } from "@/lib/utils/whatsapp";
 import { toggleFavoriteAction } from "@/lib/actions/favorites";
 
 const ICON_BUTTON_CLASS =
-  "flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-ink/15 text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white";
+  "flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-ink/15 text-ink transition-all duration-150 hover:border-primary hover:text-primary active:scale-90 dark:border-white/20 dark:text-white";
 
 /**
  * Mobile bottom action bar for the hotel detail page — 5 buttons (spec:
  * Book Now, WhatsApp, Call Hotel, Share, Save) replacing the previous
  * single "Book Now" pill that opened a bottom sheet. Hotel-only component
  * (restaurant/cafe pages have their own separate bottom bars), safe to
- * redesign in place.
+ * redesign in place. `env(safe-area-inset-bottom)` keeps the bar clear of
+ * the home indicator on notched iPhones (app/[locale]/layout.tsx sets
+ * viewport-fit: "cover" so that value is actually non-zero there).
  */
 export function MobileBookingBar({
   hotelId,
@@ -79,7 +81,7 @@ export function MobileBookingBar({
   }
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-2 border-t border-ink/10 bg-white/95 px-3 py-2.5 shadow-[0_-8px_30px_rgba(20,30,45,0.12)] backdrop-blur-xl dark:border-white/10 dark:bg-ink/95 lg:hidden">
+    <div className="animate-fadeUp fixed inset-x-0 bottom-0 z-40 flex items-center gap-2.5 border-t border-ink/10 bg-white/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 shadow-[0_-6px_22px_rgba(20,30,45,0.08)] backdrop-blur-xl dark:border-white/10 dark:bg-ink/95 lg:hidden">
       {whatsappHref && (
         <a
           href={whatsappHref}
@@ -98,12 +100,7 @@ export function MobileBookingBar({
         </a>
       )}
 
-      <button
-        type="button"
-        onClick={onShare}
-        aria-label={t("share")}
-        className={ICON_BUTTON_CLASS}
-      >
+      <button type="button" onClick={onShare} aria-label={t("share")} className={ICON_BUTTON_CLASS}>
         {copied ? <Check size={18} aria-hidden="true" /> : <Share2 size={18} aria-hidden="true" />}
       </button>
 
@@ -114,7 +111,12 @@ export function MobileBookingBar({
         aria-label={t("save")}
         className={`${ICON_BUTTON_CLASS} disabled:opacity-60`}
       >
-        <Heart size={18} fill={favorited ? "#F4B400" : "none"} color={favorited ? "#F4B400" : "currentColor"} aria-hidden="true" />
+        <Heart
+          size={18}
+          fill={favorited ? "#F4B400" : "none"}
+          color={favorited ? "#F4B400" : "currentColor"}
+          aria-hidden="true"
+        />
       </button>
 
       <div className="min-w-0 flex-1" />
@@ -124,7 +126,7 @@ export function MobileBookingBar({
           href={booking.href}
           target={booking.external ? "_blank" : undefined}
           rel={booking.external ? "noopener noreferrer" : undefined}
-          className="inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-full bg-primary px-6 text-sm font-semibold text-white transition-colors hover:bg-primary-700"
+          className="inline-flex h-12 shrink-0 items-center justify-center gap-1.5 rounded-full bg-primary px-7 text-sm font-bold text-white transition-all duration-150 hover:bg-primary-700 active:scale-95"
         >
           {t("bookNow")}
           {booking.external && <ArrowUpRight size={15} aria-hidden="true" />}
@@ -133,7 +135,7 @@ export function MobileBookingBar({
         <button
           type="button"
           disabled
-          className="inline-flex h-11 shrink-0 cursor-not-allowed items-center justify-center rounded-full bg-primary/40 px-6 text-sm font-semibold text-white/80"
+          className="inline-flex h-12 shrink-0 cursor-not-allowed items-center justify-center rounded-full bg-primary/40 px-7 text-sm font-bold text-white/80"
         >
           {t("bookNow")}
         </button>

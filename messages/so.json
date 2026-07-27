@@ -18,11 +18,19 @@
     "signOut": "Ka Bax"
   },
   "hero": {
+    "premiumBadge": "Ta Ugu Horreysay Nooceeda",
     "eyebrow": "Caasimadda Somaliland",
     "title": "Soo Sahami Hargeysa",
+    "positioning": "Goobta Ugu Horreysa ee Dalxiiska Buuxa ee Hargeysa",
     "subtitle": "Waddooyin ganacsi oo taariikhi ah, soo dhoweyn diirran, iyo magaalo si degdeg ah u kobcaysa oo noqotay mid ka mid ah meelaha ugu soo jiidashada badan Geeska Afrika.",
     "searchPlaceholder": "Raadi hudheello, maqaayado, goobo aad booqato…",
     "searchButton": "Raadi",
+
+    "highlightHotels": "Hudheello",
+    "highlightRestaurants": "Maqaayado",
+    "highlightCafes": "Kafateeriyo",
+    "highlightAttractions": "Goobo",
+    "highlightEvents": "Dhacdooyin",
 
     "hotelCardTitle": "Hudheello",
     "hotelCardDescription": "Ka hel hudheellada ugu wanaagsan ee Hargeysa.",

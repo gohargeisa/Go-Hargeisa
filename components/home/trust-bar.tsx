@@ -1,33 +1,46 @@
-import { Star, MapPin, Globe2, ShieldCheck } from "lucide-react";
+export interface TrustStat {
+  emoji: string;
+  label: string;
+  value: string | number;
+}
 
-const stats = [
-  { icon: MapPin, value: "50+", label: "Curated places" },
-  { icon: Star, value: "4.6", label: "Average rating" },
-  { icon: Globe2, value: "3", label: "Languages" },
-  { icon: ShieldCheck, value: "100%", label: "Locally verified" },
+/**
+ * Placeholder platform-scope stats — "Growing" stands in for real counts
+ * until there's enough listing data to be worth showing. Swap in live
+ * numbers later by passing `stats` with real `value`s, e.g.
+ * `<TrustBar stats={[{ emoji: "🏨", label: "Hotels Joined", value: hotelCount }, ...]} />`
+ * — the layout (icon + big value + small label) doesn't need to change.
+ */
+const DEFAULT_STATS: TrustStat[] = [
+  { emoji: "🏨", label: "Hotels", value: "Growing" },
+  { emoji: "🍽", label: "Restaurants", value: "Growing" },
+  { emoji: "☕", label: "Cafés", value: "Growing" },
+  { emoji: "🎉", label: "Events", value: "Growing" },
+  { emoji: "📍", label: "Attractions", value: "Growing" },
 ];
 
-export function TrustBar() {
+export function TrustBar({ stats = DEFAULT_STATS }: { stats?: TrustStat[] }) {
   return (
     <div className="relative z-10 -mt-12 md:-mt-16">
       <div className="container-px mx-auto">
         <div
-          className="animate-fadeUp grid grid-cols-2 gap-px overflow-hidden rounded-xl3 border border-ink/8 bg-ink/8 shadow-[0_20px_50px_rgba(15,23,42,0.18)] backdrop-blur-xl dark:border-white/10 dark:bg-white/10 sm:grid-cols-4"
+          className="animate-fadeUp grid grid-cols-1 gap-px overflow-hidden rounded-xl3 border border-ink/8 bg-ink/8 shadow-[0_20px_50px_rgba(15,23,42,0.18)] backdrop-blur-xl dark:border-white/10 dark:bg-white/10 sm:grid-cols-3 lg:grid-cols-5"
           style={{ animationDelay: "150ms", animationFillMode: "backwards" }}
         >
-          {stats.map(({ icon: Icon, value, label }) => (
+          {stats.map(({ emoji, label, value }) => (
             <div
               key={label}
               className="group flex items-center gap-3.5 bg-white/95 p-5 transition-colors duration-300 hover:bg-primary/5 dark:bg-ink/95 dark:hover:bg-primary/10 md:p-6"
             >
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 text-primary transition-transform duration-300 group-hover:scale-110 dark:from-primary/25 dark:to-primary/10">
-                <Icon size={19} aria-hidden="true" />
+              <span
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 text-xl transition-transform duration-300 group-hover:scale-110 dark:from-primary/25 dark:to-primary/10"
+                aria-hidden="true"
+              >
+                {emoji}
               </span>
               <div className="min-w-0 leading-tight">
-                <p className="font-display text-xl font-bold">{value}</p>
-                <p className="truncate text-xs text-ink/55 dark:text-sand/55">
-                  {label}
-                </p>
+                <p className="font-display text-lg font-bold">{value}</p>
+                <p className="truncate text-xs text-ink/55 dark:text-sand/55">{label}</p>
               </div>
             </div>
           ))}

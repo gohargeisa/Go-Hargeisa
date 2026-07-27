@@ -18,11 +18,19 @@
     "signOut": "Sign Out"
   },
   "hero": {
+    "premiumBadge": "First of Its Kind",
     "eyebrow": "The Capital of Somaliland",
     "title": "Discover Hargeisa",
+    "positioning": "The First All-in-One Tourism Platform for Hargeisa",
     "subtitle": "Ancient trade routes, warm hospitality, and a city rebuilding itself into one of the Horn of Africa's most compelling destinations.",
     "searchPlaceholder": "Search hotels, restaurants, places to visit…",
     "searchButton": "Search",
+
+    "highlightHotels": "Hotels",
+    "highlightRestaurants": "Restaurants",
+    "highlightCafes": "Cafés",
+    "highlightAttractions": "Attractions",
+    "highlightEvents": "Events",
 
     "hotelCardTitle": "Hotels",
     "hotelCardDescription": "Stay at trusted hotels across Hargeisa.",

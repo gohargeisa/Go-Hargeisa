@@ -136,6 +136,7 @@ export const viewport: Viewport = {
   themeColor: "#0B5ED7",
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default async function LocaleLayout({

@@ -36,6 +36,14 @@ const categoryCards = [
   },
 ] as const;
 
+const highlightPills = [
+  { emoji: "🏨", labelKey: "highlightHotels" },
+  { emoji: "🍽", labelKey: "highlightRestaurants" },
+  { emoji: "☕", labelKey: "highlightCafes" },
+  { emoji: "📍", labelKey: "highlightAttractions" },
+  { emoji: "🎉", labelKey: "highlightEvents" },
+] as const;
+
 type Category = (typeof categoryCards)[number]["key"];
 
 const fadeUp = {
@@ -84,14 +92,25 @@ export function Hero({ locale }: { locale: Locale }) {
           initial={initial}
           animate="show"
           variants={fadeUp}
-          className="inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] backdrop-blur-md"
+          className="inline-flex items-center gap-2 rounded-full border border-primary-300/50 bg-gradient-to-r from-primary-500/25 via-white/10 to-primary-500/25 px-4 py-1.5 text-xs font-bold tracking-wide text-white shadow-[0_8px_24px_rgba(245,158,11,0.25)] backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.03] hover:shadow-[0_12px_32px_rgba(245,158,11,0.35)]"
+        >
+          <span aria-hidden="true">🥇</span>
+          {t("premiumBadge")}
+        </motion.span>
+
+        <motion.span
+          custom={1}
+          initial={initial}
+          animate="show"
+          variants={fadeUp}
+          className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] backdrop-blur-md"
         >
           <MapPin size={13} aria-hidden="true" />
           {t("eyebrow")}
         </motion.span>
 
         <motion.h1
-          custom={1}
+          custom={2}
           initial={initial}
           animate="show"
           variants={fadeUp}
@@ -101,17 +120,45 @@ export function Hero({ locale }: { locale: Locale }) {
         </motion.h1>
 
         <motion.p
-          custom={2}
+          custom={3}
           initial={initial}
           animate="show"
           variants={fadeUp}
-          className="mt-5 max-w-xl text-balance text-base text-white/85 md:text-lg"
+          className="mt-4 max-w-2xl text-balance font-display text-lg font-semibold text-white/95 sm:text-xl md:text-2xl"
+        >
+          {t("positioning")}
+        </motion.p>
+
+        <motion.p
+          custom={4}
+          initial={initial}
+          animate="show"
+          variants={fadeUp}
+          className="mt-4 max-w-xl text-balance text-base text-white/85 md:text-lg"
         >
           {t("subtitle")}
         </motion.p>
 
+        <motion.div
+          custom={5}
+          initial={initial}
+          animate="show"
+          variants={fadeUp}
+          className="mt-6 flex flex-wrap items-center justify-center gap-2.5 sm:gap-3"
+        >
+          {highlightPills.map(({ emoji, labelKey }) => (
+            <span
+              key={labelKey}
+              className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:border-white/40 hover:bg-white/20"
+            >
+              <span aria-hidden="true">{emoji}</span>
+              {t(labelKey)}
+            </span>
+          ))}
+        </motion.div>
+
         <motion.form
-          custom={3}
+          custom={6}
           initial={initial}
           animate="show"
           variants={fadeUp}
@@ -150,7 +197,7 @@ export function Hero({ locale }: { locale: Locale }) {
         </motion.form>
 
         <motion.div
-          custom={4}
+          custom={7}
           initial={initial}
           animate="show"
           variants={fadeUp}

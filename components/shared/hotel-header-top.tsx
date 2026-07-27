@@ -8,8 +8,8 @@ import { hotelCategoryLabel } from "@/lib/utils/hotel-category";
  * replaces the old image-overlay hero title (components/shared/hotel-hero.tsx,
  * now unused) per the spec's "logo above name" layout, while reusing the
  * exact same font-display / primary / accent tokens as the rest of the site.
- * Logo styled as a small "luxury badge" (fixed size, thin white ring, soft
- * glass shadow, hover lift) per the premium-polish passes.
+ * Logo styled as a small "luxury badge" (fixed size, hairline white ring,
+ * layered shadow, hover lift) per the premium-polish passes.
  */
 export function HotelHeaderTop({
   logo,
@@ -27,18 +27,19 @@ export function HotelHeaderTop({
   return (
     <Reveal>
       <div className="container-px mx-auto flex flex-col items-center pt-8 text-center sm:pt-12">
-        <div className="group relative mb-5 h-[108px] w-[108px] shrink-0 overflow-hidden rounded-full border-2 border-white bg-white shadow-glass transition-all duration-300 ease-out hover:-translate-y-0.5 hover:scale-105 hover:shadow-card dark:border-white/90 dark:bg-white/5 sm:h-32 sm:w-32">
+        <div className="group relative mb-5 h-[120px] w-[120px] shrink-0 overflow-hidden rounded-full border border-white bg-white shadow-[0_4px_12px_rgba(15,23,42,0.10),0_14px_34px_rgba(15,23,42,0.14)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:scale-105 hover:shadow-[0_6px_16px_rgba(15,23,42,0.12),0_18px_40px_rgba(15,23,42,0.18)] dark:border-white/90 dark:bg-white/5 sm:h-[140px] sm:w-[140px]">
           {logo ? (
             <Image
               src={logo}
               alt={`${name} logo`}
               fill
-              sizes="128px"
+              sizes="140px"
+              quality={90}
               className="object-cover transition-transform duration-300 ease-out group-hover:scale-110"
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/15 via-secondary/10 to-primary/5 dark:from-primary/20 dark:via-secondary/20 dark:to-white/5">
-              <Building2 size={36} strokeWidth={1.5} className="text-primary/50" aria-hidden="true" />
+              <Building2 size={40} strokeWidth={1.5} className="text-primary/50" aria-hidden="true" />
             </div>
           )}
         </div>
@@ -57,16 +58,15 @@ export function HotelHeaderTop({
           )}
         </div>
 
-        <p className="mt-2.5 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm font-medium text-ink/55 dark:text-sand/55">
-          <span className="font-semibold text-ink/75 dark:text-sand/75">{hotelCategoryLabel(priceRange)}</span>
-          <span aria-hidden="true" className="text-ink/25 dark:text-sand/25">
-            •
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <MapPin size={13} className="text-primary" aria-hidden="true" />
+        <div className="mt-2.5 flex flex-col items-center gap-1">
+          <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink/80 dark:text-sand/80">
+            <MapPin size={14} className="shrink-0 text-primary" aria-hidden="true" />
             Hargeisa, Somaliland
           </span>
-        </p>
+          <span className="text-xs font-medium uppercase tracking-wide text-ink/45 dark:text-sand/45">
+            {hotelCategoryLabel(priceRange)}
+          </span>
+        </div>
       </div>
     </Reveal>
   );

@@ -74,8 +74,8 @@ export function HotelGallerySlider({
   }, [emblaApi]);
 
   return (
-    <div className="container-px mx-auto pt-7 sm:pt-8">
-      <h2 className="mb-3 font-display text-lg font-semibold text-ink dark:text-white sm:text-xl">
+    <div className="container-px mx-auto pt-4 sm:pt-8">
+      <h2 className="mb-2.5 font-display text-lg font-semibold text-ink dark:text-white sm:mb-3 sm:text-xl">
         {tc("gallery")}
         {slides.length > 1 && (
           <span className="ms-2 font-body text-sm font-medium text-ink/45 dark:text-sand/45">
@@ -89,7 +89,7 @@ export function HotelGallerySlider({
             {slides.map((s, i) => (
               <div
                 key={i}
-                className="relative h-[46vh] max-h-[520px] min-h-[280px] w-full shrink-0 grow-0 basis-full sm:h-[52vh]"
+                className="relative h-[50vh] max-h-[520px] min-h-[300px] w-full shrink-0 grow-0 basis-full sm:h-[54vh]"
               >
                 {!loaded[i] && (
                   <div className="absolute inset-0 animate-pulse bg-ink/10 dark:bg-white/10" aria-hidden="true" />
@@ -103,6 +103,10 @@ export function HotelGallerySlider({
                   sizes="100vw"
                   onLoad={() => setLoaded((l) => ({ ...l, [i]: true }))}
                   className={`object-cover transition-opacity duration-500 ${loaded[i] ? "opacity-100" : "opacity-0"}`}
+                />
+                <div
+                  className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent"
+                  aria-hidden="true"
                 />
               </div>
             ))}
