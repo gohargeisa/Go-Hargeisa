@@ -17,6 +17,56 @@ export interface Review {
   comment: string;
   createdAt: string;
   photos?: GalleryImage[];
+  ownerReply?: string;
+  ownerReplyAt?: string;
+  isReported?: boolean;
+}
+
+/** Listing types a `business_owner` profile can currently own/manage — see lib/data/business.ts. */
+export type BusinessListingType = "hotel" | "restaurant" | "cafe";
+
+export interface Booking {
+  id: string;
+  hotelId: string;
+  roomId?: string;
+  roomName?: string;
+  guestName: string;
+  guestPhone?: string;
+  guestEmail?: string;
+  guestsCount: number;
+  checkIn: string;
+  checkOut: string;
+  status: "pending" | "confirmed" | "cancelled" | "completed";
+  notes?: string;
+  createdAt: string;
+}
+
+export interface BusinessMetricEvent {
+  id: string;
+  listingType: BusinessListingType;
+  listingId: string;
+  eventType: "view" | "website_click" | "call_click" | "whatsapp_click";
+  createdAt: string;
+}
+
+export interface BusinessSubscription {
+  id: string;
+  listingType: BusinessListingType;
+  listingId: string;
+  planTier: "standard" | "premium";
+  renewsAt?: string;
+}
+
+export interface BusinessMessage {
+  id: string;
+  listingType: BusinessListingType;
+  listingId: string;
+  senderName: string;
+  senderEmail?: string;
+  senderPhone?: string;
+  message: string;
+  isRead: boolean;
+  createdAt: string;
 }
 
 export interface Coordinates {

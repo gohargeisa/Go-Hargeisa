@@ -46,7 +46,7 @@ export function UserMenu({
       >
         {avatarUrl ? (
           <span className="relative h-7 w-7 shrink-0 overflow-hidden rounded-full">
-            <Image src={avatarUrl} alt="" fill sizes="28px" className="object-cover" />
+            <Image src={avatarUrl} alt={name} fill sizes="28px" className="object-cover" />
           </span>
         ) : (
           <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white">
@@ -83,13 +83,22 @@ export function UserMenu({
           >
             <Settings size={15} /> {t("settings")}
           </Link>
-          {(isOwner || isBusinessOwner) && (
+          {isBusinessOwner && (
             <Link
-              href={`/${locale}/admin${isOwner ? "" : "/hotels"}`}
+              href={`/${locale}/business`}
               onClick={() => setOpen(false)}
               className="flex items-center gap-2.5 px-4 py-3 text-sm hover:bg-ink/5 dark:hover:bg-white/10"
             >
-              <ShieldCheck size={15} /> {isOwner ? t("adminDashboard") : t("manageListings")}
+              <ShieldCheck size={15} /> {t("manageListings")}
+            </Link>
+          )}
+          {isOwner && (
+            <Link
+              href={`/${locale}/admin`}
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2.5 px-4 py-3 text-sm hover:bg-ink/5 dark:hover:bg-white/10"
+            >
+              <ShieldCheck size={15} /> {t("adminDashboard")}
             </Link>
           )}
           <div className="border-t border-ink/8 dark:border-white/10 px-4 py-3">

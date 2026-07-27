@@ -8,6 +8,7 @@ import type { Locale } from "@/lib/i18n/config";
 import { getHotelBySlug, getAllHotelSlugs, getNearbyAttractionsForHotel, getHotels } from "@/lib/data/hotels";
 import { getSiteSettings } from "@/lib/actions/settings";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
+import { ViewTracker } from "@/components/shared/view-tracker";
 import { HotelHeaderTop } from "@/components/shared/hotel-header-top";
 import { HotelActionBar } from "@/components/shared/hotel-action-bar";
 import { HotelQuickInfoCards } from "@/components/shared/hotel-quick-info-cards";
@@ -109,6 +110,7 @@ export default async function HotelDetailPage({
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <ViewTracker listingType="hotel" listingId={hotel.id} />
 
       <Breadcrumbs
         items={[
@@ -125,7 +127,7 @@ export default async function HotelDetailPage({
         priceRange={hotel.priceRange}
       />
 
-      <HotelActionBar name={hotel.name} phone={hotel.phone} website={hotel.website} whatsappFallback={whatsappFallback} />
+      <HotelActionBar hotelId={hotel.id} name={hotel.name} phone={hotel.phone} website={hotel.website} whatsappFallback={whatsappFallback} />
 
       <HotelQuickInfoCards
         rating={hotel.rating}

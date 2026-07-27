@@ -40,7 +40,7 @@ export default async function middleware(request: NextRequest) {
       const locale = segments[0];
       const section = segments[1];
 
-      if (section === "dashboard" || section === "admin") {
+      if (section === "dashboard" || section === "admin" || section === "business") {
         if (!user) {
           const loginUrl = new URL(`/${locale}/auth/login`, request.url);
           loginUrl.searchParams.set("next", request.nextUrl.pathname);
@@ -63,6 +63,24 @@ export default async function middleware(request: NextRequest) {
           const allowed = role === "owner" || (isBusinessSection && role === "business_owner");
 
           if (!allowed) {
+            return NextResponse.redirect(new URL(`/${locale}`, request.url));
+          }
+        }
+
+        // /business is the dedicated business-owner dashboard — same
+        // owner-or-business_owner door as the admin listings sections,
+        // just without the per-section allowlist (every /business/* page
+        // is available to both roles; ownership of individual data is
+        // still scoped by RLS + lib/data/business.ts's owner_id filters).
+        if (section === "business") {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", user.id)
+            .single();
+
+          const role = profile?.role;
+          if (role !== "owner" && role !== "business_owner") {
             return NextResponse.redirect(new URL(`/${locale}`, request.url));
           }
         }

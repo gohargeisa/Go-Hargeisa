@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { ChevronLeft, ChevronRight, Expand } from "lucide-react";
 import type { GalleryImage } from "@/types";
 import { Lightbox, type LightboxSlide } from "@/components/shared/lightbox";
+import { SHIMMER_BLUR_DATA_URL } from "@/lib/utils/shimmer";
 
 const AUTOPLAY_MS = 5000;
 
@@ -101,6 +102,8 @@ export function HotelGallerySlider({
                   priority={i === 0}
                   quality={90}
                   sizes="100vw"
+                  placeholder="blur"
+                  blurDataURL={SHIMMER_BLUR_DATA_URL}
                   onLoad={() => setLoaded((l) => ({ ...l, [i]: true }))}
                   className={`object-cover transition-opacity duration-500 ${loaded[i] ? "opacity-100" : "opacity-0"}`}
                 />

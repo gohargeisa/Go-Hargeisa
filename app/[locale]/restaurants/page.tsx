@@ -38,6 +38,12 @@ export default async function RestaurantsPage({
   const t = await getTranslations({ locale, namespace: "comingSoon" });
   const tNav = await getTranslations({ locale, namespace: "nav" });
 
+  // "Coming soon" only applies when there are truly no listings yet — a
+  // search that legitimately matches nothing should show a normal
+  // no-results state (handled inside RestaurantsPageClient), not tell the
+  // searching user the whole category doesn't exist.
+  const showComingSoon = restaurants.length === 0 && !searchParams.q;
+
   return (
     <>
       <PageHero
@@ -46,7 +52,7 @@ export default async function RestaurantsPage({
   image="/images/restaurants/sultan/hero.png"
 />
 
-      {restaurants.length === 0 ? (
+      {showComingSoon ? (
         <ComingSoonSection type="restaurant" locale={locale} />
       ) : (
         <RestaurantsPageClient locale={locale} initialRestaurants={restaurants} searchParams={searchParams} />

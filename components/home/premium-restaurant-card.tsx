@@ -104,7 +104,7 @@ function PremiumRestaurantCardBase({
                 fill
                 sizes="(max-width: 767px) 88vw, (max-width: 1024px) 45vw, 340px"
                 onLoad={() => setLoaded(true)}
-                className={`object-cover transition-transform duration-700 ease-out group-hover:scale-110 ${
+                className={`object-cover transition-transform duration-500 ease-out group-hover:scale-105 ${
                   loaded ? "opacity-100" : "opacity-0"
                 }`}
               />
@@ -122,7 +122,7 @@ function PremiumRestaurantCardBase({
           <Link
             href={href}
             aria-label={name}
-            className="absolute inset-0 z-0 flex items-center justify-center bg-gradient-to-br from-primary/15 via-secondary/10 to-primary/5 transition-transform duration-700 ease-out group-hover:scale-110 dark:from-primary/20 dark:via-secondary/20 dark:to-white/5"
+            className="absolute inset-0 z-0 flex items-center justify-center bg-gradient-to-br from-primary/15 via-secondary/10 to-primary/5 transition-transform duration-500 ease-out group-hover:scale-105 dark:from-primary/20 dark:via-secondary/20 dark:to-white/5"
           >
             <UtensilsCrossed size={44} strokeWidth={1.5} className="text-primary/40" aria-hidden="true" />
           </Link>

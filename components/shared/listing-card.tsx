@@ -22,6 +22,7 @@ export function ListingCard({
   const t = useTranslations("listings");
   const [favorited, setFavorited] = useState(initiallyFavorited);
   const [isPending, startTransition] = useTransition();
+  const [loaded, setLoaded] = useState(false);
   const router = useRouter();
 
   function onToggleFavorite(event: React.MouseEvent) {
@@ -47,12 +48,14 @@ export function ListingCard({
       className="group flex h-full w-full min-w-[272px] flex-col overflow-hidden rounded-2xl border border-ink/8 bg-white shadow-[0_10px_30px_rgba(20,30,45,0.08)] transition-all duration-300 hover:-translate-y-1 hover:border-primary/25 hover:shadow-[0_18px_42px_rgba(20,30,45,0.16)] dark:border-white/10 dark:bg-white/[0.04]"
     >
       <div className="relative h-44 overflow-hidden sm:h-48">
+        {!loaded && <div className="absolute inset-0 animate-pulse bg-ink/10 dark:bg-white/10" aria-hidden="true" />}
         <Image
           src={image}
           alt={title}
           fill
           sizes="(max-width: 767px) 78vw, (max-width: 1024px) 33vw, 25vw"
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
+          onLoad={() => setLoaded(true)}
+          className={`object-cover transition-all duration-500 group-hover:scale-105 ${loaded ? "opacity-100" : "opacity-0"}`}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
         <div className="absolute start-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1.5 text-xs font-bold text-ink shadow-sm backdrop-blur">

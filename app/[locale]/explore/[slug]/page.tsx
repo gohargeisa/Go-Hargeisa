@@ -34,7 +34,7 @@ export default async function DestinationDetailPage({
   return (
     <>
       <section className="relative h-72 md:h-96 w-full overflow-hidden">
-        <Image src={destination.image} alt={destination.name} fill priority className="object-cover" />
+        <Image src={destination.image} alt={destination.name} fill priority sizes="100vw" className="object-cover" />
         <div className="absolute inset-0 bg-hero-gradient" />
         <div className="relative z-10 flex h-full flex-col items-center justify-center container-px text-center text-white">
           <h1 className="font-display text-3xl md:text-4xl font-semibold">{destination.name}</h1>

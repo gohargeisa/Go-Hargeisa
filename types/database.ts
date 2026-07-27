@@ -57,6 +57,30 @@ type AttractionRow = ListingBase & {
   category: "landmark" | "museum" | "market" | "nature" | "religious";
 };
 
+type BusinessListingType = "hotel" | "restaurant" | "cafe";
+
+type BookingRow = {
+  id: string; hotel_id: string; room_id: string | null; guest_name: string; guest_phone: string | null;
+  guest_email: string | null; guests_count: number; check_in: string; check_out: string;
+  status: "pending" | "confirmed" | "cancelled" | "completed"; notes: string | null;
+  created_at: string; updated_at: string;
+};
+
+type BusinessMetricEventRow = {
+  id: string; listing_type: BusinessListingType; listing_id: string;
+  event_type: "view" | "website_click" | "call_click" | "whatsapp_click"; created_at: string;
+};
+
+type BusinessSubscriptionRow = {
+  id: string; listing_type: BusinessListingType; listing_id: string;
+  plan_tier: "standard" | "premium"; renews_at: string | null; created_at: string; updated_at: string;
+};
+
+type BusinessMessageRow = {
+  id: string; listing_type: BusinessListingType; listing_id: string; sender_name: string;
+  sender_email: string | null; sender_phone: string | null; message: string; is_read: boolean; created_at: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -69,8 +93,12 @@ export type Database = {
       articles: Table<{ id: string; slug: string; title: string; title_ar: string | null; title_so: string | null; excerpt: string; body: string; cover_image: string; category: string; author_id: string | null; read_minutes: number; status: "draft" | "published" | "archived"; published_at: string | null; created_at: string }>;
       destinations: Table<{ id: string; slug: string; name: string; description: string; image: string; place_count: number; created_at: string }>;
       map_points: Table<{ id: string; name: string; category: string; lat: number; lng: number; created_at: string }>;
-      reviews: Table<{ id: string; listing_type: "hotel" | "restaurant" | "cafe" | "attraction"; listing_id: string; user_id: string | null; rating: number; comment: string | null; photos: Json; created_at: string }>;
+      reviews: Table<{ id: string; listing_type: "hotel" | "restaurant" | "cafe" | "attraction"; listing_id: string; user_id: string | null; rating: number; comment: string | null; photos: Json; owner_reply: string | null; owner_reply_at: string | null; is_reported: boolean; created_at: string }>;
       hotel_rooms: Table<HotelRoomRow>;
+      bookings: Table<BookingRow>;
+      business_metric_events: Table<BusinessMetricEventRow>;
+      business_subscriptions: Table<BusinessSubscriptionRow>;
+      business_messages: Table<BusinessMessageRow>;
       favorites: Table<{ id: string; user_id: string | null; listing_type: "hotel" | "restaurant" | "cafe" | "attraction"; listing_id: string; created_at: string }>;
       saved_trips: Table<{ id: string; user_id: string | null; title: string; notes: string | null; created_at: string }>;
       saved_trip_items: Table<{ id: string; trip_id: string | null; listing_type: "hotel" | "restaurant" | "cafe" | "attraction"; listing_id: string; day_number: number | null; sort_order: number | null }>;

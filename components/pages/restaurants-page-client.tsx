@@ -2,10 +2,12 @@
 
 import { useMemo } from "react";
 import { useTranslations } from "next-intl";
+import { SearchX } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { ListingCard } from "@/components/shared/listing-card";
 import { SearchWithin } from "@/components/shared/search-within";
 import { ListingFilters, type FilterOptions } from "@/components/shared/listing-filters";
+import { EmptyState } from "@/components/shared/empty-state";
 import { filterListings, getUniqueCuisines } from "@/lib/utils/filter-listings";
 
 interface Restaurant {
@@ -88,12 +90,7 @@ export function RestaurantsPageClient({
       </div>
 
       {filteredRestaurants.total === 0 ? (
-        <div className="mt-12 rounded-2xl border border-dashed border-ink/20 bg-ink/5 p-12 text-center dark:border-white/20 dark:bg-white/[0.02]">
-          <h3 className="font-display text-lg font-semibold">{t("noRestaurantsMatch")}</h3>
-          <p className="mt-2 text-sm text-ink/60 dark:text-sand/60">
-            {t("adjustFilters")}
-          </p>
-        </div>
+        <EmptyState icon={SearchX} title={t("noRestaurantsMatch")} description={t("adjustFilters")} className="mt-12" />
       ) : (
         <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
           {/* Filters Sidebar */}

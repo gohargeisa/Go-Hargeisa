@@ -21,6 +21,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
         {t("description")}
       </p>
       <button
+        type="button"
         onClick={reset}
         className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary-700 transition-colors"
       >

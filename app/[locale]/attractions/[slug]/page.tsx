@@ -70,7 +70,7 @@ export default async function AttractionDetailPage({
       </div>
 
       <div className="container-px mx-auto grid gap-10 py-10 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-10">
+        <div className="lg:col-span-2 space-y-14">
           <div>
             <span className="rounded-full bg-secondary/10 px-3 py-1 text-xs font-semibold uppercase text-secondary-700">
               {attraction.category}
@@ -190,7 +190,7 @@ function NearbyRow({ href, image, name }: { href: string; image: string; name: s
   return (
     <Link href={href} className="flex items-center gap-3 rounded-xl border border-ink/8 dark:border-white/10 p-3 hover:border-primary/40 transition-colors">
       <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg">
-        <Image src={image} alt={name} fill className="object-cover" />
+        <Image src={image} alt={name} fill sizes="48px" className="object-cover" />
       </div>
       <p className="text-sm font-medium">{name}</p>
     </Link>

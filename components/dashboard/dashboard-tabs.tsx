@@ -7,6 +7,7 @@ import { Bell, Compass, Heart, MapIcon, MessageSquare, Settings as SettingsIcon,
 import type { Locale } from "@/lib/i18n/config";
 import { ListingCard } from "@/components/shared/listing-card";
 import { HotelCard } from "@/components/shared/hotel-card";
+import { EmptyState } from "@/components/shared/empty-state";
 import { SavedTripsPanel } from "@/components/dashboard/saved-trips-panel";
 import { ReviewsPanel } from "@/components/dashboard/reviews-panel";
 import { ProfilePanel } from "@/components/dashboard/profile-panel";
@@ -121,8 +122,4 @@ export function DashboardTabs({
       </div>
     </div>
   );
-}
-
-function EmptyState({ icon: Icon, title, description }: { icon: typeof Compass; title: string; description: string }) {
-  return <div className="flex min-h-56 flex-col items-center justify-center rounded-2xl border border-dashed border-primary/25 bg-primary/[0.035] px-6 text-center dark:bg-primary/[0.08]"><span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-primary shadow-sm dark:bg-ink"><Icon size={22} /></span><h3 className="mt-4 font-display text-xl font-semibold">{title}</h3><p className="mt-2 max-w-sm text-sm leading-6 text-ink/55 dark:text-sand/60">{description}</p></div>;
 }

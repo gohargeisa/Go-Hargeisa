@@ -84,7 +84,7 @@ export default async function RestaurantDetailPage({
       <DetailGallery cover={restaurant.coverImage} images={restaurant.gallery} alt={restaurant.name} />
 
       <div className="container-px mx-auto grid gap-10 pb-28 pt-10 lg:grid-cols-3 lg:pb-10">
-        <div className="space-y-12 lg:col-span-2">
+        <div className="space-y-14 lg:col-span-2">
           <Reveal>
             <section aria-labelledby="overview-heading">
               <h2 id="overview-heading" className="font-display text-2xl font-semibold">

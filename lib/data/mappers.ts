@@ -29,6 +29,9 @@ export function mapReview(row: ReviewRow, authorName = "Guest"): Review {
     comment: row.comment ?? "",
     createdAt: row.created_at,
     photos: toGallery((row as { photos?: unknown }).photos),
+    ownerReply: row.owner_reply ?? undefined,
+    ownerReplyAt: row.owner_reply_at ?? undefined,
+    isReported: row.is_reported,
   };
 }
 

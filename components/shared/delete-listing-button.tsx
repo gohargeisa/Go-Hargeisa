@@ -37,7 +37,7 @@ export function DeleteListingButton({ table, id, name }: { table: Table; id: str
       onClick={onDelete}
       onBlur={() => setConfirming(false)}
       disabled={isPending}
-      title={confirming ? t("deleteConfirmTooltip", { name }) : t("deleteLabel")}
+      aria-label={confirming ? t("deleteConfirmTooltip", { name }) : t("deleteLabel")}
       className={`flex h-8 items-center gap-1.5 rounded-lg border px-2 text-xs font-semibold transition-colors ${
         confirming
           ? "border-red-500 bg-red-500 text-white"

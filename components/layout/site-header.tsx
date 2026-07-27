@@ -128,7 +128,7 @@ export function SiteHeader({ locale, initialUser }: { locale: Locale; initialUse
                   key={l.key}
                   href={`/${locale}/${l.href}`}
                   onClick={() => setOpen(false)}
-                  className="rounded-lg px-12 py-4 rounded-full font-semibold shadow-lg text-sm font-medium hover:bg-primary/5 hover:text-primary"
+                  className="rounded-full px-12 py-4 font-semibold shadow-lg text-sm font-medium hover:bg-primary/5 hover:text-primary"
                 >
                   {t(l.key)}
                 </Link>
@@ -160,13 +160,22 @@ export function SiteHeader({ locale, initialUser }: { locale: Locale; initialUse
                     {td("settings")}
                   </Link>
 
-                  {(user.isOwner || user.isBusinessOwner) && (
+                  {user.isBusinessOwner && (
                     <Link
-                      href={`/${locale}/admin${user.isOwner ? "" : "/hotels"}`}
+                      href={`/${locale}/business`}
                       onClick={() => setOpen(false)}
                       className="block rounded-full border border-ink/15 dark:border-white/20 py-2.5 text-center text-sm font-semibold"
                     >
-                      {user.isOwner ? td("adminDashboard") : td("manageListings")}
+                      {td("manageListings")}
+                    </Link>
+                  )}
+                  {user.isOwner && (
+                    <Link
+                      href={`/${locale}/admin`}
+                      onClick={() => setOpen(false)}
+                      className="block rounded-full border border-ink/15 dark:border-white/20 py-2.5 text-center text-sm font-semibold"
+                    >
+                      {td("adminDashboard")}
                     </Link>
                   )}
 

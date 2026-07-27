@@ -43,7 +43,7 @@ export default async function BlogPage({ params: { locale } }: { params: { local
             {articles.map((a) => (
               <Link key={a.id} href={`/${locale}/blog/${a.slug}`} className="group block">
                 <div className="relative h-52 w-full overflow-hidden rounded-xl2">
-                  <Image src={a.coverImage} alt={a.title} fill className="object-cover transition-transform duration-500 group-hover:scale-105" />
+                  <Image src={a.coverImage} alt={a.title} fill sizes="(min-width: 768px) 33vw, 100vw" className="object-cover transition-transform duration-500 group-hover:scale-105" />
                 </div>
                 <span className="mt-4 inline-block text-xs font-semibold uppercase tracking-wide text-secondary">
                   {a.category}

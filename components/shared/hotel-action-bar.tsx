@@ -1,6 +1,7 @@
 import { ArrowUpRight, Globe, MessageCircle, Phone } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Reveal } from "@/components/home/reveal";
+import { TrackedCtaLink } from "@/components/shared/tracked-cta-link";
 import { getBookingHref } from "@/lib/utils/booking-href";
 import { normalizeExternalUrl } from "@/lib/utils/normalize-url";
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
@@ -20,11 +21,13 @@ const SECONDARY_CLASS =
  * bottom bar and the desktop sidebar booking card.
  */
 export async function HotelActionBar({
+  hotelId,
   name,
   phone,
   website,
   whatsappFallback,
 }: {
+  hotelId: string;
   name: string;
   phone?: string;
   website?: string;
@@ -56,14 +59,17 @@ export async function HotelActionBar({
         )}
 
         {phone && (
-          <a href={`tel:${phone}`} className={SECONDARY_CLASS}>
+          <TrackedCtaLink listingType="hotel" listingId={hotelId} eventType="call_click" href={`tel:${phone}`} className={SECONDARY_CLASS}>
             <Phone size={15} aria-hidden="true" />
             {t("call")}
-          </a>
+          </TrackedCtaLink>
         )}
 
         {whatsappHref && (
-          <a
+          <TrackedCtaLink
+            listingType="hotel"
+            listingId={hotelId}
+            eventType="whatsapp_click"
             href={whatsappHref}
             target="_blank"
             rel="noopener noreferrer"
@@ -71,14 +77,22 @@ export async function HotelActionBar({
           >
             <MessageCircle size={15} aria-hidden="true" />
             {t("whatsapp")}
-          </a>
+          </TrackedCtaLink>
         )}
 
         {websiteHref && (
-          <a href={websiteHref} target="_blank" rel="noopener noreferrer" className={SECONDARY_CLASS}>
+          <TrackedCtaLink
+            listingType="hotel"
+            listingId={hotelId}
+            eventType="website_click"
+            href={websiteHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={SECONDARY_CLASS}
+          >
             <Globe size={15} aria-hidden="true" />
             {t("website")}
-          </a>
+          </TrackedCtaLink>
         )}
       </div>
     </Reveal>

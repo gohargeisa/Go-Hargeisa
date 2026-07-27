@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 import type { Locale } from "@/lib/i18n/config";
+import { SHIMMER_BLUR_DATA_URL } from "@/lib/utils/shimmer";
 
 const categoryCards = [
   {
@@ -80,6 +81,8 @@ export function Hero({ locale }: { locale: Locale }) {
         fill
         priority
         sizes="100vw"
+        placeholder="blur"
+        blurDataURL={SHIMMER_BLUR_DATA_URL}
         className="object-cover"
       />
 
@@ -217,7 +220,7 @@ export function Hero({ locale }: { locale: Locale }) {
                   className={`group rounded-2xl border p-5 text-left backdrop-blur-xl transition-all duration-300 lg:p-6 ${
                     active
                       ? "scale-[1.02] border-white bg-white text-ink shadow-2xl ring-4 ring-white/20"
-                      : "border-white/20 bg-white/15 text-white hover:-translate-y-2 hover:border-white/40 hover:bg-white/20 hover:shadow-2xl"
+                      : "border-white/20 bg-white/15 text-white hover:-translate-y-1 hover:border-white/40 hover:bg-white/20 hover:shadow-2xl"
                   }`}
                 >
                   <div

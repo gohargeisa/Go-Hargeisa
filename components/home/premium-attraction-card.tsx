@@ -86,7 +86,7 @@ function PremiumAttractionCardBase({
                 fill
                 sizes="(max-width: 767px) 88vw, (max-width: 1024px) 45vw, 340px"
                 onLoad={() => setLoaded(true)}
-                className={`object-cover transition-transform duration-700 ease-out group-hover:scale-110 ${
+                className={`object-cover transition-transform duration-500 ease-out group-hover:scale-105 ${
                   loaded ? "opacity-100" : "opacity-0"
                 }`}
               />
@@ -104,7 +104,7 @@ function PremiumAttractionCardBase({
           <Link
             href={href}
             aria-label={name}
-            className="absolute inset-0 z-0 flex items-center justify-center bg-gradient-to-br from-secondary/15 via-primary/10 to-secondary/5 transition-transform duration-700 ease-out group-hover:scale-110 dark:from-secondary/25 dark:via-primary/15 dark:to-white/5"
+            className="absolute inset-0 z-0 flex items-center justify-center bg-gradient-to-br from-secondary/15 via-primary/10 to-secondary/5 transition-transform duration-500 ease-out group-hover:scale-105 dark:from-secondary/25 dark:via-primary/15 dark:to-white/5"
           >
             <Landmark size={44} strokeWidth={1.5} className="text-secondary-700/50 dark:text-white/30" aria-hidden="true" />
           </Link>

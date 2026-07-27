@@ -60,7 +60,7 @@ export default async function OwnerDashboardPage({ params: { locale } }: { param
         </div>
         <Link
           href={`/${locale}/admin/users`}
-          className="flex items-center gap-2 rounded-lg border border-ink/15 dark:border-white/20 bg-white/40 dark:bg-white/5 px-4 py-2 text-sm font-semibold hover:bg-white/60 dark:hover:bg-white/10 transition-colors"
+          className="inline-flex items-center gap-2 rounded-full border border-ink/15 px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
         >
           <Users size={16} /> {t("usersNav")}
         </Link>
