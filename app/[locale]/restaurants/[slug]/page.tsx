@@ -1,21 +1,27 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { ExternalLink, FileText, MapPin } from "lucide-react";
+import { ExternalLink, FileText, MapPin, Navigation } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { getRestaurantBySlug, getAllRestaurantSlugs, getRestaurants } from "@/lib/data/restaurants";
+import { getSiteSettings } from "@/lib/actions/settings";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
-import { RestaurantHero } from "@/components/shared/restaurant-hero";
-import { HotelGallery as DetailGallery } from "@/components/shared/hotel-gallery";
+import { ViewTracker } from "@/components/shared/view-tracker";
+import { HotelHeaderTop } from "@/components/shared/hotel-header-top";
+import { HotelActionBar } from "@/components/shared/hotel-action-bar";
+import { RestaurantQuickInfoCards } from "@/components/shared/restaurant-quick-info-cards";
+import { HotelGallerySlider } from "@/components/shared/hotel-gallery-slider";
+import { HotelNavTabs, type HotelNavTab } from "@/components/shared/hotel-nav-tabs";
 import { BusinessPhotoGallery } from "@/components/shared/business-photo-gallery";
 import { RESTAURANT_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import { RestaurantBookingCard } from "@/components/shared/restaurant-booking-card";
-import { RestaurantMobileBookingBar } from "@/components/shared/restaurant-mobile-booking-bar";
+import { MobileBookingBar } from "@/components/shared/mobile-booking-bar";
 import { ListingCard } from "@/components/shared/listing-card";
 import { ReviewsSection } from "@/components/shared/reviews-section";
 import { ReviewForm } from "@/components/shared/review-form";
 import { SingleLocationMapLoader } from "@/components/map/single-location-map-loader";
 import { Reveal } from "@/components/home/reveal";
+import { listingCategoryLabel } from "@/lib/utils/hotel-category";
 
 // Public content changes infrequently; revalidate hourly instead of
 // rendering on every request (this page no longer reads cookies, so
@@ -37,6 +43,7 @@ export async function generateMetadata({
   return {
     title: `${r.name} — Restaurant in Hargeisa`,
     description: r.shortDescription,
+    openGraph: { images: [r.coverImage] },
     alternates: { canonical: `/${locale}/restaurants/${r.slug}` },
   };
 }
@@ -51,17 +58,51 @@ export default async function RestaurantDetailPage({
   const t = await getTranslations("common");
   const tNav = await getTranslations("nav");
   const td = await getTranslations("detail");
-  const allRestaurants = await getRestaurants();
+  const th = await getTranslations("hotelDetail");
+  const [allRestaurants, siteSettings] = await Promise.all([getRestaurants(), getSiteSettings()]);
   const similarRestaurants = allRestaurants.filter((r) => r.id !== restaurant.id).slice(0, 4);
+  const whatsappFallback = (siteSettings as { whatsapp_number?: string } | null)?.whatsapp_number ?? undefined;
+
+  const navTabs: HotelNavTab[] = [
+    { id: "overview", label: td("overview") },
+    ...(restaurant.menuHighlights.length > 0 || restaurant.menuPdfUrl ? [{ id: "menu", label: td("menuHighlights") }] : []),
+    ...(restaurant.gallery.length > 0 ? [{ id: "gallery", label: t("gallery") }] : []),
+    { id: "reviews", label: t("reviews") },
+    { id: "location", label: td("location") },
+  ];
 
   const hasCoordinates =
     Number.isFinite(restaurant.location?.lat) && Number.isFinite(restaurant.location?.lng);
   const googleMapsHref = hasCoordinates
     ? `https://www.google.com/maps/search/?api=1&query=${restaurant.location.lat},${restaurant.location.lng}`
     : undefined;
+  const directionsHref = hasCoordinates
+    ? `https://www.google.com/maps/dir/?api=1&destination=${restaurant.location.lat},${restaurant.location.lng}`
+    : undefined;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Restaurant",
+    name: restaurant.name,
+    description: restaurant.shortDescription,
+    image: restaurant.coverImage,
+    logo: restaurant.logo,
+    address: { "@type": "PostalAddress", streetAddress: restaurant.address, addressLocality: "Hargeisa" },
+    telephone: restaurant.phone,
+    servesCuisine: restaurant.cuisine,
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: restaurant.rating,
+      reviewCount: restaurant.reviewCount,
+    },
+    priceRange: restaurant.priceRange,
+  };
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <ViewTracker listingType="restaurant" listingId={restaurant.id} />
+
       <Breadcrumbs
         items={[
           { label: tNav("restaurants"), href: `/${locale}/restaurants` },
@@ -69,34 +110,53 @@ export default async function RestaurantDetailPage({
         ]}
       />
 
-      <RestaurantHero
-        image={restaurant.coverImage}
+      <HotelHeaderTop
         logo={restaurant.logo}
         name={restaurant.name}
-        address={restaurant.address}
         rating={restaurant.rating}
         reviewCount={restaurant.reviewCount}
-        priceRange={restaurant.priceRange}
-        cuisine={restaurant.cuisine}
-        featured={restaurant.featured}
+        categoryLabel={listingCategoryLabel(restaurant.priceRange, "Restaurant")}
       />
 
-      <DetailGallery cover={restaurant.coverImage} images={restaurant.gallery} alt={restaurant.name} />
+      <HotelActionBar
+        listingType="restaurant"
+        listingId={restaurant.id}
+        name={restaurant.name}
+        phone={restaurant.phone}
+        website={restaurant.website}
+        whatsappFallback={whatsappFallback}
+        showPrimary={restaurant.reservable}
+        primaryLabel={t("reserveTable")}
+      />
 
-      <div className="container-px mx-auto grid gap-10 pb-28 pt-10 lg:grid-cols-3 lg:pb-10">
+      <RestaurantQuickInfoCards
+        rating={restaurant.rating}
+        priceRange={restaurant.priceRange}
+        cuisine={restaurant.cuisine}
+        openingHours={restaurant.openingHours}
+        reservable={restaurant.reservable}
+      />
+
+      <HotelGallerySlider cover={restaurant.coverImage} images={restaurant.gallery} alt={restaurant.name} />
+
+      <div className="mt-8">
+        <HotelNavTabs tabs={navTabs} />
+      </div>
+
+      <div className="container-px mx-auto grid gap-10 pb-28 pt-10 lg:grid-cols-3 lg:gap-12 lg:pb-10">
         <div className="space-y-14 lg:col-span-2">
           <Reveal>
-            <section aria-labelledby="overview-heading">
-              <h2 id="overview-heading" className="font-display text-2xl font-semibold">
+            <section id="overview" aria-labelledby="overview-heading" className="scroll-mt-36">
+              <h2 id="overview-heading" className="mb-5 font-display text-2xl font-semibold">
                 {td("overview")}
               </h2>
-              <p className="mt-4 leading-relaxed text-ink/75 dark:text-sand/75">{restaurant.description}</p>
+              <p className="leading-relaxed text-ink/75 dark:text-sand/75">{restaurant.description}</p>
             </section>
           </Reveal>
 
           {(restaurant.menuHighlights.length > 0 || restaurant.menuPdfUrl) && (
             <Reveal>
-              <section aria-labelledby="menu-heading">
+              <section id="menu" aria-labelledby="menu-heading" className="scroll-mt-36">
                 <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
                   <h2 id="menu-heading" className="font-display text-2xl font-semibold">
                     {td("menuHighlights")}
@@ -138,9 +198,9 @@ export default async function RestaurantDetailPage({
 
           {restaurant.gallery.length > 0 && (
             <Reveal>
-              <section aria-labelledby="photo-gallery-heading">
+              <section id="gallery" aria-labelledby="photo-gallery-heading" className="scroll-mt-36">
                 <h2 id="photo-gallery-heading" className="mb-5 font-display text-2xl font-semibold">
-                  Photo Gallery
+                  {th("photoGallery")}
                 </h2>
                 <BusinessPhotoGallery
                   images={restaurant.gallery}
@@ -152,7 +212,7 @@ export default async function RestaurantDetailPage({
           )}
 
           <Reveal>
-            <section aria-labelledby="location-heading">
+            <section id="location" aria-labelledby="location-heading" className="scroll-mt-36">
               <h2 id="location-heading" className="mb-5 font-display text-2xl font-semibold">
                 {td("location")}
               </h2>
@@ -163,24 +223,37 @@ export default async function RestaurantDetailPage({
                     <MapPin size={16} className="shrink-0 text-primary" aria-hidden="true" />
                     {restaurant.address}
                   </p>
-                  {googleMapsHref && (
-                    <a
-                      href={googleMapsHref}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center gap-1.5 rounded-full border border-ink/15 px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
-                    >
-                      {td("openInGoogleMaps")}
-                      <ExternalLink size={14} aria-hidden="true" />
-                    </a>
-                  )}
+                  <div className="flex flex-wrap gap-2.5">
+                    {directionsHref && (
+                      <a
+                        href={directionsHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-700"
+                      >
+                        <Navigation size={14} aria-hidden="true" />
+                        {th("directions")}
+                      </a>
+                    )}
+                    {googleMapsHref && (
+                      <a
+                        href={googleMapsHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center gap-1.5 rounded-full border border-ink/15 px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
+                      >
+                        {td("openInGoogleMaps")}
+                        <ExternalLink size={14} aria-hidden="true" />
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
             </section>
           </Reveal>
 
           <Reveal>
-            <section aria-labelledby="reviews-heading">
+            <section id="reviews" aria-labelledby="reviews-heading" className="scroll-mt-36">
               <h2 id="reviews-heading" className="mb-5 font-display text-2xl font-semibold">
                 {t("reviews")}
               </h2>
@@ -191,6 +264,7 @@ export default async function RestaurantDetailPage({
                   listingId={restaurant.id}
                   locale={locale}
                   pathToRevalidate={`/${locale}/restaurants/${restaurant.slug}`}
+                  allowPhotos
                 />
               </div>
             </section>
@@ -244,18 +318,16 @@ export default async function RestaurantDetailPage({
         </section>
       )}
 
-      <RestaurantMobileBookingBar
-        restaurantId={restaurant.id}
+      <MobileBookingBar
+        listingType="restaurant"
+        listingId={restaurant.id}
         name={restaurant.name}
-        priceRange={restaurant.priceRange}
-        priceLabel={t("priceRange")}
-        openingHours={restaurant.openingHours}
-        hoursLabel={t("openingHours")}
-        reservable={restaurant.reservable}
-        reserveLabel={t("reserveTable")}
         phone={restaurant.phone}
         website={restaurant.website}
+        whatsappFallback={whatsappFallback}
         locale={locale}
+        showPrimary={restaurant.reservable}
+        primaryLabel={t("reserveTable")}
       />
     </>
   );

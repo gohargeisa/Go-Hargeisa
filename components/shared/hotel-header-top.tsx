@@ -1,7 +1,6 @@
 import Image from "next/image";
 import { Building2, MapPin, Star } from "lucide-react";
 import { Reveal } from "@/components/home/reveal";
-import { hotelCategoryLabel } from "@/lib/utils/hotel-category";
 
 /**
  * Centered logo / name / rating block shown above the hero gallery — this
@@ -9,20 +8,23 @@ import { hotelCategoryLabel } from "@/lib/utils/hotel-category";
  * now unused) per the spec's "logo above name" layout, while reusing the
  * exact same font-display / primary / accent tokens as the rest of the site.
  * Logo styled as a small "luxury badge" (fixed size, hairline white ring,
- * layered shadow, hover lift) per the premium-polish passes.
+ * layered shadow, hover lift) per the premium-polish passes. Reused as-is by
+ * the hotel, restaurant, and cafe detail pages — the category label (e.g.
+ * "Premium Hotel", "Budget Restaurant") is computed by the caller via
+ * `listingCategoryLabel` so this component stays listing-type-agnostic.
  */
 export function HotelHeaderTop({
   logo,
   name,
   rating,
   reviewCount,
-  priceRange,
+  categoryLabel,
 }: {
   logo?: string;
   name: string;
   rating: number;
   reviewCount: number;
-  priceRange?: string;
+  categoryLabel: string;
 }) {
   return (
     <Reveal>
@@ -64,7 +66,7 @@ export function HotelHeaderTop({
             Hargeisa, Somaliland
           </span>
           <span className="text-xs font-medium uppercase tracking-wide text-ink/45 dark:text-sand/45">
-            {hotelCategoryLabel(priceRange)}
+            {categoryLabel}
           </span>
         </div>
       </div>

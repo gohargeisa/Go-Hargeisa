@@ -1,13 +1,21 @@
-/** Derived from price_range — shared by the header badge line and the quick-info cards so they never drift apart. */
-export function hotelCategoryLabel(priceRange?: string): string {
+/**
+ * Derived from price_range — shared by every listing type's header badge
+ * line and quick-info cards so they never drift apart. `kind` is the plain
+ * noun for the listing type ("Hotel", "Restaurant", "Cafe").
+ */
+export function listingCategoryLabel(priceRange: string | undefined, kind: string): string {
   switch (priceRange) {
     case "$$$$":
-      return "Luxury Hotel";
+      return `Luxury ${kind}`;
     case "$$$":
-      return "Premium Hotel";
+      return `Premium ${kind}`;
     case "$":
-      return "Budget Hotel";
+      return `Budget ${kind}`;
     default:
-      return "Hotel";
+      return kind;
   }
+}
+
+export function hotelCategoryLabel(priceRange?: string): string {
+  return listingCategoryLabel(priceRange, "Hotel");
 }

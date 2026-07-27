@@ -6,6 +6,7 @@ import { getTranslations } from "next-intl/server";
 import { ExternalLink, MapPin, Navigation } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { getHotelBySlug, getAllHotelSlugs, getNearbyAttractionsForHotel, getHotels } from "@/lib/data/hotels";
+import { hotelCategoryLabel } from "@/lib/utils/hotel-category";
 import { getSiteSettings } from "@/lib/actions/settings";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { ViewTracker } from "@/components/shared/view-tracker";
@@ -124,10 +125,10 @@ export default async function HotelDetailPage({
         name={hotel.name}
         rating={hotel.rating}
         reviewCount={hotel.reviewCount}
-        priceRange={hotel.priceRange}
+        categoryLabel={hotelCategoryLabel(hotel.priceRange)}
       />
 
-      <HotelActionBar hotelId={hotel.id} name={hotel.name} phone={hotel.phone} website={hotel.website} whatsappFallback={whatsappFallback} />
+      <HotelActionBar listingType="hotel" listingId={hotel.id} name={hotel.name} phone={hotel.phone} website={hotel.website} whatsappFallback={whatsappFallback} />
 
       <HotelQuickInfoCards
         rating={hotel.rating}
@@ -357,7 +358,8 @@ export default async function HotelDetailPage({
       )}
 
       <MobileBookingBar
-        hotelId={hotel.id}
+        listingType="hotel"
+        listingId={hotel.id}
         name={hotel.name}
         phone={hotel.phone}
         website={hotel.website}

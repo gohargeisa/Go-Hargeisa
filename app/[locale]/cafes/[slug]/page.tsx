@@ -1,16 +1,21 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { ExternalLink, FileText, Laptop, MapPin, Wifi } from "lucide-react";
+import { ExternalLink, FileText, Laptop, MapPin, Navigation, Wifi } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { getCafeBySlug, getAllCafeSlugs, getCafes } from "@/lib/data/cafes";
+import { getSiteSettings } from "@/lib/actions/settings";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
-import { CafeHero } from "@/components/shared/cafe-hero";
-import { HotelGallery as DetailGallery } from "@/components/shared/hotel-gallery";
+import { ViewTracker } from "@/components/shared/view-tracker";
+import { HotelHeaderTop } from "@/components/shared/hotel-header-top";
+import { HotelActionBar } from "@/components/shared/hotel-action-bar";
+import { CafeQuickInfoCards } from "@/components/shared/cafe-quick-info-cards";
+import { HotelGallerySlider } from "@/components/shared/hotel-gallery-slider";
+import { HotelNavTabs, type HotelNavTab } from "@/components/shared/hotel-nav-tabs";
 import { BusinessPhotoGallery } from "@/components/shared/business-photo-gallery";
 import { CAFE_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import { CafeActionCard } from "@/components/shared/cafe-action-card";
-import { CafeMobileActionBar } from "@/components/shared/cafe-mobile-action-bar";
+import { MobileBookingBar } from "@/components/shared/mobile-booking-bar";
 import { ListingCard } from "@/components/shared/listing-card";
 import { ReviewsSection } from "@/components/shared/reviews-section";
 import { ReviewForm } from "@/components/shared/review-form";
@@ -37,6 +42,7 @@ export async function generateMetadata({
   return {
     title: `${cafe.name} — Cafe in Hargeisa`,
     description: cafe.shortDescription,
+    openGraph: { images: [cafe.coverImage] },
     alternates: { canonical: `/${locale}/cafes/${cafe.slug}` },
   };
 }
@@ -51,17 +57,51 @@ export default async function CafeDetailPage({
   const t = await getTranslations("common");
   const tNav = await getTranslations("nav");
   const td = await getTranslations("detail");
-  const allCafes = await getCafes();
+  const th = await getTranslations("hotelDetail");
+  const [allCafes, siteSettings] = await Promise.all([getCafes(), getSiteSettings()]);
   const similarCafes = allCafes.filter((c) => c.id !== cafe.id).slice(0, 4);
+  const whatsappFallback = (siteSettings as { whatsapp_number?: string } | null)?.whatsapp_number ?? undefined;
 
   const hasCoordinates = Number.isFinite(cafe.location?.lat) && Number.isFinite(cafe.location?.lng);
   const googleMapsHref = hasCoordinates
     ? `https://www.google.com/maps/search/?api=1&query=${cafe.location.lat},${cafe.location.lng}`
     : undefined;
+  const directionsHref = hasCoordinates
+    ? `https://www.google.com/maps/dir/?api=1&destination=${cafe.location.lat},${cafe.location.lng}`
+    : undefined;
   const hasAmenities = cafe.wifi || cafe.workingSpace;
+
+  const navTabs: HotelNavTab[] = [
+    { id: "overview", label: td("overview") },
+    ...(cafe.specialDrinks.length > 0 ? [{ id: "specialties", label: td("coffeeSpecialties") }] : []),
+    ...(cafe.menuHighlights.length > 0 || cafe.menuPdfUrl ? [{ id: "menu", label: td("menuHighlights") }] : []),
+    ...(cafe.gallery.length > 0 ? [{ id: "gallery", label: t("gallery") }] : []),
+    ...(hasAmenities ? [{ id: "amenities", label: t("amenities") }] : []),
+    { id: "reviews", label: t("reviews") },
+    { id: "location", label: td("location") },
+  ];
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CafeOrCoffeeShop",
+    name: cafe.name,
+    description: cafe.shortDescription,
+    image: cafe.coverImage,
+    logo: cafe.logo,
+    address: { "@type": "PostalAddress", streetAddress: cafe.address, addressLocality: "Hargeisa" },
+    telephone: cafe.phone,
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: cafe.rating,
+      reviewCount: cafe.reviewCount,
+    },
+  };
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <ViewTracker listingType="cafe" listingId={cafe.id} />
+
       <Breadcrumbs
         items={[
           { label: tNav("cafes"), href: `/${locale}/cafes` },
@@ -69,34 +109,45 @@ export default async function CafeDetailPage({
         ]}
       />
 
-      <CafeHero
-        image={cafe.coverImage}
+      <HotelHeaderTop
         logo={cafe.logo}
         name={cafe.name}
-        address={cafe.address}
         rating={cafe.rating}
         reviewCount={cafe.reviewCount}
-        wifi={cafe.wifi}
-        workingSpace={cafe.workingSpace}
-        featured={cafe.featured}
+        categoryLabel="Cafe"
       />
 
-      <DetailGallery cover={cafe.coverImage} images={cafe.gallery} alt={cafe.name} />
+      <HotelActionBar
+        listingType="cafe"
+        listingId={cafe.id}
+        name={cafe.name}
+        phone={cafe.phone}
+        whatsappFallback={whatsappFallback}
+        showPrimary={false}
+      />
 
-      <div className="container-px mx-auto grid gap-10 pb-28 pt-10 lg:grid-cols-3 lg:pb-10">
+      <CafeQuickInfoCards rating={cafe.rating} openingHours={cafe.openingHours} wifi={cafe.wifi} workingSpace={cafe.workingSpace} />
+
+      <HotelGallerySlider cover={cafe.coverImage} images={cafe.gallery} alt={cafe.name} />
+
+      <div className="mt-8">
+        <HotelNavTabs tabs={navTabs} />
+      </div>
+
+      <div className="container-px mx-auto grid gap-10 pb-28 pt-10 lg:grid-cols-3 lg:gap-12 lg:pb-10">
         <div className="space-y-14 lg:col-span-2">
           <Reveal>
-            <section aria-labelledby="overview-heading">
-              <h2 id="overview-heading" className="font-display text-2xl font-semibold">
+            <section id="overview" aria-labelledby="overview-heading" className="scroll-mt-36">
+              <h2 id="overview-heading" className="mb-5 font-display text-2xl font-semibold">
                 {td("overview")}
               </h2>
-              <p className="mt-4 leading-relaxed text-ink/75 dark:text-sand/75">{cafe.description}</p>
+              <p className="leading-relaxed text-ink/75 dark:text-sand/75">{cafe.description}</p>
             </section>
           </Reveal>
 
           {cafe.specialDrinks.length > 0 && (
             <Reveal>
-              <section aria-labelledby="specialties-heading">
+              <section id="specialties" aria-labelledby="specialties-heading" className="scroll-mt-36">
                 <h2 id="specialties-heading" className="mb-5 font-display text-2xl font-semibold">
                   {td("coffeeSpecialties")}
                 </h2>
@@ -116,10 +167,10 @@ export default async function CafeDetailPage({
 
           {(cafe.menuHighlights.length > 0 || cafe.menuPdfUrl) && (
             <Reveal>
-              <section aria-labelledby="menu-heading">
+              <section id="menu" aria-labelledby="menu-heading" className="scroll-mt-36">
                 <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
                   <h2 id="menu-heading" className="font-display text-2xl font-semibold">
-                    Menu
+                    {td("menuHighlights")}
                   </h2>
                   {cafe.menuPdfUrl && (
                     <a
@@ -158,9 +209,9 @@ export default async function CafeDetailPage({
 
           {cafe.gallery.length > 0 && (
             <Reveal>
-              <section aria-labelledby="photo-gallery-heading">
+              <section id="gallery" aria-labelledby="photo-gallery-heading" className="scroll-mt-36">
                 <h2 id="photo-gallery-heading" className="mb-5 font-display text-2xl font-semibold">
-                  Photo Gallery
+                  {th("photoGallery")}
                 </h2>
                 <BusinessPhotoGallery images={cafe.gallery} alt={cafe.name} categories={CAFE_GALLERY_CATEGORIES} />
               </section>
@@ -169,7 +220,7 @@ export default async function CafeDetailPage({
 
           {hasAmenities && (
             <Reveal>
-              <section aria-labelledby="amenities-heading">
+              <section id="amenities" aria-labelledby="amenities-heading" className="scroll-mt-36">
                 <h2 id="amenities-heading" className="mb-5 font-display text-2xl font-semibold">
                   {t("amenities")}
                 </h2>
@@ -192,7 +243,7 @@ export default async function CafeDetailPage({
           )}
 
           <Reveal>
-            <section aria-labelledby="location-heading">
+            <section id="location" aria-labelledby="location-heading" className="scroll-mt-36">
               <h2 id="location-heading" className="mb-5 font-display text-2xl font-semibold">
                 {td("location")}
               </h2>
@@ -203,24 +254,37 @@ export default async function CafeDetailPage({
                     <MapPin size={16} className="shrink-0 text-primary" aria-hidden="true" />
                     {cafe.address}
                   </p>
-                  {googleMapsHref && (
-                    <a
-                      href={googleMapsHref}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center gap-1.5 rounded-full border border-ink/15 px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
-                    >
-                      {td("openInGoogleMaps")}
-                      <ExternalLink size={14} aria-hidden="true" />
-                    </a>
-                  )}
+                  <div className="flex flex-wrap gap-2.5">
+                    {directionsHref && (
+                      <a
+                        href={directionsHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-700"
+                      >
+                        <Navigation size={14} aria-hidden="true" />
+                        {th("directions")}
+                      </a>
+                    )}
+                    {googleMapsHref && (
+                      <a
+                        href={googleMapsHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center gap-1.5 rounded-full border border-ink/15 px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
+                      >
+                        {td("openInGoogleMaps")}
+                        <ExternalLink size={14} aria-hidden="true" />
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
             </section>
           </Reveal>
 
           <Reveal>
-            <section aria-labelledby="reviews-heading">
+            <section id="reviews" aria-labelledby="reviews-heading" className="scroll-mt-36">
               <h2 id="reviews-heading" className="mb-5 font-display text-2xl font-semibold">
                 {t("reviews")}
               </h2>
@@ -231,6 +295,7 @@ export default async function CafeDetailPage({
                   listingId={cafe.id}
                   locale={locale}
                   pathToRevalidate={`/${locale}/cafes/${cafe.slug}`}
+                  allowPhotos
                 />
               </div>
             </section>
@@ -279,13 +344,14 @@ export default async function CafeDetailPage({
         </section>
       )}
 
-      <CafeMobileActionBar
-        cafeId={cafe.id}
+      <MobileBookingBar
+        listingType="cafe"
+        listingId={cafe.id}
         name={cafe.name}
-        openingHours={cafe.openingHours}
-        hoursLabel={t("openingHours")}
         phone={cafe.phone}
+        whatsappFallback={whatsappFallback}
         locale={locale}
+        showPrimary={false}
       />
     </>
   );

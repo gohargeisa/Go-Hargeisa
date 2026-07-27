@@ -131,6 +131,8 @@
     "rating": "Rating",
     "priceRange": "Price Range",
     "openingHours": "Opening Hours",
+    "cuisine": "Cuisine",
+    "reservable": "Reservations",
     "amenities": "Amenities",
     "gallery": "Gallery",
     "reviews": "Reviews",

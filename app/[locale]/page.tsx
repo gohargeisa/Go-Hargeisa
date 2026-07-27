@@ -8,7 +8,6 @@ import { getRestaurants } from "@/lib/data/restaurants";
 import { getAttractions } from "@/lib/data/attractions";
 
 import { Hero } from "@/components/home/hero";
-import { TrustBar } from "@/components/home/trust-bar";
 import { CafesComingSoonSection } from "@/components/home/cafes-coming-soon-section";
 import { ExploreHargeisaSection } from "@/components/home/explore-hargeisa-section";
 import { NewsletterSection } from "@/components/home/newsletter-section";
@@ -50,7 +49,6 @@ export default async function HomePage({
       />
 
       <Hero locale={locale} />
-      <TrustBar />
 
       {/* About Go Hargeisa */}
       <section className="mx-auto max-w-7xl px-5 py-20 md:px-8 md:py-28 lg:px-12">
