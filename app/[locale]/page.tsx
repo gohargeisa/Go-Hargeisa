@@ -51,7 +51,7 @@ export default async function HomePage({
       <Hero locale={locale} />
 
       {/* About Go Hargeisa */}
-      <section className="mx-auto max-w-7xl px-5 py-20 md:px-8 md:py-28 lg:px-12">
+      <section className="mx-auto max-w-7xl px-5 pb-20 pt-2 md:px-8 md:pb-28 md:pt-12 lg:px-12">
         <Reveal>
           <div className="mx-auto max-w-5xl rounded-[32px] border border-primary/20 bg-gradient-to-br from-primary via-primary-700 to-secondary-800 p-8 shadow-2xl sm:p-12 md:p-16">
             <div className="text-center">
