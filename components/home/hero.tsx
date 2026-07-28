@@ -74,7 +74,7 @@ export function Hero({ locale }: { locale: Locale }) {
   const initial = reduceMotion ? "show" : "hidden";
 
   return (
-    <section className="relative flex min-h-[720px] h-auto items-start overflow-hidden pb-12 md:h-screen md:max-h-[980px] md:pb-0 md:items-center">
+    <section className="relative flex min-h-[720px] h-auto items-start overflow-hidden pb-12 md:h-screen md:max-h-[980px] md:pb-0 md:items-center lg:h-auto lg:min-h-screen lg:max-h-none">
       <Image
         src="/images/hero-bg.png"
         alt="Panoramic view of Hargeisa at golden hour"
@@ -89,7 +89,7 @@ export function Hero({ locale }: { locale: Locale }) {
       <div className="absolute inset-0 bg-hero-gradient" />
       <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-ink/10" />
 
-      <div className="container-px relative z-10 mx-auto flex w-full flex-col items-center pt-24 text-center text-white sm:pt-28 md:pt-16">
+      <div className="container-px relative z-10 mx-auto flex w-full flex-col items-center pt-24 text-center text-white sm:pt-28 md:pt-16 lg:min-w-0 lg:pt-24 lg:pb-8">
         <motion.span
           custom={0}
           initial={initial}
@@ -117,7 +117,7 @@ export function Hero({ locale }: { locale: Locale }) {
           initial={initial}
           animate="show"
           variants={fadeUp}
-          className="mt-6 max-w-3xl text-balance font-display text-4xl font-semibold leading-[1.08] sm:text-5xl md:text-6xl lg:text-[5.25rem] lg:leading-[1.03]"
+          className="mt-6 max-w-3xl text-balance font-display text-4xl font-semibold leading-[1.08] sm:text-5xl md:text-6xl lg:text-[5.25rem] lg:leading-[1.03] lg:break-words"
         >
           {t("title")}
         </motion.h1>
@@ -127,7 +127,7 @@ export function Hero({ locale }: { locale: Locale }) {
           initial={initial}
           animate="show"
           variants={fadeUp}
-          className="mt-4 max-w-2xl text-balance font-display text-lg font-semibold text-white/95 sm:text-xl md:text-2xl"
+          className="mt-4 max-w-2xl text-balance font-display text-lg font-semibold text-white/95 sm:text-xl md:text-2xl lg:mt-3"
         >
           {t("positioning")}
         </motion.p>
@@ -137,7 +137,7 @@ export function Hero({ locale }: { locale: Locale }) {
           initial={initial}
           animate="show"
           variants={fadeUp}
-          className="mt-4 max-w-xl text-balance text-base text-white/85 md:text-lg"
+          className="mt-4 max-w-xl text-balance text-base text-white/85 md:text-lg lg:mt-3"
         >
           {t("subtitle")}
         </motion.p>
@@ -147,7 +147,7 @@ export function Hero({ locale }: { locale: Locale }) {
           initial={initial}
           animate="show"
           variants={fadeUp}
-          className="mt-6 flex flex-wrap items-center justify-center gap-2.5 sm:gap-3"
+          className="mt-6 flex flex-wrap items-center justify-center gap-2.5 sm:gap-3 lg:mt-4"
         >
           {highlightPills.map(({ emoji, labelKey }) => (
             <span
@@ -168,7 +168,7 @@ export function Hero({ locale }: { locale: Locale }) {
           onSubmit={onSearch}
           role="search"
           aria-label={t("searchButton")}
-          className="glass mt-8 w-full max-w-2xl rounded-2xl p-2 shadow-[0_20px_60px_rgba(0,0,0,0.25)] ring-1 ring-white/15 backdrop-saturate-150 sm:mt-9 md:rounded-full"
+          className="glass mt-8 w-full max-w-2xl rounded-2xl p-2 shadow-[0_20px_60px_rgba(0,0,0,0.25)] ring-1 ring-white/15 backdrop-saturate-150 sm:mt-9 md:rounded-full lg:mt-4"
         >
           <div className="flex flex-col gap-2 md:flex-row">
             <div className="flex flex-1 items-center gap-2.5 rounded-full bg-white/95 px-5 py-3.5 dark:bg-ink/70">
@@ -204,7 +204,7 @@ export function Hero({ locale }: { locale: Locale }) {
           initial={initial}
           animate="show"
           variants={fadeUp}
-          className="mt-10 grid w-full max-w-4xl grid-cols-1 gap-4 md:mt-12 md:grid-cols-3"
+          className="mt-10 grid w-full max-w-4xl grid-cols-1 gap-4 md:mt-12 md:grid-cols-3 lg:mt-4"
         >
           {categoryCards.map(
             ({ key, icon: Icon, titleKey, descriptionKey }) => {
@@ -217,14 +217,14 @@ export function Hero({ locale }: { locale: Locale }) {
                   aria-label={t(titleKey)}
                   aria-pressed={active}
                   onClick={() => setCategory(key)}
-                  className={`group rounded-2xl border p-5 text-left backdrop-blur-xl transition-all duration-300 lg:p-6 ${
+                  className={`group rounded-2xl border p-5 text-left backdrop-blur-xl transition-all duration-300 lg:p-4 ${
                     active
                       ? "scale-[1.02] border-white bg-white text-ink shadow-2xl ring-4 ring-white/20"
                       : "border-white/20 bg-white/15 text-white hover:-translate-y-1 hover:border-white/40 hover:bg-white/20 hover:shadow-2xl"
                   }`}
                 >
                   <div
-                    className={`mb-4 inline-flex h-14 w-14 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-105 ${
+                    className={`mb-4 inline-flex h-14 w-14 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-105 lg:mb-2 lg:h-11 lg:w-11 ${
                       active
                         ? "bg-primary text-white"
                         : "bg-white/15 text-white"
