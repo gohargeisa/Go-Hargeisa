@@ -147,6 +147,19 @@
     "noResults": "No results found.",
     "breadcrumbAriaLabel": "Breadcrumb"
   },
+  "claimBusiness": {
+    "button": "Claim this Business",
+    "modalTitle": "Claim this Business",
+    "disclaimer": "Tell us a bit about yourself and your connection to this business. Our team reviews every request manually before granting access — submitting a claim does not verify, feature, or partner this listing with Go Hargeisa.",
+    "fullNameLabel": "Your full name",
+    "emailLabel": "Email address",
+    "phoneLabel": "Phone number (optional)",
+    "messageLabel": "How are you connected to this business? (optional)",
+    "submit": "Submit Claim",
+    "submitting": "Submitting…",
+    "success": "Thanks — we've received your claim and will be in touch by email.",
+    "error": "Something went wrong. Please try again."
+  },
   "auth": {
     "welcomeTitle": "Welcome to Go Hargeisa",
     "welcomeSubtitle": "Sign in to save favorites, write reviews, and plan your trips.",
@@ -660,8 +673,18 @@
     "availableRestaurants": "{count} available restaurants",
     "featuredTag": "Featured",
 
+    "cafesCount": "{count} Cafes",
+    "browseAllCafes": "Browse all cafes in Hargeisa",
+    "noCafesMatch": "No cafes match your filters",
+    "featuredCafes": "⭐ Featured Cafes",
+    "featuredCafesSubtitle": "Our top-rated coffee spots",
+    "allCafes": "All Cafes",
+    "availableCafes": "{count} available cafes",
+    "cafeSubtitleFallback": "Café",
+
     "searchHotelsPlaceholder": "Search hotels by name or area…",
     "searchRestaurantsPlaceholder": "Search restaurants or cuisine…",
+    "searchCafesPlaceholder": "Search cafes by name or area…",
     "searchAttractionsPlaceholder": "Search attractions…",
     "freeEntry": "Free entry",
     "searchButton": "Search",

@@ -147,6 +147,19 @@
     "noResults": "Wax natiijo ah lama helin.",
     "breadcrumbAriaLabel": "Waddada Raadraaca"
   },
+  "claimBusiness": {
+    "button": "U Sheeg Ganacsigan Adiga",
+    "modalTitle": "U Sheeg Ganacsigan Adiga",
+    "disclaimer": "Naga sheeg wax yar oo kugu saabsan iyo xiriirkaaga ganacsigan. Kooxdayadu waxay gacanta ku eegtaa codsi kasta ka hor inta aan la siin gelitaanka — soo gudbinta codsigan micnaheedu ma aha in ganacsigan la xaqiijiyay, la muujiyay, ama uu Go Hargeisa la shirkad yahay.",
+    "fullNameLabel": "Magacaaga oo dhan",
+    "emailLabel": "Ciwaanka Iimaylka",
+    "phoneLabel": "Lambarka Taleefanka (ikhtiyaari)",
+    "messageLabel": "Sidee ayaad ula xiriirtaa ganacsigan? (ikhtiyaari)",
+    "submit": "Gudbi Codsiga",
+    "submitting": "Waa la gudbinayaa…",
+    "success": "Mahadsanid — waan helnay codsigaaga waana kula soo xiriiri doonaa iimaylka.",
+    "error": "Wax baa qaldamay. Fadlan isku day mar kale."
+  },
   "auth": {
     "welcomeTitle": "Ku soo dhawoow Go Hargeisa",
     "welcomeSubtitle": "Gal si aad u kaydiso meelaha aad jeceshahay, u qorto faallooyin, una qorsheyso safarradaada.",
@@ -660,8 +673,18 @@
     "availableRestaurants": "{count} maqaayad oo la heli karo",
     "featuredTag": "La Xushay",
 
+    "cafesCount": "{count} Kafateeriyo",
+    "browseAllCafes": "Eeg dhammaan kafateeriyada Hargeisa",
+    "noCafesMatch": "Kafateeriyo kuma jiraan shaandhaynta",
+    "featuredCafes": "⭐ Kafateeriyada La Xushay",
+    "featuredCafesSubtitle": "Goobaha kafeega ee ugu qiimaha sarreeya",
+    "allCafes": "Dhammaan Kafateeriyada",
+    "availableCafes": "{count} kafateeriya oo la heli karo",
+    "cafeSubtitleFallback": "Kafateeriya",
+
     "searchHotelsPlaceholder": "Raadi hudheello magaca ama aagga…",
     "searchRestaurantsPlaceholder": "Raadi maqaayado ama cunto…",
+    "searchCafesPlaceholder": "Raadi kafateeriyo magaca ama aagga…",
     "searchAttractionsPlaceholder": "Raadi goobaha dalxiiska…",
     "freeEntry": "Gelitaan bilaash ah",
     "searchButton": "Raadi",

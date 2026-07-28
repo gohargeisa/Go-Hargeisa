@@ -147,6 +147,19 @@
     "noResults": "لا توجد نتائج.",
     "breadcrumbAriaLabel": "مسار التصفح"
   },
+  "claimBusiness": {
+    "button": "طالب بملكية هذا النشاط التجاري",
+    "modalTitle": "طالب بملكية هذا النشاط التجاري",
+    "disclaimer": "أخبرنا قليلاً عن نفسك وعلاقتك بهذا النشاط التجاري. يراجع فريقنا كل طلب يدويًا قبل منح الوصول — تقديم الطلب لا يعني توثيق هذا النشاط أو تمييزه أو إقامة شراكة معه من قِبل Go Hargeisa.",
+    "fullNameLabel": "الاسم الكامل",
+    "emailLabel": "البريد الإلكتروني",
+    "phoneLabel": "رقم الهاتف (اختياري)",
+    "messageLabel": "ما علاقتك بهذا النشاط التجاري؟ (اختياري)",
+    "submit": "إرسال الطلب",
+    "submitting": "جارٍ الإرسال…",
+    "success": "شكرًا لك — لقد استلمنا طلبك وسنتواصل معك عبر البريد الإلكتروني.",
+    "error": "حدث خطأ ما. يرجى المحاولة مرة أخرى."
+  },
   "auth": {
     "welcomeTitle": "مرحبًا بك في Go Hargeisa",
     "welcomeSubtitle": "سجّل الدخول لحفظ الأماكن المفضلة، وكتابة التقييمات، وتخطيط رحلاتك.",
@@ -660,8 +673,18 @@
     "availableRestaurants": "{count} مطعم متاح",
     "featuredTag": "مميز",
 
+    "cafesCount": "{count} مقهى",
+    "browseAllCafes": "تصفح جميع المقاهي في هرجيسا",
+    "noCafesMatch": "لا توجد مقاهي تطابق عوامل التصفية",
+    "featuredCafes": "⭐ مقاهٍ مميزة",
+    "featuredCafesSubtitle": "أفضل أماكن القهوة لدينا",
+    "allCafes": "جميع المقاهي",
+    "availableCafes": "{count} مقهى متاح",
+    "cafeSubtitleFallback": "مقهى",
+
     "searchHotelsPlaceholder": "ابحث عن الفنادق بالاسم أو المنطقة…",
     "searchRestaurantsPlaceholder": "ابحث عن المطاعم أو المطبخ…",
+    "searchCafesPlaceholder": "ابحث عن المقاهي بالاسم أو المنطقة…",
     "searchAttractionsPlaceholder": "ابحث عن المعالم السياحية…",
     "freeEntry": "دخول مجاني",
     "searchButton": "بحث",

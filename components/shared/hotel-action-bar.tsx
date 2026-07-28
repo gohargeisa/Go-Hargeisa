@@ -2,6 +2,7 @@ import { ArrowUpRight, Globe, MessageCircle, Phone } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Reveal } from "@/components/home/reveal";
 import { TrackedCtaLink } from "@/components/shared/tracked-cta-link";
+import { ClaimBusinessButton } from "@/components/shared/claim-business-button";
 import { getBookingHref } from "@/lib/utils/booking-href";
 import { normalizeExternalUrl } from "@/lib/utils/normalize-url";
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
@@ -105,6 +106,8 @@ export async function HotelActionBar({
             {t("website")}
           </TrackedCtaLink>
         )}
+
+        <ClaimBusinessButton listingType={listingType} listingId={listingId} className={SECONDARY_CLASS} />
       </div>
     </Reveal>
   );
