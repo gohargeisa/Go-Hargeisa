@@ -5,8 +5,8 @@ import { mapHotel, mapReview, mapHotelRoom, mapRestaurant, mapCafe } from "./map
 import { hotels as mockHotels } from "@/lib/mock-data";
 import type { Hotel } from "@/types";
 
-export async function getHotels(options?: { q?: string; featuredOnly?: boolean }): Promise<Hotel[]> {
-  const { q, featuredOnly } = options ?? {};
+export async function getHotels(options?: { q?: string; featuredOnly?: boolean; limit?: number }): Promise<Hotel[]> {
+  const { q, featuredOnly, limit } = options ?? {};
 
   if (!isSupabaseConfigured()) {
     let results = mockHotels;
@@ -19,7 +19,7 @@ export async function getHotels(options?: { q?: string; featuredOnly?: boolean }
           h.shortDescription.toLowerCase().includes(needle)
       );
     }
-    return results;
+    return limit ? results.slice(0, limit) : results;
   }
 
   const supabase = createPublicClient();
@@ -34,6 +34,7 @@ export async function getHotels(options?: { q?: string; featuredOnly?: boolean }
     query = query.or(
       `name.ilike.%${q}%,short_description.ilike.%${q}%,address.ilike.%${q}%`
     );
+  if (limit) query = query.limit(limit);
 
   const { data, error } = await query;
 

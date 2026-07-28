@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { SearchX } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
-import { ListingCard } from "@/components/shared/listing-card";
+import { CafeCard } from "@/components/shared/cafe-card";
 import { SearchWithin } from "@/components/shared/search-within";
 import { ListingFilters, type FilterOptions } from "@/components/shared/listing-filters";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -14,10 +14,14 @@ interface Cafe {
   id: string;
   slug: string;
   name: string;
-  specialDrinks: string[];
+  address: string;
   coverImage: string;
   rating: number;
   reviewCount: number;
+  specialDrinks?: string[];
+  wifi?: boolean;
+  workingSpace?: boolean;
+  phone?: string;
   featured?: boolean;
   createdAt?: string;
 }
@@ -67,10 +71,12 @@ export function CafesPageClient({
         <EmptyState icon={SearchX} title={t("noCafesMatch")} description={t("adjustFilters")} className="mt-12" />
       ) : (
         <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
+          {/* Filters Sidebar */}
           <div className="lg:sticky lg:top-24 lg:h-fit">
             <ListingFilters locale={locale} maxPrice={500} />
           </div>
 
+          {/* Listings Grid */}
           <div>
             {filteredCafes.featured.length > 0 && (
               <div className="mb-12">
@@ -80,18 +86,21 @@ export function CafesPageClient({
                 </div>
                 <div className="grid gap-6 sm:grid-cols-2">
                   {filteredCafes.featured.map((c) => (
-                    <ListingCard
+                    <CafeCard
                       key={c.id}
                       href={`/${locale}/cafes/${c.slug}`}
                       image={c.coverImage}
-                      title={c.name}
-                      subtitle={c.specialDrinks.join(" • ") || t("cafeSubtitleFallback")}
+                      name={c.name}
+                      address={c.address}
                       rating={c.rating}
                       reviewCount={c.reviewCount}
-                      listingType="cafe"
-                      listingId={c.id}
+                      specialDrinks={c.specialDrinks}
+                      wifi={c.wifi}
+                      workingSpace={c.workingSpace}
+                      phone={c.phone}
+                      featured
+                      cafeId={c.id}
                       locale={locale}
-                      tag={t("featuredTag")}
                     />
                   ))}
                 </div>
@@ -108,16 +117,19 @@ export function CafesPageClient({
                 </div>
                 <div className="grid gap-6 sm:grid-cols-2">
                   {filteredCafes.nonFeatured.map((c) => (
-                    <ListingCard
+                    <CafeCard
                       key={c.id}
                       href={`/${locale}/cafes/${c.slug}`}
                       image={c.coverImage}
-                      title={c.name}
-                      subtitle={c.specialDrinks.join(" • ") || t("cafeSubtitleFallback")}
+                      name={c.name}
+                      address={c.address}
                       rating={c.rating}
                       reviewCount={c.reviewCount}
-                      listingType="cafe"
-                      listingId={c.id}
+                      specialDrinks={c.specialDrinks}
+                      wifi={c.wifi}
+                      workingSpace={c.workingSpace}
+                      phone={c.phone}
+                      cafeId={c.id}
                       locale={locale}
                     />
                   ))}

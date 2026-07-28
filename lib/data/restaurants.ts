@@ -5,8 +5,8 @@ import { mapRestaurant, mapReview } from "./mappers";
 import { restaurants as mockRestaurants } from "@/lib/mock-data";
 import type { Restaurant } from "@/types";
 
-export async function getRestaurants(options?: { q?: string; featuredOnly?: boolean }): Promise<Restaurant[]> {
-  const { q, featuredOnly } = options ?? {};
+export async function getRestaurants(options?: { q?: string; featuredOnly?: boolean; limit?: number }): Promise<Restaurant[]> {
+  const { q, featuredOnly, limit } = options ?? {};
 
   if (!isSupabaseConfigured()) {
     let results = mockRestaurants;
@@ -20,7 +20,7 @@ export async function getRestaurants(options?: { q?: string; featuredOnly?: bool
           r.cuisine.some((c) => c.toLowerCase().includes(needle))
       );
     }
-    return results;
+    return limit ? results.slice(0, limit) : results;
   }
 
   const supabase = createPublicClient();
@@ -31,6 +31,7 @@ export async function getRestaurants(options?: { q?: string; featuredOnly?: bool
     .order("featured", { ascending: false });
   if (featuredOnly) query = query.eq("featured", true);
   if (q) query = query.or(`name.ilike.%${q}%,short_description.ilike.%${q}%,address.ilike.%${q}%`);
+  if (limit) query = query.limit(limit);
 
   const { data, error } = await query;
   if (error) {

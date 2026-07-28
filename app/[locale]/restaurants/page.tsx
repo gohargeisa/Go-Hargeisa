@@ -53,7 +53,7 @@ export default async function RestaurantsPage({
 />
 
       {showComingSoon ? (
-        <ComingSoonSection type="restaurant" locale={locale} />
+        <ComingSoonSection locale={locale} />
       ) : (
         <RestaurantsPageClient locale={locale} initialRestaurants={restaurants} searchParams={searchParams} />
       )}

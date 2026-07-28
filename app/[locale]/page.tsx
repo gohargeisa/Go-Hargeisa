@@ -5,19 +5,28 @@ import type { Locale } from "@/lib/i18n/config";
 
 import { getHotels } from "@/lib/data/hotels";
 import { getRestaurants } from "@/lib/data/restaurants";
+import { getCafes } from "@/lib/data/cafes";
 import { getAttractions } from "@/lib/data/attractions";
 
 import { Hero } from "@/components/home/hero";
-import { CafesComingSoonSection } from "@/components/home/cafes-coming-soon-section";
 import { ExploreHargeisaSection } from "@/components/home/explore-hargeisa-section";
 import { NewsletterSection } from "@/components/home/newsletter-section";
 import { Reveal } from "@/components/home/reveal";
 import { ScrollRow } from "@/components/shared/scroll-row";
 import { PremiumHotelCard } from "@/components/home/premium-hotel-card";
 import { PremiumRestaurantCard } from "@/components/home/premium-restaurant-card";
+import { PremiumCafeCard } from "@/components/home/premium-cafe-card";
 import { PremiumAttractionCard } from "@/components/home/premium-attraction-card";
+import { ViewAllButton } from "@/components/home/view-all-button";
 
 export const revalidate = 3600;
+
+// Homepage preview sections show a fixed handful of cards each — the full
+// database is untouched, only fetched at this cap (rather than fetching
+// everything and slicing) so the homepage doesn't pull the entire table
+// just to show 3 rows. The real listing pages (/hotels, /restaurants,
+// /cafes) call the same functions with no limit and show everything.
+const HOMEPAGE_PREVIEW_COUNT = 3;
 
 export default async function HomePage({
   params: { locale },
@@ -26,9 +35,10 @@ export default async function HomePage({
 }) {
   const t = await getTranslations("home");
 
-  const [hotels, restaurants, attractions] = await Promise.all([
-    getHotels(),
-    getRestaurants(),
+  const [hotels, restaurants, cafes, attractions] = await Promise.all([
+    getHotels({ limit: HOMEPAGE_PREVIEW_COUNT }),
+    getRestaurants({ limit: HOMEPAGE_PREVIEW_COUNT }),
+    getCafes({ limit: HOMEPAGE_PREVIEW_COUNT }),
     getAttractions(),
   ]);
 
@@ -103,27 +113,18 @@ export default async function HomePage({
         <section className="bg-white py-16 dark:bg-white/[0.03] md:py-24">
           <div className="container-px mx-auto">
             <Reveal>
-              <div className="mb-10 flex flex-col gap-5 md:mb-14 md:flex-row md:items-end md:justify-between">
-                <div>
-                  <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary">
-                    Stay
-                  </span>
-                  <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">
-                    {t("hotelsTitle")}
-                  </h2>
-                  <p className="mt-2 max-w-xl text-ink/60 dark:text-sand/60">{t("hotelsSubtitle")}</p>
-                </div>
-                <Link
-                  href={`/${locale}/hotels`}
-                  className="inline-flex items-center gap-2 self-start rounded-full border border-ink/15 px-5 py-2.5 text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5 hover:border-primary hover:bg-primary/5 hover:text-primary dark:border-white/20 dark:hover:border-primary dark:hover:bg-primary/10 md:self-auto"
-                >
-                  {t("viewAll")}
-                  <ArrowUpRight size={16} aria-hidden="true" />
-                </Link>
+              <div className="mx-auto mb-10 max-w-2xl text-center md:mb-14">
+                <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary">
+                  Stay
+                </span>
+                <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">
+                  {t("hotelsTitle")}
+                </h2>
+                <p className="mt-2 text-ink/60 dark:text-sand/60">{t("hotelsSubtitle")}</p>
               </div>
             </Reveal>
             <Reveal delay={0.1}>
-              <ScrollRow>
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {hotels.map((h) => (
                   <PremiumHotelCard
                     key={h.id}
@@ -141,8 +142,9 @@ export default async function HomePage({
                     website={h.website}
                   />
                 ))}
-              </ScrollRow>
+              </div>
             </Reveal>
+            <ViewAllButton href={`/${locale}/hotels`} label={t("viewAllHotelsButton")} />
           </div>
         </section>
       )}
@@ -151,26 +153,17 @@ export default async function HomePage({
         <section className="py-16 md:py-24">
           <div className="container-px mx-auto">
             <Reveal>
-              <div className="mb-10 flex flex-col gap-5 md:mb-14 md:flex-row md:items-end md:justify-between">
-                <div>
-                  <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary">
-                    Eat
-                  </span>
-                  <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">
-                    {t("restaurantsTitle")}
-                  </h2>
-                </div>
-                <Link
-                  href={`/${locale}/restaurants`}
-                  className="inline-flex items-center gap-2 self-start rounded-full border border-ink/15 px-5 py-2.5 text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5 hover:border-primary hover:bg-primary/5 hover:text-primary dark:border-white/20 dark:hover:border-primary dark:hover:bg-primary/10 md:self-auto"
-                >
-                  {t("viewAll")}
-                  <ArrowUpRight size={16} aria-hidden="true" />
-                </Link>
+              <div className="mx-auto mb-10 max-w-2xl text-center md:mb-14">
+                <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary">
+                  Eat
+                </span>
+                <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">
+                  {t("restaurantsTitle")}
+                </h2>
               </div>
             </Reveal>
             <Reveal delay={0.1}>
-              <ScrollRow>
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {restaurants.map((r) => (
                   <PremiumRestaurantCard
                     key={r.id}
@@ -190,13 +183,53 @@ export default async function HomePage({
                     phone={r.phone}
                   />
                 ))}
-              </ScrollRow>
+              </div>
             </Reveal>
+            <ViewAllButton href={`/${locale}/restaurants`} label={t("viewAllRestaurantsButton")} />
           </div>
         </section>
       )}
 
-      <CafesComingSoonSection locale={locale} />
+      {cafes.length > 0 && (
+        <section className="bg-white py-16 dark:bg-white/[0.03] md:py-24">
+          <div className="container-px mx-auto">
+            <Reveal>
+              <div className="mx-auto mb-10 max-w-2xl text-center md:mb-14">
+                <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary">
+                  Sip
+                </span>
+                <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">
+                  {t("cafesTitle")}
+                </h2>
+                <p className="mt-2 text-ink/60 dark:text-sand/60">{t("cafesSubtitle")}</p>
+              </div>
+            </Reveal>
+            <Reveal delay={0.1}>
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {cafes.map((c) => (
+                  <PremiumCafeCard
+                    key={c.id}
+                    href={`/${locale}/cafes/${c.slug}`}
+                    image={c.coverImage}
+                    name={c.name}
+                    address={c.address}
+                    rating={c.rating}
+                    reviewCount={c.reviewCount}
+                    specialDrinks={c.specialDrinks}
+                    wifi={c.wifi}
+                    workingSpace={c.workingSpace}
+                    featured={c.featured}
+                    cafeId={c.id}
+                    locale={locale}
+                    phone={c.phone}
+                  />
+                ))}
+              </div>
+            </Reveal>
+            <ViewAllButton href={`/${locale}/cafes`} label={t("viewAllCafesButton")} />
+          </div>
+        </section>
+      )}
 
       {attractions.length > 0 && (
         <section className="py-16 md:py-24">

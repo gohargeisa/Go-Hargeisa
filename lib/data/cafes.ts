@@ -5,8 +5,8 @@ import { mapCafe, mapReview } from "./mappers";
 import { cafes as mockCafes } from "@/lib/mock-data";
 import type { Cafe } from "@/types";
 
-export async function getCafes(options?: { q?: string; featuredOnly?: boolean }): Promise<Cafe[]> {
-  const { q, featuredOnly } = options ?? {};
+export async function getCafes(options?: { q?: string; featuredOnly?: boolean; limit?: number }): Promise<Cafe[]> {
+  const { q, featuredOnly, limit } = options ?? {};
 
   if (!isSupabaseConfigured()) {
     let results = mockCafes;
@@ -17,13 +17,14 @@ export async function getCafes(options?: { q?: string; featuredOnly?: boolean })
         (c) => c.name.toLowerCase().includes(needle) || c.shortDescription.toLowerCase().includes(needle)
       );
     }
-    return results;
+    return limit ? results.slice(0, limit) : results;
   }
 
   const supabase = createPublicClient();
   let query = supabase.from("cafes").select("*").eq("status", "published").order("featured", { ascending: false });
   if (featuredOnly) query = query.eq("featured", true);
   if (q) query = query.or(`name.ilike.%${q}%,short_description.ilike.%${q}%,address.ilike.%${q}%`);
+  if (limit) query = query.limit(limit);
 
   const { data, error } = await query;
   if (error) {
