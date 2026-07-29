@@ -140,6 +140,7 @@ export function MobileBookingBar({
       {showPrimary && bookingCta && (
         <HotelBookNowButton
           cta={bookingCta}
+          locale={locale}
           hotelId={listingId}
           hotelName={name}
           rooms={rooms}

@@ -185,6 +185,86 @@ async function seedArticles() {
   console.log(`✔ Seeded ${rows.length} articles`);
 }
 
+// One representative room per required room type (Standard/Deluxe/Twin/
+// Family/Executive Suite — see lib/utils/room-type.ts) for the hotel used in
+// the presentation demo, so the new booking modal's room selector has real
+// options to show. Owners/admins can add, edit, or remove rooms afterward
+// via HotelRoomsManager — this is just a starting point, not fixed content.
+const GRAND_HAADI_ROOMS = [
+  {
+    name: "Standard Room",
+    roomType: "standard" as const,
+    maxGuests: 2,
+    bedType: "1 Queen Bed",
+    features: ["Free WiFi", "Air Conditioning"],
+    pricePerNight: 45,
+  },
+  {
+    name: "Deluxe Room",
+    roomType: "deluxe" as const,
+    maxGuests: 2,
+    bedType: "1 King Bed",
+    features: ["Free WiFi", "Air Conditioning", "Mini Fridge", "City View"],
+    pricePerNight: 65,
+  },
+  {
+    name: "Twin Room",
+    roomType: "twin" as const,
+    maxGuests: 2,
+    bedType: "2 Single Beds",
+    features: ["Free WiFi", "Air Conditioning", "Work Desk"],
+    pricePerNight: 55,
+  },
+  {
+    name: "Family Room",
+    roomType: "family" as const,
+    maxGuests: 4,
+    bedType: "2 Double Beds",
+    features: ["Free WiFi", "Air Conditioning", "Extra Space", "Sofa Bed"],
+    pricePerNight: 85,
+  },
+  {
+    name: "Executive Suite",
+    roomType: "executive_suite" as const,
+    maxGuests: 3,
+    bedType: "1 King Bed + Sofa",
+    features: ["Free WiFi", "Air Conditioning", "Living Area", "Mini Bar", "Premium View"],
+    pricePerNight: 120,
+  },
+];
+
+async function seedHotelRooms() {
+  const { data: hotel } = await supabase.from("hotels").select("id").eq("slug", "grand-haadi-hotel").maybeSingle();
+  if (!hotel) {
+    console.log("↷ Skipped hotel rooms — grand-haadi-hotel not found");
+    return;
+  }
+
+  const { count } = await supabase
+    .from("hotel_rooms")
+    .select("id", { count: "exact", head: true })
+    .eq("hotel_id", hotel.id);
+  if (count && count > 0) {
+    console.log(`↷ Skipped hotel rooms — ${count} already exist`);
+    return;
+  }
+
+  const rows = GRAND_HAADI_ROOMS.map((r, i) => ({
+    hotel_id: hotel.id,
+    name: r.name,
+    max_guests: r.maxGuests,
+    bed_type: r.bedType,
+    features: r.features,
+    price_per_night: r.pricePerNight,
+    room_type: r.roomType,
+    is_available: true,
+    sort_order: i,
+  }));
+  const { error } = await supabase.from("hotel_rooms").insert(rows);
+  if (error) throw error;
+  console.log(`✔ Seeded ${rows.length} hotel rooms`);
+}
+
 async function main() {
   await seedHotels();
   await seedRestaurants();
@@ -193,6 +273,7 @@ async function main() {
   await seedAttractions();
   await seedEvents();
   await seedArticles();
+  await seedHotelRooms();
   console.log("\n🎉 Seed complete.");
 }
 

@@ -119,6 +119,7 @@ export default async function RestaurantDetailPage({
       />
 
       <HotelActionBar
+        locale={locale}
         listingType="restaurant"
         listingId={restaurant.id}
         name={restaurant.name}

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { BookingRequestModal } from "@/components/shared/booking-request-modal";
 import type { HotelBookingCta } from "@/lib/utils/booking-cta";
+import type { Locale } from "@/lib/i18n/config";
 import type { HotelRoom } from "@/types";
 
 /**
@@ -12,20 +13,25 @@ import type { HotelRoom } from "@/types";
  * re-implementing the external-link-vs-request-modal branch itself — the
  * `cta` (from lib/utils/booking-cta.ts) already decided which one applies.
  * Self-contained modal state per instance, same pattern as
- * components/shared/claim-business-button.tsx.
+ * components/shared/claim-business-button.tsx. WhatsApp mode still opens the
+ * modal (never a bare wa.me link) — see BookingRequestModal for why.
  */
 export function HotelBookNowButton({
   cta,
+  locale,
   hotelId,
   hotelName,
+  hotelRating,
   rooms = [],
   preselectedRoomId,
   className,
   iconSize = 15,
 }: {
   cta: HotelBookingCta;
+  locale: Locale;
   hotelId: string;
   hotelName: string;
+  hotelRating?: number;
   rooms?: HotelRoom[];
   preselectedRoomId?: string;
   className: string;
@@ -50,10 +56,13 @@ export function HotelBookNowButton({
       </button>
       {open && (
         <BookingRequestModal
+          locale={locale}
           hotelId={hotelId}
           hotelName={hotelName}
+          hotelRating={hotelRating}
           rooms={rooms}
           preselectedRoomId={preselectedRoomId}
+          whatsappNumber={cta.kind === "whatsapp" ? cta.whatsappNumber : undefined}
           onClose={() => setOpen(false)}
         />
       )}

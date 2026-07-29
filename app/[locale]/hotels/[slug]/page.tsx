@@ -151,9 +151,11 @@ export default async function HotelDetailPage({
       />
 
       <HotelActionBar
+        locale={locale}
         listingType="hotel"
         listingId={hotel.id}
         name={hotel.name}
+        rating={hotel.rating}
         phone={hotel.phone}
         website={hotel.website}
         whatsappFallback={whatsappFallback}
@@ -199,7 +201,14 @@ export default async function HotelDetailPage({
                 <h2 id="rooms-heading" className="mb-5 font-display text-2xl font-semibold">
                   {th("rooms")}
                 </h2>
-                <HotelRoomsSection rooms={hotel.rooms} hotelId={hotel.id} hotelName={hotel.name} bookingCta={bookingCta} />
+                <HotelRoomsSection
+                  rooms={hotel.rooms}
+                  locale={locale}
+                  hotelId={hotel.id}
+                  hotelName={hotel.name}
+                  hotelRating={hotel.rating}
+                  bookingCta={bookingCta}
+                />
               </section>
             </Reveal>
           )}
@@ -348,6 +357,7 @@ export default async function HotelDetailPage({
           <HotelBookingCard
             hotelId={hotel.id}
             name={hotel.name}
+            rating={hotel.rating}
             priceRange={hotel.priceRange}
             phone={hotel.phone}
             website={hotel.website}

@@ -268,20 +268,37 @@ export async function getViewsSeries(
   return points;
 }
 
-function mapBooking(row: { id: string; hotel_id: string; room_id: string | null; guest_name: string; guest_phone: string | null; guest_email: string | null; guests_count: number; check_in: string; check_out: string; status: Booking["status"]; notes: string | null; created_at: string; hotel_rooms?: { name: string } | null }): Booking {
+function mapBooking(row: {
+  id: string; hotel_id: string; room_id: string | null; guest_name: string; guest_phone: string | null;
+  guest_email: string | null; guests_count: number; check_in: string; check_out: string;
+  status: Booking["status"]; notes: string | null; created_at: string;
+  adults?: number; children?: number; rooms_count?: number; booking_reference?: string | null;
+  payment_status?: Booking["paymentStatus"]; payment_method?: string | null; user_id?: string | null;
+  hotel_rooms?: { name: string } | null;
+  hotels?: { name: string; slug: string } | null;
+}): Booking {
   return {
     id: row.id,
     hotelId: row.hotel_id,
+    hotelName: row.hotels?.name,
+    hotelSlug: row.hotels?.slug,
     roomId: row.room_id ?? undefined,
     roomName: row.hotel_rooms?.name,
     guestName: row.guest_name,
     guestPhone: row.guest_phone ?? undefined,
     guestEmail: row.guest_email ?? undefined,
     guestsCount: row.guests_count,
+    adults: row.adults ?? row.guests_count ?? 1,
+    children: row.children ?? 0,
+    roomsCount: row.rooms_count ?? 1,
     checkIn: row.check_in,
     checkOut: row.check_out,
     status: row.status,
     notes: row.notes ?? undefined,
+    bookingReference: row.booking_reference ?? undefined,
+    paymentStatus: row.payment_status ?? "unpaid",
+    paymentMethod: row.payment_method ?? undefined,
+    userId: row.user_id ?? undefined,
     createdAt: row.created_at,
   };
 }
@@ -296,6 +313,27 @@ export async function getBookingsForHotel(hotelId: string, limit?: number): Prom
   if (limit) query = query.limit(limit);
 
   const { data } = await query;
+  return (data ?? []).map((row: any) => mapBooking(row));
+}
+
+/** The signed-in guest's own bookings, across every hotel — powers the user
+ * dashboard's "My Bookings" tab. Requires the "Users view their own
+ * bookings" RLS policy (user_id = auth.uid()); only bookings submitted while
+ * logged in ever get a user_id, so anonymous guest requests won't show up
+ * here even for the same person. */
+export async function getMyBookings(): Promise<Booking[]> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data } = await supabase
+    .from("bookings")
+    .select("*, hotel_rooms(name), hotels(name, slug)")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
+
   return (data ?? []).map((row: any) => mapBooking(row));
 }
 

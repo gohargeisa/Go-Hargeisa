@@ -9,6 +9,7 @@ import { normalizeExternalUrl } from "@/lib/utils/normalize-url";
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
 import type { BusinessListingType, HotelRoom } from "@/types";
 import type { HotelBookingCta } from "@/lib/utils/booking-cta";
+import type { Locale } from "@/lib/i18n/config";
 
 const SECONDARY_CLASS =
   "inline-flex h-12 items-center justify-center gap-2 rounded-full border border-ink/15 px-4 text-sm font-semibold text-ink transition-all duration-200 hover:-translate-y-0.5 hover:border-primary hover:text-primary hover:shadow-soft active:scale-95 dark:border-white/20 dark:text-white";
@@ -32,9 +33,11 @@ const PRIMARY_CLASS =
   "inline-flex h-12 items-center justify-center gap-2 rounded-full bg-primary px-8 text-[15px] font-bold text-white shadow-soft transition-all duration-300 ease-out hover:-translate-y-0.5 hover:scale-[1.03] hover:bg-primary-700 hover:shadow-card active:scale-95";
 
 export async function HotelActionBar({
+  locale,
   listingType,
   listingId,
   name,
+  rating,
   phone,
   website,
   whatsappFallback,
@@ -43,9 +46,11 @@ export async function HotelActionBar({
   bookingCta,
   rooms,
 }: {
+  locale: Locale;
   listingType: BusinessListingType;
   listingId: string;
   name: string;
+  rating?: number;
   phone?: string;
   website?: string;
   whatsappFallback?: string;
@@ -73,8 +78,10 @@ export async function HotelActionBar({
         {showPrimary && bookingCta && (
           <HotelBookNowButton
             cta={bookingCta}
+            locale={locale}
             hotelId={listingId}
             hotelName={name}
+            hotelRating={rating}
             rooms={rooms}
             className={PRIMARY_CLASS}
             iconSize={16}

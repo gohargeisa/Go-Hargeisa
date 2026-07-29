@@ -111,11 +111,27 @@ export async function updateBookingStatus(
 ): Promise<{ ok: boolean; error?: string }> {
   const supabase = await assertCanManageListing("hotel", hotelId);
 
+  const { data: existing } = await supabase.from("bookings").select("status").eq("id", bookingId).single();
+  const previousStatus = (existing as { status: BookingInput["status"] } | null)?.status;
+
   const { error } = await supabase
     .from("bookings")
     .update({ status, updated_at: new Date().toISOString() } as never)
     .eq("id", bookingId);
   if (error) return { ok: false, error: error.message };
+
+  // Audit trail — best-effort, never blocks the actual status change.
+  if (previousStatus && previousStatus !== status) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    await supabase.from("booking_status_history").insert({
+      booking_id: bookingId,
+      old_status: previousStatus,
+      new_status: status,
+      changed_by: user?.id ?? null,
+    } as never);
+  }
 
   for (const path of revalidatePaths) revalidatePath(path);
   return { ok: true };

@@ -46,6 +46,8 @@ export function mapHotelRoom(row: HotelRoomRow): HotelRoom {
     bedType: row.bed_type ?? undefined,
     features: row.features ?? [],
     pricePerNight: row.price_per_night != null ? Number(row.price_per_night) : undefined,
+    roomType: row.room_type ?? "standard",
+    isAvailable: row.is_available ?? true,
   };
 }
 

@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { MyBusinessForm } from "@/components/business/my-business-form";
 import { ServiceBadges } from "@/components/business/service-badges";
 import { HotelBookingSettingsForm } from "@/components/business/hotel-booking-settings-form";
+import { HotelRoomsManager } from "@/components/admin/hotel-rooms-manager";
 import type { HotelBookingMode, HotelExternalBookingOption } from "@/types";
 
 export const metadata: Metadata = { title: "My Business — Dashboard", robots: { index: false } };
@@ -19,6 +20,11 @@ export default async function MyBusinessPage({ params: { locale } }: { params: {
   const supabase = await createClient();
   const table = listing.listingType === "hotel" ? "hotels" : listing.listingType === "restaurant" ? "restaurants" : "cafes";
   const { data: row } = await supabase.from(table).select("*").eq("id", listing.id).single();
+
+  const { data: roomRows } =
+    listing.listingType === "hotel"
+      ? await supabase.from("hotel_rooms" as any).select("*").eq("hotel_id", listing.id).order("sort_order", { ascending: true })
+      : { data: null };
 
   return (
     <div className="max-w-2xl space-y-8">
@@ -57,6 +63,25 @@ export default async function MyBusinessPage({ params: { locale } }: { params: {
             bookingComUrl: (row as { booking_com_url?: string })?.booking_com_url ?? "",
             website: (row as { website?: string })?.website ?? "",
           }}
+        />
+      )}
+
+      {listing.listingType === "hotel" && (
+        <HotelRoomsManager
+          hotelId={listing.id}
+          initialRooms={(roomRows ?? []).map((r: any) => ({
+            id: r.id,
+            name: r.name,
+            image: r.image ?? "",
+            sizeSqm: r.size_sqm ?? undefined,
+            maxGuests: r.max_guests,
+            bedType: r.bed_type ?? "",
+            features: r.features ?? [],
+            pricePerNight: r.price_per_night != null ? Number(r.price_per_night) : undefined,
+            roomType: r.room_type ?? "standard",
+            isAvailable: r.is_available ?? true,
+          }))}
+          revalidatePaths={[currentPath, `/${locale}/hotels/${listing.slug}`]}
         />
       )}
 

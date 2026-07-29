@@ -7,6 +7,8 @@ import { Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
 import { createHotelRoom, deleteHotelRoom, updateHotelRoom, type HotelRoomInput } from "@/lib/actions/hotel-rooms";
 import { ImageUploader } from "@/components/shared/image-uploader";
 import { Field, TagInput, inputClass } from "@/components/admin/form-shared";
+import { ROOM_TYPE_LABELS, ROOM_TYPE_ORDER } from "@/lib/utils/room-type";
+import type { RoomType } from "@/types";
 
 export interface HotelRoomManagerRow extends HotelRoomInput {
   id: string;
@@ -20,6 +22,8 @@ const BLANK: HotelRoomInput = {
   bedType: "",
   features: [],
   pricePerNight: undefined,
+  roomType: "standard",
+  isAvailable: true,
 };
 
 const FEATURE_SUGGESTIONS = [
@@ -70,6 +74,8 @@ export function HotelRoomsManager({
         bedType: room.bedType,
         features: room.features,
         pricePerNight: room.pricePerNight,
+        roomType: room.roomType,
+        isAvailable: room.isAvailable,
       });
     } else {
       setEditingId("new");
@@ -146,7 +152,21 @@ export function HotelRoomsManager({
                 {room.image && <Image src={room.image} alt={room.name} fill sizes="56px" className="object-cover" />}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold">{room.name}</p>
+                <div className="flex items-center gap-1.5">
+                  <p className="truncate text-sm font-semibold">{room.name}</p>
+                  <span className="inline-flex shrink-0 items-center rounded-full bg-ink/8 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-ink/60 dark:bg-white/10 dark:text-sand/60">
+                    {ROOM_TYPE_LABELS[room.roomType]}
+                  </span>
+                  <span
+                    className={`inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                      room.isAvailable
+                        ? "bg-accent/10 text-accent-700 dark:bg-accent/15 dark:text-accent-400"
+                        : "bg-red-100 text-red-700 dark:bg-red-400/15 dark:text-red-300"
+                    }`}
+                  >
+                    {room.isAvailable ? "Available" : "Unavailable"}
+                  </span>
+                </div>
                 <p className="text-xs text-ink/50 dark:text-sand/50">
                   {room.maxGuests} guests
                   {room.bedType ? ` • ${room.bedType}` : ""}
@@ -221,6 +241,22 @@ function RoomForm({
             placeholder="Deluxe King Room"
           />
         </Field>
+        <Field label="Room type">
+          <select
+            value={draft.roomType}
+            onChange={(e) => update("roomType", e.target.value as RoomType)}
+            className={inputClass}
+          >
+            {ROOM_TYPE_ORDER.map((type) => (
+              <option key={type} value={type}>
+                {ROOM_TYPE_LABELS[type]}
+              </option>
+            ))}
+          </select>
+        </Field>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
         <Field label="Bed type">
           <input
             value={draft.bedType ?? ""}
@@ -228,6 +264,16 @@ function RoomForm({
             className={inputClass}
             placeholder="King Bed"
           />
+        </Field>
+        <Field label="Availability">
+          <select
+            value={draft.isAvailable ? "available" : "unavailable"}
+            onChange={(e) => update("isAvailable", e.target.value === "available")}
+            className={inputClass}
+          >
+            <option value="available">Available</option>
+            <option value="unavailable">Unavailable</option>
+          </select>
         </Field>
       </div>
 

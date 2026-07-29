@@ -8,6 +8,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { getFavoritesForUser } from "@/lib/data/favorites";
 import { getSavedTripsForUser } from "@/lib/data/saved-trips";
 import { getReviewsForUser } from "@/lib/data/reviews";
+import { getMyBookings } from "@/lib/data/business";
 import { DashboardTabs } from "@/components/dashboard/dashboard-tabs";
 
 export const metadata: Metadata = { title: "My Dashboard — Go Hargeisa" };
@@ -37,13 +38,14 @@ export default async function DashboardPage({
         : (data as unknown as Database["public"]["Tables"]["profiles"]["Row"]);
   }
 
-  const [favorites, trips, reviews] = user
+  const [favorites, trips, reviews, bookings] = user
     ? await Promise.all([
         getFavoritesForUser(user.id),
         getSavedTripsForUser(user.id),
         getReviewsForUser(user.id),
+        getMyBookings(),
       ])
-    : [[], [], []];
+    : [[], [], [], []];
 
   const userName =
     profile?.full_name || user?.email?.split("@")[0] || "there";
@@ -73,6 +75,7 @@ export default async function DashboardPage({
         email={user?.email ?? ""}
         favorites={favorites}
         trips={trips}
+        bookings={bookings}
         reviews={reviews}
         userName={userName}
         avatarUrl={avatarUrl}

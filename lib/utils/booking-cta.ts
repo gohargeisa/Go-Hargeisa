@@ -1,9 +1,9 @@
 import { normalizeExternalUrl } from "@/lib/utils/normalize-url";
-import { toWhatsAppHref } from "@/lib/utils/whatsapp";
 import type { HotelBookingMode, HotelExternalBookingOption } from "@/types";
 
 export type HotelBookingCta =
   | { kind: "go_hargeisa"; label: string }
+  | { kind: "whatsapp"; label: string; whatsappNumber: string }
   | { kind: "external"; href: string; label: string };
 
 export interface BookingCtaLabels {
@@ -31,6 +31,12 @@ export interface BookableHotel {
  * configured mode behaves identically everywhere it appears. Column-driven:
  * no hotel-specific branching, works the same for 1 hotel or 10,000.
  *
+ * WhatsApp is deliberately its own `kind`, not a plain external link: the
+ * button must still open the full booking modal first (never an empty
+ * WhatsApp chat) — see components/shared/booking-request-modal.tsx, which
+ * creates the booking, then formats its reference + the form's own details
+ * into the WhatsApp message before opening it.
+ *
  * External mode falls back to whichever external field is actually filled
  * in if the chosen `externalBookingOption` itself has no value (e.g. the
  * owner picked "WhatsApp" but hasn't saved a number yet) — and falls all the
@@ -50,13 +56,7 @@ export function getHotelBookingCta(hotel: BookableHotel, labels: BookingCtaLabel
     booking_com: hotel.bookingComUrl
       ? { kind: "external", href: normalizeExternalUrl(hotel.bookingComUrl), label: labels.bookOnBookingCom }
       : null,
-    whatsapp: whatsappNumber
-      ? {
-          kind: "external",
-          href: toWhatsAppHref(whatsappNumber, `Hi, I'd like to book a room at ${hotel.name}.`),
-          label: labels.bookViaWhatsApp,
-        }
-      : null,
+    whatsapp: whatsappNumber ? { kind: "whatsapp", whatsappNumber, label: labels.bookViaWhatsApp } : null,
     custom_url: hotel.externalBookingUrl
       ? { kind: "external", href: normalizeExternalUrl(hotel.externalBookingUrl), label: labels.bookNow }
       : null,

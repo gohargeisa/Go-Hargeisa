@@ -3,17 +3,27 @@ import { BedDouble, Building2, Maximize, Users } from "lucide-react";
 import { amenityIcon } from "@/lib/utils/amenity-icon";
 import { HotelBookNowButton } from "@/components/shared/hotel-book-now-button";
 import type { HotelBookingCta } from "@/lib/utils/booking-cta";
+import type { Locale } from "@/lib/i18n/config";
 import type { HotelRoom } from "@/types";
 
 export function HotelRoomCard({
   room,
+  allRooms,
+  locale,
   hotelId,
   hotelName,
+  hotelRating,
   bookingCta,
 }: {
   room: HotelRoom;
+  /** The hotel's full room list — the modal needs every option even when
+   * launched from one specific room's card, so it can preselect that room
+   * while still letting the guest switch to another. */
+  allRooms: HotelRoom[];
+  locale: Locale;
   hotelId: string;
   hotelName: string;
+  hotelRating?: number;
   bookingCta: HotelBookingCta;
 }) {
   const hasImage = Boolean(room.image);
@@ -83,8 +93,11 @@ export function HotelRoomCard({
 
           <HotelBookNowButton
             cta={bookingCta}
+            locale={locale}
             hotelId={hotelId}
             hotelName={hotelName}
+            hotelRating={hotelRating}
+            rooms={allRooms}
             preselectedRoomId={room.id}
             className="inline-flex h-10 items-center justify-center gap-1 rounded-full bg-primary px-4 text-sm font-semibold text-white transition-colors hover:bg-primary-700"
             iconSize={13}

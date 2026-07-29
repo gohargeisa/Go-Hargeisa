@@ -78,6 +78,8 @@ export default async function EditHotelPage({
           bedType: r.bed_type ?? "",
           features: r.features ?? [],
           pricePerNight: r.price_per_night != null ? Number(r.price_per_night) : undefined,
+          roomType: r.room_type ?? "standard",
+          isAvailable: r.is_available ?? true,
         }))}
         initial={{
           slug: hotel.slug,

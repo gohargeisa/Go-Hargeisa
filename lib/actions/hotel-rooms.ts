@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import type { RoomType } from "@/types";
 
 export interface HotelRoomInput {
   name: string;
@@ -12,6 +13,8 @@ export interface HotelRoomInput {
   features: string[];
   pricePerNight?: number;
   sortOrder?: number;
+  roomType: RoomType;
+  isAvailable: boolean;
 }
 
 /**
@@ -52,6 +55,8 @@ function toPayload(input: HotelRoomInput, hotelId: string) {
     features: input.features,
     price_per_night: input.pricePerNight ?? null,
     sort_order: input.sortOrder ?? 0,
+    room_type: input.roomType,
+    is_available: input.isAvailable,
   };
 }
 

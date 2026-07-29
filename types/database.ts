@@ -40,10 +40,16 @@ type HotelRow = ListingBase & {
   external_booking_url: string | null; booking_whatsapp: string | null; booking_com_url: string | null;
 };
 
+type RoomTypeDb = "standard" | "deluxe" | "twin" | "family" | "executive_suite";
+
 type HotelRoomRow = {
   id: string; hotel_id: string; name: string; image: string | null; size_sqm: number | null;
   max_guests: number; bed_type: string | null; features: string[]; price_per_night: number | null;
-  sort_order: number; created_at: string; updated_at: string;
+  sort_order: number; room_type: RoomTypeDb; is_available: boolean; created_at: string; updated_at: string;
+};
+
+type RoomAvailabilityRow = {
+  id: string; room_id: string; date: string; is_available: boolean; note: string | null; created_at: string;
 };
 type RestaurantRow = ListingBase & {
   phone: string | null; website: string | null; cuisine: string[]; price_range: "$" | "$$" | "$$$" | "$$$$";
@@ -73,7 +79,17 @@ type BookingRow = {
   id: string; hotel_id: string; room_id: string | null; guest_name: string; guest_phone: string | null;
   guest_email: string | null; guests_count: number; check_in: string; check_out: string;
   status: "pending" | "confirmed" | "cancelled" | "completed"; notes: string | null;
+  adults: number; children: number; rooms_count: number; booking_reference: string | null;
+  payment_status: "unpaid" | "pending" | "paid" | "refunded"; payment_method: string | null;
+  user_id: string | null;
   created_at: string; updated_at: string;
+};
+
+type BookingStatusHistoryRow = {
+  id: string; booking_id: string;
+  old_status: "pending" | "confirmed" | "cancelled" | "completed" | null;
+  new_status: "pending" | "confirmed" | "cancelled" | "completed";
+  changed_by: string | null; created_at: string;
 };
 
 type BusinessMetricEventRow = {
@@ -106,7 +122,9 @@ export type Database = {
       map_points: Table<{ id: string; name: string; category: string; lat: number; lng: number; created_at: string }>;
       reviews: Table<{ id: string; listing_type: "hotel" | "restaurant" | "cafe" | "attraction" | "service"; listing_id: string; user_id: string | null; rating: number; comment: string | null; photos: Json; owner_reply: string | null; owner_reply_at: string | null; is_reported: boolean; created_at: string }>;
       hotel_rooms: Table<HotelRoomRow>;
+      room_availability: Table<RoomAvailabilityRow>;
       bookings: Table<BookingRow>;
+      booking_status_history: Table<BookingStatusHistoryRow>;
       business_metric_events: Table<BusinessMetricEventRow>;
       business_subscriptions: Table<BusinessSubscriptionRow>;
       business_messages: Table<BusinessMessageRow>;

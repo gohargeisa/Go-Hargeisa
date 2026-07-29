@@ -25,19 +25,31 @@ export interface Review {
 /** Listing types a `business_owner` profile can currently own/manage — see lib/data/business.ts. */
 export type BusinessListingType = "hotel" | "restaurant" | "cafe" | "service";
 
+export type PaymentStatus = "unpaid" | "pending" | "paid" | "refunded";
+
 export interface Booking {
   id: string;
   hotelId: string;
+  hotelName?: string;
+  hotelSlug?: string;
   roomId?: string;
   roomName?: string;
   guestName: string;
   guestPhone?: string;
   guestEmail?: string;
+  /** Total headcount (adults + children) — kept for existing displays; prefer `adults`/`children` for new UI. */
   guestsCount: number;
+  adults: number;
+  children: number;
+  roomsCount: number;
   checkIn: string;
   checkOut: string;
   status: "pending" | "confirmed" | "cancelled" | "completed";
   notes?: string;
+  bookingReference?: string;
+  paymentStatus: PaymentStatus;
+  paymentMethod?: string;
+  userId?: string;
   createdAt: string;
 }
 
@@ -96,6 +108,8 @@ export interface Destination {
   highlights?: string[];
 }
 
+export type RoomType = "standard" | "deluxe" | "twin" | "family" | "executive_suite";
+
 export interface HotelRoom {
   id: string;
   name: string;
@@ -105,6 +119,8 @@ export interface HotelRoom {
   bedType?: string;
   features: string[];
   pricePerNight?: number;
+  roomType: RoomType;
+  isAvailable: boolean;
 }
 
 export type HotelBookingMode = "go_hargeisa" | "external";

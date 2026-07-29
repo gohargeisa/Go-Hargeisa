@@ -11,6 +11,7 @@ import type { HotelRoom } from "@/types";
 export function HotelBookingCard({
   hotelId,
   name,
+  rating,
   priceRange,
   phone,
   website,
@@ -20,6 +21,7 @@ export function HotelBookingCard({
 }: {
   hotelId: string;
   name: string;
+  rating?: number;
   priceRange?: string;
   phone?: string;
   website?: string;
@@ -47,8 +49,10 @@ export function HotelBookingCard({
 
       <HotelBookNowButton
         cta={bookingCta}
+        locale={locale}
         hotelId={hotelId}
         hotelName={name}
+        hotelRating={rating}
         rooms={rooms}
         className="flex h-12 w-full items-center justify-center gap-1.5 rounded-full bg-primary text-sm font-semibold text-white transition-colors hover:bg-primary-700"
       />
