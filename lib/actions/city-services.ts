@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { logActivity } from "./activity";
 import type { EssentialServiceCategory } from "@/types";
 
 async function assertOwner() {
@@ -44,6 +45,7 @@ export async function createCityService(
 
   if (error) return { ok: false, error: error.message };
 
+  await logActivity("create", "city_service", undefined, { name: input.name, category: input.category });
   revalidatePath(`/${locale}/admin/city-services`);
   revalidatePath(`/${locale}/city-services`);
   return { ok: true };
@@ -71,6 +73,7 @@ export async function updateCityService(
 
   if (error) return { ok: false, error: error.message };
 
+  await logActivity("update", "city_service", id, { name: input.name });
   revalidatePath(`/${locale}/admin/city-services`);
   revalidatePath(`/${locale}/city-services`);
   return { ok: true };
@@ -82,6 +85,7 @@ export async function deleteCityService(locale: string, id: string): Promise<{ o
   const { error } = await supabase.from("city_services").delete().eq("id", id);
   if (error) return { ok: false, error: error.message };
 
+  await logActivity("delete", "city_service", id);
   revalidatePath(`/${locale}/admin/city-services`);
   revalidatePath(`/${locale}/city-services`);
   return { ok: true };
@@ -97,6 +101,7 @@ export async function toggleCityServiceVisibility(
   const { error } = await supabase.from("city_services").update({ status: nextStatus } as never).eq("id", id);
   if (error) return { ok: false, error: error.message };
 
+  await logActivity(nextStatus === "published" ? "publish" : "archive", "city_service", id);
   revalidatePath(`/${locale}/admin/city-services`);
   revalidatePath(`/${locale}/city-services`);
   return { ok: true };

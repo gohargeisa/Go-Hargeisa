@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { logActivity } from "./activity";
 
 const ALLOWED_TABLES = ["hotels", "restaurants", "cafes", "services", "attractions", "events", "articles"] as const;
 export type AllowedTable = (typeof ALLOWED_TABLES)[number];
@@ -137,6 +138,7 @@ export async function deleteListing(
     return { ok: false, error: error?.message ?? "Delete failed — the listing may already be gone or you may not have permission." };
   }
 
+  await logActivity("delete", table, id);
   revalidatePath(revalidate);
   return { ok: true };
 }
@@ -193,6 +195,7 @@ export async function toggleListingVisibility(
     return { ok: false, error: error?.message ?? "Could not update visibility." };
   }
 
+  await logActivity(nextStatus === "published" ? "publish" : "archive", table, id);
   revalidatePath(revalidate);
   return { ok: true };
 }
@@ -261,6 +264,7 @@ export async function createRecord(
     revalidatePath(`/${locale}/${TABLE_DETAIL_SEGMENT[table]}/${inserted.slug}`);
   }
 
+  await logActivity("create", table, inserted.slug);
   redirect(redirectTo);
 }
 
@@ -338,5 +342,6 @@ export async function updateRecord(
     if (previousSlug && previousSlug !== updated.slug) revalidatePath(`/${locale}/${segment}/${previousSlug}`);
   }
 
+  await logActivity("update", table, id);
   redirect(redirectTo);
 }

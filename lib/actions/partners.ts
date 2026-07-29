@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { logActivity } from "./activity";
 import type { SubscriptionPlanId } from "@/lib/config/subscription-plans";
 
 const PARTNER_TABLES = ["hotels", "restaurants", "cafes"] as const;
@@ -52,6 +53,7 @@ export async function setPartnerStatus(
 
   if (error) return { ok: false, error: error.message };
 
+  await logActivity("update", "partner_status", id, { table, status });
   revalidatePath(`/${locale}/admin/partners`);
   revalidatePath(`/${locale}/business`);
   return { ok: true };
@@ -83,6 +85,7 @@ export async function assignSubscriptionPlan(
 
   if (error) return { ok: false, error: error.message };
 
+  await logActivity("update", "subscription", listingId, { table, planTier });
   revalidatePath(`/${locale}/admin/partners`);
   revalidatePath(`/${locale}/business/subscription`);
   return { ok: true };
