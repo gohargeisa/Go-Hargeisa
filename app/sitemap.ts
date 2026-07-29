@@ -6,6 +6,12 @@ import { getAllCafeSlugs } from "@/lib/data/cafes";
 import { getAllAttractionSlugs } from "@/lib/data/attractions";
 import { getAllEventSlugs } from "@/lib/data/events";
 import { getAllArticleSlugs } from "@/lib/data/articles";
+import {
+  HOTELS_PRESENTATION_MODE,
+  PRESENTATION_HOTEL_SLUG,
+  RESTAURANTS_PUBLIC_ENABLED,
+  CAFES_PUBLIC_ENABLED,
+} from "@/lib/config/features";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gohargeisa.com";
 
@@ -26,14 +32,23 @@ const staticRoutes = [
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [hotelSlugs, restaurantSlugs, cafeSlugs, attractionSlugs, eventSlugs, articleSlugs] = await Promise.all([
-    getAllHotelSlugs(),
-    getAllRestaurantSlugs(),
-    getAllCafeSlugs(),
-    getAllAttractionSlugs(),
-    getAllEventSlugs(),
-    getAllArticleSlugs(),
-  ]);
+  const [hotelSlugsRaw, restaurantSlugsRaw, cafeSlugsRaw, attractionSlugs, eventSlugs, articleSlugs] =
+    await Promise.all([
+      getAllHotelSlugs(),
+      getAllRestaurantSlugs(),
+      getAllCafeSlugs(),
+      getAllAttractionSlugs(),
+      getAllEventSlugs(),
+      getAllArticleSlugs(),
+    ]);
+
+  // Hotel presentation mode + temporarily-hidden restaurants/cafes
+  // (lib/config/features.ts) — don't list URLs the public site won't show.
+  const hotelSlugs = HOTELS_PRESENTATION_MODE
+    ? hotelSlugsRaw.filter((s) => s === PRESENTATION_HOTEL_SLUG)
+    : hotelSlugsRaw;
+  const restaurantSlugs = RESTAURANTS_PUBLIC_ENABLED ? restaurantSlugsRaw : [];
+  const cafeSlugs = CAFES_PUBLIC_ENABLED ? cafeSlugsRaw : [];
 
   const entries: MetadataRoute.Sitemap = [];
 

@@ -4,6 +4,8 @@ import type { Locale } from "@/lib/i18n/config";
 import { getCafes } from "@/lib/data/cafes";
 import { PageHero } from "@/components/shared/page-hero";
 import { CafesPageClient } from "@/components/pages/cafes-page-client";
+import { ComingSoonSection } from "@/components/shared/coming-soon-section";
+import { CAFES_PUBLIC_ENABLED } from "@/lib/config/features";
 
 // Public content changes infrequently; revalidate hourly instead of
 // rendering on every request (mirrors hotels/restaurants).
@@ -30,13 +32,20 @@ export default async function CafesPage({
 }) {
   const t = await getTranslations("home");
   const tNav = await getTranslations("nav");
-  const cafes = await getCafes({ q: searchParams.q });
+  // Cafes are temporarily hidden site-wide for the hotel presentation
+  // (lib/config/features.ts) — skip the fetch entirely and always show
+  // Coming Soon in that case, even if a visitor searches.
+  const cafes = CAFES_PUBLIC_ENABLED ? await getCafes({ q: searchParams.q }) : [];
 
   return (
     <>
       <PageHero eyebrow={`☕ ${tNav("cafes")}`} title={t("cafesTitle")} subtitle={t("cafesSubtitle")} image="/images/cafes/hero.png" />
 
-      <CafesPageClient locale={locale} initialCafes={cafes} searchParams={searchParams} />
+      {CAFES_PUBLIC_ENABLED ? (
+        <CafesPageClient locale={locale} initialCafes={cafes} searchParams={searchParams} />
+      ) : (
+        <ComingSoonSection locale={locale} type="cafes" />
+      )}
     </>
   );
 }

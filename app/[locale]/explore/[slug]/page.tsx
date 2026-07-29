@@ -6,6 +6,7 @@ import { getRestaurants } from "@/lib/data/restaurants";
 import { getAttractions } from "@/lib/data/attractions";
 import { ListingCard } from "@/components/shared/listing-card";
 import { HotelCard } from "@/components/shared/hotel-card";
+import { RESTAURANTS_PUBLIC_ENABLED, filterHotelsForPresentation } from "@/lib/config/features";
 
 // Public content changes infrequently; revalidate hourly instead of
 // rendering on every request (this page no longer reads cookies, so
@@ -25,11 +26,12 @@ export default async function DestinationDetailPage({
   const destination = await getDestinationBySlug(slug);
   if (!destination) notFound();
 
-  const [hotels, restaurants, attractions] = await Promise.all([
+  const [hotelsRaw, restaurants, attractions] = await Promise.all([
     getHotels(),
-    getRestaurants(),
+    RESTAURANTS_PUBLIC_ENABLED ? getRestaurants() : Promise.resolve([]),
     getAttractions(),
   ]);
+  const hotels = filterHotelsForPresentation(hotelsRaw);
 
   return (
     <>
@@ -65,14 +67,16 @@ export default async function DestinationDetailPage({
             ))}
           </div>
         </div>
-        <div>
-          <h2 className="font-display text-xl font-semibold mb-4">Places to eat</h2>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {restaurants.slice(0, 3).map((r) => (
-              <ListingCard key={r.id} href={`/${locale}/restaurants/${r.slug}`} image={r.coverImage} title={r.name} subtitle={r.cuisine.join(" · ")} rating={r.rating} reviewCount={r.reviewCount} priceRange={r.priceRange} />
-            ))}
+        {restaurants.length > 0 && (
+          <div>
+            <h2 className="font-display text-xl font-semibold mb-4">Places to eat</h2>
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {restaurants.slice(0, 3).map((r) => (
+                <ListingCard key={r.id} href={`/${locale}/restaurants/${r.slug}`} image={r.coverImage} title={r.name} subtitle={r.cuisine.join(" · ")} rating={r.rating} reviewCount={r.reviewCount} priceRange={r.priceRange} />
+              ))}
+            </div>
           </div>
-        </div>
+        )}
         <div>
           <h2 className="font-display text-xl font-semibold mb-4">Things to see</h2>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

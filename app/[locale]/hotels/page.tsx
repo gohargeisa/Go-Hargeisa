@@ -6,6 +6,7 @@ import { ListingCard } from "@/components/shared/listing-card";
 import { PageHero } from "@/components/shared/page-hero";
 import { SearchWithin } from "@/components/shared/search-within";
 import { HotelsPageClient } from "@/components/pages/hotels-page-client";
+import { filterHotelsForPresentation } from "@/lib/config/features";
 
 // Public content changes infrequently; revalidate hourly instead of
 // rendering on every request (this page no longer reads cookies, so
@@ -34,7 +35,7 @@ export default async function HotelsPage({
 }) {
   const t = await getTranslations("home");
   const tNav = await getTranslations("nav");
-  const hotels = await getHotels({ q: searchParams.q });
+  const hotels = filterHotelsForPresentation(await getHotels({ q: searchParams.q }));
 
   return (
     <>

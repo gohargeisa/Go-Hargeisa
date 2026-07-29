@@ -30,6 +30,13 @@ import { ReviewForm } from "@/components/shared/review-form";
 import { SingleLocationMapLoader } from "@/components/map/single-location-map-loader";
 import { Reveal } from "@/components/home/reveal";
 import { getHotelBookingCta } from "@/lib/utils/booking-cta";
+import {
+  HOTELS_PRESENTATION_MODE,
+  PRESENTATION_HOTEL_SLUG,
+  RESTAURANTS_PUBLIC_ENABLED,
+  CAFES_PUBLIC_ENABLED,
+  filterHotelsForPresentation,
+} from "@/lib/config/features";
 
 // Public content changes infrequently; revalidate hourly instead of
 // rendering on every request (this page no longer reads cookies, so
@@ -38,7 +45,10 @@ export const revalidate = 3600;
 
 export async function generateStaticParams() {
   const slugs = await getAllHotelSlugs();
-  return slugs.map((slug) => ({ slug }));
+  // Presentation mode: only pre-render the one hotel that's staying public
+  // — see lib/config/features.ts. Every other hotel's page 404s below.
+  const visibleSlugs = HOTELS_PRESENTATION_MODE ? slugs.filter((s) => s === PRESENTATION_HOTEL_SLUG) : slugs;
+  return visibleSlugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({
@@ -63,6 +73,8 @@ export default async function HotelDetailPage({
 }) {
   const hotel = await getHotelBySlug(slug);
   if (!hotel) notFound();
+  if (HOTELS_PRESENTATION_MODE && slug !== PRESENTATION_HOTEL_SLUG) notFound();
+
   const t = await getTranslations("common");
   const tNav = await getTranslations("nav");
   const td = await getTranslations("detail");
@@ -72,7 +84,9 @@ export default async function HotelDetailPage({
     getHotels(),
     getSiteSettings(),
   ]);
-  const similarHotels = allHotels.filter((h) => h.id !== hotel.id).slice(0, 4);
+  const similarHotels = filterHotelsForPresentation(allHotels)
+    .filter((h) => h.id !== hotel.id)
+    .slice(0, 4);
   const whatsappFallback = (siteSettings as { whatsapp_number?: string } | null)?.whatsapp_number ?? undefined;
 
   const bookingCta = getHotelBookingCta(hotel, {
@@ -201,7 +215,7 @@ export default async function HotelDetailPage({
             </Reveal>
           )}
 
-          {hotel.restaurant && (
+          {RESTAURANTS_PUBLIC_ENABLED && hotel.restaurant && (
             <Reveal>
               <section aria-labelledby="restaurant-heading">
                 <h2 id="restaurant-heading" className="mb-5 font-display text-2xl font-semibold">
@@ -212,7 +226,7 @@ export default async function HotelDetailPage({
             </Reveal>
           )}
 
-          {hotel.cafe && (
+          {CAFES_PUBLIC_ENABLED && hotel.cafe && (
             <Reveal>
               <section aria-labelledby="cafe-heading">
                 <h2 id="cafe-heading" className="mb-5 font-display text-2xl font-semibold">

@@ -106,8 +106,10 @@
     "badge": "Dhawaan",
     "partnerButton": "Nala Noqo Shariig",
     "contactButton": "Nala Soo Xiriir",
-    "restaurantsTitle": "Soo Ogow Maqaayadaha Ugu Fiican ee Hargeysa",
-    "restaurantsDescription": "Waxaan hadda la shaqaynaynaa maqaayadaha ugu fiican ee Hargeysa si aan idiin keeno liisas la xaqiijiyay, sawirro qurux badan, iyo talooyin la aamini karo."
+    "restaurantsTitle": "🍽️ Maqaayadaha Dhawaan Ayay Iman Doonaan",
+    "restaurantsDescription": "Waxaan hadda la shaqaynaynaa maqaayadaha ugu fiican ee Hargeysa. Sug, maqaayado cusub ayaa dhawaan lagu dari doonaa.",
+    "cafesTitle": "☕ Kafateeriyada Dhawaan Ayay Iman Doonaan",
+    "cafesDescription": "Waxaan la shaqaynaynaa kafateeriyada Hargeysa si aan idiin keeno waayo-aragnimada qaxwaha ugu fiican."
   },
   "footer": {
     "tagline": "Hagaha aad ku kalsoon tahay ee Hargeysa — hudheellada ugu fiican, maqaayadaha, kafateeriyada iyo meelaha ugu muhiimsan ee magaalada.",

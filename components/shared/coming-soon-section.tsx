@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Handshake, Mail, Sparkles, UtensilsCrossed } from "lucide-react";
+import { Coffee, Handshake, Mail, Sparkles, UtensilsCrossed } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { Reveal } from "@/components/home/reveal";
 
-export function ComingSoonSection({ locale }: { locale: Locale }) {
+export function ComingSoonSection({ locale, type = "restaurants" }: { locale: Locale; type?: "restaurants" | "cafes" }) {
   const t = useTranslations("comingSoon");
-  const Icon = UtensilsCrossed;
-  const title = t("restaurantsTitle");
-  const description = t("restaurantsDescription");
+  const Icon = type === "cafes" ? Coffee : UtensilsCrossed;
+  const title = type === "cafes" ? t("cafesTitle") : t("restaurantsTitle");
+  const description = type === "cafes" ? t("cafesDescription") : t("restaurantsDescription");
 
   return (
     <section className="container-px mx-auto py-16 md:py-24">

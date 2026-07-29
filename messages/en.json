@@ -106,8 +106,10 @@
     "badge": "Coming Soon",
     "partnerButton": "Partner With Us",
     "contactButton": "Contact Us",
-    "restaurantsTitle": "Discover Hargeisa's Best Restaurants",
-    "restaurantsDescription": "We're currently partnering with Hargeisa's best restaurants to bring you verified listings, beautiful photos, and trusted recommendations."
+    "restaurantsTitle": "🍽️ Restaurants Coming Soon",
+    "restaurantsDescription": "We are currently partnering with the best restaurants in Hargeisa. Stay tuned as new restaurants will be added soon.",
+    "cafesTitle": "☕ Cafés Coming Soon",
+    "cafesDescription": "We're working with cafés across Hargeisa to bring you the best coffee experiences."
   },
   "footer": {
     "tagline": "Your trusted guide to Hargeisa — hotels, food, culture and everything in between.",
