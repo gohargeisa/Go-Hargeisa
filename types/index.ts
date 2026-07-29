@@ -23,7 +23,7 @@ export interface Review {
 }
 
 /** Listing types a `business_owner` profile can currently own/manage — see lib/data/business.ts. */
-export type BusinessListingType = "hotel" | "restaurant" | "cafe";
+export type BusinessListingType = "hotel" | "restaurant" | "cafe" | "service";
 
 export interface Booking {
   id: string;
@@ -190,6 +190,41 @@ export interface Cafe {
   menuPdfUrl?: string;
 }
 
+/** Phase 2 — Essential City Services. One shared shape across all 8
+ * categories (see supabase/migrations/20260729000001_add_services.sql for
+ * why this is one table/type instead of eight near-identical ones). */
+export type ServiceCategory =
+  | "hospital"
+  | "pharmacy"
+  | "dental_clinic"
+  | "bank"
+  | "atm"
+  | "currency_exchange"
+  | "gas_station"
+  | "car_rental";
+
+export interface Service {
+  id: string;
+  slug: string;
+  name: string;
+  shortDescription: string;
+  description: string;
+  coverImage: string;
+  gallery: GalleryImage[];
+  address: string;
+  location: Coordinates;
+  rating: number;
+  reviewCount: number;
+  reviews: Review[];
+  phone?: string;
+  website?: string;
+  openingHours?: string;
+  services: string[];
+  category: ServiceCategory;
+  featured?: boolean;
+  logo?: string;
+}
+
 export interface Attraction {
   id: string;
   slug: string;
@@ -248,8 +283,12 @@ export interface Article {
 export type CityServiceCategory =
   | "hospital"
   | "pharmacy"
-  | "gas_station"
+  | "dental_clinic"
+  | "bank"
   | "atm"
+  | "currency_exchange"
+  | "gas_station"
+  | "car_rental"
   | "mosque"
   | "supermarket"
   | "police"
@@ -264,4 +303,11 @@ export interface CityServicePoint {
   name: string;
   category: CityServiceCategory;
   location: Coordinates;
+  /** Present for Phase 2 service points (backed by the `services` table)
+   * so the map popup can show full details + a working Claim button
+   * without a second fetch. Absent for legacy map_points pins. */
+  slug?: string;
+  address?: string;
+  description?: string;
+  phone?: string;
 }

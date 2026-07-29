@@ -4,10 +4,11 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { BusinessListingType } from "@/types";
 
-const LISTING_TABLE: Record<BusinessListingType, "hotels" | "restaurants" | "cafes"> = {
+const LISTING_TABLE: Record<BusinessListingType, "hotels" | "restaurants" | "cafes" | "services"> = {
   hotel: "hotels",
   restaurant: "restaurants",
   cafe: "cafes",
+  service: "services",
 };
 
 /**

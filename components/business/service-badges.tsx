@@ -12,11 +12,13 @@ const FIELD_BY_TYPE: Record<BusinessListingType, string> = {
   hotel: "amenities",
   restaurant: "cuisine",
   cafe: "special_drinks",
+  service: "services",
 };
-const TABLE_BY_TYPE: Record<BusinessListingType, "hotels" | "restaurants" | "cafes"> = {
+const TABLE_BY_TYPE: Record<BusinessListingType, "hotels" | "restaurants" | "cafes" | "services"> = {
   hotel: "hotels",
   restaurant: "restaurants",
   cafe: "cafes",
+  service: "services",
 };
 const SUGGESTIONS_BY_TYPE: Record<BusinessListingType, string[]> = {
   hotel: [
@@ -32,6 +34,7 @@ const SUGGESTIONS_BY_TYPE: Record<BusinessListingType, string[]> = {
   ],
   restaurant: ["Somali", "Grill", "International", "Seafood", "Fast Food", "Ethiopian"],
   cafe: ["Somali Spiced Coffee", "Somali Tea (Shaah)", "Iced Caramel Macchiato", "Cold Brew"],
+  service: ["24/7", "Emergency", "Card Payment", "Cash Only", "Home Delivery", "Wheelchair Accessible"],
 };
 
 /**

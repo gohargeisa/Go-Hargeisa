@@ -6,6 +6,7 @@ import type { Locale } from "@/lib/i18n/config";
 import { getHotels } from "@/lib/data/hotels";
 import { getRestaurants } from "@/lib/data/restaurants";
 import { getCafes } from "@/lib/data/cafes";
+import { getServices } from "@/lib/data/services";
 import { getAttractions } from "@/lib/data/attractions";
 
 import { Hero } from "@/components/home/hero";
@@ -16,8 +17,10 @@ import { ScrollRow } from "@/components/shared/scroll-row";
 import { PremiumHotelCard } from "@/components/home/premium-hotel-card";
 import { PremiumRestaurantCard } from "@/components/home/premium-restaurant-card";
 import { PremiumCafeCard } from "@/components/home/premium-cafe-card";
+import { PremiumServiceCard } from "@/components/home/premium-service-card";
 import { PremiumAttractionCard } from "@/components/home/premium-attraction-card";
 import { ViewAllButton } from "@/components/home/view-all-button";
+import { serviceHref } from "@/lib/utils/service-categories";
 
 export const revalidate = 3600;
 
@@ -25,8 +28,10 @@ export const revalidate = 3600;
 // database is untouched, only fetched at this cap (rather than fetching
 // everything and slicing) so the homepage doesn't pull the entire table
 // just to show 3 rows. The real listing pages (/hotels, /restaurants,
-// /cafes) call the same functions with no limit and show everything.
+// /cafes, /services) call the same functions with no limit and show
+// everything.
 const HOMEPAGE_PREVIEW_COUNT = 3;
+const HOMEPAGE_SERVICES_PREVIEW_COUNT = 4;
 
 export default async function HomePage({
   params: { locale },
@@ -35,10 +40,11 @@ export default async function HomePage({
 }) {
   const t = await getTranslations("home");
 
-  const [hotels, restaurants, cafes, attractions] = await Promise.all([
+  const [hotels, restaurants, cafes, services, attractions] = await Promise.all([
     getHotels({ limit: HOMEPAGE_PREVIEW_COUNT }),
     getRestaurants({ limit: HOMEPAGE_PREVIEW_COUNT }),
     getCafes({ limit: HOMEPAGE_PREVIEW_COUNT }),
+    getServices({ limit: HOMEPAGE_SERVICES_PREVIEW_COUNT }),
     getAttractions(),
   ]);
 
@@ -231,6 +237,45 @@ export default async function HomePage({
         </section>
       )}
 
+      {services.length > 0 && (
+        <section className="py-16 md:py-24">
+          <div className="container-px mx-auto">
+            <Reveal>
+              <div className="mx-auto mb-10 max-w-2xl text-center md:mb-14">
+                <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary">
+                  Essentials
+                </span>
+                <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">
+                  {t("servicesTitle")}
+                </h2>
+                <p className="mt-2 text-ink/60 dark:text-sand/60">{t("servicesSubtitle")}</p>
+              </div>
+            </Reveal>
+            <Reveal delay={0.1}>
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                {services.map((s) => (
+                  <PremiumServiceCard
+                    key={s.id}
+                    href={`/${locale}${serviceHref(s.category, s.slug)}`}
+                    image={s.coverImage}
+                    name={s.name}
+                    address={s.address}
+                    rating={s.rating}
+                    reviewCount={s.reviewCount}
+                    category={s.category}
+                    featured={s.featured}
+                    serviceId={s.id}
+                    locale={locale}
+                    phone={s.phone}
+                  />
+                ))}
+              </div>
+            </Reveal>
+            <ViewAllButton href={`/${locale}/services`} label={t("viewAllServicesButton")} />
+          </div>
+        </section>
+      )}
+
       {attractions.length > 0 && (
         <section className="py-16 md:py-24">
           <div className="container-px mx-auto">
@@ -277,7 +322,7 @@ export default async function HomePage({
         </section>
       )}
 
-      <ExploreHargeisaSection />
+      <ExploreHargeisaSection locale={locale} />
 
       <NewsletterSection locale={locale} />
     </>

@@ -9,7 +9,7 @@ import { ArrowRight, Heart, Loader2, MapPin, Star } from "lucide-react";
 import { RatingBadge } from "./rating-badge";
 import { toggleFavoriteAction } from "@/lib/actions/favorites";
 
-type ListingType = "hotel" | "restaurant" | "cafe" | "attraction";
+type ListingType = "hotel" | "restaurant" | "cafe" | "attraction" | "service";
 
 export function ListingCard({
   href, image, title, subtitle, rating, reviewCount, tag, priceRange,

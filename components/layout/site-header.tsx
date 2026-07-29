@@ -17,6 +17,7 @@ const links = [
   { key: "hotels", href: "hotels" },
   { key: "restaurants", href: "restaurants" },
   { key: "cafes", href: "cafes" },
+  { key: "services", href: "services" },
 ] as const;
 
 export function SiteHeader({ locale, initialUser }: { locale: Locale; initialUser: HeaderUser | null }) {

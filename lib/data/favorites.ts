@@ -1,12 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
-import { mapHotel, mapRestaurant, mapCafe, mapAttraction } from "./mappers";
-import type { Hotel, Restaurant, Cafe, Attraction } from "@/types";
+import { mapHotel, mapRestaurant, mapCafe, mapService, mapAttraction } from "./mappers";
+import type { Hotel, Restaurant, Cafe, Service, Attraction } from "@/types";
 
 type FavoriteEntry =
   | { kind: "hotel"; item: Hotel }
   | { kind: "restaurant"; item: Restaurant }
   | { kind: "cafe"; item: Cafe }
+  | { kind: "service"; item: Service }
   | { kind: "attraction"; item: Attraction };
 
 /**
@@ -26,15 +27,17 @@ export async function getFavoritesForUser(userId: string): Promise<FavoriteEntry
     hotel: favorites.filter((f) => f.listing_type === "hotel").map((f) => f.listing_id),
     restaurant: favorites.filter((f) => f.listing_type === "restaurant").map((f) => f.listing_id),
     cafe: favorites.filter((f) => f.listing_type === "cafe").map((f) => f.listing_id),
+    service: favorites.filter((f) => f.listing_type === "service").map((f) => f.listing_id),
     attraction: favorites.filter((f) => f.listing_type === "attraction").map((f) => f.listing_id),
   };
 
-  const [hotelRows, restaurantRows, cafeRows, attractionRows] = await Promise.all([
+  const [hotelRows, restaurantRows, cafeRows, serviceRows, attractionRows] = await Promise.all([
     idsByType.hotel.length ? supabase.from("hotels").select("*").in("id", idsByType.hotel) : { data: [] },
     idsByType.restaurant.length
       ? supabase.from("restaurants").select("*").in("id", idsByType.restaurant)
       : { data: [] },
     idsByType.cafe.length ? supabase.from("cafes").select("*").in("id", idsByType.cafe) : { data: [] },
+    idsByType.service.length ? supabase.from("services").select("*").in("id", idsByType.service) : { data: [] },
     idsByType.attraction.length
       ? supabase.from("attractions").select("*").in("id", idsByType.attraction)
       : { data: [] },
@@ -44,6 +47,7 @@ export async function getFavoritesForUser(userId: string): Promise<FavoriteEntry
     ...(hotelRows.data ?? []).map((row) => ({ kind: "hotel" as const, item: mapHotel(row) })),
     ...(restaurantRows.data ?? []).map((row) => ({ kind: "restaurant" as const, item: mapRestaurant(row) })),
     ...(cafeRows.data ?? []).map((row) => ({ kind: "cafe" as const, item: mapCafe(row) })),
+    ...(serviceRows.data ?? []).map((row) => ({ kind: "service" as const, item: mapService(row) })),
     ...(attractionRows.data ?? []).map((row) => ({ kind: "attraction" as const, item: mapAttraction(row) })),
   ];
 }

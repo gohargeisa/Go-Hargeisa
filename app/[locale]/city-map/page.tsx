@@ -42,7 +42,7 @@ export default async function CityMapPage({
 
       <section className="container-px mx-auto py-8 md:py-10">
         <div className="overflow-hidden rounded-xl3 border border-ink/8 shadow-card dark:border-white/10">
-          <CityMapExperience points={points} />
+          <CityMapExperience points={points} locale={locale} />
         </div>
       </section>
     </>

@@ -46,6 +46,14 @@ export const CAFE_GALLERY_CATEGORIES: GalleryCategoryOption[] = [
   { value: "other", label: "Other" },
 ];
 
+export const SERVICE_GALLERY_CATEGORIES: GalleryCategoryOption[] = [
+  { value: "exterior", label: "Exterior" },
+  { value: "interior", label: "Interior" },
+  { value: "staff", label: "Staff" },
+  { value: "equipment", label: "Equipment" },
+  { value: "other", label: "Other" },
+];
+
 export function galleryCategoryLabel(categories: GalleryCategoryOption[], category?: string): string {
   return categories.find((c) => c.value === category)?.label ?? "Other";
 }

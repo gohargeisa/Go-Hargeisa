@@ -14,9 +14,15 @@ import { ProfilePanel } from "@/components/dashboard/profile-panel";
 import { SettingsPanel } from "@/components/dashboard/settings-panel";
 import type { SavedTrip } from "@/lib/data/saved-trips";
 import type { MyReview } from "@/lib/data/reviews";
+import { serviceHref } from "@/lib/utils/service-categories";
+import type { ServiceCategory } from "@/types";
 
-type FavoriteEntry = { kind: "hotel" | "restaurant" | "cafe" | "attraction"; item: { id: string; slug: string; name: string; address: string; coverImage: string; rating: number; reviewCount: number } };
-const hrefKind: Record<FavoriteEntry["kind"], string> = { hotel: "hotels", restaurant: "restaurants", cafe: "cafes", attraction: "attractions" };
+type FavoriteEntry = { kind: "hotel" | "restaurant" | "cafe" | "attraction" | "service"; item: { id: string; slug: string; name: string; address: string; coverImage: string; rating: number; reviewCount: number; category?: string } };
+const hrefKind: Partial<Record<FavoriteEntry["kind"], string>> = { hotel: "hotels", restaurant: "restaurants", cafe: "cafes", attraction: "attractions" };
+function favoriteHref(locale: Locale, kind: FavoriteEntry["kind"], item: FavoriteEntry["item"]): string {
+  if (kind === "service" && item.category) return `/${locale}${serviceHref(item.category as ServiceCategory, item.slug)}`;
+  return `/${locale}/${hrefKind[kind]}/${item.slug}`;
+}
 const tabs = [
   { key: "favorites", icon: Heart }, { key: "trips", icon: MapIcon },
   { key: "reviews", icon: MessageSquare }, { key: "profile", icon: User },
@@ -91,7 +97,7 @@ export function DashboardTabs({
         <section className="min-h-[360px] rounded-2xl border border-ink/8 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-white/[0.03] md:p-7">
           {active === "favorites" && <div>
             <div className="mb-6 flex items-center justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{t("favoritesEyebrow")}</p><h2 className="mt-1 font-display text-2xl font-semibold">{t("favoritesTitle")}</h2></div><Heart size={22} className="text-primary" /></div>
-            {favorites.length === 0 ? <EmptyState icon={Compass} title={t("emptyFavoritesTitle")} description={t("emptyFavoritesDescription")} /> : <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{favorites.map(({ kind, item }) => kind === "hotel" ? <HotelCard key={item.id} href={`/${locale}/hotels/${item.slug}`} image={item.coverImage} name={item.name} address={item.address} rating={item.rating} reviewCount={item.reviewCount} hotelId={item.id} initiallyFavorited locale={locale} /> : <ListingCard key={item.id} href={`/${locale}/${hrefKind[kind]}/${item.slug}`} image={item.coverImage} title={item.name} subtitle={item.address} rating={item.rating} reviewCount={item.reviewCount} listingType={kind} listingId={item.id} initiallyFavorited locale={locale} />)}</div>}
+            {favorites.length === 0 ? <EmptyState icon={Compass} title={t("emptyFavoritesTitle")} description={t("emptyFavoritesDescription")} /> : <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{favorites.map(({ kind, item }) => kind === "hotel" ? <HotelCard key={item.id} href={`/${locale}/hotels/${item.slug}`} image={item.coverImage} name={item.name} address={item.address} rating={item.rating} reviewCount={item.reviewCount} hotelId={item.id} initiallyFavorited locale={locale} /> : <ListingCard key={item.id} href={favoriteHref(locale, kind, item)} image={item.coverImage} title={item.name} subtitle={item.address} rating={item.rating} reviewCount={item.reviewCount} listingType={kind} listingId={item.id} initiallyFavorited locale={locale} />)}</div>}
           </div>}
           {active === "trips" && <SavedTripsPanel locale={locale} trips={trips} />}
           {active === "reviews" && <ReviewsPanel locale={locale} reviews={reviews} />}

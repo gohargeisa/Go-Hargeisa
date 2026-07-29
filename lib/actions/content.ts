@@ -55,7 +55,7 @@ export async function sendContactMessage(input: {
   return { ok: true };
 }
 
-type ListingType = "hotel" | "restaurant" | "cafe" | "attraction";
+type ListingType = "hotel" | "restaurant" | "cafe" | "attraction" | "service";
 
 export async function submitReview(input: {
   listingType: ListingType;

@@ -7,7 +7,7 @@ import { MapIcon, Plus, Check, Loader2 } from "lucide-react";
 import { addToTrip, getMyTripOptions } from "@/lib/actions/trips";
 import type { Locale } from "@/lib/i18n/config";
 
-type ListingType = "hotel" | "restaurant" | "cafe" | "attraction";
+type ListingType = "hotel" | "restaurant" | "cafe" | "attraction" | "service";
 
 export function AddToTripButton({
   locale,

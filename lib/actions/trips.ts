@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
-type ListingType = "hotel" | "restaurant" | "cafe" | "attraction";
+type ListingType = "hotel" | "restaurant" | "cafe" | "attraction" | "service";
 
 async function requireUserId() {
   const supabase = await createClient();

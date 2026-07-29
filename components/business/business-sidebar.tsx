@@ -42,6 +42,7 @@ const PUBLIC_SEGMENT: Record<OwnedListing["listingType"], string> = {
   hotel: "hotels",
   restaurant: "restaurants",
   cafe: "cafes",
+  service: "services",
 };
 
 /**
@@ -62,7 +63,7 @@ export function BusinessSidebar({ locale, listing }: { locale: Locale; listing: 
     return href === "" ? pathname === base : pathname.startsWith(target);
   }
 
-  const typeLabel = { hotel: t("typeHotel"), restaurant: t("typeRestaurant"), cafe: t("typeCafe") }[listing.listingType];
+  const typeLabel = { hotel: t("typeHotel"), restaurant: t("typeRestaurant"), cafe: t("typeCafe"), service: t("typeService") }[listing.listingType];
   const publicHref = `/${locale}/${PUBLIC_SEGMENT[listing.listingType]}/${listing.slug}`;
 
   const nav = (

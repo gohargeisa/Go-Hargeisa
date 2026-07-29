@@ -1,9 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
+import { serviceHref } from "@/lib/utils/service-categories";
+import type { ServiceCategory } from "@/types";
 
 export interface SavedTripItem {
   id: string;
-  listingType: "hotel" | "restaurant" | "cafe" | "attraction";
+  listingType: "hotel" | "restaurant" | "cafe" | "attraction" | "service";
   listingId: string;
   name: string;
   image: string;
@@ -18,7 +20,7 @@ export interface SavedTrip {
   items: SavedTripItem[];
 }
 
-const HREF_SEGMENT: Record<SavedTripItem["listingType"], string> = {
+const HREF_SEGMENT: Partial<Record<SavedTripItem["listingType"], string>> = {
   hotel: "hotels",
   restaurant: "restaurants",
   cafe: "cafes",
@@ -50,10 +52,11 @@ export async function getSavedTripsForUser(userId: string): Promise<SavedTrip[]>
     restaurant: [],
     cafe: [],
     attraction: [],
+    service: [],
   };
   for (const item of items ?? []) idsByType[item.listing_type as SavedTripItem["listingType"]].push(item.listing_id);
 
-  const [hotelRows, restaurantRows, cafeRows, attractionRows] = await Promise.all([
+  const [hotelRows, restaurantRows, cafeRows, attractionRows, serviceRows] = await Promise.all([
     idsByType.hotel.length ? supabase.from("hotels").select("id, name, cover_image, slug").in("id", idsByType.hotel) : { data: [] },
     idsByType.restaurant.length
       ? supabase.from("restaurants").select("id, name, cover_image, slug").in("id", idsByType.restaurant)
@@ -62,9 +65,12 @@ export async function getSavedTripsForUser(userId: string): Promise<SavedTrip[]>
     idsByType.attraction.length
       ? supabase.from("attractions").select("id, name, cover_image, slug").in("id", idsByType.attraction)
       : { data: [] },
+    idsByType.service.length
+      ? supabase.from("services").select("id, name, cover_image, slug, category").in("id", idsByType.service)
+      : { data: [] },
   ]);
 
-  const lookup = new Map<string, { name: string; image: string; slug: string }>();
+  const lookup = new Map<string, { name: string; image: string; slug: string; category?: ServiceCategory }>();
   for (const [rows] of [
     [hotelRows.data ?? []],
     [restaurantRows.data ?? []],
@@ -72,6 +78,9 @@ export async function getSavedTripsForUser(userId: string): Promise<SavedTrip[]>
     [attractionRows.data ?? []],
   ] as const) {
     for (const row of rows) lookup.set(row.id, { name: row.name, image: row.cover_image, slug: row.slug });
+  }
+  for (const row of serviceRows.data ?? []) {
+    lookup.set(row.id, { name: row.name, image: row.cover_image, slug: row.slug, category: row.category as ServiceCategory });
   }
 
   return trips.map((trip) => ({
@@ -84,13 +93,18 @@ export async function getSavedTripsForUser(userId: string): Promise<SavedTrip[]>
       .map((item) => {
         const listingType = item.listing_type as SavedTripItem["listingType"];
         const found = lookup.get(item.listing_id);
+        const href = !found
+          ? "#"
+          : listingType === "service" && found.category
+            ? serviceHref(found.category, found.slug)
+            : `/${HREF_SEGMENT[listingType]}/${found.slug}`;
         return {
           id: item.id,
           listingType,
           listingId: item.listing_id,
           name: found?.name ?? "Removed listing",
           image: found?.image ?? "",
-          href: found ? `/${HREF_SEGMENT[listingType]}/${found.slug}` : "#",
+          href,
         };
       }),
   }));

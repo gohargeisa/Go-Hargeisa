@@ -1,13 +1,26 @@
-import { ExternalLink, MapPin } from "lucide-react";
-import type { CityServicePoint } from "@/types";
+import Link from "next/link";
+import { ExternalLink, MapPin, Navigation, Phone } from "lucide-react";
+import type { CityServicePoint, ServiceCategory } from "@/types";
 import { CATEGORY_CONFIG } from "@/components/city-map/category-config";
+import { ClaimBusinessButton } from "@/components/shared/claim-business-button";
+import { serviceHref } from "@/lib/utils/service-categories";
 
-export function PointInfoCard({ point }: { point: CityServicePoint }) {
+export function PointInfoCard({ point, locale = "en" }: { point: CityServicePoint; locale?: string }) {
   const meta = CATEGORY_CONFIG[point.category];
   const Icon = meta.icon;
   const hasCoordinates = Number.isFinite(point.location?.lat) && Number.isFinite(point.location?.lng);
   const googleMapsHref = hasCoordinates
     ? `https://www.google.com/maps/search/?api=1&query=${point.location.lat},${point.location.lng}`
+    : undefined;
+  const directionsHref = hasCoordinates
+    ? `https://www.google.com/maps/dir/?api=1&destination=${point.location.lat},${point.location.lng}`
+    : undefined;
+
+  // Only Phase 2 `services` points carry a slug — that's what distinguishes
+  // them from legacy map_points pins, which have no detail page to link to.
+  const isServicePoint = Boolean(point.slug);
+  const detailHref = point.slug
+    ? `/${locale}${serviceHref(point.category as ServiceCategory, point.slug)}`
     : undefined;
 
   return (
@@ -33,24 +46,76 @@ export function PointInfoCard({ point }: { point: CityServicePoint }) {
         </div>
       </div>
 
-      {hasCoordinates && (
+      {point.description && (
+        <p className="text-sm leading-relaxed text-ink/70 dark:text-sand/70">{point.description}</p>
+      )}
+
+      {point.address && (
+        <p className="flex items-start gap-1.5 text-xs text-ink/60 dark:text-sand/60">
+          <MapPin size={13} className="mt-0.5 shrink-0" aria-hidden="true" />
+          {point.address}
+        </p>
+      )}
+
+      {!point.address && hasCoordinates && (
         <p className="flex items-center gap-1.5 text-xs text-ink/50 dark:text-sand/50">
           <MapPin size={13} className="shrink-0" aria-hidden="true" />
           {point.location.lat.toFixed(5)}, {point.location.lng.toFixed(5)}
         </p>
       )}
 
-      {googleMapsHref && (
+      {point.phone && (
         <a
-          href={googleMapsHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-full bg-primary text-sm font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary-700"
+          href={`tel:${point.phone}`}
+          className="flex items-center gap-1.5 text-xs font-semibold text-ink/70 hover:text-primary dark:text-sand/70"
         >
-          Open in Google Maps
-          <ExternalLink size={14} aria-hidden="true" />
+          <Phone size={13} className="shrink-0" aria-hidden="true" />
+          {point.phone}
         </a>
       )}
+
+      <div className="space-y-2.5">
+        {detailHref && (
+          <Link
+            href={detailHref}
+            className="inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-full bg-primary text-sm font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary-700"
+          >
+            View Details
+          </Link>
+        )}
+
+        {directionsHref && (
+          <a
+            href={directionsHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-full border border-ink/15 text-sm font-semibold text-ink transition-all duration-300 hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
+          >
+            <Navigation size={14} aria-hidden="true" />
+            Directions
+          </a>
+        )}
+
+        {!directionsHref && googleMapsHref && (
+          <a
+            href={googleMapsHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-full bg-primary text-sm font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary-700"
+          >
+            Open in Google Maps
+            <ExternalLink size={14} aria-hidden="true" />
+          </a>
+        )}
+
+        {isServicePoint && point.slug && (
+          <ClaimBusinessButton
+            listingType="service"
+            listingId={point.id}
+            className="inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-full border border-ink/15 text-sm font-semibold text-ink transition-all duration-300 hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
+          />
+        )}
+      </div>
     </div>
   );
 }

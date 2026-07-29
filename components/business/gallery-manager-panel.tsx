@@ -6,18 +6,20 @@ import { Loader2 } from "lucide-react";
 import { ImageUploader } from "@/components/shared/image-uploader";
 import { GalleryManager } from "@/components/admin/gallery-manager";
 import { updateRecord } from "@/lib/actions/admin";
-import { HOTEL_GALLERY_CATEGORIES, RESTAURANT_GALLERY_CATEGORIES, CAFE_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
+import { HOTEL_GALLERY_CATEGORIES, RESTAURANT_GALLERY_CATEGORIES, CAFE_GALLERY_CATEGORIES, SERVICE_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import type { BusinessListingType, GalleryImage } from "@/types";
 
-const TABLE_BY_TYPE: Record<BusinessListingType, "hotels" | "restaurants" | "cafes"> = {
+const TABLE_BY_TYPE: Record<BusinessListingType, "hotels" | "restaurants" | "cafes" | "services"> = {
   hotel: "hotels",
   restaurant: "restaurants",
   cafe: "cafes",
+  service: "services",
 };
 const CATEGORIES_BY_TYPE = {
   hotel: HOTEL_GALLERY_CATEGORIES,
   restaurant: RESTAURANT_GALLERY_CATEGORIES,
   cafe: CAFE_GALLERY_CATEGORIES,
+  service: SERVICE_GALLERY_CATEGORIES,
 };
 
 /** Wraps the existing admin ImageUploader/GalleryManager primitives in a dashboard-styled save panel — same upload logic, new presentation. */

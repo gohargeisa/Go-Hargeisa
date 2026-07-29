@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Fuel, MoonStar, Pill, ShoppingCart, Sparkles, Stethoscope, X, type LucideIcon } from "lucide-react";
@@ -14,6 +15,7 @@ const CARDS: {
   titleKey: string;
   descriptionKey: string;
   gradient: string;
+  href?: string;
 }[] = [
   {
     category: "hospital",
@@ -21,6 +23,7 @@ const CARDS: {
     titleKey: "exploreHargeisaHospitalsTitle",
     descriptionKey: "exploreHargeisaHospitalsDescription",
     gradient: "from-red-600/70 via-red-900/60 to-ink",
+    href: "/services/hospitals",
   },
   {
     category: "pharmacy",
@@ -28,6 +31,7 @@ const CARDS: {
     titleKey: "exploreHargeisaPharmaciesTitle",
     descriptionKey: "exploreHargeisaPharmaciesDescription",
     gradient: "from-pink-600/70 via-fuchsia-900/60 to-ink",
+    href: "/services/pharmacies",
   },
   {
     category: "gas_station",
@@ -35,6 +39,7 @@ const CARDS: {
     titleKey: "exploreHargeisaGasStationsTitle",
     descriptionKey: "exploreHargeisaGasStationsDescription",
     gradient: "from-orange-600/70 via-amber-900/60 to-ink",
+    href: "/services/gas-stations",
   },
   {
     category: "supermarket",
@@ -52,7 +57,7 @@ const CARDS: {
   },
 ];
 
-export function ExploreHargeisaSection() {
+export function ExploreHargeisaSection({ locale }: { locale: string }) {
   const t = useTranslations("home");
   const reduceMotion = useReducedMotion();
   const [toastOpen, setToastOpen] = useState(false);
@@ -92,46 +97,72 @@ export function ExploreHargeisaSection() {
 
         <Reveal delay={0.1}>
           <div className="mt-10 grid grid-cols-2 gap-5 sm:grid-cols-3 md:mt-14 lg:grid-cols-5">
-            {CARDS.map(({ category, icon: Icon, titleKey, descriptionKey, gradient }) => (
-              <motion.button
-                key={category}
-                type="button"
-                onClick={openToast}
-                whileHover={reduceMotion ? undefined : { y: -8 }}
-                transition={{ type: "spring", stiffness: 300, damping: 24 }}
-                className="group flex h-full w-full flex-col overflow-hidden rounded-[28px] border border-ink/8 bg-white text-start shadow-[0_8px_24px_rgba(20,30,45,0.07)] transition-shadow duration-300 hover:border-primary/25 hover:shadow-[0_28px_60px_rgba(20,30,45,0.16)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:border-white/10 dark:bg-white/[0.04] dark:hover:shadow-[0_28px_60px_rgba(0,0,0,0.45)]"
-              >
-                <div className="relative h-64 shrink-0 overflow-hidden rounded-t-[28px] sm:h-[17rem]">
-                  <div
-                    className={`absolute inset-0 bg-gradient-to-br ${gradient} transition-transform duration-700 ease-out group-hover:scale-110`}
-                    aria-hidden="true"
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Icon
-                      size={52}
-                      strokeWidth={1.5}
-                      className="text-white/30 transition-transform duration-700 ease-out group-hover:scale-110"
+            {CARDS.map(({ category, icon: Icon, titleKey, descriptionKey, gradient, href }) => {
+              const cardClassName =
+                "group flex h-full w-full flex-col overflow-hidden rounded-[28px] border border-ink/8 bg-white text-start shadow-[0_8px_24px_rgba(20,30,45,0.07)] transition-shadow duration-300 hover:border-primary/25 hover:shadow-[0_28px_60px_rgba(20,30,45,0.16)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:border-white/10 dark:bg-white/[0.04] dark:hover:shadow-[0_28px_60px_rgba(0,0,0,0.45)]";
+              const cardContent = (
+                <>
+                  <div className="relative h-64 shrink-0 overflow-hidden rounded-t-[28px] sm:h-[17rem]">
+                    <div
+                      className={`absolute inset-0 bg-gradient-to-br ${gradient} transition-transform duration-700 ease-out group-hover:scale-110`}
                       aria-hidden="true"
                     />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Icon
+                        size={52}
+                        strokeWidth={1.5}
+                        className="text-white/30 transition-transform duration-700 ease-out group-hover:scale-110"
+                        aria-hidden="true"
+                      />
+                    </div>
+                    <div
+                      className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent"
+                      aria-hidden="true"
+                    />
+                    {!href && (
+                      <span className="absolute start-3.5 top-3.5 z-10 inline-flex items-center gap-1 rounded-full bg-primary/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-[0_4px_14px_rgba(245,158,11,0.45)] ring-1 ring-white/30 backdrop-blur-md">
+                        <Sparkles size={10} aria-hidden="true" />
+                        {t("exploreHargeisaComingSoonBadge")}
+                      </span>
+                    )}
                   </div>
-                  <div
-                    className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent"
-                    aria-hidden="true"
-                  />
-                  <span className="absolute start-3.5 top-3.5 z-10 inline-flex items-center gap-1 rounded-full bg-primary/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-[0_4px_14px_rgba(245,158,11,0.45)] ring-1 ring-white/30 backdrop-blur-md">
-                    <Sparkles size={10} aria-hidden="true" />
-                    {t("exploreHargeisaComingSoonBadge")}
-                  </span>
-                </div>
 
-                <div className="flex flex-1 flex-col gap-2 p-6 sm:p-7">
-                  <h3 className="font-display text-lg font-bold text-ink dark:text-white">{t(titleKey)}</h3>
-                  <p className="flex-1 text-sm leading-relaxed text-ink/60 dark:text-sand/60">
-                    {t(descriptionKey)}
-                  </p>
-                </div>
-              </motion.button>
-            ))}
+                  <div className="flex flex-1 flex-col gap-2 p-6 sm:p-7">
+                    <h3 className="font-display text-lg font-bold text-ink dark:text-white">{t(titleKey)}</h3>
+                    <p className="flex-1 text-sm leading-relaxed text-ink/60 dark:text-sand/60">
+                      {t(descriptionKey)}
+                    </p>
+                  </div>
+                </>
+              );
+
+              if (href) {
+                return (
+                  <motion.div
+                    key={category}
+                    whileHover={reduceMotion ? undefined : { y: -8 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 24 }}
+                  >
+                    <Link href={`/${locale}${href}`} className={cardClassName}>
+                      {cardContent}
+                    </Link>
+                  </motion.div>
+                );
+              }
+
+              return (
+                <motion.button
+                  key={category}
+                  type="button"
+                  onClick={openToast}
+                  whileHover={reduceMotion ? undefined : { y: -8 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 24 }}
+                  className={cardClassName}
+                >
+                  {cardContent}
+                </motion.button>
+              );
+            })}
           </div>
         </Reveal>
       </div>

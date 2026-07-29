@@ -16,7 +16,7 @@ function isCityServiceCategory(value: string | null): value is CityServiceCatego
   return !!value && (CATEGORY_ORDER as string[]).includes(value);
 }
 
-export function CityMapExperience({ points }: { points: CityServicePoint[] }) {
+export function CityMapExperience({ points, locale }: { points: CityServicePoint[]; locale: string }) {
   const searchParams = useSearchParams();
   // Lets homepage category cards (?category=hospital) land pre-filtered
   // instead of always showing every category.
@@ -88,7 +88,7 @@ export function CityMapExperience({ points }: { points: CityServicePoint[] }) {
       {/* Desktop side panel */}
       <aside className="hidden w-80 shrink-0 overflow-y-auto border-s border-ink/10 bg-white/95 p-5 dark:border-white/10 dark:bg-ink/95 lg:block">
         {selected ? (
-          <PointInfoCard point={selected} />
+          <PointInfoCard point={selected} locale={locale} />
         ) : (
           <div className="flex h-full flex-col items-center justify-center gap-2 py-6 text-center">
             <span className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary">
@@ -103,7 +103,7 @@ export function CityMapExperience({ points }: { points: CityServicePoint[] }) {
       </aside>
 
       <BottomSheet open={selected !== null} onClose={() => setSelected(null)} title={selected?.name}>
-        {selected && <PointInfoCard point={selected} />}
+        {selected && <PointInfoCard point={selected} locale={locale} />}
       </BottomSheet>
     </div>
   );

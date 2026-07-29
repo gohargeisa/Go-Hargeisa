@@ -1,10 +1,11 @@
 import type { Database } from "@/types/database";
-import type { Hotel, HotelRoom, Restaurant, Cafe, Attraction, EventItem, Article, GalleryImage, Review } from "@/types";
+import type { Hotel, HotelRoom, Restaurant, Cafe, Service, Attraction, EventItem, Article, GalleryImage, Review } from "@/types";
 
 type HotelRow = Database["public"]["Tables"]["hotels"]["Row"];
 type HotelRoomRow = Database["public"]["Tables"]["hotel_rooms"]["Row"];
 type RestaurantRow = Database["public"]["Tables"]["restaurants"]["Row"];
 type CafeRow = Database["public"]["Tables"]["cafes"]["Row"];
+type ServiceRow = Database["public"]["Tables"]["services"]["Row"];
 type AttractionRow = Database["public"]["Tables"]["attractions"]["Row"];
 type EventRow = Database["public"]["Tables"]["events"]["Row"];
 type ArticleRow = Database["public"]["Tables"]["articles"]["Row"];
@@ -134,6 +135,29 @@ export function mapCafe(row: CafeRow, reviews: Review[] = []): Cafe {
     logo: row.logo_url ?? undefined,
     menuHighlights: menu,
     menuPdfUrl: row.menu_pdf_url ?? undefined,
+  };
+}
+
+export function mapService(row: ServiceRow, reviews: Review[] = []): Service {
+  return {
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    shortDescription: row.short_description,
+    description: row.description,
+    coverImage: row.cover_image,
+    gallery: toGallery(row.gallery),
+    address: row.address,
+    location: { lat: row.lat, lng: row.lng },
+    rating: Number(row.rating),
+    reviewCount: row.review_count,
+    reviews,
+    phone: row.phone ?? undefined,
+    website: row.website ?? undefined,
+    openingHours: row.opening_hours ?? undefined,
+    services: row.services ?? [],
+    category: row.category as Service["category"],
+    featured: row.featured,
   };
 }
 

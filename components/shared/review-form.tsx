@@ -8,7 +8,7 @@ import { submitReview } from "@/lib/actions/content";
 import { uploadImage } from "@/lib/supabase/storage";
 import type { Locale } from "@/lib/i18n/config";
 
-type ListingType = "hotel" | "restaurant" | "cafe" | "attraction";
+type ListingType = "hotel" | "restaurant" | "cafe" | "attraction" | "service";
 
 const MAX_REVIEW_PHOTOS = 3;
 

@@ -1,4 +1,7 @@
 import {
+  Building2,
+  Car,
+  CreditCard,
   Fuel,
   GraduationCap,
   Landmark,
@@ -10,6 +13,7 @@ import {
   Shield,
   ShoppingCart,
   School,
+  Smile,
   Stethoscope,
   Wallet,
 } from "lucide-react";
@@ -24,8 +28,12 @@ export interface CategoryMeta {
 export const CATEGORY_CONFIG: Record<CityServiceCategory, CategoryMeta> = {
   hospital: { label: "Hospitals", icon: Stethoscope, color: "#EF4444" },
   pharmacy: { label: "Pharmacies", icon: Pill, color: "#EC4899" },
-  gas_station: { label: "Gas Stations", icon: Fuel, color: "#F97316" },
+  dental_clinic: { label: "Dental Clinics", icon: Smile, color: "#F43F5E" },
+  bank: { label: "Banks", icon: Building2, color: "#2563EB" },
   atm: { label: "ATMs", icon: Wallet, color: "#14B8A6" },
+  currency_exchange: { label: "Currency Exchange", icon: CreditCard, color: "#CA8A04" },
+  gas_station: { label: "Gas Stations", icon: Fuel, color: "#F97316" },
+  car_rental: { label: "Car Rentals", icon: Car, color: "#7C3AED" },
   mosque: { label: "Mosques", icon: MoonStar, color: "#0D9488" },
   supermarket: { label: "Supermarkets", icon: ShoppingCart, color: "#8B5CF6" },
   police: { label: "Police Stations", icon: Shield, color: "#3B82F6" },

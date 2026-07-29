@@ -44,28 +44,49 @@ function toCityServiceCategory(dbCategory: string): CityServiceCategory | null {
 }
 
 /** Smart City Map data — deliberately separate from getMapPoints() above,
- * which mixes in hotels/restaurants/attractions for the listings map. */
+ * which mixes in hotels/restaurants/attractions for the listings map.
+ * Combines the legacy `map_points` table (mosques/ATMs/shopping/etc.) with
+ * the Phase 2 `services` table (hospitals/pharmacies/dental clinics/banks/
+ * ATMs/currency exchange/gas stations/car rentals), whose 8 categories are
+ * a strict subset of CityServiceCategory so no mapping is needed. */
 export async function getCityServicePoints(): Promise<CityServicePoint[]> {
-  const source = isSupabaseConfigured() ? null : mockMapPoints;
-
-  if (source) {
-    return source.flatMap((p) => {
+  if (!isSupabaseConfigured()) {
+    return mockMapPoints.flatMap((p) => {
       const category = toCityServiceCategory(p.category);
       return category ? [{ id: p.id, name: p.name, category, location: p.location }] : [];
     });
   }
 
   const supabase = createPublicClient();
-  const { data, error } = await supabase.from("map_points").select("id, name, category, lat, lng");
-  if (error || !data) {
-    if (process.env.NODE_ENV === "development" && error) console.error("getCityServicePoints:", error.message);
-    return [];
-  }
+  const [{ data, error }, { data: serviceRows, error: serviceError }] = await Promise.all([
+    supabase.from("map_points").select("id, name, category, lat, lng"),
+    supabase
+      .from("services")
+      .select("id, slug, name, category, short_description, address, phone, lat, lng")
+      .eq("status", "published"),
+  ]);
 
-  return data.flatMap((row) => {
+  if (error && process.env.NODE_ENV === "development") console.error("getCityServicePoints:", error.message);
+  if (serviceError && process.env.NODE_ENV === "development")
+    console.error("getCityServicePoints (services):", serviceError.message);
+
+  const legacyPoints = (data ?? []).flatMap((row) => {
     const category = toCityServiceCategory(row.category);
     return category
       ? [{ id: row.id, name: row.name, category, location: { lat: row.lat, lng: row.lng } }]
       : [];
   });
+
+  const servicePoints: CityServicePoint[] = (serviceRows ?? []).map((row) => ({
+    id: row.id,
+    name: row.name,
+    category: row.category as CityServiceCategory,
+    location: { lat: row.lat, lng: row.lng },
+    slug: row.slug,
+    address: row.address,
+    description: row.short_description,
+    phone: row.phone ?? undefined,
+  }));
+
+  return [...legacyPoints, ...servicePoints];
 }

@@ -4,10 +4,10 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-const ALLOWED_TABLES = ["hotels", "restaurants", "cafes", "attractions", "events", "articles"] as const;
+const ALLOWED_TABLES = ["hotels", "restaurants", "cafes", "services", "attractions", "events", "articles"] as const;
 export type AllowedTable = (typeof ALLOWED_TABLES)[number];
 
-const TABLES_WITH_UPDATED_AT = new Set(["hotels", "restaurants", "cafes", "attractions"]);
+const TABLES_WITH_UPDATED_AT = new Set(["hotels", "restaurants", "cafes", "services", "attractions"]);
 
 // Public detail-page path segment per table (articles live under /blog, not
 // /articles). Used to also revalidate the individual listing's own detail
@@ -15,10 +15,17 @@ const TABLES_WITH_UPDATED_AT = new Set(["hotels", "restaurants", "cafes", "attra
 // the admin list + the public INDEX page, never the slug-specific detail
 // page the write actually changed, so that page kept serving stale ISR
 // content until its next scheduled revalidation.
+// NOTE: services live at /services/{category-slug}/{slug} (nested — see
+// lib/utils/service-categories.ts), not a flat /{segment}/{slug} like every
+// other table here, so the revalidatePath calls below that use this map
+// can't precisely target a service's live detail page. Its ISR cache still
+// self-heals on the normal revalidate=3600 window; only the "revalidate
+// instantly on save" behavior the other tables get is missing for services.
 const TABLE_DETAIL_SEGMENT: Record<AllowedTable, string> = {
   hotels: "hotels",
   restaurants: "restaurants",
   cafes: "cafes",
+  services: "services",
   attractions: "attractions",
   events: "events",
   articles: "blog",
@@ -37,7 +44,7 @@ function localeFromRevalidatePaths(revalidatePaths: string[]): string | null {
 // supabase/schema.sql, which are UPDATE-only (no insert/delete) and
 // scoped to rows where owner_id = auth.uid(). Attractions/events/articles
 // and every table's create/delete stay owner-only.
-const BUSINESS_OWNER_TABLES = new Set<AllowedTable>(["hotels", "restaurants", "cafes"]);
+const BUSINESS_OWNER_TABLES = new Set<AllowedTable>(["hotels", "restaurants", "cafes", "services"]);
 
 async function assertOwner() {
   const supabase = await createClient();

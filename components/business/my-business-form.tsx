@@ -6,10 +6,11 @@ import { Loader2 } from "lucide-react";
 import { updateRecord } from "@/lib/actions/admin";
 import type { BusinessListingType } from "@/types";
 
-const TABLE_BY_TYPE: Record<BusinessListingType, "hotels" | "restaurants" | "cafes"> = {
+const TABLE_BY_TYPE: Record<BusinessListingType, "hotels" | "restaurants" | "cafes" | "services"> = {
   hotel: "hotels",
   restaurant: "restaurants",
   cafe: "cafes",
+  service: "services",
 };
 
 export interface MyBusinessFormInitial {

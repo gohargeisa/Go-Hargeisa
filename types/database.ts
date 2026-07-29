@@ -57,7 +57,14 @@ type AttractionRow = ListingBase & {
   category: "landmark" | "museum" | "market" | "nature" | "religious";
 };
 
-type BusinessListingType = "hotel" | "restaurant" | "cafe";
+type ServiceCategoryDb = "hospital" | "pharmacy" | "dental_clinic" | "bank" | "atm" | "currency_exchange" | "gas_station" | "car_rental";
+
+type ServiceRow = ListingBase & {
+  phone: string | null; website: string | null; opening_hours: string | null; services: string[];
+  category: ServiceCategoryDb; owner_id: string | null;
+};
+
+type BusinessListingType = "hotel" | "restaurant" | "cafe" | "service";
 
 type BookingRow = {
   id: string; hotel_id: string; room_id: string | null; guest_name: string; guest_phone: string | null;
@@ -89,19 +96,20 @@ export type Database = {
       restaurants: Table<RestaurantRow>;
       cafes: Table<CafeRow>;
       attractions: Table<AttractionRow>;
+      services: Table<ServiceRow>;
       events: Table<{ id: string; slug: string; title: string; title_ar: string | null; title_so: string | null; description: string; cover_image: string; category: "cultural" | "national" | "business" | "sports" | "concert"; start_date: string; end_date: string; location: string; ticket_info: string | null; status: "draft" | "published" | "archived"; created_by: string | null; created_at: string }>;
       articles: Table<{ id: string; slug: string; title: string; title_ar: string | null; title_so: string | null; excerpt: string; body: string; cover_image: string; category: string; author_id: string | null; read_minutes: number; status: "draft" | "published" | "archived"; published_at: string | null; created_at: string }>;
       destinations: Table<{ id: string; slug: string; name: string; description: string; image: string; place_count: number; created_at: string }>;
       map_points: Table<{ id: string; name: string; category: string; lat: number; lng: number; created_at: string }>;
-      reviews: Table<{ id: string; listing_type: "hotel" | "restaurant" | "cafe" | "attraction"; listing_id: string; user_id: string | null; rating: number; comment: string | null; photos: Json; owner_reply: string | null; owner_reply_at: string | null; is_reported: boolean; created_at: string }>;
+      reviews: Table<{ id: string; listing_type: "hotel" | "restaurant" | "cafe" | "attraction" | "service"; listing_id: string; user_id: string | null; rating: number; comment: string | null; photos: Json; owner_reply: string | null; owner_reply_at: string | null; is_reported: boolean; created_at: string }>;
       hotel_rooms: Table<HotelRoomRow>;
       bookings: Table<BookingRow>;
       business_metric_events: Table<BusinessMetricEventRow>;
       business_subscriptions: Table<BusinessSubscriptionRow>;
       business_messages: Table<BusinessMessageRow>;
-      favorites: Table<{ id: string; user_id: string | null; listing_type: "hotel" | "restaurant" | "cafe" | "attraction"; listing_id: string; created_at: string }>;
+      favorites: Table<{ id: string; user_id: string | null; listing_type: "hotel" | "restaurant" | "cafe" | "attraction" | "service"; listing_id: string; created_at: string }>;
       saved_trips: Table<{ id: string; user_id: string | null; title: string; notes: string | null; created_at: string }>;
-      saved_trip_items: Table<{ id: string; trip_id: string | null; listing_type: "hotel" | "restaurant" | "cafe" | "attraction"; listing_id: string; day_number: number | null; sort_order: number | null }>;
+      saved_trip_items: Table<{ id: string; trip_id: string | null; listing_type: "hotel" | "restaurant" | "cafe" | "attraction" | "service"; listing_id: string; day_number: number | null; sort_order: number | null }>;
       newsletter_subscribers: Table<{ id: string; email: string; locale: string | null; subscribed_at: string }, { id?: string; email: string; locale?: string | null; subscribed_at?: string }>;
       contact_messages: Table<{ id: string; name: string; email: string; subject: string | null; message: string; created_at: string }, { id?: string; name: string; email: string; subject?: string | null; message: string; created_at?: string }>;
       attraction_nearby_restaurants: Table<{ attraction_id: string; restaurant_id: string }>;
@@ -115,7 +123,7 @@ export type Database = {
     } & Record<string, Table<Record<string, unknown>, Record<string, unknown>, Record<string, unknown>>>;
     Views: Record<string, never>;
     Functions: Record<string, never>;
-    Enums: { user_role: "user" | "business_owner" | "owner"; price_range: "$" | "$$" | "$$$" | "$$$$"; attraction_category: "landmark" | "museum" | "market" | "nature" | "religious"; event_category: "cultural" | "national" | "business" | "sports" | "concert"; content_status: "draft" | "published" | "archived"; listing_type: "hotel" | "restaurant" | "cafe" | "attraction"; };
+    Enums: { user_role: "user" | "business_owner" | "owner"; price_range: "$" | "$$" | "$$$" | "$$$$"; attraction_category: "landmark" | "museum" | "market" | "nature" | "religious"; event_category: "cultural" | "national" | "business" | "sports" | "concert"; content_status: "draft" | "published" | "archived"; listing_type: "hotel" | "restaurant" | "cafe" | "attraction" | "service"; service_category: ServiceCategoryDb; };
     CompositeTypes: Record<string, never>;
   };
 };
