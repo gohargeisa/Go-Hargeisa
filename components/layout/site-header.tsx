@@ -12,12 +12,13 @@ import { UserMenu } from "./user-menu";
 import { useHeaderUser } from "./use-header-user";
 import type { HeaderUser } from "@/lib/supabase/header-user";
 import { SignOutButton } from "@/components/shared/sign-out-button";
+import { SERVICES_PUBLIC_ENABLED } from "@/lib/config/features";
 
 const links = [
   { key: "hotels", href: "hotels" },
   { key: "restaurants", href: "restaurants" },
   { key: "cafes", href: "cafes" },
-  { key: "services", href: "services" },
+  ...(SERVICES_PUBLIC_ENABLED ? [{ key: "services", href: "services" }] : []),
 ] as const;
 
 export function SiteHeader({ locale, initialUser }: { locale: Locale; initialUser: HeaderUser | null }) {

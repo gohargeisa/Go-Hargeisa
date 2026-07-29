@@ -8,6 +8,7 @@ import { getRestaurants } from "@/lib/data/restaurants";
 import { getCafes } from "@/lib/data/cafes";
 import { getServices } from "@/lib/data/services";
 import { getAttractions } from "@/lib/data/attractions";
+import { SERVICES_PUBLIC_ENABLED } from "@/lib/config/features";
 
 import { Hero } from "@/components/home/hero";
 import { ExploreHargeisaSection } from "@/components/home/explore-hargeisa-section";
@@ -44,7 +45,7 @@ export default async function HomePage({
     getHotels({ limit: HOMEPAGE_PREVIEW_COUNT }),
     getRestaurants({ limit: HOMEPAGE_PREVIEW_COUNT }),
     getCafes({ limit: HOMEPAGE_PREVIEW_COUNT }),
-    getServices({ limit: HOMEPAGE_SERVICES_PREVIEW_COUNT }),
+    SERVICES_PUBLIC_ENABLED ? getServices({ limit: HOMEPAGE_SERVICES_PREVIEW_COUNT }) : Promise.resolve([]),
     getAttractions(),
   ]);
 

@@ -6,9 +6,14 @@ import { useTranslations } from "next-intl";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Fuel, MoonStar, Pill, ShoppingCart, Sparkles, Stethoscope, X, type LucideIcon } from "lucide-react";
 import { Reveal } from "@/components/home/reveal";
+import { SERVICES_PUBLIC_ENABLED } from "@/lib/config/features";
 
 const TOAST_DURATION_MS = 4500;
 
+// hospital/pharmacy/gas_station only get a real `href` (instead of the
+// "coming soon" toast) while Services is publicly enabled — see
+// lib/config/features.ts. Flipping that flag back restores these links
+// with no other changes needed here.
 const CARDS: {
   category: string;
   icon: LucideIcon;
@@ -23,7 +28,7 @@ const CARDS: {
     titleKey: "exploreHargeisaHospitalsTitle",
     descriptionKey: "exploreHargeisaHospitalsDescription",
     gradient: "from-red-600/70 via-red-900/60 to-ink",
-    href: "/services/hospitals",
+    href: SERVICES_PUBLIC_ENABLED ? "/services/hospitals" : undefined,
   },
   {
     category: "pharmacy",
@@ -31,7 +36,7 @@ const CARDS: {
     titleKey: "exploreHargeisaPharmaciesTitle",
     descriptionKey: "exploreHargeisaPharmaciesDescription",
     gradient: "from-pink-600/70 via-fuchsia-900/60 to-ink",
-    href: "/services/pharmacies",
+    href: SERVICES_PUBLIC_ENABLED ? "/services/pharmacies" : undefined,
   },
   {
     category: "gas_station",
@@ -39,7 +44,7 @@ const CARDS: {
     titleKey: "exploreHargeisaGasStationsTitle",
     descriptionKey: "exploreHargeisaGasStationsDescription",
     gradient: "from-orange-600/70 via-amber-900/60 to-ink",
-    href: "/services/gas-stations",
+    href: SERVICES_PUBLIC_ENABLED ? "/services/gas-stations" : undefined,
   },
   {
     category: "supermarket",

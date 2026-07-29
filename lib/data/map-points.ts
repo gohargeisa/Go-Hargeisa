@@ -1,6 +1,7 @@
 import { createPublicClient } from "@/lib/supabase/public";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { mapPoints as mockMapPoints } from "@/lib/mock-data";
+import { SERVICES_PUBLIC_ENABLED } from "@/lib/config/features";
 import type { CityServiceCategory, CityServicePoint, MapPoint } from "@/types";
 
 export async function getMapPoints(): Promise<MapPoint[]> {
@@ -60,10 +61,15 @@ export async function getCityServicePoints(): Promise<CityServicePoint[]> {
   const supabase = createPublicClient();
   const [{ data, error }, { data: serviceRows, error: serviceError }] = await Promise.all([
     supabase.from("map_points").select("id, name, category, lat, lng"),
-    supabase
-      .from("services")
-      .select("id, slug, name, category, short_description, address, phone, lat, lng")
-      .eq("status", "published"),
+    // Services is temporarily hidden from the public site (lib/config/
+    // features.ts) — skip the query entirely rather than fetch rows just to
+    // discard them. Flip the flag back to restore service pins on the map.
+    SERVICES_PUBLIC_ENABLED
+      ? supabase
+          .from("services")
+          .select("id, slug, name, category, short_description, address, phone, lat, lng")
+          .eq("status", "published")
+      : Promise.resolve({ data: null, error: null }),
   ]);
 
   if (error && process.env.NODE_ENV === "development") console.error("getCityServicePoints:", error.message);

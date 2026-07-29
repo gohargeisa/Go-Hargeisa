@@ -11,10 +11,15 @@ import {
   SERVICE_CATEGORY_SINGULAR_LABELS,
   categoryFromSlug,
 } from "@/lib/utils/service-categories";
+import { SERVICES_PUBLIC_ENABLED } from "@/lib/config/features";
 
 export const revalidate = 3600;
 
 export async function generateStaticParams() {
+  // Services is temporarily hidden from the public site — see
+  // lib/config/features.ts. Returning no params here means no category
+  // pages get statically generated while disabled.
+  if (!SERVICES_PUBLIC_ENABLED) return [];
   return SERVICE_CATEGORY_ORDER.map((category) => ({ category: SERVICE_CATEGORY_SLUGS[category] }));
 }
 
@@ -23,6 +28,7 @@ export async function generateMetadata({
 }: {
   params: { locale: string; category: string };
 }): Promise<Metadata> {
+  if (!SERVICES_PUBLIC_ENABLED) return {};
   const category = categoryFromSlug(categorySlug);
   if (!category) return {};
   const label = SERVICE_CATEGORY_LABELS[category];
@@ -41,6 +47,8 @@ export default async function ServiceCategoryPage({
   params: { locale: Locale; category: string };
   searchParams: { q?: string; minRating?: string; sortBy?: string };
 }) {
+  if (!SERVICES_PUBLIC_ENABLED) notFound();
+
   const category = categoryFromSlug(categorySlug);
   if (!category) notFound();
 
