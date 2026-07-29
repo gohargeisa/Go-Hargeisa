@@ -3,7 +3,6 @@ import { getTranslations } from "next-intl/server";
 import { Plane, Car, Bus, ParkingCircle } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { PageHero } from "@/components/shared/page-hero";
-import { placeholderImage } from "@/lib/placeholder-image";
 
 export async function generateMetadata({
   params: { locale },
@@ -37,7 +36,7 @@ export default async function TransportationPage({
         eyebrow={t("eyebrow")}
         title={t("title")}
         subtitle={t("subtitle")}
-        image={placeholderImage("Transportation in Hargeisa", { tone: "primary" })}
+        image="https://images.unsplash.com/photo-1691724414154-8b1551e7b292?fm=jpg&q=80&w=2400&auto=format&fit=crop"
       />
       <section className="container-px mx-auto py-14 grid gap-5 sm:grid-cols-2">
         {options.map(({ icon: Icon, title, body }) => (
