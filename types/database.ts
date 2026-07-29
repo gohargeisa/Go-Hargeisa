@@ -143,7 +143,24 @@ export type Database = {
       amenity_categories: Table<{ id: string; name: string; icon: string | null; sort_order: number; created_at: string }>;
     } & Record<string, Table<Record<string, unknown>, Record<string, unknown>, Record<string, unknown>>>;
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      submit_booking_request: {
+        Args: {
+          p_hotel_id: string;
+          p_room_id: string | null;
+          p_guest_name: string;
+          p_guest_phone: string;
+          p_guest_email: string | null;
+          p_adults: number;
+          p_children: number;
+          p_rooms_count: number;
+          p_check_in: string;
+          p_check_out: string;
+          p_notes: string | null;
+        };
+        Returns: string;
+      };
+    };
     Enums: { user_role: "user" | "business_owner" | "owner"; price_range: "$" | "$$" | "$$$" | "$$$$"; attraction_category: "landmark" | "museum" | "market" | "nature" | "religious"; event_category: "cultural" | "national" | "business" | "sports" | "concert"; content_status: "draft" | "published" | "archived"; listing_type: "hotel" | "restaurant" | "cafe" | "attraction" | "service"; service_category: ServiceCategoryDb; };
     CompositeTypes: Record<string, never>;
   };
