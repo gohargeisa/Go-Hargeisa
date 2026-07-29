@@ -30,6 +30,8 @@ type ListingBase = {
   updated_at: string;
 };
 
+type PartnerStatusDb = "trial" | "official";
+
 type HotelRow = ListingBase & {
   description_ar: string | null; description_so: string | null; phone: string | null;
   website: string | null; price_range: "$" | "$$" | "$$$" | "$$$$"; amenities: string[]; owner_id: string | null;
@@ -38,6 +40,7 @@ type HotelRow = ListingBase & {
   booking_mode: "go_hargeisa" | "external";
   external_booking_option: "website" | "booking_com" | "whatsapp" | "custom_url" | null;
   external_booking_url: string | null; booking_whatsapp: string | null; booking_com_url: string | null;
+  partner_status: PartnerStatusDb;
 };
 
 type RoomTypeDb = "standard" | "deluxe" | "twin" | "family" | "executive_suite";
@@ -55,11 +58,22 @@ type RestaurantRow = ListingBase & {
   phone: string | null; website: string | null; cuisine: string[]; price_range: "$" | "$$" | "$$$" | "$$$$";
   opening_hours: string | null; menu: Json; reservable: boolean; owner_id: string | null;
   logo_url: string | null; menu_pdf_url: string | null;
+  partner_status: PartnerStatusDb;
 };
 type CafeRow = ListingBase & {
   phone: string | null; special_drinks: string[]; wifi: boolean; working_space: boolean;
   opening_hours: string | null; owner_id: string | null;
   logo_url: string | null; menu: Json; menu_pdf_url: string | null;
+  partner_status: PartnerStatusDb;
+};
+
+type CityServiceCategoryDb = "hospital" | "bank" | "supermarket" | "pharmacy";
+
+type CityServiceRow = {
+  id: string; category: CityServiceCategoryDb; name: string; phone: string | null;
+  opening_hours: string | null; maps_url: string | null; image: string | null;
+  status: "draft" | "published" | "archived"; sort_order: number;
+  created_at: string; updated_at: string;
 };
 type AttractionRow = ListingBase & {
   history: string | null; best_time_to_visit: string | null; entry_fee: string; visitor_tips: string[];
@@ -99,7 +113,7 @@ type BusinessMetricEventRow = {
 
 type BusinessSubscriptionRow = {
   id: string; listing_type: BusinessListingType; listing_id: string;
-  plan_tier: "standard" | "premium"; renews_at: string | null; created_at: string; updated_at: string;
+  plan_tier: "basic" | "gold" | "platinum"; renews_at: string | null; created_at: string; updated_at: string;
 };
 
 type BusinessMessageRow = {
@@ -116,6 +130,7 @@ export type Database = {
       cafes: Table<CafeRow>;
       attractions: Table<AttractionRow>;
       services: Table<ServiceRow>;
+      city_services: Table<CityServiceRow>;
       events: Table<{ id: string; slug: string; title: string; title_ar: string | null; title_so: string | null; description: string; cover_image: string; category: "cultural" | "national" | "business" | "sports" | "concert"; start_date: string; end_date: string; location: string; ticket_info: string | null; status: "draft" | "published" | "archived"; created_by: string | null; created_at: string }>;
       articles: Table<{ id: string; slug: string; title: string; title_ar: string | null; title_so: string | null; excerpt: string; body: string; cover_image: string; category: string; author_id: string | null; read_minutes: number; status: "draft" | "published" | "archived"; published_at: string | null; created_at: string }>;
       destinations: Table<{ id: string; slug: string; name: string; description: string; image: string; place_count: number; created_at: string }>;
@@ -161,7 +176,7 @@ export type Database = {
         Returns: string;
       };
     };
-    Enums: { user_role: "user" | "business_owner" | "owner"; price_range: "$" | "$$" | "$$$" | "$$$$"; attraction_category: "landmark" | "museum" | "market" | "nature" | "religious"; event_category: "cultural" | "national" | "business" | "sports" | "concert"; content_status: "draft" | "published" | "archived"; listing_type: "hotel" | "restaurant" | "cafe" | "attraction" | "service"; service_category: ServiceCategoryDb; };
+    Enums: { user_role: "user" | "business_owner" | "owner"; price_range: "$" | "$$" | "$$$" | "$$$$"; attraction_category: "landmark" | "museum" | "market" | "nature" | "religious"; event_category: "cultural" | "national" | "business" | "sports" | "concert"; content_status: "draft" | "published" | "archived"; listing_type: "hotel" | "restaurant" | "cafe" | "attraction" | "service"; service_category: ServiceCategoryDb; subscription_tier: "basic" | "gold" | "platinum"; partner_status: PartnerStatusDb; city_service_category: CityServiceCategoryDb; };
     CompositeTypes: Record<string, never>;
   };
 };

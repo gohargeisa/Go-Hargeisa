@@ -15,10 +15,10 @@ export default async function AdminCafesPage({ params: { locale } }: { params: {
   const access = await requireListingsAccess(locale, `/${locale}/admin/cafes`);
   const t = await getTranslations({ locale, namespace: "admin" });
 
-  let cafes: { id: string; name: string; address: string; cover_image: string; wifi: boolean }[] = [];
+  let cafes: { id: string; name: string; address: string; cover_image: string; wifi: boolean; status: "draft" | "published" | "archived" }[] = [];
   if (access && isSupabaseConfigured()) {
     const supabase = await createClient();
-    let query = supabase.from("cafes").select("id, name, address, cover_image, wifi");
+    let query = supabase.from("cafes").select("id, name, address, cover_image, wifi, status");
     if (access.role === "business_owner") query = query.eq("owner_id", access.userId);
     const { data } = await query;
     cafes = data ?? [];
@@ -29,6 +29,7 @@ export default async function AdminCafesPage({ params: { locale } }: { params: {
       address: c.address,
       cover_image: c.coverImage,
       wifi: c.wifi,
+      status: "published" as const,
     }));
   }
 
@@ -64,12 +65,14 @@ export default async function AdminCafesPage({ params: { locale } }: { params: {
               : t("noCafesYet")
           }
           allowDelete={canCreate}
+          allowHide={canCreate}
           rows={cafes.map((c) => ({
             id: c.id,
             image: c.cover_image,
             title: c.name,
             subtitle: c.address,
             meta: c.wifi ? t("yes") : t("no"),
+            status: c.status,
           }))}
         />
       </div>

@@ -19,6 +19,7 @@ const links = [
   { key: "hotels", href: "hotels" },
   { key: "restaurants", href: "restaurants" },
   { key: "cafes", href: "cafes" },
+  { key: "cityServices", href: "city-services" },
   ...(SERVICES_PUBLIC_ENABLED ? [{ key: "services", href: "services" }] : []),
 ] as const;
 

@@ -142,6 +142,62 @@ export async function deleteListing(
 }
 
 /**
+ * Owner-only "Hide"/"Show" toggle — flips a listing between 'published' and
+ * 'archived' without opening the full edit form. Archived rows keep every
+ * existing "Public can read published X" RLS policy denying them (those
+ * policies check status = 'published'), so hiding a listing this way is
+ * exactly as effective at removing it from the public site as archiving it
+ * through the edit form always was — this just makes it a one-click action
+ * from the list view instead.
+ */
+export async function toggleListingVisibility(
+  table: AllowedTable,
+  id: string,
+  nextStatus: "published" | "archived",
+  revalidate: string
+): Promise<{ ok: boolean; error?: string }> {
+  if (!ALLOWED_TABLES.includes(table)) {
+    return { ok: false, error: "Invalid table." };
+  }
+
+  const supabase = await assertOwner();
+
+  let error = null;
+  let data: { id: string } | null = null;
+
+  switch (table) {
+    case "hotels":
+      ({ data, error } = await supabase.from("hotels").update({ status: nextStatus } as never).eq("id", id).select("id").single());
+      break;
+    case "restaurants":
+      ({ data, error } = await supabase.from("restaurants").update({ status: nextStatus } as never).eq("id", id).select("id").single());
+      break;
+    case "cafes":
+      ({ data, error } = await supabase.from("cafes").update({ status: nextStatus } as never).eq("id", id).select("id").single());
+      break;
+    case "attractions":
+      ({ data, error } = await supabase.from("attractions").update({ status: nextStatus } as never).eq("id", id).select("id").single());
+      break;
+    case "events":
+      ({ data, error } = await supabase.from("events").update({ status: nextStatus } as never).eq("id", id).select("id").single());
+      break;
+    case "articles":
+      ({ data, error } = await supabase.from("articles").update({ status: nextStatus } as never).eq("id", id).select("id").single());
+      break;
+    case "services":
+      ({ data, error } = await supabase.from("services").update({ status: nextStatus } as never).eq("id", id).select("id").single());
+      break;
+  }
+
+  if (error || !data) {
+    return { ok: false, error: error?.message ?? "Could not update visibility." };
+  }
+
+  revalidatePath(revalidate);
+  return { ok: true };
+}
+
+/**
  * Generic insert used by every admin "create" form. `data` must already be
  * in snake_case matching the table's columns (see supabase/schema.sql) —
  * each entity's action wrapper (createHotel, createRestaurant, ...) is

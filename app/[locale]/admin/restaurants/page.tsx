@@ -15,10 +15,10 @@ export default async function AdminRestaurantsPage({ params: { locale } }: { par
   const access = await requireListingsAccess(locale, `/${locale}/admin/restaurants`);
   const t = await getTranslations({ locale, namespace: "admin" });
 
-  let restaurants: { id: string; name: string; address: string; cover_image: string; cuisine: string[] | null }[] = [];
+  let restaurants: { id: string; name: string; address: string; cover_image: string; cuisine: string[] | null; status: "draft" | "published" | "archived" }[] = [];
   if (access && isSupabaseConfigured()) {
     const supabase = await createClient();
-    let query = supabase.from("restaurants").select("id, name, address, cover_image, cuisine");
+    let query = supabase.from("restaurants").select("id, name, address, cover_image, cuisine, status");
     if (access.role === "business_owner") query = query.eq("owner_id", access.userId);
     const { data } = await query;
     restaurants = data ?? [];
@@ -29,6 +29,7 @@ export default async function AdminRestaurantsPage({ params: { locale } }: { par
       address: r.address,
       cover_image: r.coverImage,
       cuisine: r.cuisine,
+      status: "published" as const,
     }));
   }
 
@@ -64,12 +65,14 @@ export default async function AdminRestaurantsPage({ params: { locale } }: { par
               : t("noRestaurantsYet")
           }
           allowDelete={canCreate}
+          allowHide={canCreate}
           rows={restaurants.map((r) => ({
             id: r.id,
             image: r.cover_image,
             title: r.name,
             subtitle: r.address,
             meta: r.cuisine?.join(", ") || "—",
+            status: r.status,
           }))}
         />
       </div>

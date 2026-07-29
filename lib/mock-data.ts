@@ -74,6 +74,7 @@ export const hotels: Hotel[] = [
     featured: false,
     languages: [],
     rooms: [],
+    partnerStatus: "official",
   },
   {
     id: "h2",
@@ -96,6 +97,7 @@ export const hotels: Hotel[] = [
     featured: false,
     languages: [],
     rooms: [],
+    partnerStatus: "official",
   },
   {
     id: "h3",
@@ -119,6 +121,7 @@ export const hotels: Hotel[] = [
     featured: false,
     languages: [],
     rooms: [],
+    partnerStatus: "official",
   },
   {
     id: "h4",
@@ -141,6 +144,7 @@ export const hotels: Hotel[] = [
     featured: false,
     languages: [],
     rooms: [],
+    partnerStatus: "official",
   },
   {
     id: "h5",
@@ -162,6 +166,7 @@ export const hotels: Hotel[] = [
     featured: false,
     languages: [],
     rooms: [],
+    partnerStatus: "official",
   },
   {
     id: "h6",
@@ -183,6 +188,7 @@ export const hotels: Hotel[] = [
     featured: false,
     languages: [],
     rooms: [],
+    partnerStatus: "official",
   },
   {
     id: "h7",
@@ -204,6 +210,7 @@ export const hotels: Hotel[] = [
     featured: false,
     languages: [],
     rooms: [],
+    partnerStatus: "official",
   },
   {
     id: "h8",
@@ -226,6 +233,7 @@ export const hotels: Hotel[] = [
     featured: false,
     languages: [],
     rooms: [],
+    partnerStatus: "official",
   },
   {
     id: "h9",
@@ -248,6 +256,7 @@ export const hotels: Hotel[] = [
     featured: false,
     languages: [],
     rooms: [],
+    partnerStatus: "official",
   },
   {
     id: "h10",
@@ -268,6 +277,7 @@ export const hotels: Hotel[] = [
     featured: false,
     languages: [],
     rooms: [],
+    partnerStatus: "official",
   },
   {
     id: "h11",
@@ -290,6 +300,7 @@ export const hotels: Hotel[] = [
     featured: false,
     languages: [],
     rooms: [],
+    partnerStatus: "official",
   },
   {
     id: "h12",
@@ -310,6 +321,7 @@ export const hotels: Hotel[] = [
     featured: false,
     languages: [],
     rooms: [],
+    partnerStatus: "official",
   },
   {
     id: "h13",
@@ -330,6 +342,7 @@ export const hotels: Hotel[] = [
     featured: false,
     languages: [],
     rooms: [],
+    partnerStatus: "official",
   },
   {
     id: "h14",
@@ -350,6 +363,7 @@ export const hotels: Hotel[] = [
     featured: false,
     languages: [],
     rooms: [],
+    partnerStatus: "official",
   },
   {
     id: "h15",
@@ -370,6 +384,7 @@ export const hotels: Hotel[] = [
     featured: false,
     languages: [],
     rooms: [],
+    partnerStatus: "official",
   },
   {
     id: "h16",
@@ -390,6 +405,7 @@ export const hotels: Hotel[] = [
     featured: false,
     languages: [],
     rooms: [],
+    partnerStatus: "official",
   },
   {
     id: "h17",
@@ -410,6 +426,7 @@ export const hotels: Hotel[] = [
     featured: false,
     languages: [],
     rooms: [],
+    partnerStatus: "official",
   },
   {
     id: "h18",
@@ -431,6 +448,7 @@ export const hotels: Hotel[] = [
     featured: false,
     languages: [],
     rooms: [],
+    partnerStatus: "official",
   },
 
   // Second research pass (expansion phase, same sourcing standard as above).
@@ -458,6 +476,7 @@ export const hotels: Hotel[] = [
     featured: false,
     languages: [],
     rooms: [],
+    partnerStatus: "official",
   },
   {
     id: "h20",
@@ -478,6 +497,7 @@ export const hotels: Hotel[] = [
     featured: false,
     languages: [],
     rooms: [],
+    partnerStatus: "official",
   },
   {
     id: "h21",
@@ -498,6 +518,7 @@ export const hotels: Hotel[] = [
     featured: false,
     languages: [],
     rooms: [],
+    partnerStatus: "official",
   },
   {
     id: "h22",
@@ -518,6 +539,7 @@ export const hotels: Hotel[] = [
     featured: false,
     languages: [],
     rooms: [],
+    partnerStatus: "official",
   },
   {
     id: "h23",
@@ -538,6 +560,7 @@ export const hotels: Hotel[] = [
     featured: false,
     languages: [],
     rooms: [],
+    partnerStatus: "official",
   },
   {
     id: "h24",
@@ -558,6 +581,7 @@ export const hotels: Hotel[] = [
     featured: false,
     languages: [],
     rooms: [],
+    partnerStatus: "official",
   },
   {
     id: "h25",
@@ -578,6 +602,7 @@ export const hotels: Hotel[] = [
     featured: false,
     languages: [],
     rooms: [],
+    partnerStatus: "official",
   },
   {
     id: "h26",
@@ -598,6 +623,7 @@ export const hotels: Hotel[] = [
     featured: false,
     languages: [],
     rooms: [],
+    partnerStatus: "official",
   },
   {
     id: "h27",
@@ -618,6 +644,7 @@ export const hotels: Hotel[] = [
     featured: false,
     languages: [],
     rooms: [],
+    partnerStatus: "official",
   },
   {
     id: "h28",
@@ -638,6 +665,7 @@ export const hotels: Hotel[] = [
     featured: false,
     languages: [],
     rooms: [],
+    partnerStatus: "official",
   },
   {
     id: "h29",
@@ -659,6 +687,7 @@ export const hotels: Hotel[] = [
     featured: false,
     languages: [],
     rooms: [],
+    partnerStatus: "official",
   },
   {
     id: "h30",
@@ -679,6 +708,7 @@ export const hotels: Hotel[] = [
     featured: false,
     languages: [],
     rooms: [],
+    partnerStatus: "official",
   },
   {
     id: "h31",
@@ -699,6 +729,7 @@ export const hotels: Hotel[] = [
     featured: false,
     languages: [],
     rooms: [],
+    partnerStatus: "official",
   },
   {
     id: "h32",
@@ -720,6 +751,7 @@ export const hotels: Hotel[] = [
     featured: false,
     languages: [],
     rooms: [],
+    partnerStatus: "official",
   },
   {
     id: "h33",
@@ -742,6 +774,7 @@ export const hotels: Hotel[] = [
     featured: false,
     languages: [],
     rooms: [],
+    partnerStatus: "official",
   },
   {
     id: "h34",
@@ -762,6 +795,7 @@ export const hotels: Hotel[] = [
     featured: false,
     languages: [],
     rooms: [],
+    partnerStatus: "official",
   },
 ];
 
@@ -849,6 +883,7 @@ menuHighlights: [
 reservable: true,
 
 featured: false,
+    partnerStatus: "official",
   },
 
   // Real, independently-operating restaurants in Hargeisa, researched from
@@ -878,6 +913,7 @@ featured: false,
     menuHighlights: [],
     reservable: false,
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "r3",
@@ -899,6 +935,7 @@ featured: false,
     menuHighlights: [],
     reservable: false,
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "r4",
@@ -919,6 +956,7 @@ featured: false,
     menuHighlights: [],
     reservable: false,
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "r5",
@@ -939,6 +977,7 @@ featured: false,
     menuHighlights: [],
     reservable: false,
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "r6",
@@ -959,6 +998,7 @@ featured: false,
     menuHighlights: [],
     reservable: false,
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "r7",
@@ -979,6 +1019,7 @@ featured: false,
     menuHighlights: [],
     reservable: false,
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "r8",
@@ -999,6 +1040,7 @@ featured: false,
     menuHighlights: [],
     reservable: false,
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "r9",
@@ -1019,6 +1061,7 @@ featured: false,
     menuHighlights: [],
     reservable: false,
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "r10",
@@ -1040,6 +1083,7 @@ featured: false,
     menuHighlights: [],
     reservable: false,
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "r11",
@@ -1060,6 +1104,7 @@ featured: false,
     menuHighlights: [],
     reservable: false,
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "r12",
@@ -1080,6 +1125,7 @@ featured: false,
     menuHighlights: [],
     reservable: false,
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "r13",
@@ -1100,6 +1146,7 @@ featured: false,
     menuHighlights: [],
     reservable: false,
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "r14",
@@ -1120,6 +1167,7 @@ featured: false,
     menuHighlights: [],
     reservable: false,
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "r15",
@@ -1142,6 +1190,7 @@ featured: false,
     menuHighlights: [],
     reservable: true,
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "r16",
@@ -1162,6 +1211,7 @@ featured: false,
     menuHighlights: [],
     reservable: false,
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "r17",
@@ -1182,6 +1232,7 @@ featured: false,
     menuHighlights: [],
     reservable: false,
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "r18",
@@ -1202,6 +1253,7 @@ featured: false,
     menuHighlights: [],
     reservable: false,
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "r19",
@@ -1222,6 +1274,7 @@ featured: false,
     menuHighlights: [],
     reservable: false,
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "r20",
@@ -1242,6 +1295,7 @@ featured: false,
     menuHighlights: [],
     reservable: false,
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "r21",
@@ -1262,6 +1316,7 @@ featured: false,
     menuHighlights: [],
     reservable: false,
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "r22",
@@ -1282,6 +1337,7 @@ featured: false,
     menuHighlights: [],
     reservable: false,
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "r23",
@@ -1302,6 +1358,7 @@ featured: false,
     menuHighlights: [],
     reservable: false,
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "r24",
@@ -1322,6 +1379,7 @@ featured: false,
     menuHighlights: [],
     reservable: false,
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "r25",
@@ -1342,6 +1400,7 @@ featured: false,
     menuHighlights: [],
     reservable: false,
     featured: false,
+    partnerStatus: "official",
   },
 
   // Second research pass (expansion phase, same sourcing standard as above).
@@ -1364,6 +1423,7 @@ featured: false,
     menuHighlights: [],
     reservable: false,
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "r27",
@@ -1384,6 +1444,7 @@ featured: false,
     menuHighlights: [],
     reservable: false,
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "r28",
@@ -1404,6 +1465,7 @@ featured: false,
     menuHighlights: [],
     reservable: false,
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "r29",
@@ -1424,6 +1486,7 @@ featured: false,
     menuHighlights: [],
     reservable: false,
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "r30",
@@ -1444,6 +1507,7 @@ featured: false,
     menuHighlights: [],
     reservable: false,
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "r31",
@@ -1464,6 +1528,7 @@ featured: false,
     menuHighlights: [],
     reservable: false,
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "r32",
@@ -1484,6 +1549,7 @@ featured: false,
     menuHighlights: [],
     reservable: false,
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "r33",
@@ -1504,6 +1570,7 @@ featured: false,
     menuHighlights: [],
     reservable: false,
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "r34",
@@ -1524,6 +1591,7 @@ featured: false,
     menuHighlights: [],
     reservable: false,
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "r35",
@@ -1545,6 +1613,7 @@ featured: false,
     menuHighlights: [],
     reservable: true,
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "r36",
@@ -1566,6 +1635,7 @@ featured: false,
     menuHighlights: [],
     reservable: false,
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "r37",
@@ -1586,6 +1656,7 @@ featured: false,
     menuHighlights: [],
     reservable: false,
     featured: false,
+    partnerStatus: "official",
   },
 ];
 
@@ -1615,6 +1686,7 @@ export const cafes: Cafe[] = [
     openingHours: "",
     menuHighlights: [],
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "c2",
@@ -1637,6 +1709,7 @@ export const cafes: Cafe[] = [
     openingHours: "",
     menuHighlights: [],
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "c3",
@@ -1658,6 +1731,7 @@ export const cafes: Cafe[] = [
     openingHours: "Sat–Wed 7:00 AM–12:00 AM, Thu 7:00 AM–12:30 AM, Fri 1:00 PM–12:00 AM",
     menuHighlights: [],
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "c4",
@@ -1679,6 +1753,7 @@ export const cafes: Cafe[] = [
     openingHours: "8:00 AM – 12:00 AM (Fri from 4:00 PM)",
     menuHighlights: [],
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "c5",
@@ -1699,6 +1774,7 @@ export const cafes: Cafe[] = [
     openingHours: "",
     menuHighlights: [],
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "c6",
@@ -1719,6 +1795,7 @@ export const cafes: Cafe[] = [
     openingHours: "",
     menuHighlights: [],
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "c7",
@@ -1739,6 +1816,7 @@ export const cafes: Cafe[] = [
     openingHours: "",
     menuHighlights: [],
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "c8",
@@ -1759,6 +1837,7 @@ export const cafes: Cafe[] = [
     openingHours: "",
     menuHighlights: [],
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "c9",
@@ -1779,6 +1858,7 @@ export const cafes: Cafe[] = [
     openingHours: "",
     menuHighlights: [],
     featured: false,
+    partnerStatus: "official",
   },
 
   // Second research pass (expansion phase, same sourcing standard as above).
@@ -1802,6 +1882,7 @@ export const cafes: Cafe[] = [
     openingHours: "",
     menuHighlights: [],
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "c11",
@@ -1823,6 +1904,7 @@ export const cafes: Cafe[] = [
     openingHours: "Fri–Thu 7:00 AM – 11:00 PM",
     menuHighlights: [],
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "c12",
@@ -1843,6 +1925,7 @@ export const cafes: Cafe[] = [
     openingHours: "",
     menuHighlights: [],
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "c13",
@@ -1863,6 +1946,7 @@ export const cafes: Cafe[] = [
     openingHours: "",
     menuHighlights: [],
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "c14",
@@ -1883,6 +1967,7 @@ export const cafes: Cafe[] = [
     openingHours: "",
     menuHighlights: [],
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "c15",
@@ -1903,6 +1988,7 @@ export const cafes: Cafe[] = [
     openingHours: "",
     menuHighlights: [],
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "c16",
@@ -1923,6 +2009,7 @@ export const cafes: Cafe[] = [
     openingHours: "",
     menuHighlights: [],
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "c17",
@@ -1943,6 +2030,7 @@ export const cafes: Cafe[] = [
     openingHours: "",
     menuHighlights: [],
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "c18",
@@ -1963,6 +2051,7 @@ export const cafes: Cafe[] = [
     openingHours: "",
     menuHighlights: [],
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "c19",
@@ -1983,6 +2072,7 @@ export const cafes: Cafe[] = [
     openingHours: "",
     menuHighlights: [],
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "c20",
@@ -2003,6 +2093,7 @@ export const cafes: Cafe[] = [
     openingHours: "",
     menuHighlights: [],
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "c21",
@@ -2023,6 +2114,7 @@ export const cafes: Cafe[] = [
     openingHours: "",
     menuHighlights: [],
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "c22",
@@ -2043,6 +2135,7 @@ export const cafes: Cafe[] = [
     openingHours: "",
     menuHighlights: [],
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "c23",
@@ -2063,6 +2156,7 @@ export const cafes: Cafe[] = [
     openingHours: "",
     menuHighlights: [],
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "c24",
@@ -2083,6 +2177,7 @@ export const cafes: Cafe[] = [
     openingHours: "",
     menuHighlights: [],
     featured: false,
+    partnerStatus: "official",
   },
   {
     id: "c25",
@@ -2103,6 +2198,7 @@ export const cafes: Cafe[] = [
     openingHours: "",
     menuHighlights: [],
     featured: false,
+    partnerStatus: "official",
   },
 ];
 

@@ -16,7 +16,8 @@
     "contact": "تواصل معنا",
     "signIn": "تسجيل الدخول",
     "signUp": "إنشاء حساب",
-    "signOut": "تسجيل الخروج"
+    "signOut": "تسجيل الخروج",
+    "cityServices": "خدمات المدينة"
   },
   "hero": {
     "premiumBadge": "الأول من نوعه",
@@ -555,7 +556,40 @@
     "bodyHint": "نص Markdown بسيط — الفقرات مفصولة بسطر فارغ",
     "readTimeLabel": "مدة القراءة (بالدقائق)",
 
-    "removeTagAriaLabel": "إزالة {value}"
+    "removeTagAriaLabel": "إزالة {value}",
+    "statusDraft": "مسودة",
+    "statusPublished": "منشور",
+    "statusArchived": "مخفي",
+    "hideLabel": "إخفاء",
+    "showLabel": "إظهار",
+    "visibilityUpdateError": "تعذر تحديث الظهور.",
+    "partnersNav": "الشركاء",
+    "partnersTitle": "الشركاء",
+    "partnersSubtitle": "إدارة حالة الشراكة وخطط الاشتراك للفنادق والمطاعم والمقاهي المرتبطة بحساب صاحب عمل.",
+    "partnersEmptyTitle": "لا توجد أعمال مرتبطة بعد",
+    "partnersEmptyDescription": "تظهر الأعمال هنا بمجرد ربط حساب صاحب عمل بأحد قوائمه.",
+    "partnerStatusTrial": "شريك تجريبي",
+    "partnerStatusOfficial": "شريك رسمي",
+    "partnerStatusColumn": "حالة الشراكة",
+    "planColumn": "الخطة",
+    "makeOfficial": "جعله رسميًا",
+    "makeTrial": "جعله تجريبيًا",
+    "assignPlan": "تعيين خطة",
+    "cityServicesNav": "خدمات المدينة",
+    "manageCityServices": "إدارة خدمات المدينة",
+    "addCityService": "إضافة خدمة مدينة",
+    "addCityServiceTitle": "إضافة خدمة مدينة",
+    "editCityServiceTitle": "تعديل خدمة المدينة",
+    "cityServiceNameLabel": "الاسم",
+    "cityServiceCategoryLabel": "الفئة",
+    "categoryHospital": "مستشفى",
+    "categoryBank": "بنك",
+    "categorySupermarket": "سوبر ماركت",
+    "categoryPharmacy": "صيدلية",
+    "noCityServicesYet": "لا توجد خدمات مدينة بعد — أضف أول خدمة للبدء.",
+    "mapsUrlLabel": "رابط خرائط جوجل",
+    "openingHoursShortLabel": "ساعات العمل",
+    "saveCityService": "حفظ"
   },
   "about": {
     "eyebrow": "قصتنا",
@@ -931,10 +965,8 @@
     "subscriptionTitle": "الاشتراك",
     "subscriptionSubtitle": "خطتك الحالية وحالة الفوترة.",
     "currentPlan": "الخطة الحالية",
-    "planStandard": "أساسية",
-    "planPremium": "مميزة",
     "renewalDate": "التجديد",
-    "noRenewalScheduled": "لا يوجد تجديد مجدول — أنت على الخطة الأساسية المجانية.",
+    "noRenewalScheduled": "لا يوجد تجديد مجدول — يدير فريق Go Hargeisa خطتك.",
     "manageSubscription": "إدارة الاشتراك",
 
     "businessSummaryTitle": "ملخص النشاط التجاري",
@@ -992,12 +1024,30 @@
     "settingsLinkAccountTitle": "إعدادات الحساب",
     "settingsLinkAccountDescription": "كلمة المرور والإشعارات وأمان الحساب",
 
-    "analyticsSubtitle": "نظرة أقرب على زياراتك وتفاعل الزوار."
+    "analyticsSubtitle": "نظرة أقرب على زياراتك وتفاعل الزوار.",
+    "planBasic": "أساسي",
+    "planGold": "ذهبي",
+    "planPlatinum": "بلاتيني",
+    "planPriceSuffix": "/شهريًا",
+    "partnerStatusLabel": "حالة الشراكة",
+    "partnerStatusTrialBanner": "تم ربط حسابك، لكن فريق Go Hargeisa لم يفعّل بعد الوصول إلى لوحة التحكم."
   },
   "siteMetadata": {
     "titleDefault": "Go Hargeisa | الدليل السياحي الرسمي لهرجيسا، صوماليلاند",
     "titleTemplate": "%s | Go Hargeisa",
     "description": "استكشف هرجيسا مع Go Hargeisa. اكتشف الفنادق والمطاعم والمقاهي والمعالم السياحية والفعاليات ونصائح السفر في جميع أنحاء صوماليلاند.",
     "ogDescription": "الدليل السياحي الرسمي لمدينة هرجيسا، صوماليلاند."
+  },
+  "cityServices": {
+    "pageTitle": "خدمات المدينة",
+    "pageSubtitle": "الخدمات الأساسية في هرجيسا — المستشفيات والبنوك والسوبر ماركت والصيدليات.",
+    "hospitalsTitle": "المستشفيات",
+    "banksTitle": "البنوك",
+    "supermarketsTitle": "السوبر ماركت",
+    "pharmaciesTitle": "الصيدليات",
+    "comingSoonTitle": "قريباً",
+    "comingSoonDescription": "سيتم إضافة المعلومات من قبل فريق Go Hargeisa.",
+    "viewOnMaps": "عرض على الخريطة",
+    "callNow": "اتصال"
   }
 }

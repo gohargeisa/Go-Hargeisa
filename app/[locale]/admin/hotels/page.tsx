@@ -18,10 +18,10 @@ export default async function AdminHotelsPage({ params: { locale } }: { params: 
   // Owners see every hotel; business owners only see hotels they own —
   // uses the authenticated client (not lib/data/hotels.ts's public one)
   // so the owner_id-scoped query actually runs as the signed-in user.
-  let hotels: { id: string; name: string; address: string; cover_image: string; price_range: string }[] = [];
+  let hotels: { id: string; name: string; address: string; cover_image: string; price_range: string; status: "draft" | "published" | "archived" }[] = [];
   if (access && isSupabaseConfigured()) {
     const supabase = await createClient();
-    let query = supabase.from("hotels").select("id, name, address, cover_image, price_range");
+    let query = supabase.from("hotels").select("id, name, address, cover_image, price_range, status");
     if (access.role === "business_owner") query = query.eq("owner_id", access.userId);
     const { data } = await query;
     hotels = data ?? [];
@@ -34,6 +34,7 @@ export default async function AdminHotelsPage({ params: { locale } }: { params: 
       address: h.address,
       cover_image: h.coverImage,
       price_range: h.priceRange,
+      status: "published" as const,
     }));
   }
 
@@ -69,12 +70,14 @@ export default async function AdminHotelsPage({ params: { locale } }: { params: 
               : t("noHotelsYet")
           }
           allowDelete={canCreate}
+          allowHide={canCreate}
           rows={hotels.map((h) => ({
             id: h.id,
             image: h.cover_image,
             title: h.name,
             subtitle: h.address,
             meta: h.price_range,
+            status: h.status,
           }))}
         />
       </div>

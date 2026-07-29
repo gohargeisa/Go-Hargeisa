@@ -24,6 +24,9 @@ export interface OwnedListing {
   /** Real profile-completeness signals for PerformanceTips — no extra query, read straight off the same row. */
   hasDescription: boolean;
   galleryCount: number;
+  /** 'trial' listings have a linked owner_id but no dashboard access yet —
+   * see app/[locale]/business/layout.tsx, which is what actually enforces this. */
+  partnerStatus: "trial" | "official";
 }
 
 function galleryLength(gallery: unknown): number {
@@ -65,6 +68,7 @@ async function _getOwnedListings(userId: string): Promise<OwnedListing[]> {
       serviceTags: h.amenities ?? [],
       hasDescription: Boolean(h.description?.trim()),
       galleryCount: galleryLength(h.gallery),
+      partnerStatus: h.partner_status,
     });
   }
   for (const r of restaurants ?? []) {
@@ -84,6 +88,7 @@ async function _getOwnedListings(userId: string): Promise<OwnedListing[]> {
       serviceTags: r.cuisine ?? [],
       hasDescription: Boolean(r.description?.trim()),
       galleryCount: galleryLength(r.gallery),
+      partnerStatus: r.partner_status,
     });
   }
   for (const c of cafes ?? []) {
@@ -103,6 +108,7 @@ async function _getOwnedListings(userId: string): Promise<OwnedListing[]> {
       serviceTags: c.special_drinks ?? [],
       hasDescription: Boolean(c.description?.trim()),
       galleryCount: galleryLength(c.gallery),
+      partnerStatus: c.partner_status,
     });
   }
 
@@ -349,7 +355,7 @@ export async function getReviewsForListing(listingType: BusinessListingType, lis
   return (data ?? []).map((row: any) => mapReview(row, row.profiles?.full_name ?? "Guest"));
 }
 
-/** Reads (or lazily creates, defaulting to 'standard') the subscription row for a listing. */
+/** Reads (or lazily creates, defaulting to 'basic') the subscription row for a listing. */
 export async function getOrCreateSubscription(
   listingType: BusinessListingType,
   listingId: string
@@ -374,7 +380,7 @@ export async function getOrCreateSubscription(
 
   const { data: created } = await supabase
     .from("business_subscriptions")
-    .insert({ listing_type: listingType, listing_id: listingId, plan_tier: "standard" } as never)
+    .insert({ listing_type: listingType, listing_id: listingId, plan_tier: "basic" } as never)
     .select("*")
     .single();
 
@@ -382,7 +388,7 @@ export async function getOrCreateSubscription(
     id: created?.id ?? "",
     listingType,
     listingId,
-    planTier: created?.plan_tier ?? "standard",
+    planTier: created?.plan_tier ?? "basic",
     renewsAt: created?.renews_at ?? undefined,
   };
 }

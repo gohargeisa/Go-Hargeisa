@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { CreditCard } from "lucide-react";
 import { ContactSupportButton } from "./contact-support-button";
+import { SUBSCRIPTION_PLANS } from "@/lib/config/subscription-plans";
 import type { BusinessSubscription } from "@/types";
 
 export async function SubscriptionCard({
@@ -13,7 +14,8 @@ export async function SubscriptionCard({
   ownerEmail: string;
 }) {
   const t = await getTranslations("businessDashboard");
-  const isPremium = subscription.planTier === "premium";
+  const plan = SUBSCRIPTION_PLANS[subscription.planTier];
+  const planNameKey = { basic: "planBasic", gold: "planGold", platinum: "planPlatinum" } as const;
 
   return (
     <div className="rounded-2xl border border-ink/8 bg-white p-5 dark:border-white/10 dark:bg-white/[0.03]">
@@ -27,9 +29,17 @@ export async function SubscriptionCard({
           <p className="text-xs font-semibold uppercase tracking-wide text-ink/45 dark:text-sand/45">
             {t("currentPlan")}
           </p>
-          <p className="mt-1 font-display text-xl font-bold">{isPremium ? t("planPremium") : t("planStandard")}</p>
+          <p className="mt-1 font-display text-xl font-bold">
+            {t(planNameKey[subscription.planTier])}
+            <span className="ms-1.5 text-sm font-medium text-ink/50 dark:text-sand/50">
+              ${plan.priceUsd}
+              {t("planPriceSuffix")}
+            </span>
+          </p>
         </div>
-        {isPremium && <span className="rounded-full bg-primary px-3 py-1 text-xs font-bold text-white">★</span>}
+        {subscription.planTier !== "basic" && (
+          <span className="rounded-full bg-primary px-3 py-1 text-xs font-bold text-white">★</span>
+        )}
       </div>
 
       <p className="mt-3 text-sm text-ink/55 dark:text-sand/55">

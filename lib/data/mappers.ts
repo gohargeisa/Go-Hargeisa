@@ -87,6 +87,7 @@ export function mapHotel(
     externalBookingUrl: row.external_booking_url ?? undefined,
     bookingWhatsapp: row.booking_whatsapp ?? undefined,
     bookingComUrl: row.booking_com_url ?? undefined,
+    partnerStatus: row.partner_status,
   };
 }
 
@@ -115,6 +116,7 @@ export function mapRestaurant(row: RestaurantRow, reviews: Review[] = []): Resta
     featured: row.featured,
     logo: row.logo_url ?? undefined,
     menuPdfUrl: row.menu_pdf_url ?? undefined,
+    partnerStatus: row.partner_status,
   };
 }
 
@@ -142,6 +144,7 @@ export function mapCafe(row: CafeRow, reviews: Review[] = []): Cafe {
     logo: row.logo_url ?? undefined,
     menuHighlights: menu,
     menuPdfUrl: row.menu_pdf_url ?? undefined,
+    partnerStatus: row.partner_status,
   };
 }
 

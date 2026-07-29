@@ -65,7 +65,7 @@ export interface BusinessSubscription {
   id: string;
   listingType: BusinessListingType;
   listingId: string;
-  planTier: "standard" | "premium";
+  planTier: "basic" | "gold" | "platinum";
   renewsAt?: string;
 }
 
@@ -126,6 +126,12 @@ export interface HotelRoom {
 export type HotelBookingMode = "go_hargeisa" | "external";
 export type HotelExternalBookingOption = "website" | "booking_com" | "whatsapp" | "custom_url";
 
+/** Trial: listing is live publicly but its linked business owner (if any) has
+ * no /business dashboard access yet. Official: the linked owner gets full
+ * dashboard access. Owner-only to change — see the enforce_partner_status_
+ * owner_only trigger in supabase/migrations/20260730000002_partner_status.sql. */
+export type PartnerStatus = "trial" | "official";
+
 export interface Hotel {
   id: string;
   slug: string;
@@ -158,6 +164,7 @@ export interface Hotel {
   externalBookingUrl?: string;
   bookingWhatsapp?: string;
   bookingComUrl?: string;
+  partnerStatus: PartnerStatus;
 }
 
 export interface RestaurantMenuItem {
@@ -189,6 +196,7 @@ export interface Restaurant {
   featured?: boolean;
   logo?: string;
   menuPdfUrl?: string;
+  partnerStatus: PartnerStatus;
 }
 
 export interface Cafe {
@@ -213,6 +221,7 @@ export interface Cafe {
   logo?: string;
   menuHighlights: RestaurantMenuItem[];
   menuPdfUrl?: string;
+  partnerStatus: PartnerStatus;
 }
 
 /** Phase 2 — Essential City Services. One shared shape across all 8
@@ -248,6 +257,26 @@ export interface Service {
   category: ServiceCategory;
   featured?: boolean;
   logo?: string;
+}
+
+/** Phase 2 — the minimal City Services directory (Hospitals/Banks/
+ * Supermarkets/Pharmacies). Deliberately separate from `Service` above —
+ * no owner_id, no booking, no subscription, name/phone/hours/maps only.
+ * Named "Essential" (not "CityService…") to avoid colliding with the
+ * pre-existing CityServiceCategory/CityServicePoint types below, which back
+ * the unrelated Smart City Map feature. */
+export type EssentialServiceCategory = "hospital" | "bank" | "supermarket" | "pharmacy";
+
+export interface CityService {
+  id: string;
+  category: EssentialServiceCategory;
+  name: string;
+  phone: string | null;
+  openingHours: string | null;
+  mapsUrl: string | null;
+  image: string | null;
+  status: "draft" | "published" | "archived";
+  sortOrder: number;
 }
 
 export interface Attraction {

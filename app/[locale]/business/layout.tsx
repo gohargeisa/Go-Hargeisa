@@ -29,14 +29,22 @@ export default async function BusinessLayout({
   const t = await getTranslations({ locale, namespace: "businessDashboard" });
 
   const listings = access ? await getOwnedListings(access.userId) : [];
-  const listing = listings[0];
+  // A business_owner may own a mix of trial and official listings (e.g. a
+  // second business just linked, pending activation) — the dashboard opens
+  // on their first OFFICIAL one. If every listing they own is still trial,
+  // that's a distinct state from owning nothing at all, so it gets its own
+  // message instead of the generic "no business assigned" one.
+  const listing = listings.find((l) => l.partnerStatus === "official");
 
   if (!listing) {
+    const hasTrialOnly = listings.length > 0;
     return (
       <div className="flex min-h-[70vh] items-center justify-center bg-sand px-5 dark:bg-ink">
         <div className="max-w-md rounded-2xl border border-ink/8 bg-white p-8 text-center shadow-card dark:border-white/10 dark:bg-white/[0.03]">
           <h1 className="font-display text-xl font-bold">{t("noBusinessTitle")}</h1>
-          <p className="mt-2 text-sm text-ink/60 dark:text-sand/60">{t("noBusinessDescription")}</p>
+          <p className="mt-2 text-sm text-ink/60 dark:text-sand/60">
+            {hasTrialOnly ? t("partnerStatusTrialBanner") : t("noBusinessDescription")}
+          </p>
         </div>
       </div>
     );

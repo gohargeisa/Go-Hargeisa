@@ -16,7 +16,8 @@
     "contact": "Contact",
     "signIn": "Sign In",
     "signUp": "Sign Up",
-    "signOut": "Sign Out"
+    "signOut": "Sign Out",
+    "cityServices": "City Services"
   },
   "hero": {
     "premiumBadge": "First of Its Kind",
@@ -555,7 +556,40 @@
     "bodyHint": "Plain Markdown — paragraphs separated by a blank line",
     "readTimeLabel": "Read time (minutes)",
 
-    "removeTagAriaLabel": "Remove {value}"
+    "removeTagAriaLabel": "Remove {value}",
+    "statusDraft": "Draft",
+    "statusPublished": "Published",
+    "statusArchived": "Hidden",
+    "hideLabel": "Hide",
+    "showLabel": "Show",
+    "visibilityUpdateError": "Could not update visibility.",
+    "partnersNav": "Partners",
+    "partnersTitle": "Partners",
+    "partnersSubtitle": "Manage partner status and subscription plans for hotels, restaurants, and cafés with a linked business owner.",
+    "partnersEmptyTitle": "No linked businesses yet",
+    "partnersEmptyDescription": "Businesses appear here once a business owner account is linked to one of their listings.",
+    "partnerStatusTrial": "Trial Partner",
+    "partnerStatusOfficial": "Official Partner",
+    "partnerStatusColumn": "Partner Status",
+    "planColumn": "Plan",
+    "makeOfficial": "Make Official",
+    "makeTrial": "Make Trial",
+    "assignPlan": "Assign plan",
+    "cityServicesNav": "City Services",
+    "manageCityServices": "Manage City Services",
+    "addCityService": "Add City Service",
+    "addCityServiceTitle": "Add City Service",
+    "editCityServiceTitle": "Edit City Service",
+    "cityServiceNameLabel": "Name",
+    "cityServiceCategoryLabel": "Category",
+    "categoryHospital": "Hospital",
+    "categoryBank": "Bank",
+    "categorySupermarket": "Supermarket",
+    "categoryPharmacy": "Pharmacy",
+    "noCityServicesYet": "No city services yet — add your first one to get started.",
+    "mapsUrlLabel": "Google Maps link",
+    "openingHoursShortLabel": "Opening hours",
+    "saveCityService": "Save"
   },
   "about": {
     "eyebrow": "Our Story",
@@ -931,10 +965,8 @@
     "subscriptionTitle": "Subscription",
     "subscriptionSubtitle": "Your current plan and billing status.",
     "currentPlan": "Current Plan",
-    "planStandard": "Standard",
-    "planPremium": "Premium",
     "renewalDate": "Renews",
-    "noRenewalScheduled": "No renewal scheduled — you're on the free Standard plan.",
+    "noRenewalScheduled": "No renewal scheduled — your plan is managed by the Go Hargeisa team.",
     "manageSubscription": "Manage Subscription",
 
     "businessSummaryTitle": "Business Summary",
@@ -992,12 +1024,30 @@
     "settingsLinkAccountTitle": "Account Settings",
     "settingsLinkAccountDescription": "Password, notifications, and account security",
 
-    "analyticsSubtitle": "A closer look at your traffic and engagement."
+    "analyticsSubtitle": "A closer look at your traffic and engagement.",
+    "planBasic": "Basic",
+    "planGold": "Gold",
+    "planPlatinum": "Platinum",
+    "planPriceSuffix": "/month",
+    "partnerStatusLabel": "Partner Status",
+    "partnerStatusTrialBanner": "Your account is linked, but dashboard access hasn't been activated by the Go Hargeisa team yet."
   },
   "siteMetadata": {
     "titleDefault": "Go Hargeisa | Official Tourism Guide to Hargeisa, Somaliland",
     "titleTemplate": "%s | Go Hargeisa",
     "description": "Explore Hargeisa with Go Hargeisa. Discover hotels, restaurants, cafés, attractions, events, and travel tips across Somaliland.",
     "ogDescription": "The official tourism guide to Hargeisa, Somaliland."
+  },
+  "cityServices": {
+    "pageTitle": "City Services",
+    "pageSubtitle": "Essential services around Hargeisa — hospitals, banks, supermarkets, and pharmacies.",
+    "hospitalsTitle": "Hospitals",
+    "banksTitle": "Banks",
+    "supermarketsTitle": "Supermarkets",
+    "pharmaciesTitle": "Pharmacies",
+    "comingSoonTitle": "Coming Soon",
+    "comingSoonDescription": "Information will be added by the Go Hargeisa team.",
+    "viewOnMaps": "View on Maps",
+    "callNow": "Call"
   }
 }

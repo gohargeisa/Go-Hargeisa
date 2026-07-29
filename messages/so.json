@@ -16,7 +16,8 @@
     "contact": "Nala Soo Xiriir",
     "signIn": "Gal",
     "signUp": "Isdiiwaangeli",
-    "signOut": "Ka Bax"
+    "signOut": "Ka Bax",
+    "cityServices": "Adeegyada Magaalada"
   },
   "hero": {
     "premiumBadge": "Ta Ugu Horreysay Nooceeda",
@@ -555,7 +556,40 @@
     "bodyHint": "Markdown fudud — fikradaha waxaa kala saara sadar madhan",
     "readTimeLabel": "Wakhtiga akhriska (daqiiqado)",
 
-    "removeTagAriaLabel": "Ka saar {value}"
+    "removeTagAriaLabel": "Ka saar {value}",
+    "statusDraft": "Qabyo",
+    "statusPublished": "La daabacay",
+    "statusArchived": "Qarsoon",
+    "hideLabel": "Qari",
+    "showLabel": "Muuji",
+    "visibilityUpdateError": "Lama cusboonaysiin karin muuqashada.",
+    "partnersNav": "Shuraakada",
+    "partnersTitle": "Shuraakada",
+    "partnersSubtitle": "Maamul heerka shuraakada iyo qorshayaasha rukumaadka huteelada, maqaayadaha, iyo kafateeriyada leh account ganacsi oo lala xiriiriyay.",
+    "partnersEmptyTitle": "Weli ma jiraan ganacsiyo la xiriiriyay",
+    "partnersEmptyDescription": "Ganacsiyadu waxay ka soo muuqan doonaan halkan marka account milkiile ganacsi lala xiriiriyo mid ka mid ah liistooyinkiisa.",
+    "partnerStatusTrial": "Shuraako Tijaabo ah",
+    "partnerStatusOfficial": "Shuraako Rasmi ah",
+    "partnerStatusColumn": "Heerka Shuraakada",
+    "planColumn": "Qorshaha",
+    "makeOfficial": "Ka dhig Rasmi",
+    "makeTrial": "Ka dhig Tijaabo",
+    "assignPlan": "U qoondee qorshe",
+    "cityServicesNav": "Adeegyada Magaalada",
+    "manageCityServices": "Maamul Adeegyada Magaalada",
+    "addCityService": "Ku dar Adeeg Magaalo",
+    "addCityServiceTitle": "Ku dar Adeeg Magaalo",
+    "editCityServiceTitle": "Wax ka beddel Adeegga Magaalada",
+    "cityServiceNameLabel": "Magaca",
+    "cityServiceCategoryLabel": "Qaybta",
+    "categoryHospital": "Isbitaal",
+    "categoryBank": "Bangi",
+    "categorySupermarket": "Dukaan Waaweyn",
+    "categoryPharmacy": "Farmashiye",
+    "noCityServicesYet": "Weli adeeg magaalo ma jiro — ku dar kii ugu horreeyay si aad u bilowdo.",
+    "mapsUrlLabel": "Xiriirka Google Maps",
+    "openingHoursShortLabel": "Saacadaha Furan",
+    "saveCityService": "Keydi"
   },
   "about": {
     "eyebrow": "Sheekadayada",
@@ -931,10 +965,8 @@
     "subscriptionTitle": "Rukumaynta",
     "subscriptionSubtitle": "Qorshahaaga hadda iyo xaaladda lacag-bixinta.",
     "currentPlan": "Qorshaha Hadda",
-    "planStandard": "Caadi",
-    "planPremium": "Premium",
     "renewalDate": "Cusboonaysiinta",
-    "noRenewalScheduled": "Wax cusboonaysiin ah lama qorsheynin — waxaad ku sugan tahay qorshaha bilaashka ah.",
+    "noRenewalScheduled": "Wax cusboonaysiin ah lama qorsheynin — qorshahaaga waxaa maamula kooxda Go Hargeisa.",
     "manageSubscription": "Maamul Rukumaynta",
 
     "businessSummaryTitle": "Warbixinta Ganacsiga",
@@ -992,12 +1024,30 @@
     "settingsLinkAccountTitle": "Dejinta Akoonka",
     "settingsLinkAccountDescription": "Furaha sirta ah, ogeysiisyada, iyo amniga akoonka",
 
-    "analyticsSubtitle": "Fiiro dheeraad ah oo ku saabsan booqashada iyo ka qaybgalka."
+    "analyticsSubtitle": "Fiiro dheeraad ah oo ku saabsan booqashada iyo ka qaybgalka.",
+    "planBasic": "Aasaasi",
+    "planGold": "Dahab",
+    "planPlatinum": "Baltiyum",
+    "planPriceSuffix": "/bishii",
+    "partnerStatusLabel": "Heerka Shuraakada",
+    "partnerStatusTrialBanner": "Akoonkaaga waa la xiriiriyay, laakiin gelitaanka dashboard-ka weli ma shaqaynayo ilaa kooxda Go Hargeisa ay firfircooniyaan."
   },
   "siteMetadata": {
     "titleDefault": "Go Hargeisa | Hagaha Dalxiiska Rasmiga ah ee Hargeysa, Somaliland",
     "titleTemplate": "%s | Go Hargeisa",
     "description": "La sahamiso Hargeysa Go Hargeisa. Soo ogow hudheellada, maqaayadaha, kafateeriyada, goobaha dalxiiska, dhacdooyinka, iyo talooyinka safarka ee Somaliland oo dhan.",
     "ogDescription": "Hagaha dalxiiska rasmiga ah ee Hargeysa, Somaliland."
+  },
+  "cityServices": {
+    "pageTitle": "Adeegyada Magaalada",
+    "pageSubtitle": "Adeegyada muhiimka ah ee Hargeysa — isbitaallada, bangiyada, dukaannada waaweyn, iyo farmashiyada.",
+    "hospitalsTitle": "Isbitaallada",
+    "banksTitle": "Bangiyada",
+    "supermarketsTitle": "Dukaannada Waaweyn",
+    "pharmaciesTitle": "Farmashiyada",
+    "comingSoonTitle": "Dhawaan",
+    "comingSoonDescription": "Xogta waxaa ku dari doona kooxda Go Hargeisa.",
+    "viewOnMaps": "Ka eeg Khariidadda",
+    "callNow": "Wac"
   }
 }

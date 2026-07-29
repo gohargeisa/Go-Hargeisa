@@ -4,6 +4,8 @@ import { getTranslations } from "next-intl/server";
 import { Plus } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { requireAdmin } from "@/lib/supabase/guards";
+import { createClient } from "@/lib/supabase/server";
+import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { getArticles } from "@/lib/data/articles";
 import { AdminListTable } from "@/components/admin/admin-list-table";
 
@@ -12,7 +14,22 @@ export const metadata: Metadata = { title: "Manage Articles — Admin" };
 export default async function AdminArticlesPage({ params: { locale } }: { params: { locale: Locale } }) {
   await requireAdmin(locale, `/${locale}/admin/articles`);
   const t = await getTranslations({ locale, namespace: "admin" });
-  const articles = await getArticles();
+
+  let articles: { id: string; title: string; excerpt: string; cover_image: string; category: string; status: "draft" | "published" | "archived" }[] = [];
+  if (isSupabaseConfigured()) {
+    const supabase = await createClient();
+    const { data } = await supabase.from("articles").select("id, title, excerpt, cover_image, category, status");
+    articles = data ?? [];
+  } else {
+    articles = (await getArticles()).map((a) => ({
+      id: a.id,
+      title: a.title,
+      excerpt: a.excerpt,
+      cover_image: a.coverImage,
+      category: a.category,
+      status: "published" as const,
+    }));
+  }
 
   return (
     <section className="container-px mx-auto py-14">
@@ -37,10 +54,11 @@ export default async function AdminArticlesPage({ params: { locale } }: { params
           emptyLabel={t("noArticlesYet")}
           rows={articles.map((a) => ({
             id: a.id,
-            image: a.coverImage,
+            image: a.cover_image,
             title: a.title,
-            subtitle: a.author,
+            subtitle: a.excerpt,
             meta: a.category,
+            status: a.status,
           }))}
         />
       </div>
