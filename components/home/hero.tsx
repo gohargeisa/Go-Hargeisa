@@ -75,16 +75,18 @@ export function Hero({ locale }: { locale: Locale }) {
 
   return (
     <section className="relative flex min-h-[720px] h-auto items-start overflow-hidden pb-12 md:h-screen md:max-h-[980px] md:pb-0 md:items-center lg:h-auto lg:min-h-screen lg:max-h-none">
-      <Image
-        src="/images/hero-bg.png"
-        alt="Panoramic view of Hargeisa at golden hour"
-        fill
-        priority
-        sizes="100vw"
-        placeholder="blur"
-        blurDataURL={SHIMMER_BLUR_DATA_URL}
-        className="object-cover"
-      />
+      <div className="absolute inset-0 overflow-hidden">
+        <Image
+          src="/images/hero-bg.png"
+          alt="Panoramic view of Hargeisa at golden hour"
+          fill
+          priority
+          sizes="100vw"
+          placeholder="blur"
+          blurDataURL={SHIMMER_BLUR_DATA_URL}
+          className={`object-cover ${reduceMotion ? "" : "animate-kenburns"}`}
+        />
+      </div>
 
       <div className="absolute inset-0 bg-hero-gradient" />
       <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-ink/10" />

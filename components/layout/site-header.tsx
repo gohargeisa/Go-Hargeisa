@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -27,6 +28,7 @@ export function SiteHeader({ locale, initialUser }: { locale: Locale; initialUse
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const { user } = useHeaderUser(initialUser);
+  const pathname = usePathname();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -37,9 +39,9 @@ export function SiteHeader({ locale, initialUser }: { locale: Locale; initialUse
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-premium ${
         scrolled
-          ? "bg-white/95 backdrop-blur-xl shadow-lg"
+          ? "bg-white/95 backdrop-blur-xl shadow-[0_1px_0_rgba(15,23,42,0.06),0_12px_30px_rgba(15,23,42,0.08)] dark:bg-ink/90 dark:shadow-[0_1px_0_rgba(255,255,255,0.06),0_12px_30px_rgba(0,0,0,0.3)]"
           : "bg-gradient-to-b from-black/35 to-transparent backdrop-blur-md"
       }`}
     >
@@ -57,20 +59,35 @@ export function SiteHeader({ locale, initialUser }: { locale: Locale; initialUse
           </Link>
         </div>
 
-        <nav className="hidden lg:flex flex-1 items-center justify-center gap-8">
-          {links.map((l) => (
-            <Link
-              key={l.key}
-              href={`/${locale}/${l.href}`}
-              className={`rounded-full px-4 py-2 text-[15px] font-medium transition-all duration-300 ${
-                scrolled
-                  ? "text-gray-800 hover:text-primary hover:bg-primary/10"
-                  : "text-white hover:text-primary hover:bg-white/10"
-              }`}
-            >
-              {t(l.key)}
-            </Link>
-          ))}
+        <nav className="hidden lg:flex flex-1 items-center justify-center gap-2">
+          {links.map((l) => {
+            const href = `/${locale}/${l.href}`;
+            const active = pathname === href || pathname.startsWith(`${href}/`);
+            return (
+              <Link
+                key={l.key}
+                href={href}
+                aria-current={active ? "page" : undefined}
+                className={`relative rounded-full px-4 py-2 text-[15px] font-medium transition-all duration-300 ease-premium ${
+                  scrolled
+                    ? active
+                      ? "text-primary"
+                      : "text-gray-800 hover:text-primary hover:bg-primary/10 dark:text-white/90"
+                    : active
+                      ? "text-white"
+                      : "text-white hover:text-primary hover:bg-white/10"
+                }`}
+              >
+                {t(l.key)}
+                {active && (
+                  <span
+                    aria-hidden="true"
+                    className={`absolute inset-x-4 -bottom-0.5 h-0.5 rounded-full ${scrolled ? "bg-primary" : "bg-white"}`}
+                  />
+                )}
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="hidden lg:flex shrink-0 items-center gap-3 ms-auto">
@@ -122,26 +139,36 @@ export function SiteHeader({ locale, initialUser }: { locale: Locale; initialUse
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="lg:hidden overflow-hidden glass border-t border-ink/5 dark:border-white/10"
           >
-            <div className="container-px mx-auto flex flex-col py-4">
-              {links.map((l) => (
-                <Link
-                  key={l.key}
-                  href={`/${locale}/${l.href}`}
-                  onClick={() => setOpen(false)}
-                  className="rounded-full px-12 py-4 font-semibold shadow-lg text-sm font-medium hover:bg-primary/5 hover:text-primary"
-                >
-                  {t(l.key)}
-                </Link>
-              ))}
+            <div className="container-px mx-auto flex flex-col gap-1.5 py-4">
+              {links.map((l) => {
+                const href = `/${locale}/${l.href}`;
+                const active = pathname === href || pathname.startsWith(`${href}/`);
+                return (
+                  <Link
+                    key={l.key}
+                    href={href}
+                    onClick={() => setOpen(false)}
+                    aria-current={active ? "page" : undefined}
+                    className={`rounded-2xl px-4 py-3 text-[15px] font-semibold transition-colors ${
+                      active
+                        ? "bg-primary/10 text-primary"
+                        : "text-ink hover:bg-primary/5 hover:text-primary dark:text-white"
+                    }`}
+                  >
+                    {t(l.key)}
+                  </Link>
+                );
+              })}
 
               {user ? (
-                <div className="mt-2 space-y-2 px-3">
+                <div className="mt-3 space-y-2 border-t border-ink/8 px-1 pt-3 dark:border-white/10">
                   <Link
                     href={`/${locale}/dashboard`}
                     onClick={() => setOpen(false)}
-                    className="block rounded-full border border-ink/15 dark:border-white/20 py-2.5 text-center text-sm font-semibold"
+                    className="block rounded-full border border-ink/15 py-2.5 text-center text-sm font-semibold transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white dark:hover:border-primary"
                   >
                     {td("myDashboard")}
                   </Link>
@@ -149,7 +176,7 @@ export function SiteHeader({ locale, initialUser }: { locale: Locale; initialUse
                   <Link
                     href={`/${locale}/dashboard?tab=profile`}
                     onClick={() => setOpen(false)}
-                    className="block rounded-full border border-ink/15 dark:border-white/20 py-2.5 text-center text-sm font-semibold"
+                    className="block rounded-full border border-ink/15 py-2.5 text-center text-sm font-semibold transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white dark:hover:border-primary"
                   >
                     {td("tabProfile")}
                   </Link>
@@ -157,7 +184,7 @@ export function SiteHeader({ locale, initialUser }: { locale: Locale; initialUse
                   <Link
                     href={`/${locale}/dashboard?tab=settings`}
                     onClick={() => setOpen(false)}
-                    className="block rounded-full border border-ink/15 dark:border-white/20 py-2.5 text-center text-sm font-semibold"
+                    className="block rounded-full border border-ink/15 py-2.5 text-center text-sm font-semibold transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white dark:hover:border-primary"
                   >
                     {td("settings")}
                   </Link>
@@ -166,7 +193,7 @@ export function SiteHeader({ locale, initialUser }: { locale: Locale; initialUse
                     <Link
                       href={`/${locale}/business`}
                       onClick={() => setOpen(false)}
-                      className="block rounded-full border border-ink/15 dark:border-white/20 py-2.5 text-center text-sm font-semibold"
+                      className="block rounded-full border border-ink/15 py-2.5 text-center text-sm font-semibold transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white dark:hover:border-primary"
                     >
                       {td("manageListings")}
                     </Link>
@@ -175,7 +202,7 @@ export function SiteHeader({ locale, initialUser }: { locale: Locale; initialUse
                     <Link
                       href={`/${locale}/admin`}
                       onClick={() => setOpen(false)}
-                      className="block rounded-full border border-ink/15 dark:border-white/20 py-2.5 text-center text-sm font-semibold"
+                      className="block rounded-full border border-ink/15 py-2.5 text-center text-sm font-semibold transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white dark:hover:border-primary"
                     >
                       {td("adminDashboard")}
                     </Link>
@@ -184,10 +211,10 @@ export function SiteHeader({ locale, initialUser }: { locale: Locale; initialUse
                   <SignOutButton locale={locale} className="w-full flex items-center justify-center gap-2 rounded-full bg-primary py-2.5 text-sm font-semibold text-white" />
                 </div>
               ) : (
-                <div className="mt-2 px-3">
+                <div className="mt-3 border-t border-ink/8 pt-3 dark:border-white/10">
                   <Link
                     href={`/${locale}/auth/login`}
-                    className="block rounded-full border border-ink/15 dark:border-white/20 py-2.5 text-center text-sm font-semibold"
+                    className="block rounded-full border border-ink/15 py-2.5 text-center text-sm font-semibold transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white dark:hover:border-primary"
                   >
                     {t("signIn")}
                   </Link>

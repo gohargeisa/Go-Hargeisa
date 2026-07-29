@@ -42,6 +42,26 @@ body {
   .container-px {
     @apply px-5 md:px-8 lg:px-12;
   }
+
+  /* Shared loading-state shimmer for image/content placeholders — a soft
+     diagonal sweep reads as more deliberate than a flat opacity pulse. */
+  .skeleton {
+    @apply bg-ink/10 dark:bg-white/10 bg-[length:200%_100%] animate-shimmer;
+    background-image: linear-gradient(
+      100deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.35) 50%,
+      transparent 70%
+    );
+  }
+  .dark .skeleton {
+    background-image: linear-gradient(
+      100deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.08) 50%,
+      transparent 70%
+    );
+  }
 }
 
 /* Accessible focus ring across the app */
@@ -49,6 +69,38 @@ body {
   outline: 2px solid #0b5ed7;
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+/* Thin, low-contrast scrollbar for horizontal card rows and any scrollable
+   panel — matches the restrained, premium feel of the rest of the UI
+   instead of the browser's default chunky scrollbar. Chromium/WebKit +
+   Firefox; falls back to the native scrollbar everywhere else. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(17, 24, 39, 0.2) transparent;
+}
+.dark * {
+  scrollbar-color: rgba(248, 250, 252, 0.2) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(17, 24, 39, 0.18);
+  border-radius: 999px;
+}
+.dark *::-webkit-scrollbar-thumb {
+  background-color: rgba(248, 250, 252, 0.18);
+}
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(17, 24, 39, 0.32);
+}
+.dark *::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(248, 250, 252, 0.32);
 }
 
 @media (prefers-reduced-motion: reduce) {

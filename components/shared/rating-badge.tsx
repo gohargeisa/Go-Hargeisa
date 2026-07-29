@@ -11,7 +11,7 @@ export function RatingBadge({
 }) {
   return (
     <div
-      className={`inline-flex items-center gap-1 rounded-full bg-accent/15 text-accent-700 font-semibold ${
+      className={`inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary-700 font-semibold ${
         size === "sm" ? "px-2 py-0.5 text-xs" : "px-3 py-1 text-sm"
       }`}
     >
