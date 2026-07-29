@@ -1,9 +1,12 @@
-import { ArrowUpRight, Globe, Phone } from "lucide-react";
+import { Globe, Phone } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { AddToTripButton } from "@/components/shared/add-to-trip-button";
 import { ShareButton } from "@/components/shared/share-button";
+import { HotelBookNowButton } from "@/components/shared/hotel-book-now-button";
 import { normalizeExternalUrl } from "@/lib/utils/normalize-url";
 import { hasMeaningfulPrice } from "@/lib/utils/price-range";
+import type { HotelBookingCta } from "@/lib/utils/booking-cta";
+import type { HotelRoom } from "@/types";
 
 export function HotelBookingCard({
   hotelId,
@@ -12,6 +15,8 @@ export function HotelBookingCard({
   phone,
   website,
   locale,
+  bookingCta,
+  rooms,
 }: {
   hotelId: string;
   name: string;
@@ -19,6 +24,8 @@ export function HotelBookingCard({
   phone?: string;
   website?: string;
   locale: Locale;
+  bookingCta: HotelBookingCta;
+  rooms?: HotelRoom[];
 }) {
   const websiteHref = website ? normalizeExternalUrl(website) : undefined;
 
@@ -38,33 +45,13 @@ export function HotelBookingCard({
         )}
       </div>
 
-      {websiteHref ? (
-        <a
-          href={websiteHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex h-12 w-full items-center justify-center gap-1.5 rounded-full bg-primary text-sm font-semibold text-white transition-colors hover:bg-primary-700"
-        >
-          Book Now
-          <ArrowUpRight size={15} aria-hidden="true" />
-          <span className="sr-only">(opens in a new tab)</span>
-        </a>
-      ) : phone ? (
-        <a
-          href={`tel:${phone}`}
-          className="flex h-12 w-full items-center justify-center rounded-full bg-primary text-sm font-semibold text-white transition-colors hover:bg-primary-700"
-        >
-          Book Now
-        </a>
-      ) : (
-        <button
-          type="button"
-          disabled
-          className="flex h-12 w-full cursor-not-allowed items-center justify-center rounded-full bg-primary/40 text-sm font-semibold text-white/80"
-        >
-          Book Now
-        </button>
-      )}
+      <HotelBookNowButton
+        cta={bookingCta}
+        hotelId={hotelId}
+        hotelName={name}
+        rooms={rooms}
+        className="flex h-12 w-full items-center justify-center gap-1.5 rounded-full bg-primary text-sm font-semibold text-white transition-colors hover:bg-primary-700"
+      />
 
       {(phone || website) && (
         <div className="space-y-2.5 rounded-2xl border border-ink/8 p-4 dark:border-white/10">

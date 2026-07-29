@@ -80,6 +80,11 @@ export function mapHotel(
     rooms,
     restaurant,
     cafe,
+    bookingMode: row.booking_mode ?? "go_hargeisa",
+    externalBookingOption: row.external_booking_option ?? undefined,
+    externalBookingUrl: row.external_booking_url ?? undefined,
+    bookingWhatsapp: row.booking_whatsapp ?? undefined,
+    bookingComUrl: row.booking_com_url ?? undefined,
   };
 }
 

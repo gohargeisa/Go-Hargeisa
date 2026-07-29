@@ -5,6 +5,8 @@ import { getActiveListing } from "@/lib/data/business";
 import { createClient } from "@/lib/supabase/server";
 import { MyBusinessForm } from "@/components/business/my-business-form";
 import { ServiceBadges } from "@/components/business/service-badges";
+import { HotelBookingSettingsForm } from "@/components/business/hotel-booking-settings-form";
+import type { HotelBookingMode, HotelExternalBookingOption } from "@/types";
 
 export const metadata: Metadata = { title: "My Business — Dashboard", robots: { index: false } };
 
@@ -41,6 +43,22 @@ export default async function MyBusinessPage({ params: { locale } }: { params: {
           openingHours: (row as { opening_hours?: string })?.opening_hours ?? "",
         }}
       />
+
+      {listing.listingType === "hotel" && (
+        <HotelBookingSettingsForm
+          hotelId={listing.id}
+          currentPath={currentPath}
+          initial={{
+            bookingMode: ((row as { booking_mode?: HotelBookingMode })?.booking_mode ?? "go_hargeisa"),
+            externalBookingOption:
+              (row as { external_booking_option?: HotelExternalBookingOption | null })?.external_booking_option ?? "",
+            externalBookingUrl: (row as { external_booking_url?: string })?.external_booking_url ?? "",
+            bookingWhatsapp: (row as { booking_whatsapp?: string })?.booking_whatsapp ?? "",
+            bookingComUrl: (row as { booking_com_url?: string })?.booking_com_url ?? "",
+            website: (row as { website?: string })?.website ?? "",
+          }}
+        />
+      )}
 
       <ServiceBadges listingType={listing.listingType} listingId={listing.id} tags={listing.serviceTags} currentPath={currentPath} />
     </div>

@@ -100,6 +100,11 @@ export default async function EditHotelPage({
           restaurantId: hotel.restaurant_id ?? "",
           cafeId: hotel.cafe_id ?? "",
           featured: hotel.featured,
+          bookingMode: hotel.booking_mode ?? "go_hargeisa",
+          externalBookingOption: hotel.external_booking_option ?? "",
+          externalBookingUrl: hotel.external_booking_url ?? "",
+          bookingWhatsapp: hotel.booking_whatsapp ?? "",
+          bookingComUrl: hotel.booking_com_url ?? "",
         }}
       />
     </section>

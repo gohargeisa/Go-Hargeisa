@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { Loader2 } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 import { ImageUploader } from "@/components/shared/image-uploader";
 import { GalleryManager } from "@/components/admin/gallery-manager";
 import { HOTEL_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
@@ -11,7 +11,9 @@ import { Field, TagInput, inputClass } from "@/components/admin/form-shared";
 import { createRecord, updateRecord } from "@/lib/actions/admin";
 import { useUnsavedChangesWarning } from "@/lib/hooks/use-unsaved-changes-warning";
 import type { Locale } from "@/lib/i18n/config";
-import type { GalleryImage } from "@/types";
+import type { GalleryImage, HotelBookingMode, HotelExternalBookingOption } from "@/types";
+
+const EXTERNAL_BOOKING_OPTIONS: HotelExternalBookingOption[] = ["website", "booking_com", "whatsapp", "custom_url"];
 
 export interface HotelFormInput {
   slug: string;
@@ -34,6 +36,11 @@ export interface HotelFormInput {
   restaurantId: string;
   cafeId: string;
   featured: boolean;
+  bookingMode: HotelBookingMode;
+  externalBookingOption: HotelExternalBookingOption | "";
+  externalBookingUrl: string;
+  bookingWhatsapp: string;
+  bookingComUrl: string;
 }
 
 const AMENITY_SUGGESTIONS = [
@@ -82,6 +89,11 @@ export function HotelForm({
     restaurantId: initial?.restaurantId ?? "",
     cafeId: initial?.cafeId ?? "",
     featured: initial?.featured ?? false,
+    bookingMode: initial?.bookingMode ?? "go_hargeisa",
+    externalBookingOption: initial?.externalBookingOption ?? "",
+    externalBookingUrl: initial?.externalBookingUrl ?? "",
+    bookingWhatsapp: initial?.bookingWhatsapp ?? "",
+    bookingComUrl: initial?.bookingComUrl ?? "",
   });
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -122,6 +134,11 @@ export function HotelForm({
       restaurant_id: form.restaurantId || null,
       cafe_id: form.cafeId || null,
       featured: form.featured,
+      booking_mode: form.bookingMode,
+      external_booking_option: form.bookingMode === "external" ? form.externalBookingOption || null : null,
+      external_booking_url: form.externalBookingUrl || null,
+      booking_whatsapp: form.bookingWhatsapp || null,
+      booking_com_url: form.bookingComUrl || null,
     };
     const revalidatePaths = [`/${locale}/admin/hotels`, `/${locale}/hotels`, `/${locale}`];
     const redirectTo = `/${locale}/admin/hotels`;
@@ -205,6 +222,69 @@ export function HotelForm({
           <Field label="Check-out time" hint="e.g. 12:00 or noon">
             <input value={form.checkOutTime} onChange={(e) => update("checkOutTime", e.target.value)} className={inputClass} placeholder="12:00" />
           </Field>
+        </div>
+
+        <div className="space-y-4 rounded-2xl border border-ink/8 p-4 dark:border-white/10">
+          <div>
+            <p className="font-semibold">{t("bookingSettingsLabel")}</p>
+            <p className="mt-0.5 text-xs text-ink/50 dark:text-sand/50">{t("bookingSettingsAdminHint")}</p>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            {(["go_hargeisa", "external"] as HotelBookingMode[]).map((mode) => {
+              const active = form.bookingMode === mode;
+              return (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => update("bookingMode", mode)}
+                  aria-pressed={active}
+                  className={`flex items-center gap-2 rounded-xl border p-3 text-start text-sm transition-all duration-200 ${
+                    active ? "border-primary bg-primary/5 dark:bg-primary/10" : "border-ink/12 dark:border-white/15"
+                  }`}
+                >
+                  <span
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
+                      active ? "border-primary bg-primary text-white" : "border-ink/25 dark:border-white/25"
+                    }`}
+                  >
+                    {active && <Check size={12} aria-hidden="true" />}
+                  </span>
+                  <span className="font-medium">
+                    {mode === "go_hargeisa" ? t("bookingModeGoHargeisa") : t("bookingModeExternal")}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {form.bookingMode === "external" && (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label={t("externalBookingOptionLabel")}>
+                <select
+                  value={form.externalBookingOption}
+                  onChange={(e) => update("externalBookingOption", e.target.value as HotelExternalBookingOption)}
+                  className={inputClass}
+                >
+                  <option value="">—</option>
+                  {EXTERNAL_BOOKING_OPTIONS.map((option) => (
+                    <option key={option} value={option}>
+                      {t(`externalOption_${option}`)}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <Field label={t("bookingComUrlLabel")}>
+                <input value={form.bookingComUrl} onChange={(e) => update("bookingComUrl", e.target.value)} className={inputClass} />
+              </Field>
+              <Field label={t("bookingWhatsappLabel")}>
+                <input value={form.bookingWhatsapp} onChange={(e) => update("bookingWhatsapp", e.target.value)} className={inputClass} />
+              </Field>
+              <Field label={t("externalBookingUrlLabel")}>
+                <input value={form.externalBookingUrl} onChange={(e) => update("externalBookingUrl", e.target.value)} className={inputClass} />
+              </Field>
+            </div>
+          )}
         </div>
 
         <TagInput label="Languages spoken" values={form.languages} onChange={(v) => update("languages", v)} placeholder="English, Somali, Arabic…" suggestions={LANGUAGE_SUGGESTIONS} />

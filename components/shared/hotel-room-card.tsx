@@ -1,19 +1,21 @@
 import Image from "next/image";
-import { ArrowUpRight, BedDouble, Building2, Maximize, Users } from "lucide-react";
+import { BedDouble, Building2, Maximize, Users } from "lucide-react";
 import { amenityIcon } from "@/lib/utils/amenity-icon";
-import { getBookingHref } from "@/lib/utils/booking-href";
+import { HotelBookNowButton } from "@/components/shared/hotel-book-now-button";
+import type { HotelBookingCta } from "@/lib/utils/booking-cta";
 import type { HotelRoom } from "@/types";
 
 export function HotelRoomCard({
   room,
-  website,
-  phone,
+  hotelId,
+  hotelName,
+  bookingCta,
 }: {
   room: HotelRoom;
-  website?: string;
-  phone?: string;
+  hotelId: string;
+  hotelName: string;
+  bookingCta: HotelBookingCta;
 }) {
-  const booking = getBookingHref({ website, phone });
   const hasImage = Boolean(room.image);
 
   return (
@@ -79,25 +81,14 @@ export function HotelRoomCard({
             )}
           </div>
 
-          {booking ? (
-            <a
-              href={booking.href}
-              target={booking.external ? "_blank" : undefined}
-              rel={booking.external ? "noopener noreferrer" : undefined}
-              className="inline-flex h-10 items-center justify-center gap-1 rounded-full bg-primary px-4 text-sm font-semibold text-white transition-colors hover:bg-primary-700"
-            >
-              Book Now
-              {booking.external && <ArrowUpRight size={13} aria-hidden="true" />}
-            </a>
-          ) : (
-            <button
-              type="button"
-              disabled
-              className="inline-flex h-10 cursor-not-allowed items-center justify-center rounded-full bg-primary/40 px-4 text-sm font-semibold text-white/80"
-            >
-              Book Now
-            </button>
-          )}
+          <HotelBookNowButton
+            cta={bookingCta}
+            hotelId={hotelId}
+            hotelName={hotelName}
+            preselectedRoomId={room.id}
+            className="inline-flex h-10 items-center justify-center gap-1 rounded-full bg-primary px-4 text-sm font-semibold text-white transition-colors hover:bg-primary-700"
+            iconSize={13}
+          />
         </div>
       </div>
     </div>

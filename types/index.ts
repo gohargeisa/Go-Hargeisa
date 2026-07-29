@@ -107,6 +107,9 @@ export interface HotelRoom {
   pricePerNight?: number;
 }
 
+export type HotelBookingMode = "go_hargeisa" | "external";
+export type HotelExternalBookingOption = "website" | "booking_com" | "whatsapp" | "custom_url";
+
 export interface Hotel {
   id: string;
   slug: string;
@@ -133,6 +136,12 @@ export interface Hotel {
   rooms: HotelRoom[];
   restaurant?: Restaurant | null;
   cafe?: Cafe | null;
+  /** Defaults to "go_hargeisa" when absent (mock data / not yet configured). */
+  bookingMode?: HotelBookingMode;
+  externalBookingOption?: HotelExternalBookingOption;
+  externalBookingUrl?: string;
+  bookingWhatsapp?: string;
+  bookingComUrl?: string;
 }
 
 export interface RestaurantMenuItem {

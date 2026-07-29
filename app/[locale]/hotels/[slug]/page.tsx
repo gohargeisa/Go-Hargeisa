@@ -29,6 +29,7 @@ import { ReviewsSection } from "@/components/shared/reviews-section";
 import { ReviewForm } from "@/components/shared/review-form";
 import { SingleLocationMapLoader } from "@/components/map/single-location-map-loader";
 import { Reveal } from "@/components/home/reveal";
+import { getHotelBookingCta } from "@/lib/utils/booking-cta";
 
 // Public content changes infrequently; revalidate hourly instead of
 // rendering on every request (this page no longer reads cookies, so
@@ -73,6 +74,13 @@ export default async function HotelDetailPage({
   ]);
   const similarHotels = allHotels.filter((h) => h.id !== hotel.id).slice(0, 4);
   const whatsappFallback = (siteSettings as { whatsapp_number?: string } | null)?.whatsapp_number ?? undefined;
+
+  const bookingCta = getHotelBookingCta(hotel, {
+    bookNow: t("bookNow"),
+    bookOnWebsite: t("bookOnWebsite"),
+    bookViaWhatsApp: t("bookViaWhatsApp"),
+    bookOnBookingCom: t("bookOnBookingCom"),
+  });
 
   const navTabs: HotelNavTab[] = [
     { id: "overview", label: td("overview") },
@@ -128,7 +136,16 @@ export default async function HotelDetailPage({
         categoryLabel={hotelCategoryLabel(hotel.priceRange)}
       />
 
-      <HotelActionBar listingType="hotel" listingId={hotel.id} name={hotel.name} phone={hotel.phone} website={hotel.website} whatsappFallback={whatsappFallback} />
+      <HotelActionBar
+        listingType="hotel"
+        listingId={hotel.id}
+        name={hotel.name}
+        phone={hotel.phone}
+        website={hotel.website}
+        whatsappFallback={whatsappFallback}
+        bookingCta={bookingCta}
+        rooms={hotel.rooms}
+      />
 
       <HotelQuickInfoCards
         rating={hotel.rating}
@@ -168,7 +185,7 @@ export default async function HotelDetailPage({
                 <h2 id="rooms-heading" className="mb-5 font-display text-2xl font-semibold">
                   {th("rooms")}
                 </h2>
-                <HotelRoomsSection rooms={hotel.rooms} website={hotel.website} phone={hotel.phone} />
+                <HotelRoomsSection rooms={hotel.rooms} hotelId={hotel.id} hotelName={hotel.name} bookingCta={bookingCta} />
               </section>
             </Reveal>
           )}
@@ -321,6 +338,8 @@ export default async function HotelDetailPage({
             phone={hotel.phone}
             website={hotel.website}
             locale={locale}
+            bookingCta={bookingCta}
+            rooms={hotel.rooms}
           />
         </aside>
       </div>
@@ -365,6 +384,8 @@ export default async function HotelDetailPage({
         website={hotel.website}
         whatsappFallback={whatsappFallback}
         locale={locale}
+        bookingCta={bookingCta}
+        rooms={hotel.rooms}
       />
     </>
   );

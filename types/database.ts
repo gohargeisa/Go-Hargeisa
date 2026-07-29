@@ -35,6 +35,9 @@ type HotelRow = ListingBase & {
   website: string | null; price_range: "$" | "$$" | "$$$" | "$$$$"; amenities: string[]; owner_id: string | null;
   logo_url: string | null; check_in_time: string | null; check_out_time: string | null; languages: string[];
   restaurant_id: string | null; cafe_id: string | null;
+  booking_mode: "go_hargeisa" | "external";
+  external_booking_option: "website" | "booking_com" | "whatsapp" | "custom_url" | null;
+  external_booking_url: string | null; booking_whatsapp: string | null; booking_com_url: string | null;
 };
 
 type HotelRoomRow = {

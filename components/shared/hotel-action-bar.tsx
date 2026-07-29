@@ -3,10 +3,12 @@ import { getTranslations } from "next-intl/server";
 import { Reveal } from "@/components/home/reveal";
 import { TrackedCtaLink } from "@/components/shared/tracked-cta-link";
 import { ClaimBusinessButton } from "@/components/shared/claim-business-button";
+import { HotelBookNowButton } from "@/components/shared/hotel-book-now-button";
 import { getBookingHref } from "@/lib/utils/booking-href";
 import { normalizeExternalUrl } from "@/lib/utils/normalize-url";
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
-import type { BusinessListingType } from "@/types";
+import type { BusinessListingType, HotelRoom } from "@/types";
+import type { HotelBookingCta } from "@/lib/utils/booking-cta";
 
 const SECONDARY_CLASS =
   "inline-flex h-12 items-center justify-center gap-2 rounded-full border border-ink/15 px-4 text-sm font-semibold text-ink transition-all duration-200 hover:-translate-y-0.5 hover:border-primary hover:text-primary hover:shadow-soft active:scale-95 dark:border-white/20 dark:text-white";
@@ -26,6 +28,9 @@ const SECONDARY_CLASS =
  * (reservable restaurants only), or hidden entirely (cafes, which have no
  * booking concept).
  */
+const PRIMARY_CLASS =
+  "inline-flex h-12 items-center justify-center gap-2 rounded-full bg-primary px-8 text-[15px] font-bold text-white shadow-soft transition-all duration-300 ease-out hover:-translate-y-0.5 hover:scale-[1.03] hover:bg-primary-700 hover:shadow-card active:scale-95";
+
 export async function HotelActionBar({
   listingType,
   listingId,
@@ -35,6 +40,8 @@ export async function HotelActionBar({
   whatsappFallback,
   showPrimary = true,
   primaryLabel,
+  bookingCta,
+  rooms,
 }: {
   listingType: BusinessListingType;
   listingId: string;
@@ -44,6 +51,11 @@ export async function HotelActionBar({
   whatsappFallback?: string;
   showPrimary?: boolean;
   primaryLabel?: string;
+  /** Hotel-only: when set, the primary button uses the hotel's configured
+   * booking mode (Go Hargeisa request modal vs external redirect) instead
+   * of the generic website/phone fallback below. */
+  bookingCta?: HotelBookingCta;
+  rooms?: HotelRoom[];
 }) {
   const t = await getTranslations("hotelDetail");
   const tc = await getTranslations("common");
@@ -58,12 +70,23 @@ export async function HotelActionBar({
   return (
     <Reveal delay={0.05}>
       <div className="container-px mx-auto mt-6 flex flex-wrap items-center justify-center gap-3 sm:gap-3.5">
-        {showPrimary && booking && (
+        {showPrimary && bookingCta && (
+          <HotelBookNowButton
+            cta={bookingCta}
+            hotelId={listingId}
+            hotelName={name}
+            rooms={rooms}
+            className={PRIMARY_CLASS}
+            iconSize={16}
+          />
+        )}
+
+        {showPrimary && !bookingCta && booking && (
           <a
             href={booking.href}
             target={booking.external ? "_blank" : undefined}
             rel={booking.external ? "noopener noreferrer" : undefined}
-            className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-primary px-8 text-[15px] font-bold text-white shadow-soft transition-all duration-300 ease-out hover:-translate-y-0.5 hover:scale-[1.03] hover:bg-primary-700 hover:shadow-card active:scale-95"
+            className={PRIMARY_CLASS}
           >
             {primaryLabel ?? tc("bookNow")}
             {booking.external && <ArrowUpRight size={16} aria-hidden="true" />}

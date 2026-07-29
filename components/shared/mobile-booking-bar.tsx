@@ -8,7 +8,9 @@ import type { Locale } from "@/lib/i18n/config";
 import { getBookingHref } from "@/lib/utils/booking-href";
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
 import { toggleFavoriteAction } from "@/lib/actions/favorites";
-import type { BusinessListingType } from "@/types";
+import { HotelBookNowButton } from "@/components/shared/hotel-book-now-button";
+import type { HotelBookingCta } from "@/lib/utils/booking-cta";
+import type { BusinessListingType, HotelRoom } from "@/types";
 
 const ICON_BUTTON_CLASS =
   "flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-ink/15 text-ink transition-all duration-150 hover:border-primary hover:text-primary active:scale-90 dark:border-white/20 dark:text-white";
@@ -36,6 +38,8 @@ export function MobileBookingBar({
   initiallyFavorited = false,
   showPrimary = true,
   primaryLabel,
+  bookingCta,
+  rooms,
 }: {
   listingType: BusinessListingType;
   listingId: string;
@@ -48,6 +52,9 @@ export function MobileBookingBar({
   initiallyFavorited?: boolean;
   showPrimary?: boolean;
   primaryLabel?: string;
+  /** Hotel-only: see components/shared/hotel-action-bar.tsx for the same prop. */
+  bookingCta?: HotelBookingCta;
+  rooms?: HotelRoom[];
 }) {
   const t = useTranslations("hotelDetail");
   const [favorited, setFavorited] = useState(initiallyFavorited);
@@ -130,7 +137,18 @@ export function MobileBookingBar({
 
       <div className="min-w-0 flex-1" />
 
+      {showPrimary && bookingCta && (
+        <HotelBookNowButton
+          cta={bookingCta}
+          hotelId={listingId}
+          hotelName={name}
+          rooms={rooms}
+          className="inline-flex h-12 shrink-0 items-center justify-center gap-1.5 rounded-full bg-primary px-7 text-sm font-bold text-white transition-all duration-150 hover:bg-primary-700 active:scale-95"
+        />
+      )}
+
       {showPrimary &&
+        !bookingCta &&
         (booking ? (
           <a
             href={booking.href}
