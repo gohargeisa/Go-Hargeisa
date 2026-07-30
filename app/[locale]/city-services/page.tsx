@@ -4,6 +4,7 @@ import { Hospital, Landmark, ShoppingCart, Pill } from "lucide-react";
 import { PageHero } from "@/components/shared/page-hero";
 import { CityServiceCard } from "@/components/shared/city-service-card";
 import { CityServiceEmptyCard } from "@/components/shared/city-service-empty-card";
+import { Reveal } from "@/components/home/reveal";
 import { getAllCityServices } from "@/lib/data/city-services";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
@@ -77,9 +78,11 @@ export default async function CityServicesPage({ params: { locale } }: { params:
         subtitle={t("pageSubtitle")}
         image={placeholderImage("City Services", { tone: "ink" })}
       />
-      <section className="container-px mx-auto flex flex-col gap-14 py-14">
-        {sections.map((s) => (
-          <CategorySection key={s.key} title={s.title} icon={s.icon} services={byCategory[s.key]} />
+      <section className="container-px mx-auto flex flex-col gap-14 py-10 md:py-14">
+        {sections.map((s, i) => (
+          <Reveal key={s.key} delay={Math.min(i * 0.08, 0.24)}>
+            <CategorySection title={s.title} icon={s.icon} services={byCategory[s.key]} />
+          </Reveal>
         ))}
       </section>
     </>

@@ -4,6 +4,9 @@ import { Plane, Car, Bus, ParkingCircle } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
 import { PageHero } from "@/components/shared/page-hero";
+import { FeatureGrid } from "@/components/shared/feature-grid";
+import { Reveal } from "@/components/home/reveal";
+import { placeholderImage } from "@/lib/placeholder-image";
 
 export async function generateMetadata({
   params: { locale },
@@ -37,18 +40,12 @@ export default async function TransportationPage({
         eyebrow={t("eyebrow")}
         title={t("title")}
         subtitle={t("subtitle")}
-        image="https://images.unsplash.com/photo-1691724414154-8b1551e7b292?fm=jpg&q=80&w=2400&auto=format&fit=crop"
+        image={placeholderImage("Getting Around Hargeisa", { tone: "primary" })}
       />
-      <section className="container-px mx-auto py-14 grid gap-5 sm:grid-cols-2">
-        {options.map(({ icon: Icon, title, body }) => (
-          <div key={title} className="rounded-xl2 border border-ink/8 dark:border-white/10 p-6">
-            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary">
-              <Icon size={20} />
-            </span>
-            <h2 className="mt-4 font-display text-lg font-semibold">{title}</h2>
-            <p className="mt-1.5 text-sm text-ink/65 dark:text-sand/65 leading-relaxed">{body}</p>
-          </div>
-        ))}
+      <section className="container-px mx-auto py-10 md:py-14">
+        <Reveal>
+          <FeatureGrid items={options} columns={2} />
+        </Reveal>
       </section>
     </>
   );

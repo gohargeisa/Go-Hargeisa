@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
 import { getServices } from "@/lib/data/services";
@@ -55,10 +56,11 @@ export default async function ServiceCategoryPage({
 
   const services = await getServices({ category, q: searchParams.q });
   const label = SERVICE_CATEGORY_LABELS[category];
+  const tNav = await getTranslations("nav");
 
   return (
     <>
-      <PageHero eyebrow="🧭 Services" title={label} subtitle={`Real ${label.toLowerCase()} in Hargeisa, Somaliland`} image="/images/hero-bg.png" />
+      <PageHero eyebrow={`🧭 ${tNav("services")}`} title={label} subtitle={`Real ${label.toLowerCase()} in Hargeisa, Somaliland`} image="/images/hero-bg.png" />
 
       <ServicesPageClient locale={locale} initialServices={services} searchParams={searchParams} category={category} />
     </>

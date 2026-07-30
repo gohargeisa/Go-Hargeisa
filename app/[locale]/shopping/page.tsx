@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { ShoppingBag } from "lucide-react";
 import { PageHero } from "@/components/shared/page-hero";
 import { ListingCard } from "@/components/shared/listing-card";
+import { EmptyState } from "@/components/shared/empty-state";
+import { Reveal } from "@/components/home/reveal";
 import { getAttractions } from "@/lib/data/attractions";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
@@ -36,23 +39,25 @@ export default async function ShoppingPage({ params: { locale } }: { params: { l
         subtitle={t("subtitle")}
         image={placeholderImage("Shopping in Hargeisa", { tone: "accent" })}
       />
-      <section className="container-px mx-auto py-14">
+      <section className="container-px mx-auto py-10 md:py-14">
         {shoppingSpots.length === 0 ? (
-          <p className="text-center text-ink/50 dark:text-sand/50">{t("emptyState")}</p>
+          <EmptyState icon={ShoppingBag} title={t("emptyStateTitle")} description={t("emptyState")} />
         ) : (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {shoppingSpots.map((s) => (
-              <ListingCard
-                key={s.id}
-                href={`/${locale}/attractions/${s.slug}`}
-                image={s.coverImage}
-                title={s.name}
-                subtitle={s.address}
-                rating={s.rating}
-                reviewCount={s.reviewCount}
-              />
-            ))}
-          </div>
+          <Reveal>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {shoppingSpots.map((s) => (
+                <ListingCard
+                  key={s.id}
+                  href={`/${locale}/attractions/${s.slug}`}
+                  image={s.coverImage}
+                  title={s.name}
+                  subtitle={s.address}
+                  rating={s.rating}
+                  reviewCount={s.reviewCount}
+                />
+              ))}
+            </div>
+          </Reveal>
         )}
       </section>
     </>

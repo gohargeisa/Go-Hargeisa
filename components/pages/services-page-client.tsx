@@ -9,6 +9,7 @@ import { ServiceCard } from "@/components/shared/service-card";
 import { SearchWithin } from "@/components/shared/search-within";
 import { ListingFilters, type FilterOptions } from "@/components/shared/listing-filters";
 import { EmptyState } from "@/components/shared/empty-state";
+import { Reveal } from "@/components/home/reveal";
 import { CATEGORY_CONFIG } from "@/components/city-map/category-config";
 import { SERVICE_CATEGORY_ORDER, SERVICE_CATEGORY_LABELS, SERVICE_CATEGORY_SLUGS } from "@/lib/utils/service-categories";
 import { filterListings } from "@/lib/utils/filter-listings";
@@ -69,57 +70,59 @@ export function ServicesPageClient({
 
   return (
     <section className="container-px mx-auto py-10 md:py-14">
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="font-display text-2xl font-bold md:text-3xl">
-            {category ? SERVICE_CATEGORY_LABELS[category] : t("servicesCount", { count: filteredServices.total })}
-          </h2>
-          <p className="mt-1 text-sm text-ink/60 dark:text-sand/60">
-            {searchParams.q ? t("resultsFor", { query: searchParams.q }) : t("browseAllServices")}
-          </p>
+      <Reveal>
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="font-display text-2xl font-bold md:text-3xl">
+              {category ? SERVICE_CATEGORY_LABELS[category] : t("servicesCount", { count: filteredServices.total })}
+            </h2>
+            <p className="mt-1 text-sm text-ink/60 dark:text-sand/60">
+              {searchParams.q ? t("resultsFor", { query: searchParams.q }) : t("browseAllServices")}
+            </p>
+          </div>
         </div>
-      </div>
 
-      {!category && (
-        <div className="mb-6 flex flex-wrap gap-2" role="group" aria-label="Filter by category">
-          <button
-            type="button"
-            onClick={() => setActiveCategory("all")}
-            aria-pressed={activeCategory === "all"}
-            className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-semibold shadow-sm transition-all duration-300 ${
-              activeCategory === "all"
-                ? "border-transparent bg-primary text-white"
-                : "border-ink/10 bg-white text-ink/70 hover:-translate-y-0.5 hover:border-ink/20 dark:border-white/15 dark:bg-ink/80 dark:text-sand/70"
-            }`}
-          >
-            {t("allServices")}
-          </button>
-          {SERVICE_CATEGORY_ORDER.map((c) => {
-            const meta = CATEGORY_CONFIG[c];
-            const Icon = meta.icon;
-            const isActive = activeCategory === c;
-            return (
-              <button
-                key={c}
-                type="button"
-                onClick={() => setActiveCategory(c)}
-                aria-pressed={isActive}
-                className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-semibold shadow-sm transition-all duration-300 ${
-                  isActive ? "border-transparent text-white" : "border-ink/10 bg-white text-ink/70 hover:-translate-y-0.5 hover:border-ink/20 dark:border-white/15 dark:bg-ink/80 dark:text-sand/70"
-                }`}
-                style={isActive ? { backgroundColor: meta.color } : undefined}
-              >
-                <Icon size={13} aria-hidden="true" />
-                {meta.label}
-              </button>
-            );
-          })}
+        {!category && (
+          <div className="mb-6 flex flex-wrap gap-2" role="group" aria-label="Filter by category">
+            <button
+              type="button"
+              onClick={() => setActiveCategory("all")}
+              aria-pressed={activeCategory === "all"}
+              className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-semibold shadow-sm transition-all duration-300 ease-premium ${
+                activeCategory === "all"
+                  ? "border-transparent bg-primary text-white"
+                  : "border-ink/10 bg-white text-ink/70 hover:-translate-y-0.5 hover:border-ink/20 dark:border-white/15 dark:bg-ink/80 dark:text-sand/70"
+              }`}
+            >
+              {t("allServices")}
+            </button>
+            {SERVICE_CATEGORY_ORDER.map((c) => {
+              const meta = CATEGORY_CONFIG[c];
+              const Icon = meta.icon;
+              const isActive = activeCategory === c;
+              return (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setActiveCategory(c)}
+                  aria-pressed={isActive}
+                  className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-semibold shadow-sm transition-all duration-300 ease-premium ${
+                    isActive ? "border-transparent text-white" : "border-ink/10 bg-white text-ink/70 hover:-translate-y-0.5 hover:border-ink/20 dark:border-white/15 dark:bg-ink/80 dark:text-sand/70"
+                  }`}
+                  style={isActive ? { backgroundColor: meta.color } : undefined}
+                >
+                  <Icon size={13} aria-hidden="true" />
+                  {meta.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        <div className="mb-6">
+          <SearchWithin basePath={basePath} placeholder={t("searchServicesPlaceholder")} defaultValue={searchParams.q} />
         </div>
-      )}
-
-      <div className="mb-6">
-        <SearchWithin basePath={basePath} placeholder={t("searchServicesPlaceholder")} defaultValue={searchParams.q} />
-      </div>
+      </Reveal>
 
       {filteredServices.total === 0 ? (
         <EmptyState icon={SearchX} title={t("noServicesMatch")} description={t("adjustFilters")} className="mt-12" />
@@ -131,7 +134,7 @@ export function ServicesPageClient({
 
           <div>
             {filteredServices.featured.length > 0 && (
-              <div className="mb-12">
+              <Reveal className="mb-12">
                 <div className="mb-6">
                   <h3 className="font-display text-xl font-bold">{t("featuredServices")}</h3>
                 </div>
@@ -154,11 +157,11 @@ export function ServicesPageClient({
                     />
                   ))}
                 </div>
-              </div>
+              </Reveal>
             )}
 
             {filteredServices.nonFeatured.length > 0 && (
-              <div>
+              <Reveal delay={0.08}>
                 <div className="mb-6">
                   <h3 className="font-display text-xl font-bold">{t("allServices")}</h3>
                   <p className="mt-1 text-sm text-ink/60 dark:text-sand/60">
@@ -183,7 +186,7 @@ export function ServicesPageClient({
                     />
                   ))}
                 </div>
-              </div>
+              </Reveal>
             )}
           </div>
         </div>

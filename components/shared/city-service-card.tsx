@@ -1,13 +1,15 @@
 import Image from "next/image";
 import { Phone, Clock, MapPin, ImageOff } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { AnimatedCard } from "./animated-card";
+import { SecondaryButton } from "./buttons";
 import type { CityService } from "@/types";
 
 export function CityServiceCard({ service }: { service: CityService }) {
   const t = useTranslations("cityServices");
 
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-3xl border border-ink/8 bg-white shadow-[0_8px_24px_rgba(20,30,45,0.07)] dark:border-white/10 dark:bg-white/[0.04]">
+    <AnimatedCard className="flex h-full flex-col overflow-hidden rounded-xl2 border border-ink/8 bg-white shadow-soft transition-shadow duration-300 ease-premium hover:border-primary/25 hover:shadow-card dark:border-white/10 dark:bg-white/[0.04]">
       <div className="relative h-36 w-full shrink-0 bg-ink/5 dark:bg-white/10">
         {service.image ? (
           <Image src={service.image} alt={service.name} fill sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
@@ -40,17 +42,12 @@ export function CityServiceCard({ service }: { service: CityService }) {
         </div>
 
         {service.mapsUrl && (
-          <a
-            href={service.mapsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-4 inline-flex items-center justify-center gap-1.5 rounded-full border border-ink/15 py-2.5 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
-          >
+          <SecondaryButton href={service.mapsUrl} external fullWidth className="mt-4">
             <MapPin size={14} aria-hidden="true" />
             {t("viewOnMaps")}
-          </a>
+          </SecondaryButton>
         )}
       </div>
-    </div>
+    </AnimatedCard>
   );
 }

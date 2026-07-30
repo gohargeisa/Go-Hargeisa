@@ -9,7 +9,7 @@ export function CityServiceEmptyCard() {
   const t = useTranslations("cityServices");
 
   return (
-    <div className="flex h-full flex-col items-center justify-center rounded-3xl border border-dashed border-ink/15 bg-ink/[0.02] p-5 text-center dark:border-white/15 dark:bg-white/[0.02]">
+    <div className="flex h-full flex-col items-center justify-center rounded-xl2 border border-dashed border-ink/15 bg-ink/[0.02] p-5 text-center dark:border-white/15 dark:bg-white/[0.02]">
       <div className="flex h-11 w-11 items-center justify-center rounded-full bg-ink/5 text-ink/30 dark:bg-white/10 dark:text-sand/30">
         <ImageOff size={18} aria-hidden="true" />
       </div>
