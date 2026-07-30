@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
 import { PageHero } from "@/components/shared/page-hero";
+import { Reveal } from "@/components/home/reveal";
 import { placeholderImage } from "@/lib/placeholder-image";
 
 export async function generateMetadata({
@@ -31,14 +32,18 @@ export default async function AboutPage({
         title={t("title")}
         image={placeholderImage("About Go Hargeisa", { tone: "primary" })}
       />
-      <section className="container-px mx-auto max-w-3xl py-14 prose prose-neutral dark:prose-invert">
-        <p>{t("paragraph1")}</p>
-        <p>{t("paragraph2")}</p>
-        <p>
-          {t.rich("paragraph3", {
-            link: (chunks) => <a href="../contact">{chunks}</a>,
-          })}
-        </p>
+      <section className="container-px mx-auto max-w-3xl py-10 md:py-14">
+        <Reveal>
+          <div className="prose prose-neutral dark:prose-invert">
+            <p>{t("paragraph1")}</p>
+            <p>{t("paragraph2")}</p>
+            <p>
+              {t.rich("paragraph3", {
+                link: (chunks) => <a href={`/${locale}/contact`}>{chunks}</a>,
+              })}
+            </p>
+          </div>
+        </Reveal>
       </section>
     </>
   );
