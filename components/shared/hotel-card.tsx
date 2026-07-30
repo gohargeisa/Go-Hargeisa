@@ -10,6 +10,7 @@ import { toggleFavoriteAction } from "@/lib/actions/favorites";
 import { amenityIcon } from "@/lib/utils/amenity-icon";
 import { AnimatedCard } from "./animated-card";
 import { FloatingBadge } from "./floating-badge";
+import { PrimaryButton, SecondaryButton } from "./buttons";
 
 const MAX_VISIBLE_AMENITIES = 4;
 
@@ -194,31 +195,20 @@ export function HotelCard({
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <Link
-              href={href}
-              className="inline-flex h-11 items-center justify-center rounded-full border border-ink/15 px-3 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white dark:hover:border-primary"
-            >
+            <SecondaryButton href={href} compact>
               {t("viewDetails")}
-            </Link>
+            </SecondaryButton>
 
             {website ? (
-              <a
-                href={website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex h-11 items-center justify-center gap-1 rounded-full bg-primary px-3 text-sm font-semibold text-white transition-colors hover:bg-primary-700"
-              >
+              <PrimaryButton href={website} external compact>
                 {t("bookNow")}
                 <ArrowUpRight size={14} aria-hidden="true" />
                 <span className="sr-only">{t("opensInNewTab")}</span>
-              </a>
+              </PrimaryButton>
             ) : (
-              <Link
-                href={href}
-                className="inline-flex h-11 items-center justify-center rounded-full bg-primary px-3 text-sm font-semibold text-white transition-colors hover:bg-primary-700"
-              >
+              <PrimaryButton href={href} compact>
                 {t("bookNow")}
-              </Link>
+              </PrimaryButton>
             )}
           </div>
         </div>
