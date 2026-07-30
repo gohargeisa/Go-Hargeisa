@@ -4,9 +4,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { memo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { m, useReducedMotion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { Heart, Landmark, Loader2, MapPin, Sparkles, Star } from "lucide-react";
 import { toggleFavoriteAction } from "@/lib/actions/favorites";
+import { AnimatedCard } from "@/components/shared/animated-card";
+import { FloatingBadge } from "@/components/shared/floating-badge";
+import { PrimaryButton } from "@/components/shared/buttons";
 
 /**
  * Homepage-only attraction card, matching the visual language of
@@ -44,10 +47,10 @@ function PremiumAttractionCardBase({
   locale?: string;
   initiallyFavorited?: boolean;
 }) {
+  const t = useTranslations("listings");
   const [favorited, setFavorited] = useState(initiallyFavorited);
   const [isPending, startTransition] = useTransition();
   const [loaded, setLoaded] = useState(false);
-  const reduceMotion = useReducedMotion();
   const router = useRouter();
 
   function onToggleFavorite() {
@@ -67,13 +70,9 @@ function PremiumAttractionCardBase({
   const hasRealImage = Boolean(image) && !image.includes("placehold.co");
 
   return (
-    <m.div
-      whileHover={reduceMotion ? undefined : { y: -8 }}
-      transition={{ type: "spring", stiffness: 300, damping: 24 }}
-      className="group flex h-full w-full min-w-[288px] flex-col overflow-hidden rounded-[28px] border border-ink/8 bg-white shadow-[0_8px_24px_rgba(20,30,45,0.07)] transition-shadow duration-300 ease-out hover:border-primary/25 hover:shadow-[0_28px_60px_rgba(20,30,45,0.16)] dark:border-white/10 dark:bg-white/[0.04] dark:hover:shadow-[0_28px_60px_rgba(0,0,0,0.45)]"
-    >
+    <AnimatedCard className="group flex h-full w-full min-w-[288px] flex-col overflow-hidden rounded-xl3 border border-ink/8 bg-white shadow-soft transition-shadow duration-300 ease-premium hover:border-primary/25 hover:shadow-card dark:border-white/10 dark:bg-white/[0.04]">
       {/* Image */}
-      <div className="relative h-64 shrink-0 overflow-hidden rounded-t-[28px] sm:h-[17rem]">
+      <div className="relative h-64 shrink-0 overflow-hidden rounded-t-xl3 sm:h-[17rem]">
         {hasRealImage ? (
           <>
             {!loaded && (
@@ -86,7 +85,7 @@ function PremiumAttractionCardBase({
                 fill
                 sizes="(max-width: 767px) 88vw, (max-width: 1024px) 45vw, 340px"
                 onLoad={() => setLoaded(true)}
-                className={`object-cover transition-transform duration-500 ease-out group-hover:scale-105 ${
+                className={`object-cover transition-transform duration-500 ease-premium group-hover:scale-105 ${
                   loaded ? "opacity-100" : "opacity-0"
                 }`}
               />
@@ -104,18 +103,13 @@ function PremiumAttractionCardBase({
           <Link
             href={href}
             aria-label={name}
-            className="absolute inset-0 z-0 flex items-center justify-center bg-gradient-to-br from-secondary/15 via-primary/10 to-secondary/5 transition-transform duration-500 ease-out group-hover:scale-105 dark:from-secondary/25 dark:via-primary/15 dark:to-white/5"
+            className="absolute inset-0 z-0 flex items-center justify-center bg-gradient-to-br from-secondary/15 via-primary/10 to-secondary/5 transition-transform duration-500 ease-premium group-hover:scale-105 dark:from-secondary/25 dark:via-primary/15 dark:to-white/5"
           >
             <Landmark size={44} strokeWidth={1.5} className="text-secondary-700/50 dark:text-white/30" aria-hidden="true" />
           </Link>
         )}
 
-        {featured && (
-          <span className="absolute start-3.5 top-3.5 z-10 inline-flex items-center gap-1 rounded-full bg-primary/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-[0_4px_14px_rgba(245,158,11,0.45)] ring-1 ring-white/30 backdrop-blur-md">
-            <Sparkles size={10} aria-hidden="true" />
-            Featured
-          </span>
-        )}
+        {featured && <FloatingBadge icon={Sparkles}>{t("featuredBadge")}</FloatingBadge>}
 
         <div className="absolute end-3.5 top-3.5 z-10 inline-flex items-center gap-1 rounded-full border border-white/30 bg-white/20 px-2.5 py-1 text-xs font-bold text-white shadow-sm backdrop-blur-md">
           <Star size={12} fill="currentColor" className="text-primary" aria-hidden="true" />
@@ -128,8 +122,8 @@ function PremiumAttractionCardBase({
             type="button"
             onClick={onToggleFavorite}
             disabled={isPending}
-            aria-label={favorited ? `Remove ${name} from favorites` : `Add ${name} to favorites`}
-            className="absolute end-3.5 bottom-3.5 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-ink shadow-sm transition-all duration-300 hover:scale-110 hover:shadow-[0_6px_16px_rgba(0,0,0,0.25)] active:scale-95 disabled:opacity-60 dark:bg-ink/90 dark:text-white"
+            aria-label={favorited ? t("removeFromFavorites", { name }) : t("addToFavorites", { name })}
+            className="absolute end-3.5 bottom-3.5 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white/95 text-ink shadow-sm transition-all duration-300 hover:scale-110 hover:shadow-[0_6px_16px_rgba(0,0,0,0.25)] active:scale-95 disabled:opacity-60 dark:bg-ink/90 dark:text-white"
           >
             {isPending ? (
               <Loader2 size={17} className="animate-spin" aria-hidden="true" />
@@ -174,15 +168,12 @@ function PremiumAttractionCardBase({
         )}
 
         <div className="mt-auto border-t border-ink/8 pt-5 dark:border-white/10">
-          <Link
-            href={href}
-            className="inline-flex h-12 w-full items-center justify-center rounded-full bg-primary px-4 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(245,158,11,0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary-700 hover:shadow-[0_14px_30px_rgba(245,158,11,0.4)]"
-          >
-            View Details
-          </Link>
+          <PrimaryButton href={href} size="lg" fullWidth>
+            {t("viewDetails")}
+          </PrimaryButton>
         </div>
       </div>
-    </m.div>
+    </AnimatedCard>
   );
 }
 

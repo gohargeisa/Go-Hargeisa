@@ -1,5 +1,4 @@
 import { safeJsonLd } from "@/lib/utils/json-ld";
-import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/config";
@@ -29,6 +28,7 @@ import { PremiumCafeCard } from "@/components/home/premium-cafe-card";
 import { PremiumServiceCard } from "@/components/home/premium-service-card";
 import { PremiumAttractionCard } from "@/components/home/premium-attraction-card";
 import { ViewAllButton } from "@/components/home/view-all-button";
+import { SecondaryButton } from "@/components/shared/buttons";
 import { serviceHref } from "@/lib/utils/service-categories";
 
 export const revalidate = 3600;
@@ -302,13 +302,10 @@ export default async function HomePage({
                     {t("attractionsTitle")}
                   </h2>
                 </div>
-                <Link
-                  href={`/${locale}/attractions`}
-                  className="inline-flex items-center gap-2 self-start rounded-full border border-ink/15 px-5 py-2.5 text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5 hover:border-primary hover:bg-primary/5 hover:text-primary dark:border-white/20 dark:hover:border-primary dark:hover:bg-primary/10 md:self-auto"
-                >
+                <SecondaryButton href={`/${locale}/attractions`} className="self-start md:self-auto">
                   {t("viewAll")}
                   <ArrowUpRight size={16} aria-hidden="true" />
-                </Link>
+                </SecondaryButton>
               </div>
             </Reveal>
             <Reveal delay={0.1}>
