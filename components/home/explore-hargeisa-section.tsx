@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { AnimatePresence, m, useReducedMotion } from "framer-motion";
 import { Fuel, MoonStar, Pill, ShoppingCart, Sparkles, Stethoscope, X, type LucideIcon } from "lucide-react";
 import { Reveal } from "@/components/home/reveal";
+import { FloatingBadge } from "@/components/shared/floating-badge";
 import { SERVICES_PUBLIC_ENABLED } from "@/lib/config/features";
 
 const TOAST_DURATION_MS = 4500;
@@ -125,10 +126,7 @@ export function ExploreHargeisaSection({ locale }: { locale: string }) {
                       aria-hidden="true"
                     />
                     {!href && (
-                      <span className="absolute start-3.5 top-3.5 z-10 inline-flex items-center gap-1 rounded-full bg-primary/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-[0_4px_14px_rgba(245,158,11,0.45)] ring-1 ring-white/30 backdrop-blur-md">
-                        <Sparkles size={10} aria-hidden="true" />
-                        {t("exploreHargeisaComingSoonBadge")}
-                      </span>
+                      <FloatingBadge icon={Sparkles}>{t("exploreHargeisaComingSoonBadge")}</FloatingBadge>
                     )}
                   </div>
 

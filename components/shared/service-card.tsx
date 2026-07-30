@@ -8,6 +8,8 @@ import { useTranslations } from "next-intl";
 import { Heart, Loader2, MapPin, Phone, Sparkles, Star } from "lucide-react";
 import { toggleFavoriteAction } from "@/lib/actions/favorites";
 import { CATEGORY_CONFIG } from "@/components/city-map/category-config";
+import { AnimatedCard } from "./animated-card";
+import { FloatingBadge } from "./floating-badge";
 import type { ServiceCategory } from "@/types";
 
 const MAX_VISIBLE_SERVICES = 3;
@@ -76,9 +78,9 @@ export function ServiceCard({
   const hasRealImage = Boolean(image) && !image.includes("placehold.co");
 
   return (
-    <div className="group flex h-full w-full min-w-[280px] flex-col overflow-hidden rounded-3xl border border-ink/8 bg-white shadow-[0_6px_20px_rgba(20,30,45,0.06)] transition-all duration-300 ease-out hover:-translate-y-1 hover:border-primary/25 hover:shadow-[0_20px_45px_rgba(20,30,45,0.14)] dark:border-white/10 dark:bg-white/[0.04] dark:hover:shadow-[0_20px_45px_rgba(0,0,0,0.4)]">
+    <AnimatedCard className="group flex h-full w-full min-w-[280px] flex-col overflow-hidden rounded-xl3 border border-ink/8 bg-white shadow-soft transition-shadow duration-300 ease-premium hover:border-primary/25 hover:shadow-card dark:border-white/10 dark:bg-white/[0.04]">
       {/* Image */}
-      <div className="relative h-56 shrink-0 overflow-hidden rounded-t-3xl sm:h-60">
+      <div className="relative h-64 shrink-0 overflow-hidden rounded-t-xl3 sm:h-[17rem]">
         {hasRealImage ? (
           <>
             {!loaded && (
@@ -112,7 +114,7 @@ export function ServiceCard({
         )}
 
         <span
-          className="absolute start-3 top-3 z-10 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm backdrop-blur-sm"
+          className="absolute start-3.5 top-3.5 z-10 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-[0_4px_14px_rgba(0,0,0,0.25)] ring-1 ring-white/30 backdrop-blur-md"
           style={{ backgroundColor: meta.color }}
         >
           <CategoryIcon size={11} aria-hidden="true" />
@@ -120,18 +122,15 @@ export function ServiceCard({
         </span>
 
         {featured && (
-          <span className="absolute start-3 top-10 z-10 inline-flex items-center gap-1 rounded-full bg-primary/95 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm backdrop-blur-sm">
-            <Sparkles size={10} aria-hidden="true" />
+          <FloatingBadge icon={Sparkles} position="bottom-start">
             {t("featuredBadge")}
-          </span>
+          </FloatingBadge>
         )}
 
-        <div className="absolute end-3 top-3 z-10 inline-flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-xs font-bold text-ink shadow-sm backdrop-blur-sm dark:bg-ink/90 dark:text-white">
+        <div className="absolute end-3.5 top-3.5 z-10 inline-flex items-center gap-1 rounded-full border border-white/30 bg-white/20 px-2.5 py-1 text-xs font-bold text-white shadow-sm backdrop-blur-md">
           <Star size={12} fill="currentColor" className="text-primary" aria-hidden="true" />
           {rating.toFixed(1)}
-          {reviewCount > 0 && (
-            <span className="font-normal text-ink/50 dark:text-sand/50">({reviewCount})</span>
-          )}
+          {reviewCount > 0 && <span className="font-normal text-white/75">({reviewCount})</span>}
         </div>
 
         {serviceId && (
@@ -140,7 +139,7 @@ export function ServiceCard({
             onClick={onToggleFavorite}
             disabled={isPending}
             aria-label={favorited ? t("removeFromFavorites", { name }) : t("addToFavorites", { name })}
-            className="absolute end-3 bottom-3 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white/95 text-ink shadow-sm transition-all duration-300 hover:scale-110 hover:shadow-[0_6px_16px_rgba(0,0,0,0.25)] active:scale-95 disabled:opacity-60 dark:bg-ink/90 dark:text-white"
+            className="absolute end-3.5 bottom-3.5 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white/95 text-ink shadow-sm transition-all duration-300 hover:scale-110 hover:shadow-[0_6px_16px_rgba(0,0,0,0.25)] active:scale-95 disabled:opacity-60 dark:bg-ink/90 dark:text-white"
           >
             {isPending ? (
               <Loader2 size={17} className="animate-spin" aria-hidden="true" />
@@ -202,11 +201,11 @@ export function ServiceCard({
               className="inline-flex h-11 items-center justify-center gap-1.5 rounded-full bg-primary px-3 text-sm font-semibold text-white transition-colors hover:bg-primary-700"
             >
               <Phone size={14} aria-hidden="true" />
-              Call
+              {t("call")}
             </a>
           )}
         </div>
       </div>
-    </div>
+    </AnimatedCard>
   );
 }

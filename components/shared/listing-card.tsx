@@ -5,10 +5,10 @@ import Image from "next/image";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { m, useReducedMotion } from "framer-motion";
 import { ArrowRight, Heart, Loader2, MapPin, Star } from "lucide-react";
 import { RatingBadge } from "./rating-badge";
 import { toggleFavoriteAction } from "@/lib/actions/favorites";
+import { AnimatedCard } from "./animated-card";
 
 type ListingType = "hotel" | "restaurant" | "cafe" | "attraction" | "service";
 
@@ -25,7 +25,6 @@ export function ListingCard({
   const [isPending, startTransition] = useTransition();
   const [loaded, setLoaded] = useState(false);
   const router = useRouter();
-  const reduceMotion = useReducedMotion();
 
   function onToggleFavorite(event: React.MouseEvent) {
     event.preventDefault();
@@ -45,11 +44,7 @@ export function ListingCard({
   }
 
   return (
-    <m.div
-      whileHover={reduceMotion ? undefined : { y: -6 }}
-      transition={{ type: "spring", stiffness: 300, damping: 24 }}
-      className="group h-full w-full min-w-[272px]"
-    >
+    <AnimatedCard lift={6} className="group h-full w-full min-w-[272px]">
       <Link
         href={href}
         className="flex h-full flex-col overflow-hidden rounded-xl3 border border-ink/8 bg-white shadow-soft transition-shadow duration-300 ease-premium hover:border-primary/25 hover:shadow-card dark:border-white/10 dark:bg-white/[0.04]"
@@ -101,6 +96,6 @@ export function ListingCard({
           </div>
         </div>
       </Link>
-    </m.div>
+    </AnimatedCard>
   );
 }

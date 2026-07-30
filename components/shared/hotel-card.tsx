@@ -5,10 +5,11 @@ import Image from "next/image";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { m, useReducedMotion } from "framer-motion";
 import { ArrowUpRight, Building2, Heart, Loader2, MapPin, Sparkles, Star } from "lucide-react";
 import { toggleFavoriteAction } from "@/lib/actions/favorites";
 import { amenityIcon } from "@/lib/utils/amenity-icon";
+import { AnimatedCard } from "./animated-card";
+import { FloatingBadge } from "./floating-badge";
 
 const MAX_VISIBLE_AMENITIES = 4;
 
@@ -47,7 +48,6 @@ export function HotelCard({
   const [isPending, startTransition] = useTransition();
   const [loaded, setLoaded] = useState(false);
   const router = useRouter();
-  const reduceMotion = useReducedMotion();
 
   function onToggleFavorite() {
     if (!hotelId) return;
@@ -72,11 +72,7 @@ export function HotelCard({
   const hasRealImage = Boolean(image) && !image.includes("placehold.co");
 
   return (
-    <m.div
-      whileHover={reduceMotion ? undefined : { y: -8 }}
-      transition={{ type: "spring", stiffness: 300, damping: 24 }}
-      className="group flex h-full w-full min-w-[280px] flex-col overflow-hidden rounded-xl3 border border-ink/8 bg-white shadow-soft transition-shadow duration-300 ease-premium hover:border-primary/25 hover:shadow-card dark:border-white/10 dark:bg-white/[0.04]"
-    >
+    <AnimatedCard className="group flex h-full w-full min-w-[280px] flex-col overflow-hidden rounded-xl3 border border-ink/8 bg-white shadow-soft transition-shadow duration-300 ease-premium hover:border-primary/25 hover:shadow-card dark:border-white/10 dark:bg-white/[0.04]">
       {/* Image */}
       <div className="relative h-64 shrink-0 overflow-hidden rounded-t-xl3 sm:h-[17rem]">
         {hasRealImage ? (
@@ -112,10 +108,7 @@ export function HotelCard({
         )}
 
         {featured && (
-          <span className="absolute start-3.5 top-3.5 z-10 inline-flex items-center gap-1 rounded-full bg-primary/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-[0_4px_14px_rgba(245,158,11,0.45)] ring-1 ring-white/30 backdrop-blur-md">
-            <Sparkles size={10} aria-hidden="true" />
-            {t("featuredBadge")}
-          </span>
+          <FloatingBadge icon={Sparkles}>{t("featuredBadge")}</FloatingBadge>
         )}
 
         {/* Rating badge — top-end, over the image */}
@@ -230,6 +223,6 @@ export function HotelCard({
           </div>
         </div>
       </div>
-    </m.div>
+    </AnimatedCard>
   );
 }

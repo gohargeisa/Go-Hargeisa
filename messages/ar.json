@@ -992,7 +992,8 @@
     "addToFavorites": "إضافة {name} إلى المفضلة",
     "removeFromFavorites": "إزالة {name} من المفضلة",
     "explore": "استكشف",
-    "opensInNewTab": "(يفتح في علامة تبويب جديدة)"
+    "opensInNewTab": "(يفتح في علامة تبويب جديدة)",
+    "call": "اتصال"
   },
   "detail": {
     "overview": "نظرة عامة",

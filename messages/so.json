@@ -992,7 +992,8 @@
     "addToFavorites": "Ku dar {name} kuwa la jecel yahay",
     "removeFromFavorites": "Ka saar {name} kuwa la jecel yahay",
     "explore": "Sahami",
-    "opensInNewTab": "(wuxuu ku furmaa tab cusub)"
+    "opensInNewTab": "(wuxuu ku furmaa tab cusub)",
+    "call": "Wac"
   },
   "detail": {
     "overview": "Dulmar",

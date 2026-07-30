@@ -8,6 +8,7 @@ import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
 import { PageHero } from "@/components/shared/page-hero";
 import { FaqAccordion } from "@/components/shared/faq-accordion";
+import { FeatureGrid } from "@/components/shared/feature-grid";
 import { Reveal } from "@/components/home/reveal";
 import { placeholderImage } from "@/lib/placeholder-image";
 
@@ -59,20 +60,7 @@ export default async function TravelGuidePage({
       />
       <section className="container-px mx-auto py-10 md:py-14">
         <Reveal>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {sections.map(({ icon: Icon, title, body }) => (
-              <div
-                key={title}
-                className="rounded-xl2 border border-ink/8 bg-white p-6 shadow-soft transition-all duration-300 ease-premium hover:-translate-y-1 hover:shadow-card dark:border-white/10 dark:bg-white/[0.03]"
-              >
-                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary">
-                  <Icon size={20} aria-hidden="true" />
-                </span>
-                <h2 className="mt-4 font-display text-base font-semibold">{title}</h2>
-                <p className="mt-1.5 text-sm leading-relaxed text-ink/65 dark:text-sand/65">{body}</p>
-              </div>
-            ))}
-          </div>
+          <FeatureGrid items={sections} />
         </Reveal>
 
         <Reveal delay={0.08}>
