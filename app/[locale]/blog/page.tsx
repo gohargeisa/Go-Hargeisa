@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
+import { Newspaper } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { getArticles } from "@/lib/data/articles";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
 import { PageHero } from "@/components/shared/page-hero";
+import { EmptyState } from "@/components/shared/empty-state";
+import { Reveal } from "@/components/home/reveal";
 import { placeholderImage } from "@/lib/placeholder-image";
 
 // Public content changes infrequently; revalidate hourly instead of
@@ -37,29 +40,43 @@ export default async function BlogPage({ params: { locale } }: { params: { local
         subtitle={t("subtitle")}
         image={placeholderImage("Go Hargeisa Journal", { tone: "accent" })}
       />
-      <section className="container-px mx-auto py-14">
+      <section className="container-px mx-auto py-10 md:py-14">
         {articles.length === 0 ? (
-          <p className="text-center text-ink/50 dark:text-sand/50">{t("emptyState")}</p>
+          <EmptyState icon={Newspaper} title={t("emptyStateTitle")} description={t("emptyState")} />
         ) : (
-          <div className="grid gap-8 md:grid-cols-3">
-            {articles.map((a) => (
-              <Link key={a.id} href={`/${locale}/blog/${a.slug}`} className="group block">
-                <div className="relative h-52 w-full overflow-hidden rounded-xl2">
-                  <Image src={a.coverImage} alt={a.title} fill sizes="(min-width: 768px) 33vw, 100vw" className="object-cover transition-transform duration-500 group-hover:scale-105" />
-                </div>
-                <span className="mt-4 inline-block text-xs font-semibold uppercase tracking-wide text-secondary">
-                  {a.category}
-                </span>
-                <h2 className="mt-1.5 font-display text-lg font-semibold leading-snug group-hover:text-primary transition-colors">
-                  {a.title}
-                </h2>
-                <p className="mt-1.5 text-sm text-ink/60 dark:text-sand/60 line-clamp-2">{a.excerpt}</p>
-                <p className="mt-2 text-xs font-medium text-ink/45 dark:text-sand/45">
-                  {a.author} · {t("minRead", { minutes: a.readMinutes })}
-                </p>
-              </Link>
-            ))}
-          </div>
+          <Reveal>
+            <div className="grid gap-8 md:grid-cols-3">
+              {articles.map((a) => (
+                <Link
+                  key={a.id}
+                  href={`/${locale}/blog/${a.slug}`}
+                  className="group block overflow-hidden rounded-xl3 border border-ink/8 bg-white shadow-soft transition-all duration-300 ease-premium hover:-translate-y-1.5 hover:shadow-card dark:border-white/10 dark:bg-white/[0.04]"
+                >
+                  <div className="relative h-52 w-full overflow-hidden">
+                    <Image
+                      src={a.coverImage}
+                      alt={a.title}
+                      fill
+                      sizes="(min-width: 768px) 33vw, 100vw"
+                      className="object-cover transition-transform duration-500 ease-premium group-hover:scale-105"
+                    />
+                  </div>
+                  <div className="p-5">
+                    <span className="inline-block text-xs font-semibold uppercase tracking-wide text-secondary">
+                      {a.category}
+                    </span>
+                    <h2 className="mt-1.5 font-display text-lg font-semibold leading-snug transition-colors group-hover:text-primary">
+                      {a.title}
+                    </h2>
+                    <p className="mt-1.5 line-clamp-2 text-sm text-ink/60 dark:text-sand/60">{a.excerpt}</p>
+                    <p className="mt-3 border-t border-ink/8 pt-3 text-xs font-medium text-ink/45 dark:border-white/10 dark:text-sand/45">
+                      {a.author} · {t("minRead", { minutes: a.readMinutes })}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </Reveal>
         )}
       </section>
     </>

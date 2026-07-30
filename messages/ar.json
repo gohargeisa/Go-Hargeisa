@@ -64,18 +64,22 @@
     "shareTitle": "شارك",
     "shareDescription": "شارك تجربتك من خلال كتابة التقييمات وساعد الزوار الآخرين على اكتشاف أفضل الأماكن في هرجيسا.",
 
+    "hotelsEyebrow": "إقامة",
     "hotelsTitle": "أين تقيم",
     "hotelsSubtitle": "فنادق مختارة بعناية لكل ميزانية",
+    "restaurantsEyebrow": "طعام",
     "restaurantsTitle": "أين تأكل",
+    "cafesEyebrow": "مقاهي",
     "cafesTitle": "ثقافة القهوة والمقاهي",
     "cafesSubtitle": "مقاهي لتعمل أو تسترخي أو تلتقي بالأصدقاء",
     "viewAllHotelsButton": "عرض كل الفنادق",
     "viewAllRestaurantsButton": "عرض كل المطاعم",
     "viewAllCafesButton": "عرض كل المقاهي",
+    "servicesEyebrow": "أساسيات",
     "servicesTitle": "خدمات أساسية",
     "servicesSubtitle": "مستشفيات وصيدليات وبنوك وخدمات أساسية أخرى في هرجيسا",
     "viewAllServicesButton": "عرض كل الخدمات",
-    "attractionsEyebrow": "شاهد",
+    "attractionsEyebrow": "اكتشف",
     "attractionsTitle": "الأماكن السياحية",
     "eventsTitle": "الفعاليات القادمة",
     "experiencesTitle": "تجارب محلية",
@@ -102,6 +106,8 @@
     "newsletterSubtitle": "اختيارات شهرية لأحدث الافتتاحات والفعاليات ونصائح السفر.",
     "newsletterPlaceholder": "بريدك الإلكتروني",
     "newsletterButton": "اشترك",
+    "newsletterSuccess": "شكرًا لك — تم اشتراكك.",
+    "newsletterError": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
     "viewAll": "عرض الكل"
   },
   "comingSoon": {
@@ -850,6 +856,7 @@
     "title": "مدونة سفر هرجيسا",
     "subtitle": "قصص وأدلة ونصائح من أشخاص يعرفون المدينة.",
     "emptyState": "لا توجد مقالات منشورة بعد.",
+    "emptyStateTitle": "لا توجد مقالات بعد",
     "minRead": "قراءة {minutes} دقيقة"
   },
   "explore": {
@@ -857,7 +864,10 @@
     "title": "استكشف هرجيسا",
     "subtitle": "حيًا بعد حي",
     "noDestinationsTitle": "لا توجد أحياء لعرضها",
-    "noDestinationsDescription": "لم نتمكن من العثور على أي وجهات حاليًا. يرجى المحاولة مرة أخرى قريبًا."
+    "noDestinationsDescription": "لم نتمكن من العثور على أي وجهات حاليًا. يرجى المحاولة مرة أخرى قريبًا.",
+    "hotelsNearby": "فنادق قريبة",
+    "placesToEat": "أماكن لتناول الطعام",
+    "thingsToSee": "أماكن يمكن زيارتها"
   },
   "cityMap": {
     "eyebrow": "🗺 خريطة المدينة الذكية",
@@ -922,9 +932,11 @@
 
     "hotelsCount": "{count} فندق",
     "restaurantsCount": "{count} مطعم",
+    "attractionsCount": "{count} معلم",
     "resultsFor": "نتائج البحث عن «{query}»",
     "browseAllHotels": "تصفح جميع الفنادق في هرجيسا",
     "browseAllRestaurants": "تصفح جميع المطاعم في هرجيسا",
+    "browseAllAttractions": "تصفح جميع المعالم السياحية في هرجيسا",
     "noHotelsMatch": "لا توجد فنادق مطابقة لعوامل التصفية",
     "noRestaurantsMatch": "لا توجد مطاعم مطابقة لعوامل التصفية",
     "noAttractionsMatch": "لا توجد معالم مطابقة لبحثك",

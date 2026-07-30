@@ -64,18 +64,22 @@
     "shareTitle": "La wadaag",
     "shareDescription": "La wadaag khibradahaaga adigoo qoraya faallooyin si aad uga caawiso dadka kale inay helaan meelaha ugu fiican ee Hargeysa.",
 
+    "hotelsEyebrow": "Degitaan",
     "hotelsTitle": "Halka Aad Degi Karto",
     "hotelsSubtitle": "Hudheello si taxaddar leh loo doortay oo ku habboon miisaaniyad kasta",
+    "restaurantsEyebrow": "Cunto",
     "restaurantsTitle": "Halka Aad Wax Ka Cuni Karto",
+    "cafesEyebrow": "Cabbid",
     "cafesTitle": "Dhaqanka Qaxwada iyo Kafateeriyada",
     "cafesSubtitle": "Kafateeriyo aad uga shaqayn karto, ku nasan karto ama saaxiibbo kula kulmi karto",
     "viewAllHotelsButton": "Eeg Dhammaan Hudheellada",
     "viewAllRestaurantsButton": "Eeg Dhammaan Maqaayadaha",
     "viewAllCafesButton": "Eeg Dhammaan Kafateeriyada",
+    "servicesEyebrow": "Muhiimka",
     "servicesTitle": "Adeegyada Muhiimka ah",
     "servicesSubtitle": "Isbitaallada, farmashiyada, bangiyada iyo adeegyo kale oo muhiim ah ee Hargeisa",
     "viewAllServicesButton": "Eeg Dhammaan Adeegyada",
-    "attractionsEyebrow": "Arag",
+    "attractionsEyebrow": "Sahami",
     "attractionsTitle": "Goobaha Dalxiiska",
     "eventsTitle": "Dhacdooyinka Soo Socda",
     "experiencesTitle": "Waayo-aragnimooyin Maxalli ah",
@@ -102,6 +106,8 @@
     "newsletterSubtitle": "Hel wararkii ugu dambeeyay, dhacdooyinka iyo talooyinka safarka bishiiba mar.",
     "newsletterPlaceholder": "Cinwaanka iimaylkaaga",
     "newsletterButton": "Isdiiwaangeli",
+    "newsletterSuccess": "Mahadsanid — waad isdiiwaangelisay.",
+    "newsletterError": "Wax baa qaldamay. Fadlan isku day mar kale.",
     "viewAll": "Dhammaan Arag"
   },
   "comingSoon": {
@@ -850,6 +856,7 @@
     "title": "Blog-ga Safarka Hargeysa",
     "subtitle": "Sheekooyin, hage, iyo talooyin ka yimid dad yaqaan magaalada.",
     "emptyState": "Wali maqaallo lama daabicin.",
+    "emptyStateTitle": "Wali Maqaallo Lama Helin",
     "minRead": "{minutes} daqiiqo akhris ah"
   },
   "explore": {
@@ -857,7 +864,10 @@
     "title": "Sahami Hargeysa",
     "subtitle": "Xaafad kasta",
     "noDestinationsTitle": "Ma jiraan xaafado la muujinayo",
-    "noDestinationsDescription": "Hadda ma helin wax meelo ah. Fadlan dib u eeg mar dhow."
+    "noDestinationsDescription": "Hadda ma helin wax meelo ah. Fadlan dib u eeg mar dhow.",
+    "hotelsNearby": "Hudheellada Dhow",
+    "placesToEat": "Meelaha Cuntada",
+    "thingsToSee": "Waxyaabaha La Booqan Karo"
   },
   "cityMap": {
     "eyebrow": "🗺 Khariidadda Magaalada ee Caqliga leh",
@@ -922,9 +932,11 @@
 
     "hotelsCount": "{count} Hudheel",
     "restaurantsCount": "{count} Maqaayad",
+    "attractionsCount": "{count} Meelo Soo Jiidasho Leh",
     "resultsFor": "Natiijooyinka \"{query}\"",
     "browseAllHotels": "Dib u eeg dhammaan hudheellada Hargeysa",
     "browseAllRestaurants": "Dib u eeg dhammaan maqaayadaha Hargeysa",
+    "browseAllAttractions": "Dib u eeg dhammaan meelaha soo jiidashada leh ee Hargeysa",
     "noHotelsMatch": "Hudheel lama helin oo la mid ah kala soocaaga",
     "noRestaurantsMatch": "Maqaayad lama helin oo la mid ah kala soocaaga",
     "noAttractionsMatch": "Wax meelo soo jiidasho leh oo la mid ah raadintaada lama helin",

@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Image from "next/image";
+import { getTranslations } from "next-intl/server";
 import { getDestinationBySlug, getDestinations } from "@/lib/data/destinations";
 import { getHotels } from "@/lib/data/hotels";
 import { getRestaurants } from "@/lib/data/restaurants";
 import { getAttractions } from "@/lib/data/attractions";
 import { ListingCard } from "@/components/shared/listing-card";
 import { HotelCard } from "@/components/shared/hotel-card";
+import { PageHero } from "@/components/shared/page-hero";
+import { Breadcrumbs } from "@/components/shared/breadcrumbs";
+import { Reveal } from "@/components/home/reveal";
 import { RESTAURANTS_PUBLIC_ENABLED, filterHotelsForPresentation } from "@/lib/config/features";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
@@ -45,6 +48,9 @@ export default async function DestinationDetailPage({
   const destination = await getDestinationBySlug(slug);
   if (!destination) notFound();
 
+  const tExplore = await getTranslations("explore");
+  const tNav = await getTranslations("nav");
+
   const [hotelsRaw, restaurants, attractions] = await Promise.all([
     getHotels(),
     RESTAURANTS_PUBLIC_ENABLED ? getRestaurants() : Promise.resolve([]),
@@ -54,56 +60,64 @@ export default async function DestinationDetailPage({
 
   return (
     <>
-      <section className="relative h-72 md:h-96 w-full overflow-hidden">
-        <Image src={destination.image} alt={destination.name} fill priority sizes="100vw" className="object-cover" />
-        <div className="absolute inset-0 bg-hero-gradient" />
-        <div className="relative z-10 flex h-full flex-col items-center justify-center container-px text-center text-white">
-          <h1 className="font-display text-3xl md:text-4xl font-semibold">{destination.name}</h1>
-          <p className="mt-2 max-w-xl text-white/85">{destination.description}</p>
-        </div>
-      </section>
+      <Breadcrumbs
+        items={[
+          { label: tNav("explore"), href: `/${locale}/explore` },
+          { label: destination.name, href: `/${locale}/explore/${destination.slug}` },
+        ]}
+      />
 
-      <section className="container-px mx-auto py-14 space-y-14">
-        <div>
-          <h2 className="font-display text-xl font-semibold mb-4">Hotels nearby</h2>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {hotels.slice(0, 3).map((h) => (
-              <HotelCard
-                key={h.id}
-                href={`/${locale}/hotels/${h.slug}`}
-                image={h.coverImage}
-                name={h.name}
-                address={h.address}
-                rating={h.rating}
-                reviewCount={h.reviewCount}
-                priceRange={h.priceRange}
-                amenities={h.amenities}
-                featured={h.featured}
-                hotelId={h.id}
-                locale={locale}
-                website={h.website}
-              />
-            ))}
-          </div>
-        </div>
-        {restaurants.length > 0 && (
+      <PageHero eyebrow={tExplore("eyebrow")} title={destination.name} subtitle={destination.description} image={destination.image} />
+
+      <section className="container-px mx-auto py-10 md:py-14 space-y-14">
+        <Reveal>
           <div>
-            <h2 className="font-display text-xl font-semibold mb-4">Places to eat</h2>
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {restaurants.slice(0, 3).map((r) => (
-                <ListingCard key={r.id} href={`/${locale}/restaurants/${r.slug}`} image={r.coverImage} title={r.name} subtitle={r.cuisine.join(" · ")} rating={r.rating} reviewCount={r.reviewCount} priceRange={r.priceRange} />
+            <h2 className="mb-5 font-display text-2xl font-semibold">{tExplore("hotelsNearby")}</h2>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {hotels.slice(0, 3).map((h) => (
+                <HotelCard
+                  key={h.id}
+                  href={`/${locale}/hotels/${h.slug}`}
+                  image={h.coverImage}
+                  name={h.name}
+                  address={h.address}
+                  rating={h.rating}
+                  reviewCount={h.reviewCount}
+                  priceRange={h.priceRange}
+                  amenities={h.amenities}
+                  featured={h.featured}
+                  hotelId={h.id}
+                  locale={locale}
+                  website={h.website}
+                />
               ))}
             </div>
           </div>
+        </Reveal>
+
+        {restaurants.length > 0 && (
+          <Reveal>
+            <div>
+              <h2 className="mb-5 font-display text-2xl font-semibold">{tExplore("placesToEat")}</h2>
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {restaurants.slice(0, 3).map((r) => (
+                  <ListingCard key={r.id} href={`/${locale}/restaurants/${r.slug}`} image={r.coverImage} title={r.name} subtitle={r.cuisine.join(" · ")} rating={r.rating} reviewCount={r.reviewCount} priceRange={r.priceRange} />
+                ))}
+              </div>
+            </div>
+          </Reveal>
         )}
-        <div>
-          <h2 className="font-display text-xl font-semibold mb-4">Things to see</h2>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {attractions.slice(0, 3).map((a) => (
-              <ListingCard key={a.id} href={`/${locale}/attractions/${a.slug}`} image={a.coverImage} title={a.name} subtitle={a.address} rating={a.rating} reviewCount={a.reviewCount} />
-            ))}
+
+        <Reveal>
+          <div>
+            <h2 className="mb-5 font-display text-2xl font-semibold">{tExplore("thingsToSee")}</h2>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {attractions.slice(0, 3).map((a) => (
+                <ListingCard key={a.id} href={`/${locale}/attractions/${a.slug}`} image={a.coverImage} title={a.name} subtitle={a.address} rating={a.rating} reviewCount={a.reviewCount} />
+              ))}
+            </div>
           </div>
-        </div>
+        </Reveal>
       </section>
     </>
   );

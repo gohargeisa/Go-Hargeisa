@@ -60,7 +60,7 @@ export function BottomSheet({
                 type="button"
                 onClick={onClose}
                 aria-label="Close"
-                className="ms-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink/5 dark:bg-white/10"
+                className="ms-auto flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-ink/5 transition-colors hover:bg-ink/10 dark:bg-white/10 dark:hover:bg-white/15"
               >
                 <X size={18} aria-hidden="true" />
               </button>

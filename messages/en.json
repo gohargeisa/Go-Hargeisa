@@ -64,18 +64,22 @@
     "shareTitle": "Share",
     "shareDescription": "Share your experiences by writing reviews and help other visitors discover the best places in Hargeisa.",
 
+    "hotelsEyebrow": "Stay",
     "hotelsTitle": "Where to Stay",
     "hotelsSubtitle": "Handpicked hotels across every budget",
+    "restaurantsEyebrow": "Eat",
     "restaurantsTitle": "Where to Eat",
+    "cafesEyebrow": "Sip",
     "cafesTitle": "Coffee & Cafe Culture",
     "cafesSubtitle": "Coffee shops and cafes to work, relax or catch up",
     "viewAllHotelsButton": "View All Hotels",
     "viewAllRestaurantsButton": "View All Restaurants",
     "viewAllCafesButton": "View All Cafes",
+    "servicesEyebrow": "Essentials",
     "servicesTitle": "Essential Services",
     "servicesSubtitle": "Hospitals, pharmacies, banks and other essentials around Hargeisa",
     "viewAllServicesButton": "View All Services",
-    "attractionsEyebrow": "See",
+    "attractionsEyebrow": "Discover",
     "attractionsTitle": "Tourist Attractions",
     "eventsTitle": "Upcoming Events",
     "experiencesTitle": "Local Experiences",
@@ -102,6 +106,8 @@
     "newsletterSubtitle": "Monthly picks on new openings, events and travel tips. No spam.",
     "newsletterPlaceholder": "Your email address",
     "newsletterButton": "Subscribe",
+    "newsletterSuccess": "Thanks — you're subscribed.",
+    "newsletterError": "Something went wrong. Please try again.",
     "viewAll": "View all"
   },
   "comingSoon": {
@@ -850,6 +856,7 @@
     "title": "Hargeisa Travel Blog",
     "subtitle": "Stories, guides and tips from people who know the city.",
     "emptyState": "No articles published yet.",
+    "emptyStateTitle": "No Articles Yet",
     "minRead": "{minutes} min read"
   },
   "explore": {
@@ -857,7 +864,10 @@
     "title": "Explore Hargeisa",
     "subtitle": "Neighborhood by neighborhood",
     "noDestinationsTitle": "No neighborhoods to show",
-    "noDestinationsDescription": "We couldn't find any destinations right now. Please check back soon."
+    "noDestinationsDescription": "We couldn't find any destinations right now. Please check back soon.",
+    "hotelsNearby": "Hotels Nearby",
+    "placesToEat": "Places to Eat",
+    "thingsToSee": "Things to See"
   },
   "cityMap": {
     "eyebrow": "🗺 Smart City Map",
@@ -922,9 +932,11 @@
 
     "hotelsCount": "{count} Hotels",
     "restaurantsCount": "{count} Restaurants",
+    "attractionsCount": "{count} Attractions",
     "resultsFor": "Results for \"{query}\"",
     "browseAllHotels": "Browse all hotels in Hargeisa",
     "browseAllRestaurants": "Browse all restaurants in Hargeisa",
+    "browseAllAttractions": "Browse all attractions in Hargeisa",
     "noHotelsMatch": "No hotels match your filters",
     "noRestaurantsMatch": "No restaurants match your filters",
     "noAttractionsMatch": "No attractions match your search",

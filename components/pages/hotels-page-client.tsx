@@ -8,6 +8,7 @@ import { HotelCard } from "@/components/shared/hotel-card";
 import { SearchWithin } from "@/components/shared/search-within";
 import { ListingFilters, type FilterOptions } from "@/components/shared/listing-filters";
 import { EmptyState } from "@/components/shared/empty-state";
+import { Reveal } from "@/components/home/reveal";
 import { filterListings } from "@/lib/utils/filter-listings";
 
 interface Hotel {
@@ -59,24 +60,26 @@ export function HotelsPageClient({
 
   return (
     <section className="container-px mx-auto py-10 md:py-14">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
-        <div>
-          <h2 className="font-display text-2xl font-bold md:text-3xl">
-            {t("hotelsCount", { count: filteredHotels.total })}
-          </h2>
-          <p className="mt-1 text-sm text-ink/60 dark:text-sand/60">
-            {searchParams.q ? t("resultsFor", { query: searchParams.q }) : t("browseAllHotels")}
-          </p>
+      <Reveal>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+          <div>
+            <h2 className="font-display text-2xl font-bold md:text-3xl">
+              {t("hotelsCount", { count: filteredHotels.total })}
+            </h2>
+            <p className="mt-1 text-sm text-ink/60 dark:text-sand/60">
+              {searchParams.q ? t("resultsFor", { query: searchParams.q }) : t("browseAllHotels")}
+            </p>
+          </div>
         </div>
-      </div>
 
-      <div className="mb-6">
-        <SearchWithin
-          basePath={`/${locale}/hotels`}
-          placeholder={t("searchHotelsPlaceholder")}
-          defaultValue={searchParams.q}
-        />
-      </div>
+        <div className="mb-6">
+          <SearchWithin
+            basePath={`/${locale}/hotels`}
+            placeholder={t("searchHotelsPlaceholder")}
+            defaultValue={searchParams.q}
+          />
+        </div>
+      </Reveal>
 
       {filteredHotels.total === 0 ? (
         <EmptyState icon={SearchX} title={t("noHotelsMatch")} description={t("adjustFilters")} className="mt-12" />
@@ -91,7 +94,7 @@ export function HotelsPageClient({
           <div>
             {/* Featured Hotels Section */}
             {filteredHotels.featured.length > 0 && (
-              <div className="mb-12">
+              <Reveal className="mb-12">
                 <div className="mb-6">
                   <h3 className="font-display text-xl font-bold">{t("featuredHotels")}</h3>
                   <p className="mt-1 text-sm text-ink/60 dark:text-sand/60">{t("featuredHotelsSubtitle")}</p>
@@ -115,12 +118,12 @@ export function HotelsPageClient({
                     />
                   ))}
                 </div>
-              </div>
+              </Reveal>
             )}
 
             {/* All Hotels Section */}
             {filteredHotels.nonFeatured.length > 0 && (
-              <div>
+              <Reveal delay={0.08}>
                 <div className="mb-6">
                   <h3 className="font-display text-xl font-bold">{t("allHotels")}</h3>
                   <p className="mt-1 text-sm text-ink/60 dark:text-sand/60">
@@ -145,7 +148,7 @@ export function HotelsPageClient({
                     />
                   ))}
                 </div>
-              </div>
+              </Reveal>
             )}
           </div>
         </div>

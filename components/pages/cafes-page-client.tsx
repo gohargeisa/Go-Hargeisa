@@ -8,6 +8,7 @@ import { CafeCard } from "@/components/shared/cafe-card";
 import { SearchWithin } from "@/components/shared/search-within";
 import { ListingFilters, type FilterOptions } from "@/components/shared/listing-filters";
 import { EmptyState } from "@/components/shared/empty-state";
+import { Reveal } from "@/components/home/reveal";
 import { filterListings } from "@/lib/utils/filter-listings";
 
 interface Cafe {
@@ -54,18 +55,20 @@ export function CafesPageClient({
 
   return (
     <section className="container-px mx-auto py-10 md:py-14">
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="font-display text-2xl font-bold md:text-3xl">{t("cafesCount", { count: filteredCafes.total })}</h2>
-          <p className="mt-1 text-sm text-ink/60 dark:text-sand/60">
-            {searchParams.q ? t("resultsFor", { query: searchParams.q }) : t("browseAllCafes")}
-          </p>
+      <Reveal>
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="font-display text-2xl font-bold md:text-3xl">{t("cafesCount", { count: filteredCafes.total })}</h2>
+            <p className="mt-1 text-sm text-ink/60 dark:text-sand/60">
+              {searchParams.q ? t("resultsFor", { query: searchParams.q }) : t("browseAllCafes")}
+            </p>
+          </div>
         </div>
-      </div>
 
-      <div className="mb-6">
-        <SearchWithin basePath={`/${locale}/cafes`} placeholder={t("searchCafesPlaceholder")} defaultValue={searchParams.q} />
-      </div>
+        <div className="mb-6">
+          <SearchWithin basePath={`/${locale}/cafes`} placeholder={t("searchCafesPlaceholder")} defaultValue={searchParams.q} />
+        </div>
+      </Reveal>
 
       {filteredCafes.total === 0 ? (
         <EmptyState icon={SearchX} title={t("noCafesMatch")} description={t("adjustFilters")} className="mt-12" />
@@ -79,7 +82,7 @@ export function CafesPageClient({
           {/* Listings Grid */}
           <div>
             {filteredCafes.featured.length > 0 && (
-              <div className="mb-12">
+              <Reveal className="mb-12">
                 <div className="mb-6">
                   <h3 className="font-display text-xl font-bold">{t("featuredCafes")}</h3>
                   <p className="mt-1 text-sm text-ink/60 dark:text-sand/60">{t("featuredCafesSubtitle")}</p>
@@ -104,11 +107,11 @@ export function CafesPageClient({
                     />
                   ))}
                 </div>
-              </div>
+              </Reveal>
             )}
 
             {filteredCafes.nonFeatured.length > 0 && (
-              <div>
+              <Reveal delay={0.08}>
                 <div className="mb-6">
                   <h3 className="font-display text-xl font-bold">{t("allCafes")}</h3>
                   <p className="mt-1 text-sm text-ink/60 dark:text-sand/60">
@@ -134,7 +137,7 @@ export function CafesPageClient({
                     />
                   ))}
                 </div>
-              </div>
+              </Reveal>
             )}
           </div>
         </div>

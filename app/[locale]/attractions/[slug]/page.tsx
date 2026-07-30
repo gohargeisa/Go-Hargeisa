@@ -3,17 +3,21 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { Ticket, CalendarClock, MapPin, LightbulbIcon } from "lucide-react";
+import { Ticket, CalendarClock, MapPin, LightbulbIcon, Navigation, ExternalLink, Star, Tag } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
-import { getAttractionBySlug, getAllAttractionSlugs, getNearbyForAttraction } from "@/lib/data/attractions";
-import { Gallery } from "@/components/shared/gallery";
+import { getAttractionBySlug, getAllAttractionSlugs, getNearbyForAttraction, getAttractions } from "@/lib/data/attractions";
+import { HotelHeaderTop } from "@/components/shared/hotel-header-top";
+import { HotelGallerySlider } from "@/components/shared/hotel-gallery-slider";
+import { HotelNavTabs, type HotelNavTab } from "@/components/shared/hotel-nav-tabs";
+import { InfoCardsStrip, type InfoCard } from "@/components/shared/info-cards-strip";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
-import { RatingBadge } from "@/components/shared/rating-badge";
 import { ReviewsSection } from "@/components/shared/reviews-section";
 import { ReviewForm } from "@/components/shared/review-form";
 import { AddToTripButton } from "@/components/shared/add-to-trip-button";
+import { ListingCard } from "@/components/shared/listing-card";
 import { SingleLocationMapLoader } from "@/components/map/single-location-map-loader";
+import { Reveal } from "@/components/home/reveal";
 import { safeJsonLd } from "@/lib/utils/json-ld";
 
 // Public content changes infrequently; revalidate hourly instead of
@@ -29,7 +33,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params: { locale, slug },
 }: {
-  params: { locale: Locale; slug: string };
+  params: { locale: string; slug: string };
 }): Promise<Metadata> {
   const a = await getAttractionBySlug(slug);
 
@@ -40,6 +44,7 @@ export async function generateMetadata({
   return {
     title: `${a.name} — Hargeisa Attraction`,
     description: a.shortDescription,
+    openGraph: { images: [a.coverImage] },
     alternates: localeAlternates(locale as Locale, `/attractions/${a.slug}`),
   };
 }
@@ -54,7 +59,27 @@ export default async function AttractionDetailPage({
   const t = await getTranslations("common");
   const tNav = await getTranslations("nav");
   const td = await getTranslations("detail");
-  const { restaurants: nearbyRestaurants, hotels: nearbyHotels } = await getNearbyForAttraction(attraction.id);
+  const th = await getTranslations("hotelDetail");
+  const [{ restaurants: nearbyRestaurants, hotels: nearbyHotels }, allAttractions] = await Promise.all([
+    getNearbyForAttraction(attraction.id),
+    getAttractions(),
+  ]);
+  const similarAttractions = allAttractions.filter((a) => a.id !== attraction.id).slice(0, 4);
+
+  const navTabs: HotelNavTab[] = [
+    { id: "overview", label: td("overview") },
+    ...(attraction.visitorTips.length > 0 ? [{ id: "tips", label: t("visitorTips") }] : []),
+    { id: "location", label: td("location") },
+    { id: "reviews", label: t("reviews") },
+  ];
+
+  const hasCoordinates = Number.isFinite(attraction.location?.lat) && Number.isFinite(attraction.location?.lng);
+  const googleMapsHref = hasCoordinates
+    ? `https://www.google.com/maps/search/?api=1&query=${attraction.location.lat},${attraction.location.lng}`
+    : undefined;
+  const directionsHref = hasCoordinates
+    ? `https://www.google.com/maps/dir/?api=1&destination=${attraction.location.lat},${attraction.location.lng}`
+    : undefined;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -81,134 +106,218 @@ export default async function AttractionDetailPage({
         ]}
       />
 
-      <div className="container-px mx-auto pt-6">
-        <Gallery cover={attraction.coverImage} images={attraction.gallery} alt={attraction.name} />
+      <HotelHeaderTop
+        name={attraction.name}
+        rating={attraction.rating}
+        reviewCount={attraction.reviewCount}
+        categoryLabel={attraction.category}
+      />
+
+      <InfoCardsStrip
+        cards={[
+          { icon: Star, label: t("rating"), value: attraction.rating.toFixed(1) },
+          { icon: Tag, label: th("category"), value: attraction.category },
+          { icon: CalendarClock, label: t("bestTimeToVisit"), value: attraction.bestTimeToVisit },
+          { icon: Ticket, label: t("entryFee"), value: attraction.entryFee ?? "—" },
+        ]}
+      />
+
+      <HotelGallerySlider cover={attraction.coverImage} images={attraction.gallery} alt={attraction.name} />
+
+      <div className="mt-8">
+        <HotelNavTabs tabs={navTabs} />
       </div>
 
-      <div className="container-px mx-auto grid gap-10 py-10 lg:grid-cols-3">
+      <div className="container-px mx-auto grid gap-10 py-10 lg:grid-cols-3 lg:gap-12">
         <div className="lg:col-span-2 space-y-14">
-          <div>
-            <span className="rounded-full bg-secondary/10 px-3 py-1 text-xs font-semibold uppercase text-secondary-700">
-              {attraction.category}
-            </span>
-            <h1 className="mt-3 font-display text-3xl font-semibold">{attraction.name}</h1>
-            <p className="mt-2 flex items-center gap-1.5 text-sm text-ink/60 dark:text-sand/60">
-              <MapPin size={14} /> {attraction.address}
-            </p>
-            <div className="mt-3">
-              <RatingBadge rating={attraction.rating} reviewCount={attraction.reviewCount} size="md" />
-            </div>
-            <p className="mt-5 text-ink/75 dark:text-sand/75 leading-relaxed">{attraction.description}</p>
-          </div>
+          <Reveal>
+            <section id="overview" aria-labelledby="overview-heading" className="scroll-mt-36">
+              <h2 id="overview-heading" className="mb-5 font-display text-2xl font-semibold">
+                {td("overview")}
+              </h2>
+              <p className="leading-relaxed text-ink/75 dark:text-sand/75">{attraction.description}</p>
 
-          {attraction.history && (
-            <div>
-              <h2 className="font-display text-xl font-semibold mb-3">{t("history")}</h2>
-              <p className="text-ink/75 dark:text-sand/75 leading-relaxed">{attraction.history}</p>
-            </div>
-          )}
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-xl2 border border-ink/8 dark:border-white/10 p-5">
-              <p className="flex items-center gap-2 text-sm font-semibold">
-                <CalendarClock size={16} className="text-primary" /> {t("bestTimeToVisit")}
-              </p>
-              <p className="mt-1 text-sm text-ink/65 dark:text-sand/65">{attraction.bestTimeToVisit}</p>
-            </div>
-            <div className="rounded-xl2 border border-ink/8 dark:border-white/10 p-5">
-              <p className="flex items-center gap-2 text-sm font-semibold">
-                <Ticket size={16} className="text-primary" /> {t("entryFee")}
-              </p>
-              <p className="mt-1 text-sm text-ink/65 dark:text-sand/65">{attraction.entryFee}</p>
-            </div>
-          </div>
+              {attraction.history && (
+                <div className="mt-8">
+                  <h3 className="mb-3 font-display text-lg font-semibold">{t("history")}</h3>
+                  <p className="leading-relaxed text-ink/75 dark:text-sand/75">{attraction.history}</p>
+                </div>
+              )}
+            </section>
+          </Reveal>
 
           {attraction.visitorTips.length > 0 && (
-  <div>
-    <h2 className="font-display text-xl font-semibold mb-3 flex items-center gap-2">
-      <LightbulbIcon size={18} className="text-accent-700" /> {t("visitorTips")}
-    </h2>
-    <ul className="space-y-2">
-      {(attraction.visitorTips as string[]).map((tip: string) => (
-        <li key={tip} className="flex gap-2 text-sm text-ink/70 dark:text-sand/70">
-          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
-          {tip}
-        </li>
-      ))}
-    </ul>
-  </div>
-)}
+            <Reveal>
+              <section id="tips" aria-labelledby="tips-heading" className="scroll-mt-36">
+                <h2 id="tips-heading" className="mb-5 flex items-center gap-2 font-display text-2xl font-semibold">
+                  <LightbulbIcon size={20} className="text-accent-700" aria-hidden="true" />
+                  {t("visitorTips")}
+                </h2>
+                <ul className="space-y-2.5">
+                  {attraction.visitorTips.map((tip) => (
+                    <li
+                      key={tip}
+                      className="flex gap-2.5 rounded-xl2 border border-ink/8 bg-white px-4 py-3 text-sm text-ink/75 dark:border-white/10 dark:bg-white/[0.03] dark:text-sand/75"
+                    >
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true" />
+                      {tip}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            </Reveal>
+          )}
 
-          <div>
-            <h2 className="font-display text-xl font-semibold mb-4">{t("viewOnMap")}</h2>
-            <SingleLocationMapLoader location={attraction.location} label={attraction.name} />
-          </div>
+          <Reveal>
+            <section id="location" aria-labelledby="location-heading" className="scroll-mt-36">
+              <h2 id="location-heading" className="mb-5 font-display text-2xl font-semibold">
+                {td("location")}
+              </h2>
+              <div className="overflow-hidden rounded-xl3 border border-ink/8 dark:border-white/10">
+                <SingleLocationMapLoader location={attraction.location} label={attraction.name} />
+                <div className="flex flex-col gap-3 border-t border-ink/8 p-5 dark:border-white/10 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="flex items-center gap-2 text-sm text-ink/70 dark:text-sand/70">
+                    <MapPin size={16} className="shrink-0 text-primary" aria-hidden="true" />
+                    {attraction.address}
+                  </p>
+                  <div className="flex flex-wrap gap-2.5">
+                    {directionsHref && (
+                      <a
+                        href={directionsHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-700"
+                      >
+                        <Navigation size={14} aria-hidden="true" />
+                        {th("directions")}
+                      </a>
+                    )}
+                    {googleMapsHref && (
+                      <a
+                        href={googleMapsHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center gap-1.5 rounded-full border border-ink/15 px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
+                      >
+                        {td("openInGoogleMaps")}
+                        <ExternalLink size={14} aria-hidden="true" />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </section>
+          </Reveal>
 
-          <div>
-            <h2 className="font-display text-xl font-semibold mb-4">{t("reviews")}</h2>
-            <ReviewsSection
-              rating={attraction.rating}
-              reviewCount={attraction.reviewCount}
-              reviews={attraction.reviews}
-            />
-            <div className="mt-6">
-              <ReviewForm
-                listingType="attraction"
-                listingId={attraction.id}
-                locale={locale}
-                pathToRevalidate={`/${locale}/attractions/${attraction.slug}`}
+          <Reveal>
+            <section id="reviews" aria-labelledby="reviews-heading" className="scroll-mt-36">
+              <h2 id="reviews-heading" className="mb-5 font-display text-2xl font-semibold">
+                {t("reviews")}
+              </h2>
+              <ReviewsSection
+                rating={attraction.rating}
+                reviewCount={attraction.reviewCount}
+                reviews={attraction.reviews}
               />
-            </div>
-          </div>
+              <div className="mt-6">
+                <ReviewForm
+                  listingType="attraction"
+                  listingId={attraction.id}
+                  locale={locale}
+                  pathToRevalidate={`/${locale}/attractions/${attraction.slug}`}
+                  allowPhotos
+                />
+              </div>
+            </section>
+          </Reveal>
 
           {(nearbyRestaurants.length > 0 || nearbyHotels.length > 0) && (
-            <div className="grid gap-8 sm:grid-cols-2">
-              {nearbyRestaurants.length > 0 && (
-                <div>
-                  <h3 className="font-display text-lg font-semibold mb-3">{t("nearbyRestaurants")}</h3>
-                  <div className="space-y-3">
-                    {nearbyRestaurants.map((r) => (
-                      <NearbyRow key={r.id} href={`/${locale}/restaurants/${r.slug}`} image={r.coverImage} name={r.name} />
-                    ))}
-                  </div>
+            <Reveal>
+              <section aria-labelledby="nearby-heading">
+                <div className="grid gap-8 sm:grid-cols-2">
+                  {nearbyRestaurants.length > 0 && (
+                    <div>
+                      <h3 id="nearby-heading" className="mb-3 font-display text-lg font-semibold">{t("nearbyRestaurants")}</h3>
+                      <div className="space-y-3">
+                        {nearbyRestaurants.map((r) => (
+                          <NearbyRow key={r.id} href={`/${locale}/restaurants/${r.slug}`} image={r.coverImage} name={r.name} subtitle={r.address} />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {nearbyHotels.length > 0 && (
+                    <div>
+                      <h3 className="mb-3 font-display text-lg font-semibold">{t("nearbyHotels")}</h3>
+                      <div className="space-y-3">
+                        {nearbyHotels.map((h) => (
+                          <NearbyRow key={h.id} href={`/${locale}/hotels/${h.slug}`} image={h.coverImage} name={h.name} subtitle={h.address} />
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
-              {nearbyHotels.length > 0 && (
-                <div>
-                  <h3 className="font-display text-lg font-semibold mb-3">{t("nearbyHotels")}</h3>
-                  <div className="space-y-3">
-                    {nearbyHotels.map((h) => (
-                      <NearbyRow key={h.id} href={`/${locale}/hotels/${h.slug}`} image={h.coverImage} name={h.name} />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+              </section>
+            </Reveal>
           )}
         </div>
 
-        <aside className="lg:sticky lg:top-24 h-fit space-y-3 rounded-xl3 border border-ink/8 dark:border-white/10 p-6 shadow-card">
+        <aside className="h-fit space-y-3 rounded-xl3 border border-ink/8 p-6 shadow-card dark:border-white/10 lg:sticky lg:top-24">
           <AddToTripButton locale={locale} listingType="attraction" listingId={attraction.id} />
           <h3 className="font-display text-lg font-semibold">{td("planYourVisit")}</h3>
           <p className="text-sm text-ink/70 dark:text-sand/70">
-            <strong>{t("entryFee")}:</strong> {attraction.entryFee}
+            <strong>{t("entryFee")}:</strong> {attraction.entryFee ?? "—"}
           </p>
           <p className="text-sm text-ink/70 dark:text-sand/70">
             <strong>{t("bestTimeToVisit")}:</strong> {attraction.bestTimeToVisit}
           </p>
         </aside>
       </div>
+
+      {similarAttractions.length > 0 && (
+        <section className="border-t border-ink/8 bg-white py-14 dark:border-white/10 dark:bg-white/[0.03] sm:py-20">
+          <div className="container-px mx-auto">
+            <Reveal>
+              <h2 className="mb-6 font-display text-2xl font-semibold sm:text-3xl">{td("youMayAlsoLike")}</h2>
+            </Reveal>
+            <Reveal delay={0.1}>
+              <div className="flex gap-5 overflow-x-auto pb-2 scrollbar-none sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-4">
+                {similarAttractions.map((a) => (
+                  <div key={a.id} className="min-w-[272px] sm:min-w-0">
+                    <ListingCard
+                      href={`/${locale}/attractions/${a.slug}`}
+                      image={a.coverImage}
+                      title={a.name}
+                      subtitle={a.address}
+                      rating={a.rating}
+                      reviewCount={a.reviewCount}
+                      listingType="attraction"
+                      listingId={a.id}
+                      locale={locale}
+                    />
+                  </div>
+                ))}
+              </div>
+            </Reveal>
+          </div>
+        </section>
+      )}
     </>
   );
 }
 
-function NearbyRow({ href, image, name }: { href: string; image: string; name: string }) {
+function NearbyRow({ href, image, name, subtitle }: { href: string; image: string; name: string; subtitle?: string }) {
   return (
-    <Link href={href} className="flex items-center gap-3 rounded-xl border border-ink/8 dark:border-white/10 p-3 hover:border-primary/40 transition-colors">
-      <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg">
-        <Image src={image} alt={name} fill sizes="48px" className="object-cover" />
+    <Link
+      href={href}
+      className="flex items-center gap-3 rounded-xl2 border border-ink/8 p-3 transition-colors hover:border-primary/40 dark:border-white/10"
+    >
+      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl">
+        <Image src={image} alt={name} fill sizes="64px" className="object-cover" />
       </div>
-      <p className="text-sm font-medium">{name}</p>
+      <div className="min-w-0">
+        <p className="truncate text-sm font-semibold">{name}</p>
+        {subtitle && <p className="line-clamp-1 text-xs text-ink/55 dark:text-sand/55">{subtitle}</p>}
+      </div>
     </Link>
   );
 }

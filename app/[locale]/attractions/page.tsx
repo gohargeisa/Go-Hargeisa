@@ -8,6 +8,7 @@ import { ListingCard } from "@/components/shared/listing-card";
 import { PageHero } from "@/components/shared/page-hero";
 import { SearchWithin } from "@/components/shared/search-within";
 import { EmptyState } from "@/components/shared/empty-state";
+import { Reveal } from "@/components/home/reveal";
 import { placeholderImage } from "@/lib/placeholder-image";
 
 // Public content changes infrequently; revalidate hourly instead of
@@ -49,37 +50,54 @@ export default async function AttractionsPage({
         })}
       />
 
-      <section className="container-px mx-auto py-14">
-        <SearchWithin
-          basePath={`/${locale}/attractions`}
-          placeholder={tl("searchAttractionsPlaceholder")}
-          defaultValue={searchParams.q}
-        />
+      <section className="container-px mx-auto py-10 md:py-14">
+        <Reveal>
+          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="font-display text-2xl font-bold md:text-3xl">
+                {tl("attractionsCount", { count: attractions.length })}
+              </h2>
+              <p className="mt-1 text-sm text-ink/60 dark:text-sand/60">
+                {searchParams.q ? tl("resultsFor", { query: searchParams.q }) : tl("browseAllAttractions")}
+              </p>
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <SearchWithin
+              basePath={`/${locale}/attractions`}
+              placeholder={tl("searchAttractionsPlaceholder")}
+              defaultValue={searchParams.q}
+            />
+          </div>
+        </Reveal>
 
         {attractions.length === 0 ? (
-          <EmptyState icon={SearchX} title={tl("noAttractionsMatch")} description={tl("adjustFilters")} className="mt-10" />
+          <EmptyState icon={SearchX} title={tl("noAttractionsMatch")} description={tl("adjustFilters")} className="mt-12" />
         ) : (
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {attractions.map((a) => (
-              <ListingCard
-                key={a.id}
-                href={`/${locale}/attractions/${a.slug}`}
-                image={a.coverImage}
-                title={a.name}
-                subtitle={a.address}
-                rating={a.rating}
-                reviewCount={a.reviewCount}
-                listingType="attraction"
-                listingId={a.id}
-                locale={locale}
-                tag={
-                  a.entryFee === "Free"
-                    ? tl("freeEntry")
-                    : a.entryFee ?? undefined
-                }
-              />
-            ))}
-          </div>
+          <Reveal delay={0.08}>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {attractions.map((a) => (
+                <ListingCard
+                  key={a.id}
+                  href={`/${locale}/attractions/${a.slug}`}
+                  image={a.coverImage}
+                  title={a.name}
+                  subtitle={a.address}
+                  rating={a.rating}
+                  reviewCount={a.reviewCount}
+                  listingType="attraction"
+                  listingId={a.id}
+                  locale={locale}
+                  tag={
+                    a.entryFee === "Free"
+                      ? tl("freeEntry")
+                      : a.entryFee ?? undefined
+                  }
+                />
+              ))}
+            </div>
+          </Reveal>
         )}
       </section>
     </>

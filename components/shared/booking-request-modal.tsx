@@ -67,7 +67,7 @@ function Stepper({
           onClick={() => onChange(Math.max(min, value - 1))}
           disabled={value <= min}
           aria-label={`Decrease ${label}`}
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-ink/15 text-ink transition-colors hover:border-primary hover:text-primary disabled:opacity-30 dark:border-white/20 dark:text-white"
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-ink/15 text-ink transition-colors hover:border-primary hover:text-primary disabled:opacity-30 dark:border-white/20 dark:text-white"
         >
           <Minus size={14} aria-hidden="true" />
         </button>
@@ -76,7 +76,7 @@ function Stepper({
           type="button"
           onClick={() => onChange(value + 1)}
           aria-label={`Increase ${label}`}
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-ink/15 text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-ink/15 text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
         >
           <Plus size={14} aria-hidden="true" />
         </button>
@@ -348,7 +348,7 @@ export function BookingRequestModal({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink/5 dark:bg-white/10"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-ink/5 transition-colors hover:bg-ink/10 dark:bg-white/10 dark:hover:bg-white/15"
           >
             <X size={17} aria-hidden="true" />
           </button>

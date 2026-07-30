@@ -33,45 +33,51 @@ export function ContactForm() {
     });
   }
 
+  const inputClass =
+    "w-full rounded-xl border border-ink/12 bg-transparent px-4 py-3.5 text-sm outline-none transition-colors duration-200 focus:border-primary dark:border-white/15";
+
   if (sent) {
     return (
-      <div className="flex items-center gap-2 rounded-xl2 border border-secondary/30 bg-secondary/5 p-6 text-secondary-700">
-        <Check size={18} /> {t("thanksMessage")}
+      <div className="flex items-center gap-2 rounded-xl3 border border-secondary/30 bg-secondary/5 p-6 text-secondary-700 shadow-soft">
+        <Check size={18} aria-hidden="true" /> {t("thanksMessage")}
       </div>
     );
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form
+      onSubmit={onSubmit}
+      className="space-y-4 rounded-xl3 border border-ink/8 bg-white p-6 shadow-soft dark:border-white/10 dark:bg-white/[0.03] sm:p-8"
+    >
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="contact-name" className="sr-only">
             {t("namePlaceholder")}
           </label>
-          <input id="contact-name" name="name" required placeholder={t("namePlaceholder")} className="w-full rounded-xl border border-ink/12 dark:border-white/15 bg-transparent px-4 py-3 text-sm outline-none focus:border-primary" />
+          <input id="contact-name" name="name" required placeholder={t("namePlaceholder")} className={inputClass} />
         </div>
         <div>
           <label htmlFor="contact-email" className="sr-only">
             {t("emailPlaceholder")}
           </label>
-          <input id="contact-email" name="email" required type="email" placeholder={t("emailPlaceholder")} className="w-full rounded-xl border border-ink/12 dark:border-white/15 bg-transparent px-4 py-3 text-sm outline-none focus:border-primary" />
+          <input id="contact-email" name="email" required type="email" placeholder={t("emailPlaceholder")} className={inputClass} />
         </div>
       </div>
       <label htmlFor="contact-subject" className="sr-only">
         {t("subjectPlaceholder")}
       </label>
-      <input id="contact-subject" name="subject" placeholder={t("subjectPlaceholder")} className="w-full rounded-xl border border-ink/12 dark:border-white/15 bg-transparent px-4 py-3 text-sm outline-none focus:border-primary" />
+      <input id="contact-subject" name="subject" placeholder={t("subjectPlaceholder")} className={inputClass} />
       <label htmlFor="contact-message" className="sr-only">
         {t("messagePlaceholder")}
       </label>
-      <textarea id="contact-message" name="message" required rows={5} placeholder={t("messagePlaceholder")} className="w-full rounded-xl border border-ink/12 dark:border-white/15 bg-transparent px-4 py-3 text-sm outline-none focus:border-primary" />
+      <textarea id="contact-message" name="message" required rows={5} placeholder={t("messagePlaceholder")} className={inputClass} />
       {error && <p className="text-sm text-red-600">{error}</p>}
       <button
         type="submit"
         disabled={isPending}
-        className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary-700 transition-colors disabled:opacity-70"
+        className="inline-flex h-12 items-center gap-2 rounded-full bg-primary px-6 text-sm font-semibold text-white shadow-soft transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-primary-700 hover:shadow-card active:scale-95 disabled:opacity-70"
       >
-        {isPending && <Loader2 size={14} className="animate-spin" />}
+        {isPending && <Loader2 size={14} className="animate-spin" aria-hidden="true" />}
         {t("sendMessage")}
       </button>
     </form>

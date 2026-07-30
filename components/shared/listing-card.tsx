@@ -52,9 +52,9 @@ export function ListingCard({
     >
       <Link
         href={href}
-        className="flex h-full flex-col overflow-hidden rounded-3xl border border-ink/8 bg-white shadow-[0_8px_24px_rgba(20,30,45,0.07)] transition-shadow duration-300 ease-premium hover:border-primary/25 hover:shadow-[0_24px_50px_rgba(20,30,45,0.16)] dark:border-white/10 dark:bg-white/[0.04] dark:hover:shadow-[0_24px_50px_rgba(0,0,0,0.45)]"
+        className="flex h-full flex-col overflow-hidden rounded-xl3 border border-ink/8 bg-white shadow-soft transition-shadow duration-300 ease-premium hover:border-primary/25 hover:shadow-card dark:border-white/10 dark:bg-white/[0.04]"
       >
-        <div className="relative h-44 overflow-hidden sm:h-48">
+        <div className="relative h-52 overflow-hidden sm:h-56">
           {!loaded && <div className="skeleton absolute inset-0" aria-hidden="true" />}
           <Image
             src={image}
@@ -74,7 +74,7 @@ export function ListingCard({
               onClick={onToggleFavorite}
               disabled={isPending}
               aria-label={favorited ? t("removeFromFavorites", { name: title }) : t("addToFavorites", { name: title })}
-              className="absolute end-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-ink shadow-sm transition-transform duration-300 hover:scale-110 active:scale-95 disabled:opacity-60"
+              className="absolute end-3 top-3 flex h-11 w-11 items-center justify-center rounded-full bg-white/95 text-ink shadow-sm transition-transform duration-300 hover:scale-110 active:scale-95 disabled:opacity-60"
             >
               {isPending ? <Loader2 size={18} className="animate-spin" /> : <Heart size={18} fill={favorited ? "#F4B400" : "none"} color={favorited ? "#F4B400" : "#444"} />}
             </button>

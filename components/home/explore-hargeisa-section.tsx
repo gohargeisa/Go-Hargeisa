@@ -192,7 +192,7 @@ export function ExploreHargeisaSection({ locale }: { locale: string }) {
                 type="button"
                 onClick={closeToast}
                 aria-label={t("exploreHargeisaComingSoonDismiss")}
-                className="shrink-0 rounded-full p-1 text-white/60 transition-colors hover:bg-white/10 hover:text-white dark:text-ink/50 dark:hover:bg-ink/10 dark:hover:text-ink"
+                className="-m-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white/60 transition-colors hover:bg-white/10 hover:text-white dark:text-ink/50 dark:hover:bg-ink/10 dark:hover:text-ink"
               >
                 <X size={15} aria-hidden="true" />
               </button>

@@ -82,7 +82,7 @@ export default async function HomePage({
       {/* About Go Hargeisa */}
       <section className="mx-auto max-w-7xl px-5 pb-20 pt-2 md:px-8 md:pb-28 md:pt-12 lg:px-12">
         <Reveal>
-          <div className="mx-auto max-w-5xl rounded-[32px] border border-primary/20 bg-gradient-to-br from-primary via-primary-700 to-secondary-800 p-8 shadow-2xl sm:p-12 md:p-16">
+          <div className="mx-auto max-w-5xl rounded-[32px] border border-primary/20 bg-gradient-to-br from-primary via-primary-700 to-secondary-800 p-8 shadow-premium-lg sm:p-12 md:p-16">
             <div className="text-center">
               <span className="inline-flex rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm font-semibold text-white backdrop-blur-sm">
                 {t("aboutBadge")}
@@ -105,7 +105,7 @@ export default async function HomePage({
               ].map(({ emoji, titleKey, descKey, bg }) => (
                 <div
                   key={titleKey}
-                  className="rounded-3xl bg-white p-6 shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl dark:bg-ink/90 dark:shadow-none sm:p-8"
+                  className="rounded-xl3 bg-white p-6 shadow-soft transition-all duration-300 ease-premium hover:-translate-y-2 hover:shadow-card dark:bg-ink/90 dark:shadow-none sm:p-8"
                 >
                   <div
                     className={`mb-5 flex h-14 w-14 items-center justify-center rounded-2xl text-3xl ${bg}`}
@@ -134,7 +134,7 @@ export default async function HomePage({
             <Reveal>
               <div className="mx-auto mb-10 max-w-2xl text-center md:mb-14">
                 <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary">
-                  Stay
+                  {t("hotelsEyebrow")}
                 </span>
                 <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">
                   {t("hotelsTitle")}
@@ -174,7 +174,7 @@ export default async function HomePage({
             <Reveal>
               <div className="mx-auto mb-10 max-w-2xl text-center md:mb-14">
                 <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary">
-                  Eat
+                  {t("restaurantsEyebrow")}
                 </span>
                 <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">
                   {t("restaurantsTitle")}
@@ -215,7 +215,7 @@ export default async function HomePage({
             <Reveal>
               <div className="mx-auto mb-10 max-w-2xl text-center md:mb-14">
                 <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary">
-                  Sip
+                  {t("cafesEyebrow")}
                 </span>
                 <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">
                   {t("cafesTitle")}
@@ -256,7 +256,7 @@ export default async function HomePage({
             <Reveal>
               <div className="mx-auto mb-10 max-w-2xl text-center md:mb-14">
                 <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary">
-                  Essentials
+                  {t("servicesEyebrow")}
                 </span>
                 <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">
                   {t("servicesTitle")}
@@ -296,7 +296,7 @@ export default async function HomePage({
               <div className="mb-10 flex flex-col gap-5 md:mb-14 md:flex-row md:items-end md:justify-between">
                 <div>
                   <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary">
-                    Discover
+                    {t("attractionsEyebrow")}
                   </span>
                   <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">
                     {t("attractionsTitle")}

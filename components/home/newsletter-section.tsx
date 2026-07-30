@@ -23,7 +23,7 @@ export function NewsletterSection({ locale }: { locale: Locale }) {
       if (result.ok) {
         setSubmitted(true);
       } else {
-        setError(result.error ?? "Something went wrong.");
+        setError(result.error ?? t("newsletterError"));
       }
     });
   }
@@ -53,7 +53,7 @@ export function NewsletterSection({ locale }: { locale: Locale }) {
 
           {submitted ? (
             <p className="relative mt-7 inline-flex items-center gap-2 rounded-full bg-white/15 px-5 py-3 text-sm font-medium">
-              <Check size={16} aria-hidden="true" /> Thanks — you're subscribed.
+              <Check size={16} aria-hidden="true" /> {t("newsletterSuccess")}
             </p>
           ) : (
             <form

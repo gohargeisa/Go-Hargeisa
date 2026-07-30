@@ -140,7 +140,7 @@ export function ServiceCard({
             onClick={onToggleFavorite}
             disabled={isPending}
             aria-label={favorited ? t("removeFromFavorites", { name }) : t("addToFavorites", { name })}
-            className="absolute end-3 bottom-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-ink shadow-sm transition-transform hover:scale-105 disabled:opacity-60 dark:bg-ink/90 dark:text-white"
+            className="absolute end-3 bottom-3 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white/95 text-ink shadow-sm transition-all duration-300 hover:scale-110 hover:shadow-[0_6px_16px_rgba(0,0,0,0.25)] active:scale-95 disabled:opacity-60 dark:bg-ink/90 dark:text-white"
           >
             {isPending ? (
               <Loader2 size={17} className="animate-spin" aria-hidden="true" />

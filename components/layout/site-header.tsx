@@ -126,10 +126,15 @@ export function SiteHeader({ locale, initialUser }: { locale: Locale; initialUse
           <LanguageSwitcher locale={locale} />
           <button
             aria-label="Toggle menu"
+            aria-expanded={open}
             onClick={() => setOpen((o) => !o)}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-ink/10 dark:border-white/15"
+            className={`flex h-11 w-11 items-center justify-center rounded-full border transition-colors duration-300 ${
+              scrolled
+                ? "border-ink/10 text-ink dark:border-white/15 dark:text-white"
+                : "border-white/30 text-white"
+            }`}
           >
-            {open ? <X size={18} /> : <Menu size={18} />}
+            {open ? <X size={19} aria-hidden="true" /> : <Menu size={19} aria-hidden="true" />}
           </button>
         </div>
       </div>
