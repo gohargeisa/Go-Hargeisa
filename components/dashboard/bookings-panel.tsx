@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { BedDouble, CalendarCheck, Users } from "lucide-react";
+import { EmptyState } from "@/components/shared/empty-state";
 import type { Booking } from "@/types";
 import type { Locale } from "@/lib/i18n/config";
 
@@ -45,7 +46,7 @@ export function BookingsPanel({ locale, bookings }: { locale: Locale; bookings: 
             type="button"
             onClick={() => setFilter(s)}
             aria-pressed={filter === s}
-            className={`inline-flex items-center rounded-full border px-3.5 py-1.5 text-xs font-semibold capitalize transition-colors ${
+            className={`inline-flex items-center rounded-full border px-3.5 py-1.5 text-xs font-semibold capitalize transition-all duration-300 ease-premium ${
               filter === s
                 ? "border-transparent bg-primary text-white"
                 : "border-ink/10 text-ink/60 hover:border-primary/40 hover:text-primary dark:border-white/15 dark:text-sand/60"
@@ -57,19 +58,11 @@ export function BookingsPanel({ locale, bookings }: { locale: Locale; bookings: 
       </div>
 
       {filtered.length === 0 ? (
-        <div className="flex min-h-56 flex-col items-center justify-center rounded-2xl border border-dashed border-primary/25 bg-primary/[0.035] px-6 text-center dark:bg-primary/[0.08]">
-          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-primary shadow-sm dark:bg-ink">
-            <CalendarCheck size={22} />
-          </span>
-          <h3 className="mt-4 font-display text-xl font-semibold">{t("emptyBookingsTitle")}</h3>
-          <p className="mt-2 max-w-sm text-sm leading-6 text-ink/55 dark:text-sand/60">
-            {t("emptyBookingsDescription")}
-          </p>
-        </div>
+        <EmptyState icon={CalendarCheck} title={t("emptyBookingsTitle")} description={t("emptyBookingsDescription")} />
       ) : (
         <div className="space-y-3">
           {filtered.map((b) => (
-            <div key={b.id} className="rounded-2xl border border-ink/8 p-5 transition-shadow hover:shadow-sm dark:border-white/10">
+            <div key={b.id} className="rounded-xl2 border border-ink/8 p-5 transition-shadow duration-300 ease-premium hover:shadow-soft dark:border-white/10">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
                   {b.hotelSlug ? (

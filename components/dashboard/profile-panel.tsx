@@ -8,6 +8,7 @@ import { useToast, ToastViewport } from "@/components/shared/toast";
 import { updateProfile, changePassword } from "@/lib/actions/profile";
 import { createClient } from "@/lib/supabase/client";
 import { useUnsavedChangesWarning } from "@/lib/hooks/use-unsaved-changes-warning";
+import { PrimaryButton, SecondaryButton } from "@/components/shared/buttons";
 import type { Locale } from "@/lib/i18n/config";
 
 const BIO_MAX_LENGTH = 280;
@@ -144,14 +145,10 @@ export function ProfilePanel({
 
         {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
 
-        <button
-          type="submit"
-          disabled={isPending}
-          className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-white hover:bg-primary-700 transition-colors disabled:opacity-70"
-        >
-          {isPending ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+        <PrimaryButton type="submit" disabled={isPending}>
+          {isPending ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <Check size={14} aria-hidden="true" />}
           {isPending ? t("saving") : t("saveChanges")}
-        </button>
+        </PrimaryButton>
       </form>
 
       <div className="mt-10 max-w-lg border-t border-ink/8 pt-8 dark:border-white/10">
@@ -241,14 +238,10 @@ function ChangePasswordForm() {
       {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
       {success && <p className="text-sm text-emerald-600">{t("passwordChangedSuccess")}</p>}
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="inline-flex items-center gap-2 rounded-full border border-ink/15 dark:border-white/20 px-6 py-2.5 text-sm font-semibold hover:border-primary hover:text-primary transition-colors disabled:opacity-70"
-      >
-        {isPending && <Loader2 size={14} className="animate-spin" />}
+      <SecondaryButton type="submit" disabled={isPending}>
+        {isPending && <Loader2 size={14} className="animate-spin" aria-hidden="true" />}
         {isPending ? t("saving") : t("changePasswordButton")}
-      </button>
+      </SecondaryButton>
     </form>
   );
 }

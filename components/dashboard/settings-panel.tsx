@@ -20,6 +20,7 @@ import { SignOutButton } from "@/components/shared/sign-out-button";
 import { useToast, ToastViewport } from "@/components/shared/toast";
 import { updateNotificationPreferences, deleteAccount } from "@/lib/actions/account-settings";
 import { createClient } from "@/lib/supabase/client";
+import { SecondaryButton } from "@/components/shared/buttons";
 
 export function SettingsPanel({
   locale,
@@ -105,7 +106,7 @@ export function SettingsPanel({
           </Link>
         </p>
         <div className="mt-4 flex flex-wrap gap-3">
-          <SignOutButton locale={locale} className="inline-flex items-center gap-2 rounded-full border border-ink/15 dark:border-white/20 px-5 py-2.5 text-sm font-semibold hover:border-primary hover:text-primary transition-colors" />
+          <SignOutButton locale={locale} className="inline-flex items-center gap-2 rounded-full border border-ink/15 px-5 py-2.5 text-sm font-semibold transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:border-primary hover:text-primary dark:border-white/20" />
           <SignOutAllDevicesButton locale={locale} />
         </div>
       </SettingsSection>
@@ -132,10 +133,10 @@ function SettingsSection({
 }) {
   return (
     <section
-      className={`rounded-2xl border p-5 sm:p-6 ${
+      className={`rounded-xl2 border p-5 shadow-soft transition-shadow duration-300 ease-premium sm:p-6 ${
         tone === "danger"
           ? "border-red-500/25 bg-red-500/[0.03] dark:bg-red-500/[0.06]"
-          : "border-ink/8 dark:border-white/10"
+          : "border-ink/8 hover:shadow-card dark:border-white/10"
       }`}
     >
       <h3
@@ -169,10 +170,10 @@ function LanguageOptions({ locale }: { locale: Locale }) {
           type="button"
           onClick={() => switchTo(l)}
           aria-pressed={l === locale}
-          className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
+          className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-all duration-300 ease-premium ${
             l === locale
               ? "border-primary bg-primary/10 text-primary"
-              : "border-ink/12 dark:border-white/15 hover:border-primary/40"
+              : "border-ink/12 hover:-translate-y-0.5 hover:border-primary/40 dark:border-white/15"
           }`}
         >
           <FlagIcon locale={l} size={16} />
@@ -256,7 +257,7 @@ function ToggleRow({
   onChange: (value: boolean) => void;
 }) {
   return (
-    <div className="flex items-start justify-between gap-4">
+    <div className="flex items-start justify-between gap-4 rounded-xl border border-ink/8 p-4 transition-colors duration-300 ease-premium hover:border-primary/20 dark:border-white/10">
       <div>
         <p className="text-sm font-semibold">{label}</p>
         <p className="mt-0.5 text-xs text-ink/50 dark:text-sand/55">{description}</p>
@@ -267,12 +268,12 @@ function ToggleRow({
         aria-checked={checked}
         disabled={disabled}
         onClick={() => onChange(!checked)}
-        className={`relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-60 ${
+        className={`relative h-6 w-11 shrink-0 rounded-full transition-colors duration-300 ease-premium disabled:opacity-60 ${
           checked ? "bg-primary" : "bg-ink/15 dark:bg-white/15"
         }`}
       >
         <span
-          className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
+          className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-300 ease-premium ${
             checked ? "translate-x-5" : "translate-x-0.5"
           }`}
         />
@@ -318,18 +319,18 @@ function DeleteAccountSection({
         <button
           type="button"
           onClick={() => setConfirming(true)}
-          className="mt-4 inline-flex items-center gap-2 rounded-full border border-red-500/40 px-5 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-500/10 transition-colors dark:text-red-400"
+          className="mt-4 inline-flex items-center gap-2 rounded-full border border-red-500/40 px-5 py-2.5 text-sm font-semibold text-red-600 transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-red-500/10 dark:text-red-400"
         >
-          <Trash2 size={15} /> {t("deleteAccountButton")}
+          <Trash2 size={15} aria-hidden="true" /> {t("deleteAccountButton")}
         </button>
       ) : (
-        <div className="mt-4 space-y-3 rounded-xl border border-red-500/25 bg-white p-4 dark:bg-ink">
+        <div className="mt-4 space-y-3 rounded-xl2 border border-red-500/25 bg-white p-4 dark:bg-ink">
           <p className="text-sm font-semibold text-red-600 dark:text-red-400">{t("deleteAccountConfirmPrompt")}</p>
           <input
             value={confirmationText}
             onChange={(e) => setConfirmationText(e.target.value)}
             placeholder="DELETE"
-            className="w-full max-w-xs rounded-xl border border-ink/12 dark:border-white/15 bg-transparent px-4 py-2.5 text-sm outline-none focus:border-red-500"
+            className="w-full max-w-xs rounded-xl border border-ink/12 bg-transparent px-4 py-2.5 text-sm outline-none transition-colors focus:border-red-500 dark:border-white/15"
           />
           {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
           <div className="flex flex-wrap gap-3">
@@ -337,22 +338,20 @@ function DeleteAccountSection({
               type="button"
               onClick={onDelete}
               disabled={isPending || confirmationText.trim().toUpperCase() !== "DELETE"}
-              className="inline-flex items-center gap-2 rounded-full bg-red-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-red-700 transition-colors disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-full bg-red-600 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-red-700 disabled:opacity-50 disabled:pointer-events-none"
             >
-              {isPending && <Loader2 size={14} className="animate-spin" />}
+              {isPending && <Loader2 size={14} className="animate-spin" aria-hidden="true" />}
               {t("deleteAccountConfirmButton")}
             </button>
-            <button
-              type="button"
+            <SecondaryButton
               onClick={() => {
                 setConfirming(false);
                 setConfirmationText("");
                 setError(null);
               }}
-              className="inline-flex items-center gap-2 rounded-full border border-ink/15 dark:border-white/20 px-5 py-2.5 text-sm font-semibold hover:bg-ink/5 dark:hover:bg-white/5 transition-colors"
             >
               {t("cancel")}
-            </button>
+            </SecondaryButton>
           </div>
         </div>
       )}
@@ -377,14 +376,9 @@ function SignOutAllDevicesButton({ locale }: { locale: Locale }) {
   }
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={isPending}
-      className="inline-flex items-center gap-2 rounded-full border border-ink/15 dark:border-white/20 px-5 py-2.5 text-sm font-semibold hover:border-primary hover:text-primary transition-colors disabled:opacity-70"
-    >
-      {isPending ? <Loader2 size={14} className="animate-spin" /> : <LogOut size={14} />}
+    <SecondaryButton onClick={onClick} disabled={isPending}>
+      {isPending ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <LogOut size={14} aria-hidden="true" />}
       {t("signOutAllDevices")}
-    </button>
+    </SecondaryButton>
   );
 }
