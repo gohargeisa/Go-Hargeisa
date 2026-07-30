@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, m, useReducedMotion } from "framer-motion";
 import { Fuel, MoonStar, Pill, ShoppingCart, Sparkles, Stethoscope, X, type LucideIcon } from "lucide-react";
 import { Reveal } from "@/components/home/reveal";
 import { SERVICES_PUBLIC_ENABLED } from "@/lib/config/features";
@@ -143,7 +143,7 @@ export function ExploreHargeisaSection({ locale }: { locale: string }) {
 
               if (href) {
                 return (
-                  <motion.div
+                  <m.div
                     key={category}
                     whileHover={reduceMotion ? undefined : { y: -8 }}
                     transition={{ type: "spring", stiffness: 300, damping: 24 }}
@@ -151,12 +151,12 @@ export function ExploreHargeisaSection({ locale }: { locale: string }) {
                     <Link href={`/${locale}${href}`} className={cardClassName}>
                       {cardContent}
                     </Link>
-                  </motion.div>
+                  </m.div>
                 );
               }
 
               return (
-                <motion.button
+                <m.button
                   key={category}
                   type="button"
                   onClick={openToast}
@@ -165,7 +165,7 @@ export function ExploreHargeisaSection({ locale }: { locale: string }) {
                   className={cardClassName}
                 >
                   {cardContent}
-                </motion.button>
+                </m.button>
               );
             })}
           </div>
@@ -178,7 +178,7 @@ export function ExploreHargeisaSection({ locale }: { locale: string }) {
       >
         <AnimatePresence>
           {toastOpen && (
-            <motion.div
+            <m.div
               role="status"
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
@@ -196,7 +196,7 @@ export function ExploreHargeisaSection({ locale }: { locale: string }) {
               >
                 <X size={15} aria-hidden="true" />
               </button>
-            </motion.div>
+            </m.div>
           )}
         </AnimatePresence>
       </div>

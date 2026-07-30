@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
+import { LazyMotion, domAnimation } from "framer-motion";
 import { locales, localeConfig, type Locale } from "@/lib/i18n/config";
 import { ThemeProvider } from "@/components/layout/theme-provider";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -153,14 +154,26 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider messages={messages}>
-      <ThemeProvider>
-        <div lang={currentLocale} dir={localeConfig[currentLocale].dir} className="min-h-screen font-body">
-          <SiteHeader locale={currentLocale} initialUser={initialUser} />
-          <main>{children}</main>
-          <SiteFooter locale={currentLocale} />
-          <ServiceWorkerRegister />
-        </div>
-      </ThemeProvider>
+      {/* LazyMotion + the `m` component (used everywhere instead of `motion`)
+          is framer-motion's own documented pattern for this exact problem:
+          `motion.*` always bundles the full drag/layout/3d feature set,
+          while `m.*` defers to whichever feature bundle is loaded here.
+          `domAnimation` covers every animation actually used across this
+          app (variants, whileHover/whileTap/whileInView, AnimatePresence) —
+          nothing here uses drag or layout animations, which is what the
+          larger `domMax` bundle would add. Loaded synchronously (not
+          lazily) so there's no flash of unanimated content on first paint,
+          e.g. the hero's entrance animation. */}
+      <LazyMotion features={domAnimation} strict>
+        <ThemeProvider>
+          <div lang={currentLocale} dir={localeConfig[currentLocale].dir} className="min-h-screen font-body">
+            <SiteHeader locale={currentLocale} initialUser={initialUser} />
+            <main>{children}</main>
+            <SiteFooter locale={currentLocale} />
+            <ServiceWorkerRegister />
+          </div>
+        </ThemeProvider>
+      </LazyMotion>
     </NextIntlClientProvider>
   );
 }

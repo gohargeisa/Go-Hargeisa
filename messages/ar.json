@@ -144,7 +144,10 @@
     "history": "التاريخ",
     "loading": "جارٍ التحميل…",
     "noResults": "لا توجد نتائج.",
-    "breadcrumbAriaLabel": "مسار التصفح"
+    "breadcrumbAriaLabel": "مسار التصفح",
+    "bookOnWebsite": "احجز عبر الموقع الرسمي",
+    "bookViaWhatsApp": "احجز عبر واتساب",
+    "bookOnBookingCom": "احجز عبر Booking.com"
   },
   "claimBusiness": {
     "button": "طالب بملكية هذا النشاط التجاري",
@@ -804,9 +807,6 @@
     "featuredBadge": "مميز",
     "viewDetails": "عرض التفاصيل",
     "bookNow": "احجز الآن",
-    "bookOnWebsite": "احجز عبر الموقع الرسمي",
-    "bookViaWhatsApp": "احجز عبر واتساب",
-    "bookOnBookingCom": "احجز عبر Booking.com",
     "startingFrom": "يبدأ من",
     "priceOnRequest": "السعر عند الطلب",
     "perNight": "/الليلة",

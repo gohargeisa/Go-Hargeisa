@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { BarChart3 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { AnalyticsRange, ViewsSeriesPoint } from "@/lib/data/business";
@@ -91,7 +91,7 @@ export function ViewsChart({
                   <stop offset="100%" stopColor="#F59E0B" stopOpacity="0" />
                 </linearGradient>
               </defs>
-              <motion.path
+              <m.path
                 key={`${range}-area`}
                 d={areaPath}
                 fill="url(#viewsGradient)"
@@ -100,7 +100,7 @@ export function ViewsChart({
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5 }}
               />
-              <motion.path
+              <m.path
                 key={`${range}-line`}
                 d={linePath}
                 fill="none"

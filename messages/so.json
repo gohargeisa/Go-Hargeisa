@@ -144,7 +144,10 @@
     "history": "Taariikhda",
     "loading": "Waa la soo rarayaa…",
     "noResults": "Wax natiijo ah lama helin.",
-    "breadcrumbAriaLabel": "Waddada Raadraaca"
+    "breadcrumbAriaLabel": "Waddada Raadraaca",
+    "bookOnWebsite": "Ka Buukee Website-ka Rasmiga ah",
+    "bookViaWhatsApp": "Ka Buukee WhatsApp",
+    "bookOnBookingCom": "Ka Buukee Booking.com"
   },
   "claimBusiness": {
     "button": "U Sheeg Ganacsigan Adiga",
@@ -804,9 +807,6 @@
     "featuredBadge": "La Xushay",
     "viewDetails": "Fiiri Faahfaahinta",
     "bookNow": "Hadda Buukee",
-    "bookOnWebsite": "Ka Buukee Website-ka Rasmiga ah",
-    "bookViaWhatsApp": "Ka Buukee WhatsApp",
-    "bookOnBookingCom": "Ka Buukee Booking.com",
     "startingFrom": "Ka bilaabma",
     "priceOnRequest": "Qiimaha marka la codsado",
     "perNight": "/habeenkii",

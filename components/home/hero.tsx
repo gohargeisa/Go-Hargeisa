@@ -4,7 +4,7 @@ import { useId, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { motion, useReducedMotion } from "framer-motion";
+import { m, useReducedMotion } from "framer-motion";
 import {
   Search,
   MapPin,
@@ -92,7 +92,7 @@ export function Hero({ locale }: { locale: Locale }) {
       <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-ink/10" />
 
       <div className="container-px relative z-10 mx-auto flex w-full flex-col items-center pt-24 text-center text-white sm:pt-28 md:pt-16 lg:min-w-0 lg:pt-24 lg:pb-8">
-        <motion.span
+        <m.span
           custom={0}
           initial={initial}
           animate="show"
@@ -101,9 +101,9 @@ export function Hero({ locale }: { locale: Locale }) {
         >
           <span aria-hidden="true">🥇</span>
           {t("premiumBadge")}
-        </motion.span>
+        </m.span>
 
-        <motion.span
+        <m.span
           custom={1}
           initial={initial}
           animate="show"
@@ -112,9 +112,9 @@ export function Hero({ locale }: { locale: Locale }) {
         >
           <MapPin size={13} aria-hidden="true" />
           {t("eyebrow")}
-        </motion.span>
+        </m.span>
 
-        <motion.h1
+        <m.h1
           custom={2}
           initial={initial}
           animate="show"
@@ -122,9 +122,9 @@ export function Hero({ locale }: { locale: Locale }) {
           className="mt-6 max-w-3xl text-balance font-display text-4xl font-semibold leading-[1.08] sm:text-5xl md:text-6xl lg:text-[5.25rem] lg:leading-[1.03] lg:break-words"
         >
           {t("title")}
-        </motion.h1>
+        </m.h1>
 
-        <motion.p
+        <m.p
           custom={3}
           initial={initial}
           animate="show"
@@ -132,9 +132,9 @@ export function Hero({ locale }: { locale: Locale }) {
           className="mt-4 max-w-2xl text-balance font-display text-lg font-semibold text-white/95 sm:text-xl md:text-2xl lg:mt-3"
         >
           {t("positioning")}
-        </motion.p>
+        </m.p>
 
-        <motion.p
+        <m.p
           custom={4}
           initial={initial}
           animate="show"
@@ -142,9 +142,9 @@ export function Hero({ locale }: { locale: Locale }) {
           className="mt-4 max-w-xl text-balance text-base text-white/85 md:text-lg lg:mt-3"
         >
           {t("subtitle")}
-        </motion.p>
+        </m.p>
 
-        <motion.div
+        <m.div
           custom={5}
           initial={initial}
           animate="show"
@@ -160,9 +160,9 @@ export function Hero({ locale }: { locale: Locale }) {
               {t(labelKey)}
             </span>
           ))}
-        </motion.div>
+        </m.div>
 
-        <motion.form
+        <m.form
           custom={6}
           initial={initial}
           animate="show"
@@ -199,9 +199,9 @@ export function Hero({ locale }: { locale: Locale }) {
               {t("searchButton")}
             </button>
           </div>
-        </motion.form>
+        </m.form>
 
-        <motion.div
+        <m.div
           custom={7}
           initial={initial}
           animate="show"
@@ -248,7 +248,7 @@ export function Hero({ locale }: { locale: Locale }) {
               );
             }
           )}
-        </motion.div>
+        </m.div>
       </div>
     </section>
   );

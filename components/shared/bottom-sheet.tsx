@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, m, useReducedMotion } from "framer-motion";
 import { X } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -36,7 +36,7 @@ export function BottomSheet({
     <AnimatePresence>
       {open && (
         <>
-          <motion.div
+          <m.div
             initial={reduceMotion ? undefined : { opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={reduceMotion ? undefined : { opacity: 0 }}
@@ -44,7 +44,7 @@ export function BottomSheet({
             onClick={onClose}
             aria-hidden="true"
           />
-          <motion.div
+          <m.div
             role="dialog"
             aria-modal="true"
             aria-label={title}
@@ -66,7 +66,7 @@ export function BottomSheet({
               </button>
             </div>
             {children}
-          </motion.div>
+          </m.div>
         </>
       )}
     </AnimatePresence>

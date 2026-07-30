@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { motion, useReducedMotion } from "framer-motion";
+import { m, useReducedMotion } from "framer-motion";
 import { ArrowRight, Heart, Loader2, MapPin, Star } from "lucide-react";
 import { RatingBadge } from "./rating-badge";
 import { toggleFavoriteAction } from "@/lib/actions/favorites";
@@ -45,7 +45,7 @@ export function ListingCard({
   }
 
   return (
-    <motion.div
+    <m.div
       whileHover={reduceMotion ? undefined : { y: -6 }}
       transition={{ type: "spring", stiffness: 300, damping: 24 }}
       className="group h-full w-full min-w-[272px]"
@@ -101,6 +101,6 @@ export function ListingCard({
           </div>
         </div>
       </Link>
-    </motion.div>
+    </m.div>
   );
 }

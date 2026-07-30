@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m } from "framer-motion";
 import { CheckCircle2, X, XCircle } from "lucide-react";
 
 export type ToastState = { type: "success" | "error"; message: string } | null;
@@ -39,7 +39,7 @@ export function ToastViewport({ toast, onDismiss }: { toast: ToastState; onDismi
     <div aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-6 z-[100] flex justify-center px-4">
       <AnimatePresence>
         {toast && (
-          <motion.div
+          <m.div
             role="status"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -65,7 +65,7 @@ export function ToastViewport({ toast, onDismiss }: { toast: ToastState; onDismi
             >
               <X size={15} aria-hidden="true" />
             </button>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>

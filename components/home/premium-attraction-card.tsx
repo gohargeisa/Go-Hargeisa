@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { memo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { motion, useReducedMotion } from "framer-motion";
+import { m, useReducedMotion } from "framer-motion";
 import { Heart, Landmark, Loader2, MapPin, Sparkles, Star } from "lucide-react";
 import { toggleFavoriteAction } from "@/lib/actions/favorites";
 
@@ -67,7 +67,7 @@ function PremiumAttractionCardBase({
   const hasRealImage = Boolean(image) && !image.includes("placehold.co");
 
   return (
-    <motion.div
+    <m.div
       whileHover={reduceMotion ? undefined : { y: -8 }}
       transition={{ type: "spring", stiffness: 300, damping: 24 }}
       className="group flex h-full w-full min-w-[288px] flex-col overflow-hidden rounded-[28px] border border-ink/8 bg-white shadow-[0_8px_24px_rgba(20,30,45,0.07)] transition-shadow duration-300 ease-out hover:border-primary/25 hover:shadow-[0_28px_60px_rgba(20,30,45,0.16)] dark:border-white/10 dark:bg-white/[0.04] dark:hover:shadow-[0_28px_60px_rgba(0,0,0,0.45)]"
@@ -182,7 +182,7 @@ function PremiumAttractionCardBase({
           </Link>
         </div>
       </div>
-    </motion.div>
+    </m.div>
   );
 }
 

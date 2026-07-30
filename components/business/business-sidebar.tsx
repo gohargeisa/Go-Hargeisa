@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, m, useReducedMotion } from "framer-motion";
 import {
   Home,
   Building2,
@@ -149,7 +149,7 @@ export function BusinessSidebar({ locale, listing }: { locale: Locale; listing: 
       <AnimatePresence>
         {mobileOpen && (
           <>
-            <motion.div
+            <m.div
               initial={reduceMotion ? undefined : { opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={reduceMotion ? undefined : { opacity: 0 }}
@@ -157,7 +157,7 @@ export function BusinessSidebar({ locale, listing }: { locale: Locale; listing: 
               onClick={() => setMobileOpen(false)}
               aria-hidden="true"
             />
-            <motion.div
+            <m.div
               role="dialog"
               aria-modal="true"
               aria-label={t("navAriaLabel")}
@@ -180,7 +180,7 @@ export function BusinessSidebar({ locale, listing }: { locale: Locale; listing: 
               </div>
               {nav}
               {footer}
-            </motion.div>
+            </m.div>
           </>
         )}
       </AnimatePresence>

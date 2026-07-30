@@ -144,7 +144,10 @@
     "history": "History",
     "loading": "Loading…",
     "noResults": "No results found.",
-    "breadcrumbAriaLabel": "Breadcrumb"
+    "breadcrumbAriaLabel": "Breadcrumb",
+    "bookOnWebsite": "Book on Official Website",
+    "bookViaWhatsApp": "Book via WhatsApp",
+    "bookOnBookingCom": "Book on Booking.com"
   },
   "claimBusiness": {
     "button": "Claim this Business",
@@ -804,9 +807,6 @@
     "featuredBadge": "Featured",
     "viewDetails": "View Details",
     "bookNow": "Book Now",
-    "bookOnWebsite": "Book on Official Website",
-    "bookViaWhatsApp": "Book via WhatsApp",
-    "bookOnBookingCom": "Book on Booking.com",
     "startingFrom": "Starting from",
     "priceOnRequest": "Price on request",
     "perNight": "/night",
