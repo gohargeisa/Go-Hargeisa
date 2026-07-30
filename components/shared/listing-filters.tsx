@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { ChevronDown, X } from "lucide-react";
+import { PrimaryButton } from "./buttons";
 
 export interface FilterOptions {
   minPrice?: number;
@@ -117,7 +118,7 @@ export function ListingFilters({
   }
 
   return (
-    <div className="rounded-2xl border border-ink/8 dark:border-white/10 bg-white dark:bg-white/[0.03] p-6">
+    <div className="rounded-xl2 border border-ink/8 bg-white p-6 shadow-soft dark:border-white/10 dark:bg-white/[0.03]">
       <div className="mb-6 flex items-center justify-between">
         <h3 className="font-display text-lg font-semibold">{t("filtersTitle")}</h3>
         {hasActiveFilters && (
@@ -139,7 +140,7 @@ export function ListingFilters({
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as FilterOptions["sortBy"])}
-            className="mt-2 w-full rounded-lg border border-ink/12 dark:border-white/15 bg-white dark:bg-white/5 px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"
+            className="mt-2 w-full rounded-xl border border-ink/12 bg-white px-3 py-2.5 text-sm outline-none transition-colors focus:border-primary dark:border-white/15 dark:bg-white/5"
           >
             <option value="rating">{t("sortRating")}</option>
             <option value="price-low">{t("sortPriceLow")}</option>
@@ -220,7 +221,7 @@ export function ListingFilters({
               <button
                 type="button"
                 onClick={() => setShowCuisineDropdown(!showCuisineDropdown)}
-                className="w-full flex items-center justify-between rounded-lg border border-ink/12 dark:border-white/15 bg-white dark:bg-white/5 px-3 py-2 text-sm font-medium hover:border-primary/40 transition-colors"
+                className="flex w-full items-center justify-between rounded-xl border border-ink/12 bg-white px-3 py-2.5 text-sm font-medium transition-colors hover:border-primary/40 dark:border-white/15 dark:bg-white/5"
               >
                 <span>
                   {selectedCuisines.size > 0
@@ -229,17 +230,17 @@ export function ListingFilters({
                 </span>
                 <ChevronDown
                   size={16}
-                  className={`transition-transform ${showCuisineDropdown ? "rotate-180" : ""}`}
+                  className={`transition-transform duration-300 ease-premium ${showCuisineDropdown ? "rotate-180" : ""}`}
                 />
               </button>
 
               {showCuisineDropdown && (
-                <div className="absolute top-full left-0 right-0 mt-1 rounded-lg border border-ink/12 dark:border-white/15 bg-white dark:bg-ink shadow-lg z-10">
-                  <div className="p-2 space-y-1 max-h-64 overflow-y-auto">
+                <div className="absolute left-0 right-0 top-full z-10 mt-1.5 rounded-xl2 border border-ink/12 bg-white shadow-card dark:border-white/15 dark:bg-ink">
+                  <div className="max-h-64 space-y-1 overflow-y-auto p-2">
                     {cuisineOptions.map((cuisine) => (
                       <label
                         key={cuisine}
-                        className="flex items-center gap-2 p-2 hover:bg-primary/5 dark:hover:bg-white/5 rounded cursor-pointer"
+                        className="flex cursor-pointer items-center gap-2 rounded-lg p-2 hover:bg-primary/5 dark:hover:bg-white/5"
                       >
                         <input
                           type="checkbox"
@@ -258,13 +259,9 @@ export function ListingFilters({
         )}
 
         {/* Apply Filters Button */}
-        <button
-          onClick={applyFilters}
-          disabled={isPending}
-          className="w-full rounded-lg bg-primary py-2.5 text-sm font-semibold text-white hover:bg-primary-700 transition-colors disabled:opacity-60"
-        >
+        <PrimaryButton onClick={applyFilters} disabled={isPending} fullWidth>
           {isPending ? t("applying") : t("applyFilters")}
-        </button>
+        </PrimaryButton>
       </div>
     </div>
   );

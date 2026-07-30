@@ -2,6 +2,7 @@ import { Clock, Phone } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { AddToTripButton } from "@/components/shared/add-to-trip-button";
 import { ShareButton } from "@/components/shared/share-button";
+import { PrimaryButton } from "@/components/shared/buttons";
 
 export function CafeActionCard({
   cafeId,
@@ -10,6 +11,7 @@ export function CafeActionCard({
   hoursLabel,
   phone,
   locale,
+  callLabel,
 }: {
   cafeId: string;
   name: string;
@@ -17,6 +19,7 @@ export function CafeActionCard({
   hoursLabel: string;
   phone?: string;
   locale: Locale;
+  callLabel: string;
 }) {
   return (
     <div className="space-y-5">
@@ -33,13 +36,10 @@ export function CafeActionCard({
       )}
 
       {phone && (
-        <a
-          href={`tel:${phone}`}
-          className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-primary text-sm font-semibold text-white transition-colors hover:bg-primary-700"
-        >
+        <PrimaryButton href={`tel:${phone}`} size="lg" fullWidth>
           <Phone size={15} aria-hidden="true" />
-          Call Cafe
-        </a>
+          {callLabel}
+        </PrimaryButton>
       )}
 
       <AddToTripButton locale={locale} listingType="cafe" listingId={cafeId} />

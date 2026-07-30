@@ -23,6 +23,7 @@ import { ReviewsSection } from "@/components/shared/reviews-section";
 import { ReviewForm } from "@/components/shared/review-form";
 import { SingleLocationMapLoader } from "@/components/map/single-location-map-loader";
 import { Reveal } from "@/components/home/reveal";
+import { PrimaryButton, SecondaryButton } from "@/components/shared/buttons";
 import { listingCategoryLabel } from "@/lib/utils/hotel-category";
 
 // Public content changes infrequently; revalidate hourly instead of
@@ -165,15 +166,10 @@ export default async function RestaurantDetailPage({
                     {td("menuHighlights")}
                   </h2>
                   {restaurant.menuPdfUrl && (
-                    <a
-                      href={restaurant.menuPdfUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 rounded-full border border-ink/15 px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
-                    >
+                    <SecondaryButton href={restaurant.menuPdfUrl} external size="sm">
                       <FileText size={14} aria-hidden="true" />
-                      Download PDF Menu
-                    </a>
+                      {td("downloadMenuPdf")}
+                    </SecondaryButton>
                   )}
                 </div>
                 {restaurant.menuHighlights.length > 0 && (
@@ -228,26 +224,16 @@ export default async function RestaurantDetailPage({
                   </p>
                   <div className="flex flex-wrap gap-2.5">
                     {directionsHref && (
-                      <a
-                        href={directionsHref}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-700"
-                      >
+                      <PrimaryButton href={directionsHref} external size="sm">
                         <Navigation size={14} aria-hidden="true" />
                         {th("directions")}
-                      </a>
+                      </PrimaryButton>
                     )}
                     {googleMapsHref && (
-                      <a
-                        href={googleMapsHref}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center gap-1.5 rounded-full border border-ink/15 px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
-                      >
+                      <SecondaryButton href={googleMapsHref} external size="sm">
                         {td("openInGoogleMaps")}
                         <ExternalLink size={14} aria-hidden="true" />
-                      </a>
+                      </SecondaryButton>
                     )}
                   </div>
                 </div>
@@ -287,6 +273,8 @@ export default async function RestaurantDetailPage({
             phone={restaurant.phone}
             website={restaurant.website}
             locale={locale}
+            contactLabel={tNav("contact")}
+            visitWebsiteLabel={th("website")}
           />
         </aside>
       </div>

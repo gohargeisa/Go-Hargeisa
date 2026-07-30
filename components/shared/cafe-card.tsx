@@ -9,6 +9,7 @@ import { Coffee, Heart, Loader2, MapPin, Phone, Sparkles, Star, Wifi } from "luc
 import { toggleFavoriteAction } from "@/lib/actions/favorites";
 import { AnimatedCard } from "./animated-card";
 import { FloatingBadge } from "./floating-badge";
+import { PrimaryButton, SecondaryButton } from "./buttons";
 
 const MAX_VISIBLE_DRINKS = 3;
 
@@ -185,21 +186,15 @@ export function CafeCard({
         )}
 
         <div className={`mt-auto grid gap-3 border-t border-ink/8 pt-4 dark:border-white/10 ${phone ? "grid-cols-2" : "grid-cols-1"}`}>
-          <Link
-            href={href}
-            className="inline-flex h-11 items-center justify-center rounded-full border border-ink/15 px-3 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white dark:hover:border-primary"
-          >
+          <SecondaryButton href={href} compact>
             {t("viewDetails")}
-          </Link>
+          </SecondaryButton>
 
           {phone && (
-            <a
-              href={`tel:${phone}`}
-              className="inline-flex h-11 items-center justify-center gap-1.5 rounded-full bg-primary px-3 text-sm font-semibold text-white transition-colors hover:bg-primary-700"
-            >
+            <PrimaryButton href={`tel:${phone}`} compact>
               <Phone size={14} aria-hidden="true" />
               {t("call")}
-            </a>
+            </PrimaryButton>
           )}
         </div>
       </div>

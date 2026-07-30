@@ -23,6 +23,7 @@ import { ReviewsSection } from "@/components/shared/reviews-section";
 import { ReviewForm } from "@/components/shared/review-form";
 import { SingleLocationMapLoader } from "@/components/map/single-location-map-loader";
 import { Reveal } from "@/components/home/reveal";
+import { PrimaryButton, SecondaryButton } from "@/components/shared/buttons";
 
 // Public content changes infrequently; revalidate hourly instead of
 // rendering on every request (this page no longer reads cookies, so
@@ -176,15 +177,10 @@ export default async function CafeDetailPage({
                     {td("menuHighlights")}
                   </h2>
                   {cafe.menuPdfUrl && (
-                    <a
-                      href={cafe.menuPdfUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 rounded-full border border-ink/15 px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
-                    >
+                    <SecondaryButton href={cafe.menuPdfUrl} external size="sm">
                       <FileText size={14} aria-hidden="true" />
-                      Download PDF Menu
-                    </a>
+                      {td("downloadMenuPdf")}
+                    </SecondaryButton>
                   )}
                 </div>
                 {cafe.menuHighlights.length > 0 && (
@@ -259,26 +255,16 @@ export default async function CafeDetailPage({
                   </p>
                   <div className="flex flex-wrap gap-2.5">
                     {directionsHref && (
-                      <a
-                        href={directionsHref}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-700"
-                      >
+                      <PrimaryButton href={directionsHref} external size="sm">
                         <Navigation size={14} aria-hidden="true" />
                         {th("directions")}
-                      </a>
+                      </PrimaryButton>
                     )}
                     {googleMapsHref && (
-                      <a
-                        href={googleMapsHref}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center gap-1.5 rounded-full border border-ink/15 px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
-                      >
+                      <SecondaryButton href={googleMapsHref} external size="sm">
                         {td("openInGoogleMaps")}
                         <ExternalLink size={14} aria-hidden="true" />
-                      </a>
+                      </SecondaryButton>
                     )}
                   </div>
                 </div>
@@ -313,6 +299,7 @@ export default async function CafeDetailPage({
             hoursLabel={t("openingHours")}
             phone={cafe.phone}
             locale={locale}
+            callLabel={th("call")}
           />
         </aside>
       </div>

@@ -9,6 +9,7 @@ import { ArrowRight, Heart, Loader2, MapPin, Star } from "lucide-react";
 import { RatingBadge } from "./rating-badge";
 import { toggleFavoriteAction } from "@/lib/actions/favorites";
 import { AnimatedCard } from "./animated-card";
+import { FloatingBadge } from "./floating-badge";
 
 type ListingType = "hotel" | "restaurant" | "cafe" | "attraction" | "service";
 
@@ -69,12 +70,12 @@ export function ListingCard({
               onClick={onToggleFavorite}
               disabled={isPending}
               aria-label={favorited ? t("removeFromFavorites", { name: title }) : t("addToFavorites", { name: title })}
-              className="absolute end-3 top-3 flex h-11 w-11 items-center justify-center rounded-full bg-white/95 text-ink shadow-sm transition-transform duration-300 hover:scale-110 active:scale-95 disabled:opacity-60"
+              className="absolute end-3 top-3 flex h-11 w-11 items-center justify-center rounded-full bg-white/95 text-ink shadow-sm transition-all duration-300 hover:scale-110 hover:shadow-[0_6px_16px_rgba(0,0,0,0.25)] active:scale-95 disabled:opacity-60"
             >
               {isPending ? <Loader2 size={18} className="animate-spin" /> : <Heart size={18} fill={favorited ? "#F4B400" : "none"} color={favorited ? "#F4B400" : "#444"} />}
             </button>
           )}
-          {tag && <span className="absolute bottom-3 start-3 rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-white shadow-sm">{tag}</span>}
+          {tag && <FloatingBadge position="bottom-start">{tag}</FloatingBadge>}
         </div>
 
         <div className="flex flex-1 flex-col p-5">
