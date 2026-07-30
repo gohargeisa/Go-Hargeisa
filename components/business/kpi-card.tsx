@@ -7,6 +7,7 @@ export function KpiCard({
   growthPercent,
   label,
   subtitle,
+  tone = "bg-primary/10 text-primary",
 }: {
   icon: LucideIcon;
   value: string | number;
@@ -14,13 +15,18 @@ export function KpiCard({
   growthPercent: number | null;
   label: string;
   subtitle: string;
+  /** Icon badge classes — defaults to the original primary tint so every
+   * existing caller (business owner's own KPI pages) renders unchanged.
+   * Pass a tinted variant for the owner dashboard's consistent color
+   * system (blue=views, green=bookings, orange=clicks). */
+  tone?: string;
 }) {
   const isUp = growthPercent !== null && growthPercent >= 0;
 
   return (
     <div className="group rounded-2xl border border-ink/8 bg-white p-5 shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-card dark:border-white/10 dark:bg-white/[0.03]">
       <div className="flex items-center justify-between">
-        <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-transform duration-300 group-hover:scale-110">
+        <span className={`flex h-11 w-11 items-center justify-center rounded-2xl transition-transform duration-300 group-hover:scale-110 ${tone}`}>
           <Icon size={20} aria-hidden="true" />
         </span>
         {growthPercent !== null && (

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getArticleBySlug, getAllArticleSlugs } from "@/lib/data/articles";
+import type { Locale } from "@/lib/i18n/config";
+import { localeAlternates } from "@/lib/i18n/alternates";
 
 // Public content changes infrequently; revalidate hourly instead of
 // rendering on every request (this page no longer reads cookies, so
@@ -29,9 +31,7 @@ export async function generateMetadata({
       images: [a.coverImage],
       type: "article",
     },
-    alternates: {
-      canonical: `/${locale}/blog/${a.slug}`,
-    },
+    alternates: localeAlternates(locale as Locale, `/blog/${a.slug}`),
   };
 }
 

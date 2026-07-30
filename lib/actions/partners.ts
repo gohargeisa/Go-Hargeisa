@@ -90,3 +90,174 @@ export async function assignSubscriptionPlan(
   revalidatePath(`/${locale}/business/subscription`);
   return { ok: true };
 }
+
+/**
+ * Owner-only lifecycle control (activate/pause/cancel). Same RLS story as
+ * assignSubscriptionPlan above — only the owner role can UPDATE an existing
+ * business_subscriptions row, so this is already database-enforced, not
+ * just hidden from the UI.
+ */
+export async function setSubscriptionStatus(
+  locale: string,
+  table: PartnerTable,
+  listingId: string,
+  status: "active" | "paused" | "cancelled"
+): Promise<{ ok: boolean; error?: string }> {
+  if (!PARTNER_TABLES.includes(table)) return { ok: false, error: "Invalid table." };
+
+  const supabase = await assertOwner();
+  const listingType = table === "hotels" ? "hotel" : table === "restaurants" ? "restaurant" : "cafe";
+
+  const { error } = await supabase
+    .from("business_subscriptions")
+    .upsert({ listing_type: listingType, listing_id: listingId, status } as never, {
+      onConflict: "listing_type,listing_id",
+    });
+
+  if (error) return { ok: false, error: error.message };
+
+  await logActivity("update", "subscription_status", listingId, { table, status });
+  revalidatePath(`/${locale}/admin/partners`);
+  revalidatePath(`/${locale}/business/subscription`);
+  return { ok: true };
+}
+
+/** Owner-only. Sets renews_at directly to a new date ("extend manually" — no
+ * payment gateway means there's no automatic renewal to extend). */
+export async function extendSubscription(
+  locale: string,
+  table: PartnerTable,
+  listingId: string,
+  newRenewsAt: string
+): Promise<{ ok: boolean; error?: string }> {
+  if (!PARTNER_TABLES.includes(table)) return { ok: false, error: "Invalid table." };
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(newRenewsAt)) return { ok: false, error: "Invalid date." };
+
+  const supabase = await assertOwner();
+  const listingType = table === "hotels" ? "hotel" : table === "restaurants" ? "restaurant" : "cafe";
+
+  const { error } = await supabase
+    .from("business_subscriptions")
+    .upsert(
+      { listing_type: listingType, listing_id: listingId, renews_at: newRenewsAt } as never,
+      { onConflict: "listing_type,listing_id" }
+    );
+
+  if (error) return { ok: false, error: error.message };
+
+  await logActivity("update", "subscription_renewal", listingId, { table, newRenewsAt });
+  revalidatePath(`/${locale}/admin/partners`);
+  revalidatePath(`/${locale}/business/subscription`);
+  return { ok: true };
+}
+
+/** Owner-only internal note, never exposed to the business owner — see
+ * business_subscription_notes RLS in
+ * supabase/migrations/20260730000005_subscription_lifecycle.sql. */
+export async function addSubscriptionNote(
+  locale: string,
+  table: PartnerTable,
+  listingId: string,
+  note: string
+): Promise<{ ok: boolean; error?: string }> {
+  if (!PARTNER_TABLES.includes(table)) return { ok: false, error: "Invalid table." };
+  const trimmed = note.trim();
+  if (!trimmed) return { ok: false, error: "Note can't be empty." };
+
+  const supabase = await assertOwner();
+  const listingType = table === "hotels" ? "hotel" : table === "restaurants" ? "restaurant" : "cafe";
+
+  const { data: sub, error: subError } = await supabase
+    .from("business_subscriptions")
+    .upsert(
+      { listing_type: listingType, listing_id: listingId } as never,
+      { onConflict: "listing_type,listing_id", ignoreDuplicates: false }
+    )
+    .select("id")
+    .single();
+
+  if (subError || !sub) return { ok: false, error: subError?.message ?? "Could not find subscription." };
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { error } = await supabase
+    .from("business_subscription_notes")
+    .insert({ subscription_id: sub.id, note: trimmed, created_by: user?.id ?? null } as never);
+
+  if (error) return { ok: false, error: error.message };
+
+  await logActivity("create", "subscription_note", listingId, { table });
+  revalidatePath(`/${locale}/admin/partners`);
+  return { ok: true };
+}
+
+/** Owner-only. Sets/pushes a trial partner's expiry date forward. Only
+ * meaningful while partner_status = 'trial' — this doesn't validate that,
+ * since setting it on an official listing is harmless (simply unused). */
+export async function extendTrial(
+  locale: string,
+  table: PartnerTable,
+  id: string,
+  newExpiresAt: string
+): Promise<{ ok: boolean; error?: string }> {
+  if (!PARTNER_TABLES.includes(table)) return { ok: false, error: "Invalid table." };
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(newExpiresAt)) return { ok: false, error: "Invalid date." };
+
+  const supabase = await assertOwner();
+
+  let error = null;
+  switch (table) {
+    case "hotels":
+      ({ error } = await supabase.from("hotels").update({ trial_expires_at: newExpiresAt } as never).eq("id", id));
+      break;
+    case "restaurants":
+      ({ error } = await supabase.from("restaurants").update({ trial_expires_at: newExpiresAt } as never).eq("id", id));
+      break;
+    case "cafes":
+      ({ error } = await supabase.from("cafes").update({ trial_expires_at: newExpiresAt } as never).eq("id", id));
+      break;
+  }
+
+  if (error) return { ok: false, error: error.message };
+
+  await logActivity("update", "trial_extended", id, { table, newExpiresAt });
+  revalidatePath(`/${locale}/admin/partners`);
+  return { ok: true };
+}
+
+/** Owner-only. Marks a trial as expired effective immediately (sets
+ * trial_expires_at to now). This only records that the trial period is
+ * over — it does not automatically hide the listing; Hide is a separate,
+ * explicit action so the owner decides what happens to an expired trial
+ * rather than it disappearing from the site on its own. */
+export async function expireTrialNow(
+  locale: string,
+  table: PartnerTable,
+  id: string
+): Promise<{ ok: boolean; error?: string }> {
+  if (!PARTNER_TABLES.includes(table)) return { ok: false, error: "Invalid table." };
+
+  const supabase = await assertOwner();
+  const now = new Date().toISOString();
+
+  let error = null;
+  switch (table) {
+    case "hotels":
+      ({ error } = await supabase.from("hotels").update({ trial_expires_at: now } as never).eq("id", id));
+      break;
+    case "restaurants":
+      ({ error } = await supabase.from("restaurants").update({ trial_expires_at: now } as never).eq("id", id));
+      break;
+    case "cafes":
+      ({ error } = await supabase.from("cafes").update({ trial_expires_at: now } as never).eq("id", id));
+      break;
+  }
+
+  if (error) return { ok: false, error: error.message };
+
+  await logActivity("update", "trial_expired", id, { table });
+  revalidatePath(`/${locale}/admin/partners`);
+  return { ok: true };
+}

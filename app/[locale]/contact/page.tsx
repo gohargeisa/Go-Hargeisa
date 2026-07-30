@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Mail, Phone, MapPin } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
+import { localeAlternates } from "@/lib/i18n/alternates";
 import { PageHero } from "@/components/shared/page-hero";
 import { ContactForm } from "@/components/shared/contact-form";
 import { placeholderImage } from "@/lib/placeholder-image";
@@ -14,7 +15,7 @@ export async function generateMetadata({
   return {
     title: "Contact Go Hargeisa",
   description: "Get in touch with the Go Hargeisa team.",
-    alternates: { canonical: `/${locale}/contact` },
+    alternates: localeAlternates(locale as Locale, "/contact"),
   };
 }
 

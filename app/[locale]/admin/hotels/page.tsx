@@ -18,10 +18,10 @@ export default async function AdminHotelsPage({ params: { locale } }: { params: 
   // Owners see every hotel; business owners only see hotels they own —
   // uses the authenticated client (not lib/data/hotels.ts's public one)
   // so the owner_id-scoped query actually runs as the signed-in user.
-  let hotels: { id: string; name: string; address: string; cover_image: string; price_range: string; status: "draft" | "published" | "archived" }[] = [];
+  let hotels: { id: string; name: string; address: string; cover_image: string; price_range: string; status: "draft" | "published" | "archived"; featured: boolean; is_pinned: boolean }[] = [];
   if (access && isSupabaseConfigured()) {
     const supabase = await createClient();
-    let query = supabase.from("hotels").select("id, name, address, cover_image, price_range, status");
+    let query = supabase.from("hotels").select("id, name, address, cover_image, price_range, status, featured, is_pinned");
     if (access.role === "business_owner") query = query.eq("owner_id", access.userId);
     const { data } = await query;
     hotels = data ?? [];
@@ -35,6 +35,8 @@ export default async function AdminHotelsPage({ params: { locale } }: { params: 
       cover_image: h.coverImage,
       price_range: h.priceRange,
       status: "published" as const,
+      featured: h.featured ?? false,
+      is_pinned: false,
     }));
   }
 
@@ -71,6 +73,8 @@ export default async function AdminHotelsPage({ params: { locale } }: { params: 
           }
           allowDelete={canCreate}
           allowHide={canCreate}
+          allowFeature={canCreate}
+          allowPin={canCreate}
           rows={hotels.map((h) => ({
             id: h.id,
             image: h.cover_image,
@@ -78,6 +82,8 @@ export default async function AdminHotelsPage({ params: { locale } }: { params: 
             subtitle: h.address,
             meta: h.price_range,
             status: h.status,
+            featured: h.featured,
+            isPinned: h.is_pinned,
           }))}
         />
       </div>

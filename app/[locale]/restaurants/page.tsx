@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/config";
+import { localeAlternates } from "@/lib/i18n/alternates";
 import { getRestaurants } from "@/lib/data/restaurants";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { PageHero } from "@/components/shared/page-hero";
@@ -19,9 +20,7 @@ export async function generateMetadata({
     title: "Restaurants in Hargeisa — Where to Eat",
     description:
       "Discover the best restaurants in Hargeisa: Somali cuisine, Arabic food and international dining.",
-    alternates: {
-      canonical: `/${locale}/restaurants`,
-    },
+    alternates: localeAlternates(locale as Locale, "/restaurants"),
   };
 }
 

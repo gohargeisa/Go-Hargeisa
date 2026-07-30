@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { Loader2, ShieldCheck, X } from "lucide-react";
 import { submitBusinessClaim } from "@/lib/actions/claims";
@@ -24,6 +24,15 @@ export function ClaimBusinessButton({
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    if (!open) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open]);
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -78,7 +87,11 @@ export function ClaimBusinessButton({
               <form onSubmit={onSubmit} className="space-y-3">
                 <p className="text-xs leading-relaxed text-ink/60 dark:text-sand/60">{t("disclaimer")}</p>
 
+                <label htmlFor="claim-full-name" className="sr-only">
+                  {t("fullNameLabel")}
+                </label>
                 <input
+                  id="claim-full-name"
                   required
                   type="text"
                   value={fullName}
@@ -86,7 +99,11 @@ export function ClaimBusinessButton({
                   placeholder={t("fullNameLabel")}
                   className="w-full rounded-xl border border-ink/12 bg-transparent px-3.5 py-2.5 text-sm outline-none focus:border-primary dark:border-white/15"
                 />
+                <label htmlFor="claim-email" className="sr-only">
+                  {t("emailLabel")}
+                </label>
                 <input
+                  id="claim-email"
                   required
                   type="email"
                   value={email}
@@ -94,14 +111,22 @@ export function ClaimBusinessButton({
                   placeholder={t("emailLabel")}
                   className="w-full rounded-xl border border-ink/12 bg-transparent px-3.5 py-2.5 text-sm outline-none focus:border-primary dark:border-white/15"
                 />
+                <label htmlFor="claim-phone" className="sr-only">
+                  {t("phoneLabel")}
+                </label>
                 <input
+                  id="claim-phone"
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder={t("phoneLabel")}
                   className="w-full rounded-xl border border-ink/12 bg-transparent px-3.5 py-2.5 text-sm outline-none focus:border-primary dark:border-white/15"
                 />
+                <label htmlFor="claim-message" className="sr-only">
+                  {t("messageLabel")}
+                </label>
                 <textarea
+                  id="claim-message"
                   rows={3}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}

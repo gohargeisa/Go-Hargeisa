@@ -21,7 +21,12 @@ export async function getCafes(options?: { q?: string; featuredOnly?: boolean; l
   }
 
   const supabase = createPublicClient();
-  let query = supabase.from("cafes").select("*").eq("status", "published").order("featured", { ascending: false });
+  let query = supabase
+    .from("cafes")
+    .select("*")
+    .eq("status", "published")
+    .order("is_pinned", { ascending: false })
+    .order("featured", { ascending: false });
   if (featuredOnly) query = query.eq("featured", true);
   if (q) query = query.or(`name.ilike.%${q}%,short_description.ilike.%${q}%,address.ilike.%${q}%`);
   if (limit) query = query.limit(limit);

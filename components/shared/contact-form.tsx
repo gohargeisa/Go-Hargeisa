@@ -44,11 +44,27 @@ export function ContactForm() {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <div className="grid gap-4 sm:grid-cols-2">
-        <input name="name" required placeholder={t("namePlaceholder")} className="rounded-xl border border-ink/12 dark:border-white/15 bg-transparent px-4 py-3 text-sm outline-none focus:border-primary" />
-        <input name="email" required type="email" placeholder={t("emailPlaceholder")} className="rounded-xl border border-ink/12 dark:border-white/15 bg-transparent px-4 py-3 text-sm outline-none focus:border-primary" />
+        <div>
+          <label htmlFor="contact-name" className="sr-only">
+            {t("namePlaceholder")}
+          </label>
+          <input id="contact-name" name="name" required placeholder={t("namePlaceholder")} className="w-full rounded-xl border border-ink/12 dark:border-white/15 bg-transparent px-4 py-3 text-sm outline-none focus:border-primary" />
+        </div>
+        <div>
+          <label htmlFor="contact-email" className="sr-only">
+            {t("emailPlaceholder")}
+          </label>
+          <input id="contact-email" name="email" required type="email" placeholder={t("emailPlaceholder")} className="w-full rounded-xl border border-ink/12 dark:border-white/15 bg-transparent px-4 py-3 text-sm outline-none focus:border-primary" />
+        </div>
       </div>
-      <input name="subject" placeholder={t("subjectPlaceholder")} className="w-full rounded-xl border border-ink/12 dark:border-white/15 bg-transparent px-4 py-3 text-sm outline-none focus:border-primary" />
-      <textarea name="message" required rows={5} placeholder={t("messagePlaceholder")} className="w-full rounded-xl border border-ink/12 dark:border-white/15 bg-transparent px-4 py-3 text-sm outline-none focus:border-primary" />
+      <label htmlFor="contact-subject" className="sr-only">
+        {t("subjectPlaceholder")}
+      </label>
+      <input id="contact-subject" name="subject" placeholder={t("subjectPlaceholder")} className="w-full rounded-xl border border-ink/12 dark:border-white/15 bg-transparent px-4 py-3 text-sm outline-none focus:border-primary" />
+      <label htmlFor="contact-message" className="sr-only">
+        {t("messagePlaceholder")}
+      </label>
+      <textarea id="contact-message" name="message" required rows={5} placeholder={t("messagePlaceholder")} className="w-full rounded-xl border border-ink/12 dark:border-white/15 bg-transparent px-4 py-3 text-sm outline-none focus:border-primary" />
       {error && <p className="text-sm text-red-600">{error}</p>}
       <button
         type="submit"

@@ -4,6 +4,7 @@ import { getMessages, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { LazyMotion, domAnimation } from "framer-motion";
 import { locales, localeConfig, type Locale } from "@/lib/i18n/config";
+import { localeAlternates } from "@/lib/i18n/alternates";
 import { ThemeProvider } from "@/components/layout/theme-provider";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
@@ -81,14 +82,10 @@ export async function generateMetadata({
       },
     },
 
-    alternates: {
-      canonical: `/${locale}`,
-      languages: {
-        en: "/en",
-        ar: "/ar",
-        so: "/so",
-      },
-    },
+    // Every page below this layout sets its own alternates.canonical (which
+    // replaces this whole object rather than merging into it), so this
+    // default only ever actually applies to the homepage itself.
+    alternates: localeAlternates(locale as Locale, ""),
 
     openGraph: {
       title: "Go Hargeisa",
@@ -150,7 +147,11 @@ export default async function LocaleLayout({
   if (!locales.includes(locale as Locale)) notFound();
 
   const currentLocale = locale as Locale;
-  const [messages, initialUser] = await Promise.all([getMessages(), getHeaderUser()]);
+  const [messages, initialUser, tCommon] = await Promise.all([
+    getMessages(),
+    getHeaderUser(),
+    getTranslations({ locale: currentLocale, namespace: "common" }),
+  ]);
 
   return (
     <NextIntlClientProvider messages={messages}>
@@ -167,8 +168,14 @@ export default async function LocaleLayout({
       <LazyMotion features={domAnimation} strict>
         <ThemeProvider>
           <div lang={currentLocale} dir={localeConfig[currentLocale].dir} className="min-h-screen font-body">
+            <a
+              href="#main-content"
+              className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg"
+            >
+              {tCommon("skipToContent")}
+            </a>
             <SiteHeader locale={currentLocale} initialUser={initialUser} />
-            <main>{children}</main>
+            <main id="main-content">{children}</main>
             <SiteFooter locale={currentLocale} />
             <ServiceWorkerRegister />
           </div>

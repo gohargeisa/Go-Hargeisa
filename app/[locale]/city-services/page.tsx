@@ -5,6 +5,8 @@ import { PageHero } from "@/components/shared/page-hero";
 import { CityServiceCard } from "@/components/shared/city-service-card";
 import { CityServiceEmptyCard } from "@/components/shared/city-service-empty-card";
 import { getAllCityServices } from "@/lib/data/city-services";
+import type { Locale } from "@/lib/i18n/config";
+import { localeAlternates } from "@/lib/i18n/alternates";
 import { placeholderImage } from "@/lib/placeholder-image";
 import type { CityService, EssentialServiceCategory } from "@/types";
 
@@ -20,7 +22,7 @@ export async function generateMetadata({
   return {
     title: "City Services — Hospitals, Banks, Supermarkets & Pharmacies",
     description: "Essential city services in Hargeisa: hospitals, banks, supermarkets, and pharmacies.",
-    alternates: { canonical: `/${locale}/city-services` },
+    alternates: localeAlternates(locale as Locale, "/city-services"),
   };
 }
 

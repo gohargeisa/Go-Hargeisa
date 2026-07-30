@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
@@ -216,6 +216,15 @@ export function BookingRequestModal({
   onClose: () => void;
 }) {
   const t = useTranslations("bookingRequest");
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
   const [guestName, setGuestName] = useState("");
   const [guestPhone, setGuestPhone] = useState("");
   const [guestEmail, setGuestEmail] = useState("");
@@ -396,7 +405,11 @@ export function BookingRequestModal({
                   {t("guestSectionTitle")}
                 </h3>
                 <div className="space-y-3">
+                  <label htmlFor="booking-guest-name" className="sr-only">
+                    {t("guestNameLabel")}
+                  </label>
                   <input
+                    id="booking-guest-name"
                     required
                     placeholder={t("guestNameLabel")}
                     value={guestName}
@@ -404,21 +417,33 @@ export function BookingRequestModal({
                     className={inputClass}
                   />
                   <div className="grid gap-3 sm:grid-cols-2">
-                    <input
-                      required
-                      type="tel"
-                      placeholder={t("guestPhoneLabel")}
-                      value={guestPhone}
-                      onChange={(e) => setGuestPhone(e.target.value)}
-                      className={inputClass}
-                    />
-                    <input
-                      type="email"
-                      placeholder={t("guestEmailLabel")}
-                      value={guestEmail}
-                      onChange={(e) => setGuestEmail(e.target.value)}
-                      className={inputClass}
-                    />
+                    <div>
+                      <label htmlFor="booking-guest-phone" className="sr-only">
+                        {t("guestPhoneLabel")}
+                      </label>
+                      <input
+                        id="booking-guest-phone"
+                        required
+                        type="tel"
+                        placeholder={t("guestPhoneLabel")}
+                        value={guestPhone}
+                        onChange={(e) => setGuestPhone(e.target.value)}
+                        className={inputClass}
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="booking-guest-email" className="sr-only">
+                        {t("guestEmailLabel")}
+                      </label>
+                      <input
+                        id="booking-guest-email"
+                        type="email"
+                        placeholder={t("guestEmailLabel")}
+                        value={guestEmail}
+                        onChange={(e) => setGuestEmail(e.target.value)}
+                        className={inputClass}
+                      />
+                    </div>
                   </div>
                 </div>
               </section>
@@ -474,7 +499,11 @@ export function BookingRequestModal({
                 <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink/50 dark:text-sand/50">
                   {t("requestsSectionTitle")}
                 </h3>
+                <label htmlFor="booking-notes" className="sr-only">
+                  {t("requestsPlaceholder")}
+                </label>
                 <textarea
+                  id="booking-notes"
                   rows={4}
                   placeholder={t("requestsPlaceholder")}
                   value={notes}

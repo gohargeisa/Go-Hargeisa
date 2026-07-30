@@ -4,7 +4,7 @@ import { getTranslations } from "next-intl/server";
 import {
   Hotel, UtensilsCrossed, Coffee, Landmark, CalendarDays, Newspaper,
   Users, BarChart3, Plus, ArrowRight, TrendingUp, Handshake, Building,
-  Eye, MousePointerClick, CalendarCheck,
+  Eye, MousePointerClick, CalendarCheck, Inbox, Megaphone,
 } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { requireOwner } from "@/lib/supabase/guards";
@@ -107,6 +107,12 @@ export default async function OwnerDashboardPage({ params: { locale } }: { param
             <div className="flex flex-wrap items-center gap-2">
               <NotificationsBell initialItems={notifications as never} initialUnread={unreadCount} />
               <Link
+                href={`/${locale}/admin/requests`}
+                className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-xl transition-colors hover:bg-white/20"
+              >
+                <Inbox size={16} /> {t("requestsNav")}
+              </Link>
+              <Link
                 href={`/${locale}/admin/partners`}
                 className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-xl transition-colors hover:bg-white/20"
               >
@@ -124,14 +130,45 @@ export default async function OwnerDashboardPage({ params: { locale } }: { param
               >
                 <Users size={16} /> {t("usersNav")}
               </Link>
+              <Link
+                href={`/${locale}/admin/announcements`}
+                className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-xl transition-colors hover:bg-white/20"
+              >
+                <Megaphone size={16} /> {t("announcementsNav")}
+              </Link>
             </div>
           </div>
 
-          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
             <GlassStatCard icon={TrendingUp} value={totalListings} label={t("totalContent")} sublabel={t("acrossAllCategories")} />
-            <GlassStatCard icon={Handshake} value={partnerOverview.officialCount} label="Official Partners" sublabel={`${partnerOverview.trialCount} on trial`} />
-            <GlassStatCard icon={Building} value={`${cityCoverage.totalPublished}/${cityCoverage.totalTarget}`} label="City Coverage" sublabel="Essential services" />
-            <GlassStatCard icon={Eye} value={ownerKpis.totalViews.toLocaleString()} label="Total Views" sublabel="All-time, platform-wide" />
+            <GlassStatCard
+              icon={Handshake}
+              value={partnerOverview.officialCount}
+              label="Official Partners"
+              sublabel="Full dashboard access"
+              tone="bg-violet-400/25 text-violet-50"
+            />
+            <GlassStatCard
+              icon={Users}
+              value={partnerOverview.trialCount}
+              label="Trial Partners"
+              sublabel="Visible, no dashboard yet"
+              tone="bg-violet-400/25 text-violet-50"
+            />
+            <GlassStatCard
+              icon={Building}
+              value={`${cityCoverage.totalPublished}/${cityCoverage.totalTarget}`}
+              label="City Coverage"
+              sublabel={`${Math.round((cityCoverage.totalPublished / cityCoverage.totalTarget) * 100)}% of target filled`}
+              progressPercent={(cityCoverage.totalPublished / cityCoverage.totalTarget) * 100}
+            />
+            <GlassStatCard
+              icon={Eye}
+              value={ownerKpis.totalViews.toLocaleString()}
+              label="Total Views"
+              sublabel="All-time, platform-wide"
+              tone="bg-sky-400/25 text-sky-50"
+            />
           </div>
         </div>
       </section>
@@ -140,11 +177,17 @@ export default async function OwnerDashboardPage({ params: { locale } }: { param
         {/* ============ Premium Analytics ============ */}
         <Reveal>
           <div className="mb-10">
-            <h2 className="mb-4 font-display text-xl font-semibold">Premium Analytics</h2>
-            <div className="grid gap-3 sm:grid-cols-3">
-              <KpiCard icon={Eye} value={ownerKpis.totalViews.toLocaleString()} growthPercent={null} label="Total Views" subtitle="Across every partner" />
-              <KpiCard icon={MousePointerClick} value={ownerKpis.totalClicks.toLocaleString()} growthPercent={null} label="Total Clicks" subtitle="Website, call & WhatsApp" />
-              <KpiCard icon={CalendarCheck} value={ownerKpis.totalBookings.toLocaleString()} growthPercent={null} label="Total Bookings" subtitle="All hotels, all time" />
+            <h2 className="font-display text-xl font-semibold">Premium Analytics</h2>
+            <p className="mt-1 text-sm text-ink/55 dark:text-sand/55">Platform-wide traffic and activity, across every partner listing.</p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              <KpiCard icon={Eye} value={ownerKpis.totalViews.toLocaleString()} growthPercent={null} label="Total Views" subtitle="Across every partner" tone="bg-sky-500/10 text-sky-600 dark:text-sky-400" />
+              <KpiCard icon={MousePointerClick} value={ownerKpis.totalClicks.toLocaleString()} growthPercent={null} label="Total Clicks" subtitle="Website, call & WhatsApp" tone="bg-orange-500/10 text-orange-600 dark:text-orange-400" />
+              <KpiCard icon={CalendarCheck} value={ownerKpis.totalBookings.toLocaleString()} growthPercent={null} label="Total Bookings" subtitle="All hotels, all time" tone="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" />
+            </div>
+            <div className="mt-3 grid gap-3 sm:grid-cols-3">
+              <KpiCard icon={Eye} value={ownerKpis.todayViews.toLocaleString()} growthPercent={null} label="Today's Views" subtitle="Since midnight" tone="bg-sky-500/10 text-sky-600 dark:text-sky-400" />
+              <KpiCard icon={Eye} value={ownerKpis.weekViews.toLocaleString()} growthPercent={null} label="This Week's Views" subtitle="Last 7 days" tone="bg-sky-500/10 text-sky-600 dark:text-sky-400" />
+              <KpiCard icon={Eye} value={ownerKpis.monthViews.toLocaleString()} growthPercent={null} label="This Month's Views" subtitle="Since the 1st" tone="bg-sky-500/10 text-sky-600 dark:text-sky-400" />
             </div>
             <div className="mt-4">
               <ViewsChart series={ownerViewsSeries} title="Platform Views" />

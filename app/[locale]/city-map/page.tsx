@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/config";
+import { localeAlternates } from "@/lib/i18n/alternates";
 import { getCityServicePoints } from "@/lib/data/map-points";
 import { PageHero } from "@/components/shared/page-hero";
 import { CityMapExperience } from "@/components/city-map/city-map-experience";
@@ -19,7 +20,7 @@ export async function generateMetadata({
     title: "Smart City Map — Hargeisa Services",
     description:
       "Find hospitals, pharmacies, mosques, ATMs, schools and other essential city services around Hargeisa on an interactive map.",
-    alternates: { canonical: `/${locale}/city-map` },
+    alternates: localeAlternates(locale as Locale, "/city-map"),
   };
 }
 

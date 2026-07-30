@@ -28,6 +28,7 @@ export async function getRestaurants(options?: { q?: string; featuredOnly?: bool
     .from("restaurants")
     .select("*")
     .eq("status", "published")
+    .order("is_pinned", { ascending: false })
     .order("featured", { ascending: false });
   if (featuredOnly) query = query.eq("featured", true);
   if (q) query = query.or(`name.ilike.%${q}%,short_description.ilike.%${q}%,address.ilike.%${q}%`);

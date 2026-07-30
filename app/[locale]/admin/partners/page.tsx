@@ -5,6 +5,7 @@ import { requireAdmin } from "@/lib/supabase/guards";
 import { createClient } from "@/lib/supabase/server";
 import { PartnersList, type PartnerRow } from "@/components/admin/partners-list";
 import type { SubscriptionPlanId } from "@/lib/config/subscription-plans";
+import type { SubscriptionStatus } from "@/types";
 
 export const metadata: Metadata = { title: "Partners — Admin" };
 
@@ -15,37 +16,64 @@ export default async function AdminPartnersPage({ params: { locale } }: { params
   const supabase = await createClient();
 
   const [{ data: hotels }, { data: restaurants }, { data: cafes }, { data: subs }] = await Promise.all([
-    supabase.from("hotels").select("id, name, partner_status").not("owner_id", "is", null),
-    supabase.from("restaurants").select("id, name, partner_status").not("owner_id", "is", null),
-    supabase.from("cafes").select("id, name, partner_status").not("owner_id", "is", null),
-    supabase.from("business_subscriptions").select("listing_type, listing_id, plan_tier"),
+    supabase.from("hotels").select("id, name, partner_status, status, trial_expires_at, featured, is_pinned").not("owner_id", "is", null),
+    supabase.from("restaurants").select("id, name, partner_status, status, trial_expires_at, featured, is_pinned").not("owner_id", "is", null),
+    supabase.from("cafes").select("id, name, partner_status, status, trial_expires_at, featured, is_pinned").not("owner_id", "is", null),
+    supabase.from("business_subscriptions").select("id, listing_type, listing_id, plan_tier, status, renews_at"),
   ]);
 
-  const planFor = (listingType: string, listingId: string): SubscriptionPlanId | null =>
-    (subs ?? []).find((s) => s.listing_type === listingType && s.listing_id === listingId)?.plan_tier ?? null;
+  const subIds = (subs ?? []).map((s) => s.id);
+  const { data: notesRaw } =
+    subIds.length > 0
+      ? await supabase
+          .from("business_subscription_notes")
+          .select("id, subscription_id, note, created_at")
+          .in("subscription_id", subIds)
+          .order("created_at", { ascending: false })
+      : { data: [] as { id: string; subscription_id: string; note: string; created_at: string }[] };
+
+  const notesFor = (subscriptionId: string | undefined) =>
+    (notesRaw ?? [])
+      .filter((n) => n.subscription_id === subscriptionId)
+      .map((n) => ({ id: n.id, note: n.note, createdAt: n.created_at }));
+
+  const subFor = (listingType: string, listingId: string) =>
+    (subs ?? []).find((s) => s.listing_type === listingType && s.listing_id === listingId);
+
+  const toRow = (
+    table: "hotels" | "restaurants" | "cafes",
+    listingType: string,
+    entry: {
+      id: string;
+      name: string;
+      partner_status: "trial" | "official";
+      status: "draft" | "published" | "archived";
+      trial_expires_at: string | null;
+      featured: boolean;
+      is_pinned: boolean;
+    }
+  ): PartnerRow => {
+    const sub = subFor(listingType, entry.id);
+    return {
+      id: entry.id,
+      table,
+      name: entry.name,
+      partnerStatus: entry.partner_status,
+      listingStatus: entry.status,
+      featured: entry.featured,
+      isPinned: entry.is_pinned,
+      trialExpiresAt: entry.trial_expires_at,
+      planTier: (sub?.plan_tier as SubscriptionPlanId | undefined) ?? null,
+      subscriptionStatus: (sub?.status as SubscriptionStatus | undefined) ?? "active",
+      renewsAt: sub?.renews_at ?? null,
+      notes: notesFor(sub?.id),
+    };
+  };
 
   const rows: PartnerRow[] = [
-    ...(hotels ?? []).map((h) => ({
-      id: h.id,
-      table: "hotels" as const,
-      name: h.name,
-      partnerStatus: h.partner_status,
-      planTier: planFor("hotel", h.id),
-    })),
-    ...(restaurants ?? []).map((r) => ({
-      id: r.id,
-      table: "restaurants" as const,
-      name: r.name,
-      partnerStatus: r.partner_status,
-      planTier: planFor("restaurant", r.id),
-    })),
-    ...(cafes ?? []).map((c) => ({
-      id: c.id,
-      table: "cafes" as const,
-      name: c.name,
-      partnerStatus: c.partner_status,
-      planTier: planFor("cafe", c.id),
-    })),
+    ...(hotels ?? []).map((h) => toRow("hotels", "hotel", h)),
+    ...(restaurants ?? []).map((r) => toRow("restaurants", "restaurant", r)),
+    ...(cafes ?? []).map((c) => toRow("cafes", "cafe", c)),
   ];
 
   return (

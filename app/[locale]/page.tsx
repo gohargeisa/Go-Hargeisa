@@ -1,3 +1,4 @@
+import { safeJsonLd } from "@/lib/utils/json-ld";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { getTranslations } from "next-intl/server";
@@ -15,7 +16,9 @@ import {
   filterHotelsForPresentation,
 } from "@/lib/config/features";
 
+import { getLatestAnnouncement } from "@/lib/data/announcements";
 import { Hero } from "@/components/home/hero";
+import { AnnouncementBanner } from "@/components/home/announcement-banner";
 import { ExploreHargeisaSection } from "@/components/home/explore-hargeisa-section";
 import { NewsletterSection } from "@/components/home/newsletter-section";
 import { Reveal } from "@/components/home/reveal";
@@ -46,12 +49,13 @@ export default async function HomePage({
 }) {
   const t = await getTranslations("home");
 
-  const [hotelsRaw, restaurants, cafes, services, attractions] = await Promise.all([
+  const [hotelsRaw, restaurants, cafes, services, attractions, announcement] = await Promise.all([
     getHotels({ limit: HOMEPAGE_PREVIEW_COUNT }),
     RESTAURANTS_PUBLIC_ENABLED ? getRestaurants({ limit: HOMEPAGE_PREVIEW_COUNT }) : Promise.resolve([]),
     CAFES_PUBLIC_ENABLED ? getCafes({ limit: HOMEPAGE_PREVIEW_COUNT }) : Promise.resolve([]),
     SERVICES_PUBLIC_ENABLED ? getServices({ limit: HOMEPAGE_SERVICES_PREVIEW_COUNT }) : Promise.resolve([]),
     getAttractions(),
+    getLatestAnnouncement(),
   ]);
   const hotels = filterHotelsForPresentation(hotelsRaw);
 
@@ -60,7 +64,7 @@ export default async function HomePage({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
+          __html: safeJsonLd({
             "@context": "https://schema.org",
             "@type": "TouristDestination",
             name: "Go Hargeisa",
@@ -70,6 +74,8 @@ export default async function HomePage({
           }),
         }}
       />
+
+      {announcement && <AnnouncementBanner announcement={announcement} />}
 
       <Hero locale={locale} />
 

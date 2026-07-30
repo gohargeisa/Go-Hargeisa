@@ -9,10 +9,10 @@ export function TrialPartnersCard({ locale, trialPartners }: { locale: Locale; t
     <div className="rounded-2xl border border-ink/8 bg-white p-5 dark:border-white/10 dark:bg-white/[0.03] sm:p-6">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Handshake size={17} className="text-primary" aria-hidden="true" />
+          <Handshake size={17} className="text-violet-600 dark:text-violet-400" aria-hidden="true" />
           <h3 className="font-display text-base font-bold">Trial Partners</h3>
         </div>
-        <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-bold text-primary">{trialPartners.length}</span>
+        <span className="rounded-full bg-violet-500/10 px-2.5 py-1 text-xs font-bold text-violet-600 dark:text-violet-400">{trialPartners.length}</span>
       </div>
 
       {trialPartners.length === 0 ? (

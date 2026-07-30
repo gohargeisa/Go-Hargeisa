@@ -3,6 +3,8 @@ import { getTranslations } from "next-intl/server";
 import { PageHero } from "@/components/shared/page-hero";
 import { ListingCard } from "@/components/shared/listing-card";
 import { getAttractions } from "@/lib/data/attractions";
+import type { Locale } from "@/lib/i18n/config";
+import { localeAlternates } from "@/lib/i18n/alternates";
 import { placeholderImage } from "@/lib/placeholder-image";
 
 // Public content changes infrequently; revalidate hourly instead of
@@ -18,7 +20,7 @@ export async function generateMetadata({
   return {
     title: "Shopping in Hargeisa — Markets & Malls",
   description: "Where to shop in Hargeisa: Waheen Market, gold souks and modern shopping centers.",
-    alternates: { canonical: `/${locale}/shopping` },
+    alternates: localeAlternates(locale as Locale, "/shopping"),
   };
 }
 

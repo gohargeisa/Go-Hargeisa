@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { ChevronRight, Home } from "lucide-react";
+import { safeJsonLd } from "@/lib/utils/json-ld";
 
 export interface Crumb {
   label: string;
@@ -22,7 +23,7 @@ export function Breadcrumbs({ items }: { items: Crumb[] }) {
 
   return (
     <nav aria-label={t("breadcrumbAriaLabel")} className="container-px mx-auto pt-5">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <ol className="flex flex-wrap items-center gap-1.5 text-xs text-ink/50 dark:text-sand/50">
         <li className="flex items-center gap-1.5">
           <Link href={items[0]?.href.split("/").slice(0, 2).join("/") || "/"} className="hover:text-primary">

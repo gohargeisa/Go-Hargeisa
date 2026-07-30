@@ -1,8 +1,10 @@
+import { safeJsonLd } from "@/lib/utils/json-ld";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ExternalLink, MapPin, Navigation } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
+import { localeAlternates } from "@/lib/i18n/alternates";
 import { getServiceBySlug, getAllServiceSlugs, getServices } from "@/lib/data/services";
 import { getSiteSettings } from "@/lib/actions/settings";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
@@ -51,7 +53,7 @@ export async function generateMetadata({
     title: `${service.name} — ${SERVICE_CATEGORY_SINGULAR_LABELS[service.category]} in Hargeisa`,
     description: service.shortDescription,
     openGraph: { images: [service.coverImage] },
-    alternates: { canonical: `/${locale}${serviceHref(service.category, service.slug)}` },
+    alternates: localeAlternates(locale as Locale, serviceHref(service.category, service.slug)),
   };
 }
 
@@ -112,7 +114,7 @@ export default async function ServiceDetailPage({
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <ViewTracker listingType="service" listingId={service.id} />
 
       <Breadcrumbs

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { SearchX } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/config";
+import { localeAlternates } from "@/lib/i18n/alternates";
 import { getAttractions } from "@/lib/data/attractions";
 import { ListingCard } from "@/components/shared/listing-card";
 import { PageHero } from "@/components/shared/page-hero";
@@ -23,7 +24,7 @@ export async function generateMetadata({
     title: "Tourist Attractions in Hargeisa",
     description:
       "Landmarks, museums, markets and nature spots to visit in Hargeisa, Somaliland.",
-    alternates: { canonical: `/${locale}/attractions` },
+    alternates: localeAlternates(locale as Locale, "/attractions"),
   };
 }
 

@@ -1,3 +1,4 @@
+import { safeJsonLd } from "@/lib/utils/json-ld";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
@@ -5,6 +6,7 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ExternalLink, MapPin, Navigation } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
+import { localeAlternates } from "@/lib/i18n/alternates";
 import { getHotelBySlug, getAllHotelSlugs, getNearbyAttractionsForHotel, getHotels } from "@/lib/data/hotels";
 import { hotelCategoryLabel } from "@/lib/utils/hotel-category";
 import { getSiteSettings } from "@/lib/actions/settings";
@@ -62,7 +64,7 @@ export async function generateMetadata({
     title: `${hotel.name} — Hotel in Hargeisa`,
     description: hotel.shortDescription,
     openGraph: { images: [hotel.coverImage] },
-    alternates: { canonical: `/${locale}/hotels/${hotel.slug}` },
+    alternates: localeAlternates(locale as Locale, `/hotels/${hotel.slug}`),
   };
 }
 
@@ -132,7 +134,7 @@ export default async function HotelDetailPage({
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <ViewTracker listingType="hotel" listingId={hotel.id} />
 
       <Breadcrumbs

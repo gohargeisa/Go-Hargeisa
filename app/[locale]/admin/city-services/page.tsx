@@ -16,7 +16,7 @@ export default async function AdminCityServicesPage({ params: { locale } }: { pa
   const supabase = await createClient();
   const { data } = await supabase
     .from("city_services")
-    .select("id, name, image, category, status")
+    .select("id, name, image, category, status, featured")
     .order("category")
     .order("sort_order");
 

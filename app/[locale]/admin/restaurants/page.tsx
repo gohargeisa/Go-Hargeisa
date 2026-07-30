@@ -15,10 +15,10 @@ export default async function AdminRestaurantsPage({ params: { locale } }: { par
   const access = await requireListingsAccess(locale, `/${locale}/admin/restaurants`);
   const t = await getTranslations({ locale, namespace: "admin" });
 
-  let restaurants: { id: string; name: string; address: string; cover_image: string; cuisine: string[] | null; status: "draft" | "published" | "archived" }[] = [];
+  let restaurants: { id: string; name: string; address: string; cover_image: string; cuisine: string[] | null; status: "draft" | "published" | "archived"; featured: boolean; is_pinned: boolean }[] = [];
   if (access && isSupabaseConfigured()) {
     const supabase = await createClient();
-    let query = supabase.from("restaurants").select("id, name, address, cover_image, cuisine, status");
+    let query = supabase.from("restaurants").select("id, name, address, cover_image, cuisine, status, featured, is_pinned");
     if (access.role === "business_owner") query = query.eq("owner_id", access.userId);
     const { data } = await query;
     restaurants = data ?? [];
@@ -30,6 +30,8 @@ export default async function AdminRestaurantsPage({ params: { locale } }: { par
       cover_image: r.coverImage,
       cuisine: r.cuisine,
       status: "published" as const,
+      featured: r.featured ?? false,
+      is_pinned: false,
     }));
   }
 
@@ -66,6 +68,8 @@ export default async function AdminRestaurantsPage({ params: { locale } }: { par
           }
           allowDelete={canCreate}
           allowHide={canCreate}
+          allowFeature={canCreate}
+          allowPin={canCreate}
           rows={restaurants.map((r) => ({
             id: r.id,
             image: r.cover_image,
@@ -73,6 +77,8 @@ export default async function AdminRestaurantsPage({ params: { locale } }: { par
             subtitle: r.address,
             meta: r.cuisine?.join(", ") || "—",
             status: r.status,
+            featured: r.featured,
+            isPinned: r.is_pinned,
           }))}
         />
       </div>

@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Ticket, CalendarClock, MapPin, LightbulbIcon } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
+import { localeAlternates } from "@/lib/i18n/alternates";
 import { getAttractionBySlug, getAllAttractionSlugs, getNearbyForAttraction } from "@/lib/data/attractions";
 import { Gallery } from "@/components/shared/gallery";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
@@ -13,6 +14,7 @@ import { ReviewsSection } from "@/components/shared/reviews-section";
 import { ReviewForm } from "@/components/shared/review-form";
 import { AddToTripButton } from "@/components/shared/add-to-trip-button";
 import { SingleLocationMapLoader } from "@/components/map/single-location-map-loader";
+import { safeJsonLd } from "@/lib/utils/json-ld";
 
 // Public content changes infrequently; revalidate hourly instead of
 // rendering on every request (this page no longer reads cookies, so
@@ -38,9 +40,7 @@ export async function generateMetadata({
   return {
     title: `${a.name} — Hargeisa Attraction`,
     description: a.shortDescription,
-    alternates: {
-      canonical: `/${locale}/attractions/${a.slug}`,
-    },
+    alternates: localeAlternates(locale as Locale, `/attractions/${a.slug}`),
   };
 }
 
@@ -56,8 +56,24 @@ export default async function AttractionDetailPage({
   const td = await getTranslations("detail");
   const { restaurants: nearbyRestaurants, hotels: nearbyHotels } = await getNearbyForAttraction(attraction.id);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "TouristAttraction",
+    name: attraction.name,
+    description: attraction.description,
+    image: attraction.coverImage,
+    address: { "@type": "PostalAddress", streetAddress: attraction.address, addressLocality: "Hargeisa" },
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: attraction.rating,
+      reviewCount: attraction.reviewCount,
+    },
+  };
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
+
       <Breadcrumbs
         items={[
           { label: tNav("attractions"), href: `/${locale}/attractions` },

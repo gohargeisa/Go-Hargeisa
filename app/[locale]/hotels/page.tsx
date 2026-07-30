@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/config";
+import { localeAlternates } from "@/lib/i18n/alternates";
 import { getHotels } from "@/lib/data/hotels";
 import { ListingCard } from "@/components/shared/listing-card";
 import { PageHero } from "@/components/shared/page-hero";
@@ -22,7 +23,7 @@ export async function generateMetadata({
     title: "Hotels in Hargeisa — Where to Stay",
     description:
       "Browse the best hotels in Hargeisa, Somaliland, from business-friendly 4-star hotels to boutique stays. Prices, amenities, maps and reviews.",
-    alternates: { canonical: `/${locale}/hotels` },
+    alternates: localeAlternates(locale as Locale, "/hotels"),
   };
 }
 

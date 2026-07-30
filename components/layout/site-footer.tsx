@@ -20,6 +20,7 @@ export function SiteFooter({ locale }: { locale: Locale }) {
     ["about", "about"],
     ["blog", "blog"],
     ["contact", "contact"],
+    ["listYourBusiness", "join"],
   ] as const;
 
   const supportLinks = [

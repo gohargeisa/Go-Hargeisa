@@ -90,7 +90,11 @@ export function ReviewForm({
           </button>
         ))}
       </div>
+      <label htmlFor="review-comment" className="sr-only">
+        {t("commentPlaceholder")}
+      </label>
       <textarea
+        id="review-comment"
         value={comment}
         onChange={(e) => setComment(e.target.value)}
         required

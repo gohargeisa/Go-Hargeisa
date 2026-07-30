@@ -1,0 +1,254 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
+import { placeholderImage } from "@/lib/placeholder-image";
+import { logActivity } from "./activity";
+import type { JoinRequestCategory, BusinessRequestStatus } from "@/types";
+
+async function assertOwner() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not signed in.");
+
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  if (profile?.role !== "owner") throw new Error("Not authorized.");
+
+  return supabase;
+}
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function digitsOnly(value: string): string {
+  return value.replace(/\D/g, "");
+}
+
+export interface JoinRequestInput {
+  category: JoinRequestCategory;
+  businessName: string;
+  ownerName: string;
+  phone: string;
+  whatsapp?: string;
+  email: string;
+  address: string;
+  mapsUrl?: string;
+  description: string;
+  logo?: string;
+  gallery?: string[];
+  menuPdfUrl?: string;
+  bookingUrl?: string;
+  website?: string;
+}
+
+/**
+ * Public — no auth required, matches the anon-insert shape already proven
+ * safe for business_claims/contact_messages. Full server-side validation
+ * since this is the only real gate (the public form's own validation is
+ * just UX, not a security boundary).
+ */
+export async function submitJoinRequest(input: JoinRequestInput): Promise<{ ok: boolean; error?: string }> {
+  const businessName = input.businessName.trim();
+  const ownerName = input.ownerName.trim();
+  const phone = input.phone.trim();
+  const email = input.email.trim();
+  const address = input.address.trim();
+  const description = input.description.trim();
+
+  if (!businessName || !ownerName || !phone || !email || !address || !description) {
+    return { ok: false, error: "Please fill in all required fields." };
+  }
+  if (!EMAIL_RE.test(email)) {
+    return { ok: false, error: "Please enter a valid email address." };
+  }
+  if (digitsOnly(phone).length < 7) {
+    return { ok: false, error: "Please enter a valid phone number." };
+  }
+  if (!["hotel", "restaurant", "cafe"].includes(input.category)) {
+    return { ok: false, error: "Invalid category." };
+  }
+
+  // Public client — this table's RLS grants anonymous INSERT, but every
+  // other query here (the duplicate check) should use the same
+  // unauthenticated path rather than assuming a signed-in session exists.
+  const supabase = createPublicClient();
+
+  const { data: existing } = await supabase
+    .from("business_join_requests")
+    .select("id")
+    .ilike("email", email)
+    .ilike("business_name", businessName)
+    .in("status", ["pending", "needs_info"])
+    .limit(1);
+
+  if (existing && existing.length > 0) {
+    return { ok: false, error: "A request for this business is already pending review." };
+  }
+
+  const { error } = await supabase.from("business_join_requests").insert({
+    category: input.category,
+    business_name: businessName,
+    owner_name: ownerName,
+    phone,
+    whatsapp: input.whatsapp?.trim() || null,
+    email,
+    address,
+    maps_url: input.mapsUrl?.trim() || null,
+    description,
+    logo: input.logo || null,
+    gallery: input.gallery ?? [],
+    menu_pdf_url: input.menuPdfUrl || null,
+    booking_url: input.bookingUrl?.trim() || null,
+    website: input.website?.trim() || null,
+  } as never);
+
+  if (error) return { ok: false, error: error.message };
+
+  return { ok: true };
+}
+
+export async function setRequestStatus(
+  locale: string,
+  id: string,
+  status: BusinessRequestStatus
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await assertOwner();
+
+  const { error } = await supabase
+    .from("business_join_requests")
+    .update({ status, updated_at: new Date().toISOString() } as never)
+    .eq("id", id);
+
+  if (error) return { ok: false, error: error.message };
+
+  await logActivity("update", "business_join_request", id, { status });
+  revalidatePath(`/${locale}/admin/requests`);
+  return { ok: true };
+}
+
+export async function addRequestNote(locale: string, requestId: string, note: string): Promise<{ ok: boolean; error?: string }> {
+  const trimmed = note.trim();
+  if (!trimmed) return { ok: false, error: "Note can't be empty." };
+
+  const supabase = await assertOwner();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { error } = await supabase
+    .from("business_join_request_notes")
+    .insert({ request_id: requestId, note: trimmed, created_by: user?.id ?? null } as never);
+
+  if (error) return { ok: false, error: error.message };
+
+  await logActivity("create", "business_join_request_note", requestId);
+  revalidatePath(`/${locale}/admin/requests`);
+  return { ok: true };
+}
+
+export interface ConvertCompletion {
+  slug: string;
+  lat: number;
+  lng: number;
+}
+
+/**
+ * Converts an approved request into a real listing. Only lat/lng/slug are
+ * required here despite the listing tables having several other NOT NULL
+ * columns (short_description, cover_image, price_range, booking_mode, ...)
+ * — every one of those either has a sensible DB default (price_range
+ * '$$', booking_mode 'go_hargeisa', status 'published') or can be derived
+ * from the request itself (short_description from description, cover_image
+ * from the first gallery photo/logo/a placeholder). lat/lng are the only
+ * fields the join form never collects and that have no default, so they're
+ * the only ones that must be confirmed by hand before the listing can
+ * exist at all.
+ */
+export async function convertJoinRequest(
+  locale: string,
+  requestId: string,
+  targetPartnerStatus: "trial" | "official",
+  completion: ConvertCompletion
+): Promise<{ ok: boolean; error?: string; listingId?: string; table?: string }> {
+  const supabase = await assertOwner();
+
+  const slug = completion.slug.trim();
+  if (!slug) return { ok: false, error: "Slug is required." };
+  if (!Number.isFinite(completion.lat) || completion.lat < -90 || completion.lat > 90) {
+    return { ok: false, error: "Latitude must be between -90 and 90." };
+  }
+  if (!Number.isFinite(completion.lng) || completion.lng < -180 || completion.lng > 180) {
+    return { ok: false, error: "Longitude must be between -180 and 180." };
+  }
+
+  const { data: request, error: fetchError } = await supabase
+    .from("business_join_requests")
+    .select("*")
+    .eq("id", requestId)
+    .single();
+
+  if (fetchError || !request) return { ok: false, error: "Request not found." };
+  if (request.converted_listing_id) return { ok: false, error: "This request was already converted." };
+
+  const table = request.category === "hotel" ? "hotels" : request.category === "restaurant" ? "restaurants" : "cafes";
+
+  const { data: slugTaken } = await supabase.from(table).select("id").eq("slug", slug).maybeSingle();
+  if (slugTaken) return { ok: false, error: "That slug is already in use — please choose another." };
+
+  const gallery = (request.gallery as string[] | null) ?? [];
+  const coverImage = gallery[0] ?? request.logo ?? placeholderImage(request.business_name);
+  const shortDescription = request.description.length > 160 ? `${request.description.slice(0, 157)}...` : request.description;
+
+  const basePayload: Record<string, unknown> = {
+    slug,
+    name: request.business_name,
+    short_description: shortDescription,
+    description: request.description,
+    cover_image: coverImage,
+    gallery: gallery.map((url) => ({ url })),
+    address: request.address,
+    lat: completion.lat,
+    lng: completion.lng,
+    phone: request.phone,
+    logo_url: request.logo,
+    partner_status: targetPartnerStatus,
+  };
+
+  if (table === "hotels") {
+    basePayload.website = request.website;
+    if (request.booking_url) {
+      basePayload.booking_mode = "external";
+      basePayload.external_booking_option = "custom_url";
+      basePayload.external_booking_url = request.booking_url;
+    }
+  } else if (table === "restaurants") {
+    basePayload.website = request.website;
+    basePayload.menu_pdf_url = request.menu_pdf_url;
+  } else {
+    basePayload.menu_pdf_url = request.menu_pdf_url;
+  }
+
+  const { data: created, error: insertError } = await supabase.from(table).insert(basePayload as never).select("id").single();
+
+  if (insertError || !created) return { ok: false, error: insertError?.message ?? "Could not create the listing." };
+
+  await supabase
+    .from("business_join_requests")
+    .update({
+      status: "approved",
+      converted_listing_type: request.category,
+      converted_listing_id: created.id,
+      updated_at: new Date().toISOString(),
+    } as never)
+    .eq("id", requestId);
+
+  await logActivity("create", table, created.id, { fromJoinRequest: requestId, partnerStatus: targetPartnerStatus });
+  revalidatePath(`/${locale}/admin/requests`);
+  revalidatePath(`/${locale}/admin/partners`);
+  revalidatePath(`/${locale}/admin/${table}`);
+  revalidatePath(`/${locale}/${table}`);
+
+  return { ok: true, listingId: created.id, table };
+}

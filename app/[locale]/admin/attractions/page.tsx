@@ -19,10 +19,10 @@ export default async function AdminAttractionsPage({ params: { locale } }: { par
   // returns status='published' rows) so a hidden/archived attraction stays
   // visible here to be un-hidden — matches the hotels/restaurants/cafes
   // admin pages, which already query directly for the same reason.
-  let attractions: { id: string; name: string; address: string; cover_image: string; category: string; status: "draft" | "published" | "archived" }[] = [];
+  let attractions: { id: string; name: string; address: string; cover_image: string; category: string; status: "draft" | "published" | "archived"; featured: boolean; is_pinned: boolean }[] = [];
   if (isSupabaseConfigured()) {
     const supabase = await createClient();
-    const { data } = await supabase.from("attractions").select("id, name, address, cover_image, category, status");
+    const { data } = await supabase.from("attractions").select("id, name, address, cover_image, category, status, featured, is_pinned");
     attractions = data ?? [];
   } else {
     attractions = (await getAttractions()).map((a) => ({
@@ -32,6 +32,8 @@ export default async function AdminAttractionsPage({ params: { locale } }: { par
       cover_image: a.coverImage,
       category: a.category,
       status: "published" as const,
+      featured: a.featured ?? false,
+      is_pinned: false,
     }));
   }
 
@@ -56,6 +58,8 @@ export default async function AdminAttractionsPage({ params: { locale } }: { par
           metaLabel={t("categoryMetaLabel")}
           editHrefBase={`/${locale}/admin/attractions`}
           emptyLabel={t("noAttractionsYet")}
+          allowFeature
+          allowPin
           rows={attractions.map((a) => ({
             id: a.id,
             image: a.cover_image,
@@ -63,6 +67,8 @@ export default async function AdminAttractionsPage({ params: { locale } }: { par
             subtitle: a.address,
             meta: a.category,
             status: a.status,
+            featured: a.featured,
+            isPinned: a.is_pinned,
           }))}
         />
       </div>

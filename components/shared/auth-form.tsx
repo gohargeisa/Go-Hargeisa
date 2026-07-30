@@ -133,7 +133,11 @@ export function AuthForm({ mode, locale }: { mode: "login" | "register"; locale:
 
       {mode === "register" && (
         <div>
+          <label htmlFor="auth-name" className="sr-only">
+            {t("fullNamePlaceholder")}
+          </label>
           <input
+            id="auth-name"
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -145,7 +149,11 @@ export function AuthForm({ mode, locale }: { mode: "login" | "register"; locale:
       )}
 
       <div>
+        <label htmlFor="auth-email" className="sr-only">
+          {t("emailPlaceholder")}
+        </label>
         <input
+          id="auth-email"
           required
           type="email"
           value={email}
@@ -158,7 +166,11 @@ export function AuthForm({ mode, locale }: { mode: "login" | "register"; locale:
 
       <div>
         <div className="relative">
+          <label htmlFor="auth-password" className="sr-only">
+            {mode === "register" ? t("createPasswordPlaceholder") : t("passwordPlaceholder")}
+          </label>
           <input
+            id="auth-password"
             required
             type={showPassword ? "text" : "password"}
             minLength={8}

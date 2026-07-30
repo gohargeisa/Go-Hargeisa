@@ -99,7 +99,7 @@ export async function getOwnerPartnerOverview(): Promise<OwnerPartnerOverview> {
     ...toRows(cafes, "cafes", "cafe"),
   ];
 
-  const planCounts: Record<SubscriptionPlanId, number> = { basic: 0, gold: 0, platinum: 0 };
+  const planCounts: Record<SubscriptionPlanId, number> = { basic: 0, silver: 0, gold: 0 };
   for (const p of partners) if (p.planTier) planCounts[p.planTier]++;
 
   return {
@@ -125,7 +125,11 @@ const CITY_SERVICE_TARGET_PER_CATEGORY = 4;
 
 export async function getCityCoverage(): Promise<{ categories: CityCoverageCategory[]; totalPublished: number; totalTarget: number }> {
   const supabase = await createClient();
-  const { data } = await supabase.from("city_services").select("category").eq("status", "published");
+  // Coverage tracks featured (i.e. actually live on the public page) rows,
+  // not merely published ones — an owner can keep extra published rows in
+  // reserve per category without them counting toward the 4-per-category
+  // coverage target (see lib/actions/city-services.ts's featured cap).
+  const { data } = await supabase.from("city_services").select("category").eq("status", "published").eq("featured", true);
 
   const categories = CITY_SERVICE_CATEGORIES.map((category) => ({
     category,
@@ -156,7 +160,7 @@ export async function getMissionChecklist(): Promise<MissionChecklistItem[]> {
   const [{ count: hotelCount }, { count: officialCount }, { count: citySvcCount }, { count: subCount }] = await Promise.all([
     supabase.from("hotels").select("id", { count: "exact", head: true }).eq("status", "published"),
     supabase.from("hotels").select("id", { count: "exact", head: true }).eq("partner_status", "official"),
-    supabase.from("city_services").select("id", { count: "exact", head: true }).eq("status", "published"),
+    supabase.from("city_services").select("id", { count: "exact", head: true }).eq("status", "published").eq("featured", true),
     supabase.from("business_subscriptions").select("id", { count: "exact", head: true }),
   ]);
 
@@ -274,14 +278,41 @@ export interface OwnerKpis {
   totalViews: number;
   totalClicks: number;
   totalBookings: number;
+  todayViews: number;
+  weekViews: number;
+  monthViews: number;
 }
 
 export async function getOwnerKpis(): Promise<OwnerKpis> {
   const supabase = await createClient();
-  const [{ count: totalViews }, { count: totalClicks }, { count: totalBookings }] = await Promise.all([
+
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+  const weekStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
+  const [
+    { count: totalViews },
+    { count: totalClicks },
+    { count: totalBookings },
+    { count: todayViews },
+    { count: weekViews },
+    { count: monthViews },
+  ] = await Promise.all([
     supabase.from("business_metric_events").select("id", { count: "exact", head: true }).eq("event_type", "view"),
     supabase.from("business_metric_events").select("id", { count: "exact", head: true }).in("event_type", ["website_click", "call_click", "whatsapp_click"]),
     supabase.from("bookings").select("id", { count: "exact", head: true }),
+    supabase.from("business_metric_events").select("id", { count: "exact", head: true }).eq("event_type", "view").gte("created_at", todayStart),
+    supabase.from("business_metric_events").select("id", { count: "exact", head: true }).eq("event_type", "view").gte("created_at", weekStart),
+    supabase.from("business_metric_events").select("id", { count: "exact", head: true }).eq("event_type", "view").gte("created_at", monthStart),
   ]);
-  return { totalViews: totalViews ?? 0, totalClicks: totalClicks ?? 0, totalBookings: totalBookings ?? 0 };
+
+  return {
+    totalViews: totalViews ?? 0,
+    totalClicks: totalClicks ?? 0,
+    totalBookings: totalBookings ?? 0,
+    todayViews: todayViews ?? 0,
+    weekViews: weekViews ?? 0,
+    monthViews: monthViews ?? 0,
+  };
 }

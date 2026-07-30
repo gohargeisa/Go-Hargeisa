@@ -47,6 +47,8 @@ export default async function MyBusinessPage({ params: { locale } }: { params: {
           checkInTime: (row as { check_in_time?: string })?.check_in_time ?? "",
           checkOutTime: (row as { check_out_time?: string })?.check_out_time ?? "",
           openingHours: (row as { opening_hours?: string })?.opening_hours ?? "",
+          menuHighlights: (row as { menu?: { name: string; price: string; description?: string }[] })?.menu ?? [],
+          menuPdfUrl: (row as { menu_pdf_url?: string })?.menu_pdf_url ?? "",
         }}
       />
 

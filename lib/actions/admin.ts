@@ -144,18 +144,22 @@ export async function deleteListing(
 }
 
 /**
- * Owner-only "Hide"/"Show" toggle — flips a listing between 'published' and
- * 'archived' without opening the full edit form. Archived rows keep every
- * existing "Public can read published X" RLS policy denying them (those
- * policies check status = 'published'), so hiding a listing this way is
- * exactly as effective at removing it from the public site as archiving it
+ * Owner-only status control — sets a listing to 'draft', 'published', or
+ * 'archived' without opening the full edit form. Archived (and draft) rows
+ * keep every existing "Public can read published X" RLS policy denying
+ * them (those policies check status = 'published'), so this is exactly as
+ * effective at removing a listing from the public site as changing status
  * through the edit form always was — this just makes it a one-click action
- * from the list view instead.
+ * from the list view instead. Originally a binary published/archived
+ * toggle (see components/shared/hide-listing-button.tsx's replacement,
+ * components/shared/listing-status-menu.tsx) — widened to a third state so
+ * "draft" is actually reachable from the list view, not just possible in
+ * the abstract type.
  */
 export async function toggleListingVisibility(
   table: AllowedTable,
   id: string,
-  nextStatus: "published" | "archived",
+  nextStatus: "draft" | "published" | "archived",
   revalidate: string
 ): Promise<{ ok: boolean; error?: string }> {
   if (!ALLOWED_TABLES.includes(table)) {
@@ -195,7 +199,56 @@ export async function toggleListingVisibility(
     return { ok: false, error: error?.message ?? "Could not update visibility." };
   }
 
-  await logActivity(nextStatus === "published" ? "publish" : "archive", table, id);
+  await logActivity(nextStatus === "published" ? "publish" : nextStatus === "archived" ? "archive" : "update", table, id, { status: nextStatus });
+  revalidatePath(revalidate);
+  return { ok: true };
+}
+
+// Feature/Pin only apply to the tables built on the shared listing shape
+// (hotels/restaurants/cafes/attractions/services all carry `featured` and
+// `is_pinned`) — events/articles use a different, simpler row shape and
+// have neither column.
+const FEATURABLE_TABLES = ["hotels", "restaurants", "cafes", "attractions", "services"] as const;
+export type FeaturableTable = (typeof FEATURABLE_TABLES)[number];
+
+/** Owner-only one-click "Feature" toggle — the column already existed and
+ * was editable in the full edit form; this just makes it reachable from
+ * the list view too, same shape as toggleListingVisibility above. */
+export async function toggleListingFeatured(
+  table: FeaturableTable,
+  id: string,
+  featured: boolean,
+  revalidate: string
+): Promise<{ ok: boolean; error?: string }> {
+  if (!FEATURABLE_TABLES.includes(table)) return { ok: false, error: "Invalid table." };
+
+  const supabase = await assertOwner();
+  const { data, error } = await supabase.from(table).update({ featured } as never).eq("id", id).select("id").single();
+
+  if (error || !data) return { ok: false, error: error?.message ?? "Could not update." };
+
+  await logActivity("update", table, id, { featured });
+  revalidatePath(revalidate);
+  return { ok: true };
+}
+
+/** Owner-only one-click "Pin" toggle. Pinned listings sort ahead of merely
+ * featured ones on their public listing page (see lib/data/hotels.ts and
+ * siblings' getHotels-style query ordering). */
+export async function toggleListingPinned(
+  table: FeaturableTable,
+  id: string,
+  pinned: boolean,
+  revalidate: string
+): Promise<{ ok: boolean; error?: string }> {
+  if (!FEATURABLE_TABLES.includes(table)) return { ok: false, error: "Invalid table." };
+
+  const supabase = await assertOwner();
+  const { data, error } = await supabase.from(table).update({ is_pinned: pinned } as never).eq("id", id).select("id").single();
+
+  if (error || !data) return { ok: false, error: error?.message ?? "Could not update." };
+
+  await logActivity("update", table, id, { pinned });
   revalidatePath(revalidate);
   return { ok: true };
 }

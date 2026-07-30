@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/config";
+import { localeAlternates } from "@/lib/i18n/alternates";
 import { getCafes } from "@/lib/data/cafes";
 import { PageHero } from "@/components/shared/page-hero";
 import { CafesPageClient } from "@/components/pages/cafes-page-client";
@@ -19,7 +20,7 @@ export async function generateMetadata({
   return {
     title: "Cafes in Hargeisa — Coffee & Working Spots",
     description: "Modern cafes in Hargeisa with WiFi, working space and specialty drinks.",
-    alternates: { canonical: `/${locale}/cafes` },
+    alternates: localeAlternates(locale as Locale, "/cafes"),
   };
 }
 

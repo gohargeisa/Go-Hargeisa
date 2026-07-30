@@ -5,6 +5,7 @@ import {
   Users, Sun, Backpack, HelpCircle,
 } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
+import { localeAlternates } from "@/lib/i18n/alternates";
 import { PageHero } from "@/components/shared/page-hero";
 import { placeholderImage } from "@/lib/placeholder-image";
 
@@ -16,7 +17,7 @@ export async function generateMetadata({
   return {
     title: "Hargeisa Travel Guide — Visa, Safety, Transport & More",
   description: "Everything you need to know before visiting Hargeisa: visa requirements, airport guide, currency, safety tips and more.",
-    alternates: { canonical: `/${locale}/travel-guide` },
+    alternates: localeAlternates(locale as Locale, "/travel-guide"),
   };
 }
 

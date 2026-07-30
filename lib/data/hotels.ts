@@ -27,6 +27,7 @@ export async function getHotels(options?: { q?: string; featuredOnly?: boolean; 
     .from("hotels")
     .select("*")
     .eq("status", "published")
+    .order("is_pinned", { ascending: false })
     .order("featured", { ascending: false });
 
   if (featuredOnly) query = query.eq("featured", true);

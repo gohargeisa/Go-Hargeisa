@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/config";
+import { localeAlternates } from "@/lib/i18n/alternates";
 
 export async function generateMetadata({
   params: { locale },
@@ -9,7 +10,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   return {
     title: "Privacy Policy — Go Hargeisa",
-    alternates: { canonical: `/${locale}/privacy` },
+    alternates: localeAlternates(locale as Locale, "/privacy"),
   };
 }
 

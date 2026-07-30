@@ -25,6 +25,7 @@ type ListingBase = {
   rating: number;
   review_count: number;
   featured: boolean;
+  is_pinned: boolean;
   status: "draft" | "published" | "archived";
   created_at: string;
   updated_at: string;
@@ -40,7 +41,7 @@ type HotelRow = ListingBase & {
   booking_mode: "go_hargeisa" | "external";
   external_booking_option: "website" | "booking_com" | "whatsapp" | "custom_url" | null;
   external_booking_url: string | null; booking_whatsapp: string | null; booking_com_url: string | null;
-  partner_status: PartnerStatusDb;
+  partner_status: PartnerStatusDb; trial_expires_at: string | null;
 };
 
 type RoomTypeDb = "standard" | "deluxe" | "twin" | "family" | "executive_suite";
@@ -58,21 +59,21 @@ type RestaurantRow = ListingBase & {
   phone: string | null; website: string | null; cuisine: string[]; price_range: "$" | "$$" | "$$$" | "$$$$";
   opening_hours: string | null; menu: Json; reservable: boolean; owner_id: string | null;
   logo_url: string | null; menu_pdf_url: string | null;
-  partner_status: PartnerStatusDb;
+  partner_status: PartnerStatusDb; trial_expires_at: string | null;
 };
 type CafeRow = ListingBase & {
   phone: string | null; special_drinks: string[]; wifi: boolean; working_space: boolean;
   opening_hours: string | null; owner_id: string | null;
   logo_url: string | null; menu: Json; menu_pdf_url: string | null;
-  partner_status: PartnerStatusDb;
+  partner_status: PartnerStatusDb; trial_expires_at: string | null;
 };
 
 type CityServiceCategoryDb = "hospital" | "bank" | "supermarket" | "pharmacy";
 
 type CityServiceRow = {
-  id: string; category: CityServiceCategoryDb; name: string; phone: string | null;
+  id: string; category: CityServiceCategoryDb; name: string; description: string | null; phone: string | null;
   opening_hours: string | null; maps_url: string | null; image: string | null;
-  status: "draft" | "published" | "archived"; sort_order: number;
+  status: "draft" | "published" | "archived"; featured: boolean; sort_order: number;
   created_at: string; updated_at: string;
 };
 type AttractionRow = ListingBase & {
@@ -113,7 +114,32 @@ type BusinessMetricEventRow = {
 
 type BusinessSubscriptionRow = {
   id: string; listing_type: BusinessListingType; listing_id: string;
-  plan_tier: "basic" | "gold" | "platinum"; renews_at: string | null; created_at: string; updated_at: string;
+  plan_tier: "basic" | "silver" | "gold"; status: "active" | "paused" | "cancelled";
+  renews_at: string | null; created_at: string; updated_at: string;
+};
+
+type BusinessSubscriptionNoteRow = {
+  id: string; subscription_id: string; note: string; created_by: string | null; created_at: string;
+};
+
+type BusinessRequestStatusDb = "pending" | "approved" | "rejected" | "needs_info" | "archived";
+
+type BusinessJoinRequestRow = {
+  id: string; category: "hotel" | "restaurant" | "cafe"; business_name: string; owner_name: string;
+  phone: string; whatsapp: string | null; email: string; address: string; maps_url: string | null;
+  description: string; logo: string | null; gallery: Json; menu_pdf_url: string | null;
+  booking_url: string | null; website: string | null; status: BusinessRequestStatusDb;
+  converted_listing_type: "hotel" | "restaurant" | "cafe" | null; converted_listing_id: string | null;
+  created_at: string; updated_at: string;
+};
+
+type BusinessJoinRequestNoteRow = {
+  id: string; request_id: string; note: string; created_by: string | null; created_at: string;
+};
+
+type SiteAnnouncementRow = {
+  id: string; title: string; message: string; link_url: string | null; link_label: string | null;
+  status: "draft" | "published" | "archived"; created_at: string; updated_at: string;
 };
 
 type BusinessMessageRow = {
@@ -142,6 +168,10 @@ export type Database = {
       booking_status_history: Table<BookingStatusHistoryRow>;
       business_metric_events: Table<BusinessMetricEventRow>;
       business_subscriptions: Table<BusinessSubscriptionRow>;
+      business_subscription_notes: Table<BusinessSubscriptionNoteRow>;
+      business_join_requests: Table<BusinessJoinRequestRow>;
+      business_join_request_notes: Table<BusinessJoinRequestNoteRow>;
+      site_announcements: Table<SiteAnnouncementRow>;
       business_messages: Table<BusinessMessageRow>;
       favorites: Table<{ id: string; user_id: string | null; listing_type: "hotel" | "restaurant" | "cafe" | "attraction" | "service"; listing_id: string; created_at: string }>;
       saved_trips: Table<{ id: string; user_id: string | null; title: string; notes: string | null; created_at: string }>;
@@ -176,7 +206,7 @@ export type Database = {
         Returns: string;
       };
     };
-    Enums: { user_role: "user" | "business_owner" | "owner"; price_range: "$" | "$$" | "$$$" | "$$$$"; attraction_category: "landmark" | "museum" | "market" | "nature" | "religious"; event_category: "cultural" | "national" | "business" | "sports" | "concert"; content_status: "draft" | "published" | "archived"; listing_type: "hotel" | "restaurant" | "cafe" | "attraction" | "service"; service_category: ServiceCategoryDb; subscription_tier: "basic" | "gold" | "platinum"; partner_status: PartnerStatusDb; city_service_category: CityServiceCategoryDb; };
+    Enums: { user_role: "user" | "business_owner" | "owner"; price_range: "$" | "$$" | "$$$" | "$$$$"; attraction_category: "landmark" | "museum" | "market" | "nature" | "religious"; event_category: "cultural" | "national" | "business" | "sports" | "concert"; content_status: "draft" | "published" | "archived"; listing_type: "hotel" | "restaurant" | "cafe" | "attraction" | "service"; service_category: ServiceCategoryDb; subscription_tier: "basic" | "silver" | "gold"; subscription_status: "active" | "paused" | "cancelled"; partner_status: PartnerStatusDb; business_request_status: BusinessRequestStatusDb; city_service_category: CityServiceCategoryDb; };
     CompositeTypes: Record<string, never>;
   };
 };

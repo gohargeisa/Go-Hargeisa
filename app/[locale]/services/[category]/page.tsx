@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { Locale } from "@/lib/i18n/config";
+import { localeAlternates } from "@/lib/i18n/alternates";
 import { getServices } from "@/lib/data/services";
 import { PageHero } from "@/components/shared/page-hero";
 import { ServicesPageClient } from "@/components/pages/services-page-client";
@@ -36,7 +37,7 @@ export async function generateMetadata({
   return {
     title: `Best ${label} in Hargeisa — ${singular} Directory`,
     description: `Find real, up-to-date ${label.toLowerCase()} in Hargeisa, Somaliland — addresses, phone numbers, opening hours and directions.`,
-    alternates: { canonical: `/${locale}/services/${categorySlug}` },
+    alternates: localeAlternates(locale as Locale, `/services/${categorySlug}`),
   };
 }
 

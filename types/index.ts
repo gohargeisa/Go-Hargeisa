@@ -61,12 +61,76 @@ export interface BusinessMetricEvent {
   createdAt: string;
 }
 
+export type SubscriptionStatus = "active" | "paused" | "cancelled";
+
 export interface BusinessSubscription {
   id: string;
   listingType: BusinessListingType;
   listingId: string;
-  planTier: "basic" | "gold" | "platinum";
+  planTier: "basic" | "silver" | "gold";
+  status: SubscriptionStatus;
   renewsAt?: string;
+}
+
+/** Owner-only — see business_subscription_notes RLS in
+ * supabase/migrations/20260730000005_subscription_lifecycle.sql. Never
+ * fetched or shown on the business-owner-facing dashboard. */
+export interface SubscriptionNote {
+  id: string;
+  subscriptionId: string;
+  note: string;
+  createdAt: string;
+}
+
+/** Supported categories for a new-business application — narrower than
+ * BusinessListingType (no "service"), matching the listing_type_business
+ * DB enum business_join_requests.category actually uses. */
+export type JoinRequestCategory = "hotel" | "restaurant" | "cafe";
+export type BusinessRequestStatus = "pending" | "approved" | "rejected" | "needs_info" | "archived";
+
+export interface BusinessJoinRequest {
+  id: string;
+  category: JoinRequestCategory;
+  businessName: string;
+  ownerName: string;
+  phone: string;
+  whatsapp: string | null;
+  email: string;
+  address: string;
+  mapsUrl: string | null;
+  description: string;
+  logo: string | null;
+  gallery: string[];
+  menuPdfUrl: string | null;
+  bookingUrl: string | null;
+  website: string | null;
+  status: BusinessRequestStatus;
+  convertedListingType: JoinRequestCategory | null;
+  convertedListingId: string | null;
+  createdAt: string;
+}
+
+/** Owner-only — same reasoning as SubscriptionNote: never shown to the
+ * person who submitted the request. */
+export interface BusinessJoinRequestNote {
+  id: string;
+  requestId: string;
+  note: string;
+  createdAt: string;
+}
+
+/** Owner-published general announcement (Stage 7's "Launch Partners" ask —
+ * a platform-wide broadcast, not a per-partner post). Public reads only
+ * status='published'; the homepage banner shows the single most recent
+ * one, see lib/data/announcements.ts. */
+export interface SiteAnnouncement {
+  id: string;
+  title: string;
+  message: string;
+  linkUrl: string | null;
+  linkLabel: string | null;
+  status: "draft" | "published" | "archived";
+  createdAt: string;
 }
 
 export interface BusinessMessage {
@@ -271,11 +335,13 @@ export interface CityService {
   id: string;
   category: EssentialServiceCategory;
   name: string;
+  description: string | null;
   phone: string | null;
   openingHours: string | null;
   mapsUrl: string | null;
   image: string | null;
   status: "draft" | "published" | "archived";
+  featured: boolean;
   sortOrder: number;
 }
 

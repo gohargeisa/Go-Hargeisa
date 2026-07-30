@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/config";
+import { localeAlternates } from "@/lib/i18n/alternates";
 import { getServices } from "@/lib/data/services";
 import { PageHero } from "@/components/shared/page-hero";
 import { ServicesPageClient } from "@/components/pages/services-page-client";
@@ -19,7 +20,7 @@ export async function generateMetadata({
     title: "Essential Services in Hargeisa — Hospitals, Banks, Pharmacies & More",
     description:
       "Find hospitals, pharmacies, dental clinics, banks, ATMs, currency exchange, gas stations and car rentals in Hargeisa, Somaliland.",
-    alternates: { canonical: `/${locale}/services` },
+    alternates: localeAlternates(locale as Locale, "/services"),
   };
 }
 

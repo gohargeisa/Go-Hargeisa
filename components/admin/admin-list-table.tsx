@@ -3,7 +3,10 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Pencil } from "lucide-react";
 import { DeleteListingButton } from "@/components/shared/delete-listing-button";
-import { HideListingButton } from "@/components/shared/hide-listing-button";
+import { ListingStatusMenu } from "@/components/shared/listing-status-menu";
+import { FeatureListingButton } from "@/components/shared/feature-listing-button";
+import { PinListingButton } from "@/components/shared/pin-listing-button";
+import type { FeaturableTable } from "@/lib/actions/admin";
 
 type AdminTable = "hotels" | "restaurants" | "cafes" | "attractions" | "events" | "articles";
 
@@ -14,6 +17,8 @@ export interface AdminRow {
   subtitle: string;
   meta: string; // e.g. price range, category, read time — shown in its own column
   status: "draft" | "published" | "archived";
+  featured?: boolean;
+  isPinned?: boolean;
 }
 
 /**
@@ -31,6 +36,8 @@ export function AdminListTable({
   emptyLabel,
   allowDelete = true,
   allowHide = true,
+  allowFeature = false,
+  allowPin = false,
 }: {
   table: AdminTable;
   rows: AdminRow[];
@@ -41,8 +48,12 @@ export function AdminListTable({
   allowDelete?: boolean;
   /** Hiding is owner-only — business owners never see the control. */
   allowHide?: boolean;
+  /** Feature/Pin only apply to tables that carry those columns (hotels/restaurants/cafes/attractions) — events/articles don't, so callers must opt in explicitly. */
+  allowFeature?: boolean;
+  allowPin?: boolean;
 }) {
   const t = useTranslations("admin");
+  const featurableTable = table as FeaturableTable;
 
   if (rows.length === 0) {
     return (
@@ -59,6 +70,28 @@ export function AdminListTable({
     archived: "bg-ink/10 text-ink/60 dark:bg-white/10 dark:text-sand/60",
   };
 
+  const StatusControl = ({ row }: { row: AdminRow }) =>
+    allowHide ? (
+      <ListingStatusMenu table={table} id={row.id} status={row.status} />
+    ) : (
+      <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusClass[row.status]}`}>{statusLabel[row.status]}</span>
+    );
+
+  const Actions = ({ row }: { row: AdminRow }) => (
+    <>
+      <Link
+        href={`${editHrefBase}/${row.id}/edit`}
+        aria-label={t("editAriaLabel", { name: row.title })}
+        className="flex h-8 w-8 items-center justify-center rounded-lg border border-ink/10 dark:border-white/15 hover:border-primary hover:text-primary"
+      >
+        <Pencil size={13} />
+      </Link>
+      {allowFeature && <FeatureListingButton table={featurableTable} id={row.id} featured={row.featured ?? false} />}
+      {allowPin && <PinListingButton table={featurableTable} id={row.id} pinned={row.isPinned ?? false} />}
+      {allowDelete && <DeleteListingButton table={table} id={row.id} name={row.title} />}
+    </>
+  );
+
   return (
     <>
       {/* Mobile: card stack (< sm) */}
@@ -72,24 +105,14 @@ export function AdminListTable({
               <div className="min-w-0 flex-1">
                 <p className="truncate font-semibold">{row.title}</p>
                 <p className="truncate text-xs text-ink/50 dark:text-sand/50">{row.subtitle}</p>
-                <div className="mt-1.5 flex items-center gap-2">
-                  <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${statusClass[row.status]}`}>
-                    {statusLabel[row.status]}
-                  </span>
+                <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                  <StatusControl row={row} />
                   {row.meta && <span className="text-[11px] text-ink/45 dark:text-sand/45">{row.meta}</span>}
                 </div>
               </div>
             </div>
-            <div className="mt-3 flex items-center justify-end gap-2 border-t border-ink/8 pt-3 dark:border-white/10">
-              <Link
-                href={`${editHrefBase}/${row.id}/edit`}
-                aria-label={t("editAriaLabel", { name: row.title })}
-                className="flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border border-ink/10 text-xs font-semibold dark:border-white/15 hover:border-primary hover:text-primary"
-              >
-                <Pencil size={13} /> {t("colActions")}
-              </Link>
-              {allowHide && <HideListingButton table={table} id={row.id} status={row.status} />}
-              {allowDelete && <DeleteListingButton table={table} id={row.id} name={row.title} />}
+            <div className="mt-3 flex flex-wrap items-center justify-end gap-2 border-t border-ink/8 pt-3 dark:border-white/10">
+              <Actions row={row} />
             </div>
           </div>
         ))}
@@ -122,21 +145,11 @@ export function AdminListTable({
                 </td>
                 <td className="px-5 py-3 whitespace-nowrap">{row.meta}</td>
                 <td className="px-5 py-3">
-                  <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusClass[row.status]}`}>
-                    {statusLabel[row.status]}
-                  </span>
+                  <StatusControl row={row} />
                 </td>
                 <td className="px-5 py-3">
                   <div className="flex justify-end gap-2">
-                    <Link
-                      href={`${editHrefBase}/${row.id}/edit`}
-                      aria-label={t("editAriaLabel", { name: row.title })}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-ink/10 dark:border-white/15 hover:border-primary hover:text-primary"
-                    >
-                      <Pencil size={13} />
-                    </Link>
-                    {allowHide && <HideListingButton table={table} id={row.id} status={row.status} />}
-                    {allowDelete && <DeleteListingButton table={table} id={row.id} name={row.title} />}
+                    <Actions row={row} />
                   </div>
                 </td>
               </tr>

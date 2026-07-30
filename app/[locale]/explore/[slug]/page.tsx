@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { getDestinationBySlug, getDestinations } from "@/lib/data/destinations";
@@ -7,6 +8,8 @@ import { getAttractions } from "@/lib/data/attractions";
 import { ListingCard } from "@/components/shared/listing-card";
 import { HotelCard } from "@/components/shared/hotel-card";
 import { RESTAURANTS_PUBLIC_ENABLED, filterHotelsForPresentation } from "@/lib/config/features";
+import type { Locale } from "@/lib/i18n/config";
+import { localeAlternates } from "@/lib/i18n/alternates";
 
 // Public content changes infrequently; revalidate hourly instead of
 // rendering on every request (this page no longer reads cookies, so
@@ -16,6 +19,22 @@ export const revalidate = 3600;
 export async function generateStaticParams() {
   const destinations = await getDestinations();
   return destinations.map((d) => ({ slug: d.slug }));
+}
+
+export async function generateMetadata({
+  params: { locale, slug },
+}: {
+  params: { locale: string; slug: string };
+}): Promise<Metadata> {
+  const destination = await getDestinationBySlug(slug);
+
+  if (!destination) return {};
+
+  return {
+    title: `${destination.name} — Explore Hargeisa`,
+    description: destination.description,
+    alternates: localeAlternates(locale as Locale, `/explore/${destination.slug}`),
+  };
 }
 
 export default async function DestinationDetailPage({

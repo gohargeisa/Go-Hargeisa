@@ -15,7 +15,7 @@ export async function SubscriptionCard({
 }) {
   const t = await getTranslations("businessDashboard");
   const plan = SUBSCRIPTION_PLANS[subscription.planTier];
-  const planNameKey = { basic: "planBasic", gold: "planGold", platinum: "planPlatinum" } as const;
+  const planNameKey = { basic: "planBasic", silver: "planSilver", gold: "planGold" } as const;
 
   return (
     <div className="rounded-2xl border border-ink/8 bg-white p-5 dark:border-white/10 dark:bg-white/[0.03]">

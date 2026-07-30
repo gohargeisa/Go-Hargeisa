@@ -4,8 +4,8 @@ import type { SubscriptionPlanId } from "@/lib/config/subscription-plans";
 
 const PLAN_COLOR: Record<SubscriptionPlanId, string> = {
   basic: "bg-secondary-400",
+  silver: "bg-slate-400",
   gold: "bg-primary",
-  platinum: "bg-navy",
 };
 
 export function SubscriptionBreakdown({ planCounts }: { planCounts: Record<SubscriptionPlanId, number> }) {

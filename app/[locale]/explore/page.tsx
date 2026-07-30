@@ -4,6 +4,8 @@ import Image from "next/image";
 import { MapPin } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { getDestinations } from "@/lib/data/destinations";
+import type { Locale } from "@/lib/i18n/config";
+import { localeAlternates } from "@/lib/i18n/alternates";
 import { PageHero } from "@/components/shared/page-hero";
 import { EmptyState } from "@/components/shared/empty-state";
 import { placeholderImage } from "@/lib/placeholder-image";
@@ -21,7 +23,7 @@ export async function generateMetadata({
   return {
     title: "Explore Hargeisa — Neighborhoods & Districts",
   description: "Explore Hargeisa neighborhood by neighborhood.",
-    alternates: { canonical: `/${locale}/explore` },
+    alternates: localeAlternates(locale as Locale, "/explore"),
   };
 }
 

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Plane, Car, Bus, ParkingCircle } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
+import { localeAlternates } from "@/lib/i18n/alternates";
 import { PageHero } from "@/components/shared/page-hero";
 
 export async function generateMetadata({
@@ -12,7 +13,7 @@ export async function generateMetadata({
   return {
     title: "Getting Around Hargeisa — Transportation Guide",
   description: "How to get to and around Hargeisa: airport transfers, taxis, car rental and shared transport.",
-    alternates: { canonical: `/${locale}/transportation` },
+    alternates: localeAlternates(locale as Locale, "/transportation"),
   };
 }
 

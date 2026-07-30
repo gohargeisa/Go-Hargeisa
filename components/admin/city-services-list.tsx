@@ -5,8 +5,8 @@ import Image from "next/image";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Pencil, Trash2, Eye, EyeOff, Loader2 } from "lucide-react";
-import { deleteCityService, toggleCityServiceVisibility } from "@/lib/actions/city-services";
+import { Pencil, Trash2, Eye, EyeOff, Star, Loader2 } from "lucide-react";
+import { deleteCityService, toggleCityServiceVisibility, toggleCityServiceFeatured } from "@/lib/actions/city-services";
 import type { Locale } from "@/lib/i18n/config";
 import type { EssentialServiceCategory } from "@/types";
 
@@ -16,6 +16,7 @@ export interface CityServiceListRow {
   image: string | null;
   category: EssentialServiceCategory;
   status: "draft" | "published" | "archived";
+  featured: boolean;
 }
 
 /** Same mobile-card / desktop-table split as AdminListTable — city_services
@@ -53,6 +54,16 @@ export function CityServicesList({ locale, rows }: { locale: Locale; rows: CityS
     });
   }
 
+  function onToggleFeatured(row: CityServiceListRow) {
+    setPendingId(row.id);
+    startTransition(async () => {
+      const result = await toggleCityServiceFeatured(locale, row.id, row.category, !row.featured);
+      if (result.ok) router.refresh();
+      else alert(result.error ?? t("somethingWentWrong"));
+      setPendingId(null);
+    });
+  }
+
   function onDelete(row: CityServiceListRow) {
     if (confirmDeleteId !== row.id) {
       setConfirmDeleteId(row.id);
@@ -85,6 +96,20 @@ export function CityServicesList({ locale, rows }: { locale: Locale; rows: CityS
       >
         <Pencil size={13} />
       </Link>
+      <button
+        type="button"
+        onClick={() => onToggleFeatured(row)}
+        disabled={isPending && pendingId === row.id}
+        aria-label={row.featured ? t("unfeatureAriaLabel") : t("featureAriaLabel")}
+        aria-pressed={row.featured}
+        className={`flex h-8 w-8 items-center justify-center rounded-lg border transition-colors disabled:opacity-60 ${
+          row.featured
+            ? "border-amber-400 bg-amber-400/10 text-amber-500"
+            : "border-ink/10 dark:border-white/15 hover:border-amber-400 hover:text-amber-500"
+        }`}
+      >
+        <Star size={13} fill={row.featured ? "currentColor" : "none"} />
+      </button>
       <button
         type="button"
         onClick={() => onToggle(row)}
@@ -126,10 +151,15 @@ export function CityServicesList({ locale, rows }: { locale: Locale; rows: CityS
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate font-semibold">{row.name}</p>
-                <div className="mt-1.5 flex items-center gap-2">
+                <div className="mt-1.5 flex flex-wrap items-center gap-2">
                   <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${statusClass[row.status]}`}>
                     {statusLabel[row.status]}
                   </span>
+                  {row.featured && (
+                    <span className="rounded-full bg-amber-400/10 px-2 py-0.5 text-[11px] font-semibold text-amber-600 dark:text-amber-400">
+                      {t("featuredBadge")}
+                    </span>
+                  )}
                   <span className="text-[11px] text-ink/45 dark:text-sand/45">{categoryLabel[row.category]}</span>
                 </div>
               </div>
@@ -164,9 +194,16 @@ export function CityServicesList({ locale, rows }: { locale: Locale; rows: CityS
                 </td>
                 <td className="px-5 py-3">{categoryLabel[row.category]}</td>
                 <td className="px-5 py-3">
-                  <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusClass[row.status]}`}>
-                    {statusLabel[row.status]}
-                  </span>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusClass[row.status]}`}>
+                      {statusLabel[row.status]}
+                    </span>
+                    {row.featured && (
+                      <span className="rounded-full bg-amber-400/10 px-2.5 py-1 text-xs font-semibold text-amber-600 dark:text-amber-400">
+                        {t("featuredBadge")}
+                      </span>
+                    )}
+                  </div>
                 </td>
                 <td className="px-5 py-3">
                   <div className="flex justify-end gap-2">

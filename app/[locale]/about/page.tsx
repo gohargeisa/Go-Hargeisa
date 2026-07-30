@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/config";
+import { localeAlternates } from "@/lib/i18n/alternates";
 import { PageHero } from "@/components/shared/page-hero";
 import { placeholderImage } from "@/lib/placeholder-image";
 
@@ -12,7 +13,7 @@ export async function generateMetadata({
   return {
     title: "About Go Hargeisa",
   description: "Go Hargeisa is an independent guide to the capital of Somaliland, built for travelers, business visitors and the diaspora.",
-    alternates: { canonical: `/${locale}/about` },
+    alternates: localeAlternates(locale as Locale, "/about"),
   };
 }
 

@@ -3,6 +3,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { getArticles } from "@/lib/data/articles";
+import type { Locale } from "@/lib/i18n/config";
+import { localeAlternates } from "@/lib/i18n/alternates";
 import { PageHero } from "@/components/shared/page-hero";
 import { placeholderImage } from "@/lib/placeholder-image";
 
@@ -19,7 +21,7 @@ export async function generateMetadata({
   return {
     title: "Hargeisa Travel Blog",
   description: "Guides, food, culture and travel tips for visiting Hargeisa, Somaliland.",
-    alternates: { canonical: `/${locale}/blog` },
+    alternates: localeAlternates(locale as Locale, "/blog"),
   };
 }
 

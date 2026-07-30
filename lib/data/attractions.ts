@@ -25,6 +25,7 @@ export async function getAttractions(options?: { q?: string; category?: string }
     .from("attractions")
     .select("*")
     .eq("status", "published")
+    .order("is_pinned", { ascending: false })
     .order("featured", { ascending: false });
   if (category) query = query.eq("category", category as any);
   if (q) query = query.or(`name.ilike.%${q}%,short_description.ilike.%${q}%,address.ilike.%${q}%`);

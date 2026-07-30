@@ -2,8 +2,9 @@
 
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { Loader2 } from "lucide-react";
+import { Loader2, Plus, X } from "lucide-react";
 import { updateRecord } from "@/lib/actions/admin";
+import { ImageUploader } from "@/components/shared/image-uploader";
 import type { BusinessListingType } from "@/types";
 
 const TABLE_BY_TYPE: Record<BusinessListingType, "hotels" | "restaurants" | "cafes" | "services"> = {
@@ -23,6 +24,8 @@ export interface MyBusinessFormInitial {
   checkInTime?: string;
   checkOutTime?: string;
   openingHours?: string;
+  menuHighlights?: { name: string; price: string; description?: string }[];
+  menuPdfUrl?: string;
 }
 
 /** Core-info editor reusing the same generic updateRecord server action every admin form already uses — new presentation, reused logic. */
@@ -46,6 +49,19 @@ export function MyBusinessForm({
     setForm((f) => ({ ...f, [key]: value }));
   }
 
+  function addMenuItem() {
+    update("menuHighlights", [...(form.menuHighlights ?? []), { name: "", price: "" }]);
+  }
+  function updateMenuItem(i: number, patch: Partial<{ name: string; price: string; description?: string }>) {
+    update(
+      "menuHighlights",
+      (form.menuHighlights ?? []).map((item, idx) => (idx === i ? { ...item, ...patch } : item))
+    );
+  }
+  function removeMenuItem(i: number) {
+    update("menuHighlights", (form.menuHighlights ?? []).filter((_, idx) => idx !== i));
+  }
+
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -63,8 +79,12 @@ export function MyBusinessForm({
     } else if (listingType === "restaurant") {
       payload.website = form.website || null;
       payload.opening_hours = form.openingHours || null;
+      payload.menu = form.menuHighlights ?? [];
+      payload.menu_pdf_url = form.menuPdfUrl || null;
     } else {
       payload.opening_hours = form.openingHours || null;
+      payload.menu = form.menuHighlights ?? [];
+      payload.menu_pdf_url = form.menuPdfUrl || null;
     }
 
     startTransition(async () => {
@@ -154,6 +174,56 @@ export function MyBusinessForm({
             className={inputClass}
             placeholder="9:00 AM – 10:00 PM"
           />
+        </div>
+      )}
+
+      {listingType !== "hotel" && (
+        <div>
+          <div className="mb-1.5 flex items-center justify-between">
+            <label className="text-sm font-semibold">{t("menuHighlightsLabel")}</label>
+            <button
+              type="button"
+              onClick={addMenuItem}
+              className="inline-flex items-center gap-1 text-xs font-semibold text-primary"
+            >
+              <Plus size={13} /> {t("addItemLabel")}
+            </button>
+          </div>
+          <div className="space-y-2">
+            {(form.menuHighlights ?? []).map((item, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <input
+                  value={item.name}
+                  onChange={(e) => updateMenuItem(i, { name: e.target.value })}
+                  placeholder={t("dishNamePlaceholder")}
+                  className={inputClass}
+                />
+                <input
+                  value={item.price}
+                  onChange={(e) => updateMenuItem(i, { price: e.target.value })}
+                  placeholder="$8"
+                  className={`${inputClass} w-24 shrink-0`}
+                />
+                <button
+                  type="button"
+                  onClick={() => removeMenuItem(i)}
+                  aria-label={t("removeMenuItemAriaLabel")}
+                  className="shrink-0 text-ink/40 hover:text-red-500"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-4">
+            <ImageUploader
+              folder={TABLE_BY_TYPE[listingType]}
+              value={form.menuPdfUrl ?? ""}
+              onChange={(url) => update("menuPdfUrl", url)}
+              label={t("menuPdfLabel")}
+            />
+          </div>
         </div>
       )}
 

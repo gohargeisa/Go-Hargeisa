@@ -1,8 +1,10 @@
+import { safeJsonLd } from "@/lib/utils/json-ld";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ExternalLink, FileText, MapPin, Navigation } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
+import { localeAlternates } from "@/lib/i18n/alternates";
 import { getRestaurantBySlug, getAllRestaurantSlugs, getRestaurants } from "@/lib/data/restaurants";
 import { getSiteSettings } from "@/lib/actions/settings";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
@@ -44,7 +46,7 @@ export async function generateMetadata({
     title: `${r.name} — Restaurant in Hargeisa`,
     description: r.shortDescription,
     openGraph: { images: [r.coverImage] },
-    alternates: { canonical: `/${locale}/restaurants/${r.slug}` },
+    alternates: localeAlternates(locale as Locale, `/restaurants/${r.slug}`),
   };
 }
 
@@ -100,7 +102,7 @@ export default async function RestaurantDetailPage({
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <ViewTracker listingType="restaurant" listingId={restaurant.id} />
 
       <Breadcrumbs

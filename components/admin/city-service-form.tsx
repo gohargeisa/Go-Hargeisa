@@ -14,10 +14,12 @@ import type { EssentialServiceCategory } from "@/types";
 export interface CityServiceFormInput {
   category: EssentialServiceCategory;
   name: string;
+  description: string;
   phone: string;
   openingHours: string;
   mapsUrl: string;
   image: string;
+  featured: boolean;
 }
 
 export function CityServiceForm({
@@ -36,10 +38,12 @@ export function CityServiceForm({
   const [form, setForm] = useState<CityServiceFormInput>({
     category: initial?.category ?? "hospital",
     name: initial?.name ?? "",
+    description: initial?.description ?? "",
     phone: initial?.phone ?? "",
     openingHours: initial?.openingHours ?? "",
     mapsUrl: initial?.mapsUrl ?? "",
     image: initial?.image ?? "",
+    featured: initial?.featured ?? false,
   });
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -59,10 +63,12 @@ export function CityServiceForm({
     const payload = {
       category: form.category,
       name: form.name,
+      description: form.description || undefined,
       phone: form.phone || undefined,
       openingHours: form.openingHours || undefined,
       mapsUrl: form.mapsUrl || undefined,
       image: form.image || undefined,
+      featured: form.featured,
     };
 
     startTransition(async () => {
@@ -119,6 +125,26 @@ export function CityServiceForm({
           placeholder="https://maps.google.com/…"
         />
       </Field>
+
+      <Field label={t("cityServiceDescriptionLabel")}>
+        <textarea
+          rows={3}
+          value={form.description}
+          onChange={(e) => update("description", e.target.value)}
+          className={inputClass}
+        />
+      </Field>
+
+      <label className="flex items-center gap-2.5 text-sm font-semibold">
+        <input
+          type="checkbox"
+          checked={form.featured}
+          onChange={(e) => update("featured", e.target.checked)}
+          className="h-4 w-4 rounded border-ink/25 text-primary focus:ring-primary dark:border-white/25"
+        />
+        {t("cityServiceFeaturedLabel")}
+      </label>
+      <p className="-mt-4 text-xs text-ink/45 dark:text-sand/45">{t("cityServiceFeaturedHint")}</p>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 

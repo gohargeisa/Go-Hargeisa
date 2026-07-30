@@ -34,10 +34,12 @@ export default async function EditCityServicePage({
         initial={{
           category: service.category,
           name: service.name,
+          description: service.description ?? "",
           phone: service.phone ?? "",
           openingHours: service.opening_hours ?? "",
           mapsUrl: service.maps_url ?? "",
           image: service.image ?? "",
+          featured: service.featured,
         }}
       />
     </section>
