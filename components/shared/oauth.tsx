@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { Loader2 } from "lucide-react";
+import { SecondaryButton } from "@/components/shared/buttons";
 import type { Locale } from "@/lib/i18n/config";
 
 export function OAuth({
@@ -55,19 +56,14 @@ export function OAuth({
   return (
     <div className="space-y-4">
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-800 dark:border-red-900/30 dark:bg-red-900/20 dark:text-red-300">
+        <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-800 dark:border-red-900/30 dark:bg-red-900/20 dark:text-red-300">
           {error}
         </div>
       )}
 
-      <button
-        type="button"
-        onClick={signInWithGoogle}
-        disabled={loading}
-        className="w-full rounded-lg border border-ink/12 dark:border-white/15 py-3 px-4 text-sm font-medium hover:bg-ink/5 dark:hover:bg-white/5 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-      >
+      <SecondaryButton type="button" onClick={signInWithGoogle} disabled={loading} size="lg" fullWidth>
         {loading ? (
-          <Loader2 size={16} className="animate-spin" />
+          <Loader2 size={16} className="animate-spin" aria-hidden="true" />
         ) : (
           <svg className="w-4 h-4" viewBox="0 0 24 24">
             <path
@@ -90,7 +86,7 @@ export function OAuth({
         )}
 
         {loading ? t("signingIn") : t("continueWithGoogle")}
-      </button>
+      </SecondaryButton>
     </div>
-);
+  );
 }

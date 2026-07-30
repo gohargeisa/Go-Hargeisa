@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { Loader2, Eye, EyeOff, Check, X } from "lucide-react";
+import { PrimaryButton } from "@/components/shared/buttons";
 import type { Locale } from "@/lib/i18n/config";
 
 function getPasswordStrength(
@@ -111,7 +112,7 @@ export function AuthForm({ mode, locale }: { mode: "login" | "register"; locale:
 
   if (checkEmail) {
     return (
-      <div className="rounded-2xl border border-secondary/30 bg-secondary/5 p-6 text-sm">
+      <div className="rounded-xl2 border border-secondary/30 bg-secondary/5 p-6 text-sm">
         <p className="font-semibold text-secondary-700">{t("checkEmailTitle")}</p>
         <p className="mt-2 text-secondary-600">
           {t("checkEmailDescription", { email })}
@@ -142,7 +143,7 @@ export function AuthForm({ mode, locale }: { mode: "login" | "register"; locale:
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder={t("fullNamePlaceholder")}
-            className="w-full rounded-lg border border-ink/12 dark:border-white/15 bg-transparent px-4 py-3 text-sm outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/20"
+            className="w-full rounded-xl border border-ink/12 bg-transparent px-4 py-3 text-sm outline-none transition-colors focus:border-primary dark:border-white/15"
           />
           {nameError && <p className="mt-2 text-xs text-red-600">{nameError}</p>}
         </div>
@@ -159,7 +160,7 @@ export function AuthForm({ mode, locale }: { mode: "login" | "register"; locale:
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder={t("emailPlaceholder")}
-          className="w-full rounded-lg border border-ink/12 dark:border-white/15 bg-transparent px-4 py-3 text-sm outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/20"
+          className="w-full rounded-xl border border-ink/12 bg-transparent px-4 py-3 text-sm outline-none transition-colors focus:border-primary dark:border-white/15"
         />
         {emailError && <p className="mt-2 text-xs text-red-600">{emailError}</p>}
       </div>
@@ -177,7 +178,7 @@ export function AuthForm({ mode, locale }: { mode: "login" | "register"; locale:
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder={mode === "register" ? t("createPasswordPlaceholder") : t("passwordPlaceholder")}
-            className="w-full rounded-lg border border-ink/12 dark:border-white/15 bg-transparent px-4 py-3 pe-10 text-sm outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/20"
+            className="w-full rounded-xl border border-ink/12 bg-transparent px-4 py-3 pe-10 text-sm outline-none transition-colors focus:border-primary dark:border-white/15"
           />
           <button
             type="button"
@@ -228,14 +229,10 @@ export function AuthForm({ mode, locale }: { mode: "login" | "register"; locale:
         )}
       </div>
 
-      <button
-        type="submit"
-        disabled={loading || (mode === "register" && !isPasswordValid)}
-        className="w-full rounded-lg bg-primary py-3 text-sm font-semibold text-white hover:bg-primary-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-      >
-        {loading && <Loader2 size={14} className="animate-spin" />}
+      <PrimaryButton type="submit" disabled={loading || (mode === "register" && !isPasswordValid)} size="lg" fullWidth>
+        {loading && <Loader2 size={14} className="animate-spin" aria-hidden="true" />}
         {loading ? t("pleaseWait") : mode === "login" ? t("submitSignIn") : t("submitCreateAccount")}
-      </button>
+      </PrimaryButton>
     </form>
   );
 }

@@ -19,7 +19,7 @@ export default async function RegisterPage({
 
   return (
     <section className="container-px mx-auto flex min-h-[70vh] items-center justify-center py-16">
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-sm rounded-xl3 border border-ink/8 bg-white p-8 shadow-soft dark:border-white/10 dark:bg-white/[0.03]">
         <h1 className="text-center font-display text-3xl font-bold">
           {t("registerTitle")}
         </h1>

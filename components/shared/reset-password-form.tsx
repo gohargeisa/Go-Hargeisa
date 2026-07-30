@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { PrimaryButton } from "@/components/shared/buttons";
 import type { Locale } from "@/lib/i18n/config";
 
 export function ResetPasswordForm({ locale }: { locale: Locale }) {
@@ -44,9 +45,9 @@ export function ResetPasswordForm({ locale }: { locale: Locale }) {
       <input required type="password" autoComplete="new-password" minLength={8} value={confirmation} onChange={(event) => setConfirmation(event.target.value)} placeholder={t("confirmNewPasswordPlaceholder")}
         className="w-full rounded-xl border border-ink/12 bg-transparent px-4 py-3 text-sm outline-none focus:border-primary dark:border-white/15" />
       {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
-      <button type="submit" disabled={loading} className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-700 disabled:opacity-60">
-        {loading && <Loader2 size={14} className="animate-spin" />} {t("saveNewPassword")}
-      </button>
+      <PrimaryButton type="submit" disabled={loading} size="lg" fullWidth>
+        {loading && <Loader2 size={14} className="animate-spin" aria-hidden="true" />} {t("saveNewPassword")}
+      </PrimaryButton>
     </form>
   );
 }

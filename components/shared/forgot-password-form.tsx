@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { PrimaryButton } from "@/components/shared/buttons";
 import type { Locale } from "@/lib/i18n/config";
 
 export function ForgotPasswordForm({ locale }: { locale: Locale }) {
@@ -37,9 +38,9 @@ export function ForgotPasswordForm({ locale }: { locale: Locale }) {
       <input required type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)}
         placeholder={t("emailPlaceholder")} className="w-full rounded-xl border border-ink/12 bg-transparent px-4 py-3 text-sm outline-none focus:border-primary dark:border-white/15" />
       {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
-      <button type="submit" disabled={loading} className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-700 disabled:opacity-60">
-        {loading && <Loader2 size={14} className="animate-spin" />} {t("sendResetLink")}
-      </button>
+      <PrimaryButton type="submit" disabled={loading} size="lg" fullWidth>
+        {loading && <Loader2 size={14} className="animate-spin" aria-hidden="true" />} {t("sendResetLink")}
+      </PrimaryButton>
     </form>
   );
 }
