@@ -958,6 +958,8 @@
   "contact": {
     "eyebrow": "Get in Touch",
     "title": "Contact Us",
+    "subtitle": "Have a question, feedback, or a business you'd like listed? We'd love to hear from you.",
+    "scrollHint": "Scroll to discover",
     "emailLabel": "Email",
     "phoneLabel": "Phone",
     "officeLabel": "Office",

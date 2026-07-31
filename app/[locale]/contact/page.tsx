@@ -3,10 +3,12 @@ import { getTranslations } from "next-intl/server";
 import { Mail, Phone, MapPin } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
-import { PageHero } from "@/components/shared/page-hero";
+import { PremiumPageHero } from "@/components/shared/premium-page-hero";
 import { ContactForm } from "@/components/shared/contact-form";
 import { Reveal } from "@/components/home/reveal";
-import { placeholderImage } from "@/lib/placeholder-image";
+
+/** Reuses the shared hero photo — same swap-in-place pattern as attractions-hero.tsx / about-hero.tsx. */
+const CONTACT_HERO_IMAGE = "/images/hero-bg.png";
 
 export async function generateMetadata({
   params: { locale },
@@ -29,12 +31,15 @@ export default async function ContactPage({
 
   return (
     <>
-      <PageHero
+      <PremiumPageHero
+        image={CONTACT_HERO_IMAGE}
+        imageAlt="Panoramic view of Hargeisa"
         eyebrow={t("eyebrow")}
         title={t("title")}
-        image={placeholderImage("Contact Go Hargeisa", { tone: "secondary" })}
+        subtitle={t("subtitle")}
+        scrollHint={t("scrollHint")}
       />
-      <section className="container-px mx-auto grid gap-8 py-10 md:py-14 lg:grid-cols-3 lg:gap-10">
+      <section className="container-px mx-auto grid gap-8 py-16 md:py-24 lg:grid-cols-3 lg:gap-10">
         <Reveal>
           <div className="space-y-4 rounded-xl3 border border-ink/8 bg-white p-6 shadow-soft dark:border-white/10 dark:bg-white/[0.03]">
             <ContactRow icon={Mail} label={t("emailLabel")} value="info@gohargeisa.com" />

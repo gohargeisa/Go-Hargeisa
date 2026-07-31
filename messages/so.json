@@ -958,6 +958,8 @@
   "contact": {
     "eyebrow": "Nala Soo Xiriir",
     "title": "Nala Soo Xiriir",
+    "subtitle": "Ma haysaa su'aal, jawaab celin, ama ganacsi aad rabto in la liistoyo? Waan ku faraxsanahay inaan ka maqalno.",
+    "scrollHint": "Dhaadhac si aad u baarto",
     "emailLabel": "Iimaylka",
     "phoneLabel": "Taleefanka",
     "officeLabel": "Xafiiska",
