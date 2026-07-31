@@ -868,6 +868,7 @@
   "terms": {
     "title": "Terms of Service",
     "lastUpdated": "Last updated: July 2026",
+    "scrollHint": "Scroll to discover",
     "intro": "By using Go Hargeisa, you agree to the following terms. Please read them carefully.",
     "useOfContentTitle": "Use of content",
     "useOfContentText": "Listing information (hotels, restaurants, attractions, events) is provided for general travel planning purposes. Prices, hours and availability should be confirmed directly with the business before booking.",
