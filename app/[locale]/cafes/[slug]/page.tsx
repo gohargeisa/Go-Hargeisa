@@ -18,6 +18,8 @@ import { BusinessPhotoGallery } from "@/components/shared/business-photo-gallery
 import { CAFE_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import { CAFE_AMENITY_ICON, type CafeAmenityCode } from "@/lib/utils/cafe-amenities";
 import { normalizeExternalUrl } from "@/lib/utils/normalize-url";
+import { formatDayRange, formatTime12h } from "@/lib/utils/opening-hours";
+import { OpenStatusBadge } from "@/components/shared/open-status-badge";
 import { CafeActionCard } from "@/components/shared/cafe-action-card";
 import { MobileBookingBar } from "@/components/shared/mobile-booking-bar";
 import { ListingCard } from "@/components/shared/listing-card";
@@ -84,15 +86,15 @@ export default async function CafeDetailPage({
   const instagramHref = cafe.socialInstagram ? normalizeExternalUrl(cafe.socialInstagram) : undefined;
   const facebookHref = cafe.socialFacebook ? normalizeExternalUrl(cafe.socialFacebook) : undefined;
 
+  const hasStructuredHours = cafe.openingHoursStructured && cafe.openingHoursStructured.length > 0;
+
   const navTabs: HotelNavTab[] = [
     { id: "overview", label: td("overview") },
+    ...(hasStructuredHours ? [{ id: "hours", label: td("openingHoursByDay") }] : []),
     ...(cafe.specialDrinks.length > 0 ? [{ id: "specialties", label: td("coffeeSpecialties") }] : []),
     ...(cafe.menuHighlights.length > 0 || cafe.menuPdfUrl ? [{ id: "menu", label: td("menuHighlights") }] : []),
     ...(cafe.gallery.length > 0 ? [{ id: "gallery", label: t("gallery") }] : []),
     ...(hasAmenities ? [{ id: "amenities", label: t("amenities") }] : []),
-    ...(cafe.openingHoursStructured && cafe.openingHoursStructured.length > 0
-      ? [{ id: "hours", label: td("openingHoursByDay") }]
-      : []),
     { id: "reviews", label: t("reviews") },
     { id: "location", label: td("location") },
   ];
@@ -182,7 +184,6 @@ export default async function CafeDetailPage({
 
       <CafeQuickInfoCards
         rating={cafe.rating}
-        openingHours={cafe.openingHours}
         wifi={cafe.wifi}
         workingSpace={cafe.workingSpace}
         priceRange={cafe.priceRange}
@@ -204,6 +205,38 @@ export default async function CafeDetailPage({
               <p className="leading-relaxed text-ink/75 dark:text-sand/75">{cafe.description}</p>
             </section>
           </Reveal>
+
+          {hasStructuredHours && (
+            <Reveal>
+              <section id="hours" aria-labelledby="hours-heading" className="scroll-mt-36">
+                <div className="mb-5 flex flex-wrap items-center gap-3">
+                  <h2 id="hours-heading" className="font-display text-2xl font-semibold">
+                    🕒 {td("openingHoursByDay")}
+                  </h2>
+                  <OpenStatusBadge
+                    groups={cafe.openingHoursStructured!}
+                    openLabel={td("openNow")}
+                    closedLabel={td("closedNow")}
+                  />
+                </div>
+                <div className="divide-y divide-ink/8 overflow-hidden rounded-xl2 border border-ink/8 dark:divide-white/10 dark:border-white/10">
+                  {cafe.openingHoursStructured!.map((group, i) => (
+                    <div
+                      key={i}
+                      className="flex flex-col gap-1 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:p-5"
+                    >
+                      <span className="min-w-0 break-words text-sm font-semibold">
+                        {formatDayRange(group.days, tw)}
+                      </span>
+                      <span className="shrink-0 text-sm text-ink/70 dark:text-sand/70">
+                        {formatTime12h(group.open)} – {formatTime12h(group.close)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </Reveal>
+          )}
 
           {cafe.specialDrinks.length > 0 && (
             <Reveal>
@@ -297,26 +330,6 @@ export default async function CafeDetailPage({
             </Reveal>
           )}
 
-          {cafe.openingHoursStructured && cafe.openingHoursStructured.length > 0 && (
-            <Reveal>
-              <section id="hours" aria-labelledby="hours-heading" className="scroll-mt-36">
-                <h2 id="hours-heading" className="mb-5 font-display text-2xl font-semibold">
-                  {td("openingHoursByDay")}
-                </h2>
-                <div className="divide-y divide-ink/8 overflow-hidden rounded-xl2 border border-ink/8 dark:divide-white/10 dark:border-white/10">
-                  {cafe.openingHoursStructured.map((group, i) => (
-                    <div key={i} className="flex items-center justify-between gap-4 p-4 sm:p-5">
-                      <span className="text-sm font-semibold">{group.days.map((d) => tw(d)).join(", ")}</span>
-                      <span className="shrink-0 text-sm text-ink/70 dark:text-sand/70">
-                        {group.open} – {group.close}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            </Reveal>
-          )}
-
           <Reveal>
             <section id="location" aria-labelledby="location-heading" className="scroll-mt-36">
               <h2 id="location-heading" className="mb-5 font-display text-2xl font-semibold">
@@ -371,8 +384,11 @@ export default async function CafeDetailPage({
           <CafeActionCard
             cafeId={cafe.id}
             name={cafe.name}
-            openingHours={cafe.openingHours}
+            openingHoursStructured={cafe.openingHoursStructured}
             hoursLabel={t("openingHours")}
+            openNowLabel={td("openNow")}
+            closedLabel={td("closedNow")}
+            viewHoursLabel={td("viewHours")}
             phone={cafe.phone}
             locale={locale}
             callLabel={th("call")}

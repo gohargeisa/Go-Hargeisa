@@ -6,6 +6,7 @@ import { getRestaurants } from "@/lib/data/restaurants";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { PageHero } from "@/components/shared/page-hero";
 import { ComingSoonSection } from "@/components/shared/coming-soon-section";
+import { RestaurantsEmptyState } from "@/components/shared/restaurants-empty-state";
 import { RestaurantsPageClient } from "@/components/pages/restaurants-page-client";
 import { RESTAURANTS_PUBLIC_ENABLED } from "@/lib/config/features";
 
@@ -33,21 +34,20 @@ export default async function RestaurantsPage({
 }) {
   // Never show mock/seed restaurants to visitors — only real, published
   // partner listings. When Supabase isn't connected there is no real data,
-  // so the page renders the "Coming Soon" state instead of sample content.
-  // Restaurants are also temporarily hidden site-wide for the hotel
-  // presentation (lib/config/features.ts) — skip the fetch entirely and
-  // always show Coming Soon in that case, even if a visitor searches.
+  // so the page renders an empty state instead of sample content.
   const restaurants =
     RESTAURANTS_PUBLIC_ENABLED && isSupabaseConfigured() ? await getRestaurants({ q: searchParams.q }) : [];
-  const t = await getTranslations({ locale, namespace: "comingSoon" });
   const th = await getTranslations({ locale, namespace: "home" });
   const tNav = await getTranslations({ locale, namespace: "nav" });
 
-  // "Coming soon" only applies when there are truly no listings yet — a
-  // search that legitimately matches nothing should show a normal
-  // no-results state (handled inside RestaurantsPageClient), not tell the
-  // searching user the whole category doesn't exist.
-  const showComingSoon = !RESTAURANTS_PUBLIC_ENABLED || (restaurants.length === 0 && !searchParams.q);
+  // The feature-disabled "Coming Soon" placeholder only applies when the
+  // whole category is switched off. Once enabled, zero restaurants means
+  // there are genuinely no partners yet — every query against an empty
+  // table also returns zero rows, so this correctly stays the "be our
+  // first partner" invite (search box included) rather than exposing a
+  // search UI with nothing to search.
+  const isDisabled = !RESTAURANTS_PUBLIC_ENABLED;
+  const isEmpty = RESTAURANTS_PUBLIC_ENABLED && restaurants.length === 0;
 
   return (
     <>
@@ -57,8 +57,10 @@ export default async function RestaurantsPage({
   image="/images/restaurants/sultan/hero.png"
 />
 
-      {showComingSoon ? (
+      {isDisabled ? (
         <ComingSoonSection locale={locale} />
+      ) : isEmpty ? (
+        <RestaurantsEmptyState locale={locale} />
       ) : (
         <RestaurantsPageClient locale={locale} initialRestaurants={restaurants} searchParams={searchParams} />
       )}

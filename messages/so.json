@@ -120,6 +120,11 @@
     "cafesTitle": "☕ Kafateeriyada Dhawaan Ayay Iman Doonaan",
     "cafesDescription": "Waxaan la shaqaynaynaa kafateeriyada Hargeysa si aan idiin keeno waayo-aragnimada qaxwaha ugu fiican."
   },
+  "restaurantsEmptyState": {
+    "title": "⭐ Noqo Macaamilka Maqaayadda ee Ugu Horreeya ee Go Hargeisa",
+    "description": "Ku biir goobta dalxiiska ee ugu soo koraysa Hargeysa oo tus maqaayaddaada booqdayaasha maxalliga iyo caalamiga ah. Noqo macaamilkayaga rasmiga ah ee ugu horreeya oo bilow inaad hesho aragti dheeraad ah.",
+    "joinButton": "Ku Biir Go Hargeisa"
+  },
   "footer": {
     "tagline": "Hagaha aad ku kalsoon tahay ee Hargeysa — hudheellada ugu fiican, maqaayadaha, kafateeriyada iyo meelaha ugu muhiimsan ee magaalada.",
     "explore": "Sahami",
@@ -1124,7 +1129,10 @@
     "planYourVisit": "Qorshee booqashadaada",
     "followInstagram": "Nagu Raac Instagram",
     "followFacebook": "Nagu Raac Facebook",
-    "openingHoursByDay": "Saacadaha Shaqada"
+    "openingHoursByDay": "Saacadaha Shaqada",
+    "openNow": "Hadda Waa Furan",
+    "closedNow": "Xiran",
+    "viewHours": "Eeg saacadaha"
   },
   "weekdays": {
     "sunday": "Axad",

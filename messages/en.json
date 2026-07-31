@@ -120,6 +120,11 @@
     "cafesTitle": "☕ Cafés Coming Soon",
     "cafesDescription": "We're working with cafés across Hargeisa to bring you the best coffee experiences."
   },
+  "restaurantsEmptyState": {
+    "title": "⭐ Be the First Restaurant Partner in Go Hargeisa",
+    "description": "Join the fastest-growing tourism platform in Hargeisa and showcase your restaurant to local and international visitors. Become our first official restaurant partner and start receiving more visibility.",
+    "joinButton": "Join Go Hargeisa"
+  },
   "footer": {
     "tagline": "Your trusted guide to Hargeisa — hotels, food, culture and everything in between.",
     "explore": "Explore",
@@ -1124,7 +1129,10 @@
     "planYourVisit": "Plan your visit",
     "followInstagram": "Follow on Instagram",
     "followFacebook": "Follow on Facebook",
-    "openingHoursByDay": "Opening Hours"
+    "openingHoursByDay": "Opening Hours",
+    "openNow": "Open Now",
+    "closedNow": "Closed",
+    "viewHours": "View hours"
   },
   "weekdays": {
     "sunday": "Sun",
