@@ -93,9 +93,9 @@ export async function JoinHero({ locale }: { locale: Locale }) {
           </Reveal>
 
           <Reveal delay={0.3}>
-            <div className="mx-auto mt-9 grid max-w-lg grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4 lg:mx-0">
+            <div className="mx-auto mt-9 grid w-full max-w-lg grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-x-6 gap-y-5 sm:max-w-xl lg:mx-0 lg:max-w-none lg:grid-cols-4">
               {stats.map((stat) => (
-                <div key={stat.label}>
+                <div key={stat.label} className="flex min-w-0 flex-col items-center text-center">
                   <p className="font-display text-2xl font-bold text-white sm:text-3xl">{stat.value}</p>
                   <p className="mt-0.5 text-xs font-medium text-white/60 sm:text-sm">{stat.label}</p>
                 </div>
