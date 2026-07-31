@@ -113,6 +113,9 @@ export function GalleryManager({
     onChange(next);
   }
 
+  const iconButtonClass =
+    "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-ink/45 transition-colors hover:bg-ink/5 hover:text-primary disabled:opacity-30 disabled:hover:bg-transparent dark:text-sand/45 dark:hover:bg-white/10";
+
   return (
     <div>
       <label className="mb-2 block text-sm font-semibold">Photo gallery</label>
@@ -131,11 +134,11 @@ export function GalleryManager({
                 setDraggedIndex(null);
               }}
               onDragEnd={() => setDraggedIndex(null)}
-              className={`flex items-center gap-2 rounded-xl border border-ink/10 p-2.5 dark:border-white/15 ${
+              className={`flex flex-wrap items-center gap-2 rounded-xl border border-ink/10 p-2.5 dark:border-white/15 ${
                 draggedIndex === i ? "opacity-40" : ""
               }`}
             >
-              <span className="shrink-0 cursor-grab text-ink/25 active:cursor-grabbing" aria-hidden="true">
+              <span className="flex h-9 w-9 shrink-0 cursor-grab items-center justify-center text-ink/25 active:cursor-grabbing" aria-hidden="true">
                 <GripVertical size={15} />
               </span>
               <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-ink/5 dark:bg-white/5">
@@ -146,11 +149,11 @@ export function GalleryManager({
                   </span>
                 )}
               </div>
-              <div className="min-w-0 flex-1">
+              <div className="min-w-0 flex-1 basis-full sm:basis-auto">
                 <select
                   value={img.category ?? "other"}
                   onChange={(e) => updateAt(i, { category: e.target.value })}
-                  className="w-full rounded-lg border border-ink/12 bg-transparent px-2 py-1.5 text-xs outline-none focus:border-primary dark:border-white/15"
+                  className="w-full rounded-lg border border-ink/12 bg-transparent px-2 py-2 text-xs outline-none focus:border-primary dark:border-white/15"
                 >
                   {categories.map((c) => (
                     <option key={c.value} value={c.value}>
@@ -159,56 +162,56 @@ export function GalleryManager({
                   ))}
                 </select>
               </div>
-              <div className="flex shrink-0 flex-col gap-0.5">
+              <div className="ms-auto flex shrink-0 items-center gap-0.5">
                 <button
                   type="button"
                   onClick={() => move(i, -1)}
                   disabled={i === 0}
                   aria-label="Move photo earlier"
-                  className="text-ink/40 hover:text-primary disabled:opacity-30"
+                  className={iconButtonClass}
                 >
-                  <ChevronUp size={14} />
+                  <ChevronUp size={16} />
                 </button>
                 <button
                   type="button"
                   onClick={() => move(i, 1)}
                   disabled={i === value.length - 1}
                   aria-label="Move photo later"
-                  className="text-ink/40 hover:text-primary disabled:opacity-30"
+                  className={iconButtonClass}
                 >
-                  <ChevronDown size={14} />
+                  <ChevronDown size={16} />
                 </button>
-              </div>
-              {onSetCover && coverUrl !== img.url && (
+                {onSetCover && coverUrl !== img.url && (
+                  <button
+                    type="button"
+                    onClick={() => onSetCover(img.url)}
+                    aria-label={setCoverLabel}
+                    title={setCoverLabel}
+                    className={iconButtonClass}
+                  >
+                    <ImageIcon size={16} />
+                  </button>
+                )}
                 <button
                   type="button"
-                  onClick={() => onSetCover(img.url)}
-                  aria-label={setCoverLabel}
-                  title={setCoverLabel}
-                  className="shrink-0 text-ink/40 hover:text-primary"
+                  onClick={() => {
+                    setReplacingIndex(i);
+                    replaceInputRef.current?.click();
+                  }}
+                  aria-label="Replace photo"
+                  className={iconButtonClass}
                 >
-                  <ImageIcon size={15} />
+                  <Repeat size={16} />
                 </button>
-              )}
-              <button
-                type="button"
-                onClick={() => {
-                  setReplacingIndex(i);
-                  replaceInputRef.current?.click();
-                }}
-                aria-label="Replace photo"
-                className="shrink-0 text-ink/40 hover:text-primary"
-              >
-                <Repeat size={15} />
-              </button>
-              <button
-                type="button"
-                onClick={() => removeAt(i)}
-                aria-label="Remove photo"
-                className="shrink-0 text-ink/40 hover:text-red-500"
-              >
-                <X size={16} />
-              </button>
+                <button
+                  type="button"
+                  onClick={() => removeAt(i)}
+                  aria-label="Remove photo"
+                  className={`${iconButtonClass} hover:text-red-500`}
+                >
+                  <X size={17} />
+                </button>
+              </div>
             </div>
           ))}
         </div>

@@ -197,6 +197,9 @@ export function HotelForm({
           hint={t("videosHint")}
           captionPlaceholder={t("videoCaptionPlaceholder")}
           removeAriaLabel={t("removeVideoAriaLabel")}
+          replaceAriaLabel={t("replaceVideoAriaLabel")}
+          moveEarlierAriaLabel={t("moveVideoEarlierAriaLabel")}
+          moveLaterAriaLabel={t("moveVideoLaterAriaLabel")}
         />
 
         <div className="grid gap-4 sm:grid-cols-2">

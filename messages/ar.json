@@ -696,6 +696,9 @@
     "videosHint": "اسحب وأفلت مقاطع الفيديو القصيرة هنا، أو انقر للتصفح. الحد الأقصى 30 ميغابايت لكل مقطع.",
     "videoCaptionPlaceholder": "تعليق (اختياري)",
     "removeVideoAriaLabel": "إزالة الفيديو",
+    "replaceVideoAriaLabel": "استبدال الفيديو",
+    "moveVideoEarlierAriaLabel": "نقل الفيديو للأعلى",
+    "moveVideoLaterAriaLabel": "نقل الفيديو للأسفل",
 
     "publishHotel": "نشر الفندق",
     "publishRestaurant": "نشر المطعم",
@@ -1461,6 +1464,9 @@
     "videosHint": "اسحب وأفلت مقاطع الفيديو القصيرة هنا، أو انقر للتصفح. الحد الأقصى 30 ميغابايت لكل مقطع.",
     "videoCaptionPlaceholder": "تعليق (اختياري)",
     "removeVideoAriaLabel": "إزالة الفيديو",
+    "replaceVideoAriaLabel": "استبدال الفيديو",
+    "moveVideoEarlierAriaLabel": "نقل الفيديو للأعلى",
+    "moveVideoLaterAriaLabel": "نقل الفيديو للأسفل",
 
     "businessInfoTitle": "معلومات النشاط التجاري",
     "businessType": "نوع النشاط التجاري",

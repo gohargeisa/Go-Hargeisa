@@ -696,6 +696,9 @@
     "videosHint": "Halkan ku tuur fiidiyowyo gaagaaban, ama guji si aad u doorato. Ugu badnaan 30MB mid kasta.",
     "videoCaptionPlaceholder": "Faah faahin (ikhtiyaari)",
     "removeVideoAriaLabel": "Ka saar fiidiyowga",
+    "replaceVideoAriaLabel": "Beddel fiidiyowga",
+    "moveVideoEarlierAriaLabel": "U dhaqaaji fiidiyowga kor",
+    "moveVideoLaterAriaLabel": "U dhaqaaji fiidiyowga hoos",
 
     "publishHotel": "Daabac Hudheelka",
     "publishRestaurant": "Daabac Maqaayadda",
@@ -1461,6 +1464,9 @@
     "videosHint": "Halkan ku tuur fiidiyowyo gaagaaban, ama guji si aad u doorato. Ugu badnaan 30MB mid kasta.",
     "videoCaptionPlaceholder": "Faah faahin (ikhtiyaari)",
     "removeVideoAriaLabel": "Ka saar fiidiyowga",
+    "replaceVideoAriaLabel": "Beddel fiidiyowga",
+    "moveVideoEarlierAriaLabel": "U dhaqaaji fiidiyowga kor",
+    "moveVideoLaterAriaLabel": "U dhaqaaji fiidiyowga hoos",
 
     "businessInfoTitle": "Macluumaadka Ganacsiga",
     "businessType": "Nooca Ganacsiga",

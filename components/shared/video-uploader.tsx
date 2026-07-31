@@ -1,15 +1,16 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Loader2, X, Video as VideoIcon } from "lucide-react";
+import { ChevronDown, ChevronUp, GripVertical, Loader2, Repeat, Video as VideoIcon, X } from "lucide-react";
 import { uploadVideo } from "@/lib/supabase/storage";
 import type { MediaVideo } from "@/types";
 
 /**
  * Optional short-video gallery — the Media Manager's one genuinely new media
- * type. Mirrors GalleryManager's drag & drop + multi-file UX, but simpler
- * (no categories/reordering): a video either belongs or it doesn't, and a
- * caption is the only per-clip detail worth editing.
+ * type. Mirrors GalleryManager's drag & drop, multi-file upload, drag-to-
+ * reorder, and per-clip replace, just without categories (a video either
+ * belongs or it doesn't, and a caption is the only per-clip detail worth
+ * editing).
  */
 export function VideoUploader({
   folder,
@@ -20,6 +21,9 @@ export function VideoUploader({
   hint,
   captionPlaceholder,
   removeAriaLabel,
+  replaceAriaLabel,
+  moveEarlierAriaLabel,
+  moveLaterAriaLabel,
 }: {
   folder: string;
   value: MediaVideo[];
@@ -29,11 +33,17 @@ export function VideoUploader({
   hint: string;
   captionPlaceholder: string;
   removeAriaLabel: string;
+  replaceAriaLabel: string;
+  moveEarlierAriaLabel: string;
+  moveLaterAriaLabel: string;
 }) {
   const [uploading, setUploading] = useState(false);
+  const [replacingIndex, setReplacingIndex] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const replaceInputRef = useRef<HTMLInputElement>(null);
 
   async function addFiles(files: File[]) {
     const videoFiles = files.filter((f) => f.type.startsWith("video/"));
@@ -62,12 +72,47 @@ export function VideoUploader({
     void addFiles(Array.from(e.dataTransfer.files ?? []));
   }
 
-  function updateCaption(i: number, caption: string) {
-    onChange(value.map((v, idx) => (idx === i ? { ...v, caption } : v)));
+  async function onReplaceSelected(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    const i = replacingIndex;
+    if (!file || i === null) return;
+    setError(null);
+    setUploading(true);
+    try {
+      const url = await uploadVideo(file, { folder });
+      updateAt(i, { url, caption: value[i]?.caption });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Upload failed.");
+    } finally {
+      setUploading(false);
+      setReplacingIndex(null);
+      if (replaceInputRef.current) replaceInputRef.current.value = "";
+    }
+  }
+
+  function updateAt(i: number, patch: Partial<MediaVideo>) {
+    onChange(value.map((v, idx) => (idx === i ? { ...v, ...patch } : v)));
   }
   function removeAt(i: number) {
     onChange(value.filter((_, idx) => idx !== i));
   }
+  function move(i: number, dir: -1 | 1) {
+    const j = i + dir;
+    if (j < 0 || j >= value.length) return;
+    const next = [...value];
+    [next[i], next[j]] = [next[j], next[i]];
+    onChange(next);
+  }
+  function reorderTo(from: number, to: number) {
+    if (from === to) return;
+    const next = [...value];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    onChange(next);
+  }
+
+  const iconButtonClass =
+    "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-ink/45 transition-colors hover:bg-ink/5 hover:text-primary disabled:opacity-30 disabled:hover:bg-transparent dark:text-sand/45 dark:hover:bg-white/10";
 
   return (
     <div>
@@ -76,28 +121,70 @@ export function VideoUploader({
       {value.length > 0 && (
         <div className="mb-4 grid gap-3 sm:grid-cols-2">
           {value.map((v, i) => (
-            <div key={`${v.url}-${i}`} className="rounded-xl border border-ink/10 p-2.5 dark:border-white/15">
-              <video src={v.url} controls preload="metadata" className="mb-2 aspect-video w-full rounded-lg bg-black" />
-              <div className="flex items-center gap-2">
+            <div
+              key={`${v.url}-${i}`}
+              draggable
+              onDragStart={() => setDraggedIndex(i)}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                e.preventDefault();
+                if (draggedIndex !== null) reorderTo(draggedIndex, i);
+                setDraggedIndex(null);
+              }}
+              onDragEnd={() => setDraggedIndex(null)}
+              className={`rounded-xl border border-ink/10 p-2.5 dark:border-white/15 ${draggedIndex === i ? "opacity-40" : ""}`}
+            >
+              <div className="relative mb-2">
+                <video src={v.url} controls preload="metadata" className="aspect-video w-full rounded-lg bg-black" />
+                <span
+                  className="absolute start-1.5 top-1.5 flex h-7 w-7 shrink-0 cursor-grab items-center justify-center rounded-lg bg-black/50 text-white active:cursor-grabbing"
+                  aria-hidden="true"
+                >
+                  <GripVertical size={15} />
+                </span>
+              </div>
+              <div className="flex flex-wrap items-center gap-1.5">
                 <input
                   value={v.caption ?? ""}
-                  onChange={(e) => updateCaption(i, e.target.value)}
+                  onChange={(e) => updateAt(i, { caption: e.target.value })}
                   placeholder={captionPlaceholder}
-                  className="w-full rounded-lg border border-ink/12 bg-transparent px-2.5 py-1.5 text-xs outline-none focus:border-primary dark:border-white/15"
+                  className="min-w-0 flex-1 basis-full rounded-lg border border-ink/12 bg-transparent px-2.5 py-2 text-xs outline-none focus:border-primary dark:border-white/15 sm:basis-auto"
                 />
-                <button
-                  type="button"
-                  onClick={() => removeAt(i)}
-                  aria-label={removeAriaLabel}
-                  className="shrink-0 text-ink/40 hover:text-red-500"
-                >
-                  <X size={16} />
-                </button>
+                <div className="ms-auto flex items-center gap-0.5">
+                  <button type="button" onClick={() => move(i, -1)} disabled={i === 0} aria-label={moveEarlierAriaLabel} className={iconButtonClass}>
+                    <ChevronUp size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => move(i, 1)}
+                    disabled={i === value.length - 1}
+                    aria-label={moveLaterAriaLabel}
+                    className={iconButtonClass}
+                  >
+                    <ChevronDown size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setReplacingIndex(i);
+                      replaceInputRef.current?.click();
+                    }}
+                    aria-label={replaceAriaLabel}
+                    className={iconButtonClass}
+                  >
+                    <Repeat size={16} />
+                  </button>
+                  <button type="button" onClick={() => removeAt(i)} aria-label={removeAriaLabel} className={`${iconButtonClass} hover:text-red-500`}>
+                    <X size={17} />
+                  </button>
+                </div>
               </div>
             </div>
           ))}
         </div>
       )}
+
+      <input ref={replaceInputRef} type="file" accept="video/*" onChange={onReplaceSelected} className="hidden" />
 
       <div
         onDragOver={(e) => {

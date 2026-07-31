@@ -696,6 +696,9 @@
     "videosHint": "Drag & drop short video clips here, or click to browse. Max 30MB each.",
     "videoCaptionPlaceholder": "Caption (optional)",
     "removeVideoAriaLabel": "Remove video",
+    "replaceVideoAriaLabel": "Replace video",
+    "moveVideoEarlierAriaLabel": "Move video earlier",
+    "moveVideoLaterAriaLabel": "Move video later",
 
     "publishHotel": "Publish Hotel",
     "publishRestaurant": "Publish Restaurant",
@@ -1461,6 +1464,9 @@
     "videosHint": "Drag & drop short video clips here, or click to browse. Max 30MB each.",
     "videoCaptionPlaceholder": "Caption (optional)",
     "removeVideoAriaLabel": "Remove video",
+    "replaceVideoAriaLabel": "Replace video",
+    "moveVideoEarlierAriaLabel": "Move video earlier",
+    "moveVideoLaterAriaLabel": "Move video later",
 
     "businessInfoTitle": "Business Info",
     "businessType": "Business Type",

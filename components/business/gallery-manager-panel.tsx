@@ -102,6 +102,9 @@ export function GalleryManagerPanel({
             hint={t("videosHint")}
             captionPlaceholder={t("videoCaptionPlaceholder")}
             removeAriaLabel={t("removeVideoAriaLabel")}
+            replaceAriaLabel={t("replaceVideoAriaLabel")}
+            moveEarlierAriaLabel={t("moveVideoEarlierAriaLabel")}
+            moveLaterAriaLabel={t("moveVideoLaterAriaLabel")}
           />
         </div>
       )}
