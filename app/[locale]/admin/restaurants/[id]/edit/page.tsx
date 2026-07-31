@@ -7,6 +7,7 @@ import { requireListingsAccess } from "@/lib/supabase/guards";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { RestaurantForm } from "@/components/admin/restaurant-form";
+import type { OpeningHoursGroup } from "@/types";
 
 export const metadata: Metadata = { title: "Edit Restaurant — Admin" };
 
@@ -74,12 +75,19 @@ export default async function EditRestaurantPage({
           lng: restaurant.lng,
           phone: restaurant.phone ?? "",
           website: restaurant.website ?? "",
+          whatsapp: restaurant.whatsapp ?? "",
+          email: restaurant.email ?? "",
+          socialInstagram: restaurant.social_instagram ?? "",
+          socialFacebook: restaurant.social_facebook ?? "",
           cuisine: (restaurant.cuisine ?? []) as string[],
           priceRange:
             restaurant.price_range === "$$$$"
               ? "$$$"
               : restaurant.price_range,
           openingHours: restaurant.opening_hours ?? "",
+          openingHoursStructured: Array.isArray(restaurant.opening_hours_structured)
+            ? (restaurant.opening_hours_structured as unknown as OpeningHoursGroup[])
+            : [],
           menuHighlights: Array.isArray(restaurant.menu)
             ? (restaurant.menu as unknown as {
                 name: string;

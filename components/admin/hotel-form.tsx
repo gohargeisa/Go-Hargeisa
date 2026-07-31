@@ -28,6 +28,10 @@ export interface HotelFormInput {
   lng: number;
   phone?: string;
   website?: string;
+  whatsapp?: string;
+  email?: string;
+  socialInstagram?: string;
+  socialFacebook?: string;
   priceRange: "$" | "$$" | "$$$" | "$$$$";
   amenities: string[];
   checkInTime: string;
@@ -81,6 +85,10 @@ export function HotelForm({
     lng: initial?.lng ?? 44.065,
     phone: initial?.phone ?? "",
     website: initial?.website ?? "",
+    whatsapp: initial?.whatsapp ?? "",
+    email: initial?.email ?? "",
+    socialInstagram: initial?.socialInstagram ?? "",
+    socialFacebook: initial?.socialFacebook ?? "",
     priceRange: initial?.priceRange ?? "$$",
     amenities: initial?.amenities ?? [],
     checkInTime: initial?.checkInTime ?? "",
@@ -126,6 +134,10 @@ export function HotelForm({
       lng: form.lng,
       phone: form.phone || null,
       website: form.website || null,
+      whatsapp: form.whatsapp || null,
+      email: form.email || null,
+      social_instagram: form.socialInstagram || null,
+      social_facebook: form.socialFacebook || null,
       price_range: form.priceRange,
       amenities: form.amenities,
       check_in_time: form.checkInTime || null,
@@ -212,6 +224,24 @@ export function HotelForm({
               <option value="$$$">$$$</option>
               <option value="$$$$">$$$$</option>
             </select>
+          </Field>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label={t("whatsappLabel")}>
+            <input value={form.whatsapp} onChange={(e) => update("whatsapp", e.target.value)} className={inputClass} placeholder="+252 63 000 0000" />
+          </Field>
+          <Field label={t("emailLabel")}>
+            <input type="email" value={form.email} onChange={(e) => update("email", e.target.value)} className={inputClass} />
+          </Field>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label={t("socialInstagramLabel")}>
+            <input type="url" value={form.socialInstagram} onChange={(e) => update("socialInstagram", e.target.value)} className={inputClass} placeholder="https://instagram.com/…" />
+          </Field>
+          <Field label={t("socialFacebookLabel")}>
+            <input type="url" value={form.socialFacebook} onChange={(e) => update("socialFacebook", e.target.value)} className={inputClass} placeholder="https://facebook.com/…" />
           </Field>
         </div>
 

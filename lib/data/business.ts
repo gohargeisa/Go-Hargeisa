@@ -2,9 +2,9 @@ import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireListingsAccess } from "@/lib/supabase/guards";
-import { mapReview } from "./mappers";
+import { mapReview, mapBusinessOffer } from "./mappers";
 import type { Locale } from "@/lib/i18n/config";
-import type { BusinessListingType, Booking, BusinessSubscription, SubscriptionNote, BusinessMessage, Review } from "@/types";
+import type { BusinessListingType, Booking, BusinessSubscription, SubscriptionNote, BusinessMessage, Review, BusinessOffer } from "@/types";
 
 export interface OwnedListing {
   listingType: BusinessListingType;
@@ -43,10 +43,11 @@ function galleryLength(gallery: unknown): number {
 async function _getOwnedListings(userId: string): Promise<OwnedListing[]> {
   const supabase = await createClient();
 
-  const [{ data: hotels }, { data: restaurants }, { data: cafes }] = await Promise.all([
+  const [{ data: hotels }, { data: restaurants }, { data: cafes }, { data: services }] = await Promise.all([
     supabase.from("hotels").select("*").eq("owner_id", userId),
     supabase.from("restaurants").select("*").eq("owner_id", userId),
     supabase.from("cafes").select("*").eq("owner_id", userId),
+    supabase.from("services").select("*").eq("owner_id", userId),
   ]);
 
   const out: OwnedListing[] = [];
@@ -109,6 +110,30 @@ async function _getOwnedListings(userId: string): Promise<OwnedListing[]> {
       hasDescription: Boolean(c.description?.trim()),
       galleryCount: galleryLength(c.gallery),
       partnerStatus: c.partner_status,
+    });
+  }
+  // Services has no partner_status/logo_url column — there's no trial
+  // flow for this listing type (owner_id is set directly by an admin, not
+  // via a convertJoinRequest-style upgrade path), so every service owner
+  // is treated as "official" and gets dashboard access immediately.
+  for (const s of services ?? []) {
+    out.push({
+      listingType: "service",
+      id: s.id,
+      slug: s.slug,
+      name: s.name,
+      logo: undefined,
+      coverImage: s.cover_image,
+      address: s.address,
+      phone: s.phone ?? undefined,
+      website: s.website ?? undefined,
+      rating: Number(s.rating),
+      reviewCount: s.review_count,
+      createdAt: s.created_at,
+      serviceTags: s.services ?? [],
+      hasDescription: Boolean(s.description?.trim()),
+      galleryCount: galleryLength(s.gallery),
+      partnerStatus: "official",
     });
   }
 
@@ -412,6 +437,21 @@ export async function getSubscriptionNotes(subscriptionId: string): Promise<Subs
     note: n.note,
     createdAt: n.created_at,
   }));
+}
+
+export async function getOffersForListing(
+  listingType: "hotel" | "restaurant" | "cafe",
+  listingId: string
+): Promise<BusinessOffer[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("business_offers")
+    .select("*")
+    .eq("listing_type", listingType)
+    .eq("listing_id", listingId)
+    .order("created_at", { ascending: false });
+
+  return (data ?? []).map(mapBusinessOffer);
 }
 
 export async function getMessagesForListing(listingType: BusinessListingType, listingId: string): Promise<BusinessMessage[]> {

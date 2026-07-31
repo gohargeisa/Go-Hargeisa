@@ -28,6 +28,8 @@ export interface CafeFormInput {
   lat: number;
   lng: number;
   phone?: string;
+  whatsapp: string;
+  email: string;
   specialDrinks: string[];
   wifi: boolean;
   workingSpace: boolean;
@@ -81,6 +83,8 @@ export function CafeForm({
     lat: initial?.lat ?? 9.5624,
     lng: initial?.lng ?? 44.065,
     phone: initial?.phone ?? "",
+    whatsapp: initial?.whatsapp ?? "",
+    email: initial?.email ?? "",
     specialDrinks: initial?.specialDrinks ?? [],
     wifi: initial?.wifi ?? true,
     workingSpace: initial?.workingSpace ?? false,
@@ -165,6 +169,8 @@ export function CafeForm({
       lat: form.lat,
       lng: form.lng,
       phone: form.phone || null,
+      whatsapp: form.whatsapp || null,
+      email: form.email || null,
       special_drinks: form.specialDrinks,
       wifi: form.wifi,
       working_space: form.workingSpace,
@@ -253,6 +259,15 @@ export function CafeForm({
             <option value="$$$">$$$</option>
             <option value="$$$$">$$$$</option>
           </select>
+        </Field>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label={t("whatsappLabel")}>
+          <input value={form.whatsapp} onChange={(e) => update("whatsapp", e.target.value)} className={inputClass} placeholder="+252 63 000 0000" />
+        </Field>
+        <Field label={t("emailLabel")}>
+          <input type="email" value={form.email} onChange={(e) => update("email", e.target.value)} className={inputClass} />
         </Field>
       </div>
 

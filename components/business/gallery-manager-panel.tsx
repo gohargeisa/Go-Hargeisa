@@ -45,25 +45,26 @@ export function GalleryManagerPanel({
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  // Services (Phase 2 city services) has no logo_url column at all.
+  const hasLogo = listingType !== "service";
+
   function onSave() {
     setError(null);
     startTransition(async () => {
-      const result = await updateRecord(
-        TABLE_BY_TYPE[listingType],
-        listingId,
-        { cover_image: cover, logo_url: logo || null, gallery },
-        [currentPath],
-        currentPath
-      );
+      const payload: Record<string, unknown> = { cover_image: cover, gallery };
+      if (hasLogo) payload.logo_url = logo || null;
+      const result = await updateRecord(TABLE_BY_TYPE[listingType], listingId, payload, [currentPath], currentPath);
       if (result && !result.ok) setError(result.error ?? "Something went wrong.");
     });
   }
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-6 rounded-2xl border border-ink/8 bg-white p-5 dark:border-white/10 dark:bg-white/[0.03] sm:grid-cols-2 sm:p-6">
+      <div className={`grid gap-6 rounded-2xl border border-ink/8 bg-white p-5 dark:border-white/10 dark:bg-white/[0.03] sm:p-6 ${hasLogo ? "sm:grid-cols-2" : ""}`}>
         <ImageUploader folder={`${listingType}s`} value={cover} onChange={setCover} label={t("coverImage")} />
-        <ImageUploader folder={`${listingType}s/logos`} value={logo} onChange={setLogo} label={t("businessLogo")} rounded="rounded-full" />
+        {hasLogo && (
+          <ImageUploader folder={`${listingType}s/logos`} value={logo} onChange={setLogo} label={t("businessLogo")} rounded="rounded-full" />
+        )}
       </div>
 
       <div className="rounded-2xl border border-ink/8 bg-white p-5 dark:border-white/10 dark:bg-white/[0.03] sm:p-6">

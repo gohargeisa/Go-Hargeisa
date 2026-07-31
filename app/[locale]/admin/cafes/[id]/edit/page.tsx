@@ -70,6 +70,8 @@ export default async function EditCafePage({
           lat: cafe.lat,
           lng: cafe.lng,
           phone: cafe.phone ?? "",
+          whatsapp: cafe.whatsapp ?? "",
+          email: cafe.email ?? "",
           specialDrinks: cafe.special_drinks ?? [],
           wifi: cafe.wifi,
           workingSpace: cafe.working_space,

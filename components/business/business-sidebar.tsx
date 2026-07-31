@@ -20,6 +20,7 @@ import {
   Menu,
   X,
   ExternalLink,
+  Tag,
 } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { SignOutButton } from "@/components/shared/sign-out-button";
@@ -28,6 +29,7 @@ import type { OwnedListing } from "@/lib/data/business";
 const NAV_ITEMS = [
   { href: "", icon: Home, key: "navDashboard" },
   { href: "/listing", icon: Building2, key: "navMyBusiness" },
+  { href: "/offers", icon: Tag, key: "navOffers" },
   { href: "/bookings", icon: CalendarDays, key: "navBookings" },
   { href: "/gallery", icon: Images, key: "navGallery" },
   { href: "/reviews", icon: Star, key: "navReviews" },

@@ -7,9 +7,16 @@ import { MyBusinessForm } from "@/components/business/my-business-form";
 import { ServiceBadges } from "@/components/business/service-badges";
 import { HotelBookingSettingsForm } from "@/components/business/hotel-booking-settings-form";
 import { HotelRoomsManager } from "@/components/admin/hotel-rooms-manager";
-import type { HotelBookingMode, HotelExternalBookingOption } from "@/types";
+import type { HotelBookingMode, HotelExternalBookingOption, BusinessListingType } from "@/types";
 
 export const metadata: Metadata = { title: "My Business — Dashboard", robots: { index: false } };
+
+const TABLE_BY_TYPE: Record<BusinessListingType, "hotels" | "restaurants" | "cafes" | "services"> = {
+  hotel: "hotels",
+  restaurant: "restaurants",
+  cafe: "cafes",
+  service: "services",
+};
 
 export default async function MyBusinessPage({ params: { locale } }: { params: { locale: Locale } }) {
   const currentPath = `/${locale}/business/listing`;
@@ -18,7 +25,7 @@ export default async function MyBusinessPage({ params: { locale } }: { params: {
 
   const t = await getTranslations({ locale, namespace: "businessDashboard" });
   const supabase = await createClient();
-  const table = listing.listingType === "hotel" ? "hotels" : listing.listingType === "restaurant" ? "restaurants" : "cafes";
+  const table = TABLE_BY_TYPE[listing.listingType];
   const { data: row } = await supabase.from(table).select("*").eq("id", listing.id).single();
 
   const { data: roomRows } =
@@ -44,9 +51,15 @@ export default async function MyBusinessPage({ params: { locale } }: { params: {
           address: row?.address ?? listing.address,
           phone: row?.phone ?? listing.phone ?? "",
           website: (row as { website?: string })?.website ?? listing.website ?? "",
+          whatsapp: (row as { whatsapp?: string })?.whatsapp ?? "",
+          email: (row as { email?: string })?.email ?? "",
+          socialInstagram: (row as { social_instagram?: string })?.social_instagram ?? "",
+          socialFacebook: (row as { social_facebook?: string })?.social_facebook ?? "",
+          priceRange: (row as { price_range?: "$" | "$$" | "$$$" | "$$$$" })?.price_range ?? "$$",
           checkInTime: (row as { check_in_time?: string })?.check_in_time ?? "",
           checkOutTime: (row as { check_out_time?: string })?.check_out_time ?? "",
           openingHours: (row as { opening_hours?: string })?.opening_hours ?? "",
+          openingHoursStructured: (row as { opening_hours_structured?: any })?.opening_hours_structured ?? [],
           menuHighlights: (row as { menu?: { name: string; price: string; description?: string }[] })?.menu ?? [],
           menuPdfUrl: (row as { menu_pdf_url?: string })?.menu_pdf_url ?? "",
         }}

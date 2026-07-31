@@ -5,13 +5,23 @@ import { useTranslations } from "next-intl";
 import { Loader2, Plus, X } from "lucide-react";
 import { updateRecord } from "@/lib/actions/admin";
 import { ImageUploader } from "@/components/shared/image-uploader";
-import type { BusinessListingType } from "@/types";
+import { OpeningHoursEditor } from "@/components/shared/opening-hours-editor";
+import type { BusinessListingType, OpeningHoursGroup } from "@/types";
 
 const TABLE_BY_TYPE: Record<BusinessListingType, "hotels" | "restaurants" | "cafes" | "services"> = {
   hotel: "hotels",
   restaurant: "restaurants",
   cafe: "cafes",
   service: "services",
+};
+
+/** Only hotels/restaurants/cafes have price_range, whatsapp, email, and
+ * social columns — services (Phase 2 city services) has none of them. */
+const HAS_RICH_CONTACT_FIELDS: Record<BusinessListingType, boolean> = {
+  hotel: true,
+  restaurant: true,
+  cafe: true,
+  service: false,
 };
 
 export interface MyBusinessFormInitial {
@@ -21,12 +31,20 @@ export interface MyBusinessFormInitial {
   address: string;
   phone: string;
   website: string;
+  whatsapp?: string;
+  email?: string;
+  socialInstagram?: string;
+  socialFacebook?: string;
+  priceRange?: "$" | "$$" | "$$$" | "$$$$";
   checkInTime?: string;
   checkOutTime?: string;
   openingHours?: string;
+  openingHoursStructured?: OpeningHoursGroup[];
   menuHighlights?: { name: string; price: string; description?: string }[];
   menuPdfUrl?: string;
 }
+
+const PRICE_LEVELS: NonNullable<MyBusinessFormInitial["priceRange"]>[] = ["$", "$$", "$$$", "$$$$"];
 
 /** Core-info editor reusing the same generic updateRecord server action every admin form already uses — new presentation, reused logic. */
 export function MyBusinessForm({
@@ -41,9 +59,16 @@ export function MyBusinessForm({
   currentPath: string;
 }) {
   const t = useTranslations("businessDashboard");
-  const [form, setForm] = useState(initial);
+  const tw = useTranslations("weekdays");
+  const [form, setForm] = useState<MyBusinessFormInitial>({
+    ...initial,
+    priceRange: initial.priceRange ?? "$$",
+    openingHoursStructured: initial.openingHoursStructured ?? [],
+  });
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  const hasRichFields = HAS_RICH_CONTACT_FIELDS[listingType];
 
   function update<K extends keyof MyBusinessFormInitial>(key: K, value: MyBusinessFormInitial[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -72,19 +97,31 @@ export function MyBusinessForm({
       address: form.address,
       phone: form.phone || null,
     };
+    if (hasRichFields) {
+      payload.whatsapp = form.whatsapp || null;
+      payload.email = form.email || null;
+      payload.social_instagram = form.socialInstagram || null;
+      payload.social_facebook = form.socialFacebook || null;
+      payload.price_range = form.priceRange;
+    }
+    // cafes has no `website` column at all — every other type does.
+    if (listingType !== "cafe") payload.website = form.website || null;
+
     if (listingType === "hotel") {
-      payload.website = form.website || null;
       payload.check_in_time = form.checkInTime || null;
       payload.check_out_time = form.checkOutTime || null;
     } else if (listingType === "restaurant") {
-      payload.website = form.website || null;
       payload.opening_hours = form.openingHours || null;
+      payload.opening_hours_structured = form.openingHoursStructured ?? [];
+      payload.menu = form.menuHighlights ?? [];
+      payload.menu_pdf_url = form.menuPdfUrl || null;
+    } else if (listingType === "cafe") {
+      payload.opening_hours = form.openingHours || null;
+      payload.opening_hours_structured = form.openingHoursStructured ?? [];
       payload.menu = form.menuHighlights ?? [];
       payload.menu_pdf_url = form.menuPdfUrl || null;
     } else {
       payload.opening_hours = form.openingHours || null;
-      payload.menu = form.menuHighlights ?? [];
-      payload.menu_pdf_url = form.menuPdfUrl || null;
     }
 
     startTransition(async () => {
@@ -131,6 +168,7 @@ export function MyBusinessForm({
         <label className="mb-1.5 block text-sm font-semibold">{t("addressLabel")}</label>
         <input required value={form.address} onChange={(e) => update("address", e.target.value)} className={inputClass} />
       </div>
+
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label className="mb-1.5 block text-sm font-semibold">{t("phoneLabel")}</label>
@@ -143,6 +181,52 @@ export function MyBusinessForm({
           </div>
         )}
       </div>
+
+      {hasRichFields && (
+        <>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="mb-1.5 block text-sm font-semibold">{t("whatsappLabel")}</label>
+              <input value={form.whatsapp ?? ""} onChange={(e) => update("whatsapp", e.target.value)} className={inputClass} placeholder="+252 63 000 0000" />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-sm font-semibold">{t("emailLabel")}</label>
+              <input type="email" value={form.email ?? ""} onChange={(e) => update("email", e.target.value)} className={inputClass} />
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="mb-1.5 block text-sm font-semibold">{t("socialInstagramLabel")}</label>
+              <input type="url" value={form.socialInstagram ?? ""} onChange={(e) => update("socialInstagram", e.target.value)} className={inputClass} placeholder="https://instagram.com/…" />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-sm font-semibold">{t("socialFacebookLabel")}</label>
+              <input type="url" value={form.socialFacebook ?? ""} onChange={(e) => update("socialFacebook", e.target.value)} className={inputClass} placeholder="https://facebook.com/…" />
+            </div>
+          </div>
+
+          <div>
+            <label className="mb-1.5 block text-sm font-semibold">{t("priceRangeLabel")}</label>
+            <div className="grid grid-cols-4 gap-2">
+              {PRICE_LEVELS.map((level) => (
+                <button
+                  key={level}
+                  type="button"
+                  onClick={() => update("priceRange", level)}
+                  className={`rounded-xl border py-2 text-center font-display text-sm font-bold transition-colors ${
+                    form.priceRange === level
+                      ? "border-primary bg-primary/8 text-primary"
+                      : "border-ink/12 text-ink/60 hover:border-primary/40 dark:border-white/15 dark:text-sand/60"
+                  }`}
+                >
+                  {level}
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
 
       {listingType === "hotel" ? (
         <div className="grid gap-4 sm:grid-cols-2">
@@ -177,7 +261,20 @@ export function MyBusinessForm({
         </div>
       )}
 
-      {listingType !== "hotel" && (
+      {(listingType === "restaurant" || listingType === "cafe") && (
+        <OpeningHoursEditor
+          value={form.openingHoursStructured ?? []}
+          onChange={(v) => update("openingHoursStructured", v)}
+          dayLabel={tw}
+          title={t("openingHoursByDay")}
+          addLabel={t("addHoursGroupLabel")}
+          openLabel={t("hoursOpenLabel")}
+          closeLabel={t("hoursCloseLabel")}
+          removeAriaLabel={t("removeHoursGroupAriaLabel")}
+        />
+      )}
+
+      {listingType !== "hotel" && listingType !== "service" && (
         <div>
           <div className="mb-1.5 flex items-center justify-between">
             <label className="text-sm font-semibold">{t("menuHighlightsLabel")}</label>

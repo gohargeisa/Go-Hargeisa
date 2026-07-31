@@ -10,8 +10,9 @@ import { Field, TagInput, inputClass } from "@/components/admin/form-shared";
 import { createRecord, updateRecord } from "@/lib/actions/admin";
 import { useUnsavedChangesWarning } from "@/lib/hooks/use-unsaved-changes-warning";
 import { RESTAURANT_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
+import { OpeningHoursEditor } from "@/components/shared/opening-hours-editor";
 import type { Locale } from "@/lib/i18n/config";
-import type { GalleryImage } from "@/types";
+import type { GalleryImage, OpeningHoursGroup } from "@/types";
 
 export interface RestaurantFormInput {
   slug: string;
@@ -26,9 +27,14 @@ export interface RestaurantFormInput {
   lng: number;
   phone?: string;
   website?: string;
+  whatsapp?: string;
+  email?: string;
+  socialInstagram?: string;
+  socialFacebook?: string;
   cuisine: string[];
   priceRange: "$" | "$$" | "$$$";
   openingHours: string;
+  openingHoursStructured: OpeningHoursGroup[];
   menuHighlights: { name: string; price: string; description?: string }[];
   menuPdfUrl: string;
   reservable: boolean;
@@ -49,6 +55,7 @@ export function RestaurantForm({
   initial?: Partial<RestaurantFormInput>;
 }) {
   const t = useTranslations("admin");
+  const tw = useTranslations("weekdays");
   const [form, setForm] = useState<RestaurantFormInput>({
     slug: initial?.slug ?? "",
     name: initial?.name ?? "",
@@ -62,9 +69,14 @@ export function RestaurantForm({
     lng: initial?.lng ?? 44.065,
     phone: initial?.phone ?? "",
     website: initial?.website ?? "",
+    whatsapp: initial?.whatsapp ?? "",
+    email: initial?.email ?? "",
+    socialInstagram: initial?.socialInstagram ?? "",
+    socialFacebook: initial?.socialFacebook ?? "",
     cuisine: initial?.cuisine ?? [],
     priceRange: initial?.priceRange ?? "$$",
     openingHours: initial?.openingHours ?? "",
+    openingHoursStructured: initial?.openingHoursStructured ?? [],
     menuHighlights: initial?.menuHighlights ?? [],
     menuPdfUrl: initial?.menuPdfUrl ?? "",
     reservable: initial?.reservable ?? false,
@@ -115,9 +127,14 @@ export function RestaurantForm({
       lng: form.lng,
       phone: form.phone || null,
       website: form.website || null,
+      whatsapp: form.whatsapp || null,
+      email: form.email || null,
+      social_instagram: form.socialInstagram || null,
+      social_facebook: form.socialFacebook || null,
       cuisine: form.cuisine,
       price_range: form.priceRange,
       opening_hours: form.openingHours,
+      opening_hours_structured: form.openingHoursStructured,
       menu: form.menuHighlights,
       menu_pdf_url: form.menuPdfUrl || null,
       reservable: form.reservable,
@@ -194,6 +211,35 @@ export function RestaurantForm({
           </select>
         </Field>
       </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label={t("whatsappLabel")}>
+          <input value={form.whatsapp} onChange={(e) => update("whatsapp", e.target.value)} className={inputClass} placeholder="+252 63 000 0000" />
+        </Field>
+        <Field label={t("emailLabel")}>
+          <input type="email" value={form.email} onChange={(e) => update("email", e.target.value)} className={inputClass} />
+        </Field>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label={t("socialInstagramLabel")}>
+          <input type="url" value={form.socialInstagram} onChange={(e) => update("socialInstagram", e.target.value)} className={inputClass} placeholder="https://instagram.com/…" />
+        </Field>
+        <Field label={t("socialFacebookLabel")}>
+          <input type="url" value={form.socialFacebook} onChange={(e) => update("socialFacebook", e.target.value)} className={inputClass} placeholder="https://facebook.com/…" />
+        </Field>
+      </div>
+
+      <OpeningHoursEditor
+        value={form.openingHoursStructured}
+        onChange={(v) => update("openingHoursStructured", v)}
+        dayLabel={tw}
+        title={t("structuredHoursLabel")}
+        addLabel={t("addHoursGroupLabel")}
+        openLabel={t("hoursOpenLabel")}
+        closeLabel={t("hoursCloseLabel")}
+        removeAriaLabel={t("removeHoursGroupAriaLabel")}
+      />
 
       <TagInput label={t("cuisineLabel")} values={form.cuisine} onChange={(v) => update("cuisine", v)} placeholder={t("tagInputPlaceholder")} suggestions={CUISINE_SUGGESTIONS} />
 

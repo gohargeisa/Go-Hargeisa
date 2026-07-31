@@ -38,6 +38,7 @@ type HotelRow = ListingBase & {
   website: string | null; price_range: "$" | "$$" | "$$$" | "$$$$"; amenities: string[]; owner_id: string | null;
   logo_url: string | null; check_in_time: string | null; check_out_time: string | null; languages: string[];
   restaurant_id: string | null; cafe_id: string | null;
+  social_instagram: string | null; social_facebook: string | null; whatsapp: string | null; email: string | null;
   booking_mode: "go_hargeisa" | "external";
   external_booking_option: "website" | "booking_com" | "whatsapp" | "custom_url" | null;
   external_booking_url: string | null; booking_whatsapp: string | null; booking_com_url: string | null;
@@ -57,8 +58,9 @@ type RoomAvailabilityRow = {
 };
 type RestaurantRow = ListingBase & {
   phone: string | null; website: string | null; cuisine: string[]; price_range: "$" | "$$" | "$$$" | "$$$$";
-  opening_hours: string | null; menu: Json; reservable: boolean; owner_id: string | null;
+  opening_hours: string | null; opening_hours_structured: Json; menu: Json; reservable: boolean; owner_id: string | null;
   logo_url: string | null; menu_pdf_url: string | null;
+  social_instagram: string | null; social_facebook: string | null; whatsapp: string | null; email: string | null;
   partner_status: PartnerStatusDb; trial_expires_at: string | null;
 };
 type CafeRow = ListingBase & {
@@ -66,9 +68,16 @@ type CafeRow = ListingBase & {
   phone: string | null; special_drinks: string[]; wifi: boolean; working_space: boolean;
   opening_hours: string | null; opening_hours_structured: Json; owner_id: string | null;
   price_range: "$" | "$$" | "$$$" | "$$$$"; amenities: string[];
-  social_instagram: string | null; social_facebook: string | null;
+  social_instagram: string | null; social_facebook: string | null; whatsapp: string | null; email: string | null;
   logo_url: string | null; menu: Json; menu_pdf_url: string | null;
   partner_status: PartnerStatusDb; trial_expires_at: string | null;
+};
+
+type BusinessOfferRow = {
+  id: string; listing_type: "hotel" | "restaurant" | "cafe"; listing_id: string;
+  title: string; description: string | null; discount_label: string | null;
+  starts_at: string | null; ends_at: string | null; is_active: boolean;
+  created_at: string; updated_at: string;
 };
 
 type CityServiceCategoryDb = "hospital" | "bank" | "supermarket" | "pharmacy";
@@ -183,6 +192,7 @@ export type Database = {
       business_join_request_notes: Table<BusinessJoinRequestNoteRow>;
       site_announcements: Table<SiteAnnouncementRow>;
       business_messages: Table<BusinessMessageRow>;
+      business_offers: Table<BusinessOfferRow>;
       favorites: Table<{ id: string; user_id: string | null; listing_type: "hotel" | "restaurant" | "cafe" | "attraction" | "service"; listing_id: string; created_at: string }>;
       saved_trips: Table<{ id: string; user_id: string | null; title: string; notes: string | null; created_at: string }>;
       saved_trip_items: Table<{ id: string; trip_id: string | null; listing_type: "hotel" | "restaurant" | "cafe" | "attraction" | "service"; listing_id: string; day_number: number | null; sort_order: number | null }>;

@@ -72,6 +72,23 @@ export interface BusinessSubscription {
   renewsAt?: string;
 }
 
+/** Owner-published, time-boxed promotion against their own listing —
+ * "hotel"|"restaurant"|"cafe" only, matching converted_listing_type's
+ * scope (services has no dashboard-driven offers concept yet). */
+export interface BusinessOffer {
+  id: string;
+  listingType: "hotel" | "restaurant" | "cafe";
+  listingId: string;
+  title: string;
+  description?: string;
+  discountLabel?: string;
+  startsAt?: string;
+  endsAt?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 /** Owner-only — see business_subscription_notes RLS in
  * supabase/migrations/20260730000005_subscription_lifecycle.sql. Never
  * fetched or shown on the business-owner-facing dashboard. */
@@ -251,6 +268,10 @@ export interface Hotel {
   reviews: Review[];
   phone?: string;
   website?: string;
+  whatsapp?: string;
+  email?: string;
+  socialInstagram?: string;
+  socialFacebook?: string;
   priceRange: string;
   amenities: string[];
   nearbyAttractionIds: string[];
@@ -292,9 +313,14 @@ export interface Restaurant {
   reviews: Review[];
   phone?: string;
   website?: string;
+  whatsapp?: string;
+  email?: string;
+  socialInstagram?: string;
+  socialFacebook?: string;
   cuisine: string[];
   priceRange: "$" | "$$" | "$$$";
   openingHours: string;
+  openingHoursStructured?: OpeningHoursGroup[];
   menuHighlights: RestaurantMenuItem[];
   reservable: boolean;
   featured?: boolean;
@@ -328,6 +354,8 @@ export interface Cafe {
   reviewCount: number;
   reviews: Review[];
   phone?: string;
+  whatsapp?: string;
+  email?: string;
   specialDrinks: string[];
   wifi: boolean;
   workingSpace: boolean;

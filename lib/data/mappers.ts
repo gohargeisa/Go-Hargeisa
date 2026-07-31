@@ -1,5 +1,5 @@
 import type { Database } from "@/types/database";
-import type { Hotel, HotelRoom, Restaurant, Cafe, Service, Attraction, EventItem, Article, GalleryImage, Review } from "@/types";
+import type { Hotel, HotelRoom, Restaurant, Cafe, Service, Attraction, EventItem, Article, GalleryImage, Review, BusinessOffer } from "@/types";
 
 type HotelRow = Database["public"]["Tables"]["hotels"]["Row"];
 type HotelRoomRow = Database["public"]["Tables"]["hotel_rooms"]["Row"];
@@ -71,6 +71,10 @@ export function mapHotel(
     reviews,
     phone: row.phone ?? undefined,
     website: row.website ?? undefined,
+    whatsapp: row.whatsapp ?? undefined,
+    email: row.email ?? undefined,
+    socialInstagram: row.social_instagram ?? undefined,
+    socialFacebook: row.social_facebook ?? undefined,
     priceRange: row.price_range,
     amenities: row.amenities ?? [],
     nearbyAttractionIds: [],
@@ -93,6 +97,9 @@ export function mapHotel(
 
 export function mapRestaurant(row: RestaurantRow, reviews: Review[] = []): Restaurant {
   const menu = Array.isArray(row.menu) ? (row.menu as { name: string; price: string; description?: string }[]) : [];
+  const openingHoursStructured = Array.isArray(row.opening_hours_structured)
+    ? (row.opening_hours_structured as unknown as Restaurant["openingHoursStructured"])
+    : [];
   return {
     id: row.id,
     slug: row.slug,
@@ -108,9 +115,14 @@ export function mapRestaurant(row: RestaurantRow, reviews: Review[] = []): Resta
     reviews,
     phone: row.phone ?? undefined,
     website: row.website ?? undefined,
+    whatsapp: row.whatsapp ?? undefined,
+    email: row.email ?? undefined,
+    socialInstagram: row.social_instagram ?? undefined,
+    socialFacebook: row.social_facebook ?? undefined,
     cuisine: row.cuisine ?? [],
     priceRange: (row.price_range as "$" | "$$" | "$$$") ?? "$$",
     openingHours: row.opening_hours ?? "",
+    openingHoursStructured,
     menuHighlights: menu,
     reservable: row.reservable,
     featured: row.featured,
@@ -143,6 +155,8 @@ export function mapCafe(row: CafeRow, reviews: Review[] = [], locale?: string): 
     reviewCount: row.review_count,
     reviews,
     phone: row.phone ?? undefined,
+    whatsapp: row.whatsapp ?? undefined,
+    email: row.email ?? undefined,
     specialDrinks: row.special_drinks ?? [],
     wifi: row.wifi,
     workingSpace: row.working_space,
@@ -234,5 +248,23 @@ export function mapArticle(row: ArticleRow, authorName = "Go Hargeisa Editorial"
     publishedAt: row.published_at ?? row.created_at,
     readMinutes: row.read_minutes,
     category: row.category,
+  };
+}
+
+type BusinessOfferRow = Database["public"]["Tables"]["business_offers"]["Row"];
+
+export function mapBusinessOffer(row: BusinessOfferRow): BusinessOffer {
+  return {
+    id: row.id,
+    listingType: row.listing_type,
+    listingId: row.listing_id,
+    title: row.title,
+    description: row.description ?? undefined,
+    discountLabel: row.discount_label ?? undefined,
+    startsAt: row.starts_at ?? undefined,
+    endsAt: row.ends_at ?? undefined,
+    isActive: row.is_active,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
   };
 }
