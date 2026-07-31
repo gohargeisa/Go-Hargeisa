@@ -994,7 +994,19 @@
     "removeFromFavorites": "Ka saar {name} kuwa la jecel yahay",
     "explore": "Sahami",
     "opensInNewTab": "(wuxuu ku furmaa tab cusub)",
-    "call": "Wac"
+    "call": "Wac",
+
+    "sortRecommended": "La talinayo",
+    "sortMostReviewed": "Ugu Dib-u-eegista Badan",
+    "sortNameAZ": "Magaca (A-Z)",
+    "categoryLabel": "Qaybta",
+    "allCategoriesOption": "Dhammaan Qaybaha",
+    "regionLabel": "Gobolka",
+    "allRegionsOption": "Dhammaan Gobollada",
+    "getDirections": "Hel Jihada",
+    "openingHoursLabel": "Saacadaha Furan",
+    "visitDurationLabel": "Muddada Booqashada",
+    "viewOnMap": "Ku Eeg Khariidada"
   },
   "detail": {
     "overview": "Dulmar",
@@ -1235,5 +1247,58 @@
     "comingSoonDescription": "Xogta waxaa ku dari doona kooxda Go Hargeisa.",
     "viewOnMaps": "Ka eeg Khariidadda",
     "callNow": "Wac"
+  },
+  "attractionsPage": {
+    "heroSubtitle": "Baaro taallooyinka taariikhiga ah, dhaqanka hidaha, suuqyada maxalliga ah, matxafyada iyo meelaha qarsoon ee Hargeysa.",
+    "heroExplore": "Baaro Meelaha Soo Jiita",
+    "heroViewMap": "Ku Eeg Khariidada",
+    "scrollHint": "Dhaadhac si aad u baarto",
+
+    "statsAttractions": "Meelo Soo Jiita",
+    "statsCategories": "Qaybo",
+    "statsTopRated": "Ugu Qiimaha Sarreeya",
+    "statsReviews": "Dib-u-eegis",
+
+    "emptyTitle": "Weli lama helin meelo soo jiita",
+    "emptyDescription": "Waxaan hadda ku dari doonaa meelo soo jiita oo cajiib ah oo ka mid ah Hargeysa. Dib u soo booqo, ama baaro waxa kale ee magaaladu bixiso.",
+    "emptyGoHome": "Aad Bogga Hore",
+    "emptyExploreHotels": "Baaro Huteelada",
+
+    "categoriesEyebrow": "Ku Baar Qaybta",
+    "categoriesTitle": "Baaro Sida Xiisahaaga",
+    "categoriesSubtitle": "Hel nooca khibrada aad raadinayso.",
+    "categoryLandmark": "Taallooyinka Taariikhiga",
+    "categoryMuseum": "Matxafyada",
+    "categoryMarket": "Suuqyada",
+    "categoryNature": "Dabiiciga",
+    "categoryReligious": "Goobaha Diinta",
+    "categoryCount": "{count} meelood",
+
+    "featuredEyebrow": "La Doortay",
+    "featuredTitle": "Meelaha Soo Jiita ee Gaarka ah",
+    "featuredSubtitle": "Goobaha aan lagu waayin karin ee ay jecel yihiin tifaftirayaasheena iyo dalxiisayaasha.",
+
+    "mapEyebrow": "Khariidada",
+    "mapTitle": "Ku Baar Meelaha Soo Jiita Khariidada",
+    "mapSubtitle": "Ogow halka ay taal meel kasta oo magaalada ku taal.",
+    "mapOpenDetails": "Fur Faahfaahinta",
+    "mapLoading": "Khariidad ayaa soo shubmaysa…",
+
+    "whyVisitEyebrow": "Sababta Hargeysa",
+    "whyVisitTitle": "Sababta aad u Booqan Lahayd Hargeysa",
+    "whyVisitSubtitle": "Magaalo adkaysi, martiqaad iyo sheekooyin sugaya in la ogaado.",
+    "whyHistoryTitle": "Taariikh Nool",
+    "whyHistoryBody": "Laga bilaabo Taallada MiG-ga ilaa waddooyinka wakhtiga gumeysiga, taallooyinka Hargeysa waxay sheegayaan safarka Somaliland ee xagga nabadda iyo madax-bannaanida.",
+    "whyCultureTitle": "Dhaqan Hodan ah",
+    "whyCultureBody": "Ku raaxayso soo dhaweynta Soomaalida, suuqyada dhaqameed iyo bulsho hal-abuur leh oo ku xidhan boqolaal sano oo ganacsi iyo dhaqan ah.",
+    "whySafetyTitle": "Ammaan iyo Soo Dhaweyn",
+    "whySafetyBody": "Somaliland waxaa loo yaqaan mid ka mid ah meelaha ugu ammaanka badan ee Geeska Afrika, dadkuna waxay ku faraxsan yihiin inay soo dhaweeyaan booqdayaasha.",
+    "whyValueTitle": "Qiimo Wanaagsan",
+    "whyValueBody": "Ku raaxayso khibrado, cunto iyo hoy dhab ah oo qarash yar marka loo eego meelaha kale ee la yaqaan.",
+
+    "ctaTitle": "Ma Diyaar u Tahay Inaad Baarto Hargeysa?",
+    "ctaSubtitle": "Qorshee joogitaankaaga oo baaro waxa magaaladu bixiso, laga bilaabo huteelada raaxada leh ilaa cuntooyinka aan la illoobi karin.",
+    "ctaBookHotel": "Balan Qaad Huteel",
+    "ctaFindRestaurants": "Raadi Maqaayado"
   }
 }

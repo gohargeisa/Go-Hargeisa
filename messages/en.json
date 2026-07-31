@@ -994,7 +994,19 @@
     "removeFromFavorites": "Remove {name} from favorites",
     "explore": "Explore",
     "opensInNewTab": "(opens in a new tab)",
-    "call": "Call"
+    "call": "Call",
+
+    "sortRecommended": "Recommended",
+    "sortMostReviewed": "Most Reviewed",
+    "sortNameAZ": "Name (A–Z)",
+    "categoryLabel": "Category",
+    "allCategoriesOption": "All Categories",
+    "regionLabel": "Region",
+    "allRegionsOption": "All Regions",
+    "getDirections": "Get Directions",
+    "openingHoursLabel": "Opening Hours",
+    "visitDurationLabel": "Visit Duration",
+    "viewOnMap": "View on Map"
   },
   "detail": {
     "overview": "Overview",
@@ -1235,5 +1247,58 @@
     "comingSoonDescription": "Information will be added by the Go Hargeisa team.",
     "viewOnMaps": "View on Maps",
     "callNow": "Call"
+  },
+  "attractionsPage": {
+    "heroSubtitle": "Discover historical landmarks, cultural heritage, local markets, museums and hidden gems across Hargeisa.",
+    "heroExplore": "Explore Attractions",
+    "heroViewMap": "View on Map",
+    "scrollHint": "Scroll to discover",
+
+    "statsAttractions": "Attractions",
+    "statsCategories": "Categories",
+    "statsTopRated": "Top Rated",
+    "statsReviews": "Reviews",
+
+    "emptyTitle": "No attractions available yet",
+    "emptyDescription": "We're currently adding amazing attractions across Hargeisa. Check back soon, or explore what else the city has to offer.",
+    "emptyGoHome": "Go Home",
+    "emptyExploreHotels": "Explore Hotels",
+
+    "categoriesEyebrow": "Browse by Category",
+    "categoriesTitle": "Explore by Interest",
+    "categoriesSubtitle": "Find exactly the kind of experience you're looking for.",
+    "categoryLandmark": "Historical Landmarks",
+    "categoryMuseum": "Museums",
+    "categoryMarket": "Markets",
+    "categoryNature": "Nature",
+    "categoryReligious": "Religious Sites",
+    "categoryCount": "{count} places",
+
+    "featuredEyebrow": "Handpicked",
+    "featuredTitle": "Featured Attractions",
+    "featuredSubtitle": "The must-see spots our editors and travelers love most.",
+
+    "mapEyebrow": "On the Map",
+    "mapTitle": "Explore Attractions on the Map",
+    "mapSubtitle": "See exactly where each attraction sits across the city.",
+    "mapOpenDetails": "Open Details",
+    "mapLoading": "Loading map…",
+
+    "whyVisitEyebrow": "Why Hargeisa",
+    "whyVisitTitle": "Why Visit Hargeisa",
+    "whyVisitSubtitle": "A city of resilience, hospitality and stories waiting to be discovered.",
+    "whyHistoryTitle": "Living History",
+    "whyHistoryBody": "From the MiG Monument to colonial-era streets, Hargeisa's landmarks tell the story of Somaliland's journey to peace and independence.",
+    "whyCultureTitle": "Rich Culture",
+    "whyCultureBody": "Experience Somali hospitality, traditional markets and a vibrant creative scene rooted in centuries of trade and tradition.",
+    "whySafetyTitle": "Safe & Welcoming",
+    "whySafetyBody": "Somaliland is known as one of the safest and most stable destinations in the Horn of Africa, with locals eager to welcome visitors.",
+    "whyValueTitle": "Great Value",
+    "whyValueBody": "Enjoy authentic experiences, food and stays at a fraction of the cost of better-known destinations.",
+
+    "ctaTitle": "Ready to Explore Hargeisa?",
+    "ctaSubtitle": "Plan your stay and discover everything the city has to offer, from comfortable hotels to unforgettable meals.",
+    "ctaBookHotel": "Book a Hotel",
+    "ctaFindRestaurants": "Find Restaurants"
   }
 }

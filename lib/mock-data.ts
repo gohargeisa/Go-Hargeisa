@@ -2893,6 +2893,8 @@ export const attractions: Attraction[] = [
     nearbyHotelIds: ["h1"],
     category: "landmark",
     featured: true,
+    openingHours: "Open daily · 6:00 AM – 8:00 PM",
+    visitDuration: "30–45 min",
   },
   {
     id: "a2",
@@ -2915,6 +2917,8 @@ export const attractions: Attraction[] = [
     nearbyRestaurantIds: [],
     nearbyHotelIds: ["h2"],
     category: "market",
+    openingHours: "Open daily · 7:00 AM – 6:00 PM",
+    visitDuration: "1–2 hours",
   },
 ];
 

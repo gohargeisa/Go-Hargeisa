@@ -366,6 +366,9 @@ export interface Attraction {
   nearbyHotelIds: string[];
   category: string;
   featured?: boolean;
+  /** Optional — not every source (e.g. Supabase rows) populates these yet. */
+  openingHours?: string;
+  visitDuration?: string;
 }
 
 export interface EventItem {

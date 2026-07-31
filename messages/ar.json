@@ -994,7 +994,19 @@
     "removeFromFavorites": "إزالة {name} من المفضلة",
     "explore": "استكشف",
     "opensInNewTab": "(يفتح في علامة تبويب جديدة)",
-    "call": "اتصال"
+    "call": "اتصال",
+
+    "sortRecommended": "موصى به",
+    "sortMostReviewed": "الأكثر تقييمًا",
+    "sortNameAZ": "الاسم (أ-ي)",
+    "categoryLabel": "الفئة",
+    "allCategoriesOption": "جميع الفئات",
+    "regionLabel": "المنطقة",
+    "allRegionsOption": "جميع المناطق",
+    "getDirections": "الحصول على الاتجاهات",
+    "openingHoursLabel": "ساعات العمل",
+    "visitDurationLabel": "مدة الزيارة",
+    "viewOnMap": "عرض على الخريطة"
   },
   "detail": {
     "overview": "نظرة عامة",
@@ -1235,5 +1247,58 @@
     "comingSoonDescription": "سيتم إضافة المعلومات من قبل فريق Go Hargeisa.",
     "viewOnMaps": "عرض على الخريطة",
     "callNow": "اتصال"
+  },
+  "attractionsPage": {
+    "heroSubtitle": "اكتشف المعالم التاريخية والتراث الثقافي والأسواق المحلية والمتاحف والأماكن الخفية في هرجيسا.",
+    "heroExplore": "استكشف المعالم",
+    "heroViewMap": "عرض على الخريطة",
+    "scrollHint": "مرر للاكتشاف",
+
+    "statsAttractions": "معلم سياحي",
+    "statsCategories": "فئة",
+    "statsTopRated": "الأعلى تقييمًا",
+    "statsReviews": "تقييم",
+
+    "emptyTitle": "لا توجد معالم سياحية بعد",
+    "emptyDescription": "نعمل حاليًا على إضافة معالم رائعة في جميع أنحاء هرجيسا. تحقق لاحقًا أو استكشف ما تقدمه المدينة أيضًا.",
+    "emptyGoHome": "الصفحة الرئيسية",
+    "emptyExploreHotels": "استكشف الفنادق",
+
+    "categoriesEyebrow": "تصفح حسب الفئة",
+    "categoriesTitle": "استكشف حسب اهتمامك",
+    "categoriesSubtitle": "اعثر على نوع التجربة التي تبحث عنها بالضبط.",
+    "categoryLandmark": "المعالم التاريخية",
+    "categoryMuseum": "المتاحف",
+    "categoryMarket": "الأسواق",
+    "categoryNature": "الطبيعة",
+    "categoryReligious": "المواقع الدينية",
+    "categoryCount": "{count} مكان",
+
+    "featuredEyebrow": "مختارات مميزة",
+    "featuredTitle": "معالم مميزة",
+    "featuredSubtitle": "الأماكن التي لا يجب تفويتها والمفضلة لدى محررينا والزوار.",
+
+    "mapEyebrow": "على الخريطة",
+    "mapTitle": "استكشف المعالم على الخريطة",
+    "mapSubtitle": "تعرف بالضبط على موقع كل معلم في المدينة.",
+    "mapOpenDetails": "فتح التفاصيل",
+    "mapLoading": "جارٍ تحميل الخريطة…",
+
+    "whyVisitEyebrow": "لماذا هرجيسا",
+    "whyVisitTitle": "لماذا تزور هرجيسا",
+    "whyVisitSubtitle": "مدينة صمود وضيافة وقصص تنتظر أن تُكتشف.",
+    "whyHistoryTitle": "تاريخ حي",
+    "whyHistoryBody": "من نصب الميغ التذكاري إلى شوارع الحقبة الاستعمارية، تروي معالم هرجيسا قصة رحلة صوماليلاند نحو السلام والاستقلال.",
+    "whyCultureTitle": "ثقافة غنية",
+    "whyCultureBody": "استمتع بالضيافة الصومالية والأسواق التقليدية ومشهد إبداعي نابض بالحياة متجذر في قرون من التجارة والتقاليد.",
+    "whySafetyTitle": "آمنة ومرحبة",
+    "whySafetyBody": "تُعرف صوماليلاند بأنها واحدة من أكثر الوجهات أمانًا واستقرارًا في القرن الأفريقي، وسكانها متحمسون للترحيب بالزوار.",
+    "whyValueTitle": "قيمة رائعة",
+    "whyValueBody": "استمتع بتجارب وأطعمة وإقامات أصيلة بجزء بسيط من تكلفة الوجهات الأكثر شهرة.",
+
+    "ctaTitle": "هل أنت مستعد لاستكشاف هرجيسا؟",
+    "ctaSubtitle": "خطط لإقامتك واكتشف كل ما تقدمه المدينة، من الفنادق المريحة إلى الوجبات التي لا تُنسى.",
+    "ctaBookHotel": "احجز فندقًا",
+    "ctaFindRestaurants": "ابحث عن مطاعم"
   }
 }
