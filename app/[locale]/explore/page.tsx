@@ -6,10 +6,12 @@ import { getTranslations } from "next-intl/server";
 import { getDestinations } from "@/lib/data/destinations";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
-import { PageHero } from "@/components/shared/page-hero";
+import { PremiumPageHero } from "@/components/shared/premium-page-hero";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Reveal } from "@/components/home/reveal";
-import { placeholderImage } from "@/lib/placeholder-image";
+
+/** Reuses the shared hero photo — same swap-in-place pattern as attractions-hero.tsx / about-hero.tsx. */
+const EXPLORE_HERO_IMAGE = "/images/hero-bg.png";
 
 // Public content changes infrequently; revalidate hourly instead of
 // rendering on every request (this page no longer reads cookies, so
@@ -34,13 +36,15 @@ export default async function ExplorePage({ params: { locale } }: { params: { lo
 
   return (
     <>
-      <PageHero
+      <PremiumPageHero
+        image={EXPLORE_HERO_IMAGE}
+        imageAlt="Panoramic view of Hargeisa"
         eyebrow={t("eyebrow")}
         title={t("title")}
         subtitle={t("subtitle")}
-        image={placeholderImage("Explore Hargeisa", { tone: "primary" })}
+        scrollHint={t("scrollHint")}
       />
-      <section className="container-px mx-auto py-10 md:py-14">
+      <section className="container-px mx-auto py-16 md:py-24">
         {destinations.length === 0 ? (
           <EmptyState icon={MapPin} title={t("noDestinationsTitle")} description={t("noDestinationsDescription")} />
         ) : (

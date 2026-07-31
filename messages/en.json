@@ -950,6 +950,7 @@
     "eyebrow": "Explore",
     "title": "Explore Hargeisa",
     "subtitle": "Neighborhood by neighborhood",
+    "scrollHint": "Scroll to discover",
     "noDestinationsTitle": "No neighborhoods to show",
     "noDestinationsDescription": "We couldn't find any destinations right now. Please check back soon.",
     "hotelsNearby": "Hotels Nearby",
