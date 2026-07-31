@@ -82,30 +82,70 @@ export interface SubscriptionNote {
   createdAt: string;
 }
 
-/** Supported categories for a new-business application — narrower than
- * BusinessListingType (no "service"), matching the listing_type_business
- * DB enum business_join_requests.category actually uses. */
-export type JoinRequestCategory = "hotel" | "restaurant" | "cafe";
+/** Every business type the partner-onboarding form accepts. Wider than
+ * BusinessListingType/ConvertibleJoinRequestCategory below — most of these
+ * have no matching listing table yet, so "approved" for them means
+ * "verified partner", not "converted into a public listing". */
+export type JoinRequestCategory =
+  | "hotel"
+  | "restaurant"
+  | "cafe"
+  | "tour_company"
+  | "travel_agency"
+  | "car_rental"
+  | "apartment"
+  | "shopping_mall"
+  | "hospital"
+  | "pharmacy"
+  | "gym"
+  | "beauty_salon"
+  | "other";
+
+/** The subset of JoinRequestCategory that convertJoinRequest can actually
+ * turn into a real listing row (hotels/restaurants/cafes tables only). */
+export type ConvertibleJoinRequestCategory = "hotel" | "restaurant" | "cafe";
+
 export type BusinessRequestStatus = "pending" | "approved" | "rejected" | "needs_info" | "archived";
+
+/** One weekday's hours for the partner-onboarding form's weekly schedule —
+ * distinct from cafes' OpeningHoursGroup (which groups several days under
+ * one range): here every day is its own row with its own closed toggle,
+ * matching the form's "Saturday / Sunday / … each with Open, Close, Closed"
+ * spec exactly. */
+export interface WeeklyHoursDay {
+  day: "saturday" | "sunday" | "monday" | "tuesday" | "wednesday" | "thursday" | "friday";
+  open: string;
+  close: string;
+  closed: boolean;
+}
 
 export interface BusinessJoinRequest {
   id: string;
   category: JoinRequestCategory;
   businessName: string;
-  ownerName: string;
+  ownerName: string | null;
   phone: string;
   whatsapp: string | null;
   email: string;
   address: string;
+  city: string;
+  district: string | null;
+  location: Coordinates | null;
   mapsUrl: string | null;
   description: string;
   logo: string | null;
-  gallery: string[];
+  coverImage: string | null;
+  gallery: GalleryImage[];
   menuPdfUrl: string | null;
   bookingUrl: string | null;
   website: string | null;
+  instagram: string | null;
+  facebook: string | null;
+  openingHours: WeeklyHoursDay[];
+  amenities: string[];
+  priceRange: "$" | "$$" | "$$$" | "$$$$" | null;
   status: BusinessRequestStatus;
-  convertedListingType: JoinRequestCategory | null;
+  convertedListingType: ConvertibleJoinRequestCategory | null;
   convertedListingId: string | null;
   createdAt: string;
 }

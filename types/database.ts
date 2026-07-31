@@ -127,11 +127,18 @@ type BusinessSubscriptionNoteRow = {
 
 type BusinessRequestStatusDb = "pending" | "approved" | "rejected" | "needs_info" | "archived";
 
+type PartnerRequestCategoryDb =
+  | "hotel" | "restaurant" | "cafe" | "tour_company" | "travel_agency" | "car_rental"
+  | "apartment" | "shopping_mall" | "hospital" | "pharmacy" | "gym" | "beauty_salon" | "other";
+
 type BusinessJoinRequestRow = {
-  id: string; category: "hotel" | "restaurant" | "cafe"; business_name: string; owner_name: string;
+  id: string; category: PartnerRequestCategoryDb; business_name: string; owner_name: string | null;
   phone: string; whatsapp: string | null; email: string; address: string; maps_url: string | null;
   description: string; logo: string | null; gallery: Json; menu_pdf_url: string | null;
   booking_url: string | null; website: string | null; status: BusinessRequestStatusDb;
+  instagram: string | null; facebook: string | null; city: string; district: string | null;
+  lat: number | null; lng: number | null; cover_image: string | null;
+  opening_hours: Json; amenities: string[]; price_range: "$" | "$$" | "$$$" | "$$$$" | null;
   converted_listing_type: "hotel" | "restaurant" | "cafe" | null; converted_listing_id: string | null;
   created_at: string; updated_at: string;
 };

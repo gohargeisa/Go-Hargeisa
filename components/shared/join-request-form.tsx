@@ -2,62 +2,108 @@
 
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { Check, Loader2, Plus, X, AlertCircle } from "lucide-react";
+import { Check, Loader2, AlertCircle, MapPin } from "lucide-react";
 import { submitJoinRequest } from "@/lib/actions/business-requests";
 import { ImageUploader } from "@/components/shared/image-uploader";
-import type { JoinRequestCategory } from "@/types";
+import { GalleryManager } from "@/components/admin/gallery-manager";
+import { PdfUploader } from "@/components/admin/pdf-uploader";
+import { LocationPickerLoader } from "@/components/map/location-picker-loader";
+import {
+  PARTNER_CATEGORIES,
+  PARTNER_CATEGORY_ICON,
+  PARTNER_AMENITIES,
+  PARTNER_AMENITY_ICON,
+} from "@/lib/utils/partner-categories";
+import { WEEK_DAYS_SAT_FIRST, defaultWeeklyHours } from "@/lib/utils/weekly-hours";
+import type { JoinRequestCategory, GalleryImage, Coordinates, WeeklyHoursDay } from "@/types";
 
-const MAX_GALLERY = 6;
+type PriceRange = "$" | "$$" | "$$$" | "$$$$";
+const PRICE_LEVELS: PriceRange[] = ["$", "$$", "$$$", "$$$$"];
+
+const inputClass =
+  "w-full rounded-2xl border border-ink/12 bg-transparent px-4 py-3 text-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/15 dark:border-white/15";
+const labelClass = "mb-2 block text-sm font-semibold text-ink/85 dark:text-sand/85";
 
 export function JoinRequestForm() {
   const t = useTranslations("joinRequest");
+  const tc = useTranslations("partnerCategories");
+  const ta = useTranslations("partnerAmenities");
+  const tw = useTranslations("weekdays");
+
   const [category, setCategory] = useState<JoinRequestCategory>("hotel");
   const [businessName, setBusinessName] = useState("");
-  const [ownerName, setOwnerName] = useState("");
+  const [description, setDescription] = useState("");
   const [phone, setPhone] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [email, setEmail] = useState("");
+  const [website, setWebsite] = useState("");
+  const [instagram, setInstagram] = useState("");
+  const [facebook, setFacebook] = useState("");
   const [address, setAddress] = useState("");
+  const [city, setCity] = useState("Hargeisa");
+  const [district, setDistrict] = useState("");
+  const [location, setLocation] = useState<Coordinates | null>(null);
   const [mapsUrl, setMapsUrl] = useState("");
-  const [description, setDescription] = useState("");
   const [logo, setLogo] = useState("");
-  const [gallery, setGallery] = useState<string[]>([]);
+  const [coverImage, setCoverImage] = useState("");
+  const [gallery, setGallery] = useState<GalleryImage[]>([]);
   const [menuPdfUrl, setMenuPdfUrl] = useState("");
   const [bookingUrl, setBookingUrl] = useState("");
-  const [website, setWebsite] = useState("");
+  const [openingHours, setOpeningHours] = useState<WeeklyHoursDay[]>(defaultWeeklyHours());
+  const [amenities, setAmenities] = useState<string[]>([]);
+  const [priceRange, setPriceRange] = useState<PriceRange | undefined>(undefined);
+  const [confirmed, setConfirmed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  function addGallerySlot() {
-    if (gallery.length < MAX_GALLERY) setGallery((g) => [...g, ""]);
+  const categoryAmenities = PARTNER_AMENITIES[category];
+
+  function selectCategory(next: JoinRequestCategory) {
+    setCategory(next);
+    setAmenities([]);
   }
-  function updateGallerySlot(i: number, url: string) {
-    setGallery((g) => g.map((v, idx) => (idx === i ? url : v)));
+
+  function toggleAmenity(code: string) {
+    setAmenities((a) => (a.includes(code) ? a.filter((x) => x !== code) : [...a, code]));
   }
-  function removeGallerySlot(i: number) {
-    setGallery((g) => g.filter((_, idx) => idx !== i));
+
+  function updateHoursDay(day: WeeklyHoursDay["day"], patch: Partial<WeeklyHoursDay>) {
+    setOpeningHours((hours) => hours.map((h) => (h.day === day ? { ...h, ...patch } : h)));
   }
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    if (!confirmed) {
+      setError(t("confirmationRequiredError"));
+      return;
+    }
     startTransition(async () => {
       const result = await submitJoinRequest({
         category,
         businessName,
-        ownerName,
         phone,
         whatsapp: whatsapp || undefined,
         email,
+        website: website || undefined,
+        instagram: instagram || undefined,
+        facebook: facebook || undefined,
         address,
+        city,
+        district: district || undefined,
+        lat: location?.lat,
+        lng: location?.lng,
         mapsUrl: mapsUrl || undefined,
         description,
         logo: logo || undefined,
-        gallery: gallery.filter(Boolean),
+        coverImage: coverImage || undefined,
+        gallery,
         menuPdfUrl: menuPdfUrl || undefined,
         bookingUrl: bookingUrl || undefined,
-        website: website || undefined,
+        openingHours,
+        amenities,
+        priceRange,
       });
 
       if (result.ok) {
@@ -80,134 +126,281 @@ export function JoinRequestForm() {
     );
   }
 
-  const inputClass =
-    "w-full rounded-2xl border border-ink/12 bg-transparent px-4 py-3 text-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/15 dark:border-white/15";
-  const labelClass = "mb-2 block text-sm font-semibold text-ink/85 dark:text-sand/85";
-
   return (
-    <form onSubmit={onSubmit} className="space-y-6">
-      <div>
+    <form onSubmit={onSubmit} className="space-y-12">
+      {/* Business Type */}
+      <div id="business-type" className="scroll-mt-24">
         <label className={labelClass}>{t("categoryLabel")}</label>
-        <select
-          value={category}
-          onChange={(e) => setCategory(e.target.value as JoinRequestCategory)}
-          className={`${inputClass} appearance-none bg-[url('data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23999%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22M6%209l6%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_1rem_center] bg-no-repeat pe-10 rtl:bg-[position:left_1rem_center]`}
-        >
-          <option value="hotel">{t("categoryHotel")}</option>
-          <option value="restaurant">{t("categoryRestaurant")}</option>
-          <option value="cafe">{t("categoryCafe")}</option>
-        </select>
-      </div>
-
-      <div className="grid gap-5 sm:grid-cols-2">
-        <div>
-          <label className={labelClass}>{t("businessNameLabel")}</label>
-          <input required value={businessName} onChange={(e) => setBusinessName(e.target.value)} className={inputClass} />
-        </div>
-        <div>
-          <label className={labelClass}>{t("ownerNameLabel")}</label>
-          <input required value={ownerName} onChange={(e) => setOwnerName(e.target.value)} className={inputClass} />
-        </div>
-      </div>
-
-      <div className="grid gap-5 sm:grid-cols-3">
-        <div>
-          <label className={labelClass}>{t("phoneLabel")}</label>
-          <input required type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className={inputClass} placeholder="+252 63 000 0000" />
-        </div>
-        <div>
-          <label className={labelClass}>{t("whatsappLabel")}</label>
-          <input type="tel" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} className={inputClass} placeholder="+252 63 000 0000" />
-        </div>
-        <div>
-          <label className={labelClass}>{t("emailLabel")}</label>
-          <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} />
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          {PARTNER_CATEGORIES.map((cat) => {
+            const Icon = PARTNER_CATEGORY_ICON[cat];
+            const active = category === cat;
+            return (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => selectCategory(cat)}
+                aria-pressed={active}
+                className={`flex flex-col items-center gap-2 rounded-2xl border p-4 text-center transition-all duration-200 ${
+                  active
+                    ? "border-primary bg-primary/8 shadow-soft"
+                    : "border-ink/10 hover:border-primary/40 hover:bg-primary/5 dark:border-white/15"
+                }`}
+              >
+                <span
+                  className={`flex h-11 w-11 items-center justify-center rounded-xl ${
+                    active ? "bg-primary text-white" : "bg-ink/5 text-ink/60 dark:bg-white/10 dark:text-sand/60"
+                  }`}
+                >
+                  <Icon size={20} aria-hidden="true" />
+                </span>
+                <span className={`text-xs font-semibold ${active ? "text-primary" : "text-ink/75 dark:text-sand/75"}`}>
+                  {tc(cat)}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
+      {/* Business Information */}
       <div>
-        <label className={labelClass}>{t("addressLabel")}</label>
-        <input required value={address} onChange={(e) => setAddress(e.target.value)} className={inputClass} />
-      </div>
+        <h3 className="mb-5 font-display text-lg font-bold">{t("businessInfoTitle")}</h3>
+        <div className="space-y-5">
+          <div>
+            <label className={labelClass}>{t("businessNameLabel")}</label>
+            <input required value={businessName} onChange={(e) => setBusinessName(e.target.value)} className={inputClass} />
+          </div>
 
-      <div>
-        <label className={labelClass}>{t("mapsUrlLabel")}</label>
-        <input type="url" value={mapsUrl} onChange={(e) => setMapsUrl(e.target.value)} className={inputClass} placeholder="https://maps.google.com/…" />
-      </div>
+          <div>
+            <label className={labelClass}>{t("descriptionLabel")}</label>
+            <textarea
+              required
+              rows={4}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className={`${inputClass} resize-none leading-relaxed`}
+            />
+          </div>
 
-      <div>
-        <label className={labelClass}>{t("descriptionLabel")}</label>
-        <textarea
-          required
-          rows={4}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className={`${inputClass} resize-none leading-relaxed`}
-        />
-      </div>
+          <div className="grid gap-5 sm:grid-cols-3">
+            <div>
+              <label className={labelClass}>{t("phoneLabel")}</label>
+              <input required type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className={inputClass} placeholder="+252 63 000 0000" />
+            </div>
+            <div>
+              <label className={labelClass}>{t("whatsappLabel")}</label>
+              <input type="tel" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} className={inputClass} placeholder="+252 63 000 0000" />
+            </div>
+            <div>
+              <label className={labelClass}>{t("emailLabel")}</label>
+              <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} />
+            </div>
+          </div>
 
-      <ImageUploader folder="join-requests" value={logo} onChange={setLogo} label={t("logoLabel")} />
+          <div className="grid gap-5 sm:grid-cols-3">
+            <div>
+              <label className={labelClass}>{t("websiteLabel")}</label>
+              <input type="url" value={website} onChange={(e) => setWebsite(e.target.value)} className={inputClass} placeholder="https://…" />
+            </div>
+            <div>
+              <label className={labelClass}>{t("instagramLabel")}</label>
+              <input type="url" value={instagram} onChange={(e) => setInstagram(e.target.value)} className={inputClass} placeholder="https://instagram.com/…" />
+            </div>
+            <div>
+              <label className={labelClass}>{t("facebookLabel")}</label>
+              <input type="url" value={facebook} onChange={(e) => setFacebook(e.target.value)} className={inputClass} placeholder="https://facebook.com/…" />
+            </div>
+          </div>
 
-      <div>
-        <div className="mb-2 flex items-center justify-between">
-          <label className="text-sm font-semibold text-ink/85 dark:text-sand/85">{t("galleryLabel")}</label>
-          {gallery.length < MAX_GALLERY && (
-            <button
-              type="button"
-              onClick={addGallerySlot}
-              className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-primary/15"
-            >
-              <Plus size={13} /> {t("addPhotoLabel")}
-            </button>
+          {(category === "restaurant" || category === "cafe") && (
+            <PdfUploader folder="join-requests/menus" value={menuPdfUrl} onChange={setMenuPdfUrl} label={t("menuPdfLabel")} />
+          )}
+
+          {category === "hotel" && (
+            <div>
+              <label className={labelClass}>{t("bookingUrlLabel")}</label>
+              <input type="url" value={bookingUrl} onChange={(e) => setBookingUrl(e.target.value)} className={inputClass} placeholder="https://…" />
+            </div>
           )}
         </div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          {gallery.map((url, i) => (
-            <div key={i} className="relative">
-              <ImageUploader folder="join-requests" value={url} onChange={(u) => updateGallerySlot(i, u)} label={`${t("galleryLabel")} ${i + 1}`} />
-              <button
-                type="button"
-                onClick={() => removeGallerySlot(i)}
-                aria-label={t("removePhotoLabel")}
-                className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white transition-colors hover:bg-black/75"
-              >
-                <X size={13} />
-              </button>
+      </div>
+
+      {/* Address */}
+      <div>
+        <h3 className="mb-5 font-display text-lg font-bold">{t("addressTitle")}</h3>
+        <div className="space-y-5">
+          <div className="grid gap-5 sm:grid-cols-2">
+            <div>
+              <label className={labelClass}>{t("cityLabel")}</label>
+              <input required value={city} onChange={(e) => setCity(e.target.value)} className={inputClass} />
             </div>
+            <div>
+              <label className={labelClass}>{t("districtLabel")}</label>
+              <input value={district} onChange={(e) => setDistrict(e.target.value)} className={inputClass} placeholder={t("districtPlaceholder")} />
+            </div>
+          </div>
+
+          <div>
+            <label className={labelClass}>{t("addressLabel")}</label>
+            <input required value={address} onChange={(e) => setAddress(e.target.value)} className={inputClass} placeholder={t("addressPlaceholder")} />
+          </div>
+
+          <div>
+            <label className={labelClass}>{t("mapPickerLabel")}</label>
+            <p className="mb-2.5 text-xs text-ink/50 dark:text-sand/50">{t("mapPickerHint")}</p>
+            <LocationPickerLoader value={location} onChange={setLocation} />
+            {location && (
+              <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-secondary-700 dark:text-sand/70">
+                <MapPin size={13} className="shrink-0" aria-hidden="true" />
+                {t("locationPickedLabel", { lat: location.lat.toFixed(5), lng: location.lng.toFixed(5) })}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className={labelClass}>{t("mapsUrlLabel")}</label>
+            <input type="url" value={mapsUrl} onChange={(e) => setMapsUrl(e.target.value)} className={inputClass} placeholder="https://maps.google.com/…" />
+          </div>
+        </div>
+      </div>
+
+      {/* Images */}
+      <div>
+        <h3 className="mb-5 font-display text-lg font-bold">{t("imagesTitle")}</h3>
+        <div className="space-y-5">
+          <div className="grid gap-6 sm:grid-cols-2">
+            <ImageUploader folder="join-requests/logos" value={logo} onChange={setLogo} label={t("logoLabel")} rounded="rounded-full" />
+            <ImageUploader folder="join-requests/covers" value={coverImage} onChange={setCoverImage} label={t("coverImageLabel")} />
+          </div>
+          <GalleryManager
+            folder="join-requests/gallery"
+            value={gallery}
+            onChange={setGallery}
+            categories={[{ value: "photo", label: t("galleryPhotoCategoryLabel") }]}
+          />
+        </div>
+      </div>
+
+      {/* Opening Hours */}
+      <div>
+        <h3 className="mb-5 font-display text-lg font-bold">{t("openingHoursTitle")}</h3>
+        <div className="divide-y divide-ink/8 overflow-hidden rounded-2xl border border-ink/12 dark:divide-white/10 dark:border-white/15">
+          {WEEK_DAYS_SAT_FIRST.map((day) => {
+            const entry = openingHours.find((h) => h.day === day)!;
+            return (
+              <div key={day} className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:gap-4">
+                <span className="w-full shrink-0 text-sm font-semibold sm:w-32">{tw(day)}</span>
+                <div className="flex flex-1 flex-wrap items-center gap-3">
+                  <input
+                    type="time"
+                    value={entry.open}
+                    disabled={entry.closed}
+                    onChange={(e) => updateHoursDay(day, { open: e.target.value })}
+                    className={`${inputClass} w-auto py-2 disabled:opacity-40`}
+                  />
+                  <span className="text-ink/40 dark:text-sand/40">–</span>
+                  <input
+                    type="time"
+                    value={entry.close}
+                    disabled={entry.closed}
+                    onChange={(e) => updateHoursDay(day, { close: e.target.value })}
+                    className={`${inputClass} w-auto py-2 disabled:opacity-40`}
+                  />
+                  <label className="ms-auto flex items-center gap-2 text-xs font-semibold text-ink/60 dark:text-sand/60">
+                    <input
+                      type="checkbox"
+                      checked={entry.closed}
+                      onChange={(e) => updateHoursDay(day, { closed: e.target.checked })}
+                    />
+                    {t("closedToggleLabel")}
+                  </label>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Amenities */}
+      {categoryAmenities && categoryAmenities.length > 0 && (
+        <div>
+          <h3 className="mb-5 font-display text-lg font-bold">{t("amenitiesTitle")}</h3>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {categoryAmenities.map((code) => {
+              const Icon = PARTNER_AMENITY_ICON[code];
+              const active = amenities.includes(code);
+              return (
+                <button
+                  key={code}
+                  type="button"
+                  onClick={() => toggleAmenity(code)}
+                  aria-pressed={active}
+                  className={`flex items-center gap-2.5 rounded-2xl border p-3.5 text-start text-sm font-medium transition-colors ${
+                    active
+                      ? "border-primary bg-primary/8 text-primary"
+                      : "border-ink/10 text-ink/70 hover:border-primary/40 dark:border-white/15 dark:text-sand/70"
+                  }`}
+                >
+                  <Icon size={17} className="shrink-0" aria-hidden="true" />
+                  {ta(code)}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Pricing */}
+      <div>
+        <h3 className="mb-5 font-display text-lg font-bold">{t("pricingTitle")}</h3>
+        <div className="grid grid-cols-4 gap-3">
+          {PRICE_LEVELS.map((level) => (
+            <button
+              key={level}
+              type="button"
+              onClick={() => setPriceRange(level)}
+              aria-pressed={priceRange === level}
+              className={`rounded-2xl border p-4 text-center font-display text-lg font-bold transition-colors ${
+                priceRange === level
+                  ? "border-primary bg-primary/8 text-primary"
+                  : "border-ink/10 text-ink/60 hover:border-primary/40 dark:border-white/15 dark:text-sand/60"
+              }`}
+            >
+              {level}
+            </button>
           ))}
         </div>
       </div>
 
-      {category !== "hotel" && (
-        <ImageUploader folder="join-requests" value={menuPdfUrl} onChange={setMenuPdfUrl} label={t("menuPdfLabel")} />
-      )}
+      {/* Final */}
+      <div className="space-y-5 border-t border-ink/8 pt-8 dark:border-white/10">
+        <label className="flex items-start gap-3 text-sm text-ink/75 dark:text-sand/75">
+          <input
+            type="checkbox"
+            required
+            checked={confirmed}
+            onChange={(e) => setConfirmed(e.target.checked)}
+            className="mt-0.5 shrink-0"
+          />
+          {t("confirmationLabel")}
+        </label>
 
-      {category === "hotel" && (
-        <div>
-          <label className={labelClass}>{t("bookingUrlLabel")}</label>
-          <input type="url" value={bookingUrl} onChange={(e) => setBookingUrl(e.target.value)} className={inputClass} placeholder="https://…" />
-        </div>
-      )}
+        {error && (
+          <div className="flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/30 dark:bg-red-900/15 dark:text-red-300">
+            <AlertCircle size={16} className="shrink-0" aria-hidden="true" />
+            {error}
+          </div>
+        )}
 
-      <div>
-        <label className={labelClass}>{t("websiteLabel")}</label>
-        <input type="url" value={website} onChange={(e) => setWebsite(e.target.value)} className={inputClass} placeholder="https://…" />
+        <button
+          type="submit"
+          disabled={isPending}
+          className="flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(245,158,11,0.3)] transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-primary-700 hover:shadow-[0_14px_30px_rgba(245,158,11,0.4)] disabled:translate-y-0 disabled:opacity-70 disabled:shadow-none sm:w-auto"
+        >
+          {isPending && <Loader2 size={14} className="animate-spin" />} {t("submitButton")}
+        </button>
       </div>
-
-      {error && (
-        <div className="flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/30 dark:bg-red-900/15 dark:text-red-300">
-          <AlertCircle size={16} className="shrink-0" aria-hidden="true" />
-          {error}
-        </div>
-      )}
-
-      <button
-        type="submit"
-        disabled={isPending}
-        className="flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(245,158,11,0.3)] transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-primary-700 hover:shadow-[0_14px_30px_rgba(245,158,11,0.4)] disabled:translate-y-0 disabled:opacity-70 disabled:shadow-none sm:w-auto"
-      >
-        {isPending && <Loader2 size={14} className="animate-spin" />} {t("submitButton")}
-      </button>
     </form>
   );
 }

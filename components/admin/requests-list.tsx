@@ -7,13 +7,16 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
   Loader2, ChevronDown, ChevronUp, Phone, Mail, MapPin, Globe, FileText,
-  Check, X, MessageSquareWarning, Archive, ExternalLink,
+  Check, X, MessageSquareWarning, Archive, ExternalLink, Instagram, Facebook,
+  Pencil, BadgeCheck, Clock,
 } from "lucide-react";
 import {
-  setRequestStatus, addRequestNote, convertJoinRequest,
+  setRequestStatus, addRequestNote, convertJoinRequest, updateJoinRequest,
 } from "@/lib/actions/business-requests";
+import { isConvertibleCategory, PARTNER_CATEGORY_ICON } from "@/lib/utils/partner-categories";
+import { formatTime12h } from "@/lib/utils/opening-hours";
 import type { Locale } from "@/lib/i18n/config";
-import type { BusinessRequestStatus, JoinRequestCategory } from "@/types";
+import type { BusinessRequestStatus, JoinRequestCategory, WeeklyHoursDay } from "@/types";
 
 export interface RequestNote {
   id: string;
@@ -25,18 +28,28 @@ export interface RequestRow {
   id: string;
   category: JoinRequestCategory;
   businessName: string;
-  ownerName: string;
+  ownerName: string | null;
   phone: string;
   whatsapp: string | null;
   email: string;
   address: string;
+  city: string;
+  district: string | null;
+  lat: number | null;
+  lng: number | null;
   mapsUrl: string | null;
   description: string;
   logo: string | null;
+  coverImage: string | null;
   gallery: string[];
   menuPdfUrl: string | null;
   bookingUrl: string | null;
   website: string | null;
+  instagram: string | null;
+  facebook: string | null;
+  openingHours: WeeklyHoursDay[];
+  amenities: string[];
+  priceRange: "$" | "$$" | "$$$" | "$$$$" | null;
   status: BusinessRequestStatus;
   convertedListingType: JoinRequestCategory | null;
   convertedListingId: string | null;
@@ -71,6 +84,20 @@ export function RequestsList({ locale, rows }: { locale: Locale; rows: RequestRo
   const [convertSlug, setConvertSlug] = useState("");
   const [convertLat, setConvertLat] = useState("");
   const [convertLng, setConvertLng] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editDraft, setEditDraft] = useState({
+    businessName: "",
+    phone: "",
+    whatsapp: "",
+    email: "",
+    website: "",
+    instagram: "",
+    facebook: "",
+    address: "",
+    city: "",
+    district: "",
+    description: "",
+  });
 
   function run(id: string, action: () => Promise<{ ok: boolean; error?: string }>) {
     setPendingId(id);
@@ -103,8 +130,8 @@ export function RequestsList({ locale, rows }: { locale: Locale; rows: RequestRo
 
   function onStartConvert(row: RequestRow) {
     setConvertSlug(slugify(row.businessName));
-    setConvertLat("");
-    setConvertLng("");
+    setConvertLat(row.lat !== null ? String(row.lat) : "");
+    setConvertLng(row.lng !== null ? String(row.lng) : "");
     setConvertingId(row.id);
   }
 
@@ -121,6 +148,37 @@ export function RequestsList({ locale, rows }: { locale: Locale; rows: RequestRo
       if (result.ok) {
         router.refresh();
         setConvertingId(null);
+      } else {
+        alert(result.error ?? t("somethingWentWrong"));
+      }
+      setPendingId(null);
+    });
+  }
+
+  function onStartEdit(row: RequestRow) {
+    setEditDraft({
+      businessName: row.businessName,
+      phone: row.phone,
+      whatsapp: row.whatsapp ?? "",
+      email: row.email,
+      website: row.website ?? "",
+      instagram: row.instagram ?? "",
+      facebook: row.facebook ?? "",
+      address: row.address,
+      city: row.city,
+      district: row.district ?? "",
+      description: row.description,
+    });
+    setEditingId(row.id);
+  }
+
+  function onSaveEdit(row: RequestRow) {
+    setPendingId(row.id);
+    startTransition(async () => {
+      const result = await updateJoinRequest(locale, row.id, editDraft);
+      if (result.ok) {
+        router.refresh();
+        setEditingId(null);
       } else {
         alert(result.error ?? t("somethingWentWrong"));
       }
@@ -220,6 +278,14 @@ export function RequestsList({ locale, rows }: { locale: Locale; rows: RequestRo
                   <Archive size={12} /> {t("archiveAction")}
                 </button>
               )}
+              <button
+                type="button"
+                onClick={() => onStartEdit(row)}
+                disabled={busy}
+                className="flex h-8 items-center gap-1.5 rounded-lg border border-ink/10 px-2.5 text-xs font-semibold transition-colors hover:border-primary hover:text-primary disabled:opacity-60 dark:border-white/15"
+              >
+                <Pencil size={12} /> {t("editAction")}
+              </button>
 
               {alreadyConverted ? (
                 <span className="flex items-center gap-1.5 rounded-lg bg-secondary/10 px-2.5 py-1.5 text-xs font-semibold text-secondary-700 dark:text-sand/70">
@@ -231,7 +297,7 @@ export function RequestsList({ locale, rows }: { locale: Locale; rows: RequestRo
                     {t("viewListingLabel")} <ExternalLink size={11} />
                   </Link>
                 </span>
-              ) : !converting ? (
+              ) : isConvertibleCategory(row.category) && !converting ? (
                 <button
                   type="button"
                   onClick={() => onStartConvert(row)}
@@ -240,8 +306,67 @@ export function RequestsList({ locale, rows }: { locale: Locale; rows: RequestRo
                 >
                   {t("convertAction")}
                 </button>
+              ) : !isConvertibleCategory(row.category) && row.status === "approved" ? (
+                <span className="flex items-center gap-1.5 rounded-lg bg-secondary/10 px-2.5 py-1.5 text-xs font-semibold text-secondary-700 dark:text-sand/70">
+                  <BadgeCheck size={12} /> {t("verifiedPartnerLabel")}
+                </span>
               ) : null}
             </div>
+
+            {editingId === row.id && (
+              <div className="mt-3 grid gap-2.5 rounded-xl2 border border-ink/10 bg-ink/[0.02] p-4 dark:border-white/15 dark:bg-white/[0.02] sm:grid-cols-2">
+                {(
+                  [
+                    ["businessName", t("businessNameLabel")],
+                    ["phone", t("phoneLabel")],
+                    ["whatsapp", t("whatsappLabel")],
+                    ["email", t("emailLabel")],
+                    ["website", t("websiteLabel")],
+                    ["instagram", t("socialInstagramLabel")],
+                    ["facebook", t("socialFacebookLabel")],
+                    ["address", t("addressLabel")],
+                    ["city", t("cityLabel")],
+                    ["district", t("districtLabel")],
+                  ] as const
+                ).map(([key, label]) => (
+                  <div key={key}>
+                    <label className="mb-1 block text-xs font-semibold text-ink/55 dark:text-sand/55">{label}</label>
+                    <input
+                      value={editDraft[key]}
+                      onChange={(e) => setEditDraft((d) => ({ ...d, [key]: e.target.value }))}
+                      className="h-8 w-full rounded-lg border border-ink/10 bg-transparent px-2 text-xs outline-none focus:border-primary dark:border-white/15"
+                    />
+                  </div>
+                ))}
+                <div className="sm:col-span-2">
+                  <label className="mb-1 block text-xs font-semibold text-ink/55 dark:text-sand/55">{t("descriptionLabel")}</label>
+                  <textarea
+                    rows={3}
+                    value={editDraft.description}
+                    onChange={(e) => setEditDraft((d) => ({ ...d, description: e.target.value }))}
+                    className="w-full rounded-lg border border-ink/10 bg-transparent px-2 py-1.5 text-xs outline-none focus:border-primary dark:border-white/15"
+                  />
+                </div>
+                <div className="flex items-center gap-2 sm:col-span-2">
+                  <button
+                    type="button"
+                    onClick={() => onSaveEdit(row)}
+                    disabled={busy}
+                    className="h-8 rounded-lg bg-primary px-3 text-xs font-semibold text-white transition-colors hover:bg-primary-700 disabled:opacity-60"
+                  >
+                    {busy ? <Loader2 size={12} className="animate-spin" /> : t("saveChanges")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditingId(null)}
+                    disabled={busy}
+                    className="h-8 rounded-lg border border-ink/10 px-3 text-xs font-semibold dark:border-white/15"
+                  >
+                    {t("extendCancel")}
+                  </button>
+                </div>
+              </div>
+            )}
 
             {converting && !alreadyConverted && (
               <div className="mt-3 flex flex-col gap-2.5 rounded-xl2 border border-primary/20 bg-primary/5 p-4 sm:flex-row sm:flex-wrap sm:items-end">
@@ -303,9 +428,11 @@ export function RequestsList({ locale, rows }: { locale: Locale; rows: RequestRo
             {expanded && (
               <div className="mt-4 flex flex-col gap-3 border-t border-ink/8 pt-4 text-sm dark:border-white/10">
                 <div className="grid gap-2 sm:grid-cols-2">
-                  <p className="flex items-center gap-2 text-ink/70 dark:text-sand/70">
-                    <span className="text-ink/40 dark:text-sand/40">{t("ownerNameLabel")}:</span> {row.ownerName}
-                  </p>
+                  {row.ownerName && (
+                    <p className="flex items-center gap-2 text-ink/70 dark:text-sand/70">
+                      <span className="text-ink/40 dark:text-sand/40">{t("ownerNameLabel")}:</span> {row.ownerName}
+                    </p>
+                  )}
                   <p className="flex items-center gap-2 text-ink/70 dark:text-sand/70">
                     <Phone size={13} className="text-ink/40 dark:text-sand/40" /> {row.phone}
                     {row.whatsapp && <span className="text-ink/40 dark:text-sand/40">· WA: {row.whatsapp}</span>}
@@ -315,12 +442,28 @@ export function RequestsList({ locale, rows }: { locale: Locale; rows: RequestRo
                   </p>
                   <p className="flex items-center gap-2 text-ink/70 dark:text-sand/70">
                     <MapPin size={13} className="shrink-0 text-ink/40 dark:text-sand/40" /> {row.address}
+                    {row.district ? `, ${row.district}` : ""}, {row.city}
                     {row.mapsUrl && (
                       <a href={row.mapsUrl} target="_blank" rel="noopener noreferrer" className="text-primary underline">
                         {t("viewOnMapsLabel")}
                       </a>
                     )}
                   </p>
+                  {row.lat !== null && row.lng !== null && (
+                    <a
+                      href={`https://www.google.com/maps/search/?api=1&query=${row.lat},${row.lng}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-primary underline"
+                    >
+                      <MapPin size={13} /> {row.lat.toFixed(4)}, {row.lng.toFixed(4)}
+                    </a>
+                  )}
+                  {row.priceRange && (
+                    <p className="flex items-center gap-2 text-ink/70 dark:text-sand/70">
+                      <span className="text-ink/40 dark:text-sand/40">{t("priceRangeLabel")}:</span> {row.priceRange}
+                    </p>
+                  )}
                 </div>
 
                 <p className="text-ink/70 dark:text-sand/70">{row.description}</p>
@@ -329,6 +472,16 @@ export function RequestsList({ locale, rows }: { locale: Locale; rows: RequestRo
                   {row.website && (
                     <a href={row.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-primary underline">
                       <Globe size={12} /> {t("websiteLabel")}
+                    </a>
+                  )}
+                  {row.instagram && (
+                    <a href={row.instagram} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-primary underline">
+                      <Instagram size={12} /> Instagram
+                    </a>
+                  )}
+                  {row.facebook && (
+                    <a href={row.facebook} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-primary underline">
+                      <Facebook size={12} /> Facebook
                     </a>
                   )}
                   {row.bookingUrl && (
@@ -343,8 +496,35 @@ export function RequestsList({ locale, rows }: { locale: Locale; rows: RequestRo
                   )}
                 </div>
 
-                {row.gallery.length > 0 && (
+                {row.amenities.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {row.amenities.map((a) => (
+                      <span key={a} className="rounded-full bg-ink/5 px-2 py-1 text-[11px] font-medium text-ink/70 dark:bg-white/10 dark:text-sand/70">
+                        {a}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {row.openingHours.length > 0 && (
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink/60 dark:text-sand/60">
+                    {row.openingHours.map((h) => (
+                      <span key={h.day} className="flex items-center gap-1">
+                        <Clock size={11} className="text-ink/35 dark:text-sand/35" />
+                        <span className="capitalize">{h.day.slice(0, 3)}</span>{" "}
+                        {h.closed ? t("closedLabel") : `${formatTime12h(h.open)}–${formatTime12h(h.close)}`}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {(row.coverImage || row.gallery.length > 0) && (
                   <div className="flex flex-wrap gap-2">
+                    {row.coverImage && (
+                      <div className="relative h-16 w-16 overflow-hidden rounded-lg bg-ink/5 dark:bg-white/10 ring-2 ring-primary/40">
+                        <Image src={row.coverImage} alt={row.businessName} fill sizes="64px" className="object-cover" />
+                      </div>
+                    )}
                     {row.gallery.map((url) => (
                       <div key={url} className="relative h-16 w-16 overflow-hidden rounded-lg bg-ink/5 dark:bg-white/10">
                         <Image src={url} alt={row.businessName} fill sizes="64px" className="object-cover" />

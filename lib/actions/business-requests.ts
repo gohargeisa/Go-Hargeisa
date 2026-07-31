@@ -5,7 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 import { createPublicClient } from "@/lib/supabase/public";
 import { placeholderImage } from "@/lib/placeholder-image";
 import { logActivity } from "./activity";
-import type { JoinRequestCategory, BusinessRequestStatus } from "@/types";
+import { PARTNER_CATEGORIES, isConvertibleCategory } from "@/lib/utils/partner-categories";
+import type { JoinRequestCategory, BusinessRequestStatus, GalleryImage, WeeklyHoursDay } from "@/types";
 
 async function assertOwner() {
   const supabase = await createClient();
@@ -29,18 +30,27 @@ function digitsOnly(value: string): string {
 export interface JoinRequestInput {
   category: JoinRequestCategory;
   businessName: string;
-  ownerName: string;
   phone: string;
   whatsapp?: string;
   email: string;
+  website?: string;
+  instagram?: string;
+  facebook?: string;
   address: string;
+  city: string;
+  district?: string;
+  lat?: number;
+  lng?: number;
   mapsUrl?: string;
   description: string;
   logo?: string;
-  gallery?: string[];
+  coverImage?: string;
+  gallery?: GalleryImage[];
   menuPdfUrl?: string;
   bookingUrl?: string;
-  website?: string;
+  openingHours?: WeeklyHoursDay[];
+  amenities?: string[];
+  priceRange?: "$" | "$$" | "$$$" | "$$$$";
 }
 
 /**
@@ -51,13 +61,13 @@ export interface JoinRequestInput {
  */
 export async function submitJoinRequest(input: JoinRequestInput): Promise<{ ok: boolean; error?: string }> {
   const businessName = input.businessName.trim();
-  const ownerName = input.ownerName.trim();
   const phone = input.phone.trim();
   const email = input.email.trim();
   const address = input.address.trim();
+  const city = input.city.trim();
   const description = input.description.trim();
 
-  if (!businessName || !ownerName || !phone || !email || !address || !description) {
+  if (!businessName || !phone || !email || !address || !city || !description) {
     return { ok: false, error: "Please fill in all required fields." };
   }
   if (!EMAIL_RE.test(email)) {
@@ -66,8 +76,14 @@ export async function submitJoinRequest(input: JoinRequestInput): Promise<{ ok: 
   if (digitsOnly(phone).length < 7) {
     return { ok: false, error: "Please enter a valid phone number." };
   }
-  if (!["hotel", "restaurant", "cafe"].includes(input.category)) {
+  if (!PARTNER_CATEGORIES.includes(input.category)) {
     return { ok: false, error: "Invalid category." };
+  }
+  if (input.lat !== undefined && (input.lat < -90 || input.lat > 90)) {
+    return { ok: false, error: "Invalid location." };
+  }
+  if (input.lng !== undefined && (input.lng < -180 || input.lng > 180)) {
+    return { ok: false, error: "Invalid location." };
   }
 
   // Public client — this table's RLS grants anonymous INSERT, but every
@@ -90,18 +106,27 @@ export async function submitJoinRequest(input: JoinRequestInput): Promise<{ ok: 
   const { error } = await supabase.from("business_join_requests").insert({
     category: input.category,
     business_name: businessName,
-    owner_name: ownerName,
     phone,
     whatsapp: input.whatsapp?.trim() || null,
     email,
+    website: input.website?.trim() || null,
+    instagram: input.instagram?.trim() || null,
+    facebook: input.facebook?.trim() || null,
     address,
+    city,
+    district: input.district?.trim() || null,
+    lat: input.lat ?? null,
+    lng: input.lng ?? null,
     maps_url: input.mapsUrl?.trim() || null,
     description,
     logo: input.logo || null,
+    cover_image: input.coverImage || null,
     gallery: input.gallery ?? [],
     menu_pdf_url: input.menuPdfUrl || null,
     booking_url: input.bookingUrl?.trim() || null,
-    website: input.website?.trim() || null,
+    opening_hours: input.openingHours ?? [],
+    amenities: input.amenities ?? [],
+    price_range: input.priceRange ?? null,
   } as never);
 
   if (error) return { ok: false, error: error.message };
@@ -191,14 +216,17 @@ export async function convertJoinRequest(
 
   if (fetchError || !request) return { ok: false, error: "Request not found." };
   if (request.converted_listing_id) return { ok: false, error: "This request was already converted." };
+  if (!isConvertibleCategory(request.category)) {
+    return { ok: false, error: "This business type has no matching listing table to convert into." };
+  }
 
   const table = request.category === "hotel" ? "hotels" : request.category === "restaurant" ? "restaurants" : "cafes";
 
   const { data: slugTaken } = await supabase.from(table).select("id").eq("slug", slug).maybeSingle();
   if (slugTaken) return { ok: false, error: "That slug is already in use — please choose another." };
 
-  const gallery = (request.gallery as string[] | null) ?? [];
-  const coverImage = gallery[0] ?? request.logo ?? placeholderImage(request.business_name);
+  const gallery = (request.gallery as { url: string; alt?: string; category?: string }[] | null) ?? [];
+  const coverImage = request.cover_image || gallery[0]?.url || request.logo || placeholderImage(request.business_name);
   const shortDescription = request.description.length > 160 ? `${request.description.slice(0, 157)}...` : request.description;
 
   const basePayload: Record<string, unknown> = {
@@ -207,7 +235,7 @@ export async function convertJoinRequest(
     short_description: shortDescription,
     description: request.description,
     cover_image: coverImage,
-    gallery: gallery.map((url) => ({ url })),
+    gallery,
     address: request.address,
     lat: completion.lat,
     lng: completion.lng,
@@ -215,6 +243,16 @@ export async function convertJoinRequest(
     logo_url: request.logo,
     partner_status: targetPartnerStatus,
   };
+
+  if (request.price_range) basePayload.price_range = request.price_range;
+  // Only hotels has a free-form amenities column that matches the join
+  // form's vocabulary 1:1 — restaurants has no amenities column at all, and
+  // cafes uses its own fixed CAFE_AMENITY_CODES vocabulary (see
+  // lib/utils/cafe-amenities.ts), so passing the partner-form's codes
+  // through there would just silently not match any known chip.
+  if (table === "hotels" && request.amenities && request.amenities.length > 0) {
+    basePayload.amenities = request.amenities;
+  }
 
   if (table === "hotels") {
     basePayload.website = request.website;
@@ -251,4 +289,68 @@ export async function convertJoinRequest(
   revalidatePath(`/${locale}/${table}`);
 
   return { ok: true, listingId: created.id, table };
+}
+
+export interface JoinRequestEditInput {
+  businessName: string;
+  phone: string;
+  whatsapp?: string;
+  email: string;
+  website?: string;
+  instagram?: string;
+  facebook?: string;
+  address: string;
+  city: string;
+  district?: string;
+  description: string;
+}
+
+/** Admin quick-edit — corrects a typo'd phone number, tidies up the
+ * description, etc. before approving/converting. Doesn't touch
+ * images/hours/amenities/location — those came from the applicant's own
+ * upload/picker and are left as submitted. */
+export async function updateJoinRequest(
+  locale: string,
+  requestId: string,
+  input: JoinRequestEditInput
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await assertOwner();
+
+  const businessName = input.businessName.trim();
+  const phone = input.phone.trim();
+  const email = input.email.trim();
+  const address = input.address.trim();
+  const city = input.city.trim();
+  const description = input.description.trim();
+
+  if (!businessName || !phone || !email || !address || !city || !description) {
+    return { ok: false, error: "Please fill in all required fields." };
+  }
+  if (!EMAIL_RE.test(email)) {
+    return { ok: false, error: "Please enter a valid email address." };
+  }
+
+  const { error } = await supabase
+    .from("business_join_requests")
+    .update({
+      business_name: businessName,
+      phone,
+      whatsapp: input.whatsapp?.trim() || null,
+      email,
+      website: input.website?.trim() || null,
+      instagram: input.instagram?.trim() || null,
+      facebook: input.facebook?.trim() || null,
+      address,
+      city,
+      district: input.district?.trim() || null,
+      description,
+      updated_at: new Date().toISOString(),
+    } as never)
+    .eq("id", requestId);
+
+  if (error) return { ok: false, error: error.message };
+
+  await logActivity("update", "business_join_request", requestId, { edited: true });
+  revalidatePath(`/${locale}/admin/requests`);
+  return { ok: true };
 }
