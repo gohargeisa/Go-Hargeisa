@@ -10,14 +10,17 @@ import { Field, TagInput, inputClass } from "@/components/admin/form-shared";
 import { createRecord, updateRecord } from "@/lib/actions/admin";
 import { useUnsavedChangesWarning } from "@/lib/hooks/use-unsaved-changes-warning";
 import { CAFE_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
+import { CAFE_AMENITY_CODES } from "@/lib/utils/cafe-amenities";
 import type { Locale } from "@/lib/i18n/config";
-import type { GalleryImage } from "@/types";
+import type { GalleryImage, OpeningHoursGroup } from "@/types";
 
 export interface CafeFormInput {
   slug: string;
   name: string;
   shortDescription: string;
   description: string;
+  descriptionAr: string;
+  descriptionSo: string;
   coverImage: string;
   logo: string;
   gallery: GalleryImage[];
@@ -29,12 +32,26 @@ export interface CafeFormInput {
   wifi: boolean;
   workingSpace: boolean;
   openingHours: string;
+  openingHoursStructured: OpeningHoursGroup[];
+  priceRange: "$" | "$$" | "$$$" | "$$$$";
+  amenities: string[];
+  socialInstagram: string;
+  socialFacebook: string;
   menuHighlights: { name: string; price: string; description?: string }[];
   menuPdfUrl: string;
   featured: boolean;
 }
 
 const DRINK_SUGGESTIONS = ["Somali Spiced Coffee", "Somali Tea (Shaah)", "Iced Caramel Macchiato", "Cold Brew"];
+const WEEKDAYS: OpeningHoursGroup["days"][number][] = [
+  "sunday",
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+];
 
 export function CafeForm({
   locale,
@@ -48,11 +65,15 @@ export function CafeForm({
   initial?: Partial<CafeFormInput>;
 }) {
   const t = useTranslations("admin");
+  const tw = useTranslations("weekdays");
+  const ta = useTranslations("cafeAmenities");
   const [form, setForm] = useState<CafeFormInput>({
     slug: initial?.slug ?? "",
     name: initial?.name ?? "",
     shortDescription: initial?.shortDescription ?? "",
     description: initial?.description ?? "",
+    descriptionAr: initial?.descriptionAr ?? "",
+    descriptionSo: initial?.descriptionSo ?? "",
     coverImage: initial?.coverImage ?? "",
     logo: initial?.logo ?? "",
     gallery: initial?.gallery ?? [],
@@ -64,6 +85,11 @@ export function CafeForm({
     wifi: initial?.wifi ?? true,
     workingSpace: initial?.workingSpace ?? false,
     openingHours: initial?.openingHours ?? "",
+    openingHoursStructured: initial?.openingHoursStructured ?? [],
+    priceRange: initial?.priceRange ?? "$$",
+    amenities: initial?.amenities ?? [],
+    socialInstagram: initial?.socialInstagram ?? "",
+    socialFacebook: initial?.socialFacebook ?? "",
     menuHighlights: initial?.menuHighlights ?? [],
     menuPdfUrl: initial?.menuPdfUrl ?? "",
     featured: initial?.featured ?? false,
@@ -92,6 +118,31 @@ export function CafeForm({
     update("menuHighlights", form.menuHighlights.filter((_, idx) => idx !== i));
   }
 
+  function toggleAmenity(code: string) {
+    update(
+      "amenities",
+      form.amenities.includes(code) ? form.amenities.filter((a) => a !== code) : [...form.amenities, code]
+    );
+  }
+
+  function addHoursGroup() {
+    update("openingHoursStructured", [...form.openingHoursStructured, { days: [], open: "09:00", close: "18:00" }]);
+  }
+  function updateHoursGroup(i: number, patch: Partial<OpeningHoursGroup>) {
+    update(
+      "openingHoursStructured",
+      form.openingHoursStructured.map((g, idx) => (idx === i ? { ...g, ...patch } : g))
+    );
+  }
+  function removeHoursGroup(i: number) {
+    update("openingHoursStructured", form.openingHoursStructured.filter((_, idx) => idx !== i));
+  }
+  function toggleHoursGroupDay(i: number, day: OpeningHoursGroup["days"][number]) {
+    const group = form.openingHoursStructured[i];
+    const days = group.days.includes(day) ? group.days.filter((d) => d !== day) : [...group.days, day];
+    updateHoursGroup(i, { days });
+  }
+
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -105,6 +156,8 @@ export function CafeForm({
       name: form.name,
       short_description: form.shortDescription,
       description: form.description,
+      description_ar: form.descriptionAr || null,
+      description_so: form.descriptionSo || null,
       cover_image: form.coverImage,
       logo_url: form.logo || null,
       gallery: form.gallery,
@@ -116,6 +169,11 @@ export function CafeForm({
       wifi: form.wifi,
       working_space: form.workingSpace,
       opening_hours: form.openingHours,
+      opening_hours_structured: form.openingHoursStructured,
+      price_range: form.priceRange,
+      amenities: form.amenities,
+      social_instagram: form.socialInstagram || null,
+      social_facebook: form.socialFacebook || null,
       menu: form.menuHighlights,
       menu_pdf_url: form.menuPdfUrl || null,
       featured: form.featured,
@@ -163,6 +221,14 @@ export function CafeForm({
         <textarea required rows={4} value={form.description} onChange={(e) => update("description", e.target.value)} className={inputClass} />
       </Field>
 
+      <Field label={t("fullDescriptionArLabel")}>
+        <textarea dir="rtl" rows={4} value={form.descriptionAr} onChange={(e) => update("descriptionAr", e.target.value)} className={inputClass} />
+      </Field>
+
+      <Field label={t("fullDescriptionSoLabel")}>
+        <textarea rows={4} value={form.descriptionSo} onChange={(e) => update("descriptionSo", e.target.value)} className={inputClass} />
+      </Field>
+
       <Field label={t("addressLabel")}>
         <input required value={form.address} onChange={(e) => update("address", e.target.value)} className={inputClass} />
       </Field>
@@ -180,12 +246,93 @@ export function CafeForm({
         <Field label={t("phoneLabel")}>
           <input value={form.phone} onChange={(e) => update("phone", e.target.value)} className={inputClass} />
         </Field>
-        <Field label={t("openingHoursLabel")}>
-          <input value={form.openingHours} onChange={(e) => update("openingHours", e.target.value)} className={inputClass} placeholder="6:00 AM – 9:00 PM" />
+        <Field label={t("priceRangeLabel")}>
+          <select value={form.priceRange} onChange={(e) => update("priceRange", e.target.value as CafeFormInput["priceRange"])} className={inputClass}>
+            <option value="$">$</option>
+            <option value="$$">$$</option>
+            <option value="$$$">$$$</option>
+            <option value="$$$$">$$$$</option>
+          </select>
         </Field>
       </div>
 
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label={t("socialInstagramLabel")}>
+          <input value={form.socialInstagram} onChange={(e) => update("socialInstagram", e.target.value)} className={inputClass} placeholder="https://instagram.com/…" />
+        </Field>
+        <Field label={t("socialFacebookLabel")}>
+          <input value={form.socialFacebook} onChange={(e) => update("socialFacebook", e.target.value)} className={inputClass} placeholder="https://facebook.com/…" />
+        </Field>
+      </div>
+
+      <Field label={t("openingHoursLabel")}>
+        <input value={form.openingHours} onChange={(e) => update("openingHours", e.target.value)} className={inputClass} placeholder="6:00 AM – 9:00 PM" />
+      </Field>
+
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <label className="text-sm font-semibold">{t("structuredHoursLabel")}</label>
+          <button type="button" onClick={addHoursGroup} className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
+            <Plus size={13} /> {t("addHoursGroupLabel")}
+          </button>
+        </div>
+        <div className="space-y-3">
+          {form.openingHoursStructured.map((group, i) => (
+            <div key={i} className="rounded-xl border border-ink/12 dark:border-white/15 p-3 space-y-2.5">
+              <div className="flex flex-wrap gap-1.5">
+                {WEEKDAYS.map((day) => (
+                  <button
+                    key={day}
+                    type="button"
+                    onClick={() => toggleHoursGroupDay(i, day)}
+                    className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
+                      group.days.includes(day)
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-ink/12 text-ink/50 dark:border-white/15 dark:text-sand/50"
+                    }`}
+                  >
+                    {tw(day)}
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="time"
+                  value={group.open}
+                  onChange={(e) => updateHoursGroup(i, { open: e.target.value })}
+                  aria-label={t("hoursOpenLabel")}
+                  className={`${inputClass} w-auto`}
+                />
+                <span className="text-ink/40 dark:text-sand/40">–</span>
+                <input
+                  type="time"
+                  value={group.close}
+                  onChange={(e) => updateHoursGroup(i, { close: e.target.value })}
+                  aria-label={t("hoursCloseLabel")}
+                  className={`${inputClass} w-auto`}
+                />
+                <button type="button" onClick={() => removeHoursGroup(i)} aria-label={t("removeHoursGroupAriaLabel")} className="ms-auto shrink-0 text-ink/40 hover:text-red-500">
+                  <X size={16} />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <TagInput label={t("specialDrinksLabel")} values={form.specialDrinks} onChange={(v) => update("specialDrinks", v)} placeholder={t("tagInputPlaceholder")} suggestions={DRINK_SUGGESTIONS} />
+
+      <div>
+        <label className="mb-2 block text-sm font-semibold">{t("amenitiesLabel")}</label>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {CAFE_AMENITY_CODES.map((code) => (
+            <label key={code} className="flex items-center gap-2 text-sm font-medium">
+              <input type="checkbox" checked={form.amenities.includes(code)} onChange={() => toggleAmenity(code)} />
+              {ta(code)}
+            </label>
+          ))}
+        </div>
+      </div>
 
       <div>
         <div className="flex items-center justify-between mb-2">

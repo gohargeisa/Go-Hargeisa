@@ -30,12 +30,14 @@ export function filterHotelsForPresentation<T extends Pick<Hotel, "slug">>(hotel
 }
 
 /**
- * Temporary kill switches for the public-facing Restaurants and Cafes
- * listings, alongside Services above. The dedicated /restaurants and /cafes
- * pages stay reachable and show a "Coming Soon" section instead of 404ing
- * (unlike Services) — see components/shared/coming-soon-section.tsx. Data,
- * schema, and the admin dashboard are untouched; flip back to `true` to
- * fully restore both listings everywhere.
+ * Temporary kill switch for the public-facing Restaurants listing, alongside
+ * Services above. The dedicated /restaurants page stays reachable and shows
+ * a "Coming Soon" section instead of 404ing (unlike Services) — see
+ * components/shared/coming-soon-section.tsx. Data, schema, and the admin
+ * dashboard are untouched; flip back to `true` to fully restore the listing.
+ *
+ * Cafes were re-enabled on 2026-07-31 (Beydan Coffee going live) — restore
+ * `RESTAURANTS_PUBLIC_ENABLED` the same way whenever restaurants are ready.
  */
 export const RESTAURANTS_PUBLIC_ENABLED = false;
-export const CAFES_PUBLIC_ENABLED = false;
+export const CAFES_PUBLIC_ENABLED = true;

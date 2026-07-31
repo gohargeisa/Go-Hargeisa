@@ -52,7 +52,7 @@ export default async function HomePage({
   const [hotelsRaw, restaurants, cafes, services, attractions, announcement] = await Promise.all([
     getHotels({ limit: HOMEPAGE_PREVIEW_COUNT }),
     RESTAURANTS_PUBLIC_ENABLED ? getRestaurants({ limit: HOMEPAGE_PREVIEW_COUNT }) : Promise.resolve([]),
-    CAFES_PUBLIC_ENABLED ? getCafes({ limit: HOMEPAGE_PREVIEW_COUNT }) : Promise.resolve([]),
+    CAFES_PUBLIC_ENABLED ? getCafes({ limit: HOMEPAGE_PREVIEW_COUNT, locale }) : Promise.resolve([]),
     SERVICES_PUBLIC_ENABLED ? getServices({ limit: HOMEPAGE_SERVICES_PREVIEW_COUNT }) : Promise.resolve([]),
     getAttractions(),
     getLatestAnnouncement(),

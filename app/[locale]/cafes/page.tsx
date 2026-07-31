@@ -36,7 +36,7 @@ export default async function CafesPage({
   // Cafes are temporarily hidden site-wide for the hotel presentation
   // (lib/config/features.ts) — skip the fetch entirely and always show
   // Coming Soon in that case, even if a visitor searches.
-  const cafes = CAFES_PUBLIC_ENABLED ? await getCafes({ q: searchParams.q }) : [];
+  const cafes = CAFES_PUBLIC_ENABLED ? await getCafes({ q: searchParams.q, locale }) : [];
 
   return (
     <>

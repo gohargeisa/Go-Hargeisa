@@ -263,12 +263,23 @@ export interface Restaurant {
   partnerStatus: PartnerStatus;
 }
 
+/** One opening-hours row spanning one or more days, e.g. Sat–Wed vs. a
+ * standalone Thursday/Friday with different hours. `open`/`close` are
+ * "HH:mm" 24h strings; a `close` earlier than `open` means past midnight. */
+export interface OpeningHoursGroup {
+  days: ("sunday" | "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday")[];
+  open: string;
+  close: string;
+}
+
 export interface Cafe {
   id: string;
   slug: string;
   name: string;
   shortDescription: string;
   description: string;
+  descriptionAr?: string;
+  descriptionSo?: string;
   coverImage: string;
   gallery: GalleryImage[];
   address: string;
@@ -281,6 +292,11 @@ export interface Cafe {
   wifi: boolean;
   workingSpace: boolean;
   openingHours: string;
+  openingHoursStructured?: OpeningHoursGroup[];
+  priceRange?: "$" | "$$" | "$$$" | "$$$$";
+  amenities?: string[];
+  socialInstagram?: string;
+  socialFacebook?: string;
   featured?: boolean;
   logo?: string;
   menuHighlights: RestaurantMenuItem[];

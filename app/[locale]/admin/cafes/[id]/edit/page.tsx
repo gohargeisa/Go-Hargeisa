@@ -6,7 +6,7 @@ import type { Locale } from "@/lib/i18n/config";
 import { requireListingsAccess } from "@/lib/supabase/guards";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
-import { CafeForm } from "@/components/admin/cafe-form";
+import { CafeForm, type CafeFormInput } from "@/components/admin/cafe-form";
 
 export const metadata: Metadata = { title: "Edit Cafe — Admin" };
 
@@ -61,6 +61,8 @@ export default async function EditCafePage({
           name: cafe.name,
           shortDescription: cafe.short_description,
           description: cafe.description,
+          descriptionAr: cafe.description_ar ?? "",
+          descriptionSo: cafe.description_so ?? "",
           coverImage: cafe.cover_image,
           logo: cafe.logo_url ?? "",
           gallery: gallery as any,
@@ -72,6 +74,13 @@ export default async function EditCafePage({
           wifi: cafe.wifi,
           workingSpace: cafe.working_space,
           openingHours: cafe.opening_hours ?? "",
+          openingHoursStructured: Array.isArray(cafe.opening_hours_structured)
+            ? (cafe.opening_hours_structured as unknown as CafeFormInput["openingHoursStructured"])
+            : [],
+          priceRange: cafe.price_range,
+          amenities: cafe.amenities ?? [],
+          socialInstagram: cafe.social_instagram ?? "",
+          socialFacebook: cafe.social_facebook ?? "",
           menuHighlights: Array.isArray(cafe.menu)
             ? (cafe.menu as unknown as { name: string; price: string; description?: string }[])
             : [],

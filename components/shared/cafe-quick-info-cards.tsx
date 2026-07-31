@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { Clock, Laptop, MapPin, Star, Tag, Wifi } from "lucide-react";
+import { Banknote, Clock, Laptop, MapPin, Star, Tag, Wifi } from "lucide-react";
 import { InfoCardsStrip, type InfoCard } from "@/components/shared/info-cards-strip";
 
 /** Cafe counterpart of HotelQuickInfoCards, reusing the same InfoCardsStrip chrome. */
@@ -8,11 +8,13 @@ export async function CafeQuickInfoCards({
   openingHours,
   wifi,
   workingSpace,
+  priceRange,
 }: {
   rating: number;
   openingHours?: string;
   wifi?: boolean;
   workingSpace?: boolean;
+  priceRange?: string;
 }) {
   const t = await getTranslations("hotelDetail");
   const tc = await getTranslations("common");
@@ -23,6 +25,7 @@ export async function CafeQuickInfoCards({
     { icon: Tag, label: t("category"), value: "Cafe" },
     { icon: MapPin, label: t("city"), value: "Hargeisa" },
   ];
+  if (priceRange) cards.push({ icon: Banknote, label: tc("priceRange"), value: priceRange });
   if (openingHours) cards.push({ icon: Clock, label: tc("openingHours"), value: openingHours });
   if (wifi) cards.push({ icon: Wifi, label: t("amenity"), value: td("freeWifi") });
   if (workingSpace) cards.push({ icon: Laptop, label: t("amenity"), value: td("workingSpace") });

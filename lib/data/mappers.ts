@@ -120,14 +120,21 @@ export function mapRestaurant(row: RestaurantRow, reviews: Review[] = []): Resta
   };
 }
 
-export function mapCafe(row: CafeRow, reviews: Review[] = []): Cafe {
+export function mapCafe(row: CafeRow, reviews: Review[] = [], locale?: string): Cafe {
   const menu = Array.isArray(row.menu) ? (row.menu as { name: string; price: string; description?: string }[]) : [];
+  const openingHoursStructured = Array.isArray(row.opening_hours_structured)
+    ? (row.opening_hours_structured as unknown as Cafe["openingHoursStructured"])
+    : [];
+  const description =
+    (locale === "ar" && row.description_ar) || (locale === "so" && row.description_so) || row.description;
   return {
     id: row.id,
     slug: row.slug,
     name: row.name,
     shortDescription: row.short_description,
-    description: row.description,
+    description,
+    descriptionAr: row.description_ar ?? undefined,
+    descriptionSo: row.description_so ?? undefined,
     coverImage: row.cover_image,
     gallery: toGallery(row.gallery),
     address: row.address,
@@ -140,6 +147,11 @@ export function mapCafe(row: CafeRow, reviews: Review[] = []): Cafe {
     wifi: row.wifi,
     workingSpace: row.working_space,
     openingHours: row.opening_hours ?? "",
+    openingHoursStructured,
+    priceRange: row.price_range,
+    amenities: row.amenities ?? [],
+    socialInstagram: row.social_instagram ?? undefined,
+    socialFacebook: row.social_facebook ?? undefined,
     featured: row.featured,
     logo: row.logo_url ?? undefined,
     menuHighlights: menu,

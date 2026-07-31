@@ -5,8 +5,13 @@ import { mapCafe, mapReview } from "./mappers";
 import { cafes as mockCafes } from "@/lib/mock-data";
 import type { Cafe } from "@/types";
 
-export async function getCafes(options?: { q?: string; featuredOnly?: boolean; limit?: number }): Promise<Cafe[]> {
-  const { q, featuredOnly, limit } = options ?? {};
+export async function getCafes(options?: {
+  q?: string;
+  featuredOnly?: boolean;
+  limit?: number;
+  locale?: string;
+}): Promise<Cafe[]> {
+  const { q, featuredOnly, limit, locale } = options ?? {};
 
   if (!isSupabaseConfigured()) {
     let results = mockCafes;
@@ -17,7 +22,11 @@ export async function getCafes(options?: { q?: string; featuredOnly?: boolean; l
         (c) => c.name.toLowerCase().includes(needle) || c.shortDescription.toLowerCase().includes(needle)
       );
     }
-    return limit ? results.slice(0, limit) : results;
+    results = limit ? results.slice(0, limit) : results;
+    return results.map((c) => ({
+      ...c,
+      description: (locale === "ar" && c.descriptionAr) || (locale === "so" && c.descriptionSo) || c.description,
+    }));
   }
 
   const supabase = createPublicClient();
@@ -36,12 +45,18 @@ export async function getCafes(options?: { q?: string; featuredOnly?: boolean; l
     if (process.env.NODE_ENV === "development") console.error("getCafes:", error.message);
     return [];
   }
-  return (data ?? []).map((row) => mapCafe(row));
+  return (data ?? []).map((row) => mapCafe(row, [], locale));
 }
 
-async function _getCafeBySlug(slug: string): Promise<Cafe | null> {
+async function _getCafeBySlug(slug: string, locale?: string): Promise<Cafe | null> {
   if (!isSupabaseConfigured()) {
-    return mockCafes.find((c) => c.slug === slug) ?? null;
+    const cafe = mockCafes.find((c) => c.slug === slug);
+    if (!cafe) return null;
+    return {
+      ...cafe,
+      description:
+        (locale === "ar" && cafe.descriptionAr) || (locale === "so" && cafe.descriptionSo) || cafe.description,
+    };
   }
 
   const supabase = createPublicClient();
@@ -56,7 +71,7 @@ async function _getCafeBySlug(slug: string): Promise<Cafe | null> {
     .order("created_at", { ascending: false });
 
   const reviews = (reviewRows ?? []).map((r: any) => mapReview(r, r.profiles?.full_name ?? "Guest"));
-  return mapCafe(cafe, reviews);
+  return mapCafe(cafe, reviews, locale);
 }
 
 /** Cached per-request: dedupes calls from generateMetadata + the page itself. */

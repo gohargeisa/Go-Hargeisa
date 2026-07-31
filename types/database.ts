@@ -62,8 +62,11 @@ type RestaurantRow = ListingBase & {
   partner_status: PartnerStatusDb; trial_expires_at: string | null;
 };
 type CafeRow = ListingBase & {
+  description_ar: string | null; description_so: string | null;
   phone: string | null; special_drinks: string[]; wifi: boolean; working_space: boolean;
-  opening_hours: string | null; owner_id: string | null;
+  opening_hours: string | null; opening_hours_structured: Json; owner_id: string | null;
+  price_range: "$" | "$$" | "$$$" | "$$$$"; amenities: string[];
+  social_instagram: string | null; social_facebook: string | null;
   logo_url: string | null; menu: Json; menu_pdf_url: string | null;
   partner_status: PartnerStatusDb; trial_expires_at: string | null;
 };
