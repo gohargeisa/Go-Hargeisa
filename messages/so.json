@@ -689,6 +689,13 @@
 
     "uploadCoverImageError": "Fadlan soo geli sawir daboolka ah.",
     "somethingWentWrong": "Wax baa qaldamay.",
+    "setAsCoverLabel": "Ka dhig sawirka daboolka",
+    "coverBadgeLabel": "Daboolka",
+    "videosLabel": "Fiidiyowyo (ikhtiyaari)",
+    "addVideoLabel": "Ku dar fiidiyow",
+    "videosHint": "Halkan ku tuur fiidiyowyo gaagaaban, ama guji si aad u doorato. Ugu badnaan 30MB mid kasta.",
+    "videoCaptionPlaceholder": "Faah faahin (ikhtiyaari)",
+    "removeVideoAriaLabel": "Ka saar fiidiyowga",
 
     "publishHotel": "Daabac Hudheelka",
     "publishRestaurant": "Daabac Maqaayadda",
@@ -1447,6 +1454,13 @@
     "gallerySubtitle": "Maamul astaantaada, sawirka daboolka, iyo sawirrada.",
     "coverImage": "Sawirka Daboolka",
     "businessLogo": "Astaanta Ganacsiga",
+    "setAsCoverLabel": "Ka dhig sawirka daboolka",
+    "coverBadgeLabel": "Daboolka",
+    "videosLabel": "Fiidiyowyo (ikhtiyaari)",
+    "addVideoLabel": "Ku dar fiidiyow",
+    "videosHint": "Halkan ku tuur fiidiyowyo gaagaaban, ama guji si aad u doorato. Ugu badnaan 30MB mid kasta.",
+    "videoCaptionPlaceholder": "Faah faahin (ikhtiyaari)",
+    "removeVideoAriaLabel": "Ka saar fiidiyowga",
 
     "businessInfoTitle": "Macluumaadka Ganacsiga",
     "businessType": "Nooca Ganacsiga",

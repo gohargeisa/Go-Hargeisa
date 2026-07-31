@@ -5,13 +5,14 @@ import { useTranslations } from "next-intl";
 import { Check, Loader2 } from "lucide-react";
 import { ImageUploader } from "@/components/shared/image-uploader";
 import { GalleryManager } from "@/components/admin/gallery-manager";
+import { VideoUploader } from "@/components/shared/video-uploader";
 import { HOTEL_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import { HotelRoomsManager, type HotelRoomManagerRow } from "@/components/admin/hotel-rooms-manager";
 import { Field, TagInput, inputClass } from "@/components/admin/form-shared";
 import { createRecord, updateRecord } from "@/lib/actions/admin";
 import { useUnsavedChangesWarning } from "@/lib/hooks/use-unsaved-changes-warning";
 import type { Locale } from "@/lib/i18n/config";
-import type { GalleryImage, HotelBookingMode, HotelExternalBookingOption } from "@/types";
+import type { GalleryImage, MediaVideo, HotelBookingMode, HotelExternalBookingOption } from "@/types";
 
 const EXTERNAL_BOOKING_OPTIONS: HotelExternalBookingOption[] = ["website", "booking_com", "whatsapp", "custom_url"];
 
@@ -23,6 +24,7 @@ export interface HotelFormInput {
   coverImage: string;
   logo: string;
   gallery: GalleryImage[];
+  videos: MediaVideo[];
   address: string;
   lat: number;
   lng: number;
@@ -80,6 +82,7 @@ export function HotelForm({
     coverImage: initial?.coverImage ?? "",
     logo: initial?.logo ?? "",
     gallery: initial?.gallery ?? [],
+    videos: initial?.videos ?? [],
     address: initial?.address ?? "",
     lat: initial?.lat ?? 9.5624,
     lng: initial?.lng ?? 44.065,
@@ -129,6 +132,7 @@ export function HotelForm({
       cover_image: form.coverImage,
       logo_url: form.logo || null,
       gallery: form.gallery,
+      videos: form.videos,
       address: form.address,
       lat: form.lat,
       lng: form.lng,
@@ -178,6 +182,21 @@ export function HotelForm({
           value={form.gallery}
           onChange={(v) => update("gallery", v)}
           categories={HOTEL_GALLERY_CATEGORIES}
+          coverUrl={form.coverImage}
+          onSetCover={(url) => update("coverImage", url)}
+          setCoverLabel={t("setAsCoverLabel")}
+          coverBadgeLabel={t("coverBadgeLabel")}
+        />
+
+        <VideoUploader
+          folder="hotels/videos"
+          value={form.videos}
+          onChange={(v) => update("videos", v)}
+          label={t("videosLabel")}
+          addLabel={t("addVideoLabel")}
+          hint={t("videosHint")}
+          captionPlaceholder={t("videoCaptionPlaceholder")}
+          removeAriaLabel={t("removeVideoAriaLabel")}
         />
 
         <div className="grid gap-4 sm:grid-cols-2">

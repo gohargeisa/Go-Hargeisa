@@ -689,6 +689,13 @@
 
     "uploadCoverImageError": "Please upload a cover image.",
     "somethingWentWrong": "Something went wrong.",
+    "setAsCoverLabel": "Set as cover",
+    "coverBadgeLabel": "Cover",
+    "videosLabel": "Videos (optional)",
+    "addVideoLabel": "Add video",
+    "videosHint": "Drag & drop short video clips here, or click to browse. Max 30MB each.",
+    "videoCaptionPlaceholder": "Caption (optional)",
+    "removeVideoAriaLabel": "Remove video",
 
     "publishHotel": "Publish Hotel",
     "publishRestaurant": "Publish Restaurant",
@@ -1447,6 +1454,13 @@
     "gallerySubtitle": "Manage your logo, cover photo, and photo gallery.",
     "coverImage": "Cover Image",
     "businessLogo": "Business Logo",
+    "setAsCoverLabel": "Set as cover",
+    "coverBadgeLabel": "Cover",
+    "videosLabel": "Videos (optional)",
+    "addVideoLabel": "Add video",
+    "videosHint": "Drag & drop short video clips here, or click to browse. Max 30MB each.",
+    "videoCaptionPlaceholder": "Caption (optional)",
+    "removeVideoAriaLabel": "Remove video",
 
     "businessInfoTitle": "Business Info",
     "businessType": "Business Type",

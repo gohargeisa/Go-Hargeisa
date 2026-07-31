@@ -7,6 +7,7 @@ import { requireListingsAccess } from "@/lib/supabase/guards";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { CafeForm, type CafeFormInput } from "@/components/admin/cafe-form";
+import type { MediaVideo } from "@/types";
 
 export const metadata: Metadata = { title: "Edit Cafe — Admin" };
 
@@ -66,6 +67,7 @@ export default async function EditCafePage({
           coverImage: cafe.cover_image,
           logo: cafe.logo_url ?? "",
           gallery: gallery as any,
+          videos: Array.isArray(cafe.videos) ? (cafe.videos as unknown as MediaVideo[]) : [],
           address: cafe.address,
           lat: cafe.lat,
           lng: cafe.lng,

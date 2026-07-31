@@ -4,7 +4,7 @@ import type { Locale } from "@/lib/i18n/config";
 import { getActiveListing } from "@/lib/data/business";
 import { createClient } from "@/lib/supabase/server";
 import { GalleryManagerPanel } from "@/components/business/gallery-manager-panel";
-import type { BusinessListingType, GalleryImage } from "@/types";
+import type { BusinessListingType, GalleryImage, MediaVideo } from "@/types";
 
 export const metadata: Metadata = { title: "Gallery — Dashboard", robots: { index: false } };
 
@@ -23,16 +23,23 @@ export default async function GalleryPage({ params: { locale } }: { params: { lo
   const t = await getTranslations({ locale, namespace: "businessDashboard" });
   const supabase = await createClient();
   const table = TABLE_BY_TYPE[listing.listingType];
-  // Services has no logo_url column at all.
-  const columns = listing.listingType === "service" ? "cover_image, gallery" : "cover_image, logo_url, gallery";
+  // Services has no logo_url or videos column at all.
+  const columns =
+    listing.listingType === "service" ? "cover_image, gallery" : "cover_image, logo_url, gallery, videos";
   const { data: row } = await supabase.from(table).select(columns).eq("id", listing.id).single();
-  const typedRow = row as { cover_image?: string; logo_url?: string; gallery?: unknown } | null;
+  const typedRow = row as { cover_image?: string; logo_url?: string; gallery?: unknown; videos?: unknown } | null;
 
   const gallery: GalleryImage[] = Array.isArray(typedRow?.gallery)
     ? (typedRow!.gallery as unknown as { url: string; alt?: string; category?: string }[]).map((g) => ({
         url: g.url,
         alt: g.alt,
         category: g.category,
+      }))
+    : [];
+  const videos: MediaVideo[] = Array.isArray(typedRow?.videos)
+    ? (typedRow!.videos as unknown as { url: string; caption?: string }[]).map((v) => ({
+        url: v.url,
+        caption: v.caption,
       }))
     : [];
 
@@ -50,6 +57,7 @@ export default async function GalleryPage({ params: { locale } }: { params: { lo
           initialCover={typedRow?.cover_image ?? listing.coverImage}
           initialLogo={typedRow?.logo_url ?? listing.logo ?? ""}
           initialGallery={gallery}
+          initialVideos={videos}
           currentPath={currentPath}
         />
       </div>

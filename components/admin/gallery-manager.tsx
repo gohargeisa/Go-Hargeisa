@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import Image from "next/image";
-import { ChevronDown, ChevronUp, GripVertical, Loader2, Repeat, Upload, X } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, GripVertical, ImageIcon, Loader2, Repeat, Upload, X } from "lucide-react";
 import { uploadImage } from "@/lib/supabase/storage";
 import type { GalleryCategoryOption } from "@/lib/utils/gallery-categories";
 import type { GalleryImage } from "@/types";
@@ -19,11 +19,22 @@ export function GalleryManager({
   value,
   onChange,
   categories,
+  coverUrl,
+  onSetCover,
+  setCoverLabel,
+  coverBadgeLabel,
 }: {
   folder: string;
   value: GalleryImage[];
   onChange: (value: GalleryImage[]) => void;
   categories: GalleryCategoryOption[];
+  /** When provided alongside onSetCover, each photo gets a "Set as cover"
+   * action so an owner/admin can promote an existing gallery photo to the
+   * cover image instead of only ever uploading a separate one. */
+  coverUrl?: string;
+  onSetCover?: (url: string) => void;
+  setCoverLabel?: string;
+  coverBadgeLabel?: string;
 }) {
   const [uploading, setUploading] = useState(false);
   const [replacingIndex, setReplacingIndex] = useState<number | null>(null);
@@ -129,6 +140,11 @@ export function GalleryManager({
               </span>
               <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-ink/5 dark:bg-white/5">
                 <Image src={img.url} alt={img.alt || ""} fill sizes="64px" className="object-cover" />
+                {coverUrl === img.url && (
+                  <span className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-0.5 bg-primary/90 py-0.5 text-[9px] font-bold text-white">
+                    <Check size={9} aria-hidden="true" /> {coverBadgeLabel}
+                  </span>
+                )}
               </div>
               <div className="min-w-0 flex-1">
                 <select
@@ -163,6 +179,17 @@ export function GalleryManager({
                   <ChevronDown size={14} />
                 </button>
               </div>
+              {onSetCover && coverUrl !== img.url && (
+                <button
+                  type="button"
+                  onClick={() => onSetCover(img.url)}
+                  aria-label={setCoverLabel}
+                  title={setCoverLabel}
+                  className="shrink-0 text-ink/40 hover:text-primary"
+                >
+                  <ImageIcon size={15} />
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => {

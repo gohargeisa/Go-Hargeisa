@@ -6,13 +6,14 @@ import { Loader2, Plus, X } from "lucide-react";
 import { ImageUploader } from "@/components/shared/image-uploader";
 import { GalleryManager } from "@/components/admin/gallery-manager";
 import { PdfUploader } from "@/components/admin/pdf-uploader";
+import { VideoUploader } from "@/components/shared/video-uploader";
 import { Field, TagInput, inputClass } from "@/components/admin/form-shared";
 import { createRecord, updateRecord } from "@/lib/actions/admin";
 import { useUnsavedChangesWarning } from "@/lib/hooks/use-unsaved-changes-warning";
 import { CAFE_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import { CAFE_AMENITY_CODES } from "@/lib/utils/cafe-amenities";
 import type { Locale } from "@/lib/i18n/config";
-import type { GalleryImage, OpeningHoursGroup } from "@/types";
+import type { GalleryImage, MediaVideo, OpeningHoursGroup } from "@/types";
 
 export interface CafeFormInput {
   slug: string;
@@ -24,6 +25,7 @@ export interface CafeFormInput {
   coverImage: string;
   logo: string;
   gallery: GalleryImage[];
+  videos: MediaVideo[];
   address: string;
   lat: number;
   lng: number;
@@ -79,6 +81,7 @@ export function CafeForm({
     coverImage: initial?.coverImage ?? "",
     logo: initial?.logo ?? "",
     gallery: initial?.gallery ?? [],
+    videos: initial?.videos ?? [],
     address: initial?.address ?? "",
     lat: initial?.lat ?? 9.5624,
     lng: initial?.lng ?? 44.065,
@@ -165,6 +168,7 @@ export function CafeForm({
       cover_image: form.coverImage,
       logo_url: form.logo || null,
       gallery: form.gallery,
+      videos: form.videos,
       address: form.address,
       lat: form.lat,
       lng: form.lng,
@@ -208,6 +212,21 @@ export function CafeForm({
         value={form.gallery}
         onChange={(v) => update("gallery", v)}
         categories={CAFE_GALLERY_CATEGORIES}
+        coverUrl={form.coverImage}
+        onSetCover={(url) => update("coverImage", url)}
+        setCoverLabel={t("setAsCoverLabel")}
+        coverBadgeLabel={t("coverBadgeLabel")}
+      />
+
+      <VideoUploader
+        folder="cafes/videos"
+        value={form.videos}
+        onChange={(v) => update("videos", v)}
+        label={t("videosLabel")}
+        addLabel={t("addVideoLabel")}
+        hint={t("videosHint")}
+        captionPlaceholder={t("videoCaptionPlaceholder")}
+        removeAriaLabel={t("removeVideoAriaLabel")}
       />
 
       <div className="grid gap-4 sm:grid-cols-2">

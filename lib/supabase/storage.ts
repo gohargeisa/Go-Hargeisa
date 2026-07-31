@@ -47,3 +47,15 @@ export async function uploadFile(
 export async function uploadListingImage(file: File, folder: string): Promise<string> {
   return uploadImage(file, { bucket: "listing-images", folder });
 }
+
+/** Short video clips (Media Manager) — no client-side compression (that
+ * needs a real video encoder, not the canvas trick images use), so this
+ * just enforces a size cap to keep clips genuinely short before handing
+ * off to the same uploadFile() every other upload uses. */
+export const MAX_VIDEO_BYTES = 30 * 1024 * 1024;
+
+export async function uploadVideo(file: File, options: { folder: string }): Promise<string> {
+  if (!file.type.startsWith("video/")) throw new Error("Please choose a video file.");
+  if (file.size > MAX_VIDEO_BYTES) throw new Error("Video must be 30MB or smaller.");
+  return uploadFile(file, { bucket: "listing-images", ...options });
+}

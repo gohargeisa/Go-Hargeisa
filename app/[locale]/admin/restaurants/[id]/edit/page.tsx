@@ -7,7 +7,7 @@ import { requireListingsAccess } from "@/lib/supabase/guards";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { RestaurantForm } from "@/components/admin/restaurant-form";
-import type { OpeningHoursGroup } from "@/types";
+import type { OpeningHoursGroup, MediaVideo } from "@/types";
 
 export const metadata: Metadata = { title: "Edit Restaurant — Admin" };
 
@@ -70,6 +70,7 @@ export default async function EditRestaurantPage({
           coverImage: restaurant.cover_image,
           logo: restaurant.logo_url ?? "",
           gallery: gallery as any,
+          videos: Array.isArray(restaurant.videos) ? (restaurant.videos as unknown as MediaVideo[]) : [],
           address: restaurant.address,
           lat: restaurant.lat,
           lng: restaurant.lng,

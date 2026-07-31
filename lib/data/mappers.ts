@@ -1,5 +1,5 @@
 import type { Database } from "@/types/database";
-import type { Hotel, HotelRoom, Restaurant, Cafe, Service, Attraction, EventItem, Article, GalleryImage, Review, BusinessOffer } from "@/types";
+import type { Hotel, HotelRoom, Restaurant, Cafe, Service, Attraction, EventItem, Article, GalleryImage, Review, BusinessOffer, MediaVideo } from "@/types";
 
 type HotelRow = Database["public"]["Tables"]["hotels"]["Row"];
 type HotelRoomRow = Database["public"]["Tables"]["hotel_rooms"]["Row"];
@@ -20,6 +20,13 @@ function toGallery(json: unknown): GalleryImage[] {
       alt: g.alt ?? "",
       category: (g.category as GalleryImage["category"]) ?? undefined,
     }));
+}
+
+function toVideos(json: unknown): MediaVideo[] {
+  if (!Array.isArray(json)) return [];
+  return json
+    .filter((v): v is { url: string; caption?: string } => !!v && typeof v === "object" && "url" in v)
+    .map((v) => ({ url: v.url, caption: v.caption || undefined }));
 }
 
 export function mapReview(row: ReviewRow, authorName = "Guest"): Review {
@@ -64,6 +71,7 @@ export function mapHotel(
     description: row.description,
     coverImage: row.cover_image,
     gallery: toGallery(row.gallery),
+    videos: toVideos(row.videos),
     address: row.address,
     location: { lat: row.lat, lng: row.lng },
     rating: Number(row.rating),
@@ -108,6 +116,7 @@ export function mapRestaurant(row: RestaurantRow, reviews: Review[] = []): Resta
     description: row.description,
     coverImage: row.cover_image,
     gallery: toGallery(row.gallery),
+    videos: toVideos(row.videos),
     address: row.address,
     location: { lat: row.lat, lng: row.lng },
     rating: Number(row.rating),
@@ -149,6 +158,7 @@ export function mapCafe(row: CafeRow, reviews: Review[] = [], locale?: string): 
     descriptionSo: row.description_so ?? undefined,
     coverImage: row.cover_image,
     gallery: toGallery(row.gallery),
+    videos: toVideos(row.videos),
     address: row.address,
     location: { lat: row.lat, lng: row.lng },
     rating: Number(row.rating),

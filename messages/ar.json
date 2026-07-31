@@ -689,6 +689,13 @@
 
     "uploadCoverImageError": "يرجى رفع صورة غلاف.",
     "somethingWentWrong": "حدث خطأ ما.",
+    "setAsCoverLabel": "تعيين كصورة غلاف",
+    "coverBadgeLabel": "الغلاف",
+    "videosLabel": "مقاطع فيديو (اختياري)",
+    "addVideoLabel": "إضافة فيديو",
+    "videosHint": "اسحب وأفلت مقاطع الفيديو القصيرة هنا، أو انقر للتصفح. الحد الأقصى 30 ميغابايت لكل مقطع.",
+    "videoCaptionPlaceholder": "تعليق (اختياري)",
+    "removeVideoAriaLabel": "إزالة الفيديو",
 
     "publishHotel": "نشر الفندق",
     "publishRestaurant": "نشر المطعم",
@@ -1447,6 +1454,13 @@
     "gallerySubtitle": "إدارة الشعار وصورة الغلاف ومعرض الصور.",
     "coverImage": "صورة الغلاف",
     "businessLogo": "شعار النشاط التجاري",
+    "setAsCoverLabel": "تعيين كصورة غلاف",
+    "coverBadgeLabel": "الغلاف",
+    "videosLabel": "مقاطع فيديو (اختياري)",
+    "addVideoLabel": "إضافة فيديو",
+    "videosHint": "اسحب وأفلت مقاطع الفيديو القصيرة هنا، أو انقر للتصفح. الحد الأقصى 30 ميغابايت لكل مقطع.",
+    "videoCaptionPlaceholder": "تعليق (اختياري)",
+    "removeVideoAriaLabel": "إزالة الفيديو",
 
     "businessInfoTitle": "معلومات النشاط التجاري",
     "businessType": "نوع النشاط التجاري",

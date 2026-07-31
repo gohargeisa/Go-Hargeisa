@@ -9,6 +9,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { HotelForm } from "@/components/admin/hotel-form";
 import { getRestaurants } from "@/lib/data/restaurants";
 import { getCafes } from "@/lib/data/cafes";
+import type { MediaVideo } from "@/types";
 
 export const metadata: Metadata = { title: "Edit Hotel — Admin" };
 
@@ -89,6 +90,7 @@ export default async function EditHotelPage({
           coverImage: hotel.cover_image,
           logo: hotel.logo_url ?? "",
           gallery: gallery as any,
+          videos: Array.isArray(hotel.videos) ? (hotel.videos as unknown as MediaVideo[]) : [],
           address: hotel.address,
           lat: hotel.lat,
           lng: hotel.lng,

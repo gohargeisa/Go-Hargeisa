@@ -10,6 +10,13 @@ export interface GalleryImage {
   category?: string;
 }
 
+/** Optional short video clip attached to a listing — the Media Manager's
+ * one genuinely new media type alongside the existing cover/logo/gallery. */
+export interface MediaVideo {
+  url: string;
+  caption?: string;
+}
+
 export interface Review {
   id: string;
   authorName: string;
@@ -261,6 +268,7 @@ export interface Hotel {
   description: string;
   coverImage: string;
   gallery: GalleryImage[];
+  videos?: MediaVideo[];
   address: string;
   location: Coordinates;
   rating: number;
@@ -306,6 +314,7 @@ export interface Restaurant {
   description: string;
   coverImage: string;
   gallery: GalleryImage[];
+  videos?: MediaVideo[];
   address: string;
   location: Coordinates;
   rating: number;
@@ -348,6 +357,7 @@ export interface Cafe {
   descriptionSo?: string;
   coverImage: string;
   gallery: GalleryImage[];
+  videos?: MediaVideo[];
   address: string;
   location: Coordinates;
   rating: number;
