@@ -4,9 +4,12 @@ import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
 import { getServices } from "@/lib/data/services";
-import { PageHero } from "@/components/shared/page-hero";
+import { PremiumPageHero } from "@/components/shared/premium-page-hero";
 import { ServicesPageClient } from "@/components/pages/services-page-client";
 import { SERVICES_PUBLIC_ENABLED } from "@/lib/config/features";
+
+/** Reuses the shared hero photo — same swap-in-place pattern as attractions-hero.tsx / about-hero.tsx. */
+const SERVICES_HERO_IMAGE = "/images/hero-bg.png";
 
 export const revalidate = 3600;
 
@@ -37,12 +40,18 @@ export default async function ServicesPage({
   if (!SERVICES_PUBLIC_ENABLED) notFound();
 
   const t = await getTranslations("home");
-  const tNav = await getTranslations("nav");
   const services = await getServices({ q: searchParams.q });
 
   return (
     <>
-      <PageHero eyebrow={`🧭 ${tNav("services")}`} title={t("servicesTitle")} subtitle={t("servicesSubtitle")} image="/images/hero-bg.png" />
+      <PremiumPageHero
+        image={SERVICES_HERO_IMAGE}
+        imageAlt="Panoramic view of Hargeisa"
+        eyebrow={t("servicesEyebrow")}
+        title={t("servicesTitle")}
+        subtitle={t("servicesSubtitle")}
+        scrollHint={t("servicesScrollHint")}
+      />
 
       <ServicesPageClient locale={locale} initialServices={services} searchParams={searchParams} />
     </>
