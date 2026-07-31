@@ -1,19 +1,22 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Hospital, Landmark, ShoppingCart, Pill } from "lucide-react";
-import { PageHero } from "@/components/shared/page-hero";
+import { PremiumPageHero } from "@/components/shared/premium-page-hero";
+import { PremiumSectionHeading } from "@/components/shared/premium-section-heading";
 import { CityServiceCard } from "@/components/shared/city-service-card";
 import { CityServiceEmptyCard } from "@/components/shared/city-service-empty-card";
 import { Reveal } from "@/components/home/reveal";
 import { getAllCityServices } from "@/lib/data/city-services";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
-import { placeholderImage } from "@/lib/placeholder-image";
 import type { CityService, EssentialServiceCategory } from "@/types";
 
 export const revalidate = 3600;
 
 const SLOTS_PER_CATEGORY = 4;
+
+/** Reuses the shared hero photo — same swap-in-place pattern as attractions-hero.tsx / about-hero.tsx. */
+const CITY_SERVICES_HERO_IMAGE = "/images/hero-bg.png";
 
 export async function generateMetadata({
   params: { locale },
@@ -72,18 +75,24 @@ export default async function CityServicesPage({ params: { locale } }: { params:
 
   return (
     <>
-      <PageHero
-        eyebrow={t("pageTitle")}
+      <PremiumPageHero
+        image={CITY_SERVICES_HERO_IMAGE}
+        imageAlt="Panoramic view of Hargeisa"
+        eyebrow={t("eyebrow")}
         title={t("pageTitle")}
         subtitle={t("pageSubtitle")}
-        image={placeholderImage("City Services", { tone: "ink" })}
+        scrollHint={t("scrollHint")}
       />
-      <section className="container-px mx-auto flex flex-col gap-14 py-10 md:py-14">
-        {sections.map((s, i) => (
-          <Reveal key={s.key} delay={Math.min(i * 0.08, 0.24)}>
-            <CategorySection title={s.title} icon={s.icon} services={byCategory[s.key]} />
-          </Reveal>
-        ))}
+
+      <section className="container-px mx-auto py-10 md:py-14">
+        <PremiumSectionHeading title={t("sectionsTitle")} subtitle={t("sectionsSubtitle")} className="mb-10 md:mb-14" />
+        <div className="flex flex-col gap-14">
+          {sections.map((s, i) => (
+            <Reveal key={s.key} delay={Math.min(i * 0.08, 0.24)}>
+              <CategorySection title={s.title} icon={s.icon} services={byCategory[s.key]} />
+            </Reveal>
+          ))}
+        </div>
       </section>
     </>
   );

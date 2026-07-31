@@ -1314,6 +1314,10 @@
     "ogDescription": "The official tourism guide to Hargeisa, Somaliland."
   },
   "cityServices": {
+    "eyebrow": "Around the City",
+    "scrollHint": "Scroll to discover",
+    "sectionsTitle": "Find What You Need",
+    "sectionsSubtitle": "Hospitals, banks, supermarkets and pharmacies across Hargeisa.",
     "pageTitle": "City Services",
     "pageSubtitle": "Essential services around Hargeisa — hospitals, banks, supermarkets, and pharmacies.",
     "hospitalsTitle": "Hospitals",

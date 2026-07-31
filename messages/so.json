@@ -1314,6 +1314,10 @@
     "ogDescription": "Hagaha dalxiiska rasmiga ah ee Hargeysa, Somaliland."
   },
   "cityServices": {
+    "eyebrow": "Magaalada Gudaheeda",
+    "scrollHint": "Dhaadhac si aad u baarto",
+    "sectionsTitle": "Hel Waxa Aad U Baahan Tahay",
+    "sectionsSubtitle": "Isbitaallada, bangiyada, dukaannada waaweyn, iyo farmashiyada ee Hargeysa oo dhan.",
     "pageTitle": "Adeegyada Magaalada",
     "pageSubtitle": "Adeegyada muhiimka ah ee Hargeysa — isbitaallada, bangiyada, dukaannada waaweyn, iyo farmashiyada.",
     "hospitalsTitle": "Isbitaallada",
