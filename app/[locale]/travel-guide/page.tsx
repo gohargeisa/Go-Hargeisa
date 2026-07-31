@@ -2,15 +2,18 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import {
   Stamp, Plane, Bus, Coins, ShieldAlert, PhoneCall, Wifi,
-  Users, Sun, Backpack, HelpCircle,
+  Users, Sun, Backpack,
 } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
-import { PageHero } from "@/components/shared/page-hero";
+import { PremiumPageHero } from "@/components/shared/premium-page-hero";
+import { PremiumSectionHeading } from "@/components/shared/premium-section-heading";
 import { FaqAccordion } from "@/components/shared/faq-accordion";
 import { FeatureGrid } from "@/components/shared/feature-grid";
 import { Reveal } from "@/components/home/reveal";
-import { placeholderImage } from "@/lib/placeholder-image";
+
+/** Reuses the shared hero photo — same swap-in-place pattern as attractions-hero.tsx / about-hero.tsx. */
+const TRAVEL_GUIDE_HERO_IMAGE = "/images/hero-bg.png";
 
 export async function generateMetadata({
   params: { locale },
@@ -19,7 +22,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   return {
     title: "Hargeisa Travel Guide — Visa, Safety, Transport & More",
-  description: "Everything you need to know before visiting Hargeisa: visa requirements, airport guide, currency, safety tips and more.",
+    description: "Everything you need to know before visiting Hargeisa: visa requirements, airport guide, currency, safety tips and more.",
     alternates: localeAlternates(locale as Locale, "/travel-guide"),
   };
 }
@@ -52,22 +55,29 @@ export default async function TravelGuidePage({
 
   return (
     <>
-      <PageHero
+      <PremiumPageHero
+        image={TRAVEL_GUIDE_HERO_IMAGE}
+        imageAlt="Panoramic view of Hargeisa"
         eyebrow={t("eyebrow")}
         title={t("title")}
         subtitle={t("subtitle")}
-        image={placeholderImage("Hargeisa Travel Guide", { tone: "secondary" })}
+        scrollHint={t("scrollHint")}
       />
-      <section className="container-px mx-auto py-10 md:py-14">
+
+      <section className="container-px mx-auto py-16 md:py-24">
         <Reveal>
+          <PremiumSectionHeading
+            eyebrow={t("infoEyebrow")}
+            title={t("infoTitle")}
+            subtitle={t("infoSubtitle")}
+            className="mb-10 md:mb-14"
+          />
           <FeatureGrid items={sections} />
         </Reveal>
 
         <Reveal delay={0.08}>
-          <div className="mt-16 max-w-3xl">
-            <h2 className="mb-6 flex items-center gap-2 font-display text-2xl font-semibold">
-              <HelpCircle size={22} className="text-secondary" aria-hidden="true" /> {t("faqTitle")}
-            </h2>
+          <div className="mx-auto mt-16 max-w-3xl md:mt-24">
+            <PremiumSectionHeading eyebrow={t("faqEyebrow")} title={t("faqTitle")} className="mb-8" />
             <FaqAccordion items={faqs} />
           </div>
         </Reveal>
