@@ -7,7 +7,7 @@ import { getRestaurants } from "@/lib/data/restaurants";
 import { getAttractions } from "@/lib/data/attractions";
 import { ListingCard } from "@/components/shared/listing-card";
 import { HotelCard } from "@/components/shared/hotel-card";
-import { PageHero } from "@/components/shared/page-hero";
+import { PremiumPageHero } from "@/components/shared/premium-page-hero";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { Reveal } from "@/components/home/reveal";
 import { RESTAURANTS_PUBLIC_ENABLED, filterHotelsForPresentation } from "@/lib/config/features";
@@ -67,9 +67,16 @@ export default async function DestinationDetailPage({
         ]}
       />
 
-      <PageHero eyebrow={tExplore("eyebrow")} title={destination.name} subtitle={destination.description} image={destination.image} />
+      <PremiumPageHero
+        image={destination.image}
+        imageAlt={destination.name}
+        eyebrow={tExplore("eyebrow")}
+        title={destination.name}
+        subtitle={destination.description}
+        scrollHint={tExplore("scrollHint")}
+      />
 
-      <section className="container-px mx-auto py-10 md:py-14 space-y-14">
+      <section className="container-px mx-auto py-16 md:py-24 space-y-14">
         <Reveal>
           <div>
             <h2 className="mb-5 font-display text-2xl font-semibold">{tExplore("hotelsNearby")}</h2>
