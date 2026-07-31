@@ -853,6 +853,7 @@
   "privacy": {
     "title": "Privacy Policy",
     "lastUpdated": "Last updated: July 2026",
+    "scrollHint": "Scroll to discover",
     "intro": "Go Hargeisa (\"we\", \"our\") respects your privacy. This page explains what information we collect when you use this website and how it is used.",
     "infoTitle": "Information we collect",
     "infoItem1": "Account information (name, email) when you sign up.",
