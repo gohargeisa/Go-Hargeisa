@@ -4,7 +4,7 @@ import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
 import { getServices } from "@/lib/data/services";
-import { PageHero } from "@/components/shared/page-hero";
+import { PremiumPageHero } from "@/components/shared/premium-page-hero";
 import { ServicesPageClient } from "@/components/pages/services-page-client";
 import {
   SERVICE_CATEGORY_ORDER,
@@ -14,6 +14,9 @@ import {
   categoryFromSlug,
 } from "@/lib/utils/service-categories";
 import { SERVICES_PUBLIC_ENABLED } from "@/lib/config/features";
+
+/** Reuses the shared hero photo — same swap-in-place pattern as attractions-hero.tsx / about-hero.tsx. */
+const SERVICE_CATEGORY_HERO_IMAGE = "/images/hero-bg.png";
 
 export const revalidate = 3600;
 
@@ -56,11 +59,18 @@ export default async function ServiceCategoryPage({
 
   const services = await getServices({ category, q: searchParams.q });
   const label = SERVICE_CATEGORY_LABELS[category];
-  const tNav = await getTranslations("nav");
+  const t = await getTranslations("home");
 
   return (
     <>
-      <PageHero eyebrow={`🧭 ${tNav("services")}`} title={label} subtitle={`Real ${label.toLowerCase()} in Hargeisa, Somaliland`} image="/images/hero-bg.png" />
+      <PremiumPageHero
+        image={SERVICE_CATEGORY_HERO_IMAGE}
+        imageAlt="Panoramic view of Hargeisa"
+        eyebrow={t("servicesEyebrow")}
+        title={label}
+        subtitle={`Real ${label.toLowerCase()} in Hargeisa, Somaliland`}
+        scrollHint={t("servicesScrollHint")}
+      />
 
       <ServicesPageClient locale={locale} initialServices={services} searchParams={searchParams} category={category} />
     </>
