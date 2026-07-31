@@ -960,6 +960,7 @@
     "eyebrow": "🗺 Khariidadda Magaalada ee Caqliga leh",
     "title": "Adeegyada Muhiimka ah ee Hargeysa",
     "subtitle": "Isbitaallada, farmashiyada, masaajidyada, ATM-yada, dugsiyada iyo waxyaabo kale — hel waxa aad u baahan tahay, meel kastoo aad joogto.",
+    "scrollHint": "Dhaadhac si aad u baarto",
     "searchLabel": "Raadi adeegyada magaalada",
     "searchPlaceholder": "Raadi isbitaallo, masaajido, ATM-yo…",
     "clearSearchAriaLabel": "Nadiifi raadinta"

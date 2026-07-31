@@ -960,6 +960,7 @@
     "eyebrow": "🗺 Smart City Map",
     "title": "Essential Services Around Hargeisa",
     "subtitle": "Hospitals, pharmacies, mosques, ATMs, schools and more — find what you need, wherever you are.",
+    "scrollHint": "Scroll to discover",
     "searchLabel": "Search city services",
     "searchPlaceholder": "Search hospitals, mosques, ATMs…",
     "clearSearchAriaLabel": "Clear search"

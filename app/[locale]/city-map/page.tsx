@@ -3,8 +3,11 @@ import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
 import { getCityServicePoints } from "@/lib/data/map-points";
-import { PageHero } from "@/components/shared/page-hero";
+import { PremiumPageHero } from "@/components/shared/premium-page-hero";
 import { CityMapExperience } from "@/components/city-map/city-map-experience";
+
+/** Reuses the shared hero photo — same swap-in-place pattern as attractions-hero.tsx / about-hero.tsx. */
+const CITY_MAP_HERO_IMAGE = "/images/hero-bg.png";
 
 // Public content changes infrequently; revalidate hourly instead of
 // rendering on every request (this page no longer reads cookies, so
@@ -34,11 +37,13 @@ export default async function CityMapPage({
 
   return (
     <>
-      <PageHero
+      <PremiumPageHero
+        image={CITY_MAP_HERO_IMAGE}
+        imageAlt="Panoramic view of Hargeisa"
         eyebrow={t("eyebrow")}
         title={t("title")}
         subtitle={t("subtitle")}
-        image="/images/hero-bg.png"
+        scrollHint={t("scrollHint")}
       />
 
       <section className="container-px mx-auto py-8 md:py-10">
