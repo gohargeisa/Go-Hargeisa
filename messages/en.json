@@ -942,6 +942,7 @@
     "eyebrow": "The Journal",
     "title": "Hargeisa Travel Blog",
     "subtitle": "Stories, guides and tips from people who know the city.",
+    "scrollHint": "Scroll to discover",
     "emptyState": "No articles published yet.",
     "emptyStateTitle": "No Articles Yet",
     "minRead": "{minutes} min read"

@@ -942,6 +942,7 @@
     "eyebrow": "Joornaalka",
     "title": "Blog-ga Safarka Hargeysa",
     "subtitle": "Sheekooyin, hage, iyo talooyin ka yimid dad yaqaan magaalada.",
+    "scrollHint": "Dhaadhac si aad u baarto",
     "emptyState": "Wali maqaallo lama daabicin.",
     "emptyStateTitle": "Wali Maqaallo Lama Helin",
     "minRead": "{minutes} daqiiqo akhris ah"
