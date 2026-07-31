@@ -934,6 +934,7 @@
     "eyebrow": "Shop",
     "title": "Shopping in Hargeisa",
     "subtitle": "From the historic Waheen Market to modern shopping centers",
+    "scrollHint": "Scroll to discover",
     "emptyState": "No shopping listings yet — check back soon.",
     "emptyStateTitle": "No Shopping Listings Yet"
   },
