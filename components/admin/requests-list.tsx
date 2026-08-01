@@ -129,9 +129,21 @@ export function RequestsList({ locale, rows }: { locale: Locale; rows: RequestRo
   }
 
   function onStartConvert(row: RequestRow) {
+    // The public join form's map picker is optional (see
+    // components/shared/join-request-form.tsx), so row.lat/row.lng are
+    // routinely null for real submitted requests. Leaving the inputs at
+    // "" here meant they showed nothing but the "9.5624"/"44.0770"
+    // placeholder text — visually indistinguishable enough from a real
+    // value that clicking Convert without touching them submitted two
+    // empty strings while looking, to the admin, exactly like a filled-in
+    // form. Defaulting to Hargeisa's city center (same fallback already
+    // used by hotel-form.tsx/cafe-form.tsx/restaurant-form.tsx/
+    // attraction-form.tsx) makes the field contain a real, submittable
+    // value from the start; the admin can still overwrite it with the
+    // business's exact coordinates when known.
     setConvertSlug(slugify(row.businessName));
-    setConvertLat(row.lat !== null ? String(row.lat) : "");
-    setConvertLng(row.lng !== null ? String(row.lng) : "");
+    setConvertLat(row.lat !== null ? String(row.lat) : "9.5624");
+    setConvertLng(row.lng !== null ? String(row.lng) : "44.065");
     setConvertingId(row.id);
   }
 
@@ -157,6 +169,10 @@ export function RequestsList({ locale, rows }: { locale: Locale; rows: RequestRo
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
       alert(t("convertMissingFields"));
       return;
+    }
+
+    if (process.env.NODE_ENV === "development") {
+      console.debug("[convertJoinRequest] submitting", { requestId: row.id, partnerStatus, slug, lat, lng });
     }
 
     setPendingId(row.id);
