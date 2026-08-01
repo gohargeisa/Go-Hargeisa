@@ -136,15 +136,32 @@ export function RequestsList({ locale, rows }: { locale: Locale; rows: RequestRo
   }
 
   function onConvert(row: RequestRow, partnerStatus: "trial" | "official") {
-    const lat = parseFloat(convertLat);
-    const lng = parseFloat(convertLng);
-    if (!convertSlug.trim() || Number.isNaN(lat) || Number.isNaN(lng)) {
+    // Read straight from the editable form state (never row.slug/row.lat/
+    // row.lng — those are the original, possibly-empty request values this
+    // panel exists to fill in) and trim every field, not just the slug,
+    // before checking anything — a trailing space or newline left over
+    // from pasting coordinates was enough to fail Number.isFinite while
+    // the field still looked filled in.
+    const slug = convertSlug.trim();
+    const latRaw = convertLat.trim();
+    const lngRaw = convertLng.trim();
+
+    if (!slug || !latRaw || !lngRaw) {
       alert(t("convertMissingFields"));
       return;
     }
+
+    const lat = Number(latRaw);
+    const lng = Number(lngRaw);
+
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      alert(t("convertMissingFields"));
+      return;
+    }
+
     setPendingId(row.id);
     startTransition(async () => {
-      const result = await convertJoinRequest(locale, row.id, partnerStatus, { slug: convertSlug.trim(), lat, lng });
+      const result = await convertJoinRequest(locale, row.id, partnerStatus, { slug, lat, lng });
       if (result.ok) {
         router.refresh();
         setConvertingId(null);
