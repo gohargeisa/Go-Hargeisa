@@ -17,9 +17,11 @@ import {
 
 import { getLatestAnnouncement } from "@/lib/data/announcements";
 import { getFeaturedOffersForHomepage } from "@/lib/data/offers";
+import { DIASPORA_WEEK_END_ISO } from "@/lib/config/diaspora-week";
 import { Hero } from "@/components/home/hero";
 import { OfferCard } from "@/components/home/offer-card";
 import { AnnouncementBanner } from "@/components/home/announcement-banner";
+import { DiasporaWeekBanner } from "@/components/home/diaspora-week-banner";
 import { ExploreHargeisaSection } from "@/components/home/explore-hargeisa-section";
 import { NewsletterSection } from "@/components/home/newsletter-section";
 import { Reveal } from "@/components/home/reveal";
@@ -61,6 +63,7 @@ export default async function HomePage({
     getFeaturedOffersForHomepage(),
   ]);
   const hotels = filterHotelsForPresentation(hotelsRaw);
+  const showDiasporaWeekBanner = Date.now() < new Date(DIASPORA_WEEK_END_ISO).getTime();
 
   return (
     <>
@@ -81,6 +84,8 @@ export default async function HomePage({
       {announcement && <AnnouncementBanner announcement={announcement} />}
 
       <Hero locale={locale} />
+
+      {showDiasporaWeekBanner && <DiasporaWeekBanner locale={locale} />}
 
       {/* About Go Hargeisa */}
       <section className="mx-auto max-w-7xl px-5 pb-20 pt-2 md:px-8 md:pb-28 md:pt-12 lg:px-12">

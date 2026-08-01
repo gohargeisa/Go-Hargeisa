@@ -30,6 +30,7 @@ const staticRoutes = [
   "about",
   "contact",
   "join",
+  "diaspora-week-2026",
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
