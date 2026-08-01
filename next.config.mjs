@@ -25,11 +25,18 @@ const nextConfig = {
     // CSP origins are an exact inventory of what this app actually loads —
     // verified by grep, not guessed: Supabase (API + Storage), the two
     // placeholder-image hosts already declared in images.remotePatterns
-    // above, and the OpenStreetMap tile servers Leaflet points at
-    // (components/map/*.tsx). There is no Google Maps JS API or Google
-    // Analytics call anywhere in the codebase despite both having an env
-    // var placeholder in .env.example — nothing to allow for either.
-    const connectSrc = ["'self'", "https://*.supabase.co", "wss://*.supabase.co"];
+    // above, and Google Maps JS API (components/map/*.tsx, replacing the
+    // Leaflet/OpenStreetMap tiles this app used to load). Origins below
+    // match Google's own documented CSP requirements for the Maps
+    // JavaScript API + Advanced Markers (which need `worker-src blob:` —
+    // vector map rendering loads its renderer via a Web Worker).
+    const connectSrc = [
+      "'self'",
+      "https://*.supabase.co",
+      "wss://*.supabase.co",
+      "https://maps.googleapis.com",
+      "https://maps.gstatic.com",
+    ];
     const imgSrc = [
       "'self'",
       "data:",
@@ -37,18 +44,21 @@ const nextConfig = {
       "https://*.supabase.co",
       "https://images.unsplash.com",
       "https://placehold.co",
-      "https://*.tile.openstreetmap.org",
+      "https://maps.googleapis.com",
+      "https://maps.gstatic.com",
+      "https://*.gstatic.com",
     ];
     const csp = [
       `default-src 'self'`,
       // Next.js's own hydration bootstrap and this app's inline JSON-LD
       // <script> tags need 'unsafe-inline' without a nonce-based setup;
       // JSON-LD content itself is escaped separately (lib/utils/json-ld.ts).
-      `script-src 'self' 'unsafe-inline'`,
+      `script-src 'self' 'unsafe-inline' https://maps.googleapis.com`,
       `style-src 'self' 'unsafe-inline'`,
       `img-src ${imgSrc.join(" ")}`,
       `font-src 'self' data:`,
       `connect-src ${connectSrc.join(" ")}`,
+      `worker-src 'self' blob:`,
       `frame-src 'none'`,
       `object-src 'none'`,
       `base-uri 'self'`,

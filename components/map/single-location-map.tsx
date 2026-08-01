@@ -1,35 +1,35 @@
 "use client";
 
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import L from "leaflet";
+import { AdvancedMarker, Map, Pin } from "@vis.gl/react-google-maps";
 import type { Coordinates } from "@/types";
-import { MapResizeHandler } from "@/components/map/map-resize-handler";
-
-const icon = L.divIcon({
-  className: "",
-  html: `<span style="background:#0B5ED7" class="block h-5 w-5 rounded-full border-2 border-white shadow-lg"></span>`,
-  iconSize: [20, 20],
-  iconAnchor: [10, 10],
-});
+import { GOOGLE_MAPS_CONFIGURED, GOOGLE_MAPS_MAP_ID } from "@/lib/config/google-maps";
+import { MapUnavailable } from "@/components/map/map-unavailable";
 
 export function SingleLocationMap({ location, label }: { location: Coordinates; label: string }) {
+  if (!GOOGLE_MAPS_CONFIGURED) {
+    return (
+      <div className="h-72 w-full overflow-hidden rounded-xl2">
+        <MapUnavailable />
+      </div>
+    );
+  }
+
   return (
     <div className="h-72 w-full overflow-hidden rounded-xl2">
-      <MapContainer
-        center={[location.lat, location.lng]}
-        zoom={15}
-        scrollWheelZoom={false}
-        style={{ height: "100%", width: "100%" }}
+      <Map
+        mapId={GOOGLE_MAPS_MAP_ID}
+        defaultCenter={location}
+        defaultZoom={15}
+        gestureHandling="cooperative"
+        colorScheme="FOLLOW_SYSTEM"
+        disableDefaultUI={false}
+        fullscreenControl={false}
+        streetViewControl={false}
       >
-        <MapResizeHandler />
-        <TileLayer
-          attribution='&copy; OpenStreetMap contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        <Marker position={[location.lat, location.lng]} icon={icon}>
-          <Popup>{label}</Popup>
-        </Marker>
-      </MapContainer>
+        <AdvancedMarker position={location} title={label}>
+          <Pin background="#0B5ED7" borderColor="#ffffff" glyphColor="#ffffff" />
+        </AdvancedMarker>
+      </Map>
     </div>
   );
 }

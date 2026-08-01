@@ -1,12 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import L from "leaflet";
+import { AdvancedMarker, InfoWindow, Map, Pin, useMap } from "@vis.gl/react-google-maps";
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
+import { Navigation, ExternalLink } from "lucide-react";
 import { HARGEISA_CENTER } from "@/lib/mock-data";
-import { MapResizeHandler } from "@/components/map/map-resize-handler";
+import { GOOGLE_MAPS_CONFIGURED, GOOGLE_MAPS_MAP_ID } from "@/lib/config/google-maps";
+import { MapUnavailable } from "@/components/map/map-unavailable";
+import { useMarkerClusterer } from "@/lib/hooks/use-marker-clusterer";
 
 export type EventMapCategory = "venue" | "hotel" | "restaurant" | "cafe" | "attraction";
 
@@ -26,27 +27,48 @@ const CATEGORY_COLOR: Record<EventMapCategory, string> = {
   attraction: "#EF6C00",
 };
 
-function makeIcon(color: string, big: boolean) {
-  const size = big ? 22 : 16;
-  return L.divIcon({
-    className: "",
-    html: `<span style="background:${color};width:${size}px;height:${size}px" class="block rounded-full border-2 border-white shadow-md"></span>`,
-    iconSize: [size, size],
-    iconAnchor: [size / 2, size / 2],
-  });
+function ClusteredMarkers({
+  points,
+  onSelect,
+}: {
+  points: EventMapPoint[];
+  onSelect: (id: string) => void;
+}) {
+  const map = useMap();
+  const { setMarkerRef } = useMarkerClusterer(map);
+
+  return (
+    <>
+      {points.map((point) => (
+        <AdvancedMarker
+          key={point.id}
+          position={point.location}
+          title={point.name}
+          ref={(marker) => setMarkerRef(marker, point.id)}
+          onClick={() => onSelect(point.id)}
+        >
+          <Pin
+            background={CATEGORY_COLOR[point.category]}
+            borderColor="#ffffff"
+            glyphColor="#ffffff"
+            scale={point.category === "venue" ? 1.25 : 1}
+          />
+        </AdvancedMarker>
+      ))}
+    </>
+  );
 }
 
 /**
- * Self-contained Leaflet map for the Diaspora Week page only — deliberately
- * not built on top of components/map/interactive-map.tsx, whose category
- * set/colors are hardcoded and don't include "cafe" or a "venue" pin;
- * extending that shared component would risk the existing city-map page
- * (same isolation pattern already used by components/home/premium-*-card.tsx
- * vs. components/shared/*-card.tsx elsewhere in this codebase).
+ * Self-contained Google Map for the Diaspora Week page only — deliberately
+ * not built on top of the Smart City Map's category set/colors, which
+ * don't include "cafe" or a "venue" pin (same isolation pattern already
+ * used by components/home/premium-*-card.tsx vs. components/shared/*-card.tsx
+ * elsewhere in this codebase).
  */
 export function EventMap({ points }: { points: EventMapPoint[] }) {
   const t = useTranslations("diasporaWeek");
-  const router = useRouter();
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [active, setActive] = useState<Set<EventMapCategory>>(
     new Set(["venue", "hotel", "restaurant", "cafe", "attraction"])
   );
@@ -66,6 +88,13 @@ export function EventMap({ points }: { points: EventMapPoint[] }) {
   );
 
   const visible = useMemo(() => points.filter((p) => active.has(p.category)), [points, active]);
+  const selected = visible.find((p) => p.id === selectedId) ?? null;
+  const directionsHref = selected
+    ? `https://www.google.com/maps/dir/?api=1&destination=${selected.location.lat},${selected.location.lng}`
+    : undefined;
+  const googleMapsHref = selected
+    ? `https://www.google.com/maps/search/?api=1&query=${selected.location.lat},${selected.location.lng}`
+    : undefined;
 
   function toggle(cat: EventMapCategory) {
     setActive((prev) => {
@@ -94,32 +123,56 @@ export function EventMap({ points }: { points: EventMapPoint[] }) {
         ))}
       </div>
       <div className="h-[440px] w-full">
-        <MapContainer
-          center={[HARGEISA_CENTER.lat, HARGEISA_CENTER.lng]}
-          zoom={13}
-          scrollWheelZoom={false}
-          style={{ height: "100%", width: "100%" }}
-        >
-          <MapResizeHandler />
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          {visible.map((p) => (
-            <Marker
-              key={p.id}
-              position={[p.location.lat, p.location.lng]}
-              icon={makeIcon(CATEGORY_COLOR[p.category], p.category === "venue")}
-              eventHandlers={p.href ? { click: () => router.push(p.href!) } : undefined}
-            >
-              <Popup>
-                <strong>{p.name}</strong>
-                <br />
-                <span>{categoryLabel[p.category]}</span>
-              </Popup>
-            </Marker>
-          ))}
-        </MapContainer>
+        {!GOOGLE_MAPS_CONFIGURED ? (
+          <MapUnavailable />
+        ) : (
+          <Map
+            mapId={GOOGLE_MAPS_MAP_ID}
+            defaultCenter={HARGEISA_CENTER}
+            defaultZoom={13}
+            gestureHandling="cooperative"
+            colorScheme="FOLLOW_SYSTEM"
+          >
+            <ClusteredMarkers points={visible} onSelect={setSelectedId} />
+
+            {selected && (
+              <InfoWindow position={selected.location} onCloseClick={() => setSelectedId(null)} maxWidth={220}>
+                <div className="w-44">
+                  <p className="font-display text-sm font-bold text-ink">{selected.name}</p>
+                  <p className="mt-0.5 text-xs text-ink/60">{categoryLabel[selected.category]}</p>
+                  {selected.href && (
+                    <a
+                      href={selected.href}
+                      className="mt-2 inline-flex w-full items-center justify-center rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary-700"
+                    >
+                      {t("mapViewDetails")}
+                    </a>
+                  )}
+                  <div className="mt-1.5 flex gap-1.5">
+                    <a
+                      href={directionsHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex flex-1 items-center justify-center gap-1 rounded-full border border-ink/15 px-2 py-1.5 text-[11px] font-semibold text-ink hover:border-primary hover:text-primary"
+                    >
+                      <Navigation size={11} aria-hidden="true" />
+                      {t("mapDirections")}
+                    </a>
+                    <a
+                      href={googleMapsHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex flex-1 items-center justify-center gap-1 rounded-full border border-ink/15 px-2 py-1.5 text-[11px] font-semibold text-ink hover:border-primary hover:text-primary"
+                    >
+                      {t("mapOpenInMaps")}
+                      <ExternalLink size={11} aria-hidden="true" />
+                    </a>
+                  </div>
+                </div>
+              </InfoWindow>
+            )}
+          </Map>
+        )}
       </div>
     </div>
   );

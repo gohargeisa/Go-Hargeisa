@@ -9,6 +9,7 @@ import { ThemeProvider } from "@/components/layout/theme-provider";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { ServiceWorkerRegister } from "@/components/shared/service-worker-register";
+import { GoogleMapsProvider } from "@/components/map/google-maps-provider";
 import { getHeaderUser } from "@/lib/supabase/guards";
 
 // next-intl's request-based APIs read headers in the installed version, so
@@ -167,18 +168,20 @@ export default async function LocaleLayout({
           e.g. the hero's entrance animation. */}
       <LazyMotion features={domAnimation} strict>
         <ThemeProvider>
-          <div lang={currentLocale} dir={localeConfig[currentLocale].dir} className="min-h-screen font-body">
-            <a
-              href="#main-content"
-              className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg"
-            >
-              {tCommon("skipToContent")}
-            </a>
-            <SiteHeader locale={currentLocale} initialUser={initialUser} />
-            <main id="main-content">{children}</main>
-            <SiteFooter locale={currentLocale} />
-            <ServiceWorkerRegister />
-          </div>
+          <GoogleMapsProvider>
+            <div lang={currentLocale} dir={localeConfig[currentLocale].dir} className="min-h-screen font-body">
+              <a
+                href="#main-content"
+                className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg"
+              >
+                {tCommon("skipToContent")}
+              </a>
+              <SiteHeader locale={currentLocale} initialUser={initialUser} />
+              <main id="main-content">{children}</main>
+              <SiteFooter locale={currentLocale} />
+              <ServiceWorkerRegister />
+            </div>
+          </GoogleMapsProvider>
         </ThemeProvider>
       </LazyMotion>
     </NextIntlClientProvider>

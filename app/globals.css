@@ -1,11 +1,3 @@
-/* Leaflet's own stylesheet — required for tiles/panes/markers to be
-   absolutely positioned into their grid. Without it, tiles stack in normal
-   document flow instead, so only the first tile (a tiny corner) is ever
-   visible inside a map's overflow-hidden container. This was never
-   imported anywhere in the app; the `.leaflet-container` rules below only
-   ever set the container's own size, not its internal tile layout. */
-@import "leaflet/dist/leaflet.css";
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -112,16 +104,8 @@ body {
   }
 }
 
-/* Leaflet map container needs explicit height */
-.leaflet-container {
-  width: 100%;
-  height: 100%;
-  border-radius: 1.25rem;
-  z-index: 0;
-}
-
-/* Smart City Map dark mode: invert OSM tiles only, leave markers/popups
-   untouched. Scoped to .city-map-dark so it never affects other maps. */
-.city-map-dark .leaflet-tile-pane {
-  filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9);
-}
+/* No Leaflet/Google Maps container rules needed here — every map is
+   wrapped in its own `overflow-hidden rounded-xl*` Tailwind container,
+   and @vis.gl/react-google-maps' <Map> already fills 100% of its parent
+   by default (unlike Leaflet, it also needs no external stylesheet
+   import for its own tiles/panes to lay out correctly). */
