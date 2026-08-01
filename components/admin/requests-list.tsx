@@ -15,6 +15,7 @@ import {
 } from "@/lib/actions/business-requests";
 import { isConvertibleCategory, PARTNER_CATEGORY_ICON } from "@/lib/utils/partner-categories";
 import { formatTime12h } from "@/lib/utils/opening-hours";
+import { buildGoogleMapsUrl } from "@/lib/utils/google-maps";
 import type { Locale } from "@/lib/i18n/config";
 import type { BusinessRequestStatus, JoinRequestCategory, WeeklyHoursDay } from "@/types";
 
@@ -484,7 +485,7 @@ export function RequestsList({ locale, rows }: { locale: Locale; rows: RequestRo
                   </p>
                   {row.lat !== null && row.lng !== null && (
                     <a
-                      href={`https://www.google.com/maps/search/?api=1&query=${row.lat},${row.lng}`}
+                      href={buildGoogleMapsUrl(row.lat, row.lng)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-1 text-primary underline"

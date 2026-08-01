@@ -27,7 +27,7 @@ import { MobileBookingBar } from "@/components/shared/mobile-booking-bar";
 import { ListingCard } from "@/components/shared/listing-card";
 import { ReviewsSection } from "@/components/shared/reviews-section";
 import { ReviewForm } from "@/components/shared/review-form";
-import { SingleLocationMapLoader } from "@/components/map/single-location-map-loader";
+import { resolveMapsUrl, resolveDirectionsUrl } from "@/lib/utils/google-maps";
 import { Reveal } from "@/components/home/reveal";
 import { PrimaryButton, SecondaryButton } from "@/components/shared/buttons";
 
@@ -77,13 +77,8 @@ export default async function CafeDetailPage({
   const similarCafes = allCafes.filter((c) => c.id !== cafe.id).slice(0, 4);
   const whatsappFallback = (siteSettings as { whatsapp_number?: string } | null)?.whatsapp_number ?? undefined;
 
-  const hasCoordinates = Number.isFinite(cafe.location?.lat) && Number.isFinite(cafe.location?.lng);
-  const googleMapsHref = hasCoordinates
-    ? `https://www.google.com/maps/search/?api=1&query=${cafe.location.lat},${cafe.location.lng}`
-    : undefined;
-  const directionsHref = hasCoordinates
-    ? `https://www.google.com/maps/dir/?api=1&destination=${cafe.location.lat},${cafe.location.lng}`
-    : undefined;
+  const googleMapsHref = resolveMapsUrl(cafe.location);
+  const directionsHref = resolveDirectionsUrl(cafe.location);
   const amenityList: CafeAmenityCode[] =
     cafe.amenities && cafe.amenities.length > 0
       ? (cafe.amenities.filter((a): a is CafeAmenityCode => a in CAFE_AMENITY_ICON) as CafeAmenityCode[])
@@ -353,27 +348,24 @@ export default async function CafeDetailPage({
               <h2 id="location-heading" className="mb-5 font-display text-2xl font-semibold">
                 {td("location")}
               </h2>
-              <div className="overflow-hidden rounded-xl3 border border-ink/8 dark:border-white/10">
-                <SingleLocationMapLoader location={cafe.location} label={cafe.name} />
-                <div className="flex flex-col gap-3 border-t border-ink/8 p-5 dark:border-white/10 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="flex items-center gap-2 text-sm text-ink/70 dark:text-sand/70">
-                    <MapPin size={16} className="shrink-0 text-primary" aria-hidden="true" />
-                    {cafe.address}
-                  </p>
-                  <div className="flex flex-wrap gap-2.5">
-                    {directionsHref && (
-                      <PrimaryButton href={directionsHref} external size="sm">
-                        <Navigation size={14} aria-hidden="true" />
-                        {th("directions")}
-                      </PrimaryButton>
-                    )}
-                    {googleMapsHref && (
-                      <SecondaryButton href={googleMapsHref} external size="sm">
-                        {td("openInGoogleMaps")}
-                        <ExternalLink size={14} aria-hidden="true" />
-                      </SecondaryButton>
-                    )}
-                  </div>
+              <div className="flex flex-col gap-4 rounded-xl3 border border-ink/8 bg-white p-5 dark:border-white/10 dark:bg-white/[0.03] sm:flex-row sm:items-center sm:justify-between">
+                <p className="flex items-center gap-2 text-sm text-ink/70 dark:text-sand/70">
+                  <MapPin size={16} className="shrink-0 text-primary" aria-hidden="true" />
+                  {cafe.address}
+                </p>
+                <div className="flex flex-wrap gap-2.5">
+                  {directionsHref && (
+                    <PrimaryButton href={directionsHref} external size="sm">
+                      <Navigation size={14} aria-hidden="true" />
+                      {th("directions")}
+                    </PrimaryButton>
+                  )}
+                  {googleMapsHref && (
+                    <SecondaryButton href={googleMapsHref} external size="sm">
+                      {td("openInGoogleMaps")}
+                      <ExternalLink size={14} aria-hidden="true" />
+                    </SecondaryButton>
+                  )}
                 </div>
               </div>
             </section>

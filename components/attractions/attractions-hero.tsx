@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { m, useReducedMotion } from "framer-motion";
 import { ChevronDown, Compass, MapPin } from "lucide-react";
-import { PrimaryButton, SecondaryButton } from "@/components/shared/buttons";
+import { PrimaryButton } from "@/components/shared/buttons";
 
 /**
  * Single source of truth for the hero background — swap this one constant
@@ -27,14 +27,12 @@ export function AttractionsHero({
   title,
   subtitle,
   exploreLabel,
-  mapLabel,
   scrollHint,
 }: {
   eyebrow: string;
   title: string;
   subtitle: string;
   exploreLabel: string;
-  mapLabel: string;
   scrollHint: string;
 }) {
   const reduceMotion = useReducedMotion();
@@ -100,14 +98,6 @@ export function AttractionsHero({
             <Compass size={18} aria-hidden="true" />
             {exploreLabel}
           </PrimaryButton>
-          <SecondaryButton
-            href="#attractions-map"
-            size="lg"
-            className="border-white/40 bg-white/10 text-white backdrop-blur-md hover:border-white hover:bg-white/20 hover:text-white"
-          >
-            <MapPin size={18} aria-hidden="true" />
-            {mapLabel}
-          </SecondaryButton>
         </m.div>
       </div>
 

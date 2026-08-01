@@ -30,8 +30,6 @@ import { PremiumCafeCard } from "@/components/home/premium-cafe-card";
 import { PremiumAttractionCard } from "@/components/home/premium-attraction-card";
 import { OfferCard } from "@/components/home/offer-card";
 import { DiasporaWeekHero } from "@/components/diaspora-week/diaspora-week-hero";
-import { EventMapLoader } from "@/components/diaspora-week/event-map-loader";
-import type { EventMapPoint } from "@/components/diaspora-week/event-map";
 
 export const revalidate = 3600;
 
@@ -85,14 +83,6 @@ export default async function DiasporaWeekPage({
   const restaurants = restaurantsRaw;
   const cafes = cafesRaw;
   const attractions = attractionsRaw.filter((a) => a.featured);
-
-  const mapPoints: EventMapPoint[] = [
-    { id: "venue", name: t("mapVenueName"), category: "venue", location: HARGEISA_CENTER },
-    ...hotels.map((h) => ({ id: h.id, name: h.name, category: "hotel" as const, location: h.location, href: `/${locale}/hotels/${h.slug}` })),
-    ...restaurants.map((r) => ({ id: r.id, name: r.name, category: "restaurant" as const, location: r.location, href: `/${locale}/restaurants/${r.slug}` })),
-    ...cafes.map((c) => ({ id: c.id, name: c.name, category: "cafe" as const, location: c.location, href: `/${locale}/cafes/${c.slug}` })),
-    ...attractions.map((a) => ({ id: a.id, name: a.name, category: "attraction" as const, location: a.location, href: `/${locale}/attractions/${a.slug}` })),
-  ];
 
   const infoCards = [
     { icon: CalendarDays, title: t("infoDatesTitle"), body: t("infoDatesBody") },
@@ -309,18 +299,6 @@ export default async function DiasporaWeekPage({
           </div>
         </section>
       )}
-
-      {/* ============ Interactive Map ============ */}
-      <section className="bg-white py-16 dark:bg-white/[0.03] md:py-24">
-        <div className="container-px mx-auto">
-          <Reveal>
-            <PremiumSectionHeading eyebrow={t("mapEyebrow")} title={t("mapTitle")} subtitle={t("mapSubtitle")} className="mb-10 md:mb-14" />
-          </Reveal>
-          <Reveal delay={0.1}>
-            <EventMapLoader points={mapPoints} />
-          </Reveal>
-        </div>
-      </section>
 
       {/* ============ Special Offers ============ */}
       {featuredOffers.length > 0 && (

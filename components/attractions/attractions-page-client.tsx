@@ -13,7 +13,6 @@ import { AttractionsStats } from "./attractions-stats";
 import { AttractionsEmptyState } from "./attractions-empty-state";
 import { AttractionCard } from "./attraction-card";
 import { AttractionCategories } from "./attraction-categories";
-import { AttractionsMapLoader } from "./attractions-map-loader";
 
 export type AttractionSortOption = "recommended" | "rating" | "reviews" | "name";
 
@@ -97,19 +96,6 @@ export function AttractionsPageClient({ locale, attractions }: { locale: Locale;
   );
 
   const featured = useMemo(() => attractions.filter((a) => a.featured), [attractions]);
-
-  const mapPoints = useMemo(
-    () =>
-      filtered.map((a) => ({
-        id: a.id,
-        href: `/${locale}/attractions/${a.slug}`,
-        name: a.name,
-        image: a.coverImage,
-        rating: a.rating,
-        location: a.location,
-      })),
-    [filtered, locale]
-  );
 
   if (attractions.length === 0) {
     return (
@@ -238,24 +224,6 @@ export function AttractionsPageClient({ locale, attractions }: { locale: Locale;
         </section>
       )}
 
-      <section id="attractions-map" className="container-px mx-auto scroll-mt-24 py-16 md:py-24">
-        <Reveal>
-          <div className="mx-auto mb-10 max-w-2xl text-center md:mb-14">
-            <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary">
-              {tp("mapEyebrow")}
-            </span>
-            <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">
-              {tp("mapTitle")}
-            </h2>
-            <p className="mt-2 text-ink/60 dark:text-sand/60">{tp("mapSubtitle")}</p>
-          </div>
-        </Reveal>
-        <Reveal delay={0.1}>
-          <div className="h-[28rem] w-full overflow-hidden rounded-xl3 border border-ink/8 shadow-soft dark:border-white/10 md:h-[32rem]">
-            <AttractionsMapLoader points={mapPoints} openDetailsLabel={tp("mapOpenDetails")} />
-          </div>
-        </Reveal>
-      </section>
     </>
   );
 }

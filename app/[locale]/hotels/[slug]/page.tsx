@@ -31,10 +31,10 @@ import { MobileBookingBar } from "@/components/shared/mobile-booking-bar";
 import { HotelCard } from "@/components/shared/hotel-card";
 import { ReviewsSection } from "@/components/shared/reviews-section";
 import { ReviewForm } from "@/components/shared/review-form";
-import { SingleLocationMapLoader } from "@/components/map/single-location-map-loader";
 import { Reveal } from "@/components/home/reveal";
 import { PrimaryButton, SecondaryButton } from "@/components/shared/buttons";
 import { getHotelBookingCta } from "@/lib/utils/booking-cta";
+import { resolveMapsUrl, resolveDirectionsUrl } from "@/lib/utils/google-maps";
 import {
   HOTELS_PRESENTATION_MODE,
   PRESENTATION_HOTEL_SLUG,
@@ -112,13 +112,8 @@ export default async function HotelDetailPage({
     { id: "location", label: td("location") },
   ];
 
-  const hasCoordinates = Number.isFinite(hotel.location?.lat) && Number.isFinite(hotel.location?.lng);
-  const googleMapsHref = hasCoordinates
-    ? `https://www.google.com/maps/search/?api=1&query=${hotel.location.lat},${hotel.location.lng}`
-    : undefined;
-  const directionsHref = hasCoordinates
-    ? `https://www.google.com/maps/dir/?api=1&destination=${hotel.location.lat},${hotel.location.lng}`
-    : undefined;
+  const googleMapsHref = resolveMapsUrl(hotel.location);
+  const directionsHref = resolveDirectionsUrl(hotel.location);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -278,27 +273,24 @@ export default async function HotelDetailPage({
               <h2 id="location-heading" className="mb-5 font-display text-2xl font-semibold">
                 {td("location")}
               </h2>
-              <div className="overflow-hidden rounded-xl3 border border-ink/8 dark:border-white/10">
-                <SingleLocationMapLoader location={hotel.location} label={hotel.name} />
-                <div className="flex flex-col gap-3 border-t border-ink/8 p-5 dark:border-white/10 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="flex items-center gap-2 text-sm text-ink/70 dark:text-sand/70">
-                    <MapPin size={16} className="shrink-0 text-primary" aria-hidden="true" />
-                    {hotel.address}
-                  </p>
-                  <div className="flex flex-wrap gap-2.5">
-                    {directionsHref && (
-                      <PrimaryButton href={directionsHref} external size="sm">
-                        <Navigation size={14} aria-hidden="true" />
-                        {th("directions")}
-                      </PrimaryButton>
-                    )}
-                    {googleMapsHref && (
-                      <SecondaryButton href={googleMapsHref} external size="sm">
-                        {td("openInGoogleMaps")}
-                        <ExternalLink size={14} aria-hidden="true" />
-                      </SecondaryButton>
-                    )}
-                  </div>
+              <div className="flex flex-col gap-4 rounded-xl3 border border-ink/8 bg-white p-5 dark:border-white/10 dark:bg-white/[0.03] sm:flex-row sm:items-center sm:justify-between">
+                <p className="flex items-center gap-2 text-sm text-ink/70 dark:text-sand/70">
+                  <MapPin size={16} className="shrink-0 text-primary" aria-hidden="true" />
+                  {hotel.address}
+                </p>
+                <div className="flex flex-wrap gap-2.5">
+                  {directionsHref && (
+                    <PrimaryButton href={directionsHref} external size="sm">
+                      <Navigation size={14} aria-hidden="true" />
+                      {th("directions")}
+                    </PrimaryButton>
+                  )}
+                  {googleMapsHref && (
+                    <SecondaryButton href={googleMapsHref} external size="sm">
+                      {td("openInGoogleMaps")}
+                      <ExternalLink size={14} aria-hidden="true" />
+                    </SecondaryButton>
+                  )}
                 </div>
               </div>
             </section>

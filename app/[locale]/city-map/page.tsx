@@ -22,7 +22,7 @@ export async function generateMetadata({
   return {
     title: "Smart City Map — Hargeisa Services",
     description:
-      "Find hospitals, pharmacies, mosques, ATMs, schools and other essential city services around Hargeisa on an interactive map.",
+      "Find hospitals, pharmacies, mosques, ATMs, schools and other essential city services around Hargeisa, each with directions straight to Google Maps.",
     alternates: localeAlternates(locale as Locale, "/city-map"),
   };
 }
@@ -47,9 +47,7 @@ export default async function CityMapPage({
       />
 
       <section className="container-px mx-auto py-8 md:py-10">
-        <div className="overflow-hidden rounded-xl3 border border-ink/8 shadow-card dark:border-white/10">
-          <CityMapExperience points={points} locale={locale} />
-        </div>
+        <CityMapExperience points={points} locale={locale} />
       </section>
     </>
   );

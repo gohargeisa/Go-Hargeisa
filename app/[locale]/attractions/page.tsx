@@ -53,7 +53,6 @@ export default async function AttractionsPage({
         title={t("attractionsTitle")}
         subtitle={tp("heroSubtitle")}
         exploreLabel={tp("heroExplore")}
-        mapLabel={tp("heroViewMap")}
         scrollHint={tp("scrollHint")}
       />
 

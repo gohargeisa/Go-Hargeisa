@@ -19,7 +19,7 @@ import { ServiceActionCard } from "@/components/shared/service-action-card";
 import { ServiceCard } from "@/components/shared/service-card";
 import { ReviewsSection } from "@/components/shared/reviews-section";
 import { ReviewForm } from "@/components/shared/review-form";
-import { SingleLocationMapLoader } from "@/components/map/single-location-map-loader";
+import { resolveMapsUrl, resolveDirectionsUrl } from "@/lib/utils/google-maps";
 import { Reveal } from "@/components/home/reveal";
 import {
   categoryFromSlug,
@@ -80,13 +80,8 @@ export default async function ServiceDetailPage({
   const similarServices = allServices.filter((s) => s.id !== service.id).slice(0, 4);
   const whatsappFallback = (siteSettings as { whatsapp_number?: string } | null)?.whatsapp_number ?? undefined;
 
-  const hasCoordinates = Number.isFinite(service.location?.lat) && Number.isFinite(service.location?.lng);
-  const googleMapsHref = hasCoordinates
-    ? `https://www.google.com/maps/search/?api=1&query=${service.location.lat},${service.location.lng}`
-    : undefined;
-  const directionsHref = hasCoordinates
-    ? `https://www.google.com/maps/dir/?api=1&destination=${service.location.lat},${service.location.lng}`
-    : undefined;
+  const googleMapsHref = resolveMapsUrl(service.location);
+  const directionsHref = resolveDirectionsUrl(service.location);
 
   const navTabs: HotelNavTab[] = [
     { id: "overview", label: td("overview") },
@@ -197,37 +192,34 @@ export default async function ServiceDetailPage({
               <h2 id="location-heading" className="mb-5 font-display text-2xl font-semibold">
                 {td("location")}
               </h2>
-              <div className="overflow-hidden rounded-xl3 border border-ink/8 dark:border-white/10">
-                <SingleLocationMapLoader location={service.location} label={service.name} />
-                <div className="flex flex-col gap-3 border-t border-ink/8 p-5 dark:border-white/10 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="flex items-center gap-2 text-sm text-ink/70 dark:text-sand/70">
-                    <MapPin size={16} className="shrink-0 text-primary" aria-hidden="true" />
-                    {service.address}
-                  </p>
-                  <div className="flex flex-wrap gap-2.5">
-                    {directionsHref && (
-                      <a
-                        href={directionsHref}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-700"
-                      >
-                        <Navigation size={14} aria-hidden="true" />
-                        {th("directions")}
-                      </a>
-                    )}
-                    {googleMapsHref && (
-                      <a
-                        href={googleMapsHref}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center gap-1.5 rounded-full border border-ink/15 px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
-                      >
-                        {td("openInGoogleMaps")}
-                        <ExternalLink size={14} aria-hidden="true" />
-                      </a>
-                    )}
-                  </div>
+              <div className="flex flex-col gap-4 rounded-xl3 border border-ink/8 bg-white p-5 dark:border-white/10 dark:bg-white/[0.03] sm:flex-row sm:items-center sm:justify-between">
+                <p className="flex items-center gap-2 text-sm text-ink/70 dark:text-sand/70">
+                  <MapPin size={16} className="shrink-0 text-primary" aria-hidden="true" />
+                  {service.address}
+                </p>
+                <div className="flex flex-wrap gap-2.5">
+                  {directionsHref && (
+                    <a
+                      href={directionsHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-700"
+                    >
+                      <Navigation size={14} aria-hidden="true" />
+                      {th("directions")}
+                    </a>
+                  )}
+                  {googleMapsHref && (
+                    <a
+                      href={googleMapsHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-1.5 rounded-full border border-ink/15 px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
+                    >
+                      {td("openInGoogleMaps")}
+                      <ExternalLink size={14} aria-hidden="true" />
+                    </a>
+                  )}
                 </div>
               </div>
             </section>

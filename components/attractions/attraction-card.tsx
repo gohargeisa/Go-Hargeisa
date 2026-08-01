@@ -11,6 +11,7 @@ import { AnimatedCard } from "@/components/shared/animated-card";
 import { FloatingBadge } from "@/components/shared/floating-badge";
 import { PrimaryButton, SecondaryButton } from "@/components/shared/buttons";
 import { getCategoryMeta } from "@/lib/config/attraction-categories";
+import { resolveDirectionsUrl } from "@/lib/utils/google-maps";
 import type { Coordinates } from "@/types";
 
 export function AttractionCard({
@@ -58,10 +59,7 @@ export function AttractionCard({
   const CategoryIcon = categoryMeta.icon;
   const categoryLabel = tp(categoryMeta.labelKey);
 
-  const hasCoordinates = Number.isFinite(location?.lat) && Number.isFinite(location?.lng);
-  const directionsHref = hasCoordinates
-    ? `https://www.google.com/maps/dir/?api=1&destination=${location.lat},${location.lng}`
-    : undefined;
+  const directionsHref = resolveDirectionsUrl(location);
 
   function onToggleFavorite() {
     if (!attractionId) return;

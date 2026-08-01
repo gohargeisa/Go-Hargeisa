@@ -4,17 +4,14 @@ import type { CityServicePoint, ServiceCategory } from "@/types";
 import { CATEGORY_CONFIG } from "@/components/city-map/category-config";
 import { ClaimBusinessButton } from "@/components/shared/claim-business-button";
 import { serviceHref } from "@/lib/utils/service-categories";
+import { resolveMapsUrl, resolveDirectionsUrl } from "@/lib/utils/google-maps";
 
 export function PointInfoCard({ point, locale = "en" }: { point: CityServicePoint; locale?: string }) {
   const meta = CATEGORY_CONFIG[point.category];
   const Icon = meta.icon;
   const hasCoordinates = Number.isFinite(point.location?.lat) && Number.isFinite(point.location?.lng);
-  const googleMapsHref = hasCoordinates
-    ? `https://www.google.com/maps/search/?api=1&query=${point.location.lat},${point.location.lng}`
-    : undefined;
-  const directionsHref = hasCoordinates
-    ? `https://www.google.com/maps/dir/?api=1&destination=${point.location.lat},${point.location.lng}`
-    : undefined;
+  const googleMapsHref = resolveMapsUrl(point.location);
+  const directionsHref = resolveDirectionsUrl(point.location);
 
   // Only Phase 2 `services` points carry a slug — that's what distinguishes
   // them from legacy map_points pins, which have no detail page to link to.

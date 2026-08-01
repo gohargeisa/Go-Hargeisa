@@ -2,20 +2,24 @@
 
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { MapPin } from "lucide-react";
 import type { CityServiceCategory, CityServicePoint } from "@/types";
 import { CATEGORY_ORDER } from "@/components/city-map/category-config";
 import { CategoryFilters } from "@/components/city-map/category-filters";
 import { CitySearchBar } from "@/components/city-map/city-search-bar";
 import { PointInfoCard } from "@/components/city-map/point-info-card";
 import { CityMapEmptyState } from "@/components/city-map/empty-state";
-import { CityMapLoader } from "@/components/map/city-map-loader";
-import { BottomSheet } from "@/components/shared/bottom-sheet";
 
 function isCityServiceCategory(value: string | null): value is CityServiceCategory {
   return !!value && (CATEGORY_ORDER as string[]).includes(value);
 }
 
+/**
+ * No embedded map — this is a searchable/filterable list of every city
+ * service, each card linking straight out to Google Maps (View on Map/
+ * Directions) rather than showing a pin on an in-page map. Same
+ * search/category-filter UI as before; only the map-in-the-middle layout
+ * was replaced with a card grid.
+ */
 export function CityMapExperience({ points, locale }: { points: CityServicePoint[]; locale: string }) {
   const searchParams = useSearchParams();
   // Lets homepage category cards (?category=hospital) land pre-filtered
@@ -25,7 +29,6 @@ export function CityMapExperience({ points, locale }: { points: CityServicePoint
     return isCityServiceCategory(requested) ? new Set([requested]) : new Set(CATEGORY_ORDER);
   });
   const [query, setQuery] = useState("");
-  const [selected, setSelected] = useState<CityServicePoint | null>(null);
 
   const counts = useMemo(() => {
     const record = Object.fromEntries(CATEGORY_ORDER.map((c) => [c, 0])) as Record<CityServiceCategory, number>;
@@ -51,60 +54,42 @@ export function CityMapExperience({ points, locale }: { points: CityServicePoint
 
   const hasAnyData = points.length > 0;
 
+  if (!hasAnyData) {
+    return (
+      <div className="flex min-h-[420px] items-center justify-center rounded-xl3 border border-dashed border-ink/15 bg-ink/[0.02] dark:border-white/15 dark:bg-white/[0.02]">
+        <CityMapEmptyState
+          title="No city services added yet"
+          description="Check back soon — hospitals, mosques, pharmacies and more will appear here as they're added."
+        />
+      </div>
+    );
+  }
+
   return (
-    <div className="flex h-[75vh] min-h-[560px] w-full overflow-hidden">
-      <div className="relative flex-1">
-        {hasAnyData ? (
-          <CityMapLoader points={visible} onSelectPoint={setSelected} />
-        ) : (
-          <div className="flex h-full items-center justify-center bg-ink/5 dark:bg-white/5">
-            <CityMapEmptyState
-              title="No city services added yet"
-              description="Check back soon — hospitals, mosques, pharmacies and more will appear here as they're added."
-            />
-          </div>
-        )}
-
-        {hasAnyData && (
-          <div className="pointer-events-none absolute inset-x-0 top-0 z-[15] flex flex-col gap-3 p-4">
-            <div className="pointer-events-auto mx-auto w-full max-w-md">
-              <CitySearchBar value={query} onChange={setQuery} />
-            </div>
-            <div className="pointer-events-auto">
-              <CategoryFilters counts={counts} active={active} onToggle={toggleCategory} />
-            </div>
-          </div>
-        )}
-
-        {hasAnyData && visible.length === 0 && (
-          <div className="pointer-events-none absolute inset-0 z-[12] flex items-center justify-center">
-            <div className="pointer-events-auto rounded-2xl bg-white/95 shadow-lg backdrop-blur-sm dark:bg-ink/90">
-              <CityMapEmptyState />
-            </div>
-          </div>
-        )}
+    <div className="flex w-full flex-col gap-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="w-full sm:max-w-md">
+          <CitySearchBar value={query} onChange={setQuery} />
+        </div>
+        <CategoryFilters counts={counts} active={active} onToggle={toggleCategory} />
       </div>
 
-      {/* Desktop side panel */}
-      <aside className="hidden w-80 shrink-0 overflow-y-auto border-s border-ink/10 bg-white/95 p-5 dark:border-white/10 dark:bg-ink/95 lg:block">
-        {selected ? (
-          <PointInfoCard point={selected} locale={locale} />
-        ) : (
-          <div className="flex h-full flex-col items-center justify-center gap-2 py-6 text-center">
-            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary">
-              <MapPin size={20} aria-hidden="true" />
-            </span>
-            <p className="text-sm font-semibold text-ink dark:text-white">Tap a marker</p>
-            <p className="max-w-[200px] text-xs text-ink/50 dark:text-sand/50">
-              Select any pin on the map to see its details here.
-            </p>
-          </div>
-        )}
-      </aside>
-
-      <BottomSheet open={selected !== null} onClose={() => setSelected(null)} title={selected?.name}>
-        {selected && <PointInfoCard point={selected} locale={locale} />}
-      </BottomSheet>
+      {visible.length === 0 ? (
+        <div className="flex min-h-[300px] items-center justify-center rounded-xl3 border border-dashed border-ink/15 dark:border-white/15">
+          <CityMapEmptyState />
+        </div>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {visible.map((point) => (
+            <div
+              key={point.id}
+              className="rounded-2xl border border-ink/8 bg-white p-5 shadow-soft transition-shadow duration-300 ease-premium hover:shadow-card dark:border-white/10 dark:bg-white/[0.03]"
+            >
+              <PointInfoCard point={point} locale={locale} />
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

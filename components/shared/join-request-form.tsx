@@ -2,12 +2,12 @@
 
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { Check, Loader2, AlertCircle, MapPin } from "lucide-react";
+import { Check, Loader2, AlertCircle } from "lucide-react";
 import { submitJoinRequest } from "@/lib/actions/business-requests";
 import { ImageUploader } from "@/components/shared/image-uploader";
 import { GalleryManager } from "@/components/admin/gallery-manager";
 import { PdfUploader } from "@/components/admin/pdf-uploader";
-import { LocationPickerLoader } from "@/components/map/location-picker-loader";
+import { CoordinatesInput } from "@/components/shared/coordinates-input";
 import {
   PARTNER_CATEGORIES,
   PARTNER_CATEGORY_ICON,
@@ -249,13 +249,15 @@ export function JoinRequestForm() {
           <div>
             <label className={labelClass}>{t("mapPickerLabel")}</label>
             <p className="mb-2.5 text-xs text-ink/50 dark:text-sand/50">{t("mapPickerHint")}</p>
-            <LocationPickerLoader value={location} onChange={setLocation} />
-            {location && (
-              <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-secondary-700 dark:text-sand/70">
-                <MapPin size={13} className="shrink-0" aria-hidden="true" />
-                {t("locationPickedLabel", { lat: location.lat.toFixed(5), lng: location.lng.toFixed(5) })}
-              </p>
-            )}
+            <CoordinatesInput
+              value={location}
+              onChange={setLocation}
+              pasteLabel={t("coordPasteLabel")}
+              pasteErrorLabel={t("coordPasteError")}
+              latLabel={t("coordLatLabel")}
+              lngLabel={t("coordLngLabel")}
+              confirmedLabel={(lat, lng) => t("locationPickedLabel", { lat, lng })}
+            />
           </div>
 
           <div>

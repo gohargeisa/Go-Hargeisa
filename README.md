@@ -154,9 +154,8 @@ components/
   admin/      # AdminListTable, form-shared (Field/TagInput), one *-form.tsx per content type
   dashboard/  # DashboardTabs, SavedTripsPanel, ReviewsPanel, ProfilePanel
   shared/     # gallery, reviews, review form, listing card (favorite toggle), search box,
-              # breadcrumbs, image uploader, delete button, add-to-trip button, flag icon
-  map/        # Google Maps (@vis.gl/react-google-maps, dynamically imported, no SSR),
-              # requires NEXT_PUBLIC_GOOGLE_MAPS_API_KEY + NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID
+              # breadcrumbs, image uploader, delete button, add-to-trip button, flag icon,
+              # coordinates-input (paste-a-Google-Maps-link-or-type-lat/lng, no map/API key)
 lib/
   supabase/   # server.ts (cookie-aware, for auth-dependent reads/writes), public.ts
               # (no cookies — for public content, enables ISR), client.ts (browser), storage.ts
@@ -259,13 +258,13 @@ Verified by static analysis in this sandbox (no network access):
 - No Somalia flag emoji or references anywhere in the codebase
 
 **Not verified** (requires an actual environment): a real `npm install && npm run build`, ESLint
-passing cleanly beyond config validity, runtime behavior of the Supabase auth cookie flow, and
-Google Maps rendering (requires a real API key + Map ID). Run `.github/workflows/ci.yml`'s steps
-locally first if you want a final check before deploying.
+passing cleanly beyond config validity, and runtime behavior of the Supabase auth cookie flow. Run
+`.github/workflows/ci.yml`'s steps locally first if you want a final check before deploying.
 
 ---
 
 ## 11. Tech stack
 
 Next.js 14 · React 18 · TypeScript · Tailwind CSS · Supabase (Postgres + Auth + Storage) ·
-next-intl · Framer Motion · @vis.gl/react-google-maps (Google Maps) · lucide-react · next-themes.
+next-intl · Framer Motion · lucide-react · next-themes. No map SDK of any kind — every location
+action is a plain link out to Google Maps (lib/utils/google-maps.ts).

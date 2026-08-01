@@ -23,20 +23,14 @@ const nextConfig = {
   },
   async headers() {
     // CSP origins are an exact inventory of what this app actually loads —
-    // verified by grep, not guessed: Supabase (API + Storage), the two
+    // verified by grep, not guessed: Supabase (API + Storage) and the two
     // placeholder-image hosts already declared in images.remotePatterns
-    // above, and Google Maps JS API (components/map/*.tsx, replacing the
-    // Leaflet/OpenStreetMap tiles this app used to load). Origins below
-    // match Google's own documented CSP requirements for the Maps
-    // JavaScript API + Advanced Markers (which need `worker-src blob:` —
-    // vector map rendering loads its renderer via a Web Worker).
-    const connectSrc = [
-      "'self'",
-      "https://*.supabase.co",
-      "wss://*.supabase.co",
-      "https://maps.googleapis.com",
-      "https://maps.gstatic.com",
-    ];
+    // above. No map SDK/embed of any kind runs in this app — every "View
+    // on Map"/"Directions" action is a plain <a target="_blank"> out to
+    // Google Maps (lib/utils/google-maps.ts), which needs no CSP entry
+    // since it's a normal top-level navigation, not a fetch/script/iframe
+    // load this page makes itself.
+    const connectSrc = ["'self'", "https://*.supabase.co", "wss://*.supabase.co"];
     const imgSrc = [
       "'self'",
       "data:",
@@ -44,21 +38,17 @@ const nextConfig = {
       "https://*.supabase.co",
       "https://images.unsplash.com",
       "https://placehold.co",
-      "https://maps.googleapis.com",
-      "https://maps.gstatic.com",
-      "https://*.gstatic.com",
     ];
     const csp = [
       `default-src 'self'`,
       // Next.js's own hydration bootstrap and this app's inline JSON-LD
       // <script> tags need 'unsafe-inline' without a nonce-based setup;
       // JSON-LD content itself is escaped separately (lib/utils/json-ld.ts).
-      `script-src 'self' 'unsafe-inline' https://maps.googleapis.com`,
+      `script-src 'self' 'unsafe-inline'`,
       `style-src 'self' 'unsafe-inline'`,
       `img-src ${imgSrc.join(" ")}`,
       `font-src 'self' data:`,
       `connect-src ${connectSrc.join(" ")}`,
-      `worker-src 'self' blob:`,
       `frame-src 'none'`,
       `object-src 'none'`,
       `base-uri 'self'`,
