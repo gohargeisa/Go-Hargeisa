@@ -14,10 +14,15 @@ import type { EssentialServiceCategory } from "@/types";
 export interface CityServiceFormInput {
   category: EssentialServiceCategory;
   name: string;
+  nameAr: string;
+  nameSo: string;
   description: string;
+  descriptionAr: string;
+  descriptionSo: string;
   phone: string;
   openingHours: string;
   mapsUrl: string;
+  website: string;
   image: string;
   featured: boolean;
 }
@@ -38,10 +43,15 @@ export function CityServiceForm({
   const [form, setForm] = useState<CityServiceFormInput>({
     category: initial?.category ?? "hospital",
     name: initial?.name ?? "",
+    nameAr: initial?.nameAr ?? "",
+    nameSo: initial?.nameSo ?? "",
     description: initial?.description ?? "",
+    descriptionAr: initial?.descriptionAr ?? "",
+    descriptionSo: initial?.descriptionSo ?? "",
     phone: initial?.phone ?? "",
     openingHours: initial?.openingHours ?? "",
     mapsUrl: initial?.mapsUrl ?? "",
+    website: initial?.website ?? "",
     image: initial?.image ?? "",
     featured: initial?.featured ?? false,
   });
@@ -63,10 +73,15 @@ export function CityServiceForm({
     const payload = {
       category: form.category,
       name: form.name,
+      nameAr: form.nameAr || undefined,
+      nameSo: form.nameSo || undefined,
       description: form.description || undefined,
+      descriptionAr: form.descriptionAr || undefined,
+      descriptionSo: form.descriptionSo || undefined,
       phone: form.phone || undefined,
       openingHours: form.openingHours || undefined,
       mapsUrl: form.mapsUrl || undefined,
+      website: form.website || undefined,
       image: form.image || undefined,
       featured: form.featured,
     };
@@ -108,8 +123,27 @@ export function CityServiceForm({
         </Field>
       </div>
 
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label={t("cityServiceNameArLabel")}>
+          <input dir="rtl" value={form.nameAr} onChange={(e) => update("nameAr", e.target.value)} className={inputClass} />
+        </Field>
+        <Field label={t("cityServiceNameSoLabel")}>
+          <input value={form.nameSo} onChange={(e) => update("nameSo", e.target.value)} className={inputClass} />
+        </Field>
+      </div>
+
       <Field label={t("phoneLabel")}>
         <input value={form.phone} onChange={(e) => update("phone", e.target.value)} className={inputClass} placeholder="+252 63 000 0000" />
+      </Field>
+
+      <Field label={t("websiteLabel")}>
+        <input
+          type="url"
+          value={form.website}
+          onChange={(e) => update("website", e.target.value)}
+          className={inputClass}
+          placeholder="https://…"
+        />
       </Field>
 
       <Field label={t("openingHoursShortLabel")}>
@@ -133,6 +167,14 @@ export function CityServiceForm({
           onChange={(e) => update("description", e.target.value)}
           className={inputClass}
         />
+      </Field>
+
+      <Field label={t("fullDescriptionArLabel")}>
+        <textarea dir="rtl" rows={3} value={form.descriptionAr} onChange={(e) => update("descriptionAr", e.target.value)} className={inputClass} />
+      </Field>
+
+      <Field label={t("fullDescriptionSoLabel")}>
+        <textarea rows={3} value={form.descriptionSo} onChange={(e) => update("descriptionSo", e.target.value)} className={inputClass} />
       </Field>
 
       <label className="flex items-center gap-2.5 text-sm font-semibold">

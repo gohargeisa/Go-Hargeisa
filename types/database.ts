@@ -86,8 +86,9 @@ type BusinessOfferRow = {
 type CityServiceCategoryDb = "hospital" | "bank" | "supermarket" | "pharmacy";
 
 type CityServiceRow = {
-  id: string; category: CityServiceCategoryDb; name: string; description: string | null; phone: string | null;
-  opening_hours: string | null; maps_url: string | null; image: string | null;
+  id: string; category: CityServiceCategoryDb; name: string; name_ar: string | null; name_so: string | null;
+  description: string | null; description_ar: string | null; description_so: string | null;
+  phone: string | null; opening_hours: string | null; maps_url: string | null; website: string | null; image: string | null;
   status: "draft" | "published" | "archived"; featured: boolean; sort_order: number;
   created_at: string; updated_at: string;
 };

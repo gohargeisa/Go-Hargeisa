@@ -964,6 +964,8 @@
     "addCityServiceTitle": "Ku dar Adeeg Magaalo",
     "editCityServiceTitle": "Wax ka beddel Adeegga Magaalada",
     "cityServiceNameLabel": "Magaca",
+    "cityServiceNameArLabel": "Magaca (Carabi)",
+    "cityServiceNameSoLabel": "Magaca (Soomaali)",
     "cityServiceCategoryLabel": "Qaybta",
     "categoryHospital": "Isbitaal",
     "categoryBank": "Bangi",
@@ -1703,6 +1705,7 @@
     "comingSoonTitle": "Dhawaan",
     "comingSoonDescription": "Xogta waxaa ku dari doona kooxda Go Hargeisa.",
     "viewOnMaps": "Ka eeg Khariidadda",
+    "visitWebsite": "Booqo Websaydka",
     "callNow": "Wac"
   },
   "attractionsPage": {

@@ -21,10 +21,15 @@ async function assertOwner() {
 export interface CityServiceInput {
   category: EssentialServiceCategory;
   name: string;
+  nameAr?: string;
+  nameSo?: string;
   description?: string;
+  descriptionAr?: string;
+  descriptionSo?: string;
   phone?: string;
   openingHours?: string;
   mapsUrl?: string;
+  website?: string;
   image?: string;
   featured?: boolean;
 }
@@ -63,10 +68,15 @@ export async function createCityService(
   const { error } = await supabase.from("city_services").insert({
     category: input.category,
     name: input.name.trim(),
+    name_ar: input.nameAr?.trim() || null,
+    name_so: input.nameSo?.trim() || null,
     description: input.description?.trim() || null,
+    description_ar: input.descriptionAr?.trim() || null,
+    description_so: input.descriptionSo?.trim() || null,
     phone: input.phone?.trim() || null,
     opening_hours: input.openingHours?.trim() || null,
     maps_url: input.mapsUrl?.trim() || null,
+    website: input.website?.trim() || null,
     image: input.image || null,
     status: "published",
     featured: input.featured ?? false,
@@ -96,10 +106,15 @@ export async function updateCityService(
     .update({
       category: input.category,
       name: input.name.trim(),
+      name_ar: input.nameAr?.trim() || null,
+      name_so: input.nameSo?.trim() || null,
       description: input.description?.trim() || null,
+      description_ar: input.descriptionAr?.trim() || null,
+      description_so: input.descriptionSo?.trim() || null,
       phone: input.phone?.trim() || null,
       opening_hours: input.openingHours?.trim() || null,
       maps_url: input.mapsUrl?.trim() || null,
+      website: input.website?.trim() || null,
       image: input.image || null,
       featured: input.featured ?? false,
       updated_at: new Date().toISOString(),

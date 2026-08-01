@@ -22,6 +22,7 @@ const staticRoutes = [
   "restaurants",
   "cafes",
   "attractions",
+  "city-services",
   "shopping",
   "events",
   "travel-guide",

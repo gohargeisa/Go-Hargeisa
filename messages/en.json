@@ -964,6 +964,8 @@
     "addCityServiceTitle": "Add City Service",
     "editCityServiceTitle": "Edit City Service",
     "cityServiceNameLabel": "Name",
+    "cityServiceNameArLabel": "Name (Arabic)",
+    "cityServiceNameSoLabel": "Name (Somali)",
     "cityServiceCategoryLabel": "Category",
     "categoryHospital": "Hospital",
     "categoryBank": "Bank",
@@ -1703,6 +1705,7 @@
     "comingSoonTitle": "Coming Soon",
     "comingSoonDescription": "Information will be added by the Go Hargeisa team.",
     "viewOnMaps": "View on Maps",
+    "visitWebsite": "Visit Website",
     "callNow": "Call"
   },
   "attractionsPage": {

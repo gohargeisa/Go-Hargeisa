@@ -2,27 +2,36 @@ import { createPublicClient } from "@/lib/supabase/public";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import type { CityService, EssentialServiceCategory } from "@/types";
 
-function mapCityService(row: {
-  id: string;
-  category: EssentialServiceCategory;
-  name: string;
-  description: string | null;
-  phone: string | null;
-  opening_hours: string | null;
-  maps_url: string | null;
-  image: string | null;
-  status: "draft" | "published" | "archived";
-  featured: boolean;
-  sort_order: number;
-}): CityService {
+function mapCityService(
+  row: {
+    id: string;
+    category: EssentialServiceCategory;
+    name: string;
+    name_ar: string | null;
+    name_so: string | null;
+    description: string | null;
+    description_ar: string | null;
+    description_so: string | null;
+    phone: string | null;
+    opening_hours: string | null;
+    maps_url: string | null;
+    website: string | null;
+    image: string | null;
+    status: "draft" | "published" | "archived";
+    featured: boolean;
+    sort_order: number;
+  },
+  locale?: string
+): CityService {
   return {
     id: row.id,
     category: row.category,
-    name: row.name,
-    description: row.description,
+    name: (locale === "ar" && row.name_ar) || (locale === "so" && row.name_so) || row.name,
+    description: (locale === "ar" && row.description_ar) || (locale === "so" && row.description_so) || row.description,
     phone: row.phone,
     openingHours: row.opening_hours,
     mapsUrl: row.maps_url,
+    website: row.website,
     image: row.image,
     status: row.status,
     featured: row.featured,
@@ -38,7 +47,7 @@ function mapCityService(row: {
  * ship empty (see Phase 2 product decision — no fabricated city services)
  * until the owner adds real entries, so "not configured" and "configured
  * but empty" both correctly render as empty categories. */
-export async function getCityServicesByCategory(category: EssentialServiceCategory): Promise<CityService[]> {
+export async function getCityServicesByCategory(category: EssentialServiceCategory, locale?: string): Promise<CityService[]> {
   if (!isSupabaseConfigured()) return [];
 
   const supabase = createPublicClient();
@@ -55,12 +64,12 @@ export async function getCityServicesByCategory(category: EssentialServiceCatego
     if (process.env.NODE_ENV === "development") console.error("getCityServicesByCategory:", error.message);
     return [];
   }
-  return (data ?? []).map(mapCityService);
+  return (data ?? []).map((row) => mapCityService(row, locale));
 }
 
-export async function getAllCityServices(): Promise<Record<EssentialServiceCategory, CityService[]>> {
+export async function getAllCityServices(locale?: string): Promise<Record<EssentialServiceCategory, CityService[]>> {
   const categories: EssentialServiceCategory[] = ["hospital", "bank", "supermarket", "pharmacy"];
-  const results = await Promise.all(categories.map((c) => getCityServicesByCategory(c)));
+  const results = await Promise.all(categories.map((c) => getCityServicesByCategory(c, locale)));
   return {
     hospital: results[0],
     bank: results[1],

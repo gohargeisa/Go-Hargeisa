@@ -9,11 +9,22 @@ import { Reveal } from "@/components/home/reveal";
 import { getAllCityServices } from "@/lib/data/city-services";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
+import { safeJsonLd } from "@/lib/utils/json-ld";
 import type { CityService, EssentialServiceCategory } from "@/types";
 
 export const revalidate = 3600;
 
 const SLOTS_PER_CATEGORY = 4;
+
+/** schema.org type per category — used to build one structured-data entry
+ * per published+featured city service (see the @graph built in the page
+ * component below). */
+const CATEGORY_SCHEMA_TYPE: Record<EssentialServiceCategory, string> = {
+  hospital: "Hospital",
+  bank: "BankOrCreditUnion",
+  supermarket: "GroceryStore",
+  pharmacy: "Pharmacy",
+};
 
 /** Reuses the shared hero photo — same swap-in-place pattern as attractions-hero.tsx / about-hero.tsx. */
 const CITY_SERVICES_HERO_IMAGE = "/images/hero-bg.png";
@@ -64,7 +75,7 @@ function CategorySection({
 
 export default async function CityServicesPage({ params: { locale } }: { params: { locale: string } }) {
   const t = await getTranslations({ locale, namespace: "cityServices" });
-  const byCategory = await getAllCityServices();
+  const byCategory = await getAllCityServices(locale);
 
   const sections: { key: EssentialServiceCategory; title: string; icon: typeof Hospital }[] = [
     { key: "hospital", title: t("hospitalsTitle"), icon: Hospital },
@@ -73,8 +84,27 @@ export default async function CityServicesPage({ params: { locale } }: { params:
     { key: "pharmacy", title: t("pharmaciesTitle"), icon: Pill },
   ];
 
+  const allServices = Object.values(byCategory).flat();
+  const jsonLd =
+    allServices.length > 0
+      ? {
+          "@context": "https://schema.org",
+          "@graph": allServices.map((s) => ({
+            "@type": CATEGORY_SCHEMA_TYPE[s.category],
+            name: s.name,
+            description: s.description ?? undefined,
+            image: s.image ?? undefined,
+            telephone: s.phone ?? undefined,
+            url: s.website ?? undefined,
+            address: { "@type": "PostalAddress", addressLocality: "Hargeisa", addressCountry: "Somaliland" },
+          })),
+        }
+      : null;
+
   return (
     <>
+      {jsonLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />}
+
       <PremiumPageHero
         image={CITY_SERVICES_HERO_IMAGE}
         imageAlt="Panoramic view of Hargeisa"

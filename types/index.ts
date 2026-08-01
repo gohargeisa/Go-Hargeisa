@@ -479,11 +479,14 @@ export type EssentialServiceCategory = "hospital" | "bank" | "supermarket" | "ph
 export interface CityService {
   id: string;
   category: EssentialServiceCategory;
+  /** Already resolved to the request locale (falls back to English) —
+   * see lib/data/city-services.ts, same pattern as Cafe.description. */
   name: string;
   description: string | null;
   phone: string | null;
   openingHours: string | null;
   mapsUrl: string | null;
+  website: string | null;
   image: string | null;
   status: "draft" | "published" | "archived";
   featured: boolean;

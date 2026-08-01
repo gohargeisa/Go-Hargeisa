@@ -964,6 +964,8 @@
     "addCityServiceTitle": "إضافة خدمة مدينة",
     "editCityServiceTitle": "تعديل خدمة المدينة",
     "cityServiceNameLabel": "الاسم",
+    "cityServiceNameArLabel": "الاسم (بالعربية)",
+    "cityServiceNameSoLabel": "الاسم (بالصومالية)",
     "cityServiceCategoryLabel": "الفئة",
     "categoryHospital": "مستشفى",
     "categoryBank": "بنك",
@@ -1703,6 +1705,7 @@
     "comingSoonTitle": "قريباً",
     "comingSoonDescription": "سيتم إضافة المعلومات من قبل فريق Go Hargeisa.",
     "viewOnMaps": "عرض على الخريطة",
+    "visitWebsite": "زيارة الموقع الإلكتروني",
     "callNow": "اتصال"
   },
   "attractionsPage": {

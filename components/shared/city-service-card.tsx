@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Phone, Clock, MapPin, ImageOff } from "lucide-react";
+import { Phone, Clock, MapPin, Globe, ImageOff } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { AnimatedCard } from "./animated-card";
 import { SecondaryButton } from "./buttons";
@@ -38,6 +38,12 @@ export function CityServiceCard({ service }: { service: CityService }) {
               <Clock size={14} className="shrink-0 text-primary" aria-hidden="true" />
               {service.openingHours}
             </span>
+          )}
+          {service.website && (
+            <a href={service.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-primary">
+              <Globe size={14} className="shrink-0 text-primary" aria-hidden="true" />
+              {t("visitWebsite")}
+            </a>
           )}
         </div>
 
