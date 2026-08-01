@@ -1,5 +1,5 @@
 import type { Database } from "@/types/database";
-import type { Hotel, HotelRoom, Restaurant, Cafe, Service, Attraction, EventItem, Article, GalleryImage, Review, BusinessOffer, MediaVideo } from "@/types";
+import type { Hotel, HotelRoom, Restaurant, Cafe, Service, Attraction, EventItem, Article, GalleryImage, Review, BusinessOffer, MediaVideo, Notification, NotificationCategory, NotificationSeverity } from "@/types";
 
 type HotelRow = Database["public"]["Tables"]["hotels"]["Row"];
 type HotelRoomRow = Database["public"]["Tables"]["hotel_rooms"]["Row"];
@@ -281,5 +281,22 @@ export function mapBusinessOffer(row: BusinessOfferRow): BusinessOffer {
     featured: row.featured,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+  };
+}
+
+type NotificationRow = Database["public"]["Tables"]["notifications"]["Row"];
+
+export function mapNotification(row: NotificationRow): Notification {
+  return {
+    id: row.id,
+    title: row.title,
+    message: row.message ?? null,
+    type: (row.type as NotificationSeverity) ?? "info",
+    category: (row.category as NotificationCategory | null) ?? null,
+    data: (row.data as Record<string, string | number | null>) ?? {},
+    actionUrl: row.action_url ?? null,
+    isRead: row.is_read,
+    createdAt: row.created_at,
+    readAt: row.read_at ?? null,
   };
 }

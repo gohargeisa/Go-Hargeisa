@@ -4,7 +4,7 @@ import { useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, m } from "framer-motion";
-import { Bell, BedDouble, Compass, Heart, MapIcon, MessageSquare, Settings as SettingsIcon, Sparkles, User } from "lucide-react";
+import { Bell, BedDouble, Compass, Heart, MapIcon, MessageSquare, Settings as SettingsIcon, User } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { ListingCard } from "@/components/shared/listing-card";
 import { HotelCard } from "@/components/shared/hotel-card";
@@ -14,10 +14,11 @@ import { ReviewsPanel } from "@/components/dashboard/reviews-panel";
 import { BookingsPanel } from "@/components/dashboard/bookings-panel";
 import { ProfilePanel } from "@/components/dashboard/profile-panel";
 import { SettingsPanel } from "@/components/dashboard/settings-panel";
+import { NotificationList } from "@/components/shared/notification-list";
 import type { SavedTrip } from "@/lib/data/saved-trips";
 import type { MyReview } from "@/lib/data/reviews";
 import { serviceHref } from "@/lib/utils/service-categories";
-import type { Booking, ServiceCategory } from "@/types";
+import type { Booking, Notification, ServiceCategory } from "@/types";
 
 type FavoriteEntry = { kind: "hotel" | "restaurant" | "cafe" | "attraction" | "service"; item: { id: string; slug: string; name: string; address: string; coverImage: string; rating: number; reviewCount: number; category?: string } };
 const hrefKind: Partial<Record<FavoriteEntry["kind"], string>> = { hotel: "hotels", restaurant: "restaurants", cafe: "cafes", attraction: "attractions" };
@@ -38,11 +39,12 @@ function isTabKey(value: string | null): value is TabKey {
 }
 
 export function DashboardTabs({
-  locale, userId, email, favorites, trips, bookings, reviews, userName, avatarUrl,
+  locale, userId, email, favorites, trips, bookings, reviews, notifications, unreadNotifications, userName, avatarUrl,
   phone, bio, hasPassword, memberSince, notifyActivity, notifyMarketing,
 }: {
   locale: Locale; userId: string; email: string; favorites: FavoriteEntry[]; trips: SavedTrip[];
-  bookings: Booking[]; reviews: MyReview[]; userName: string; avatarUrl: string;
+  bookings: Booking[]; reviews: MyReview[]; notifications: Notification[]; unreadNotifications: number;
+  userName: string; avatarUrl: string;
   phone: string; bio: string; hasPassword: boolean; memberSince: string;
   notifyActivity: boolean; notifyMarketing: boolean;
 }) {
@@ -94,6 +96,11 @@ export function DashboardTabs({
             <button key={key} type="button" onClick={() => selectTab(key)} aria-current={active === key ? "page" : undefined}
               className={`flex shrink-0 items-center gap-3 rounded-xl px-3.5 py-3 text-start text-sm font-semibold transition-all duration-300 ease-premium ${active === key ? "bg-primary text-white shadow-soft" : "text-ink/65 hover:bg-primary/5 hover:text-primary dark:text-sand/65 dark:hover:bg-white/5"}`}>
               <Icon size={17} /> {tabLabels[key]}
+              {key === "notifications" && unreadNotifications > 0 && (
+                <span className={`ms-auto flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[11px] font-bold ${active === key ? "bg-white/25 text-white" : "bg-primary text-white"}`}>
+                  {unreadNotifications > 9 ? "9+" : unreadNotifications}
+                </span>
+              )}
             </button>
           ))}
         </nav>
@@ -132,7 +139,7 @@ export function DashboardTabs({
           )}
           {active === "notifications" && <div>
             <div className="mb-6 flex items-center justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{t("notificationsEyebrow")}</p><h2 className="mt-1 font-display text-2xl font-semibold">{t("notificationsTitle")}</h2></div><Bell size={22} className="text-primary" /></div>
-            <EmptyState icon={Sparkles} title={t("emptyNotificationsTitle")} description={t("emptyNotificationsDescription")} />
+            <NotificationList locale={locale} initialItems={notifications} initialUnread={unreadNotifications} />
           </div>}
         </m.div>
         </AnimatePresence>

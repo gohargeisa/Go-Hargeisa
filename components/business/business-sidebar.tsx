@@ -21,6 +21,7 @@ import {
   X,
   ExternalLink,
   Tag,
+  Bell,
 } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { SignOutButton } from "@/components/shared/sign-out-button";
@@ -35,6 +36,7 @@ const NAV_ITEMS = [
   { href: "/reviews", icon: Star, key: "navReviews" },
   { href: "/analytics", icon: BarChart3, key: "navAnalytics" },
   { href: "/messages", icon: MessageCircle, key: "navMessages" },
+  { href: "/notifications", icon: Bell, key: "navNotifications" },
   { href: "/subscription", icon: CreditCard, key: "navSubscription" },
   { href: "/settings", icon: Settings, key: "navSettings" },
   { href: "/support", icon: HelpCircle, key: "navSupport" },

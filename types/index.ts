@@ -110,6 +110,43 @@ export interface BusinessOffer {
   updatedAt: string;
 }
 
+/** Stable event keys a notification's `data` payload can be rendered
+ * against — see lib/utils/notification-text.ts. Any row without one of
+ * these (or with category null, e.g. very old rows) falls back to its raw
+ * title/message instead of a localized string. */
+export type NotificationCategory =
+  | "business_claim_new"
+  | "contact_message_new"
+  | "join_request_new"
+  | "join_request_approved"
+  | "join_request_rejected"
+  | "booking_new"
+  | "booking_status"
+  | "review_new"
+  | "offer_approved"
+  | "offer_rejected"
+  | "message_new";
+
+export type NotificationSeverity = "success" | "error" | "warning" | "info";
+
+/** In-app notification row — recipient-scoped (RLS: user_id = auth.uid()),
+ * written exclusively by SECURITY DEFINER DB triggers (see
+ * supabase/migrations/20260801000005_notifications_system.sql), never by
+ * client code directly. `data` carries whatever raw values the matching
+ * category needs to render a localized string. */
+export interface Notification {
+  id: string;
+  title: string;
+  message: string | null;
+  type: NotificationSeverity;
+  category: NotificationCategory | null;
+  data: Record<string, string | number | null>;
+  actionUrl: string | null;
+  isRead: boolean;
+  createdAt: string;
+  readAt: string | null;
+}
+
 /** Owner-only — see business_subscription_notes RLS in
  * supabase/migrations/20260730000005_subscription_lifecycle.sql. Never
  * fetched or shown on the business-owner-facing dashboard. */

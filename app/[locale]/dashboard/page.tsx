@@ -9,6 +9,7 @@ import { getFavoritesForUser } from "@/lib/data/favorites";
 import { getSavedTripsForUser } from "@/lib/data/saved-trips";
 import { getReviewsForUser } from "@/lib/data/reviews";
 import { getMyBookings } from "@/lib/data/business";
+import { getUserNotifications, getUnreadNotificationCount } from "@/lib/actions/notifications";
 import { DashboardTabs } from "@/components/dashboard/dashboard-tabs";
 
 export const metadata: Metadata = { title: "My Dashboard — Go Hargeisa" };
@@ -38,14 +39,16 @@ export default async function DashboardPage({
         : (data as unknown as Database["public"]["Tables"]["profiles"]["Row"]);
   }
 
-  const [favorites, trips, reviews, bookings] = user
+  const [favorites, trips, reviews, bookings, notifications, unreadNotifications] = user
     ? await Promise.all([
         getFavoritesForUser(user.id),
         getSavedTripsForUser(user.id),
         getReviewsForUser(user.id),
         getMyBookings(),
+        getUserNotifications(50),
+        getUnreadNotificationCount(),
       ])
-    : [[], [], [], []];
+    : [[], [], [], [], [], 0];
 
   const userName =
     profile?.full_name || user?.email?.split("@")[0] || "there";
@@ -77,6 +80,8 @@ export default async function DashboardPage({
         trips={trips}
         bookings={bookings}
         reviews={reviews}
+        notifications={notifications}
+        unreadNotifications={unreadNotifications}
         userName={userName}
         avatarUrl={avatarUrl}
         phone={phone}

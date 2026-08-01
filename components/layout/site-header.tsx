@@ -13,6 +13,7 @@ import { UserMenu } from "./user-menu";
 import { useHeaderUser } from "./use-header-user";
 import type { HeaderUser } from "@/lib/supabase/header-user";
 import { SignOutButton } from "@/components/shared/sign-out-button";
+import { NotificationBell } from "@/components/shared/notification-bell";
 import { SERVICES_PUBLIC_ENABLED } from "@/lib/config/features";
 
 const links = [
@@ -100,6 +101,10 @@ export function SiteHeader({ locale, initialUser }: { locale: Locale; initialUse
             <LanguageSwitcher locale={locale} />
           </div>
 
+          {user && (
+            <NotificationBell locale={locale} scrolled={scrolled} isOwner={user.isOwner} isBusinessOwner={user.isBusinessOwner} />
+          )}
+
           {user ? (
             <UserMenu
               locale={locale}
@@ -123,6 +128,9 @@ export function SiteHeader({ locale, initialUser }: { locale: Locale; initialUse
         </div>
 
         <div className="ms-auto flex shrink-0 items-center gap-1.5 sm:gap-2 lg:hidden">
+          {user && (
+            <NotificationBell locale={locale} scrolled={scrolled} isOwner={user.isOwner} isBusinessOwner={user.isBusinessOwner} />
+          )}
           <LanguageSwitcher locale={locale} />
           <button
             aria-label="Toggle menu"

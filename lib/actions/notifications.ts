@@ -1,9 +1,17 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { mapNotification } from "@/lib/data/mappers";
+import type { Notification } from "@/types";
 
 export type NotificationType = "success" | "error" | "warning" | "info";
 
+/** @deprecated Every notification is written by a SECURITY DEFINER DB
+ * trigger now (see supabase/migrations/20260801000005_notifications_system.sql)
+ * so it works regardless of who/what triggered the source row. Kept only
+ * because nothing else in this file needs to change to keep it callable;
+ * calling it directly still requires an INSERT policy this table doesn't
+ * grant to regular sessions, so it will no-op for non-owner callers. */
 export async function createNotification(
   userId: string,
   title: string,
@@ -34,7 +42,7 @@ export async function createNotification(
   }
 }
 
-export async function getUserNotifications(limit = 20, onlyUnread = false) {
+export async function getUserNotifications(limit = 20, onlyUnread = false): Promise<Notification[]> {
   try {
     const supabase = await createClient();
     const {
@@ -61,7 +69,7 @@ export async function getUserNotifications(limit = 20, onlyUnread = false) {
       return [];
     }
 
-    return data || [];
+    return (data ?? []).map((row) => mapNotification(row as never));
   } catch (err) {
     console.warn("Error fetching notifications:", err);
     return [];
@@ -90,6 +98,31 @@ export async function markNotificationAsRead(notificationId: string): Promise<{ 
     return { ok: true };
   } catch (err) {
     return { ok: false, error: "Failed to mark as read" };
+  }
+}
+
+export async function markAllNotificationsAsRead(): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) return { ok: false, error: "Not authenticated" };
+
+    const { error } = await supabase
+      .from("notifications")
+      .update({ is_read: true, read_at: new Date().toISOString() })
+      .eq("user_id", user.id)
+      .eq("is_read", false);
+
+    if (error) {
+      return { ok: false, error: error.message };
+    }
+
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: "Failed to mark all as read" };
   }
 }
 
@@ -129,7 +162,7 @@ export async function getUnreadNotificationCount(): Promise<number> {
 
     const { count, error } = await supabase
       .from("notifications")
-      .select("*", { count: "exact" })
+      .select("*", { count: "exact", head: true })
       .eq("user_id", user.id)
       .eq("is_read", false);
 
