@@ -79,19 +79,33 @@ export interface BusinessSubscription {
   renewsAt?: string;
 }
 
+export type OfferDiscountType = "percentage" | "fixed";
+export type OfferApprovalStatus = "pending" | "approved" | "rejected";
+/** Derived, never stored — see lib/utils/offer-status.ts. "inactive" means
+ * the owner has it toggled off; the other three are purely date-driven,
+ * which is how offers auto-expire without a cron job. */
+export type OfferLifecycleStatus = "inactive" | "scheduled" | "active" | "expired";
+
 /** Owner-published, time-boxed promotion against their own listing —
  * "hotel"|"restaurant"|"cafe" only, matching converted_listing_type's
- * scope (services has no dashboard-driven offers concept yet). */
+ * scope (services has no dashboard-driven offers concept yet). Only
+ * visible publicly once approvalStatus is "approved" (see the RLS policy
+ * in 20260801000004_offers_moderation.sql). */
 export interface BusinessOffer {
   id: string;
   listingType: "hotel" | "restaurant" | "cafe";
   listingId: string;
   title: string;
   description?: string;
-  discountLabel?: string;
+  discountType: OfferDiscountType;
+  discountValue?: number;
+  couponCode?: string;
+  coverImage?: string;
   startsAt?: string;
   endsAt?: string;
   isActive: boolean;
+  approvalStatus: OfferApprovalStatus;
+  featured: boolean;
   createdAt: string;
   updatedAt: string;
 }

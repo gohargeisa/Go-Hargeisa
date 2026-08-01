@@ -18,7 +18,7 @@ const LISTING_TABLE: Record<BusinessListingType, "hotels" | "restaurants" | "caf
  * via the parent listing's owner_id, not a column of their own. RLS on each
  * new table mirrors this server-side as the authoritative backstop.
  */
-async function assertCanManageListing(listingType: BusinessListingType, listingId: string) {
+export async function assertCanManageListing(listingType: BusinessListingType, listingId: string) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -196,105 +196,3 @@ export async function markMessageRead(
   return { ok: true };
 }
 
-export interface OfferInput {
-  title: string;
-  description?: string;
-  discountLabel?: string;
-  startsAt?: string;
-  endsAt?: string;
-  isActive: boolean;
-}
-
-function offerPayload(input: OfferInput) {
-  return {
-    title: input.title.trim(),
-    description: input.description?.trim() || null,
-    discount_label: input.discountLabel?.trim() || null,
-    starts_at: input.startsAt || null,
-    ends_at: input.endsAt || null,
-    is_active: input.isActive,
-  };
-}
-
-export async function createOffer(
-  listingType: "hotel" | "restaurant" | "cafe",
-  listingId: string,
-  input: OfferInput,
-  revalidatePaths: string[]
-): Promise<{ ok: boolean; error?: string }> {
-  if (!input.title.trim()) return { ok: false, error: "A title is required." };
-  const supabase = await assertCanManageListing(listingType, listingId);
-
-  const { error } = await supabase.from("business_offers").insert({
-    listing_type: listingType,
-    listing_id: listingId,
-    ...offerPayload(input),
-  } as never);
-  if (error) return { ok: false, error: error.message };
-
-  for (const path of revalidatePaths) revalidatePath(path);
-  return { ok: true };
-}
-
-export async function updateOffer(
-  offerId: string,
-  listingType: "hotel" | "restaurant" | "cafe",
-  listingId: string,
-  input: OfferInput,
-  revalidatePaths: string[]
-): Promise<{ ok: boolean; error?: string }> {
-  if (!input.title.trim()) return { ok: false, error: "A title is required." };
-  const supabase = await assertCanManageListing(listingType, listingId);
-
-  const { error } = await supabase
-    .from("business_offers")
-    .update({ ...offerPayload(input), updated_at: new Date().toISOString() } as never)
-    .eq("id", offerId)
-    .eq("listing_type", listingType)
-    .eq("listing_id", listingId);
-  if (error) return { ok: false, error: error.message };
-
-  for (const path of revalidatePaths) revalidatePath(path);
-  return { ok: true };
-}
-
-export async function toggleOfferActive(
-  offerId: string,
-  listingType: "hotel" | "restaurant" | "cafe",
-  listingId: string,
-  isActive: boolean,
-  revalidatePaths: string[]
-): Promise<{ ok: boolean; error?: string }> {
-  const supabase = await assertCanManageListing(listingType, listingId);
-
-  const { error } = await supabase
-    .from("business_offers")
-    .update({ is_active: isActive, updated_at: new Date().toISOString() } as never)
-    .eq("id", offerId)
-    .eq("listing_type", listingType)
-    .eq("listing_id", listingId);
-  if (error) return { ok: false, error: error.message };
-
-  for (const path of revalidatePaths) revalidatePath(path);
-  return { ok: true };
-}
-
-export async function deleteOffer(
-  offerId: string,
-  listingType: "hotel" | "restaurant" | "cafe",
-  listingId: string,
-  revalidatePaths: string[]
-): Promise<{ ok: boolean; error?: string }> {
-  const supabase = await assertCanManageListing(listingType, listingId);
-
-  const { error } = await supabase
-    .from("business_offers")
-    .delete()
-    .eq("id", offerId)
-    .eq("listing_type", listingType)
-    .eq("listing_id", listingId);
-  if (error) return { ok: false, error: error.message };
-
-  for (const path of revalidatePaths) revalidatePath(path);
-  return { ok: true };
-}

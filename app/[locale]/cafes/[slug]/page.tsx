@@ -6,7 +6,9 @@ import { ExternalLink, FileText, Instagram, Facebook, MapPin, Navigation } from 
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
 import { getCafeBySlug, getAllCafeSlugs, getCafes } from "@/lib/data/cafes";
+import { getPublicOffersForListing } from "@/lib/data/offers";
 import { getSiteSettings } from "@/lib/actions/settings";
+import { ListingOffersSection } from "@/components/shared/listing-offers-section";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { ViewTracker } from "@/components/shared/view-tracker";
 import { HotelHeaderTop } from "@/components/shared/hotel-header-top";
@@ -67,7 +69,11 @@ export default async function CafeDetailPage({
   const th = await getTranslations("hotelDetail");
   const ta = await getTranslations("cafeAmenities");
   const tw = await getTranslations("weekdays");
-  const [allCafes, siteSettings] = await Promise.all([getCafes({ locale }), getSiteSettings()]);
+  const [allCafes, siteSettings, offers] = await Promise.all([
+    getCafes({ locale }),
+    getSiteSettings(),
+    getPublicOffersForListing("cafe", cafe.id),
+  ]);
   const similarCafes = allCafes.filter((c) => c.id !== cafe.id).slice(0, 4);
   const whatsappFallback = (siteSettings as { whatsapp_number?: string } | null)?.whatsapp_number ?? undefined;
 
@@ -90,6 +96,7 @@ export default async function CafeDetailPage({
 
   const navTabs: HotelNavTab[] = [
     { id: "overview", label: td("overview") },
+    ...(offers.length > 0 ? [{ id: "offers", label: td("offersTabLabel") }] : []),
     ...(hasStructuredHours ? [{ id: "hours", label: td("openingHoursByDay") }] : []),
     ...(cafe.specialDrinks.length > 0 ? [{ id: "specialties", label: td("coffeeSpecialties") }] : []),
     ...(cafe.menuHighlights.length > 0 || cafe.menuPdfUrl ? [{ id: "menu", label: td("menuHighlights") }] : []),
@@ -205,6 +212,17 @@ export default async function CafeDetailPage({
               <p className="leading-relaxed text-ink/75 dark:text-sand/75">{cafe.description}</p>
             </section>
           </Reveal>
+
+          {offers.length > 0 && (
+            <Reveal>
+              <ListingOffersSection
+                offers={offers}
+                title={td("offersTabLabel")}
+                couponLabel={td("offerCouponCodeLabel")}
+                validUntilLabel={(date) => td("offerValidUntil", { date })}
+              />
+            </Reveal>
+          )}
 
           {hasStructuredHours && (
             <Reveal>

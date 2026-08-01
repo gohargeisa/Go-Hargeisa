@@ -16,7 +16,9 @@ import {
 } from "@/lib/config/features";
 
 import { getLatestAnnouncement } from "@/lib/data/announcements";
+import { getFeaturedOffersForHomepage } from "@/lib/data/offers";
 import { Hero } from "@/components/home/hero";
+import { OfferCard } from "@/components/home/offer-card";
 import { AnnouncementBanner } from "@/components/home/announcement-banner";
 import { ExploreHargeisaSection } from "@/components/home/explore-hargeisa-section";
 import { NewsletterSection } from "@/components/home/newsletter-section";
@@ -49,13 +51,14 @@ export default async function HomePage({
 }) {
   const t = await getTranslations("home");
 
-  const [hotelsRaw, restaurants, cafes, services, attractions, announcement] = await Promise.all([
+  const [hotelsRaw, restaurants, cafes, services, attractions, announcement, featuredOffers] = await Promise.all([
     getHotels({ limit: HOMEPAGE_PREVIEW_COUNT }),
     RESTAURANTS_PUBLIC_ENABLED ? getRestaurants({ limit: HOMEPAGE_PREVIEW_COUNT }) : Promise.resolve([]),
     CAFES_PUBLIC_ENABLED ? getCafes({ limit: HOMEPAGE_PREVIEW_COUNT, locale }) : Promise.resolve([]),
     SERVICES_PUBLIC_ENABLED ? getServices({ limit: HOMEPAGE_SERVICES_PREVIEW_COUNT }) : Promise.resolve([]),
     getAttractions(),
     getLatestAnnouncement(),
+    getFeaturedOffersForHomepage(),
   ]);
   const hotels = filterHotelsForPresentation(hotelsRaw);
 
@@ -127,6 +130,31 @@ export default async function HomePage({
           </div>
         </Reveal>
       </section>
+
+      {featuredOffers.length > 0 && (
+        <section className="py-16 md:py-24">
+          <div className="container-px mx-auto">
+            <Reveal>
+              <div className="mx-auto mb-10 max-w-2xl text-center md:mb-14">
+                <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary">
+                  {t("offersEyebrow")}
+                </span>
+                <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">
+                  {t("offersTitle")}
+                </h2>
+                <p className="mt-2 text-ink/60 dark:text-sand/60">{t("offersSubtitleHome")}</p>
+              </div>
+            </Reveal>
+            <Reveal delay={0.1}>
+              <ScrollRow>
+                {featuredOffers.map((offer) => (
+                  <OfferCard key={offer.id} offer={offer} locale={locale} />
+                ))}
+              </ScrollRow>
+            </Reveal>
+          </div>
+        </section>
+      )}
 
       {hotels.length > 0 && (
         <section className="bg-white py-16 dark:bg-white/[0.03] md:py-24">

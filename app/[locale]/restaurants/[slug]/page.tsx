@@ -6,7 +6,9 @@ import { ExternalLink, FileText, MapPin, Navigation } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
 import { getRestaurantBySlug, getAllRestaurantSlugs, getRestaurants } from "@/lib/data/restaurants";
+import { getPublicOffersForListing } from "@/lib/data/offers";
 import { getSiteSettings } from "@/lib/actions/settings";
+import { ListingOffersSection } from "@/components/shared/listing-offers-section";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { ViewTracker } from "@/components/shared/view-tracker";
 import { HotelHeaderTop } from "@/components/shared/hotel-header-top";
@@ -62,12 +64,17 @@ export default async function RestaurantDetailPage({
   const tNav = await getTranslations("nav");
   const td = await getTranslations("detail");
   const th = await getTranslations("hotelDetail");
-  const [allRestaurants, siteSettings] = await Promise.all([getRestaurants(), getSiteSettings()]);
+  const [allRestaurants, siteSettings, offers] = await Promise.all([
+    getRestaurants(),
+    getSiteSettings(),
+    getPublicOffersForListing("restaurant", restaurant.id),
+  ]);
   const similarRestaurants = allRestaurants.filter((r) => r.id !== restaurant.id).slice(0, 4);
   const whatsappFallback = (siteSettings as { whatsapp_number?: string } | null)?.whatsapp_number ?? undefined;
 
   const navTabs: HotelNavTab[] = [
     { id: "overview", label: td("overview") },
+    ...(offers.length > 0 ? [{ id: "offers", label: td("offersTabLabel") }] : []),
     ...(restaurant.menuHighlights.length > 0 || restaurant.menuPdfUrl ? [{ id: "menu", label: td("menuHighlights") }] : []),
     ...(restaurant.gallery.length > 0 ? [{ id: "gallery", label: t("gallery") }] : []),
     { id: "reviews", label: t("reviews") },
@@ -157,6 +164,17 @@ export default async function RestaurantDetailPage({
               <p className="leading-relaxed text-ink/75 dark:text-sand/75">{restaurant.description}</p>
             </section>
           </Reveal>
+
+          {offers.length > 0 && (
+            <Reveal>
+              <ListingOffersSection
+                offers={offers}
+                title={td("offersTabLabel")}
+                couponLabel={td("offerCouponCodeLabel")}
+                validUntilLabel={(date) => td("offerValidUntil", { date })}
+              />
+            </Reveal>
+          )}
 
           {(restaurant.menuHighlights.length > 0 || restaurant.menuPdfUrl) && (
             <Reveal>

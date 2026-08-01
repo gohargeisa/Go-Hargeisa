@@ -8,8 +8,10 @@ import { ExternalLink, MapPin, Navigation } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
 import { getHotelBySlug, getAllHotelSlugs, getNearbyAttractionsForHotel, getHotels } from "@/lib/data/hotels";
+import { getPublicOffersForListing } from "@/lib/data/offers";
 import { hotelCategoryLabel } from "@/lib/utils/hotel-category";
 import { getSiteSettings } from "@/lib/actions/settings";
+import { ListingOffersSection } from "@/components/shared/listing-offers-section";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { ViewTracker } from "@/components/shared/view-tracker";
 import { HotelHeaderTop } from "@/components/shared/hotel-header-top";
@@ -82,10 +84,11 @@ export default async function HotelDetailPage({
   const tNav = await getTranslations("nav");
   const td = await getTranslations("detail");
   const th = await getTranslations("hotelDetail");
-  const [nearby, allHotels, siteSettings] = await Promise.all([
+  const [nearby, allHotels, siteSettings, offers] = await Promise.all([
     getNearbyAttractionsForHotel(hotel.id),
     getHotels(),
     getSiteSettings(),
+    getPublicOffersForListing("hotel", hotel.id),
   ]);
   const similarHotels = filterHotelsForPresentation(allHotels)
     .filter((h) => h.id !== hotel.id)
@@ -101,6 +104,7 @@ export default async function HotelDetailPage({
 
   const navTabs: HotelNavTab[] = [
     { id: "overview", label: td("overview") },
+    ...(offers.length > 0 ? [{ id: "offers", label: td("offersTabLabel") }] : []),
     ...(hotel.rooms.length > 0 ? [{ id: "rooms", label: th("rooms") }] : []),
     ...(hotel.gallery.length > 0 ? [{ id: "gallery", label: t("gallery") }] : []),
     { id: "amenities", label: t("amenities") },
@@ -197,6 +201,17 @@ export default async function HotelDetailPage({
               />
             </section>
           </Reveal>
+
+          {offers.length > 0 && (
+            <Reveal>
+              <ListingOffersSection
+                offers={offers}
+                title={td("offersTabLabel")}
+                couponLabel={td("offerCouponCodeLabel")}
+                validUntilLabel={(date) => td("offerValidUntil", { date })}
+              />
+            </Reveal>
+          )}
 
           {hotel.rooms.length > 0 && (
             <Reveal>
