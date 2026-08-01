@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { mapNotification } from "@/lib/data/mappers";
@@ -9,6 +10,59 @@ import type { Notification } from "@/types";
 import type { Database } from "@/types/database";
 
 type NotificationRow = Database["public"]["Tables"]["notifications"]["Row"];
+type InsertListener = (n: Notification) => void;
+
+/**
+ * lib/supabase/client.ts's createClient() returns a cached singleton
+ * SupabaseClient in the browser, and Supabase's RealtimeClient.channel(topic)
+ * returns the SAME channel object for a repeated topic string instead of a
+ * fresh one. Two components mounting this hook at once for the same user
+ * (e.g. the header's desktop + mobile notification bells, both rendered in
+ * the DOM simultaneously) would otherwise both call .channel("notifications-
+ * <uid>") and get back the same object — the second caller's .on() then
+ * throws "cannot add `postgres_changes` callbacks ... after `subscribe()`"
+ * because the first caller already subscribed it.
+ *
+ * This module-level registry makes exactly one real channel.on().subscribe()
+ * happen per userId per browser tab, however many components observe it,
+ * and only tears it down once the last one unmounts.
+ */
+const sharedChannels = new Map<string, { channel: RealtimeChannel; listeners: Set<InsertListener>; refCount: number }>();
+
+function subscribeShared(userId: string, onInsert: InsertListener): () => void {
+  let entry = sharedChannels.get(userId);
+
+  if (!entry) {
+    const listeners = new Set<InsertListener>();
+    const channel = createClient()
+      .channel(`notifications-${userId}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` },
+        (payload) => {
+          const next = mapNotification(payload.new as NotificationRow);
+          listeners.forEach((listener) => listener(next));
+        }
+      )
+      .subscribe();
+    entry = { channel, listeners, refCount: 0 };
+    sharedChannels.set(userId, entry);
+  }
+
+  entry.listeners.add(onInsert);
+  entry.refCount += 1;
+
+  return () => {
+    const current = sharedChannels.get(userId);
+    if (!current) return;
+    current.listeners.delete(onInsert);
+    current.refCount -= 1;
+    if (current.refCount <= 0) {
+      createClient().removeChannel(current.channel);
+      sharedChannels.delete(userId);
+    }
+  };
+}
 
 /**
  * Client-side live view of the signed-in user's notifications — seeded
@@ -53,23 +107,10 @@ export function useLiveNotifications(initialItems: Notification[], initialUnread
   useEffect(() => {
     if (!userId || !isSupabaseConfigured()) return;
 
-    const supabase = createClient();
-    const channel = supabase
-      .channel(`notifications-${userId}`)
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` },
-        (payload) => {
-          const next = mapNotification(payload.new as NotificationRow);
-          setItems((prev) => [next, ...prev].slice(0, 50));
-          if (!next.isRead) setUnreadCount((count) => count + 1);
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return subscribeShared(userId, (next) => {
+      setItems((prev) => [next, ...prev].slice(0, 50));
+      if (!next.isRead) setUnreadCount((count) => count + 1);
+    });
   }, [userId]);
 
   const markOneRead = useCallback(async (id: string) => {
