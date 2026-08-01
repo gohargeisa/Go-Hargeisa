@@ -29,7 +29,7 @@ import { PremiumRestaurantCard } from "@/components/home/premium-restaurant-card
 import { PremiumCafeCard } from "@/components/home/premium-cafe-card";
 import { PremiumAttractionCard } from "@/components/home/premium-attraction-card";
 import { OfferCard } from "@/components/home/offer-card";
-import { CountdownTimer } from "@/components/diaspora-week/countdown-timer";
+import { DiasporaWeekHero } from "@/components/diaspora-week/diaspora-week-hero";
 import { EventMapLoader } from "@/components/diaspora-week/event-map-loader";
 import type { EventMapPoint } from "@/components/diaspora-week/event-map";
 
@@ -149,68 +149,7 @@ export default async function DiasporaWeekPage({
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
 
-      {/* ============ Hero ============ */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-navy via-primary-800 to-secondary-900 pb-16 pt-32 sm:pb-20 sm:pt-40">
-        <div className="pointer-events-none absolute -top-24 -end-24 h-96 w-96 rounded-full bg-primary/25 blur-3xl" aria-hidden="true" />
-        <div className="pointer-events-none absolute -bottom-32 -start-16 h-80 w-80 rounded-full bg-accent/20 blur-3xl" aria-hidden="true" />
-
-        <div className="container-px relative mx-auto flex flex-col items-center text-center text-white">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.25em] backdrop-blur-md">
-            {t("heroEyebrow")}
-          </span>
-
-          <h1 className="mt-6 max-w-4xl text-balance font-display text-4xl font-bold leading-[1.05] drop-shadow-lg sm:text-5xl md:text-6xl">
-            {t("heroTitle")}
-          </h1>
-
-          <p className="mt-5 max-w-xl text-balance text-lg font-semibold italic text-white/90 sm:text-xl">
-            &ldquo;{t("heroTheme")}&rdquo;
-          </p>
-
-          <p className="mt-5 max-w-2xl text-balance text-base leading-7 text-white/80 sm:text-lg">
-            {t("heroSubtitle")}
-          </p>
-
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-sm font-semibold text-white/90">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-4 py-2 backdrop-blur-md">
-              <CalendarDays size={15} aria-hidden="true" /> {t("heroDates")}
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-4 py-2 backdrop-blur-md">
-              <MapPin size={15} aria-hidden="true" /> {t("heroLocation")}
-            </span>
-          </div>
-
-          <div className="mt-10">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-white/60">{t("countdownLabel")}</p>
-            <CountdownTimer
-              startIso={DIASPORA_WEEK_START_ISO}
-              endIso={DIASPORA_WEEK_END_ISO}
-              labels={{
-                days: t("countdownDays"),
-                hours: t("countdownHours"),
-                minutes: t("countdownMinutes"),
-                seconds: t("countdownSeconds"),
-                live: t("countdownLive"),
-                ended: t("countdownEnded"),
-              }}
-            />
-          </div>
-
-          <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row">
-            <PrimaryButton href={`/${locale}/hotels`} size="lg">
-              {t("heroCtaPrimary")}
-              <ArrowUpRight size={16} aria-hidden="true" />
-            </PrimaryButton>
-            <SecondaryButton
-              href={`/${locale}/diaspora-week-2026#travel-tips`}
-              size="lg"
-              className="border-white/40 bg-white/10 text-white backdrop-blur-md hover:border-white hover:bg-white/20 hover:text-white"
-            >
-              {t("heroCtaSecondary")}
-            </SecondaryButton>
-          </div>
-        </div>
-      </section>
+      <DiasporaWeekHero locale={locale} />
 
       {/* ============ About Event ============ */}
       <section className="container-px mx-auto py-16 md:py-24">
@@ -234,7 +173,7 @@ export default async function DiasporaWeekPage({
       </section>
 
       {/* ============ Event Highlights ============ */}
-      <section className="container-px mx-auto py-16 md:py-24">
+      <section id="highlights" className="container-px mx-auto scroll-mt-24 py-16 md:py-24">
         <Reveal>
           <PremiumSectionHeading eyebrow={t("highlightsEyebrow")} title={t("highlightsTitle")} subtitle={t("highlightsSubtitle")} className="mb-10 md:mb-14" />
           <FeatureGrid items={highlights} columns={3} />
@@ -243,7 +182,7 @@ export default async function DiasporaWeekPage({
 
       {/* ============ Recommended Hotels ============ */}
       {hotels.length > 0 && (
-        <section className="bg-white py-16 dark:bg-white/[0.03] md:py-24">
+        <section id="hotels" className="scroll-mt-24 bg-white py-16 dark:bg-white/[0.03] md:py-24">
           <div className="container-px mx-auto">
             <Reveal>
               <PremiumSectionHeading eyebrow={t("hotelsEyebrow")} title={t("hotelsTitle")} subtitle={t("hotelsSubtitle")} className="mb-10 md:mb-14" />
@@ -275,7 +214,7 @@ export default async function DiasporaWeekPage({
 
       {/* ============ Recommended Restaurants ============ */}
       {restaurants.length > 0 && (
-        <section className="py-16 md:py-24">
+        <section id="restaurants" className="scroll-mt-24 py-16 md:py-24">
           <div className="container-px mx-auto">
             <Reveal>
               <PremiumSectionHeading eyebrow={t("restaurantsEyebrow")} title={t("restaurantsTitle")} subtitle={t("restaurantsSubtitle")} className="mb-10 md:mb-14" />
@@ -309,7 +248,7 @@ export default async function DiasporaWeekPage({
 
       {/* ============ Recommended Cafés ============ */}
       {cafes.length > 0 && (
-        <section className="bg-white py-16 dark:bg-white/[0.03] md:py-24">
+        <section id="cafes" className="scroll-mt-24 bg-white py-16 dark:bg-white/[0.03] md:py-24">
           <div className="container-px mx-auto">
             <Reveal>
               <PremiumSectionHeading eyebrow={t("cafesEyebrow")} title={t("cafesTitle")} subtitle={t("cafesSubtitle")} className="mb-10 md:mb-14" />
@@ -342,7 +281,7 @@ export default async function DiasporaWeekPage({
 
       {/* ============ Tourist Attractions ============ */}
       {attractions.length > 0 && (
-        <section className="py-16 md:py-24">
+        <section id="attractions" className="scroll-mt-24 py-16 md:py-24">
           <div className="container-px mx-auto">
             <Reveal>
               <PremiumSectionHeading eyebrow={t("attractionsEyebrow")} title={t("attractionsTitle")} subtitle={t("attractionsSubtitle")} className="mb-10 md:mb-14" />

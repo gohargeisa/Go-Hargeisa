@@ -4,5 +4,5 @@
  * homepage banner's visibility gate, so all three can never drift out of
  * sync with each other. Hargeisa has no DST, hence the fixed +03:00 offset.
  */
-export const DIASPORA_WEEK_START_ISO = "2026-08-02T00:00:00+03:00";
+export const DIASPORA_WEEK_START_ISO = "2026-08-02T09:00:00+03:00";
 export const DIASPORA_WEEK_END_ISO = "2026-08-06T23:59:59+03:00";

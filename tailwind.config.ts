@@ -122,12 +122,17 @@ const config: Config = {
           "0%": { transform: "scale(1)" },
           "100%": { transform: "scale(1.08)" },
         },
+        float: {
+          "0%, 100%": { transform: "translateY(0)", opacity: "0.25" },
+          "50%": { transform: "translateY(-18px)", opacity: "0.7" },
+        },
       },
 
       animation: {
         fadeUp: "fadeUp .8s ease-out forwards",
         shimmer: "shimmer 2.2s ease-in-out infinite",
         kenburns: "kenburns 20s ease-out forwards",
+        float: "float 6s ease-in-out infinite",
       },
     },
   },
