@@ -8,6 +8,7 @@ import { ChevronDown, Building2, UtensilsCrossed, Coffee, MapPin, PartyPopper, U
 import type { Locale } from "@/lib/i18n/config";
 import { SHIMMER_BLUR_DATA_URL } from "@/lib/utils/shimmer";
 import { AnimatedBackground } from "@/components/shared/animated-background";
+import { FlagIcon } from "@/components/shared/flag-icon";
 import { PrimaryButton, SecondaryButton } from "@/components/shared/buttons";
 import { CountdownTimer } from "@/components/diaspora-week/countdown-timer";
 import { DIASPORA_WEEK_START_ISO, DIASPORA_WEEK_END_ISO } from "@/lib/config/diaspora-week";
@@ -117,7 +118,7 @@ export function DiasporaWeekHero({ locale }: { locale: Locale }) {
           variants={fadeUp}
           className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-white backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:border-white/40 hover:bg-white/20"
         >
-          <span aria-hidden="true">🇸🇴</span>
+          <FlagIcon locale="so" size={14} />
           {t("heroBadge")}
         </m.span>
 
