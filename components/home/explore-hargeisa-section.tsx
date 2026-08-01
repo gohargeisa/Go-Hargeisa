@@ -1,90 +1,30 @@
-"use client";
-
-import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
-import { AnimatePresence, m, useReducedMotion } from "framer-motion";
-import { Fuel, MoonStar, Pill, ShoppingCart, Sparkles, Stethoscope, X, type LucideIcon } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+import { Fuel, MoonStar, Pill, Sparkles, ShoppingCart, Stethoscope, type LucideIcon } from "lucide-react";
 import { Reveal } from "@/components/home/reveal";
-import { FloatingBadge } from "@/components/shared/floating-badge";
-import { SERVICES_PUBLIC_ENABLED } from "@/lib/config/features";
+import { EmptyState } from "@/components/shared/empty-state";
+import type { ExploreHargeisaCounts } from "@/lib/data/city-services";
 
-const TOAST_DURATION_MS = 4500;
-
-// hospital/pharmacy/gas_station only get a real `href` (instead of the
-// "coming soon" toast) while Services is publicly enabled — see
-// lib/config/features.ts. Flipping that flag back restores these links
-// with no other changes needed here.
-const CARDS: {
-  category: string;
+/** Each category's real destination page — a tile only ever renders when
+ * its count is > 0, so every href here is guaranteed to lead to real,
+ * published content, never a "coming soon" dead end. */
+const CATEGORY_META: {
+  key: keyof ExploreHargeisaCounts;
   icon: LucideIcon;
   titleKey: string;
   descriptionKey: string;
-  gradient: string;
-  href?: string;
+  href: string;
 }[] = [
-  {
-    category: "hospital",
-    icon: Stethoscope,
-    titleKey: "exploreHargeisaHospitalsTitle",
-    descriptionKey: "exploreHargeisaHospitalsDescription",
-    gradient: "from-red-600/70 via-red-900/60 to-ink",
-    href: SERVICES_PUBLIC_ENABLED ? "/services/hospitals" : undefined,
-  },
-  {
-    category: "pharmacy",
-    icon: Pill,
-    titleKey: "exploreHargeisaPharmaciesTitle",
-    descriptionKey: "exploreHargeisaPharmaciesDescription",
-    gradient: "from-pink-600/70 via-fuchsia-900/60 to-ink",
-    href: SERVICES_PUBLIC_ENABLED ? "/services/pharmacies" : undefined,
-  },
-  {
-    category: "gas_station",
-    icon: Fuel,
-    titleKey: "exploreHargeisaGasStationsTitle",
-    descriptionKey: "exploreHargeisaGasStationsDescription",
-    gradient: "from-orange-600/70 via-amber-900/60 to-ink",
-    href: SERVICES_PUBLIC_ENABLED ? "/services/gas-stations" : undefined,
-  },
-  {
-    category: "supermarket",
-    icon: ShoppingCart,
-    titleKey: "exploreHargeisaSupermarketsTitle",
-    descriptionKey: "exploreHargeisaSupermarketsDescription",
-    gradient: "from-violet-600/70 via-purple-900/60 to-ink",
-  },
-  {
-    category: "mosque",
-    icon: MoonStar,
-    titleKey: "exploreHargeisaMosquesTitle",
-    descriptionKey: "exploreHargeisaMosquesDescription",
-    gradient: "from-teal-600/70 via-emerald-900/60 to-ink",
-  },
+  { key: "hospital", icon: Stethoscope, titleKey: "exploreHargeisaHospitalsTitle", descriptionKey: "exploreHargeisaHospitalsDescription", href: "/city-services" },
+  { key: "pharmacy", icon: Pill, titleKey: "exploreHargeisaPharmaciesTitle", descriptionKey: "exploreHargeisaPharmaciesDescription", href: "/city-services" },
+  { key: "gasStation", icon: Fuel, titleKey: "exploreHargeisaGasStationsTitle", descriptionKey: "exploreHargeisaGasStationsDescription", href: "/services/gas-stations" },
+  { key: "supermarket", icon: ShoppingCart, titleKey: "exploreHargeisaSupermarketsTitle", descriptionKey: "exploreHargeisaSupermarketsDescription", href: "/city-services" },
+  { key: "mosque", icon: MoonStar, titleKey: "exploreHargeisaMosquesTitle", descriptionKey: "exploreHargeisaMosquesDescription", href: "/city-map" },
 ];
 
-export function ExploreHargeisaSection({ locale }: { locale: string }) {
-  const t = useTranslations("home");
-  const reduceMotion = useReducedMotion();
-  const [toastOpen, setToastOpen] = useState(false);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, []);
-
-  function openToast() {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    setToastOpen(true);
-    timeoutRef.current = setTimeout(() => setToastOpen(false), TOAST_DURATION_MS);
-  }
-
-  function closeToast() {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    setToastOpen(false);
-  }
+export async function ExploreHargeisaSection({ locale, counts }: { locale: string; counts: ExploreHargeisaCounts }) {
+  const t = await getTranslations("home");
+  const cards = CATEGORY_META.filter((c) => counts[c.key] > 0);
 
   return (
     <section className="py-16 md:py-24">
@@ -102,101 +42,32 @@ export function ExploreHargeisaSection({ locale }: { locale: string }) {
         </Reveal>
 
         <Reveal delay={0.1}>
-          <div className="mt-10 grid grid-cols-2 gap-5 sm:grid-cols-3 md:mt-14 lg:grid-cols-5">
-            {CARDS.map(({ category, icon: Icon, titleKey, descriptionKey, gradient, href }) => {
-              const cardClassName =
-                "group flex h-full w-full flex-col overflow-hidden rounded-[28px] border border-ink/8 bg-white text-start shadow-[0_8px_24px_rgba(20,30,45,0.07)] transition-shadow duration-300 hover:border-primary/25 hover:shadow-[0_28px_60px_rgba(20,30,45,0.16)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:border-white/10 dark:bg-white/[0.04] dark:hover:shadow-[0_28px_60px_rgba(0,0,0,0.45)]";
-              const cardContent = (
-                <>
-                  <div className="relative h-64 shrink-0 overflow-hidden rounded-t-[28px] sm:h-[17rem]">
-                    <div
-                      className={`absolute inset-0 bg-gradient-to-br ${gradient} transition-transform duration-700 ease-out group-hover:scale-110`}
-                      aria-hidden="true"
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Icon
-                        size={52}
-                        strokeWidth={1.5}
-                        className="text-white/30 transition-transform duration-700 ease-out group-hover:scale-110"
-                        aria-hidden="true"
-                      />
-                    </div>
-                    <div
-                      className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent"
-                      aria-hidden="true"
-                    />
-                    {!href && (
-                      <FloatingBadge icon={Sparkles}>{t("exploreHargeisaComingSoonBadge")}</FloatingBadge>
-                    )}
-                  </div>
-
-                  <div className="flex flex-1 flex-col gap-2 p-6 sm:p-7">
-                    <h3 className="font-display text-lg font-bold text-ink dark:text-white">{t(titleKey)}</h3>
-                    <p className="flex-1 text-sm leading-relaxed text-ink/60 dark:text-sand/60">
-                      {t(descriptionKey)}
-                    </p>
-                  </div>
-                </>
-              );
-
-              if (href) {
-                return (
-                  <m.div
-                    key={category}
-                    whileHover={reduceMotion ? undefined : { y: -8 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 24 }}
-                  >
-                    <Link href={`/${locale}${href}`} className={cardClassName}>
-                      {cardContent}
-                    </Link>
-                  </m.div>
-                );
-              }
-
-              return (
-                <m.button
-                  key={category}
-                  type="button"
-                  onClick={openToast}
-                  whileHover={reduceMotion ? undefined : { y: -8 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 24 }}
-                  className={cardClassName}
+          {cards.length === 0 ? (
+            <div className="mt-10 md:mt-14">
+              <EmptyState
+                icon={Sparkles}
+                title={t("exploreHargeisaEmptyTitle")}
+                description={t("exploreHargeisaEmptyDescription")}
+              />
+            </div>
+          ) : (
+            <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 md:mt-14 lg:grid-cols-3">
+              {cards.map(({ key, icon: Icon, titleKey, descriptionKey, href }) => (
+                <Link
+                  key={key}
+                  href={`/${locale}${href}`}
+                  className="group flex h-full flex-col rounded-2xl border border-ink/8 bg-white p-6 shadow-soft transition-all duration-300 ease-premium hover:-translate-y-1 hover:shadow-card dark:border-white/10 dark:bg-white/[0.03] sm:p-7"
                 >
-                  {cardContent}
-                </m.button>
-              );
-            })}
-          </div>
-        </Reveal>
-      </div>
-
-      <div
-        aria-live="polite"
-        className="pointer-events-none fixed inset-x-0 bottom-6 z-[100] flex justify-center px-4"
-      >
-        <AnimatePresence>
-          {toastOpen && (
-            <m.div
-              role="status"
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 16 }}
-              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-              className="pointer-events-auto flex max-w-sm items-start gap-3 rounded-2xl border border-white/10 bg-ink px-5 py-4 text-sm text-white shadow-2xl dark:border-white/15 dark:bg-white dark:text-ink"
-            >
-              <Sparkles size={18} className="mt-0.5 shrink-0 text-primary" aria-hidden="true" />
-              <p className="flex-1 leading-relaxed">{t("exploreHargeisaComingSoonToast")}</p>
-              <button
-                type="button"
-                onClick={closeToast}
-                aria-label={t("exploreHargeisaComingSoonDismiss")}
-                className="-m-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white/60 transition-colors hover:bg-white/10 hover:text-white dark:text-ink/50 dark:hover:bg-ink/10 dark:hover:text-ink"
-              >
-                <X size={15} aria-hidden="true" />
-              </button>
-            </m.div>
+                  <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-transform duration-300 ease-premium group-hover:scale-105">
+                    <Icon size={26} aria-hidden="true" />
+                  </span>
+                  <h3 className="mt-5 font-display text-lg font-bold text-ink dark:text-white">{t(titleKey)}</h3>
+                  <p className="mt-1.5 flex-1 text-sm leading-relaxed text-ink/60 dark:text-sand/60">{t(descriptionKey)}</p>
+                </Link>
+              ))}
+            </div>
           )}
-        </AnimatePresence>
+        </Reveal>
       </div>
     </section>
   );

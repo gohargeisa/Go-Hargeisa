@@ -1,5 +1,6 @@
 import { createPublicClient } from "@/lib/supabase/public";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
+import { SERVICES_PUBLIC_ENABLED } from "@/lib/config/features";
 import type { CityService, EssentialServiceCategory } from "@/types";
 
 function mapCityService(
@@ -75,5 +76,49 @@ export async function getAllCityServices(locale?: string): Promise<Record<Essent
     bank: results[1],
     supermarket: results[2],
     pharmacy: results[3],
+  };
+}
+
+export interface ExploreHargeisaCounts {
+  hospital: number;
+  pharmacy: number;
+  gasStation: number;
+  supermarket: number;
+  mosque: number;
+}
+
+/** Real published-item counts per category shown on the homepage's
+ * "Explore Hargeisa" tile grid — used so that section only ever shows a
+ * tile backed by real data (never a "coming soon" placeholder). hospital/
+ * pharmacy/supermarket read from city_services (the live City Services
+ * directory); gas_station reads from the separate `services` table, gated
+ * by the same SERVICES_PUBLIC_ENABLED flag every other public Services
+ * surface respects; mosque reads from `map_points` (Smart City Map), the
+ * only table that carries that category at all. */
+export async function getExploreHargeisaCounts(): Promise<ExploreHargeisaCounts> {
+  if (!isSupabaseConfigured()) {
+    return { hospital: 0, pharmacy: 0, gasStation: 0, supermarket: 0, mosque: 0 };
+  }
+
+  const supabase = createPublicClient();
+  const countCityService = (category: EssentialServiceCategory) =>
+    supabase.from("city_services").select("id", { count: "exact", head: true }).eq("category", category).eq("status", "published").eq("featured", true);
+
+  const [hospital, pharmacy, supermarket, gasStation, mosque] = await Promise.all([
+    countCityService("hospital"),
+    countCityService("pharmacy"),
+    countCityService("supermarket"),
+    SERVICES_PUBLIC_ENABLED
+      ? supabase.from("services").select("id", { count: "exact", head: true }).eq("category", "gas_station").eq("status", "published")
+      : Promise.resolve({ count: 0 }),
+    supabase.from("map_points").select("id", { count: "exact", head: true }).eq("category", "mosque"),
+  ]);
+
+  return {
+    hospital: hospital.count ?? 0,
+    pharmacy: pharmacy.count ?? 0,
+    supermarket: supermarket.count ?? 0,
+    gasStation: gasStation.count ?? 0,
+    mosque: mosque.count ?? 0,
   };
 }

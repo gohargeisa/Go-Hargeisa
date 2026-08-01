@@ -17,6 +17,7 @@ import {
 
 import { getLatestAnnouncement } from "@/lib/data/announcements";
 import { getFeaturedOffersForHomepage } from "@/lib/data/offers";
+import { getExploreHargeisaCounts } from "@/lib/data/city-services";
 import { DIASPORA_WEEK_END_ISO } from "@/lib/config/diaspora-week";
 import { Hero } from "@/components/home/hero";
 import { OfferCard } from "@/components/home/offer-card";
@@ -53,7 +54,7 @@ export default async function HomePage({
 }) {
   const t = await getTranslations("home");
 
-  const [hotelsRaw, restaurants, cafes, services, attractions, announcement, featuredOffers] = await Promise.all([
+  const [hotelsRaw, restaurants, cafes, services, attractions, announcement, featuredOffers, exploreHargeisaCounts] = await Promise.all([
     getHotels({ limit: HOMEPAGE_PREVIEW_COUNT }),
     RESTAURANTS_PUBLIC_ENABLED ? getRestaurants({ limit: HOMEPAGE_PREVIEW_COUNT }) : Promise.resolve([]),
     CAFES_PUBLIC_ENABLED ? getCafes({ limit: HOMEPAGE_PREVIEW_COUNT, locale }) : Promise.resolve([]),
@@ -61,6 +62,7 @@ export default async function HomePage({
     getAttractions(),
     getLatestAnnouncement(),
     getFeaturedOffersForHomepage(),
+    getExploreHargeisaCounts(),
   ]);
   const hotels = filterHotelsForPresentation(hotelsRaw);
   const showDiasporaWeekBanner = Date.now() < new Date(DIASPORA_WEEK_END_ISO).getTime();
@@ -365,7 +367,7 @@ export default async function HomePage({
         </section>
       )}
 
-      <ExploreHargeisaSection locale={locale} />
+      <ExploreHargeisaSection locale={locale} counts={exploreHargeisaCounts} />
 
       <NewsletterSection locale={locale} />
     </>
