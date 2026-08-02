@@ -1,12 +1,22 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { BedDouble, CalendarCheck, Users } from "lucide-react";
+import { BedDouble, CalendarCheck, Loader2, Printer, Users, X } from "lucide-react";
 import { EmptyState } from "@/components/shared/empty-state";
+import { cancelMyBooking } from "@/lib/actions/bookings";
 import type { Booking } from "@/types";
 import type { Locale } from "@/lib/i18n/config";
+
+const CANCELLATION_WINDOW_HOURS = 24;
+
+function isCancellable(b: Booking): boolean {
+  if (b.status !== "pending" && b.status !== "confirmed") return false;
+  const hoursUntilCheckIn = (new Date(`${b.checkIn}T00:00:00`).getTime() - Date.now()) / 3_600_000;
+  return hoursUntilCheckIn > CANCELLATION_WINDOW_HOURS;
+}
 
 const STATUS_FILTERS: (Booking["status"] | "all")[] = ["all", "pending", "confirmed", "cancelled", "completed"];
 
@@ -25,12 +35,26 @@ function formatDate(iso: string): string {
 
 export function BookingsPanel({ locale, bookings }: { locale: Locale; bookings: Booking[] }) {
   const t = useTranslations("dashboard");
+  const router = useRouter();
   const [filter, setFilter] = useState<(typeof STATUS_FILTERS)[number]>("all");
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   const filtered = useMemo(
     () => (filter === "all" ? bookings : bookings.filter((b) => b.status === filter)),
     [bookings, filter]
   );
+
+  function onCancel(id: string) {
+    if (!confirm(t("cancelBookingConfirm"))) return;
+    setCancellingId(id);
+    startTransition(async () => {
+      const result = await cancelMyBooking(id, locale);
+      if (result.ok) router.refresh();
+      else alert(result.error ?? t("bookingsHotel"));
+      setCancellingId(null);
+    });
+  }
 
   return (
     <div>
@@ -97,6 +121,26 @@ export function BookingsPanel({ locale, bookings }: { locale: Locale; bookings: 
               {b.bookingReference && (
                 <p className="mt-2 font-mono text-[11px] text-ink/40 dark:text-sand/40">{b.bookingReference}</p>
               )}
+
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <Link
+                  href={`/${locale}/dashboard/bookings/${b.id}`}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-ink/12 px-3.5 py-1.5 text-xs font-semibold transition-colors hover:border-primary hover:text-primary dark:border-white/15"
+                >
+                  <Printer size={12} aria-hidden="true" /> {t("printConfirmation")}
+                </Link>
+                {isCancellable(b) && (
+                  <button
+                    type="button"
+                    onClick={() => onCancel(b.id)}
+                    disabled={isPending && cancellingId === b.id}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-ink/12 px-3.5 py-1.5 text-xs font-semibold text-red-600 transition-colors hover:border-red-500 disabled:opacity-60 dark:border-white/15"
+                  >
+                    {isPending && cancellingId === b.id ? <Loader2 size={12} className="animate-spin" /> : <X size={12} aria-hidden="true" />}
+                    {t("cancelBooking")}
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>

@@ -109,3 +109,16 @@ body {
    and @vis.gl/react-google-maps' <Map> already fills 100% of its parent
    by default (unlike Leaflet, it also needs no external stylesheet
    import for its own tiles/panes to lay out correctly). */
+
+/* Booking confirmation "Print"/download flow (components/dashboard/
+   booking-confirmation-view.tsx) — the header/footer/mobile booking bar
+   are rendered by the root layout, outside that page's own markup, so
+   they can't be hidden with a page-local `print:hidden` class. Every
+   other print:hidden usage in the app is already handled by Tailwind's
+   built-in print variant; this is only for the site chrome. */
+@media print {
+  header,
+  footer {
+    display: none !important;
+  }
+}

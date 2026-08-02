@@ -126,6 +126,12 @@ export default async function OwnerDashboardPage({ params: { locale } }: { param
                 <Star size={16} /> {t("reviewsNav")}
               </Link>
               <Link
+                href={`/${locale}/admin/bookings`}
+                className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-xl transition-colors hover:bg-white/20"
+              >
+                <CalendarCheck size={16} /> {t("bookingsAdminTitle")}
+              </Link>
+              <Link
                 href={`/${locale}/admin/partners`}
                 className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-xl transition-colors hover:bg-white/20"
               >

@@ -348,6 +348,29 @@ export async function getBookingsForHotel(hotelId: string, limit?: number): Prom
   return (data ?? []).map((row: any) => mapBooking(row));
 }
 
+export interface BlockedDate {
+  roomId: string;
+  date: string;
+  note?: string;
+}
+
+/** Owner-blocked dates across every room of a hotel — the booking calendar
+ * overlays these (gray) on top of real bookings (colored by status). */
+export async function getBlockedDatesForHotel(hotelId: string): Promise<BlockedDate[]> {
+  const supabase = await createClient();
+  const { data: roomIds } = await supabase.from("hotel_rooms").select("id").eq("hotel_id", hotelId);
+  const ids = (roomIds ?? []).map((r) => (r as { id: string }).id);
+  if (ids.length === 0) return [];
+
+  const { data } = await supabase
+    .from("room_availability" as any)
+    .select("room_id, date, note")
+    .in("room_id", ids)
+    .eq("is_available", false);
+
+  return (data ?? []).map((row: any) => ({ roomId: row.room_id, date: row.date, note: row.note ?? undefined }));
+}
+
 /** The signed-in guest's own bookings, across every hotel — powers the user
  * dashboard's "My Bookings" tab. Requires the "Users view their own
  * bookings" RLS policy (user_id = auth.uid()); only bookings submitted while
@@ -367,6 +390,39 @@ export async function getMyBookings(): Promise<Booking[]> {
     .order("created_at", { ascending: false });
 
   return (data ?? []).map((row: any) => mapBooking(row));
+}
+
+/** Every booking platform-wide — admin-only (backed by the "Owners manage
+ * all bookings" RLS policy). Powers /admin/bookings' filter/search/export. */
+export async function getAllBookingsForAdmin(): Promise<Booking[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("bookings")
+    .select("*, hotel_rooms(name), hotels(name, slug)")
+    .order("created_at", { ascending: false });
+
+  return (data ?? []).map((row: any) => mapBooking(row));
+}
+
+/** A single booking, scoped to the signed-in guest who made it — powers the
+ * print-friendly confirmation page. Returns null if it doesn't exist or
+ * belongs to someone else (RLS backs this up; the explicit .eq is just so
+ * this reads as "not found" rather than an empty-row surprise). */
+export async function getMyBookingById(bookingId: string): Promise<Booking | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data } = await supabase
+    .from("bookings")
+    .select("*, hotel_rooms(name), hotels(name, slug)")
+    .eq("id", bookingId)
+    .eq("user_id", user.id)
+    .single();
+
+  return data ? mapBooking(data as any) : null;
 }
 
 export async function getReviewsForListing(listingType: BusinessListingType, listingId: string): Promise<Review[]> {

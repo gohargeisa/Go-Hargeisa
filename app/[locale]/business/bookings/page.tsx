@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { CalendarDays } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
-import { getActiveListing, getBookingsForHotel } from "@/lib/data/business";
+import { getActiveListing, getBookingsForHotel, getBlockedDatesForHotel } from "@/lib/data/business";
 import { createClient } from "@/lib/supabase/server";
 import { mapHotelRoom } from "@/lib/data/mappers";
 import { BookingsTable } from "@/components/business/bookings-table";
+import { BookingsViewTabs } from "@/components/business/bookings-view-tabs";
 
 export const metadata: Metadata = { title: "Bookings — Dashboard", robots: { index: false } };
 
@@ -26,9 +27,10 @@ export default async function BookingsPage({ params: { locale } }: { params: { l
   }
 
   const supabase = await createClient();
-  const [bookings, { data: roomRows }] = await Promise.all([
+  const [bookings, { data: roomRows }, blockedDates] = await Promise.all([
     getBookingsForHotel(listing.id),
     supabase.from("hotel_rooms").select("*").eq("hotel_id", listing.id).order("sort_order", { ascending: true }),
+    getBlockedDatesForHotel(listing.id),
   ]);
   const rooms = (roomRows ?? []).map((r) => mapHotelRoom(r));
 
@@ -38,7 +40,13 @@ export default async function BookingsPage({ params: { locale } }: { params: { l
         <h1 className="font-display text-2xl font-bold">{t("navBookings")}</h1>
         <p className="mt-1 text-sm text-ink/60 dark:text-sand/60">{t("bookingsSubtitle")}</p>
       </div>
-      <BookingsTable hotelId={listing.id} bookings={bookings} rooms={rooms} revalidatePath={currentPath} />
+      <BookingsViewTabs
+        hotelId={listing.id}
+        bookings={bookings}
+        rooms={rooms}
+        blockedDates={blockedDates}
+        revalidatePath={currentPath}
+      />
     </div>
   );
 }

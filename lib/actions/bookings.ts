@@ -1,6 +1,11 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { sendEmail } from "@/lib/email/send";
+import { bookingReceivedEmail } from "@/lib/email/templates";
+import type { Locale } from "@/lib/i18n/config";
 
 export interface BookingRequestInput {
   hotelId: string;
@@ -15,6 +20,10 @@ export interface BookingRequestInput {
   checkIn: string;
   checkOut: string;
   notes?: string;
+  /** UI locale the guest booked in — used as the best-effort language for
+   * the owner's "new booking" email notification (their own locale
+   * preference isn't tracked anywhere). */
+  locale?: string;
 }
 
 export type BookingRequestResult =
@@ -87,5 +96,76 @@ export async function submitBookingRequest(input: BookingRequestInput): Promise<
   });
 
   if (error) return { ok: false, error: error.message };
-  return { ok: true, bookingReference: data ?? "" };
+  const bookingReference = data ?? "";
+
+  // Owner email notification — best-effort, gated by their notify_activity
+  // preference, same as every other transactional email in lib/email/.
+  // A failure here must never surface as a failed booking.
+  try {
+    const { data: hotel } = await supabase.from("hotels").select("owner_id, name").eq("id", input.hotelId).single();
+    const ownerId = (hotel as { owner_id: string | null; name: string } | null)?.owner_id;
+    const hotelName = (hotel as { owner_id: string | null; name: string } | null)?.name ?? "";
+    if (ownerId) {
+      const { data: ownerProfile } = await supabase.from("profiles").select("notify_activity").eq("id", ownerId).single();
+      if ((ownerProfile as { notify_activity: boolean } | null)?.notify_activity ?? true) {
+        const { data: ownerUser } = await createAdminClient().auth.admin.getUserById(ownerId);
+        if (ownerUser?.user?.email) {
+          const { subject, html } = bookingReceivedEmail(
+            (input.locale as Locale) || "en",
+            hotelName,
+            input.guestName.trim(),
+            input.checkIn,
+            input.checkOut,
+            bookingReference
+          );
+          await sendEmail({ to: ownerUser.user.email, subject, html });
+        }
+      }
+    }
+  } catch {
+    // best-effort — see comment above
+  }
+
+  return { ok: true, bookingReference };
+}
+
+const CANCELLATION_WINDOW_HOURS = 24;
+
+/**
+ * A signed-in guest cancels their own booking — only while it's still
+ * pending/confirmed and more than 24h before check-in. The app-level check
+ * here is a fast, friendly error message; the "Users cancel their own
+ * booking" RLS policy (20260802000007_user_booking_cancel.sql) mirrors the
+ * same window and is what's actually authoritative.
+ */
+export async function cancelMyBooking(bookingId: string, locale: string): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Please sign in." };
+
+  const { data: existing } = await supabase
+    .from("bookings")
+    .select("status, check_in, user_id")
+    .eq("id", bookingId)
+    .single();
+  const booking = existing as { status: string; check_in: string; user_id: string | null } | null;
+
+  if (!booking || booking.user_id !== user.id) {
+    return { ok: false, error: "Booking not found." };
+  }
+  if (booking.status !== "pending" && booking.status !== "confirmed") {
+    return { ok: false, error: "This booking can no longer be cancelled." };
+  }
+  const hoursUntilCheckIn = (new Date(`${booking.check_in}T00:00:00`).getTime() - Date.now()) / 3_600_000;
+  if (hoursUntilCheckIn <= CANCELLATION_WINDOW_HOURS) {
+    return { ok: false, error: `Bookings can only be cancelled at least ${CANCELLATION_WINDOW_HOURS}h before check-in.` };
+  }
+
+  const { error } = await supabase.from("bookings").update({ status: "cancelled" } as never).eq("id", bookingId);
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath(`/${locale}/dashboard`);
+  return { ok: true };
 }

@@ -66,6 +66,20 @@ const T = {
     ar: (title: string, message: string) => ({ subject: title, body: `<p>${message}</p>` }),
     so: (title: string, message: string) => ({ subject: title, body: `<p>${message}</p>` }),
   },
+  bookingReceived: {
+    en: (listing: string, guest: string, checkIn: string, checkOut: string, reference: string) => ({
+      subject: `New booking request — ${listing}`,
+      body: `<p><strong>${guest}</strong> requested a booking at <strong>${listing}</strong>.</p><p>${checkIn} → ${checkOut}</p><p>Reference: ${reference}</p><p>Review it from your Go Hargeisa dashboard.</p>`,
+    }),
+    ar: (listing: string, guest: string, checkIn: string, checkOut: string, reference: string) => ({
+      subject: `طلب حجز جديد — ${listing}`,
+      body: `<p>قام <strong>${guest}</strong> بطلب حجز في <strong>${listing}</strong>.</p><p>${checkIn} → ${checkOut}</p><p>المرجع: ${reference}</p><p>راجع الطلب من لوحة تحكم Go Hargeisa الخاصة بك.</p>`,
+    }),
+    so: (listing: string, guest: string, checkIn: string, checkOut: string, reference: string) => ({
+      subject: `Codsi Ballan Cusub — ${listing}`,
+      body: `<p><strong>${guest}</strong> wuxuu codsaday ballan ${listing}.</p><p>${checkIn} → ${checkOut}</p><p>Tixraaca: ${reference}</p><p>Ka eeg codsiga dashboard-kaaga Go Hargeisa.</p>`,
+    }),
+  },
 };
 
 export function bookingStatusEmail(locale: Locale, listing: string, status: string) {
@@ -85,5 +99,10 @@ export function accountVerifiedEmail(locale: Locale, listing: string) {
 
 export function announcementEmail(locale: Locale, title: string, message: string) {
   const { subject, body } = T.announcement[locale](title, message);
+  return { subject, html: shell(locale, body) };
+}
+
+export function bookingReceivedEmail(locale: Locale, listing: string, guest: string, checkIn: string, checkOut: string, reference: string) {
+  const { subject, body } = T.bookingReceived[locale](listing, guest, checkIn, checkOut, reference);
   return { subject, html: shell(locale, body) };
 }

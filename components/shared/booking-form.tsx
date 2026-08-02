@@ -293,6 +293,7 @@ export function BookingForm({
         checkIn,
         checkOut,
         notes: notes || undefined,
+        locale,
       });
 
       if (!result.ok) {
