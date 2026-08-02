@@ -54,6 +54,13 @@ export const SERVICE_GALLERY_CATEGORIES: GalleryCategoryOption[] = [
   { value: "other", label: "Other" },
 ];
 
+export const ATTRACTION_GALLERY_CATEGORIES: GalleryCategoryOption[] = [
+  { value: "landmark", label: "Landmark" },
+  { value: "surroundings", label: "Surroundings" },
+  { value: "visitors", label: "Visitors" },
+  { value: "other", label: "Other" },
+];
+
 export function galleryCategoryLabel(categories: GalleryCategoryOption[], category?: string): string {
   return categories.find((c) => c.value === category)?.label ?? "Other";
 }

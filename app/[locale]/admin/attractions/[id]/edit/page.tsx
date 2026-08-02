@@ -41,6 +41,10 @@ export default async function EditAttractionPage({
 
   const attraction = data as unknown as Database["public"]["Tables"]["attractions"]["Row"];
 
+  const gallery = Array.isArray(attraction.gallery)
+    ? (attraction.gallery as unknown as { url: string; alt?: string; category?: string }[])
+    : [];
+
   return (
     <section className="container-px mx-auto py-14">
       <h1 className="font-display text-2xl font-semibold mb-8">{t("editAttractionTitle")}</h1>
@@ -54,6 +58,7 @@ export default async function EditAttractionPage({
           shortDescription: attraction.short_description,
           description: attraction.description,
           coverImage: attraction.cover_image,
+          gallery: gallery as any,
           address: attraction.address,
           lat: attraction.lat,
           lng: attraction.lng,

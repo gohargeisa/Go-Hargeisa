@@ -4,10 +4,13 @@ import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 import { ImageUploader } from "@/components/shared/image-uploader";
+import { GalleryManager } from "@/components/admin/gallery-manager";
 import { Field, TagInput, inputClass } from "@/components/admin/form-shared";
 import { createRecord, updateRecord } from "@/lib/actions/admin";
 import { useUnsavedChangesWarning } from "@/lib/hooks/use-unsaved-changes-warning";
+import { ATTRACTION_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import type { Locale } from "@/lib/i18n/config";
+import type { GalleryImage } from "@/types";
 
 export interface AttractionFormInput {
   slug: string;
@@ -15,6 +18,7 @@ export interface AttractionFormInput {
   shortDescription: string;
   description: string;
   coverImage: string;
+  gallery: GalleryImage[];
   address: string;
   lat: number;
   lng: number;
@@ -45,6 +49,7 @@ export function AttractionForm({
     shortDescription: initial?.shortDescription ?? "",
     description: initial?.description ?? "",
     coverImage: initial?.coverImage ?? "",
+    gallery: initial?.gallery ?? [],
     address: initial?.address ?? "",
     lat: initial?.lat ?? 9.5624,
     lng: initial?.lng ?? 44.065,
@@ -81,7 +86,7 @@ export function AttractionForm({
       short_description: form.shortDescription,
       description: form.description,
       cover_image: form.coverImage,
-      gallery: [],
+      gallery: form.gallery,
       address: form.address,
       lat: form.lat,
       lng: form.lng,
@@ -108,6 +113,17 @@ export function AttractionForm({
   return (
     <form onSubmit={onSubmit} className="max-w-2xl space-y-6">
       <ImageUploader folder="attractions" value={form.coverImage} onChange={(url) => update("coverImage", url)} />
+
+      <GalleryManager
+        folder="attractions/gallery"
+        value={form.gallery}
+        onChange={(v) => update("gallery", v)}
+        categories={ATTRACTION_GALLERY_CATEGORIES}
+        coverUrl={form.coverImage}
+        onSetCover={(url) => update("coverImage", url)}
+        setCoverLabel={t("setAsCoverLabel")}
+        coverBadgeLabel={t("coverBadgeLabel")}
+      />
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label={t("attractionNameLabel")}>
