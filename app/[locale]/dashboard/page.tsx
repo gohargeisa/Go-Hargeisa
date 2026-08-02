@@ -29,7 +29,7 @@ export default async function DashboardPage({
 
     const { data, error } = await supabase
       .from("profiles")
-      .select("full_name, avatar_url, phone, bio, notify_activity, notify_marketing")
+      .select("full_name, avatar_url, phone, bio, notify_activity, notify_marketing, notify_in_app, notify_categories")
       .eq("id", user.id)
       .single();
 
@@ -45,7 +45,7 @@ export default async function DashboardPage({
         getSavedTripsForUser(user.id),
         getReviewsForUser(user.id),
         getMyBookings(),
-        getUserNotifications(50),
+        getUserNotifications(20),
         getUnreadNotificationCount(),
       ])
     : [[], [], [], [], [], 0];
@@ -58,6 +58,8 @@ export default async function DashboardPage({
   const bio = profile?.bio ?? "";
   const notifyActivity = profile?.notify_activity ?? true;
   const notifyMarketing = profile?.notify_marketing ?? false;
+  const notifyInApp = profile?.notify_in_app ?? true;
+  const notifyCategories = profile?.notify_categories ?? {};
   const hasPassword = user?.identities?.some((identity) => identity.provider === "email") ?? false;
   const memberSince = user?.created_at ?? new Date().toISOString();
 
@@ -90,6 +92,8 @@ export default async function DashboardPage({
         memberSince={memberSince}
         notifyActivity={notifyActivity}
         notifyMarketing={notifyMarketing}
+        notifyInApp={notifyInApp}
+        notifyCategories={notifyCategories}
       />
     </section>
   );

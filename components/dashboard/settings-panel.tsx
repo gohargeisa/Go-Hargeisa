@@ -29,6 +29,8 @@ export function SettingsPanel({
   hasPassword,
   initialNotifyActivity,
   initialNotifyMarketing,
+  initialNotifyInApp,
+  initialNotifyCategories,
 }: {
   locale: Locale;
   email: string;
@@ -36,6 +38,8 @@ export function SettingsPanel({
   hasPassword: boolean;
   initialNotifyActivity: boolean;
   initialNotifyMarketing: boolean;
+  initialNotifyInApp: boolean;
+  initialNotifyCategories: Record<string, boolean>;
 }) {
   const t = useTranslations("dashboard");
   const { toast, showToast, dismiss } = useToast();
@@ -83,6 +87,8 @@ export function SettingsPanel({
           locale={locale}
           initialNotifyActivity={initialNotifyActivity}
           initialNotifyMarketing={initialNotifyMarketing}
+          initialNotifyInApp={initialNotifyInApp}
+          initialNotifyCategories={initialNotifyCategories}
           showToast={showToast}
         />
       </SettingsSection>
@@ -185,37 +191,38 @@ function LanguageOptions({ locale }: { locale: Locale }) {
   );
 }
 
+const NOTIFICATION_CATEGORY_KEYS = ["booking", "review", "promotion", "event", "announcement"] as const;
+type NotificationCategoryKey = (typeof NOTIFICATION_CATEGORY_KEYS)[number];
+
 function NotificationToggles({
   locale,
   initialNotifyActivity,
   initialNotifyMarketing,
+  initialNotifyInApp,
+  initialNotifyCategories,
   showToast,
 }: {
   locale: Locale;
   initialNotifyActivity: boolean;
   initialNotifyMarketing: boolean;
+  initialNotifyInApp: boolean;
+  initialNotifyCategories: Record<string, boolean>;
   showToast: (type: "success" | "error", message: string) => void;
 }) {
   const t = useTranslations("dashboard");
   const [notifyActivity, setNotifyActivity] = useState(initialNotifyActivity);
   const [notifyMarketing, setNotifyMarketing] = useState(initialNotifyMarketing);
+  const [notifyInApp, setNotifyInApp] = useState(initialNotifyInApp);
+  const [categories, setCategories] = useState<Record<string, boolean>>(initialNotifyCategories);
   const [isPending, startTransition] = useTransition();
 
-  function toggle(key: "notifyActivity" | "notifyMarketing", value: boolean) {
-    const next = {
-      notifyActivity: key === "notifyActivity" ? value : notifyActivity,
-      notifyMarketing: key === "notifyMarketing" ? value : notifyMarketing,
-    };
-    if (key === "notifyActivity") setNotifyActivity(value);
-    else setNotifyMarketing(value);
-
+  function save(next: { notifyActivity: boolean; notifyMarketing: boolean; notifyInApp: boolean; notifyCategories: Record<string, boolean> }, revert: () => void) {
     startTransition(async () => {
       const result = await updateNotificationPreferences(locale, next);
       if (!result.ok) {
         // Revert on failure — never let the UI claim a preference stuck
         // that wasn't actually saved.
-        if (key === "notifyActivity") setNotifyActivity(!value);
-        else setNotifyMarketing(!value);
+        revert();
         showToast("error", result.error ?? t("genericError"));
         return;
       }
@@ -223,22 +230,86 @@ function NotificationToggles({
     });
   }
 
+  function toggle(key: "notifyActivity" | "notifyMarketing" | "notifyInApp", value: boolean) {
+    const previous = { notifyActivity, notifyMarketing, notifyInApp };
+    if (key === "notifyActivity") setNotifyActivity(value);
+    else if (key === "notifyMarketing") setNotifyMarketing(value);
+    else setNotifyInApp(value);
+
+    save(
+      {
+        notifyActivity: key === "notifyActivity" ? value : notifyActivity,
+        notifyMarketing: key === "notifyMarketing" ? value : notifyMarketing,
+        notifyInApp: key === "notifyInApp" ? value : notifyInApp,
+        notifyCategories: categories,
+      },
+      () => {
+        setNotifyActivity(previous.notifyActivity);
+        setNotifyMarketing(previous.notifyMarketing);
+        setNotifyInApp(previous.notifyInApp);
+      }
+    );
+  }
+
+  function toggleCategory(key: NotificationCategoryKey, value: boolean) {
+    const previous = categories;
+    const next = { ...categories, [key]: value };
+    setCategories(next);
+
+    save(
+      { notifyActivity, notifyMarketing, notifyInApp, notifyCategories: next },
+      () => setCategories(previous)
+    );
+  }
+
   return (
-    <div className="space-y-4">
-      <ToggleRow
-        label={t("notifyActivityLabel")}
-        description={t("notifyActivityDescription")}
-        checked={notifyActivity}
-        disabled={isPending}
-        onChange={(v) => toggle("notifyActivity", v)}
-      />
-      <ToggleRow
-        label={t("notifyMarketingLabel")}
-        description={t("notifyMarketingDescription")}
-        checked={notifyMarketing}
-        disabled={isPending}
-        onChange={(v) => toggle("notifyMarketing", v)}
-      />
+    <div className="space-y-6">
+      <div className="space-y-4">
+        <ToggleRow
+          label={t("notifyActivityLabel")}
+          description={t("notifyActivityDescription")}
+          checked={notifyActivity}
+          disabled={isPending}
+          onChange={(v) => toggle("notifyActivity", v)}
+        />
+        <ToggleRow
+          label={t("notifyMarketingLabel")}
+          description={t("notifyMarketingDescription")}
+          checked={notifyMarketing}
+          disabled={isPending}
+          onChange={(v) => toggle("notifyMarketing", v)}
+        />
+        <ToggleRow
+          label={t("notifyInAppLabel")}
+          description={t("notifyInAppDescription")}
+          checked={notifyInApp}
+          disabled={isPending}
+          onChange={(v) => toggle("notifyInApp", v)}
+        />
+      </div>
+
+      <div className={notifyInApp ? "" : "pointer-events-none opacity-50"}>
+        <p className="mb-2.5 text-xs font-semibold uppercase tracking-wide text-ink/45 dark:text-sand/45">
+          {t("notifyCategoriesTitle")}
+        </p>
+        <div className="grid gap-2 sm:grid-cols-2">
+          {NOTIFICATION_CATEGORY_KEYS.map((key) => (
+            <label
+              key={key}
+              className="flex items-center gap-2.5 rounded-xl border border-ink/8 px-3.5 py-2.5 text-sm dark:border-white/10"
+            >
+              <input
+                type="checkbox"
+                checked={categories[key] !== false}
+                disabled={isPending || !notifyInApp}
+                onChange={(e) => toggleCategory(key, e.target.checked)}
+                className="h-4 w-4 shrink-0 rounded accent-primary"
+              />
+              {t(`notifyCategory_${key}`)}
+            </label>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useTranslations, useFormatter } from "next-intl";
-import { Bell, Check, CheckCheck, Sparkles } from "lucide-react";
+import { Bell, Check, CheckCheck, Loader2, Sparkles, Trash2 } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { useLiveNotifications } from "@/lib/hooks/use-live-notifications";
 import { getNotificationText } from "@/lib/utils/notification-text";
@@ -27,7 +27,10 @@ export function NotificationList({
   const t = useTranslations("notifications");
   const format = useFormatter();
   const router = useRouter();
-  const { items, unreadCount, markOneRead, markAllRead } = useLiveNotifications(initialItems, initialUnread);
+  const { items, unreadCount, markOneRead, markAllRead, deleteOne, loadMore, hasMore, isLoadingMore } = useLiveNotifications(
+    initialItems,
+    initialUnread
+  );
 
   if (items.length === 0) {
     return <EmptyState icon={Sparkles} title={t("emptyTitle")} description={t("emptyDescription")} />;
@@ -81,23 +84,49 @@ export function NotificationList({
                 {body && <p className="mt-1 text-sm text-ink/60 dark:text-sand/60">{body}</p>}
                 <p className="mt-1.5 text-xs text-ink/35 dark:text-sand/35">{format.relativeTime(new Date(n.createdAt))}</p>
               </div>
-              {!n.isRead && (
+              <div className="flex shrink-0 items-center gap-1.5">
+                {!n.isRead && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      void markOneRead(n.id);
+                    }}
+                    aria-label={t("markRead")}
+                    className="flex h-7 w-7 items-center justify-center rounded-full border border-ink/10 text-ink/40 hover:border-primary hover:text-primary dark:border-white/15"
+                  >
+                    <Check size={13} />
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    void markOneRead(n.id);
+                    void deleteOne(n.id);
                   }}
-                  aria-label={t("markRead")}
-                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-ink/10 text-ink/40 hover:border-primary hover:text-primary dark:border-white/15"
+                  aria-label={t("deleteNotification")}
+                  className="flex h-7 w-7 items-center justify-center rounded-full border border-ink/10 text-ink/40 hover:border-red-500 hover:text-red-500 dark:border-white/15"
                 >
-                  <Check size={13} />
+                  <Trash2 size={13} />
                 </button>
-              )}
+              </div>
             </div>
           );
         })}
       </div>
+
+      {hasMore && (
+        <div className="border-t border-ink/8 px-5 py-4 text-center dark:border-white/10">
+          <button
+            type="button"
+            onClick={() => void loadMore()}
+            disabled={isLoadingMore}
+            className="inline-flex items-center gap-1.5 rounded-full border border-ink/10 px-4 py-2 text-xs font-semibold transition-colors hover:border-primary hover:text-primary disabled:opacity-60 dark:border-white/15"
+          >
+            {isLoadingMore && <Loader2 size={13} className="animate-spin" />} {t("loadMore")}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

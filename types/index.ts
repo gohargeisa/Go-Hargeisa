@@ -125,7 +125,12 @@ export type NotificationCategory =
   | "review_new"
   | "offer_approved"
   | "offer_rejected"
-  | "message_new";
+  | "message_new"
+  | "review_reply"
+  | "promotion_new"
+  | "event_published"
+  | "account_verified"
+  | "system_announcement";
 
 export type NotificationSeverity = "success" | "error" | "warning" | "info";
 

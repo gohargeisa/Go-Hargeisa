@@ -11,7 +11,7 @@ export default async function AdminNotificationsPage({ params: { locale } }: { p
   await requireAdmin(locale, `/${locale}/admin/notifications`);
   const t = await getTranslations({ locale, namespace: "admin" });
 
-  const [items, unread] = await Promise.all([getUserNotifications(50), getUnreadNotificationCount()]);
+  const [items, unread] = await Promise.all([getUserNotifications(20), getUnreadNotificationCount()]);
 
   return (
     <section className="container-px mx-auto py-14">

@@ -2,6 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { sendEmail } from "@/lib/email/send";
+import { announcementEmail } from "@/lib/email/templates";
+import type { Locale } from "@/lib/i18n/config";
 import { logActivity } from "./activity";
 
 async function assertOwner() {
@@ -53,12 +57,31 @@ export async function setAnnouncementStatus(
 ): Promise<{ ok: boolean; error?: string }> {
   const supabase = await assertOwner();
 
+  const { data: before } = await supabase.from("site_announcements").select("status, title, message").eq("id", id).single();
+  const previous = before as { status: string; title: string; message: string } | null;
+
   const { error } = await supabase
     .from("site_announcements")
     .update({ status, updated_at: new Date().toISOString() } as never)
     .eq("id", id);
 
   if (error) return { ok: false, error: error.message };
+
+  // Email broadcast — best-effort, only on a genuine ->published
+  // transition, sent to every user who has "Local recommendations & news"
+  // (notify_marketing) enabled. Capped at 500 recipients per publish so one
+  // announcement can't turn into an unbounded synchronous fan-out.
+  if (status === "published" && previous && previous.status !== "published") {
+    const { data: optedIn } = await supabase.from("profiles").select("id").eq("notify_marketing", true).limit(500);
+    const optedInIds = new Set((optedIn ?? []).map((p) => (p as { id: string }).id));
+    if (optedInIds.size > 0) {
+      const admin = createAdminClient();
+      const { data: page } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+      const { subject, html } = announcementEmail(locale as Locale, previous.title, previous.message);
+      const recipients = (page?.users ?? []).filter((u) => optedInIds.has(u.id) && u.email);
+      await Promise.all(recipients.map((u) => sendEmail({ to: u.email!, subject, html })));
+    }
+  }
 
   await logActivity(status === "published" ? "publish" : "update", "site_announcement", id, { status });
   revalidatePath(`/${locale}/admin/announcements`);

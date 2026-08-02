@@ -40,13 +40,13 @@ function isTabKey(value: string | null): value is TabKey {
 
 export function DashboardTabs({
   locale, userId, email, favorites, trips, bookings, reviews, notifications, unreadNotifications, userName, avatarUrl,
-  phone, bio, hasPassword, memberSince, notifyActivity, notifyMarketing,
+  phone, bio, hasPassword, memberSince, notifyActivity, notifyMarketing, notifyInApp, notifyCategories,
 }: {
   locale: Locale; userId: string; email: string; favorites: FavoriteEntry[]; trips: SavedTrip[];
   bookings: Booking[]; reviews: MyReview[]; notifications: Notification[]; unreadNotifications: number;
   userName: string; avatarUrl: string;
   phone: string; bio: string; hasPassword: boolean; memberSince: string;
-  notifyActivity: boolean; notifyMarketing: boolean;
+  notifyActivity: boolean; notifyMarketing: boolean; notifyInApp: boolean; notifyCategories: Record<string, boolean>;
 }) {
   const t = useTranslations("dashboard");
   const router = useRouter();
@@ -135,6 +135,8 @@ export function DashboardTabs({
               hasPassword={hasPassword}
               initialNotifyActivity={notifyActivity}
               initialNotifyMarketing={notifyMarketing}
+              initialNotifyInApp={notifyInApp}
+              initialNotifyCategories={notifyCategories}
             />
           )}
           {active === "notifications" && <div>

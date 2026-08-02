@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useTranslations, useFormatter } from "next-intl";
 import { AnimatePresence, m } from "framer-motion";
-import { Bell, Check, CheckCheck, Sparkles } from "lucide-react";
+import { Bell, Check, CheckCheck, Sparkles, Trash2 } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { getUserNotifications, getUnreadNotificationCount } from "@/lib/actions/notifications";
 import { useLiveNotifications } from "@/lib/hooks/use-live-notifications";
@@ -46,7 +46,7 @@ export function NotificationBell({
     };
   }, []);
 
-  const { items, unreadCount, markOneRead, markAllRead } = useLiveNotifications(seed.items, seed.unread);
+  const { items, unreadCount, markOneRead, markAllRead, deleteOne } = useLiveNotifications(seed.items, seed.unread);
 
   const homeHref = isOwner
     ? `/${locale}/admin/notifications`
@@ -130,20 +130,34 @@ export function NotificationBell({
                             {format.relativeTime(new Date(n.createdAt))}
                           </p>
                         </div>
-                        {!n.isRead && (
+                        <div className="mt-0.5 flex shrink-0 items-center gap-1">
+                          {!n.isRead && (
+                            <span
+                              role="button"
+                              tabIndex={-1}
+                              aria-label={t("markRead")}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                void markOneRead(n.id);
+                              }}
+                              className="flex h-6 w-6 items-center justify-center rounded-full border border-ink/10 text-ink/40 hover:border-primary hover:text-primary dark:border-white/15"
+                            >
+                              <Check size={12} />
+                            </span>
+                          )}
                           <span
                             role="button"
                             tabIndex={-1}
-                            aria-label={t("markRead")}
+                            aria-label={t("deleteNotification")}
                             onClick={(e) => {
                               e.stopPropagation();
-                              void markOneRead(n.id);
+                              void deleteOne(n.id);
                             }}
-                            className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-ink/10 text-ink/40 hover:border-primary hover:text-primary dark:border-white/15"
+                            className="flex h-6 w-6 items-center justify-center rounded-full border border-ink/10 text-ink/40 hover:border-red-500 hover:text-red-500 dark:border-white/15"
                           >
-                            <Check size={12} />
+                            <Trash2 size={12} />
                           </span>
-                        )}
+                        </div>
                       </button>
                     );
                   })

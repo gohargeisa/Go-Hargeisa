@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "Notifications — Business", robots:
 export default async function BusinessNotificationsPage({ params: { locale } }: { params: { locale: Locale } }) {
   const t = await getTranslations({ locale, namespace: "businessDashboard" });
 
-  const [items, unread] = await Promise.all([getUserNotifications(50), getUnreadNotificationCount()]);
+  const [items, unread] = await Promise.all([getUserNotifications(20), getUnreadNotificationCount()]);
 
   return (
     <div>

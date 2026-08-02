@@ -5,7 +5,7 @@ import type { RealtimeChannel } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { mapNotification } from "@/lib/data/mappers";
-import { markNotificationAsRead, markAllNotificationsAsRead } from "@/lib/actions/notifications";
+import { markNotificationAsRead, markAllNotificationsAsRead, deleteNotification, getMoreNotifications } from "@/lib/actions/notifications";
 import type { Notification } from "@/types";
 import type { Database } from "@/types/database";
 
@@ -77,14 +77,17 @@ function subscribeShared(userId: string, onInsert: InsertListener): () => void {
  * which independently enforce "own rows only" via RLS/auth.uid(), so
  * callers don't need to source or pass an id themselves.
  */
-export function useLiveNotifications(initialItems: Notification[], initialUnread: number) {
+export function useLiveNotifications(initialItems: Notification[], initialUnread: number, pageSize = 20) {
   const [items, setItems] = useState<Notification[]>(initialItems);
   const [unreadCount, setUnreadCount] = useState(initialUnread);
   const [userId, setUserId] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(initialItems.length >= pageSize);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   useEffect(() => {
     setItems(initialItems);
     setUnreadCount(initialUnread);
+    setHasMore(initialItems.length >= pageSize);
     // Only re-sync when the server-fetched snapshot itself changes (e.g.
     // navigating between pages that each fetch their own initial page of
     // notifications) — not on every render.
@@ -139,5 +142,29 @@ export function useLiveNotifications(initialItems: Notification[], initialUnread
     }
   }, [items]);
 
-  return { items, unreadCount, markOneRead, markAllRead };
+  const deleteOne = useCallback(async (id: string) => {
+    const target = items.find((n) => n.id === id);
+    if (!target) return;
+
+    setItems((prev) => prev.filter((n) => n.id !== id));
+    if (!target.isRead) setUnreadCount((count) => Math.max(0, count - 1));
+
+    const result = await deleteNotification(id);
+    if (!result.ok) {
+      setItems((prev) => [...prev, target].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1)));
+      if (!target.isRead) setUnreadCount((count) => count + 1);
+    }
+  }, [items]);
+
+  const loadMore = useCallback(async () => {
+    if (isLoadingMore || !hasMore || items.length === 0) return;
+    setIsLoadingMore(true);
+    const oldestCreatedAt = items[items.length - 1].createdAt;
+    const next = await getMoreNotifications(oldestCreatedAt, pageSize);
+    setItems((prev) => [...prev, ...next]);
+    setHasMore(next.length >= pageSize);
+    setIsLoadingMore(false);
+  }, [isLoadingMore, hasMore, items, pageSize]);
+
+  return { items, unreadCount, markOneRead, markAllRead, deleteOne, loadMore, hasMore, isLoadingMore };
 }

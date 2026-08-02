@@ -6,7 +6,12 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function updateNotificationPreferences(
   locale: string,
-  input: { notifyActivity: boolean; notifyMarketing: boolean }
+  input: {
+    notifyActivity: boolean;
+    notifyMarketing: boolean;
+    notifyInApp?: boolean;
+    notifyCategories?: Record<string, boolean>;
+  }
 ): Promise<{ ok: boolean; error?: string }> {
   const supabase = await createClient();
   const {
@@ -14,9 +19,16 @@ export async function updateNotificationPreferences(
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Not signed in." };
 
+  const payload: Record<string, unknown> = {
+    notify_activity: input.notifyActivity,
+    notify_marketing: input.notifyMarketing,
+  };
+  if (input.notifyInApp !== undefined) payload.notify_in_app = input.notifyInApp;
+  if (input.notifyCategories !== undefined) payload.notify_categories = input.notifyCategories;
+
   const { data, error } = await supabase
     .from("profiles")
-    .update({ notify_activity: input.notifyActivity, notify_marketing: input.notifyMarketing })
+    .update(payload)
     .eq("id", user.id)
     .select("id")
     .single();

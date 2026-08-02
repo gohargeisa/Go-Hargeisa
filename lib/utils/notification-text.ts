@@ -47,6 +47,16 @@ export function getNotificationText(
       return { title: t("offerRejectedTitle"), body: t("offerRejectedBody", { offer: str(d.offerTitle) }), href };
     case "message_new":
       return { title: t("messageNewTitle"), body: t("messageNewBody", { sender: str(d.senderName), listing: str(d.listingName) }), href };
+    case "review_reply":
+      return { title: t("reviewReplyTitle"), body: t("reviewReplyBody", { listing: str(d.listingName) }), href };
+    case "promotion_new":
+      return { title: t("promotionNewTitle"), body: t("promotionNewBody", { offer: str(d.offerTitle), listing: str(d.listingName) }), href };
+    case "event_published":
+      return { title: t("eventPublishedTitle"), body: t("eventPublishedBody", { event: str(d.eventTitle) }), href };
+    case "account_verified":
+      return { title: t("accountVerifiedTitle"), body: t("accountVerifiedBody", { listing: str(d.listingName) }), href };
+    case "system_announcement":
+      return { title: str(d.announcementTitle) || n.title, body: str(d.announcementMessage) || n.message, href };
     default:
       return { title: n.title, body: n.message, href };
   }

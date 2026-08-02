@@ -2,7 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { sendEmail } from "@/lib/email/send";
+import { accountVerifiedEmail } from "@/lib/email/templates";
 import { logActivity } from "./activity";
+import type { Locale } from "@/lib/i18n/config";
 import type { SubscriptionPlanId } from "@/lib/config/subscription-plans";
 
 const PARTNER_TABLES = ["hotels", "restaurants", "cafes"] as const;
@@ -38,6 +42,9 @@ export async function setPartnerStatus(
 
   const supabase = await assertOwner();
 
+  const { data: before } = await supabase.from(table).select("partner_status, owner_id, name").eq("id", id).single();
+  const previous = before as { partner_status: "trial" | "official"; owner_id: string | null; name: string } | null;
+
   let error = null;
   switch (table) {
     case "hotels":
@@ -52,6 +59,19 @@ export async function setPartnerStatus(
   }
 
   if (error) return { ok: false, error: error.message };
+
+  // Email notification — best-effort, only on trial -> official ("account
+  // verification"), gated by the owner's notify_activity preference.
+  if (status === "official" && previous?.partner_status === "trial" && previous.owner_id) {
+    const { data: ownerProfile } = await supabase.from("profiles").select("notify_activity").eq("id", previous.owner_id).single();
+    if ((ownerProfile as { notify_activity: boolean } | null)?.notify_activity ?? true) {
+      const { data: ownerUser } = await createAdminClient().auth.admin.getUserById(previous.owner_id);
+      if (ownerUser?.user?.email) {
+        const { subject, html } = accountVerifiedEmail(locale as Locale, previous.name);
+        await sendEmail({ to: ownerUser.user.email, subject, html });
+      }
+    }
+  }
 
   await logActivity("update", "partner_status", id, { table, status });
   revalidatePath(`/${locale}/admin/partners`);

@@ -76,6 +76,39 @@ export async function getUserNotifications(limit = 20, onlyUnread = false): Prom
   }
 }
 
+/** Cursor-based pagination for the full-page notification list (infinite
+ * scroll / "Load more") — keeps every page's query on the
+ * idx_notifications_user_created(user_id, created_at desc) index instead of
+ * an OFFSET that gets slower the deeper a user scrolls. */
+export async function getMoreNotifications(beforeCreatedAt: string, limit = 20): Promise<Notification[]> {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) return [];
+
+    const { data, error } = await supabase
+      .from("notifications")
+      .select("*")
+      .eq("user_id", user.id)
+      .lt("created_at", beforeCreatedAt)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.warn("Failed to fetch more notifications:", error.message);
+      return [];
+    }
+
+    return (data ?? []).map((row) => mapNotification(row as never));
+  } catch (err) {
+    console.warn("Error fetching more notifications:", err);
+    return [];
+  }
+}
+
 export async function markNotificationAsRead(notificationId: string): Promise<{ ok: boolean; error?: string }> {
   try {
     const supabase = await createClient();
