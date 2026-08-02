@@ -465,7 +465,10 @@ export type ServiceCategory =
   | "university"
   | "gym"
   | "tour_company"
-  | "apartment";
+  | "apartment"
+  | "supermarket"
+  | "clinic"
+  | "government_office";
 
 export interface Service {
   id: string;
@@ -599,7 +602,9 @@ export type CityServiceCategory =
   | "parking"
   | "gym"
   | "tour_company"
-  | "apartment";
+  | "apartment"
+  | "clinic"
+  | "government_office";
 
 export interface CityServicePoint {
   id: string;

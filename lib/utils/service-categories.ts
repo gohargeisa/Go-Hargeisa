@@ -25,6 +25,9 @@ export const SERVICE_CATEGORY_SLUGS: Record<ServiceCategory, string> = {
   gym: "gyms",
   tour_company: "tour-companies",
   apartment: "apartments",
+  supermarket: "supermarkets",
+  clinic: "clinics",
+  government_office: "government-offices",
 };
 
 export const SERVICE_CATEGORY_LABELS: Record<ServiceCategory, string> = {
@@ -42,6 +45,9 @@ export const SERVICE_CATEGORY_LABELS: Record<ServiceCategory, string> = {
   gym: "Gyms",
   tour_company: "Tour Companies",
   apartment: "Apartments",
+  supermarket: "Supermarkets",
+  clinic: "Clinics",
+  government_office: "Government Offices",
 };
 
 export const SERVICE_CATEGORY_SINGULAR_LABELS: Record<ServiceCategory, string> = {
@@ -59,6 +65,9 @@ export const SERVICE_CATEGORY_SINGULAR_LABELS: Record<ServiceCategory, string> =
   gym: "Gym",
   tour_company: "Tour Company",
   apartment: "Apartment",
+  supermarket: "Supermarket",
+  clinic: "Clinic",
+  government_office: "Government Office",
 };
 
 export const SERVICE_CATEGORY_ORDER: ServiceCategory[] = [
@@ -76,6 +85,9 @@ export const SERVICE_CATEGORY_ORDER: ServiceCategory[] = [
   "gym",
   "tour_company",
   "apartment",
+  "supermarket",
+  "clinic",
+  "government_office",
 ];
 
 const SLUG_TO_CATEGORY: Record<string, ServiceCategory> = Object.fromEntries(
@@ -109,6 +121,9 @@ const SERVICE_CATEGORY_KEYWORDS: Record<ServiceCategory, string[]> = {
   gym: ["gym", "gyms", "fitness", "fitness center", "workout"],
   tour_company: ["tour company", "tour companies", "tours", "travel agency", "tour operator"],
   apartment: ["apartment", "apartments", "flat", "flats", "furnished apartment"],
+  supermarket: ["supermarket", "supermarkets", "grocery", "grocery store", "market"],
+  clinic: ["clinic", "clinics", "medical clinic", "walk-in clinic"],
+  government_office: ["government office", "government offices", "ministry", "municipality", "government"],
 };
 
 /** Resolves a free-text search query to a service category when the query

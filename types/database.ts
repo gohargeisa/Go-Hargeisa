@@ -106,7 +106,8 @@ type AttractionRow = ListingBase & {
 
 type ServiceCategoryDb =
   | "hospital" | "pharmacy" | "dental_clinic" | "bank" | "atm" | "currency_exchange" | "gas_station" | "car_rental"
-  | "mosque" | "school" | "university" | "gym" | "tour_company" | "apartment";
+  | "mosque" | "school" | "university" | "gym" | "tour_company" | "apartment"
+  | "supermarket" | "clinic" | "government_office";
 
 type ServiceRow = ListingBase & {
   phone: string | null; website: string | null; opening_hours: string | null; services: string[];

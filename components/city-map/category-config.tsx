@@ -1,10 +1,12 @@
 import {
+  Briefcase,
   Building2,
   Car,
   CreditCard,
   Dumbbell,
   Fuel,
   GraduationCap,
+  HeartPulse,
   Landmark,
   type LucideIcon,
   MoonStar,
@@ -48,6 +50,8 @@ export const CATEGORY_CONFIG: Record<CityServiceCategory, CategoryMeta> = {
   gym: { label: "Gyms", icon: Dumbbell, color: "#DC2626" },
   tour_company: { label: "Tour Companies", icon: Map, color: "#0891B2" },
   apartment: { label: "Apartments", icon: Building, color: "#9333EA" },
+  clinic: { label: "Clinics", icon: HeartPulse, color: "#F472B6" },
+  government_office: { label: "Government Offices", icon: Briefcase, color: "#4F46E5" },
 };
 
 export const CATEGORY_ORDER = Object.keys(CATEGORY_CONFIG) as CityServiceCategory[];
