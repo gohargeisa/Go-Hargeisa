@@ -156,6 +156,7 @@ export default async function HotelDetailPage({
         locale={locale}
         listingType="hotel"
         listingId={hotel.id}
+        hotelSlug={hotel.slug}
         name={hotel.name}
         rating={hotel.rating}
         phone={hotel.phone}
@@ -359,6 +360,7 @@ export default async function HotelDetailPage({
         <aside className="hidden h-fit rounded-xl3 border border-ink/8 p-6 shadow-premium dark:border-white/10 lg:sticky lg:top-24 lg:block">
           <HotelBookingCard
             hotelId={hotel.id}
+            hotelSlug={hotel.slug}
             name={hotel.name}
             rating={hotel.rating}
             priceRange={hotel.priceRange}

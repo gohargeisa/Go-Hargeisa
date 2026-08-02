@@ -7,11 +7,17 @@ import type { RoomType } from "@/types";
 export interface HotelRoomInput {
   name: string;
   image?: string;
+  images?: string[];
+  description?: string;
   sizeSqm?: number;
   maxGuests: number;
   bedType?: string;
+  bathrooms?: number;
   features: string[];
   pricePerNight?: number;
+  weekendPrice?: number;
+  discountPrice?: number;
+  totalRooms?: number;
   sortOrder?: number;
   roomType: RoomType;
   isAvailable: boolean;
@@ -49,15 +55,33 @@ function toPayload(input: HotelRoomInput, hotelId: string) {
     hotel_id: hotelId,
     name: input.name,
     image: input.image || null,
+    description: input.description || null,
     size_sqm: input.sizeSqm ?? null,
     max_guests: input.maxGuests,
     bed_type: input.bedType || null,
+    bathrooms: input.bathrooms ?? 1,
     features: input.features,
     price_per_night: input.pricePerNight ?? null,
+    weekend_price: input.weekendPrice ?? null,
+    discount_price: input.discountPrice ?? null,
+    total_rooms: input.totalRooms ?? 1,
     sort_order: input.sortOrder ?? 0,
     room_type: input.roomType,
     is_available: input.isAvailable,
   };
+}
+
+/** Replaces a room's gallery wholesale — simplest correct sync for a small
+ * per-room image list, avoids diffing add/remove/reorder as three separate
+ * operations. Best-effort: a gallery write failure doesn't roll back the
+ * room save itself. */
+async function syncRoomImages(supabase: Awaited<ReturnType<typeof assertCanManageRoom>>, roomId: string, images?: string[]) {
+  if (images === undefined) return;
+  await supabase.from("room_images" as any).delete().eq("room_id", roomId);
+  if (images.length === 0) return;
+  await supabase.from("room_images" as any).insert(
+    images.map((url, i) => ({ room_id: roomId, url, sort_order: i })) as never
+  );
 }
 
 export async function createHotelRoom(
@@ -67,9 +91,11 @@ export async function createHotelRoom(
 ): Promise<{ ok: boolean; error?: string }> {
   const supabase = await assertCanManageRoom(hotelId);
 
-  const { error } = await supabase.from("hotel_rooms" as any).insert(toPayload(input, hotelId) as never);
+  const { data, error } = await supabase.from("hotel_rooms" as any).insert(toPayload(input, hotelId) as never).select("id").single();
 
-  if (error) return { ok: false, error: error.message };
+  if (error || !data) return { ok: false, error: error?.message ?? "Could not create room." };
+
+  await syncRoomImages(supabase, (data as { id: string }).id, input.images);
 
   for (const path of revalidatePaths) revalidatePath(path);
   return { ok: true };
@@ -89,6 +115,8 @@ export async function updateHotelRoom(
     .eq("id", roomId);
 
   if (error) return { ok: false, error: error.message };
+
+  await syncRoomImages(supabase, roomId, input.images);
 
   for (const path of revalidatePaths) revalidatePath(path);
   return { ok: true };

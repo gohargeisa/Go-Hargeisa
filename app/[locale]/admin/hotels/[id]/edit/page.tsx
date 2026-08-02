@@ -54,7 +54,7 @@ export default async function EditHotelPage({
   const [restaurants, cafes, { data: roomRows }] = await Promise.all([
     getRestaurants(),
     getCafes(),
-    supabase.from("hotel_rooms" as any).select("*").eq("hotel_id", hotel.id).order("sort_order", { ascending: true }),
+    supabase.from("hotel_rooms" as any).select("*, room_images(*)").eq("hotel_id", hotel.id).order("sort_order", { ascending: true }),
   ]);
 
   const gallery = Array.isArray(hotel.gallery)
@@ -74,11 +74,19 @@ export default async function EditHotelPage({
           id: r.id,
           name: r.name,
           image: r.image ?? "",
+          images: Array.isArray(r.room_images)
+            ? [...r.room_images].sort((a, b) => a.sort_order - b.sort_order).map((img: any) => img.url)
+            : [],
+          description: r.description ?? "",
           sizeSqm: r.size_sqm ?? undefined,
           maxGuests: r.max_guests,
           bedType: r.bed_type ?? "",
+          bathrooms: r.bathrooms ?? 1,
           features: r.features ?? [],
           pricePerNight: r.price_per_night != null ? Number(r.price_per_night) : undefined,
+          weekendPrice: r.weekend_price != null ? Number(r.weekend_price) : undefined,
+          discountPrice: r.discount_price != null ? Number(r.discount_price) : undefined,
+          totalRooms: r.total_rooms ?? 1,
           roomType: r.room_type ?? "standard",
           isAvailable: r.is_available ?? true,
         }))}

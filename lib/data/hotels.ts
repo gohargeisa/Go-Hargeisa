@@ -76,7 +76,7 @@ async function _getHotelBySlug(slug: string): Promise<Hotel | null> {
       .order("created_at", { ascending: false }),
     supabase
       .from("hotel_rooms" as any)
-      .select("*")
+      .select("*, room_images(*)")
       .eq("hotel_id", hotel.id)
       .order("sort_order", { ascending: true }),
     hotel.restaurant_id

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { BookingRequestModal } from "@/components/shared/booking-request-modal";
 import type { HotelBookingCta } from "@/lib/utils/booking-cta";
@@ -22,6 +23,7 @@ export function HotelBookNowButton({
   hotelId,
   hotelName,
   hotelRating,
+  hotelSlug,
   rooms = [],
   preselectedRoomId,
   className,
@@ -32,6 +34,11 @@ export function HotelBookNowButton({
   hotelId: string;
   hotelName: string;
   hotelRating?: number;
+  /** When set (and cta isn't "external"), this button navigates to the
+   * dedicated /hotels/[slug]/book page instead of opening the modal — used
+   * by the two primary "Book Now" CTAs (action bar, sidebar card). Omit to
+   * keep the modal (per-room cards, mobile sticky bar), unchanged. */
+  hotelSlug?: string;
   rooms?: HotelRoom[];
   preselectedRoomId?: string;
   className: string;
@@ -46,6 +53,15 @@ export function HotelBookNowButton({
         <ArrowUpRight size={iconSize} aria-hidden="true" />
         <span className="sr-only">(opens in a new tab)</span>
       </a>
+    );
+  }
+
+  if (hotelSlug) {
+    const href = `/${locale}/hotels/${hotelSlug}/book${preselectedRoomId ? `?room=${preselectedRoomId}` : ""}`;
+    return (
+      <Link href={href} className={className}>
+        {cta.label}
+      </Link>
     );
   }
 

@@ -107,6 +107,18 @@ export async function createBooking(
 ): Promise<{ ok: boolean; error?: string }> {
   const supabase = await assertCanManageListing("hotel", hotelId);
 
+  if (input.roomId) {
+    const { data: available } = await supabase.rpc("room_capacity_available", {
+      p_room_id: input.roomId,
+      p_check_in: input.checkIn,
+      p_check_out: input.checkOut,
+      p_rooms_count: 1,
+    });
+    if (available === false) {
+      return { ok: false, error: "This room is no longer available for the selected dates." };
+    }
+  }
+
   const { error } = await supabase.from("bookings").insert(bookingPayload(hotelId, input) as never);
   if (error) return { ok: false, error: error.message };
 

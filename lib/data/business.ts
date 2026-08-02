@@ -301,7 +301,7 @@ export async function getViewsSeries(
 
 function mapBooking(row: {
   id: string; hotel_id: string; room_id: string | null; guest_name: string; guest_phone: string | null;
-  guest_email: string | null; guests_count: number; check_in: string; check_out: string;
+  guest_email: string | null; guest_country?: string | null; guests_count: number; check_in: string; check_out: string;
   status: Booking["status"]; notes: string | null; created_at: string;
   adults?: number; children?: number; rooms_count?: number; booking_reference?: string | null;
   payment_status?: Booking["paymentStatus"]; payment_method?: string | null; user_id?: string | null;
@@ -318,6 +318,7 @@ function mapBooking(row: {
     guestName: row.guest_name,
     guestPhone: row.guest_phone ?? undefined,
     guestEmail: row.guest_email ?? undefined,
+    guestCountry: row.guest_country ?? undefined,
     guestsCount: row.guests_count,
     adults: row.adults ?? row.guests_count ?? 1,
     children: row.children ?? 0,

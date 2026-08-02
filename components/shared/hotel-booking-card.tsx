@@ -11,6 +11,7 @@ import type { HotelRoom } from "@/types";
 
 export async function HotelBookingCard({
   hotelId,
+  hotelSlug,
   name,
   rating,
   priceRange,
@@ -21,6 +22,7 @@ export async function HotelBookingCard({
   rooms,
 }: {
   hotelId: string;
+  hotelSlug?: string;
   name: string;
   rating?: number;
   priceRange?: string;
@@ -57,6 +59,7 @@ export async function HotelBookingCard({
         hotelId={hotelId}
         hotelName={name}
         hotelRating={rating}
+        hotelSlug={hotelSlug}
         rooms={rooms}
         className="flex h-12 w-full items-center justify-center gap-1.5 rounded-full bg-primary text-sm font-semibold text-white shadow-soft transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-primary-700 hover:shadow-card active:scale-95"
       />

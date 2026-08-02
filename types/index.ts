@@ -44,6 +44,7 @@ export interface Booking {
   guestName: string;
   guestPhone?: string;
   guestEmail?: string;
+  guestCountry?: string;
   /** Total headcount (adults + children) — kept for existing displays; prefer `adults`/`children` for new UI. */
   guestsCount: number;
   adults: number;
@@ -298,11 +299,17 @@ export interface HotelRoom {
   id: string;
   name: string;
   image?: string;
+  images?: GalleryImage[];
+  description?: string;
   sizeSqm?: number;
   maxGuests: number;
   bedType?: string;
+  bathrooms: number;
   features: string[];
   pricePerNight?: number;
+  weekendPrice?: number;
+  discountPrice?: number;
+  totalRooms: number;
   roomType: RoomType;
   isAvailable: boolean;
 }

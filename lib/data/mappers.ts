@@ -43,16 +43,22 @@ export function mapReview(row: ReviewRow, authorName = "Guest"): Review {
   };
 }
 
-export function mapHotelRoom(row: HotelRoomRow): HotelRoom {
+export function mapHotelRoom(row: HotelRoomRow & { room_images?: unknown }): HotelRoom {
   return {
     id: row.id,
     name: row.name,
     image: row.image ?? undefined,
+    images: toGallery(row.room_images),
+    description: row.description ?? undefined,
     sizeSqm: row.size_sqm ?? undefined,
     maxGuests: row.max_guests,
     bedType: row.bed_type ?? undefined,
+    bathrooms: row.bathrooms ?? 1,
     features: row.features ?? [],
     pricePerNight: row.price_per_night != null ? Number(row.price_per_night) : undefined,
+    weekendPrice: row.weekend_price != null ? Number(row.weekend_price) : undefined,
+    discountPrice: row.discount_price != null ? Number(row.discount_price) : undefined,
+    totalRooms: row.total_rooms ?? 1,
     roomType: row.room_type ?? "standard",
     isAvailable: row.is_available ?? true,
   };

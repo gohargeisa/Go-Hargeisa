@@ -36,6 +36,7 @@ export async function HotelActionBar({
   locale,
   listingType,
   listingId,
+  hotelSlug,
   name,
   rating,
   phone,
@@ -49,6 +50,9 @@ export async function HotelActionBar({
   locale: Locale;
   listingType: BusinessListingType;
   listingId: string;
+  /** Hotel-only: when set alongside bookingCta, the primary "Book Now"
+   * navigates to the dedicated booking page instead of opening the modal. */
+  hotelSlug?: string;
   name: string;
   rating?: number;
   phone?: string;
@@ -82,6 +86,7 @@ export async function HotelActionBar({
             hotelId={listingId}
             hotelName={name}
             hotelRating={rating}
+            hotelSlug={hotelSlug}
             rooms={rooms}
             className={PRIMARY_CLASS}
             iconSize={16}

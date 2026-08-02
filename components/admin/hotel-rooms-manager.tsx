@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
+import { Loader2, Pencil, Plus, Trash2, X, ImagePlus } from "lucide-react";
 import { createHotelRoom, deleteHotelRoom, updateHotelRoom, type HotelRoomInput } from "@/lib/actions/hotel-rooms";
 import { ImageUploader } from "@/components/shared/image-uploader";
+import { uploadImage } from "@/lib/supabase/storage";
 import { Field, TagInput, inputClass } from "@/components/admin/form-shared";
 import { ROOM_TYPE_LABELS, ROOM_TYPE_ORDER } from "@/lib/utils/room-type";
 import type { RoomType } from "@/types";
@@ -17,11 +18,17 @@ export interface HotelRoomManagerRow extends HotelRoomInput {
 const BLANK: HotelRoomInput = {
   name: "",
   image: "",
+  images: [],
+  description: "",
   sizeSqm: undefined,
   maxGuests: 2,
   bedType: "",
+  bathrooms: 1,
   features: [],
   pricePerNight: undefined,
+  weekendPrice: undefined,
+  discountPrice: undefined,
+  totalRooms: 1,
   roomType: "standard",
   isAvailable: true,
 };
@@ -69,11 +76,17 @@ export function HotelRoomsManager({
       setDraft({
         name: room.name,
         image: room.image,
+        images: room.images ?? [],
+        description: room.description,
         sizeSqm: room.sizeSqm,
         maxGuests: room.maxGuests,
         bedType: room.bedType,
+        bathrooms: room.bathrooms,
         features: room.features,
         pricePerNight: room.pricePerNight,
+        weekendPrice: room.weekendPrice,
+        discountPrice: room.discountPrice,
+        totalRooms: room.totalRooms,
         roomType: room.roomType,
         isAvailable: room.isAvailable,
       });
@@ -170,7 +183,12 @@ export function HotelRoomsManager({
                 <p className="text-xs text-ink/50 dark:text-sand/50">
                   {room.maxGuests} guests
                   {room.bedType ? ` • ${room.bedType}` : ""}
-                  {room.pricePerNight ? ` • $${room.pricePerNight}/night` : ""}
+                  {room.pricePerNight
+                    ? room.discountPrice
+                      ? ` • $${room.discountPrice}/night (was $${room.pricePerNight})`
+                      : ` • $${room.pricePerNight}/night`
+                    : ""}
+                  {` • ${room.totalRooms ?? 1} room${(room.totalRooms ?? 1) === 1 ? "" : "s"} total`}
                 </p>
               </div>
               <button
@@ -228,9 +246,59 @@ function RoomForm({
     setDraft({ ...draft, [key]: value });
   }
 
+  const images = draft.images ?? [];
+  const [uploadingGalleryPhoto, setUploadingGalleryPhoto] = useState(false);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+
+  async function onAddGalleryPhoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingGalleryPhoto(true);
+    try {
+      const url = await uploadImage(file, { bucket: "listing-images", folder: "hotel-rooms/gallery" });
+      update("images", [...images, url]);
+    } finally {
+      setUploadingGalleryPhoto(false);
+      if (galleryInputRef.current) galleryInputRef.current.value = "";
+    }
+  }
+
   return (
     <div className="space-y-3 rounded-xl2 border border-primary/30 bg-primary/5 p-4">
-      <ImageUploader folder="hotel-rooms" value={draft.image ?? ""} onChange={(url) => update("image", url)} label="Room image" />
+      <ImageUploader folder="hotel-rooms" value={draft.image ?? ""} onChange={(url) => update("image", url)} label="Room cover image" />
+
+      <div>
+        <label className="mb-1.5 block text-xs font-semibold text-ink/60 dark:text-sand/60">Additional room photos</label>
+        <div className="flex flex-wrap gap-2">
+          {images.map((url, i) => (
+            <div key={`${url}-${i}`} className="relative h-16 w-16 overflow-hidden rounded-lg border border-ink/10 dark:border-white/15">
+              <Image src={url} alt="" fill sizes="64px" className="object-cover" />
+              <button
+                type="button"
+                onClick={() => update("images", images.filter((_, idx) => idx !== i))}
+                aria-label="Remove photo"
+                className="absolute right-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-black/60 text-white"
+              >
+                <X size={10} />
+              </button>
+            </div>
+          ))}
+          <label className="flex h-16 w-16 cursor-pointer items-center justify-center rounded-lg border border-dashed border-ink/20 text-ink/40 hover:border-primary hover:text-primary dark:border-white/20">
+            {uploadingGalleryPhoto ? <Loader2 size={16} className="animate-spin" /> : <ImagePlus size={16} aria-hidden="true" />}
+            <input ref={galleryInputRef} type="file" accept="image/*" onChange={onAddGalleryPhoto} className="hidden" />
+          </label>
+        </div>
+      </div>
+
+      <Field label="Description">
+        <textarea
+          rows={2}
+          value={draft.description ?? ""}
+          onChange={(e) => update("description", e.target.value)}
+          className={inputClass}
+          placeholder="Spacious room with a king bed and city view…"
+        />
+      </Field>
 
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="Room name">
@@ -277,7 +345,7 @@ function RoomForm({
         </Field>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-4">
         <Field label="Size (m²)">
           <input
             type="number"
@@ -295,7 +363,28 @@ function RoomForm({
             className={inputClass}
           />
         </Field>
-        <Field label="Price / night">
+        <Field label="Bathrooms">
+          <input
+            type="number"
+            min={0}
+            value={draft.bathrooms ?? 1}
+            onChange={(e) => update("bathrooms", Number(e.target.value) || 0)}
+            className={inputClass}
+          />
+        </Field>
+        <Field label="Total rooms">
+          <input
+            type="number"
+            min={1}
+            value={draft.totalRooms ?? 1}
+            onChange={(e) => update("totalRooms", Number(e.target.value) || 1)}
+            className={inputClass}
+          />
+        </Field>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-3">
+        <Field label="Base price / night">
           <input
             type="number"
             value={draft.pricePerNight ?? ""}
@@ -303,10 +392,28 @@ function RoomForm({
             className={inputClass}
           />
         </Field>
+        <Field label="Weekend price / night">
+          <input
+            type="number"
+            value={draft.weekendPrice ?? ""}
+            onChange={(e) => update("weekendPrice", e.target.value ? Number(e.target.value) : undefined)}
+            className={inputClass}
+            placeholder="Optional"
+          />
+        </Field>
+        <Field label="Discount price / night">
+          <input
+            type="number"
+            value={draft.discountPrice ?? ""}
+            onChange={(e) => update("discountPrice", e.target.value ? Number(e.target.value) : undefined)}
+            className={inputClass}
+            placeholder="Optional"
+          />
+        </Field>
       </div>
 
       <TagInput
-        label="Features"
+        label="Amenities"
         values={draft.features}
         onChange={(v) => update("features", v)}
         placeholder="Free WiFi, Air Conditioning…"

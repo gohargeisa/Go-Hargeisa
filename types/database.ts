@@ -52,6 +52,12 @@ type HotelRoomRow = {
   id: string; hotel_id: string; name: string; image: string | null; size_sqm: number | null;
   max_guests: number; bed_type: string | null; features: string[]; price_per_night: number | null;
   sort_order: number; room_type: RoomTypeDb; is_available: boolean; created_at: string; updated_at: string;
+  description: string | null; bathrooms: number; weekend_price: number | null; discount_price: number | null;
+  total_rooms: number;
+};
+
+type RoomImageRow = {
+  id: string; room_id: string; url: string; alt: string | null; sort_order: number; created_at: string;
 };
 
 type RoomAvailabilityRow = {
@@ -113,7 +119,7 @@ type BookingRow = {
   status: "pending" | "confirmed" | "cancelled" | "completed"; notes: string | null;
   adults: number; children: number; rooms_count: number; booking_reference: string | null;
   payment_status: "unpaid" | "pending" | "paid" | "refunded"; payment_method: string | null;
-  user_id: string | null;
+  user_id: string | null; guest_country: string | null;
   created_at: string; updated_at: string;
 };
 
@@ -187,6 +193,7 @@ export type Database = {
       map_points: Table<{ id: string; name: string; category: string; lat: number; lng: number; created_at: string }>;
       reviews: Table<{ id: string; listing_type: "hotel" | "restaurant" | "cafe" | "attraction" | "service"; listing_id: string; user_id: string | null; rating: number; comment: string | null; photos: Json; owner_reply: string | null; owner_reply_at: string | null; is_reported: boolean; created_at: string }>;
       hotel_rooms: Table<HotelRoomRow>;
+      room_images: Table<RoomImageRow>;
       room_availability: Table<RoomAvailabilityRow>;
       bookings: Table<BookingRow>;
       booking_status_history: Table<BookingStatusHistoryRow>;
@@ -227,8 +234,19 @@ export type Database = {
           p_check_in: string;
           p_check_out: string;
           p_notes: string | null;
+          p_guest_country: string | null;
         };
         Returns: string;
+      };
+      room_capacity_available: {
+        Args: {
+          p_room_id: string | null;
+          p_check_in: string;
+          p_check_out: string;
+          p_rooms_count: number;
+          p_exclude_booking_id?: string | null;
+        };
+        Returns: boolean;
       };
     };
     Enums: { user_role: "user" | "business_owner" | "owner"; price_range: "$" | "$$" | "$$$" | "$$$$"; attraction_category: "landmark" | "museum" | "market" | "nature" | "religious"; event_category: "cultural" | "national" | "business" | "sports" | "concert"; content_status: "draft" | "published" | "archived"; listing_type: "hotel" | "restaurant" | "cafe" | "attraction" | "service"; service_category: ServiceCategoryDb; subscription_tier: "basic" | "silver" | "gold"; subscription_status: "active" | "paused" | "cancelled"; partner_status: PartnerStatusDb; business_request_status: BusinessRequestStatusDb; city_service_category: CityServiceCategoryDb; };

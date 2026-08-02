@@ -8,6 +8,7 @@ export interface BookingRequestInput {
   guestName: string;
   guestPhone: string;
   guestEmail?: string;
+  guestCountry?: string;
   adults: number;
   children: number;
   roomsCount: number;
@@ -82,6 +83,7 @@ export async function submitBookingRequest(input: BookingRequestInput): Promise<
     p_check_in: input.checkIn,
     p_check_out: input.checkOut,
     p_notes: input.notes?.trim() || null,
+    p_guest_country: input.guestCountry?.trim() || null,
   });
 
   if (error) return { ok: false, error: error.message };
