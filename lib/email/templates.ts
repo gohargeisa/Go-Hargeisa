@@ -94,6 +94,20 @@ const T = {
       body: `<p>Waan helnay codsigaaga ballanta ee <strong>${listing}</strong>.</p><p>${checkIn} → ${checkOut}</p><p>Tixraaca: <strong>${reference}</strong></p><p>Meesha ayaa dhawaan xaqiijin doonta ballantaada — email kale ayaa kuu iman doona marka la xaqiijiyo.</p>`,
     }),
   },
+  bookingReminder: {
+    en: (listing: string, checkIn: string, reference: string) => ({
+      subject: `Reminder: check-in tomorrow — ${listing}`,
+      body: `<p>Just a reminder — your check-in at <strong>${listing}</strong> is tomorrow, ${checkIn}.</p><p>Reference: <strong>${reference}</strong></p><p>Safe travels!</p>`,
+    }),
+    ar: (listing: string, checkIn: string, reference: string) => ({
+      subject: `تذكير: تسجيل الوصول غدًا — ${listing}`,
+      body: `<p>تذكير بسيط — موعد تسجيل وصولك إلى <strong>${listing}</strong> هو غدًا، ${checkIn}.</p><p>المرجع: <strong>${reference}</strong></p><p>رحلة سعيدة!</p>`,
+    }),
+    so: (listing: string, checkIn: string, reference: string) => ({
+      subject: `Xasuusin: Berri ayaad Gasho — ${listing}`,
+      body: `<p>Xasuusin — waqtiga aad gasho <strong>${listing}</strong> waa berri, ${checkIn}.</p><p>Tixraaca: <strong>${reference}</strong></p><p>Safar wanaagsan!</p>`,
+    }),
+  },
 };
 
 export function bookingStatusEmail(locale: Locale, listing: string, status: string) {
@@ -123,5 +137,10 @@ export function bookingReceivedEmail(locale: Locale, listing: string, guest: str
 
 export function bookingSubmittedEmail(locale: Locale, listing: string, checkIn: string, checkOut: string, reference: string) {
   const { subject, body } = T.bookingSubmitted[locale](listing, checkIn, checkOut, reference);
+  return { subject, html: shell(locale, body) };
+}
+
+export function bookingReminderEmail(locale: Locale, listing: string, checkIn: string, reference: string) {
+  const { subject, body } = T.bookingReminder[locale](listing, checkIn, reference);
   return { subject, html: shell(locale, body) };
 }
