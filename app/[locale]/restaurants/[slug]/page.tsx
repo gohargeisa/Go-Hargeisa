@@ -81,7 +81,7 @@ export default async function RestaurantDetailPage({
     { id: "location", label: td("location") },
   ];
 
-  const googleMapsHref = resolveMapsUrl(restaurant.location);
+  const googleMapsHref = resolveMapsUrl(restaurant.location, restaurant.googleMapsUrl);
   const directionsHref = resolveDirectionsUrl(restaurant.location);
 
   const jsonLd = {

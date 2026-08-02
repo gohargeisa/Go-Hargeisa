@@ -28,6 +28,7 @@ export interface HotelFormInput {
   address: string;
   lat: number;
   lng: number;
+  googleMapsUrl?: string;
   phone?: string;
   website?: string;
   whatsapp?: string;
@@ -86,6 +87,7 @@ export function HotelForm({
     address: initial?.address ?? "",
     lat: initial?.lat ?? 9.5624,
     lng: initial?.lng ?? 44.065,
+    googleMapsUrl: initial?.googleMapsUrl ?? "",
     phone: initial?.phone ?? "",
     website: initial?.website ?? "",
     whatsapp: initial?.whatsapp ?? "",
@@ -136,6 +138,7 @@ export function HotelForm({
       address: form.address,
       lat: form.lat,
       lng: form.lng,
+      google_maps_url: form.googleMapsUrl || null,
       phone: form.phone || null,
       website: form.website || null,
       whatsapp: form.whatsapp || null,
@@ -231,6 +234,16 @@ export function HotelForm({
             <input required type="number" step="0.0001" value={form.lng} onChange={(e) => update("lng", Number(e.target.value))} className={inputClass} />
           </Field>
         </div>
+
+        <Field label={t("mapsUrlLabel")}>
+          <input
+            type="url"
+            value={form.googleMapsUrl}
+            onChange={(e) => update("googleMapsUrl", e.target.value)}
+            className={inputClass}
+            placeholder="https://maps.google.com/?q=Grand+Haadi+Hotel"
+          />
+        </Field>
 
         <div className="grid gap-4 sm:grid-cols-3">
           <Field label={t("phoneLabel")}>

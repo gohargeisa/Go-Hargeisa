@@ -22,6 +22,7 @@ type ListingBase = {
   address: string;
   lat: number;
   lng: number;
+  google_maps_url: string | null;
   rating: number;
   review_count: number;
   featured: boolean;

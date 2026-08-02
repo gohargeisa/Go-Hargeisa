@@ -29,6 +29,7 @@ export interface CafeFormInput {
   address: string;
   lat: number;
   lng: number;
+  googleMapsUrl?: string;
   phone?: string;
   whatsapp: string;
   email: string;
@@ -85,6 +86,7 @@ export function CafeForm({
     address: initial?.address ?? "",
     lat: initial?.lat ?? 9.5624,
     lng: initial?.lng ?? 44.065,
+    googleMapsUrl: initial?.googleMapsUrl ?? "",
     phone: initial?.phone ?? "",
     whatsapp: initial?.whatsapp ?? "",
     email: initial?.email ?? "",
@@ -172,6 +174,7 @@ export function CafeForm({
       address: form.address,
       lat: form.lat,
       lng: form.lng,
+      google_maps_url: form.googleMapsUrl || null,
       phone: form.phone || null,
       whatsapp: form.whatsapp || null,
       email: form.email || null,
@@ -269,6 +272,16 @@ export function CafeForm({
           <input required type="number" step="0.0001" value={form.lng} onChange={(e) => update("lng", Number(e.target.value))} className={inputClass} />
         </Field>
       </div>
+
+      <Field label={t("mapsUrlLabel")}>
+        <input
+          type="url"
+          value={form.googleMapsUrl}
+          onChange={(e) => update("googleMapsUrl", e.target.value)}
+          className={inputClass}
+          placeholder="https://maps.google.com/?q=…"
+        />
+      </Field>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label={t("phoneLabel")}>

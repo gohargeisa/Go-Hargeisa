@@ -74,7 +74,7 @@ export default async function AttractionDetailPage({
     { id: "reviews", label: t("reviews") },
   ];
 
-  const googleMapsHref = resolveMapsUrl(attraction.location);
+  const googleMapsHref = resolveMapsUrl(attraction.location, attraction.googleMapsUrl);
   const directionsHref = resolveDirectionsUrl(attraction.location);
 
   const jsonLd = {

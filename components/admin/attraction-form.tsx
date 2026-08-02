@@ -18,6 +18,7 @@ export interface AttractionFormInput {
   address: string;
   lat: number;
   lng: number;
+  googleMapsUrl?: string;
   history: string;
   bestTimeToVisit: string;
   entryFee: string;
@@ -47,6 +48,7 @@ export function AttractionForm({
     address: initial?.address ?? "",
     lat: initial?.lat ?? 9.5624,
     lng: initial?.lng ?? 44.065,
+    googleMapsUrl: initial?.googleMapsUrl ?? "",
     history: initial?.history ?? "",
     bestTimeToVisit: initial?.bestTimeToVisit ?? "",
     entryFee: initial?.entryFee ?? "Free",
@@ -83,6 +85,7 @@ export function AttractionForm({
       address: form.address,
       lat: form.lat,
       lng: form.lng,
+      google_maps_url: form.googleMapsUrl || null,
       history: form.history || null,
       best_time_to_visit: form.bestTimeToVisit || null,
       entry_fee: form.entryFee,
@@ -139,6 +142,16 @@ export function AttractionForm({
           <input required type="number" step="0.0001" value={form.lng} onChange={(e) => update("lng", Number(e.target.value))} className={inputClass} />
         </Field>
       </div>
+
+      <Field label={t("mapsUrlLabel")}>
+        <input
+          type="url"
+          value={form.googleMapsUrl}
+          onChange={(e) => update("googleMapsUrl", e.target.value)}
+          className={inputClass}
+          placeholder="https://maps.google.com/?q=…"
+        />
+      </Field>
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Field label={t("bestTimeToVisitLabel")}>

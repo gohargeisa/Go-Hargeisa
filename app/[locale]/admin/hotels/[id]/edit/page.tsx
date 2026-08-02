@@ -94,6 +94,7 @@ export default async function EditHotelPage({
           address: hotel.address,
           lat: hotel.lat,
           lng: hotel.lng,
+          googleMapsUrl: hotel.google_maps_url ?? "",
           phone: hotel.phone ?? "",
           website: hotel.website ?? "",
           whatsapp: hotel.whatsapp ?? "",

@@ -74,6 +74,7 @@ export default async function EditRestaurantPage({
           address: restaurant.address,
           lat: restaurant.lat,
           lng: restaurant.lng,
+          googleMapsUrl: restaurant.google_maps_url ?? "",
           phone: restaurant.phone ?? "",
           website: restaurant.website ?? "",
           whatsapp: restaurant.whatsapp ?? "",

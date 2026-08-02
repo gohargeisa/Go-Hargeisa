@@ -327,6 +327,7 @@ export interface Hotel {
   videos?: MediaVideo[];
   address: string;
   location: Coordinates;
+  googleMapsUrl?: string;
   rating: number;
   reviewCount: number;
   reviews: Review[];
@@ -373,6 +374,7 @@ export interface Restaurant {
   videos?: MediaVideo[];
   address: string;
   location: Coordinates;
+  googleMapsUrl?: string;
   rating: number;
   reviewCount: number;
   reviews: Review[];
@@ -416,6 +418,7 @@ export interface Cafe {
   videos?: MediaVideo[];
   address: string;
   location: Coordinates;
+  googleMapsUrl?: string;
   rating: number;
   reviewCount: number;
   reviews: Review[];
@@ -508,6 +511,7 @@ export interface Attraction {
   gallery: GalleryImage[];
   address: string;
   location: Coordinates;
+  googleMapsUrl?: string;
   rating: number;
   reviewCount: number;
   reviews: Review[];

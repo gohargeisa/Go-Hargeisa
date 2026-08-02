@@ -57,6 +57,7 @@ export default async function EditAttractionPage({
           address: attraction.address,
           lat: attraction.lat,
           lng: attraction.lng,
+          googleMapsUrl: attraction.google_maps_url ?? "",
           history: attraction.history ?? "",
           bestTimeToVisit: attraction.best_time_to_visit ?? "",
           entryFee: attraction.entry_fee,

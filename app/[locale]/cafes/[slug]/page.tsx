@@ -77,7 +77,7 @@ export default async function CafeDetailPage({
   const similarCafes = allCafes.filter((c) => c.id !== cafe.id).slice(0, 4);
   const whatsappFallback = (siteSettings as { whatsapp_number?: string } | null)?.whatsapp_number ?? undefined;
 
-  const googleMapsHref = resolveMapsUrl(cafe.location);
+  const googleMapsHref = resolveMapsUrl(cafe.location, cafe.googleMapsUrl);
   const directionsHref = resolveDirectionsUrl(cafe.location);
   const amenityList: CafeAmenityCode[] =
     cafe.amenities && cafe.amenities.length > 0

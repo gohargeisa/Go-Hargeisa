@@ -112,7 +112,7 @@ export default async function HotelDetailPage({
     { id: "location", label: td("location") },
   ];
 
-  const googleMapsHref = resolveMapsUrl(hotel.location);
+  const googleMapsHref = resolveMapsUrl(hotel.location, hotel.googleMapsUrl);
   const directionsHref = resolveDirectionsUrl(hotel.location);
 
   const jsonLd = {

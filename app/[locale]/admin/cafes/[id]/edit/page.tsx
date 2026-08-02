@@ -71,6 +71,7 @@ export default async function EditCafePage({
           address: cafe.address,
           lat: cafe.lat,
           lng: cafe.lng,
+          googleMapsUrl: cafe.google_maps_url ?? "",
           phone: cafe.phone ?? "",
           whatsapp: cafe.whatsapp ?? "",
           email: cafe.email ?? "",
