@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 import { ImageUploader } from "@/components/shared/image-uploader";
 import { GalleryManager } from "@/components/admin/gallery-manager";
+import { GoogleMapsLocationField } from "@/components/admin/google-maps-location-field";
 import { Field, TagInput, inputClass } from "@/components/admin/form-shared";
 import { createRecord, updateRecord } from "@/lib/actions/admin";
 import { useUnsavedChangesWarning } from "@/lib/hooks/use-unsaved-changes-warning";
@@ -150,24 +151,13 @@ export function AttractionForm({
         <input required value={form.address} onChange={(e) => update("address", e.target.value)} className={inputClass} />
       </Field>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field label={t("latitudeLabel")}>
-          <input required type="number" step="0.0001" value={form.lat} onChange={(e) => update("lat", Number(e.target.value))} className={inputClass} />
-        </Field>
-        <Field label={t("longitudeLabel")}>
-          <input required type="number" step="0.0001" value={form.lng} onChange={(e) => update("lng", Number(e.target.value))} className={inputClass} />
-        </Field>
-      </div>
-
-      <Field label={t("mapsUrlLabel")}>
-        <input
-          type="url"
-          value={form.googleMapsUrl}
-          onChange={(e) => update("googleMapsUrl", e.target.value)}
-          className={inputClass}
-          placeholder="https://maps.google.com/?q=…"
-        />
-      </Field>
+      <GoogleMapsLocationField
+        googleMapsUrl={form.googleMapsUrl ?? ""}
+        onGoogleMapsUrlChange={(url) => update("googleMapsUrl", url)}
+        lat={form.lat}
+        lng={form.lng}
+        onCoordsChange={(lat, lng) => setForm((f) => ({ ...f, lat, lng }))}
+      />
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Field label={t("bestTimeToVisitLabel")}>
