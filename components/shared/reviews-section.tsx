@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { Star, User } from "lucide-react";
 import { Lightbox, type LightboxSlide } from "@/components/shared/lightbox";
 import type { Review } from "@/types";
@@ -20,6 +21,7 @@ export function ReviewsSection({
   // guests attach any — this renders a no-op (no thumbnails shown) on
   // restaurant/cafe/attraction pages where photos is always empty.
   const [lightbox, setLightbox] = useState<{ slides: LightboxSlide[]; index: number } | null>(null);
+  const t = useTranslations("review");
 
   return (
     <div>
@@ -33,13 +35,13 @@ export function ReviewsSection({
               <Star key={i} size={16} fill={i < Math.round(rating) ? "currentColor" : "none"} strokeWidth={1.5} />
             ))}
           </div>
-          <p className="mt-1 text-sm text-ink/60 dark:text-sand/60">Based on {reviewCount} reviews</p>
+          <p className="mt-1 text-sm text-ink/60 dark:text-sand/60">{t("basedOnReviews", { count: reviewCount })}</p>
         </div>
       </div>
 
       <div className="mt-6 space-y-5">
         {reviews.length === 0 && (
-          <p className="text-sm text-ink/50 dark:text-sand/50">Be the first to leave a review.</p>
+          <p className="text-sm text-ink/50 dark:text-sand/50">{t("beFirstReview")}</p>
         )}
         {reviews.map((r) => (
           <div key={r.id} className="rounded-xl2 border border-ink/8 dark:border-white/10 p-4">

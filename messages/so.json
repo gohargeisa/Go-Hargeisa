@@ -1018,6 +1018,14 @@
     "offerLifecycle_scheduled": "La qorsheeyay",
     "offerLifecycle_active": "Firfircoon",
     "offerLifecycle_expired": "Dhacay",
+    "reviewsNav": "Qiimeymaha",
+    "reviewsModerationTitle": "Dib U Eegista Qiimeymaha",
+    "reviewsModerationSubtitle": "{count, plural, =0 {Qiimeyn la sheegay ma jirto} =1 {1 qiimeyn oo la sheegay} other {# qiimeyn oo la sheegay}}",
+    "noReportedReviews": "Hadda qiimeymo la sheegay ma jiraan.",
+    "reportedBadge": "La Sheegay",
+    "dismissReportAction": "Iska Indha Tir Sheegashada",
+    "deleteReviewAction": "Tirtir Qiimeynta",
+    "deleteReviewConfirm": "Ma hubtaa inaad tirtirto qiimeyntan si joogto ah? Tallaabadan lama noqon karo.",
     "convertMissingFields": "Fadlan buuxi slug-ga, latitude-ka, iyo longitude-ka.",
     "slugLabel": "Slug",
     "latitudeLabel": "Latitude",
@@ -1279,7 +1287,10 @@
     "submitReview": "Gudbi Faallada",
     "thanksReview": "Mahadsanid faalladaada — hadda way shaqaysaa.",
     "signIn": "Gal",
-    "somethingWentWrong": "Wax baa qaldamay."
+    "somethingWentWrong": "Wax baa qaldamay.",
+    "basedOnReviews": "{count, plural, =0 {Weli qiimeyn ma jirto} =1 {Waxaa lagu saleeyay 1 qiimeyn} other {Waxaa lagu saleeyay # qiimeyn}}",
+    "beFirstReview": "Noqo qofka ugu horreeya ee qiimeyn qora.",
+    "addPhotosHint": "Ku dar ilaa {max} sawir (ikhtiyaari)."
   },
   "trip": {
     "addToTrip": "Ku Dar Safarka",

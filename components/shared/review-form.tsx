@@ -131,7 +131,7 @@ export function ReviewForm({
               </label>
             )}
           </div>
-          <p className="mt-1.5 text-xs text-ink/45 dark:text-sand/45">Add up to {MAX_REVIEW_PHOTOS} photos (optional).</p>
+          <p className="mt-1.5 text-xs text-ink/45 dark:text-sand/45">{t("addPhotosHint", { max: MAX_REVIEW_PHOTOS })}</p>
         </div>
       )}
 

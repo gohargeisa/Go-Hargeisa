@@ -1018,6 +1018,14 @@
     "offerLifecycle_scheduled": "Scheduled",
     "offerLifecycle_active": "Live",
     "offerLifecycle_expired": "Expired",
+    "reviewsNav": "Reviews",
+    "reviewsModerationTitle": "Review Moderation",
+    "reviewsModerationSubtitle": "{count, plural, =0 {No reported reviews} =1 {1 reported review} other {# reported reviews}}",
+    "noReportedReviews": "No reported reviews right now.",
+    "reportedBadge": "Reported",
+    "dismissReportAction": "Dismiss report",
+    "deleteReviewAction": "Delete review",
+    "deleteReviewConfirm": "Delete this review permanently? This can't be undone.",
     "convertMissingFields": "Please fill in a slug, latitude, and longitude.",
     "slugLabel": "Slug",
     "latitudeLabel": "Latitude",
@@ -1279,7 +1287,10 @@
     "submitReview": "Submit Review",
     "thanksReview": "Thanks for your review — it's now live.",
     "signIn": "Sign in",
-    "somethingWentWrong": "Something went wrong."
+    "somethingWentWrong": "Something went wrong.",
+    "basedOnReviews": "{count, plural, =0 {No reviews yet} =1 {Based on 1 review} other {Based on # reviews}}",
+    "beFirstReview": "Be the first to leave a review.",
+    "addPhotosHint": "Add up to {max} photos (optional)."
   },
   "trip": {
     "addToTrip": "Add to Trip",

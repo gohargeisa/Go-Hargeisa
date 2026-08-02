@@ -1018,6 +1018,14 @@
     "offerLifecycle_scheduled": "مجدوَل",
     "offerLifecycle_active": "مباشر",
     "offerLifecycle_expired": "منتهي",
+    "reviewsNav": "التقييمات",
+    "reviewsModerationTitle": "مراجعة التقييمات",
+    "reviewsModerationSubtitle": "{count, plural, =0 {لا توجد تقييمات مُبلَّغ عنها} =1 {تقييم واحد مُبلَّغ عنه} other {# تقييمات مُبلَّغ عنها}}",
+    "noReportedReviews": "لا توجد تقييمات مُبلَّغ عنها حاليًا.",
+    "reportedBadge": "مُبلَّغ عنه",
+    "dismissReportAction": "تجاهل البلاغ",
+    "deleteReviewAction": "حذف التقييم",
+    "deleteReviewConfirm": "هل تريد حذف هذا التقييم نهائيًا؟ لا يمكن التراجع عن هذا الإجراء.",
     "convertMissingFields": "يرجى إدخال الرابط المختصر وخطي الطول والعرض.",
     "slugLabel": "الرابط المختصر",
     "latitudeLabel": "خط العرض",
@@ -1279,7 +1287,10 @@
     "submitReview": "إرسال التقييم",
     "thanksReview": "شكرًا لتقييمك — أصبح الآن منشورًا.",
     "signIn": "تسجيل الدخول",
-    "somethingWentWrong": "حدث خطأ ما."
+    "somethingWentWrong": "حدث خطأ ما.",
+    "basedOnReviews": "{count, plural, =0 {لا توجد تقييمات بعد} =1 {استنادًا إلى تقييم واحد} other {استنادًا إلى # تقييمات}}",
+    "beFirstReview": "كن أول من يكتب تقييمًا.",
+    "addPhotosHint": "أضف حتى {max} صور (اختياري)."
   },
   "trip": {
     "addToTrip": "أضف إلى الرحلة",
