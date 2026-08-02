@@ -90,12 +90,18 @@ type BusinessOfferRow = {
   created_at: string; updated_at: string;
 };
 
-type CityServiceCategoryDb = "hospital" | "bank" | "supermarket" | "pharmacy";
+type CityServiceCategoryDb =
+  | "hospital" | "bank" | "supermarket" | "pharmacy" | "mosque" | "gas_station"
+  | "park_playground" | "kids_family" | "taxi_service" | "police_station" | "fire_station"
+  | "electricity_service" | "water_service" | "post_office" | "school" | "university"
+  | "sports_club" | "gym" | "car_rental" | "car_wash" | "ev_charging" | "government_office"
+  | "visa_immigration" | "internet_telecom";
 
 type CityServiceRow = {
   id: string; category: CityServiceCategoryDb; name: string; name_ar: string | null; name_so: string | null;
   description: string | null; description_ar: string | null; description_so: string | null;
-  phone: string | null; opening_hours: string | null; maps_url: string | null; website: string | null; image: string | null;
+  phone: string | null; whatsapp: string | null; email: string | null;
+  opening_hours: string | null; maps_url: string | null; website: string | null; image: string | null; gallery: Json;
   status: "draft" | "published" | "archived"; featured: boolean; sort_order: number;
   created_at: string; updated_at: string;
 };

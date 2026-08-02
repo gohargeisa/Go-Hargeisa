@@ -505,7 +505,12 @@ export interface Service {
  * Named "Essential" (not "CityService…") to avoid colliding with the
  * pre-existing CityServiceCategory/CityServicePoint types below, which back
  * the unrelated Smart City Map feature. */
-export type EssentialServiceCategory = "hospital" | "bank" | "supermarket" | "pharmacy";
+export type EssentialServiceCategory =
+  | "hospital" | "bank" | "supermarket" | "pharmacy" | "mosque" | "gas_station"
+  | "park_playground" | "kids_family" | "taxi_service" | "police_station" | "fire_station"
+  | "electricity_service" | "water_service" | "post_office" | "school" | "university"
+  | "sports_club" | "gym" | "car_rental" | "car_wash" | "ev_charging" | "government_office"
+  | "visa_immigration" | "internet_telecom";
 
 export interface CityService {
   id: string;
@@ -515,10 +520,13 @@ export interface CityService {
   name: string;
   description: string | null;
   phone: string | null;
+  whatsapp: string | null;
+  email: string | null;
   openingHours: string | null;
   mapsUrl: string | null;
   website: string | null;
   image: string | null;
+  gallery: GalleryImage[];
   status: "draft" | "published" | "archived";
   featured: boolean;
   sortOrder: number;

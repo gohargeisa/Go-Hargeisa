@@ -7,39 +7,38 @@ import { CityServiceCard } from "@/components/shared/city-service-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { SearchWithin } from "@/components/shared/search-within";
 import { Reveal } from "@/components/home/reveal";
-import { CITY_SERVICE_CATEGORIES } from "@/lib/config/city-service-categories";
-import type { CityService, EssentialServiceCategory } from "@/types";
+import { cityServiceCategoryMeta } from "@/lib/config/city-service-categories";
+import type { CityServiceCategoryGroup } from "@/lib/data/city-services";
+import type { EssentialServiceCategory } from "@/types";
 
 export function CityServicesPageClient({
-  servicesByCategory,
+  groups,
   locale,
   initialQuery,
 }: {
-  servicesByCategory: Record<EssentialServiceCategory, CityService[]>;
+  /** Already filtered to non-empty categories, sorted by listing count
+   * descending — see getCityServicesGroupedByCategory. This component never
+   * hardcodes which categories exist; it only ever renders what's passed in. */
+  groups: CityServiceCategoryGroup[];
   locale: string;
   initialQuery?: string;
 }) {
   const t = useTranslations("cityServices");
   const [activeCategory, setActiveCategory] = useState<EssentialServiceCategory | "all">("all");
 
-  const availableCategories = useMemo(
-    () => CITY_SERVICE_CATEGORIES.filter((c) => servicesByCategory[c.key].length > 0),
-    [servicesByCategory]
-  );
-
   const needle = (initialQuery ?? "").trim().toLowerCase();
 
   const sections = useMemo(() => {
-    return availableCategories
-      .filter((c) => activeCategory === "all" || activeCategory === c.key)
-      .map((c) => {
-        const items = servicesByCategory[c.key].filter(
+    return groups
+      .filter((g) => activeCategory === "all" || activeCategory === g.category)
+      .map((g) => {
+        const items = g.items.filter(
           (s) => !needle || s.name.toLowerCase().includes(needle) || (s.description ?? "").toLowerCase().includes(needle)
         );
-        return { ...c, items };
+        return { ...g, ...cityServiceCategoryMeta(g.category), items };
       })
-      .filter((c) => c.items.length > 0);
-  }, [availableCategories, activeCategory, servicesByCategory, needle]);
+      .filter((g) => g.items.length > 0);
+  }, [groups, activeCategory, needle]);
 
   const totalMatches = sections.reduce((sum, s) => sum + s.items.length, 0);
 
@@ -48,7 +47,7 @@ export function CityServicesPageClient({
       <div className="mb-8 flex flex-col gap-4">
         <SearchWithin basePath={`/${locale}/city-services`} placeholder={t("searchPlaceholder")} defaultValue={initialQuery} />
 
-        {availableCategories.length > 1 && (
+        {groups.length > 1 && (
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
@@ -62,21 +61,24 @@ export function CityServicesPageClient({
               <LayoutGrid size={14} aria-hidden="true" />
               {t("allCategoriesLabel")}
             </button>
-            {availableCategories.map((c) => (
-              <button
-                key={c.key}
-                type="button"
-                onClick={() => setActiveCategory(c.key)}
-                className={`inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
-                  activeCategory === c.key
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-ink/12 text-ink/60 hover:border-primary/40 dark:border-white/15 dark:text-sand/60"
-                }`}
-              >
-                <c.icon size={14} aria-hidden="true" />
-                {t(c.titleKey)}
-              </button>
-            ))}
+            {groups.map((g) => {
+              const meta = cityServiceCategoryMeta(g.category);
+              return (
+                <button
+                  key={g.category}
+                  type="button"
+                  onClick={() => setActiveCategory(g.category)}
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
+                    activeCategory === g.category
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-ink/12 text-ink/60 hover:border-primary/40 dark:border-white/15 dark:text-sand/60"
+                  }`}
+                >
+                  <meta.icon size={14} aria-hidden="true" />
+                  {t(meta.titleKey)}
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
@@ -86,7 +88,7 @@ export function CityServicesPageClient({
       ) : (
         <div className="flex flex-col gap-14">
           {sections.map((s, i) => (
-            <Reveal key={s.key} delay={Math.min(i * 0.08, 0.24)}>
+            <Reveal key={s.category} delay={Math.min(i * 0.08, 0.24)}>
               <div>
                 <div className="mb-5 flex items-center gap-2.5">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">

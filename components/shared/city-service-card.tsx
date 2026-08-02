@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Phone, Clock, MapPin, Globe, ImageOff } from "lucide-react";
+import { Phone, Clock, MapPin, Globe, ImageOff, MessageCircle, Mail } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { AnimatedCard } from "./animated-card";
 import { SecondaryButton } from "./buttons";
@@ -37,6 +37,23 @@ export function CityServiceCard({ service }: { service: CityService }) {
             <a href={`tel:${service.phone}`} className="flex items-center gap-2 hover:text-primary">
               <Phone size={14} className="shrink-0 text-primary" aria-hidden="true" />
               {service.phone}
+            </a>
+          )}
+          {service.whatsapp && (
+            <a
+              href={`https://wa.me/${service.whatsapp.replace(/[^\d]/g, "")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 hover:text-primary"
+            >
+              <MessageCircle size={14} className="shrink-0 text-primary" aria-hidden="true" />
+              {service.whatsapp}
+            </a>
+          )}
+          {service.email && (
+            <a href={`mailto:${service.email}`} className="flex items-center gap-2 hover:text-primary">
+              <Mail size={14} className="shrink-0 text-primary" aria-hidden="true" />
+              {service.email}
             </a>
           )}
           {service.openingHours && (

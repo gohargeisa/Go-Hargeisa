@@ -19,7 +19,7 @@ import { getHotels } from "@/lib/data/hotels";
 import { getRestaurants } from "@/lib/data/restaurants";
 import { getCafes } from "@/lib/data/cafes";
 import { getAttractions } from "@/lib/data/attractions";
-import { getAllCityServices } from "@/lib/data/city-services";
+import { getCityServicesGroupedByCategory } from "@/lib/data/city-services";
 import { RESTAURANTS_PUBLIC_ENABLED, CAFES_PUBLIC_ENABLED, filterHotelsForPresentation } from "@/lib/config/features";
 import { AboutHero } from "@/components/about/about-hero";
 import { OurStorySection } from "@/components/about/our-story-section";
@@ -48,15 +48,15 @@ export async function generateMetadata({
 export default async function AboutPage({ params: { locale } }: { params: { locale: Locale } }) {
   const t = await getTranslations({ locale, namespace: "about" });
 
-  const [hotelsRaw, restaurants, cafes, attractions, cityServicesByCategory] = await Promise.all([
+  const [hotelsRaw, restaurants, cafes, attractions, cityServiceGroups] = await Promise.all([
     getHotels(),
     RESTAURANTS_PUBLIC_ENABLED ? getRestaurants() : Promise.resolve([]),
     CAFES_PUBLIC_ENABLED ? getCafes() : Promise.resolve([]),
     getAttractions(),
-    getAllCityServices(),
+    getCityServicesGroupedByCategory(),
   ]);
   const hotels = filterHotelsForPresentation(hotelsRaw);
-  const cityServicesCount = Object.values(cityServicesByCategory).flat().length;
+  const cityServicesCount = cityServiceGroups.reduce((sum, g) => sum + g.items.length, 0);
 
   // Every value below is a real, live-fetched count — never a hardcoded
   // estimate. A count of 0 (a disabled public feature, or a not-yet-seeded

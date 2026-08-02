@@ -40,10 +40,14 @@ export default async function EditCityServicePage({
           descriptionAr: service.description_ar ?? "",
           descriptionSo: service.description_so ?? "",
           phone: service.phone ?? "",
+          whatsapp: service.whatsapp ?? "",
+          email: service.email ?? "",
           openingHours: service.opening_hours ?? "",
           mapsUrl: service.maps_url ?? "",
           website: service.website ?? "",
           image: service.image ?? "",
+          gallery: Array.isArray(service.gallery) ? (service.gallery as unknown as { url: string; alt?: string; category?: string }[]) : [],
+          status: service.status === "archived" ? "draft" : service.status,
           featured: service.featured,
         }}
       />

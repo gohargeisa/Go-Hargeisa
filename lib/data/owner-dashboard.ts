@@ -125,11 +125,10 @@ const CITY_SERVICE_TARGET_PER_CATEGORY = 4;
 
 export async function getCityCoverage(): Promise<{ categories: CityCoverageCategory[]; totalPublished: number; totalTarget: number }> {
   const supabase = await createClient();
-  // Coverage tracks featured (i.e. actually live on the public page) rows,
-  // not merely published ones — an owner can keep extra published rows in
-  // reserve per category without them counting toward the 4-per-category
-  // coverage target (see lib/actions/city-services.ts's featured cap).
-  const { data } = await supabase.from("city_services").select("category").eq("status", "published").eq("featured", true);
+  // Every published row counts toward coverage now — city_services no
+  // longer caps public visibility to a "featured" subset (see
+  // lib/actions/city-services.ts), so "published" is the only bar.
+  const { data } = await supabase.from("city_services").select("category").eq("status", "published");
 
   const categories = CITY_SERVICE_CATEGORIES.map((category) => ({
     category,

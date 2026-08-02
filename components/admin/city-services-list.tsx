@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Pencil, Trash2, Eye, EyeOff, Star, Loader2 } from "lucide-react";
 import { deleteCityService, toggleCityServiceVisibility, toggleCityServiceFeatured } from "@/lib/actions/city-services";
+import { cityServiceCategoryMeta } from "@/lib/config/city-service-categories";
 import type { Locale } from "@/lib/i18n/config";
 import type { EssentialServiceCategory } from "@/types";
 
@@ -25,17 +26,15 @@ export interface CityServiceListRow {
  * one built for the six slug-based content types. */
 export function CityServicesList({ locale, rows }: { locale: Locale; rows: CityServiceListRow[] }) {
   const t = useTranslations("admin");
+  const tCityServices = useTranslations("cityServices");
   const router = useRouter();
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const categoryLabel: Record<EssentialServiceCategory, string> = {
-    hospital: t("categoryHospital"),
-    bank: t("categoryBank"),
-    supermarket: t("categorySupermarket"),
-    pharmacy: t("categoryPharmacy"),
-  };
+  function categoryLabel(category: EssentialServiceCategory): string {
+    return tCityServices(cityServiceCategoryMeta(category).titleKey);
+  }
   const statusLabel = { draft: t("statusDraft"), published: t("statusPublished"), archived: t("statusArchived") };
   const statusClass = {
     draft: "bg-secondary/10 text-secondary-700 dark:text-sand/70",
@@ -57,7 +56,7 @@ export function CityServicesList({ locale, rows }: { locale: Locale; rows: CityS
   function onToggleFeatured(row: CityServiceListRow) {
     setPendingId(row.id);
     startTransition(async () => {
-      const result = await toggleCityServiceFeatured(locale, row.id, row.category, !row.featured);
+      const result = await toggleCityServiceFeatured(locale, row.id, !row.featured);
       if (result.ok) router.refresh();
       else alert(result.error ?? t("somethingWentWrong"));
       setPendingId(null);
@@ -160,7 +159,7 @@ export function CityServicesList({ locale, rows }: { locale: Locale; rows: CityS
                       {t("featuredBadge")}
                     </span>
                   )}
-                  <span className="text-[11px] text-ink/45 dark:text-sand/45">{categoryLabel[row.category]}</span>
+                  <span className="text-[11px] text-ink/45 dark:text-sand/45">{categoryLabel(row.category)}</span>
                 </div>
               </div>
             </div>
@@ -192,7 +191,7 @@ export function CityServicesList({ locale, rows }: { locale: Locale; rows: CityS
                     <p className="font-medium">{row.name}</p>
                   </div>
                 </td>
-                <td className="px-5 py-3">{categoryLabel[row.category]}</td>
+                <td className="px-5 py-3">{categoryLabel(row.category)}</td>
                 <td className="px-5 py-3">
                   <div className="flex flex-wrap items-center gap-1.5">
                     <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusClass[row.status]}`}>

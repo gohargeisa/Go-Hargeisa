@@ -5,11 +5,14 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 import { ImageUploader } from "@/components/shared/image-uploader";
+import { GalleryManager } from "@/components/admin/gallery-manager";
 import { Field, inputClass } from "@/components/admin/form-shared";
 import { createCityService, updateCityService } from "@/lib/actions/city-services";
 import { useUnsavedChangesWarning } from "@/lib/hooks/use-unsaved-changes-warning";
+import { CITY_SERVICE_CATEGORIES } from "@/lib/config/city-service-categories";
+import { SERVICE_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import type { Locale } from "@/lib/i18n/config";
-import type { EssentialServiceCategory } from "@/types";
+import type { EssentialServiceCategory, GalleryImage } from "@/types";
 
 export interface CityServiceFormInput {
   category: EssentialServiceCategory;
@@ -20,10 +23,14 @@ export interface CityServiceFormInput {
   descriptionAr: string;
   descriptionSo: string;
   phone: string;
+  whatsapp: string;
+  email: string;
   openingHours: string;
   mapsUrl: string;
   website: string;
   image: string;
+  gallery: GalleryImage[];
+  status: "draft" | "published";
   featured: boolean;
 }
 
@@ -39,6 +46,7 @@ export function CityServiceForm({
   initial?: Partial<CityServiceFormInput>;
 }) {
   const t = useTranslations("admin");
+  const tCityServices = useTranslations("cityServices");
   const router = useRouter();
   const [form, setForm] = useState<CityServiceFormInput>({
     category: initial?.category ?? "hospital",
@@ -49,10 +57,14 @@ export function CityServiceForm({
     descriptionAr: initial?.descriptionAr ?? "",
     descriptionSo: initial?.descriptionSo ?? "",
     phone: initial?.phone ?? "",
+    whatsapp: initial?.whatsapp ?? "",
+    email: initial?.email ?? "",
     openingHours: initial?.openingHours ?? "",
     mapsUrl: initial?.mapsUrl ?? "",
     website: initial?.website ?? "",
     image: initial?.image ?? "",
+    gallery: initial?.gallery ?? [],
+    status: initial?.status ?? "draft",
     featured: initial?.featured ?? false,
   });
   const [error, setError] = useState<string | null>(null);
@@ -79,10 +91,14 @@ export function CityServiceForm({
       descriptionAr: form.descriptionAr || undefined,
       descriptionSo: form.descriptionSo || undefined,
       phone: form.phone || undefined,
+      whatsapp: form.whatsapp || undefined,
+      email: form.email || undefined,
       openingHours: form.openingHours || undefined,
       mapsUrl: form.mapsUrl || undefined,
       website: form.website || undefined,
       image: form.image || undefined,
+      gallery: form.gallery,
+      status: form.status,
       featured: form.featured,
     };
 
@@ -105,6 +121,17 @@ export function CityServiceForm({
     <form onSubmit={onSubmit} className="max-w-2xl space-y-6">
       <ImageUploader folder="city-services" value={form.image} onChange={(url) => update("image", url)} />
 
+      <GalleryManager
+        folder="city-services/gallery"
+        value={form.gallery}
+        onChange={(v) => update("gallery", v)}
+        categories={SERVICE_GALLERY_CATEGORIES}
+        coverUrl={form.image}
+        onSetCover={(url) => update("image", url)}
+        setCoverLabel={t("setAsCoverLabel")}
+        coverBadgeLabel={t("coverBadgeLabel")}
+      />
+
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label={t("cityServiceNameLabel")}>
           <input required value={form.name} onChange={(e) => update("name", e.target.value)} className={inputClass} />
@@ -115,10 +142,11 @@ export function CityServiceForm({
             onChange={(e) => update("category", e.target.value as EssentialServiceCategory)}
             className={inputClass}
           >
-            <option value="hospital">{t("categoryHospital")}</option>
-            <option value="bank">{t("categoryBank")}</option>
-            <option value="supermarket">{t("categorySupermarket")}</option>
-            <option value="pharmacy">{t("categoryPharmacy")}</option>
+            {CITY_SERVICE_CATEGORIES.map((c) => (
+              <option key={c.key} value={c.key}>
+                {tCityServices(c.titleKey)}
+              </option>
+            ))}
           </select>
         </Field>
       </div>
@@ -132,19 +160,26 @@ export function CityServiceForm({
         </Field>
       </div>
 
-      <Field label={t("phoneLabel")}>
-        <input value={form.phone} onChange={(e) => update("phone", e.target.value)} className={inputClass} placeholder="+252 63 000 0000" />
-      </Field>
-
-      <Field label={t("websiteLabel")}>
-        <input
-          type="url"
-          value={form.website}
-          onChange={(e) => update("website", e.target.value)}
-          className={inputClass}
-          placeholder="https://…"
-        />
-      </Field>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label={t("phoneLabel")}>
+          <input value={form.phone} onChange={(e) => update("phone", e.target.value)} className={inputClass} placeholder="+252 63 000 0000" />
+        </Field>
+        <Field label={t("whatsappLabel")}>
+          <input value={form.whatsapp} onChange={(e) => update("whatsapp", e.target.value)} className={inputClass} placeholder="+252 63 000 0000" />
+        </Field>
+        <Field label={t("emailLabel")}>
+          <input type="email" value={form.email} onChange={(e) => update("email", e.target.value)} className={inputClass} />
+        </Field>
+        <Field label={t("websiteLabel")}>
+          <input
+            type="url"
+            value={form.website}
+            onChange={(e) => update("website", e.target.value)}
+            className={inputClass}
+            placeholder="https://…"
+          />
+        </Field>
+      </div>
 
       <Field label={t("openingHoursShortLabel")}>
         <input value={form.openingHours} onChange={(e) => update("openingHours", e.target.value)} className={inputClass} placeholder="Sat–Thu, 8:00 AM – 6:00 PM" />
@@ -175,6 +210,13 @@ export function CityServiceForm({
 
       <Field label={t("fullDescriptionSoLabel")}>
         <textarea rows={3} value={form.descriptionSo} onChange={(e) => update("descriptionSo", e.target.value)} className={inputClass} />
+      </Field>
+
+      <Field label={t("statusLabel")}>
+        <select value={form.status} onChange={(e) => update("status", e.target.value as "draft" | "published")} className={inputClass}>
+          <option value="draft">{t("statusDraft")}</option>
+          <option value="published">{t("statusPublished")}</option>
+        </select>
       </Field>
 
       <label className="flex items-center gap-2.5 text-sm font-semibold">

@@ -1,7 +1,11 @@
 import { Hospital, Landmark, ShoppingCart, Pill } from "lucide-react";
 import type { CityCoverageCategory } from "@/lib/data/owner-dashboard";
 
-const META: Record<CityCoverageCategory["category"], { label: string; icon: typeof Hospital }> = {
+/** This widget always tracks the same 4 priority categories regardless of
+ * how many City Services categories exist overall (see the fixed
+ * CITY_SERVICE_CATEGORIES list in getCityCoverage) — it's a curated growth
+ * KPI, not a reflection of every category. */
+const META: Record<"hospital" | "bank" | "supermarket" | "pharmacy", { label: string; icon: typeof Hospital }> = {
   hospital: { label: "Hospitals", icon: Hospital },
   bank: { label: "Banks", icon: Landmark },
   supermarket: { label: "Supermarkets", icon: ShoppingCart },
@@ -39,7 +43,9 @@ export function CityCoverageProgress({
 
       <div className="mt-5 grid grid-cols-2 gap-3">
         {categories.map(({ category, published, target }) => {
-          const Icon = META[category].icon;
+          const meta = META[category as keyof typeof META];
+          if (!meta) return null;
+          const Icon = meta.icon;
           const done = published >= target;
           return (
             <div
@@ -50,7 +56,7 @@ export function CityCoverageProgress({
             >
               <div className="flex items-center gap-2">
                 <Icon size={15} className={done ? "text-accent-600" : "text-ink/40 dark:text-sand/40"} aria-hidden="true" />
-                <span className="text-xs font-semibold text-ink/70 dark:text-sand/70">{META[category].label}</span>
+                <span className="text-xs font-semibold text-ink/70 dark:text-sand/70">{meta.label}</span>
               </div>
               <p className="mt-1.5 font-display text-lg font-bold">
                 {published}

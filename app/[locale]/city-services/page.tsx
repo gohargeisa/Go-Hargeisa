@@ -5,7 +5,7 @@ import { PremiumPageHero } from "@/components/shared/premium-page-hero";
 import { PremiumSectionHeading } from "@/components/shared/premium-section-heading";
 import { EmptyState } from "@/components/shared/empty-state";
 import { CityServicesPageClient } from "@/components/pages/city-services-page-client";
-import { getAllCityServices } from "@/lib/data/city-services";
+import { getCityServicesGroupedByCategory } from "@/lib/data/city-services";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
 import { safeJsonLd } from "@/lib/utils/json-ld";
@@ -14,13 +14,23 @@ import type { EssentialServiceCategory } from "@/types";
 export const revalidate = 3600;
 
 /** schema.org type per category — used to build one structured-data entry
- * per published+featured city service (see the @graph built in the page
- * component below). */
-const CATEGORY_SCHEMA_TYPE: Record<EssentialServiceCategory, string> = {
+ * per published city service (see the @graph built in the page component
+ * below). Categories without an obviously-correct schema.org type fall
+ * back to the generic "LocalBusiness". */
+const CATEGORY_SCHEMA_TYPE: Partial<Record<EssentialServiceCategory, string>> = {
   hospital: "Hospital",
   bank: "BankOrCreditUnion",
   supermarket: "GroceryStore",
   pharmacy: "Pharmacy",
+  school: "School",
+  university: "CollegeOrUniversity",
+  mosque: "PlaceOfWorship",
+  gas_station: "GasStation",
+  police_station: "PoliceStation",
+  fire_station: "FireStation",
+  post_office: "PostOffice",
+  car_rental: "AutoRental",
+  gym: "ExerciseGym",
 };
 
 /** Reuses the shared hero photo — same swap-in-place pattern as attractions-hero.tsx / about-hero.tsx. */
@@ -46,15 +56,15 @@ export default async function CityServicesPage({
   searchParams: { q?: string };
 }) {
   const t = await getTranslations({ locale, namespace: "cityServices" });
-  const byCategory = await getAllCityServices(locale);
+  const groups = await getCityServicesGroupedByCategory(locale);
 
-  const allServices = Object.values(byCategory).flat();
+  const allServices = groups.flatMap((g) => g.items);
   const jsonLd =
     allServices.length > 0
       ? {
           "@context": "https://schema.org",
           "@graph": allServices.map((s) => ({
-            "@type": CATEGORY_SCHEMA_TYPE[s.category],
+            "@type": CATEGORY_SCHEMA_TYPE[s.category] ?? "LocalBusiness",
             name: s.name,
             description: s.description ?? undefined,
             image: s.image ?? undefined,
@@ -84,7 +94,7 @@ export default async function CityServicesPage({
         ) : (
           <>
             <PremiumSectionHeading title={t("sectionsTitle")} subtitle={t("sectionsSubtitle")} className="mb-10 md:mb-14" />
-            <CityServicesPageClient servicesByCategory={byCategory} locale={locale} initialQuery={searchParams.q} />
+            <CityServicesPageClient groups={groups} locale={locale} initialQuery={searchParams.q} />
           </>
         )}
       </section>
