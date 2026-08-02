@@ -821,6 +821,7 @@
     "manageAttractions": "Manage Attractions",
     "manageEvents": "Manage Events",
     "manageArticles": "Manage Articles",
+    "manageServices": "Manage Services",
 
     "ofYourHotels": "of your hotels",
     "hotelsPublished": "hotels published",
@@ -831,6 +832,7 @@
     "attractionsPublished": "attractions published",
     "eventsPublished": "events published",
     "articlesPublished": "articles published",
+    "servicesPublished": "services published",
 
     "addHotel": "Add Hotel",
     "addRestaurant": "Add Restaurant",
@@ -838,6 +840,7 @@
     "addAttraction": "Add Attraction",
     "addEvent": "Add Event",
     "addArticle": "Add Article",
+    "addService": "Add Service",
 
     "noHotelsAssigned": "No hotels assigned to you yet.",
     "noHotelsYet": "No hotels yet — add your first one to get started.",
@@ -848,6 +851,7 @@
     "noAttractionsYet": "No attractions yet — add your first one to get started.",
     "noEventsYet": "No events yet — add your first one to get started.",
     "noArticlesYet": "No articles yet — add your first one to get started.",
+    "noServicesYetAdmin": "No services yet — add your first one to get started.",
 
     "priceMetaLabel": "Price",
     "cuisineMetaLabel": "Cuisine",
@@ -870,6 +874,8 @@
     "editEventTitle": "Edit Event",
     "addArticleTitle": "Add Article",
     "editArticleTitle": "Edit Article",
+    "addServiceTitle": "Add Service",
+    "editServiceTitle": "Edit Service",
 
     "editingRequiresSupabaseLong": "Editing requires a connected Supabase project. See the README to connect one, then this form will load and save real data.",
     "editingRequiresSupabaseShort": "Editing requires a connected Supabase project. See the README to connect one.",
@@ -880,6 +886,8 @@
     "attractionNameLabel": "Attraction name",
     "eventTitleLabel": "Event title",
     "articleTitleLabel": "Article title",
+    "serviceNameLabel": "Business name",
+    "servicesOfferedLabel": "Services offered",
 
     "urlSlugLabel": "URL slug",
     "shortDescriptionLabel": "Short description",
@@ -935,6 +943,7 @@
     "publishAttraction": "Publish Attraction",
     "publishEvent": "Publish Event",
     "publishArticle": "Publish Article",
+    "publishService": "Publish Service",
     "saveChanges": "Save Changes",
 
     "openingHoursLabel": "Opening hours",

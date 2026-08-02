@@ -194,6 +194,9 @@ export function mapCafe(row: CafeRow, reviews: Review[] = [], locale?: string): 
 }
 
 export function mapService(row: ServiceRow, reviews: Review[] = []): Service {
+  const openingHoursStructured = Array.isArray(row.opening_hours_structured)
+    ? (row.opening_hours_structured as unknown as Service["openingHoursStructured"])
+    : [];
   return {
     id: row.id,
     slug: row.slug,
@@ -202,17 +205,25 @@ export function mapService(row: ServiceRow, reviews: Review[] = []): Service {
     description: row.description,
     coverImage: row.cover_image,
     gallery: toGallery(row.gallery),
+    videos: toVideos(row.videos),
     address: row.address,
     location: { lat: row.lat, lng: row.lng },
+    googleMapsUrl: row.google_maps_url ?? undefined,
     rating: Number(row.rating),
     reviewCount: row.review_count,
     reviews,
     phone: row.phone ?? undefined,
+    whatsapp: row.whatsapp ?? undefined,
+    email: row.email ?? undefined,
     website: row.website ?? undefined,
+    socialInstagram: row.social_instagram ?? undefined,
+    socialFacebook: row.social_facebook ?? undefined,
     openingHours: row.opening_hours ?? undefined,
+    openingHoursStructured,
     services: row.services ?? [],
     category: row.category as Service["category"],
     featured: row.featured,
+    logo: row.logo_url ?? undefined,
   };
 }
 

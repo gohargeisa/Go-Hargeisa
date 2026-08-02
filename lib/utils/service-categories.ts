@@ -19,6 +19,12 @@ export const SERVICE_CATEGORY_SLUGS: Record<ServiceCategory, string> = {
   currency_exchange: "currency-exchange",
   gas_station: "gas-stations",
   car_rental: "car-rentals",
+  mosque: "mosques",
+  school: "schools",
+  university: "universities",
+  gym: "gyms",
+  tour_company: "tour-companies",
+  apartment: "apartments",
 };
 
 export const SERVICE_CATEGORY_LABELS: Record<ServiceCategory, string> = {
@@ -30,6 +36,12 @@ export const SERVICE_CATEGORY_LABELS: Record<ServiceCategory, string> = {
   currency_exchange: "Currency Exchange",
   gas_station: "Gas Stations",
   car_rental: "Car Rentals",
+  mosque: "Mosques",
+  school: "Schools",
+  university: "Universities",
+  gym: "Gyms",
+  tour_company: "Tour Companies",
+  apartment: "Apartments",
 };
 
 export const SERVICE_CATEGORY_SINGULAR_LABELS: Record<ServiceCategory, string> = {
@@ -41,6 +53,12 @@ export const SERVICE_CATEGORY_SINGULAR_LABELS: Record<ServiceCategory, string> =
   currency_exchange: "Currency Exchange",
   gas_station: "Gas Station",
   car_rental: "Car Rental",
+  mosque: "Mosque",
+  school: "School",
+  university: "University",
+  gym: "Gym",
+  tour_company: "Tour Company",
+  apartment: "Apartment",
 };
 
 export const SERVICE_CATEGORY_ORDER: ServiceCategory[] = [
@@ -52,6 +70,12 @@ export const SERVICE_CATEGORY_ORDER: ServiceCategory[] = [
   "currency_exchange",
   "gas_station",
   "car_rental",
+  "mosque",
+  "school",
+  "university",
+  "gym",
+  "tour_company",
+  "apartment",
 ];
 
 const SLUG_TO_CATEGORY: Record<string, ServiceCategory> = Object.fromEntries(
@@ -79,6 +103,12 @@ const SERVICE_CATEGORY_KEYWORDS: Record<ServiceCategory, string[]> = {
   currency_exchange: ["currency exchange", "money exchange", "exchange", "forex"],
   gas_station: ["gas station", "gas", "petrol", "fuel", "filling station"],
   car_rental: ["car rental", "car rentals", "rent a car", "car hire"],
+  mosque: ["mosque", "mosques", "masjid", "jaamac"],
+  school: ["school", "schools", "primary school", "secondary school"],
+  university: ["university", "universities", "college"],
+  gym: ["gym", "gyms", "fitness", "fitness center", "workout"],
+  tour_company: ["tour company", "tour companies", "tours", "travel agency", "tour operator"],
+  apartment: ["apartment", "apartments", "flat", "flats", "furnished apartment"],
 };
 
 /** Resolves a free-text search query to a service category when the query

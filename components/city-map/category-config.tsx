@@ -2,6 +2,7 @@ import {
   Building2,
   Car,
   CreditCard,
+  Dumbbell,
   Fuel,
   GraduationCap,
   Landmark,
@@ -16,6 +17,8 @@ import {
   Smile,
   Stethoscope,
   Wallet,
+  Building,
+  Map,
 } from "lucide-react";
 import type { CityServiceCategory } from "@/types";
 
@@ -42,6 +45,9 @@ export const CATEGORY_CONFIG: Record<CityServiceCategory, CategoryMeta> = {
   university: { label: "Universities", icon: GraduationCap, color: "#059669" },
   airport: { label: "Airport", icon: Plane, color: "#0EA5E9" },
   parking: { label: "Car Parking", icon: ParkingCircle, color: "#64748B" },
+  gym: { label: "Gyms", icon: Dumbbell, color: "#DC2626" },
+  tour_company: { label: "Tour Companies", icon: Map, color: "#0891B2" },
+  apartment: { label: "Apartments", icon: Building, color: "#9333EA" },
 };
 
 export const CATEGORY_ORDER = Object.keys(CATEGORY_CONFIG) as CityServiceCategory[];

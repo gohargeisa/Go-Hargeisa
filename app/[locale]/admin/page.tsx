@@ -5,6 +5,7 @@ import {
   Hotel, UtensilsCrossed, Coffee, Landmark, CalendarDays, Newspaper,
   Users, BarChart3, Plus, ArrowRight, TrendingUp, Handshake, Building,
   Eye, MousePointerClick, CalendarCheck, Inbox, Megaphone, Tag, Bell, Star,
+  Stethoscope,
 } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { requireOwner } from "@/lib/supabase/guards";
@@ -14,6 +15,7 @@ import { getCafes } from "@/lib/data/cafes";
 import { getAttractions } from "@/lib/data/attractions";
 import { getEvents } from "@/lib/data/events";
 import { getArticles } from "@/lib/data/articles";
+import { getServices } from "@/lib/data/services";
 import {
   getOwnerPartnerOverview, getCityCoverage, getMissionChecklist, getOwnerViewsSeries, getOwnerKpis,
 } from "@/lib/data/owner-dashboard";
@@ -37,7 +39,7 @@ export default async function OwnerDashboardPage({ params: { locale } }: { param
   const tNav = await getTranslations({ locale, namespace: "nav" });
 
   const [
-    hotels, restaurants, cafes, attractions, events, articles,
+    hotels, restaurants, cafes, attractions, events, articles, services,
     partnerOverview, cityCoverage, missionChecklist, ownerViewsSeries, ownerKpis,
     activityLogs,
   ] = await Promise.all([
@@ -47,6 +49,7 @@ export default async function OwnerDashboardPage({ params: { locale } }: { param
     getAttractions(),
     getEvents(),
     getArticles(),
+    getServices(),
     getOwnerPartnerOverview(),
     getCityCoverage(),
     getMissionChecklist(),
@@ -62,9 +65,10 @@ export default async function OwnerDashboardPage({ params: { locale } }: { param
     { label: t("manageAttractions"), value: attractions.length, icon: Landmark, href: "attractions", tone: "from-purple-500/10 to-purple-500/5" },
     { label: tNav("events"), value: events.length, icon: CalendarDays, href: "events", tone: "from-red-500/10 to-red-500/5" },
     { label: t("manageArticles"), value: articles.length, icon: Newspaper, href: "articles", tone: "from-green-500/10 to-green-500/5" },
+    { label: t("manageServices"), value: services.length, icon: Stethoscope, href: "services", tone: "from-teal-500/10 to-teal-500/5" },
   ];
 
-  const totalListings = hotels.length + restaurants.length + cafes.length + attractions.length + events.length + articles.length;
+  const totalListings = hotels.length + restaurants.length + cafes.length + attractions.length + events.length + articles.length + services.length;
 
   const quickActions = [
     { label: t("newHotel"), href: "hotels/new", icon: Hotel },
@@ -73,6 +77,7 @@ export default async function OwnerDashboardPage({ params: { locale } }: { param
     { label: t("newAttraction"), href: "attractions/new", icon: Landmark },
     { label: t("newEvent"), href: "events/new", icon: CalendarDays },
     { label: t("newArticle"), href: "articles/new", icon: Newspaper },
+    { label: t("addService"), href: "services/new", icon: Stethoscope },
   ];
 
   const trialPartners = partnerOverview.partners.filter((p) => p.partnerStatus === "trial");
@@ -142,6 +147,12 @@ export default async function OwnerDashboardPage({ params: { locale } }: { param
                 className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-xl transition-colors hover:bg-white/20"
               >
                 <Building size={16} /> {t("cityServicesNav")}
+              </Link>
+              <Link
+                href={`/${locale}/admin/services`}
+                className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-xl transition-colors hover:bg-white/20"
+              >
+                <Stethoscope size={16} /> {t("manageServices")}
               </Link>
               <Link
                 href={`/${locale}/admin/users`}

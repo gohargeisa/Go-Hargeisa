@@ -821,6 +821,7 @@
     "manageAttractions": "إدارة المعالم السياحية",
     "manageEvents": "إدارة الفعاليات",
     "manageArticles": "إدارة المقالات",
+    "manageServices": "إدارة الخدمات",
 
     "ofYourHotels": "من فنادقك",
     "hotelsPublished": "فندقًا منشورًا",
@@ -831,6 +832,7 @@
     "attractionsPublished": "معلمًا سياحيًا منشورًا",
     "eventsPublished": "فعالية منشورة",
     "articlesPublished": "مقالًا منشورًا",
+    "servicesPublished": "خدمة منشورة",
 
     "addHotel": "إضافة فندق",
     "addRestaurant": "إضافة مطعم",
@@ -838,6 +840,7 @@
     "addAttraction": "إضافة معلم سياحي",
     "addEvent": "إضافة فعالية",
     "addArticle": "إضافة مقال",
+    "addService": "إضافة خدمة",
 
     "noHotelsAssigned": "لا توجد فنادق مخصصة لك بعد.",
     "noHotelsYet": "لا توجد فنادق بعد — أضف أول فندق للبدء.",
@@ -848,6 +851,7 @@
     "noAttractionsYet": "لا توجد معالم سياحية بعد — أضف أول معلم للبدء.",
     "noEventsYet": "لا توجد فعاليات بعد — أضف أول فعالية للبدء.",
     "noArticlesYet": "لا توجد مقالات بعد — أضف أول مقال للبدء.",
+    "noServicesYetAdmin": "لا توجد خدمات بعد — أضف أول خدمة للبدء.",
 
     "priceMetaLabel": "السعر",
     "cuisineMetaLabel": "المطبخ",
@@ -870,6 +874,8 @@
     "editEventTitle": "تعديل الفعالية",
     "addArticleTitle": "إضافة مقال",
     "editArticleTitle": "تعديل المقال",
+    "addServiceTitle": "إضافة خدمة",
+    "editServiceTitle": "تعديل الخدمة",
 
     "editingRequiresSupabaseLong": "يتطلب التعديل مشروع Supabase متصل. راجع ملف README لربط واحد، وسيقوم هذا النموذج بعدها بتحميل البيانات الحقيقية وحفظها.",
     "editingRequiresSupabaseShort": "يتطلب التعديل مشروع Supabase متصل. راجع ملف README لربط واحد.",
@@ -880,6 +886,8 @@
     "attractionNameLabel": "اسم المعلم السياحي",
     "eventTitleLabel": "عنوان الفعالية",
     "articleTitleLabel": "عنوان المقال",
+    "serviceNameLabel": "اسم النشاط التجاري",
+    "servicesOfferedLabel": "الخدمات المقدمة",
 
     "urlSlugLabel": "الرابط المختصر (Slug)",
     "shortDescriptionLabel": "وصف مختصر",
@@ -935,6 +943,7 @@
     "publishAttraction": "نشر المعلم السياحي",
     "publishEvent": "نشر الفعالية",
     "publishArticle": "نشر المقال",
+    "publishService": "نشر الخدمة",
     "saveChanges": "حفظ التغييرات",
 
     "openingHoursLabel": "ساعات العمل",

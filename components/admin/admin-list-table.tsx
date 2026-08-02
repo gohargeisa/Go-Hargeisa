@@ -8,7 +8,7 @@ import { FeatureListingButton } from "@/components/shared/feature-listing-button
 import { PinListingButton } from "@/components/shared/pin-listing-button";
 import type { FeaturableTable } from "@/lib/actions/admin";
 
-type AdminTable = "hotels" | "restaurants" | "cafes" | "attractions" | "events" | "articles";
+type AdminTable = "hotels" | "restaurants" | "cafes" | "attractions" | "events" | "articles" | "services";
 
 export interface AdminRow {
   id: string;

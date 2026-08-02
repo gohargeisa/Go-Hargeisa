@@ -104,11 +104,15 @@ type AttractionRow = ListingBase & {
   category: "landmark" | "museum" | "market" | "nature" | "religious";
 };
 
-type ServiceCategoryDb = "hospital" | "pharmacy" | "dental_clinic" | "bank" | "atm" | "currency_exchange" | "gas_station" | "car_rental";
+type ServiceCategoryDb =
+  | "hospital" | "pharmacy" | "dental_clinic" | "bank" | "atm" | "currency_exchange" | "gas_station" | "car_rental"
+  | "mosque" | "school" | "university" | "gym" | "tour_company" | "apartment";
 
 type ServiceRow = ListingBase & {
   phone: string | null; website: string | null; opening_hours: string | null; services: string[];
   category: ServiceCategoryDb; owner_id: string | null;
+  logo_url: string | null; videos: Json; whatsapp: string | null; email: string | null;
+  social_instagram: string | null; social_facebook: string | null; opening_hours_structured: Json;
 };
 
 type BusinessListingType = "hotel" | "restaurant" | "cafe" | "service";

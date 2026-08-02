@@ -459,7 +459,13 @@ export type ServiceCategory =
   | "atm"
   | "currency_exchange"
   | "gas_station"
-  | "car_rental";
+  | "car_rental"
+  | "mosque"
+  | "school"
+  | "university"
+  | "gym"
+  | "tour_company"
+  | "apartment";
 
 export interface Service {
   id: string;
@@ -469,14 +475,21 @@ export interface Service {
   description: string;
   coverImage: string;
   gallery: GalleryImage[];
+  videos?: MediaVideo[];
   address: string;
   location: Coordinates;
+  googleMapsUrl?: string;
   rating: number;
   reviewCount: number;
   reviews: Review[];
   phone?: string;
+  whatsapp?: string;
+  email?: string;
   website?: string;
+  socialInstagram?: string;
+  socialFacebook?: string;
   openingHours?: string;
+  openingHoursStructured?: OpeningHoursGroup[];
   services: string[];
   category: ServiceCategory;
   featured?: boolean;
@@ -583,7 +596,10 @@ export type CityServiceCategory =
   | "school"
   | "university"
   | "airport"
-  | "parking";
+  | "parking"
+  | "gym"
+  | "tour_company"
+  | "apartment";
 
 export interface CityServicePoint {
   id: string;

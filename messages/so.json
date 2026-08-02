@@ -821,6 +821,7 @@
     "manageAttractions": "Maamul Goobaha Dalxiiska",
     "manageEvents": "Maamul Dhacdooyinka",
     "manageArticles": "Maamul Maqaaladaha",
+    "manageServices": "Maamul Adeegyada",
 
     "ofYourHotels": "hudheellooyinkaaga",
     "hotelsPublished": "hudheel oo la daabacay",
@@ -831,6 +832,7 @@
     "attractionsPublished": "goob dalxiis oo la daabacay",
     "eventsPublished": "dhacdo oo la daabacay",
     "articlesPublished": "maqaal oo la daabacay",
+    "servicesPublished": "adeeg oo la daabacay",
 
     "addHotel": "Ku Dar Hudheel",
     "addRestaurant": "Ku Dar Maqaayad",
@@ -838,6 +840,7 @@
     "addAttraction": "Ku Dar Goob Dalxiis",
     "addEvent": "Ku Dar Dhacdo",
     "addArticle": "Ku Dar Maqaal",
+    "addService": "Ku Dar Adeeg",
 
     "noHotelsAssigned": "Weli hudheel lagugama xilsaarin.",
     "noHotelsYet": "Wali hudheel ma jiraan — ku dar tan ugu horreysa si aad u bilowdo.",
@@ -848,6 +851,7 @@
     "noAttractionsYet": "Wali goob dalxiis ma jiraan — ku dar tan ugu horreysa si aad u bilowdo.",
     "noEventsYet": "Wali dhacdo ma jiraan — ku dar tan ugu horreysa si aad u bilowdo.",
     "noArticlesYet": "Wali maqaal ma jiraan — ku dar tan ugu horreysa si aad u bilowdo.",
+    "noServicesYetAdmin": "Wali adeeg ma jiraan — ku dar tan ugu horreysa si aad u bilowdo.",
 
     "priceMetaLabel": "Qiimaha",
     "cuisineMetaLabel": "Cuntada",
@@ -870,6 +874,8 @@
     "editEventTitle": "Wax Ka Bedel Dhacdada",
     "addArticleTitle": "Ku Dar Maqaal",
     "editArticleTitle": "Wax Ka Bedel Maqaalka",
+    "addServiceTitle": "Ku Dar Adeeg",
+    "editServiceTitle": "Wax Ka Bedel Adeegga",
 
     "editingRequiresSupabaseLong": "Wax ka beddelku wuxuu u baahan yahay mashruuc Supabase oo la xidhay. Eeg README-ga si aad mid u xidhid, ka dibna foomkani wuxuu soo rari doonaa oo kaydin doonaa xogta dhabta ah.",
     "editingRequiresSupabaseShort": "Wax ka beddelku wuxuu u baahan yahay mashruuc Supabase oo la xidhay. Eeg README-ga si aad mid u xidhid.",
@@ -880,6 +886,8 @@
     "attractionNameLabel": "Magaca goobta dalxiiska",
     "eventTitleLabel": "Cinwaanka dhacdada",
     "articleTitleLabel": "Cinwaanka maqaalka",
+    "serviceNameLabel": "Magaca ganacsiga",
+    "servicesOfferedLabel": "Adeegyada la bixiyo",
 
     "urlSlugLabel": "Slug-ga URL-ka",
     "shortDescriptionLabel": "Faahfaahin kooban",
@@ -935,6 +943,7 @@
     "publishAttraction": "Daabac Goobta Dalxiiska",
     "publishEvent": "Daabac Dhacdada",
     "publishArticle": "Daabac Maqaalka",
+    "publishService": "Daabac Adeegga",
     "saveChanges": "Kaydi Isbeddellada",
 
     "openingHoursLabel": "Saacadaha shaqada",
