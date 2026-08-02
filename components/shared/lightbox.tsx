@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 
 export interface LightboxSlide {
   url: string;
@@ -32,6 +33,8 @@ export function Lightbox({
     [index, slides.length, onIndexChange]
   );
   const goNext = useCallback(() => onIndexChange((index + 1) % slides.length), [index, slides.length, onIndexChange]);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -52,9 +55,11 @@ export function Lightbox({
 
   return (
     <div
+      ref={dialogRef}
       role="dialog"
       aria-modal="true"
       aria-label="Photo viewer"
+      tabIndex={-1}
       className="fixed inset-0 z-[100] flex flex-col bg-black/95 backdrop-blur-sm"
     >
       <div className="flex items-center justify-between px-4 py-3 text-white sm:px-6">

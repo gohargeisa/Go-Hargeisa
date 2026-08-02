@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { AnimatePresence, m, useReducedMotion } from "framer-motion";
 import { X } from "lucide-react";
+import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 import type { ReactNode } from "react";
 
 /**
@@ -22,6 +23,8 @@ export function BottomSheet({
   children: ReactNode;
 }) {
   const reduceMotion = useReducedMotion();
+  const sheetRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(sheetRef, open);
 
   useEffect(() => {
     if (!open) return;
@@ -45,9 +48,11 @@ export function BottomSheet({
             aria-hidden="true"
           />
           <m.div
+            ref={sheetRef}
             role="dialog"
             aria-modal="true"
             aria-label={title}
+            tabIndex={-1}
             initial={reduceMotion ? undefined : { y: "100%" }}
             animate={{ y: 0 }}
             exit={reduceMotion ? undefined : { y: "100%" }}

@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Check, Loader2, MessageCircle, Plus, X } from "lucide-react";
 import { createBooking, updateBookingStatus, type BookingInput } from "@/lib/actions/business";
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
+import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 import type { Booking, HotelRoom } from "@/types";
 
 const STATUS_OPTIONS: Booking["status"][] = ["pending", "confirmed", "cancelled", "completed"];
@@ -258,13 +259,26 @@ export function BookingsTable({
 }
 
 function ModalShell({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
   return (
     <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label={title}
+        tabIndex={-1}
         className="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl dark:bg-ink"
       >
         <div className="mb-4 flex items-center justify-between">

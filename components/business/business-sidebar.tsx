@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, m, useReducedMotion } from "framer-motion";
+import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 import {
   Home,
   Building2,
@@ -58,6 +59,8 @@ export function BusinessSidebar({ locale, listing }: { locale: Locale; listing: 
   const t = useTranslations("businessDashboard");
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const mobileNavRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(mobileNavRef, mobileOpen);
   const reduceMotion = useReducedMotion();
   const isRtl = locale === "ar";
   const base = `/${locale}/business`;
@@ -162,9 +165,11 @@ export function BusinessSidebar({ locale, listing }: { locale: Locale; listing: 
               aria-hidden="true"
             />
             <m.div
+              ref={mobileNavRef}
               role="dialog"
               aria-modal="true"
               aria-label={t("navAriaLabel")}
+              tabIndex={-1}
               initial={reduceMotion ? undefined : { x: isRtl ? "100%" : "-100%" }}
               animate={{ x: 0 }}
               exit={reduceMotion ? undefined : { x: isRtl ? "100%" : "-100%" }}

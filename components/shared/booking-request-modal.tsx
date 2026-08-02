@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 import { BookingForm } from "@/components/shared/booking-form";
+import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 import type { Locale } from "@/lib/i18n/config";
 import type { HotelRoom } from "@/types";
 
@@ -37,6 +38,8 @@ export function BookingRequestModal({
   onClose: () => void;
 }) {
   const t = useTranslations("bookingRequest");
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -50,9 +53,11 @@ export function BookingRequestModal({
     <div className="fixed inset-0 z-[80] flex items-center justify-center p-0 sm:p-4">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label={t("modalTitle")}
+        tabIndex={-1}
         className="relative flex h-full w-full flex-col overflow-hidden bg-white shadow-2xl dark:bg-ink sm:h-auto sm:max-h-[92vh] sm:max-w-4xl sm:rounded-3xl"
       >
         <div className="flex items-start justify-between gap-4 border-b border-ink/8 p-5 dark:border-white/10 sm:p-6">

@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { Loader2, ShieldCheck, X } from "lucide-react";
 import { submitBusinessClaim } from "@/lib/actions/claims";
+import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 import type { BusinessListingType } from "@/types";
 
 export function ClaimBusinessButton({
@@ -17,6 +18,8 @@ export function ClaimBusinessButton({
 }) {
   const t = useTranslations("claimBusiness");
   const [open, setOpen] = useState(false);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, open);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -62,9 +65,11 @@ export function ClaimBusinessButton({
         <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/50" onClick={() => setOpen(false)} aria-hidden="true" />
           <div
+            ref={dialogRef}
             role="dialog"
             aria-modal="true"
             aria-label={t("modalTitle")}
+            tabIndex={-1}
             className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-ink"
           >
             <div className="mb-4 flex items-center justify-between">
