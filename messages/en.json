@@ -1751,6 +1751,7 @@
     "dishNamePlaceholder": "Dish name",
     "removeMenuItemAriaLabel": "Remove menu item",
     "menuPdfLabel": "PDF menu (optional)",
+    "mapsUrlLabel": "Google Maps link",
     "whatsappLabel": "WhatsApp",
     "emailLabel": "Email",
     "socialInstagramLabel": "Instagram",

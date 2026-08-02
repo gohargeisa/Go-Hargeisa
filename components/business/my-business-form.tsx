@@ -15,9 +15,10 @@ const TABLE_BY_TYPE: Record<BusinessListingType, "hotels" | "restaurants" | "caf
   service: "services",
 };
 
-/** Only hotels/restaurants/cafes have price_range, whatsapp, email, and
- * social columns — services (Phase 2 city services) has none of them. */
-const HAS_RICH_CONTACT_FIELDS: Record<BusinessListingType, boolean> = {
+/** whatsapp/email/social columns exist on all four listing tables (services
+ * gained them in the Phase 9 CMS expansion) — price_range is the one field
+ * among this group that services genuinely doesn't have. */
+const HAS_PRICE_RANGE: Record<BusinessListingType, boolean> = {
   hotel: true,
   restaurant: true,
   cafe: true,
@@ -35,6 +36,7 @@ export interface MyBusinessFormInitial {
   email?: string;
   socialInstagram?: string;
   socialFacebook?: string;
+  googleMapsUrl?: string;
   priceRange?: "$" | "$$" | "$$$" | "$$$$";
   checkInTime?: string;
   checkOutTime?: string;
@@ -68,7 +70,7 @@ export function MyBusinessForm({
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const hasRichFields = HAS_RICH_CONTACT_FIELDS[listingType];
+  const hasPriceRange = HAS_PRICE_RANGE[listingType];
 
   function update<K extends keyof MyBusinessFormInitial>(key: K, value: MyBusinessFormInitial[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -97,13 +99,12 @@ export function MyBusinessForm({
       address: form.address,
       phone: form.phone || null,
     };
-    if (hasRichFields) {
-      payload.whatsapp = form.whatsapp || null;
-      payload.email = form.email || null;
-      payload.social_instagram = form.socialInstagram || null;
-      payload.social_facebook = form.socialFacebook || null;
-      payload.price_range = form.priceRange;
-    }
+    payload.whatsapp = form.whatsapp || null;
+    payload.email = form.email || null;
+    payload.social_instagram = form.socialInstagram || null;
+    payload.social_facebook = form.socialFacebook || null;
+    payload.google_maps_url = form.googleMapsUrl || null;
+    if (hasPriceRange) payload.price_range = form.priceRange;
     // cafes has no `website` column at all — every other type does.
     if (listingType !== "cafe") payload.website = form.website || null;
 
@@ -182,50 +183,59 @@ export function MyBusinessForm({
         )}
       </div>
 
-      {hasRichFields && (
-        <>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label className="mb-1.5 block text-sm font-semibold">{t("whatsappLabel")}</label>
-              <input value={form.whatsapp ?? ""} onChange={(e) => update("whatsapp", e.target.value)} className={inputClass} placeholder="+252 63 000 0000" />
-            </div>
-            <div>
-              <label className="mb-1.5 block text-sm font-semibold">{t("emailLabel")}</label>
-              <input type="email" value={form.email ?? ""} onChange={(e) => update("email", e.target.value)} className={inputClass} />
-            </div>
-          </div>
+      <div>
+        <label className="mb-1.5 block text-sm font-semibold">{t("mapsUrlLabel")}</label>
+        <input
+          type="url"
+          value={form.googleMapsUrl ?? ""}
+          onChange={(e) => update("googleMapsUrl", e.target.value)}
+          className={inputClass}
+          placeholder="https://maps.google.com/?q=…"
+        />
+      </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label className="mb-1.5 block text-sm font-semibold">{t("socialInstagramLabel")}</label>
-              <input type="url" value={form.socialInstagram ?? ""} onChange={(e) => update("socialInstagram", e.target.value)} className={inputClass} placeholder="https://instagram.com/…" />
-            </div>
-            <div>
-              <label className="mb-1.5 block text-sm font-semibold">{t("socialFacebookLabel")}</label>
-              <input type="url" value={form.socialFacebook ?? ""} onChange={(e) => update("socialFacebook", e.target.value)} className={inputClass} placeholder="https://facebook.com/…" />
-            </div>
-          </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label className="mb-1.5 block text-sm font-semibold">{t("whatsappLabel")}</label>
+          <input value={form.whatsapp ?? ""} onChange={(e) => update("whatsapp", e.target.value)} className={inputClass} placeholder="+252 63 000 0000" />
+        </div>
+        <div>
+          <label className="mb-1.5 block text-sm font-semibold">{t("emailLabel")}</label>
+          <input type="email" value={form.email ?? ""} onChange={(e) => update("email", e.target.value)} className={inputClass} />
+        </div>
+      </div>
 
-          <div>
-            <label className="mb-1.5 block text-sm font-semibold">{t("priceRangeLabel")}</label>
-            <div className="grid grid-cols-4 gap-2">
-              {PRICE_LEVELS.map((level) => (
-                <button
-                  key={level}
-                  type="button"
-                  onClick={() => update("priceRange", level)}
-                  className={`rounded-xl border py-2 text-center font-display text-sm font-bold transition-colors ${
-                    form.priceRange === level
-                      ? "border-primary bg-primary/8 text-primary"
-                      : "border-ink/12 text-ink/60 hover:border-primary/40 dark:border-white/15 dark:text-sand/60"
-                  }`}
-                >
-                  {level}
-                </button>
-              ))}
-            </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label className="mb-1.5 block text-sm font-semibold">{t("socialInstagramLabel")}</label>
+          <input type="url" value={form.socialInstagram ?? ""} onChange={(e) => update("socialInstagram", e.target.value)} className={inputClass} placeholder="https://instagram.com/…" />
+        </div>
+        <div>
+          <label className="mb-1.5 block text-sm font-semibold">{t("socialFacebookLabel")}</label>
+          <input type="url" value={form.socialFacebook ?? ""} onChange={(e) => update("socialFacebook", e.target.value)} className={inputClass} placeholder="https://facebook.com/…" />
+        </div>
+      </div>
+
+      {hasPriceRange && (
+        <div>
+          <label className="mb-1.5 block text-sm font-semibold">{t("priceRangeLabel")}</label>
+          <div className="grid grid-cols-4 gap-2">
+            {PRICE_LEVELS.map((level) => (
+              <button
+                key={level}
+                type="button"
+                onClick={() => update("priceRange", level)}
+                className={`rounded-xl border py-2 text-center font-display text-sm font-bold transition-colors ${
+                  form.priceRange === level
+                    ? "border-primary bg-primary/8 text-primary"
+                    : "border-ink/12 text-ink/60 hover:border-primary/40 dark:border-white/15 dark:text-sand/60"
+                }`}
+              >
+                {level}
+              </button>
+            ))}
           </div>
-        </>
+        </div>
       )}
 
       {listingType === "hotel" ? (

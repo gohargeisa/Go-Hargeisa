@@ -23,10 +23,7 @@ export default async function GalleryPage({ params: { locale } }: { params: { lo
   const t = await getTranslations({ locale, namespace: "businessDashboard" });
   const supabase = await createClient();
   const table = TABLE_BY_TYPE[listing.listingType];
-  // Services has no logo_url or videos column at all.
-  const columns =
-    listing.listingType === "service" ? "cover_image, gallery" : "cover_image, logo_url, gallery, videos";
-  const { data: row } = await supabase.from(table).select(columns).eq("id", listing.id).single();
+  const { data: row } = await supabase.from(table).select("cover_image, logo_url, gallery, videos").eq("id", listing.id).single();
   const typedRow = row as { cover_image?: string; logo_url?: string; gallery?: unknown; videos?: unknown } | null;
 
   const gallery: GalleryImage[] = Array.isArray(typedRow?.gallery)

@@ -26,9 +26,9 @@ const CATEGORIES_BY_TYPE = {
 /**
  * The Media Manager: cover image (upload fresh, or promote an existing
  * gallery photo), logo, the drag & drop/reorderable photo gallery, and an
- * optional short-video gallery — one save action across all four. Videos
- * and "set as cover" are skipped for services (no videos column, and no
- * dashboard media concept beyond cover/gallery for that listing type).
+ * optional short-video gallery — one save action across all four listing
+ * types, including services (logo_url/videos columns added in the Phase 9
+ * services CMS expansion).
  */
 export function GalleryManagerPanel({
   listingType,
@@ -55,15 +55,10 @@ export function GalleryManagerPanel({
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const hasLogo = listingType !== "service";
-  const hasVideos = listingType !== "service";
-
   function onSave() {
     setError(null);
     startTransition(async () => {
-      const payload: Record<string, unknown> = { cover_image: cover, gallery };
-      if (hasLogo) payload.logo_url = logo || null;
-      if (hasVideos) payload.videos = videos;
+      const payload = { cover_image: cover, logo_url: logo || null, gallery, videos };
       const result = await updateRecord(TABLE_BY_TYPE[listingType], listingId, payload, [currentPath], currentPath);
       if (result && !result.ok) setError(result.error ?? "Something went wrong.");
     });
@@ -71,11 +66,9 @@ export function GalleryManagerPanel({
 
   return (
     <div className="space-y-6">
-      <div className={`grid gap-6 rounded-2xl border border-ink/8 bg-white p-5 dark:border-white/10 dark:bg-white/[0.03] sm:p-6 ${hasLogo ? "sm:grid-cols-2" : ""}`}>
+      <div className="grid gap-6 rounded-2xl border border-ink/8 bg-white p-5 dark:border-white/10 dark:bg-white/[0.03] sm:grid-cols-2 sm:p-6">
         <ImageUploader folder={`${listingType}s`} value={cover} onChange={setCover} label={t("coverImage")} />
-        {hasLogo && (
-          <ImageUploader folder={`${listingType}s/logos`} value={logo} onChange={setLogo} label={t("businessLogo")} rounded="rounded-full" />
-        )}
+        <ImageUploader folder={`${listingType}s/logos`} value={logo} onChange={setLogo} label={t("businessLogo")} rounded="rounded-full" />
       </div>
 
       <div className="rounded-2xl border border-ink/8 bg-white p-5 dark:border-white/10 dark:bg-white/[0.03] sm:p-6">
@@ -91,23 +84,21 @@ export function GalleryManagerPanel({
         />
       </div>
 
-      {hasVideos && (
-        <div className="rounded-2xl border border-ink/8 bg-white p-5 dark:border-white/10 dark:bg-white/[0.03] sm:p-6">
-          <VideoUploader
-            folder={`${listingType}s/videos`}
-            value={videos}
-            onChange={setVideos}
-            label={t("videosLabel")}
-            addLabel={t("addVideoLabel")}
-            hint={t("videosHint")}
-            captionPlaceholder={t("videoCaptionPlaceholder")}
-            removeAriaLabel={t("removeVideoAriaLabel")}
-            replaceAriaLabel={t("replaceVideoAriaLabel")}
-            moveEarlierAriaLabel={t("moveVideoEarlierAriaLabel")}
-            moveLaterAriaLabel={t("moveVideoLaterAriaLabel")}
-          />
-        </div>
-      )}
+      <div className="rounded-2xl border border-ink/8 bg-white p-5 dark:border-white/10 dark:bg-white/[0.03] sm:p-6">
+        <VideoUploader
+          folder={`${listingType}s/videos`}
+          value={videos}
+          onChange={setVideos}
+          label={t("videosLabel")}
+          addLabel={t("addVideoLabel")}
+          hint={t("videosHint")}
+          captionPlaceholder={t("videoCaptionPlaceholder")}
+          removeAriaLabel={t("removeVideoAriaLabel")}
+          replaceAriaLabel={t("replaceVideoAriaLabel")}
+          moveEarlierAriaLabel={t("moveVideoEarlierAriaLabel")}
+          moveLaterAriaLabel={t("moveVideoLaterAriaLabel")}
+        />
+      </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 
