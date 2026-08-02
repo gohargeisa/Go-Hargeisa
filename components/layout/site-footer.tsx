@@ -5,7 +5,32 @@ import { Facebook, Instagram, Youtube } from "lucide-react";
 import { FaWhatsapp, FaTiktok, FaXTwitter } from "react-icons/fa6";
 import type { Locale } from "@/lib/i18n/config";
 
-export function SiteFooter({ locale }: { locale: Locale }) {
+export function SiteFooter({
+  locale,
+  logoUrl,
+  footerText,
+  contactEmail,
+  contactPhone,
+  whatsappNumber,
+  socialFacebook,
+  socialInstagram,
+  socialTwitter,
+  socialYoutube,
+  socialTiktok,
+}: {
+  locale: Locale;
+  /** All of these are admin-editable overrides from site_settings — each falls back to the existing hardcoded default when unset, so an empty settings row changes nothing. */
+  logoUrl?: string;
+  footerText?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  whatsappNumber?: string;
+  socialFacebook?: string;
+  socialInstagram?: string;
+  socialTwitter?: string;
+  socialYoutube?: string;
+  socialTiktok?: string;
+}) {
   const t = useTranslations("footer");
   const nav = useTranslations("nav");
 
@@ -29,12 +54,16 @@ export function SiteFooter({ locale }: { locale: Locale }) {
   ] as const;
 
   const socialLinks = [
-    { icon: FaWhatsapp, href: "https://wa.me/252656156752", label: "WhatsApp" },
-    { icon: Facebook, href: "https://facebook.com/Go.Hargeisa", label: "Facebook" },
-    { icon: Instagram, href: "https://instagram.com/go.hargeisa", label: "Instagram" },
-    { icon: FaXTwitter, href: "https://x.com/go_hargeisa", label: "X" },
-    { icon: FaTiktok, href: "https://www.tiktok.com/@gohargeisa", label: "TikTok" },
-    { icon: Youtube, href: "https://youtube.com/@go.hargeisa", label: "YouTube" },
+    {
+      icon: FaWhatsapp,
+      href: whatsappNumber ? `https://wa.me/${whatsappNumber.replace(/[^\d]/g, "")}` : "https://wa.me/252656156752",
+      label: "WhatsApp",
+    },
+    { icon: Facebook, href: socialFacebook || "https://facebook.com/Go.Hargeisa", label: "Facebook" },
+    { icon: Instagram, href: socialInstagram || "https://instagram.com/go.hargeisa", label: "Instagram" },
+    { icon: FaXTwitter, href: socialTwitter || "https://x.com/go_hargeisa", label: "X" },
+    { icon: FaTiktok, href: socialTiktok || "https://www.tiktok.com/@gohargeisa", label: "TikTok" },
+    { icon: Youtube, href: socialYoutube || "https://youtube.com/@go.hargeisa", label: "YouTube" },
   ];
 
   return (
@@ -42,14 +71,20 @@ export function SiteFooter({ locale }: { locale: Locale }) {
       <div className="container-px mx-auto grid grid-cols-2 gap-x-8 gap-y-12 py-16 md:grid-cols-5 md:gap-x-10 lg:gap-x-12 lg:py-20">
         <div className="col-span-2">
           <Image
-            src="/images/logo.png"
+            src={logoUrl || "/images/logo.png"}
             alt="Go Hargeisa"
             width={280}
             height={110}
             priority
             className="mb-6 h-auto w-auto transition-transform duration-300 ease-premium hover:scale-105"
           />
-          <p className="max-w-sm text-sm leading-7 text-ink/60 dark:text-sand/60">{t("tagline")}</p>
+          <p className="max-w-sm text-sm leading-7 text-ink/60 dark:text-sand/60">{footerText || t("tagline")}</p>
+          {(contactEmail || contactPhone) && (
+            <p className="mt-3 space-y-0.5 text-sm text-ink/60 dark:text-sand/60">
+              {contactEmail && <a href={`mailto:${contactEmail}`} className="block hover:text-primary">{contactEmail}</a>}
+              {contactPhone && <a href={`tel:${contactPhone}`} className="block hover:text-primary">{contactPhone}</a>}
+            </p>
+          )}
           <div className="mt-6 flex flex-wrap gap-2.5">
             {socialLinks.map(({ icon: Icon, href, label }) => (
               <a

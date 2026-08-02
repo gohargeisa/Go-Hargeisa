@@ -1137,7 +1137,20 @@
     "socialEligibleLabel": "Eligible for social promotion",
     "socialNotEligibleLabel": "Not eligible until Official",
     "pinAriaLabel": "Pin this listing",
-    "unpinAriaLabel": "Unpin this listing"
+    "unpinAriaLabel": "Unpin this listing",
+
+    "settingsNav": "Settings",
+    "siteSettingsTitle": "Site Settings",
+    "siteSettingsSubtitle": "Logo, favicon, contact details, and social links used across the whole site.",
+    "logoLabel": "Site logo",
+    "faviconLabel": "Favicon",
+    "siteNameLabel": "Site name",
+    "footerTaglineLabel": "Footer tagline",
+    "footerTaglineHint": "Shown under the logo in the site footer. Leave blank to use the default tagline.",
+    "socialTwitterLabel": "X (Twitter) URL",
+    "socialYoutubeLabel": "YouTube URL",
+    "socialTiktokLabel": "TikTok URL",
+    "settingsSaved": "Settings saved."
   },
   "about": {
     "eyebrow": "Our Story",

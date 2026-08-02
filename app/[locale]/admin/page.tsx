@@ -5,7 +5,7 @@ import {
   Hotel, UtensilsCrossed, Coffee, Landmark, CalendarDays, Newspaper,
   Users, BarChart3, Plus, ArrowRight, TrendingUp, Handshake, Building,
   Eye, MousePointerClick, CalendarCheck, Inbox, Megaphone, Tag, Bell, Star,
-  Stethoscope,
+  Stethoscope, Settings,
 } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { requireOwner } from "@/lib/supabase/guards";
@@ -165,6 +165,12 @@ export default async function OwnerDashboardPage({ params: { locale } }: { param
                 className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-xl transition-colors hover:bg-white/20"
               >
                 <Megaphone size={16} /> {t("announcementsNav")}
+              </Link>
+              <Link
+                href={`/${locale}/admin/settings`}
+                className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-xl transition-colors hover:bg-white/20"
+              >
+                <Settings size={16} /> {t("settingsNav")}
               </Link>
             </div>
           </div>

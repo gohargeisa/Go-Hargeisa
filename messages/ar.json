@@ -1137,7 +1137,20 @@
     "socialEligibleLabel": "مؤهل للترويج عبر السوشيال ميديا",
     "socialNotEligibleLabel": "غير مؤهل حتى يصبح رسميًا",
     "pinAriaLabel": "تثبيت هذا العنصر",
-    "unpinAriaLabel": "إلغاء تثبيت هذا العنصر"
+    "unpinAriaLabel": "إلغاء تثبيت هذا العنصر",
+
+    "settingsNav": "الإعدادات",
+    "siteSettingsTitle": "إعدادات الموقع",
+    "siteSettingsSubtitle": "الشعار، أيقونة الموقع، بيانات التواصل، وروابط التواصل الاجتماعي المستخدمة في الموقع بأكمله.",
+    "logoLabel": "شعار الموقع",
+    "faviconLabel": "أيقونة الموقع",
+    "siteNameLabel": "اسم الموقع",
+    "footerTaglineLabel": "شعار التذييل",
+    "footerTaglineHint": "يظهر أسفل الشعار في تذييل الموقع. اتركه فارغًا لاستخدام الشعار الافتراضي.",
+    "socialTwitterLabel": "رابط X (تويتر)",
+    "socialYoutubeLabel": "رابط يوتيوب",
+    "socialTiktokLabel": "رابط تيك توك",
+    "settingsSaved": "تم حفظ الإعدادات."
   },
   "about": {
     "eyebrow": "قصتنا",

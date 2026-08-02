@@ -10,6 +10,7 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { ServiceWorkerRegister } from "@/components/shared/service-worker-register";
 import { getHeaderUser } from "@/lib/supabase/guards";
+import { getSiteSettings } from "@/lib/actions/settings";
 
 // next-intl's request-based APIs read headers in the installed version, so
 // these locale routes must render dynamically instead of being prerendered.
@@ -30,6 +31,13 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gohargeisa.com";
   const t = await getTranslations({ locale, namespace: "siteMetadata" });
+  const settings = await getSiteSettings();
+  // og/twitter title+siteName are hardcoded "Go Hargeisa" (not localized),
+  // so overriding them from the admin-editable site name/favicon carries no
+  // i18n regression risk — unlike `title`/`description` above, which stay on
+  // the translated defaults since site_settings has no per-locale variants.
+  const siteName = settings?.site_name || "Go Hargeisa";
+  const faviconUrl = settings?.favicon_url;
 
   return {
   metadataBase: new URL(siteUrl),
@@ -88,12 +96,12 @@ export async function generateMetadata({
     alternates: localeAlternates(locale as Locale, ""),
 
     openGraph: {
-      title: "Go Hargeisa",
+      title: siteName,
       description: t("ogDescription"),
 
       url: `${siteUrl}/${locale}`,
 
-      siteName: "Go Hargeisa",
+      siteName,
 
       locale,
 
@@ -104,14 +112,14 @@ export async function generateMetadata({
     url: "/images/og-image.png",
     width: 1200,
     height: 630,
-    alt: "Go Hargeisa",
+    alt: siteName,
   },
 ],
     },
 
     twitter: {
   card: "summary_large_image",
-  title: "Go Hargeisa",
+  title: siteName,
   description: t("ogDescription"),
   images: ["/images/og-image.png"],
 },
@@ -119,13 +127,15 @@ export async function generateMetadata({
     manifest: "/manifest.json",
 
     icons: {
-      icon: [
-        { url: "/favicon.ico" },
-        { url: "/icons/icon-192.png", sizes: "192x192" },
-        { url: "/icons/icon-512.png", sizes: "512x512" },
-      ],
+      icon: faviconUrl
+        ? [{ url: faviconUrl }]
+        : [
+            { url: "/favicon.ico" },
+            { url: "/icons/icon-192.png", sizes: "192x192" },
+            { url: "/icons/icon-512.png", sizes: "512x512" },
+          ],
 
-      apple: "/apple-icon.png",
+      apple: faviconUrl || "/apple-icon.png",
     },
   };
 }
@@ -147,10 +157,11 @@ export default async function LocaleLayout({
   if (!locales.includes(locale as Locale)) notFound();
 
   const currentLocale = locale as Locale;
-  const [messages, initialUser, tCommon] = await Promise.all([
+  const [messages, initialUser, tCommon, siteSettings] = await Promise.all([
     getMessages(),
     getHeaderUser(),
     getTranslations({ locale: currentLocale, namespace: "common" }),
+    getSiteSettings(),
   ]);
 
   return (
@@ -174,9 +185,21 @@ export default async function LocaleLayout({
             >
               {tCommon("skipToContent")}
             </a>
-            <SiteHeader locale={currentLocale} initialUser={initialUser} />
+            <SiteHeader locale={currentLocale} initialUser={initialUser} logoUrl={siteSettings?.logo_url ?? undefined} />
             <main id="main-content">{children}</main>
-            <SiteFooter locale={currentLocale} />
+            <SiteFooter
+              locale={currentLocale}
+              logoUrl={siteSettings?.logo_url ?? undefined}
+              footerText={siteSettings?.footer_text ?? undefined}
+              contactEmail={siteSettings?.contact_email ?? undefined}
+              contactPhone={siteSettings?.contact_phone ?? undefined}
+              whatsappNumber={siteSettings?.whatsapp_number ?? undefined}
+              socialFacebook={siteSettings?.social_facebook ?? undefined}
+              socialInstagram={siteSettings?.social_instagram ?? undefined}
+              socialTwitter={siteSettings?.social_twitter ?? undefined}
+              socialYoutube={siteSettings?.social_youtube ?? undefined}
+              socialTiktok={siteSettings?.social_tiktok ?? undefined}
+            />
             <ServiceWorkerRegister />
           </div>
         </ThemeProvider>

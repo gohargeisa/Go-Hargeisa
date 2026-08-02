@@ -1137,7 +1137,20 @@
     "socialEligibleLabel": "Ku habboon dhoola-caddaynta bulshada",
     "socialNotEligibleLabel": "Ma aha mid ku habboon ilaa uu noqdo Rasmi",
     "pinAriaLabel": "Muji shayga",
-    "unpinAriaLabel": "Ka saar mujinta"
+    "unpinAriaLabel": "Ka saar mujinta",
+
+    "settingsNav": "Dejinta",
+    "siteSettingsTitle": "Dejinta Bogga",
+    "siteSettingsSubtitle": "Astaanta, favicon-ka, xogta xiriirka, iyo linkiyada bulshada ee lagu isticmaalo bogga oo dhan.",
+    "logoLabel": "Astaanta bogga",
+    "faviconLabel": "Favicon-ka",
+    "siteNameLabel": "Magaca bogga",
+    "footerTaglineLabel": "Hadalka gaaban ee footer-ka",
+    "footerTaglineHint": "Waxaa lagu muujiyaa astaanta hoosteeda footer-ka bogga. Ka banneey haddii aad rabto in la isticmaalo hadalka gaaban ee caadiga ah.",
+    "socialTwitterLabel": "Link-ka X (Twitter)",
+    "socialYoutubeLabel": "Link-ka YouTube",
+    "socialTiktokLabel": "Link-ka TikTok",
+    "settingsSaved": "Dejinta waa la kaydiyay."
   },
   "about": {
     "eyebrow": "Sheekadayada",

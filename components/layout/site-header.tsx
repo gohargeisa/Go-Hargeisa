@@ -25,7 +25,16 @@ const links = [
   ...(SERVICES_PUBLIC_ENABLED ? [{ key: "services", href: "services" }] : []),
 ] as const;
 
-export function SiteHeader({ locale, initialUser }: { locale: Locale; initialUser: HeaderUser | null }) {
+export function SiteHeader({
+  locale,
+  initialUser,
+  logoUrl,
+}: {
+  locale: Locale;
+  initialUser: HeaderUser | null;
+  /** Admin-editable override from site_settings.logo_url — falls back to the built-in logo when unset. */
+  logoUrl?: string;
+}) {
   const t = useTranslations("nav");
   const td = useTranslations("dashboard");
   const [scrolled, setScrolled] = useState(false);
@@ -52,7 +61,7 @@ export function SiteHeader({ locale, initialUser }: { locale: Locale; initialUse
         <div className="flex shrink-0 items-center">
           <Link href={`/${locale}`}>
             <Image
-              src="/images/logo.png"
+              src={logoUrl || "/images/logo.png"}
               alt="Go Hargeisa"
               width={520}
               height={180}
