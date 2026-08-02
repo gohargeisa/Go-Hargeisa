@@ -1,8 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Download, Search } from "lucide-react";
+import { Download, Loader2, Search } from "lucide-react";
+import { updateBookingStatus } from "@/lib/actions/business";
 import type { Booking } from "@/types";
 
 const STATUS_FILTERS: (Booking["status"] | "all")[] = ["all", "pending", "confirmed", "cancelled", "completed"];
@@ -46,9 +48,23 @@ function exportCsv(bookings: Booking[]) {
 
 export function AdminBookingsList({ bookings }: { bookings: Booking[] }) {
   const t = useTranslations("admin");
+  const router = useRouter();
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<(typeof STATUS_FILTERS)[number]>("all");
   const [hotelFilter, setHotelFilter] = useState("all");
+  const [pendingId, setPendingId] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+
+  function onChangeStatus(booking: Booking, status: Booking["status"]) {
+    if (!booking.hotelId || status === booking.status) return;
+    setPendingId(booking.id);
+    startTransition(async () => {
+      const result = await updateBookingStatus(booking.id, booking.hotelId!, status, [window.location.pathname]);
+      if (result.ok) router.refresh();
+      else alert(result.error ?? t("somethingWentWrong"));
+      setPendingId(null);
+    });
+  }
 
   const hotels = useMemo(() => {
     const map = new Map<string, string>();
@@ -155,9 +171,21 @@ export function AdminBookingsList({ bookings }: { bookings: Booking[] }) {
                     {formatDate(b.checkIn)} → {formatDate(b.checkOut)}
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold capitalize ${STATUS_STYLES[b.status]}`}>
-                      {t(`bookingStatus_${b.status}` as "bookingStatus_pending")}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <select
+                        value={b.status}
+                        disabled={!b.hotelId || (isPending && pendingId === b.id)}
+                        onChange={(e) => onChangeStatus(b, e.target.value as Booking["status"])}
+                        className={`rounded-full border-0 px-2.5 py-1 text-[11px] font-bold capitalize outline-none disabled:opacity-60 ${STATUS_STYLES[b.status]}`}
+                      >
+                        {(["pending", "confirmed", "cancelled", "completed"] as const).map((s) => (
+                          <option key={s} value={s}>
+                            {t(`bookingStatus_${s}` as "bookingStatus_pending")}
+                          </option>
+                        ))}
+                      </select>
+                      {isPending && pendingId === b.id && <Loader2 size={12} className="animate-spin text-ink/40" />}
+                    </div>
                   </td>
                 </tr>
               ))}
