@@ -12,6 +12,7 @@ const QUICK_INFO_AMENITIES = new Set(["Free WiFi", "Airport Shuttle", "Restauran
 /** Elegant at-a-glance facts strip below the action bar — each card only appears when its underlying data exists. */
 export async function HotelQuickInfoCards({
   rating,
+  reviewCount,
   priceRange,
   checkInTime,
   checkOutTime,
@@ -19,6 +20,7 @@ export async function HotelQuickInfoCards({
   amenities,
 }: {
   rating: number;
+  reviewCount: number;
   priceRange?: string;
   checkInTime?: string;
   checkOutTime?: string;
@@ -29,7 +31,7 @@ export async function HotelQuickInfoCards({
   const tc = await getTranslations("common");
 
   const cards: InfoCard[] = [
-    { icon: Star, label: tc("rating"), value: rating.toFixed(1) },
+    ...(reviewCount > 0 ? [{ icon: Star, label: tc("rating"), value: rating.toFixed(1) }] : []),
     { icon: Tag, label: t("category"), value: listingCategoryLabel(priceRange, "Hotel") },
     { icon: MapPin, label: t("city"), value: "Hargeisa" },
   ];

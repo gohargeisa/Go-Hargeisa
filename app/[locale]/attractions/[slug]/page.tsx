@@ -84,11 +84,9 @@ export default async function AttractionDetailPage({
     description: attraction.description,
     image: attraction.coverImage,
     address: { "@type": "PostalAddress", streetAddress: attraction.address, addressLocality: "Hargeisa" },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: attraction.rating,
-      reviewCount: attraction.reviewCount,
-    },
+    ...(attraction.reviewCount > 0
+      ? { aggregateRating: { "@type": "AggregateRating", ratingValue: attraction.rating, reviewCount: attraction.reviewCount } }
+      : {}),
   };
 
   return (
@@ -111,7 +109,7 @@ export default async function AttractionDetailPage({
 
       <InfoCardsStrip
         cards={[
-          { icon: Star, label: t("rating"), value: attraction.rating.toFixed(1) },
+          ...(attraction.reviewCount > 0 ? [{ icon: Star, label: t("rating"), value: attraction.rating.toFixed(1) }] : []),
           { icon: Tag, label: th("category"), value: attraction.category },
           { icon: CalendarClock, label: t("bestTimeToVisit"), value: attraction.bestTimeToVisit },
           { icon: Ticket, label: t("entryFee"), value: attraction.entryFee ?? "—" },

@@ -124,11 +124,9 @@ export default async function HotelDetailPage({
     logo: hotel.logo,
     address: { "@type": "PostalAddress", streetAddress: hotel.address, addressLocality: "Hargeisa" },
     telephone: hotel.phone,
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: hotel.rating,
-      reviewCount: hotel.reviewCount,
-    },
+    ...(hotel.reviewCount > 0
+      ? { aggregateRating: { "@type": "AggregateRating", ratingValue: hotel.rating, reviewCount: hotel.reviewCount } }
+      : {}),
     priceRange: hotel.priceRange,
   };
 
@@ -167,6 +165,7 @@ export default async function HotelDetailPage({
 
       <HotelQuickInfoCards
         rating={hotel.rating}
+        reviewCount={hotel.reviewCount}
         priceRange={hotel.priceRange}
         checkInTime={hotel.checkInTime}
         checkOutTime={hotel.checkOutTime}

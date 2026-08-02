@@ -94,11 +94,9 @@ export default async function RestaurantDetailPage({
     address: { "@type": "PostalAddress", streetAddress: restaurant.address, addressLocality: "Hargeisa" },
     telephone: restaurant.phone,
     servesCuisine: restaurant.cuisine,
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: restaurant.rating,
-      reviewCount: restaurant.reviewCount,
-    },
+    ...(restaurant.reviewCount > 0
+      ? { aggregateRating: { "@type": "AggregateRating", ratingValue: restaurant.rating, reviewCount: restaurant.reviewCount } }
+      : {}),
     priceRange: restaurant.priceRange,
   };
 
@@ -136,6 +134,7 @@ export default async function RestaurantDetailPage({
 
       <RestaurantQuickInfoCards
         rating={restaurant.rating}
+        reviewCount={restaurant.reviewCount}
         priceRange={restaurant.priceRange}
         cuisine={restaurant.cuisine}
         openingHours={restaurant.openingHours}

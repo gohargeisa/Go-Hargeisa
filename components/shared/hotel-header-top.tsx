@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { getTranslations } from "next-intl/server";
 import { Building2, MapPin, Star } from "lucide-react";
 import { Reveal } from "@/components/home/reveal";
 
@@ -13,7 +14,7 @@ import { Reveal } from "@/components/home/reveal";
  * "Premium Hotel", "Budget Restaurant") is computed by the caller via
  * `listingCategoryLabel` so this component stays listing-type-agnostic.
  */
-export function HotelHeaderTop({
+export async function HotelHeaderTop({
   logo,
   name,
   rating,
@@ -26,6 +27,8 @@ export function HotelHeaderTop({
   reviewCount: number;
   categoryLabel: string;
 }) {
+  const t = await getTranslations("common");
+
   return (
     <Reveal>
       <div className="container-px mx-auto flex flex-col items-center pt-8 text-center sm:pt-12">
@@ -49,14 +52,18 @@ export function HotelHeaderTop({
         <h1 className="text-balance font-display text-3xl font-bold sm:text-4xl lg:text-5xl">{name}</h1>
 
         <div className="mt-3.5 flex items-center gap-2.5">
-          <div className="flex gap-1 text-primary-600">
+          <div className={`flex gap-1 ${reviewCount > 0 ? "text-primary-600" : "text-ink/25 dark:text-sand/25"}`}>
             {Array.from({ length: 5 }).map((_, i) => (
               <Star key={i} size={19} fill={i < Math.round(rating) ? "currentColor" : "none"} strokeWidth={1.5} />
             ))}
           </div>
-          <span className="text-sm font-semibold">{rating.toFixed(1)}</span>
-          {reviewCount > 0 && (
-            <span className="text-sm text-ink/50 dark:text-sand/50">({reviewCount} reviews)</span>
+          {reviewCount > 0 ? (
+            <>
+              <span className="text-sm font-semibold">{rating.toFixed(1)}</span>
+              <span className="text-sm text-ink/50 dark:text-sand/50">({reviewCount} reviews)</span>
+            </>
+          ) : (
+            <span className="text-sm font-semibold text-ink/50 dark:text-sand/50">{t("noReviewsYet")}</span>
           )}
         </div>
 

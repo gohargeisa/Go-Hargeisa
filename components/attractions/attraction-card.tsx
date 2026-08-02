@@ -138,11 +138,13 @@ export function AttractionCard({
           </button>
         )}
 
-        <div className="absolute bottom-3.5 start-3.5 z-10 inline-flex items-center gap-1 rounded-full border border-white/30 bg-white/20 px-2.5 py-1 text-xs font-bold text-white shadow-sm backdrop-blur-md">
-          <Star size={12} fill="currentColor" className="text-primary" aria-hidden="true" />
-          {rating.toFixed(1)}
-          {reviewCount > 0 && <span className="font-normal text-white/75">({reviewCount})</span>}
-        </div>
+        {reviewCount > 0 && (
+          <div className="absolute bottom-3.5 start-3.5 z-10 inline-flex items-center gap-1 rounded-full border border-white/30 bg-white/20 px-2.5 py-1 text-xs font-bold text-white shadow-sm backdrop-blur-md">
+            <Star size={12} fill="currentColor" className="text-primary" aria-hidden="true" />
+            {rating.toFixed(1)}
+            <span className="font-normal text-white/75">({reviewCount})</span>
+          </div>
+        )}
 
         {entryTag && (
           <div className="absolute bottom-3.5 end-3.5 z-10 rounded-full bg-accent/90 px-2.5 py-1 text-xs font-bold text-white shadow-sm">

@@ -121,7 +121,7 @@ export function HotelGallerySlider({
             <button
               type="button"
               onClick={scrollPrev}
-              aria-label="Previous photo"
+              aria-label={t("previousPhoto")}
               className="absolute start-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-ink shadow-sm transition-all duration-200 hover:scale-110 hover:bg-white dark:bg-ink/80 dark:text-white dark:hover:bg-ink sm:start-4"
             >
               <ChevronLeft size={20} aria-hidden="true" />
@@ -129,7 +129,7 @@ export function HotelGallerySlider({
             <button
               type="button"
               onClick={scrollNext}
-              aria-label="Next photo"
+              aria-label={t("nextPhoto")}
               className="absolute end-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-ink shadow-sm transition-all duration-200 hover:scale-110 hover:bg-white dark:bg-ink/80 dark:text-white dark:hover:bg-ink sm:end-4"
             >
               <ChevronRight size={20} aria-hidden="true" />
@@ -143,16 +143,16 @@ export function HotelGallerySlider({
         <button
           type="button"
           onClick={() => setLightboxOpen(true)}
-          aria-label="View fullscreen gallery"
+          aria-label={t("viewFullscreenGallery")}
           className="absolute bottom-3 end-3 z-10 inline-flex items-center gap-1.5 rounded-full bg-black/55 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm transition-colors hover:bg-black/70 sm:bottom-4 sm:end-4"
         >
           <Expand size={13} aria-hidden="true" />
-          View all
+          {t("viewAllPhotos")}
         </button>
       </div>
 
       {slides.length > 1 && (
-        <div className="mt-2.5 flex justify-center gap-1.5" aria-label="Gallery slides">
+        <div className="mt-2.5 flex justify-center gap-1.5" aria-label={t("gallerySlidesAriaLabel")}>
           {slides.map((_, i) => (
             <button
               key={i}
@@ -161,7 +161,7 @@ export function HotelGallerySlider({
                 setIsPaused(true);
                 emblaApi?.scrollTo(i);
               }}
-              aria-label={`Go to photo ${i + 1}`}
+              aria-label={t("goToPhoto", { number: i + 1 })}
               aria-current={i === selectedIndex}
               className={`h-1.5 rounded-full transition-all ${
                 i === selectedIndex ? "w-6 bg-primary" : "w-1.5 bg-ink/20 dark:bg-white/20"

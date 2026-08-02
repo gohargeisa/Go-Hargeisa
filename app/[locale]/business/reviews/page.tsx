@@ -20,7 +20,8 @@ export default async function ReviewsPage({ params: { locale } }: { params: { lo
         <div>
           <h1 className="font-display text-2xl font-bold">{t("navReviews")}</h1>
           <p className="mt-1 text-sm text-ink/60 dark:text-sand/60">
-            {t("kpiReviewCountSubtitle", { count: listing.reviewCount })} · {listing.rating.toFixed(1)} ★
+            {t("kpiReviewCountSubtitle", { count: listing.reviewCount })}
+            {listing.reviewCount > 0 && <> · {listing.rating.toFixed(1)} ★</>}
           </p>
         </div>
       </div>

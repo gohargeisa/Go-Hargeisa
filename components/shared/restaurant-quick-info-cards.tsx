@@ -7,12 +7,14 @@ import { listingCategoryLabel } from "@/lib/utils/hotel-category";
 /** Restaurant counterpart of HotelQuickInfoCards, reusing the same InfoCardsStrip chrome. */
 export async function RestaurantQuickInfoCards({
   rating,
+  reviewCount,
   priceRange,
   cuisine,
   openingHours,
   reservable,
 }: {
   rating: number;
+  reviewCount: number;
   priceRange?: string;
   cuisine: string[];
   openingHours?: string;
@@ -22,7 +24,7 @@ export async function RestaurantQuickInfoCards({
   const tc = await getTranslations("common");
 
   const cards: InfoCard[] = [
-    { icon: Star, label: tc("rating"), value: rating.toFixed(1) },
+    ...(reviewCount > 0 ? [{ icon: Star, label: tc("rating"), value: rating.toFixed(1) }] : []),
     { icon: Tag, label: t("category"), value: listingCategoryLabel(priceRange, "Restaurant") },
     { icon: MapPin, label: t("city"), value: "Hargeisa" },
   ];

@@ -66,13 +66,13 @@ export function PremiumCard({
           </span>
         )}
 
-        <div className="absolute end-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-xs font-bold text-ink shadow-sm backdrop-blur-sm dark:bg-ink/90 dark:text-white">
-          <Star size={12} fill="currentColor" className="text-primary" aria-hidden="true" />
-          {rating.toFixed(1)}
-          {reviewCount > 0 && (
+        {reviewCount > 0 && (
+          <div className="absolute end-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-xs font-bold text-ink shadow-sm backdrop-blur-sm dark:bg-ink/90 dark:text-white">
+            <Star size={12} fill="currentColor" className="text-primary" aria-hidden="true" />
+            {rating.toFixed(1)}
             <span className="font-normal text-ink/50 dark:text-sand/50">({reviewCount})</span>
-          )}
-        </div>
+          </div>
+        )}
       </Link>
 
       <div className="flex flex-1 flex-col gap-2.5 p-5">

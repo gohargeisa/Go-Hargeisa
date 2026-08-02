@@ -61,9 +61,11 @@ export function ListingCard({
             className={`object-cover transition-all duration-500 ease-premium group-hover:scale-105 ${loaded ? "opacity-100" : "opacity-0"}`}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
-          <div className="absolute start-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1.5 text-xs font-bold text-ink shadow-sm backdrop-blur">
-            <Star size={13} fill="currentColor" className="text-primary" /> {rating.toFixed(1)}
-          </div>
+          {reviewCount > 0 && (
+            <div className="absolute start-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1.5 text-xs font-bold text-ink shadow-sm backdrop-blur">
+              <Star size={13} fill="currentColor" className="text-primary" /> {rating.toFixed(1)}
+            </div>
+          )}
           {listingType && listingId && (
             <button
               type="button"

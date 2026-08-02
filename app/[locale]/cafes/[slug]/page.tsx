@@ -118,11 +118,9 @@ export default async function CafeDetailPage({
       opens: group.open,
       closes: group.close,
     })),
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: cafe.rating,
-      reviewCount: cafe.reviewCount,
-    },
+    ...(cafe.reviewCount > 0
+      ? { aggregateRating: { "@type": "AggregateRating", ratingValue: cafe.rating, reviewCount: cafe.reviewCount } }
+      : {}),
   };
 
   return (
@@ -186,6 +184,7 @@ export default async function CafeDetailPage({
 
       <CafeQuickInfoCards
         rating={cafe.rating}
+        reviewCount={cafe.reviewCount}
         wifi={cafe.wifi}
         workingSpace={cafe.workingSpace}
         priceRange={cafe.priceRange}

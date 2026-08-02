@@ -87,7 +87,13 @@ export default async function BusinessOverviewPage({ params: { locale } }: { par
           label={t("kpiBookings")}
           subtitle={isHotel ? t("kpiTotalSubtitle") : t("kpiHotelOnlySubtitle")}
         />
-        <KpiCard icon={Star} value={listing.rating.toFixed(1)} growthPercent={null} label={t("kpiAverageRating")} subtitle={t("kpiReviewCountSubtitle", { count: listing.reviewCount })} />
+        <KpiCard
+          icon={Star}
+          value={listing.reviewCount > 0 ? listing.rating.toFixed(1) : "—"}
+          growthPercent={null}
+          label={t("kpiAverageRating")}
+          subtitle={t("kpiReviewCountSubtitle", { count: listing.reviewCount })}
+        />
       </div>
 
       <ViewsChart series={series} title={t("viewsChartTitle")} />

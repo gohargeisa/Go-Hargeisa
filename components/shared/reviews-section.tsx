@@ -26,11 +26,15 @@ export function ReviewsSection({
   return (
     <div>
       <div className="flex items-center gap-4">
-        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-accent/15 font-display text-2xl font-semibold text-accent-700">
-          {rating.toFixed(1)}
+        <div
+          className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl font-display text-2xl font-semibold ${
+            reviewCount > 0 ? "bg-accent/15 text-accent-700" : "bg-ink/5 text-ink/30 dark:bg-white/5 dark:text-sand/30"
+          }`}
+        >
+          {reviewCount > 0 ? rating.toFixed(1) : <Star size={22} strokeWidth={1.5} />}
         </div>
         <div>
-          <div className="flex gap-0.5 text-accent">
+          <div className={`flex gap-0.5 ${reviewCount > 0 ? "text-accent" : "text-ink/20 dark:text-sand/20"}`}>
             {Array.from({ length: 5 }).map((_, i) => (
               <Star key={i} size={16} fill={i < Math.round(rating) ? "currentColor" : "none"} strokeWidth={1.5} />
             ))}

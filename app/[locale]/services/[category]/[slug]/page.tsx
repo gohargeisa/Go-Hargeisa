@@ -100,11 +100,9 @@ export default async function ServiceDetailPage({
     address: { "@type": "PostalAddress", streetAddress: service.address, addressLocality: "Hargeisa" },
     telephone: service.phone,
     url: service.website,
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: service.rating,
-      reviewCount: service.reviewCount,
-    },
+    ...(service.reviewCount > 0
+      ? { aggregateRating: { "@type": "AggregateRating", ratingValue: service.rating, reviewCount: service.reviewCount } }
+      : {}),
   };
 
   return (

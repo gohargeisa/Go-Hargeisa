@@ -11,11 +11,13 @@ import { InfoCardsStrip, type InfoCard } from "@/components/shared/info-cards-st
  */
 export async function CafeQuickInfoCards({
   rating,
+  reviewCount,
   wifi,
   workingSpace,
   priceRange,
 }: {
   rating: number;
+  reviewCount: number;
   wifi?: boolean;
   workingSpace?: boolean;
   priceRange?: string;
@@ -25,7 +27,7 @@ export async function CafeQuickInfoCards({
   const td = await getTranslations("detail");
 
   const cards: InfoCard[] = [
-    { icon: Star, label: tc("rating"), value: rating.toFixed(1) },
+    ...(reviewCount > 0 ? [{ icon: Star, label: tc("rating"), value: rating.toFixed(1) }] : []),
     { icon: Tag, label: t("category"), value: "Cafe" },
     { icon: MapPin, label: t("city"), value: "Hargeisa" },
   ];

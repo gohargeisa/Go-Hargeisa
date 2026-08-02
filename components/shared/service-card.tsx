@@ -127,11 +127,13 @@ export function ServiceCard({
           </FloatingBadge>
         )}
 
-        <div className="absolute end-3.5 top-3.5 z-10 inline-flex items-center gap-1 rounded-full border border-white/30 bg-white/20 px-2.5 py-1 text-xs font-bold text-white shadow-sm backdrop-blur-md">
-          <Star size={12} fill="currentColor" className="text-primary" aria-hidden="true" />
-          {rating.toFixed(1)}
-          {reviewCount > 0 && <span className="font-normal text-white/75">({reviewCount})</span>}
-        </div>
+        {reviewCount > 0 && (
+          <div className="absolute end-3.5 top-3.5 z-10 inline-flex items-center gap-1 rounded-full border border-white/30 bg-white/20 px-2.5 py-1 text-xs font-bold text-white shadow-sm backdrop-blur-md">
+            <Star size={12} fill="currentColor" className="text-primary" aria-hidden="true" />
+            {rating.toFixed(1)}
+            <span className="font-normal text-white/75">({reviewCount})</span>
+          </div>
+        )}
 
         {serviceId && (
           <button
