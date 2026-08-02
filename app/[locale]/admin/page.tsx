@@ -5,7 +5,7 @@ import {
   Hotel, UtensilsCrossed, Coffee, Landmark, CalendarDays, Newspaper,
   Users, BarChart3, Plus, ArrowRight, TrendingUp, Handshake, Building,
   Eye, MousePointerClick, CalendarCheck, Inbox, Megaphone, Tag, Bell, Star,
-  Stethoscope, Settings,
+  Stethoscope, Settings, ShieldCheck,
 } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { requireOwner } from "@/lib/supabase/guards";
@@ -141,6 +141,12 @@ export default async function OwnerDashboardPage({ params: { locale } }: { param
                 className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-xl transition-colors hover:bg-white/20"
               >
                 <Handshake size={16} /> {t("partnersNav")}
+              </Link>
+              <Link
+                href={`/${locale}/admin/claims`}
+                className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-xl transition-colors hover:bg-white/20"
+              >
+                <ShieldCheck size={16} /> {t("claimsNav")}
               </Link>
               <Link
                 href={`/${locale}/admin/city-services`}

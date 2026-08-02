@@ -1150,7 +1150,20 @@
     "socialTwitterLabel": "Link-ka X (Twitter)",
     "socialYoutubeLabel": "Link-ka YouTube",
     "socialTiktokLabel": "Link-ka TikTok",
-    "settingsSaved": "Dejinta waa la kaydiyay."
+    "settingsSaved": "Dejinta waa la kaydiyay.",
+
+    "claimsNav": "Sheegashada",
+    "claimsTitle": "Sheegashada Ganacsiga",
+    "claimsSubtitle": "Dib u eeg sheegashada, ku xidh accounts-ka ganacsiyada, oo wareeji milkiilnimada.",
+    "pendingClaims": "Sheegashada Sugaya",
+    "claimHistory": "Taariikhda Sheegashada",
+    "ownedBusinesses": "Ganacsiyada La Leeyahay",
+    "transferOwnershipAction": "Wareeji Milkiilnimada",
+    "noClaimsYet": "Wali waxba halkan kuma jiraan.",
+    "statusApproved": "La Ansixiyay",
+    "statusRejected": "La Diiday",
+    "searchUserPlaceholder": "Ku raadi magaca ama email-ka…",
+    "linkAccountLabel": "Kuxidh account gacanta"
   },
   "about": {
     "eyebrow": "Sheekadayada",

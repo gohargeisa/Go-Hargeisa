@@ -1150,7 +1150,20 @@
     "socialTwitterLabel": "X (Twitter) URL",
     "socialYoutubeLabel": "YouTube URL",
     "socialTiktokLabel": "TikTok URL",
-    "settingsSaved": "Settings saved."
+    "settingsSaved": "Settings saved.",
+
+    "claimsNav": "Claims",
+    "claimsTitle": "Business Claims",
+    "claimsSubtitle": "Review claims, link accounts to businesses, and transfer ownership.",
+    "pendingClaims": "Pending Claims",
+    "claimHistory": "Claim History",
+    "ownedBusinesses": "Owned Businesses",
+    "transferOwnershipAction": "Transfer Ownership",
+    "noClaimsYet": "Nothing here yet.",
+    "statusApproved": "Approved",
+    "statusRejected": "Rejected",
+    "searchUserPlaceholder": "Search by name or email…",
+    "linkAccountLabel": "Link to an account manually"
   },
   "about": {
     "eyebrow": "Our Story",

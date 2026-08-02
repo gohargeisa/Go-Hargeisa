@@ -1150,7 +1150,20 @@
     "socialTwitterLabel": "رابط X (تويتر)",
     "socialYoutubeLabel": "رابط يوتيوب",
     "socialTiktokLabel": "رابط تيك توك",
-    "settingsSaved": "تم حفظ الإعدادات."
+    "settingsSaved": "تم حفظ الإعدادات.",
+
+    "claimsNav": "المطالبات",
+    "claimsTitle": "مطالبات الأعمال",
+    "claimsSubtitle": "راجع المطالبات، اربط الحسابات بالأعمال التجارية، وانقل الملكية.",
+    "pendingClaims": "المطالبات المعلقة",
+    "claimHistory": "سجل المطالبات",
+    "ownedBusinesses": "الأعمال المملوكة",
+    "transferOwnershipAction": "نقل الملكية",
+    "noClaimsYet": "لا يوجد شيء هنا بعد.",
+    "statusApproved": "مقبولة",
+    "statusRejected": "مرفوضة",
+    "searchUserPlaceholder": "ابحث بالاسم أو البريد الإلكتروني…",
+    "linkAccountLabel": "ربط بحساب يدويًا"
   },
   "about": {
     "eyebrow": "قصتنا",
