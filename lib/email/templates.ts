@@ -80,6 +80,20 @@ const T = {
       body: `<p><strong>${guest}</strong> wuxuu codsaday ballan ${listing}.</p><p>${checkIn} → ${checkOut}</p><p>Tixraaca: ${reference}</p><p>Ka eeg codsiga dashboard-kaaga Go Hargeisa.</p>`,
     }),
   },
+  bookingSubmitted: {
+    en: (listing: string, checkIn: string, checkOut: string, reference: string) => ({
+      subject: `Booking request received — ${listing}`,
+      body: `<p>We've received your booking request at <strong>${listing}</strong>.</p><p>${checkIn} → ${checkOut}</p><p>Reference: <strong>${reference}</strong></p><p>The property will confirm your booking shortly — you'll get another email as soon as it's confirmed.</p>`,
+    }),
+    ar: (listing: string, checkIn: string, checkOut: string, reference: string) => ({
+      subject: `تم استلام طلب الحجز — ${listing}`,
+      body: `<p>لقد استلمنا طلب حجزك في <strong>${listing}</strong>.</p><p>${checkIn} → ${checkOut}</p><p>المرجع: <strong>${reference}</strong></p><p>سيقوم النزل بتأكيد حجزك قريبًا — ستصلك رسالة أخرى بمجرد تأكيده.</p>`,
+    }),
+    so: (listing: string, checkIn: string, checkOut: string, reference: string) => ({
+      subject: `Codsiga Ballanta waa la Helay — ${listing}`,
+      body: `<p>Waan helnay codsigaaga ballanta ee <strong>${listing}</strong>.</p><p>${checkIn} → ${checkOut}</p><p>Tixraaca: <strong>${reference}</strong></p><p>Meesha ayaa dhawaan xaqiijin doonta ballantaada — email kale ayaa kuu iman doona marka la xaqiijiyo.</p>`,
+    }),
+  },
 };
 
 export function bookingStatusEmail(locale: Locale, listing: string, status: string) {
@@ -104,5 +118,10 @@ export function announcementEmail(locale: Locale, title: string, message: string
 
 export function bookingReceivedEmail(locale: Locale, listing: string, guest: string, checkIn: string, checkOut: string, reference: string) {
   const { subject, body } = T.bookingReceived[locale](listing, guest, checkIn, checkOut, reference);
+  return { subject, html: shell(locale, body) };
+}
+
+export function bookingSubmittedEmail(locale: Locale, listing: string, checkIn: string, checkOut: string, reference: string) {
+  const { subject, body } = T.bookingSubmitted[locale](listing, checkIn, checkOut, reference);
   return { subject, html: shell(locale, body) };
 }

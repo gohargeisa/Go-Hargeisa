@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendEmail } from "@/lib/email/send";
-import { bookingReceivedEmail } from "@/lib/email/templates";
+import { bookingReceivedEmail, bookingSubmittedEmail } from "@/lib/email/templates";
 import type { Locale } from "@/lib/i18n/config";
 
 export interface BookingRequestInput {
@@ -124,6 +124,25 @@ export async function submitBookingRequest(input: BookingRequestInput): Promise<
     }
   } catch {
     // best-effort — see comment above
+  }
+
+  // Guest confirmation email — best-effort, only sent when the guest gave
+  // an email (unlike phone, it's optional on this form).
+  if (input.guestEmail?.trim()) {
+    try {
+      const { data: hotel } = await supabase.from("hotels").select("name").eq("id", input.hotelId).single();
+      const hotelName = (hotel as { name: string } | null)?.name ?? "";
+      const { subject, html } = bookingSubmittedEmail(
+        (input.locale as Locale) || "en",
+        hotelName,
+        input.checkIn,
+        input.checkOut,
+        bookingReference
+      );
+      await sendEmail({ to: input.guestEmail.trim(), subject, html });
+    } catch {
+      // best-effort — a failed confirmation email must never fail the booking
+    }
   }
 
   return { ok: true, bookingReference };
