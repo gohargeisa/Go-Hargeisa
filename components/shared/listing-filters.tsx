@@ -12,6 +12,7 @@ export interface FilterOptions {
   minRating?: number;
   sortBy?: "rating" | "price-low" | "price-high" | "newest";
   cuisine?: string[]; // For restaurants
+  amenities?: string[]; // For hotels
 }
 
 export function ListingFilters({
@@ -19,12 +20,16 @@ export function ListingFilters({
   maxPrice = 500,
   showCuisineFilter = false,
   cuisineOptions = [],
+  showAmenitiesFilter = false,
+  amenitiesOptions = [],
   locale,
 }: {
   onFilterChange?: (filters: FilterOptions) => void;
   maxPrice?: number;
   showCuisineFilter?: boolean;
   cuisineOptions?: string[];
+  showAmenitiesFilter?: boolean;
+  amenitiesOptions?: string[];
   locale: string;
 }) {
   const t = useTranslations("listings");
@@ -38,6 +43,7 @@ export function ListingFilters({
   const currentMinRating = parseInt(searchParams.get("minRating") || "0");
   const currentSort = (searchParams.get("sortBy") || "rating") as FilterOptions["sortBy"];
   const currentCuisines = searchParams.get("cuisine")?.split(",") || [];
+  const currentAmenities = searchParams.get("amenities")?.split(",") || [];
 
   const [minPrice, setMinPrice] = useState(currentMinPrice);
   const [maxPrice2, setMaxPrice2] = useState(currentMaxPrice);
@@ -47,6 +53,10 @@ export function ListingFilters({
     new Set(currentCuisines)
   );
   const [showCuisineDropdown, setShowCuisineDropdown] = useState(false);
+  const [selectedAmenities, setSelectedAmenities] = useState<Set<string>>(
+    new Set(currentAmenities)
+  );
+  const [showAmenitiesDropdown, setShowAmenitiesDropdown] = useState(false);
 
   // Check if any filters are active
   const hasActiveFilters =
@@ -54,7 +64,8 @@ export function ListingFilters({
     maxPrice2 < maxPrice ||
     minRating > 0 ||
     sortBy !== "rating" ||
-    selectedCuisines.size > 0;
+    selectedCuisines.size > 0 ||
+    selectedAmenities.size > 0;
 
   function applyFilters() {
     const params = new URLSearchParams();
@@ -73,6 +84,9 @@ export function ListingFilters({
     if (selectedCuisines.size > 0) {
       params.set("cuisine", Array.from(selectedCuisines).join(","));
     }
+    if (selectedAmenities.size > 0) {
+      params.set("amenities", Array.from(selectedAmenities).join(","));
+    }
 
     const queryString = params.toString();
     const path = window.location.pathname;
@@ -86,6 +100,7 @@ export function ListingFilters({
       minRating: minRating > 0 ? minRating : undefined,
       sortBy: sortBy !== "rating" ? sortBy : undefined,
       cuisine: selectedCuisines.size > 0 ? Array.from(selectedCuisines) : undefined,
+      amenities: selectedAmenities.size > 0 ? Array.from(selectedAmenities) : undefined,
     });
   }
 
@@ -95,6 +110,7 @@ export function ListingFilters({
     setMinRating(0);
     setSortBy("rating");
     setSelectedCuisines(new Set());
+    setSelectedAmenities(new Set());
 
     const params = new URLSearchParams();
     const q = searchParams.get("q");
@@ -115,6 +131,13 @@ export function ListingFilters({
       newCuisines.add(cuisine);
     }
     setSelectedCuisines(newCuisines);
+  }
+
+  function toggleAmenity(amenity: string) {
+    const next = new Set(selectedAmenities);
+    if (next.has(amenity)) next.delete(amenity);
+    else next.add(amenity);
+    setSelectedAmenities(next);
   }
 
   return (
@@ -249,6 +272,50 @@ export function ListingFilters({
                           className="h-4 w-4 rounded cursor-pointer"
                         />
                         <span className="text-sm">{cuisine}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Amenities Filter (Hotels Only) */}
+        {showAmenitiesFilter && amenitiesOptions.length > 0 && (
+          <div>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setShowAmenitiesDropdown(!showAmenitiesDropdown)}
+                className="flex w-full items-center justify-between rounded-xl border border-ink/12 bg-white px-3 py-2.5 text-sm font-medium transition-colors hover:border-primary/40 dark:border-white/15 dark:bg-white/5"
+              >
+                <span>
+                  {selectedAmenities.size > 0
+                    ? t("amenitiesSelected", { count: selectedAmenities.size })
+                    : t("allAmenities")}
+                </span>
+                <ChevronDown
+                  size={16}
+                  className={`transition-transform duration-300 ease-premium ${showAmenitiesDropdown ? "rotate-180" : ""}`}
+                />
+              </button>
+
+              {showAmenitiesDropdown && (
+                <div className="absolute left-0 right-0 top-full z-10 mt-1.5 rounded-xl2 border border-ink/12 bg-white shadow-card dark:border-white/15 dark:bg-ink">
+                  <div className="max-h-64 space-y-1 overflow-y-auto p-2">
+                    {amenitiesOptions.map((amenity) => (
+                      <label
+                        key={amenity}
+                        className="flex cursor-pointer items-center gap-2 rounded-lg p-2 hover:bg-primary/5 dark:hover:bg-white/5"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedAmenities.has(amenity)}
+                          onChange={() => toggleAmenity(amenity)}
+                          className="h-4 w-4 rounded cursor-pointer"
+                        />
+                        <span className="text-sm">{amenity}</span>
                       </label>
                     ))}
                   </div>

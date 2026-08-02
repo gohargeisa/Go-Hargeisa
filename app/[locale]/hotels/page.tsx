@@ -32,7 +32,7 @@ export default async function HotelsPage({
   searchParams,
 }: {
   params: { locale: Locale };
-  searchParams: { q?: string; minPrice?: string; maxPrice?: string; minRating?: string; sortBy?: string };
+  searchParams: { q?: string; minPrice?: string; maxPrice?: string; minRating?: string; sortBy?: string; amenities?: string };
 }) {
   const t = await getTranslations("home");
   const tNav = await getTranslations("nav");

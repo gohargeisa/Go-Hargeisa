@@ -9,7 +9,7 @@ import { SearchWithin } from "@/components/shared/search-within";
 import { ListingFilters, type FilterOptions } from "@/components/shared/listing-filters";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Reveal } from "@/components/home/reveal";
-import { filterListings } from "@/lib/utils/filter-listings";
+import { filterListings, getUniqueAmenities } from "@/lib/utils/filter-listings";
 
 interface Hotel {
   id: string;
@@ -43,9 +43,12 @@ export function HotelsPageClient({
       maxPrice: searchParams.maxPrice ? parseInt(searchParams.maxPrice) : undefined,
       minRating: searchParams.minRating ? parseInt(searchParams.minRating) : undefined,
       sortBy: (searchParams.sortBy as any) || "rating",
+      amenities: searchParams.amenities ? searchParams.amenities.split(",") : undefined,
     }),
-    [searchParams.minPrice, searchParams.maxPrice, searchParams.minRating, searchParams.sortBy]
+    [searchParams.minPrice, searchParams.maxPrice, searchParams.minRating, searchParams.sortBy, searchParams.amenities]
   );
+
+  const amenitiesOptions = useMemo(() => getUniqueAmenities(initialHotels), [initialHotels]);
 
   // Apply filters
   const filteredHotels = useMemo(() => {
@@ -87,7 +90,12 @@ export function HotelsPageClient({
         <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
           {/* Filters Sidebar */}
           <div className="lg:sticky lg:top-24 lg:h-fit">
-            <ListingFilters locale={locale} maxPrice={500} />
+            <ListingFilters
+              locale={locale}
+              maxPrice={500}
+              showAmenitiesFilter={amenitiesOptions.length > 0}
+              amenitiesOptions={amenitiesOptions}
+            />
           </div>
 
           {/* Listings Grid */}

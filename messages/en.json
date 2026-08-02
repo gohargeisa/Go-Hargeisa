@@ -565,6 +565,23 @@
     "notFoundDescription": "The page you're looking for doesn't exist or may have moved.",
     "backToHomepage": "Back to homepage"
   },
+  "search": {
+    "triggerAriaLabel": "Search",
+    "closeAriaLabel": "Close search",
+    "placeholder": "Search hotels, restaurants, cafes, attractions…",
+    "prompt": "Start typing to search across Go Hargeisa.",
+    "noResults": "No results for \"{query}\".",
+    "noResultsTitle": "Nothing found",
+    "groupHotels": "Hotels",
+    "groupRestaurants": "Restaurants",
+    "groupCafes": "Cafes",
+    "groupAttractions": "Attractions",
+    "viewAllResults": "View all results for \"{query}\"",
+    "resultsTitle": "{count, plural, =0 {No results} =1 {1 result} other {# results}}",
+    "resultsSubtitle": "Showing results for \"{query}\"",
+    "searchPageTitle": "Search Go Hargeisa",
+    "searchPageSubtitle": "Find hotels, restaurants, cafes, and attractions in one place."
+  },
   "notifications": {
     "panelTitle": "Notifications",
     "markAllRead": "Mark all read",
@@ -1336,6 +1353,8 @@
     "maxPriceLabel": "Max Price",
     "cuisineSelected": "{count} selected",
     "allCuisines": "All Cuisines",
+    "amenitiesSelected": "{count} selected",
+    "allAmenities": "All Amenities",
     "applyFilters": "Apply Filters",
     "applying": "Applying...",
 

@@ -4,6 +4,7 @@ export interface FilterParams {
   minRating?: number;
   sortBy?: "rating" | "price-low" | "price-high" | "newest";
   cuisine?: string[];
+  amenities?: string[];
 }
 
 export interface Listing {
@@ -13,6 +14,7 @@ export interface Listing {
   reviewCount: number;
   priceRange?: string;
   cuisine?: string[];
+  amenities?: string[];
   featured?: boolean;
   createdAt?: string;
 }
@@ -61,6 +63,14 @@ export function filterListings<T extends Listing>(
     });
   }
 
+  // Amenities filter (hotels) — must have every selected amenity, not just any.
+  if (params.amenities && params.amenities.length > 0) {
+    filtered = filtered.filter((item) => {
+      const itemAmenities = item.amenities || [];
+      return params.amenities!.every((a) => itemAmenities.includes(a));
+    });
+  }
+
   // Sort
   if (params.sortBy) {
     switch (params.sortBy) {
@@ -102,4 +112,22 @@ export function getUniqueCuisines<T extends { cuisine?: string[] }>(
     }
   });
   return Array.from(cuisines).sort();
+}
+
+/**
+ * Extract unique amenities from listings. Amenities are free-text (admin-
+ * entered, no fixed enum — see lib/utils/amenity-icon.ts), so the filter's
+ * option list is derived from what's actually present in the data rather
+ * than a hardcoded taxonomy.
+ */
+export function getUniqueAmenities<T extends { amenities?: string[] }>(
+  listings: T[]
+): string[] {
+  const amenities = new Set<string>();
+  listings.forEach((item) => {
+    if (item.amenities) {
+      item.amenities.forEach((a) => amenities.add(a));
+    }
+  });
+  return Array.from(amenities).sort();
 }

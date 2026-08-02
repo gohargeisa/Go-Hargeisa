@@ -19,6 +19,7 @@ interface Cafe {
   coverImage: string;
   rating: number;
   reviewCount: number;
+  priceRange?: string;
   specialDrinks?: string[];
   wifi?: boolean;
   workingSpace?: boolean;
@@ -40,10 +41,12 @@ export function CafesPageClient({
 
   const filters: FilterOptions = useMemo(
     () => ({
+      minPrice: searchParams.minPrice ? parseInt(searchParams.minPrice) : undefined,
+      maxPrice: searchParams.maxPrice ? parseInt(searchParams.maxPrice) : undefined,
       minRating: searchParams.minRating ? parseInt(searchParams.minRating) : undefined,
       sortBy: (searchParams.sortBy as any) || "rating",
     }),
-    [searchParams.minRating, searchParams.sortBy]
+    [searchParams.minPrice, searchParams.maxPrice, searchParams.minRating, searchParams.sortBy]
   );
 
   const filteredCafes = useMemo(() => {

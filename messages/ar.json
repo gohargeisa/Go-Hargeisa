@@ -565,6 +565,23 @@
     "notFoundDescription": "الصفحة التي تبحث عنها غير موجودة أو ربما تم نقلها.",
     "backToHomepage": "العودة إلى الصفحة الرئيسية"
   },
+  "search": {
+    "triggerAriaLabel": "بحث",
+    "closeAriaLabel": "إغلاق البحث",
+    "placeholder": "ابحث عن فنادق، مطاعم، مقاهٍ، معالم…",
+    "prompt": "ابدأ الكتابة للبحث في Go Hargeisa.",
+    "noResults": "لا توجد نتائج لـ \"{query}\".",
+    "noResultsTitle": "لم يتم العثور على شيء",
+    "groupHotels": "الفنادق",
+    "groupRestaurants": "المطاعم",
+    "groupCafes": "المقاهي",
+    "groupAttractions": "المعالم",
+    "viewAllResults": "عرض كل النتائج لـ \"{query}\"",
+    "resultsTitle": "{count, plural, =0 {لا توجد نتائج} =1 {نتيجة واحدة} other {# نتيجة}}",
+    "resultsSubtitle": "عرض النتائج لـ \"{query}\"",
+    "searchPageTitle": "ابحث في Go Hargeisa",
+    "searchPageSubtitle": "اعثر على الفنادق والمطاعم والمقاهي والمعالم في مكان واحد."
+  },
   "notifications": {
     "panelTitle": "الإشعارات",
     "markAllRead": "تعليم الكل كمقروء",
@@ -1336,6 +1353,8 @@
     "maxPriceLabel": "الحد الأقصى للسعر",
     "cuisineSelected": "تم اختيار {count}",
     "allCuisines": "جميع المطابخ",
+    "amenitiesSelected": "تم اختيار {count}",
+    "allAmenities": "جميع المرافق",
     "applyFilters": "تطبيق التصفية",
     "applying": "جارٍ التطبيق...",
 

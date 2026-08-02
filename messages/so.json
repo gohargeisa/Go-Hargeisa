@@ -565,6 +565,23 @@
     "notFoundDescription": "Bogga aad raadinayso ma jiro ama waa laga guuriyay.",
     "backToHomepage": "Ku noqo bogga hore"
   },
+  "search": {
+    "triggerAriaLabel": "Raadi",
+    "closeAriaLabel": "Xir raadinta",
+    "placeholder": "Raadi huteelo, maqaayado, kafateeriyo, meelo soo jiita…",
+    "prompt": "Bilow qorista si aad u raadiso Go Hargeisa oo dhan.",
+    "noResults": "Wax natiijo ah lagama helin \"{query}\".",
+    "noResultsTitle": "Waxba lama helin",
+    "groupHotels": "Huteellada",
+    "groupRestaurants": "Maqaayadaha",
+    "groupCafes": "Kafateeriyada",
+    "groupAttractions": "Meelaha Soo Jiita",
+    "viewAllResults": "Arag dhammaan natiijooyinka \"{query}\"",
+    "resultsTitle": "{count, plural, =0 {Natiijo ma jirto} =1 {1 natiijo} other {# natiijo}}",
+    "resultsSubtitle": "Natiijooyinka \"{query}\"",
+    "searchPageTitle": "Raadi Go Hargeisa",
+    "searchPageSubtitle": "Ka hel huteelo, maqaayado, kafateeriyo, iyo meelo soo jiita meel keliya."
+  },
   "notifications": {
     "panelTitle": "Ogaysiisyada",
     "markAllRead": "Dhammaan calaamadee la akhriyay",
@@ -1336,6 +1353,8 @@
     "maxPriceLabel": "Qiimaha Ugu Badan",
     "cuisineSelected": "{count} la doortay",
     "allCuisines": "Dhammaan Cuntooyinka",
+    "amenitiesSelected": "{count} la doortay",
+    "allAmenities": "Dhammaan Adeegyada",
     "applyFilters": "Codso Kala Sooca",
     "applying": "Waa la codsanayaa...",
 
