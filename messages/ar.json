@@ -1777,7 +1777,13 @@
     "comingSoonDescription": "سيتم إضافة المعلومات من قبل فريق Go Hargeisa.",
     "viewOnMaps": "عرض على الخريطة",
     "visitWebsite": "زيارة الموقع الإلكتروني",
-    "callNow": "اتصال"
+    "callNow": "اتصال",
+    "searchPlaceholder": "ابحث عن مستشفيات، بنوك، سوبر ماركت، صيدليات…",
+    "allCategoriesLabel": "الكل",
+    "noMatchTitle": "لا توجد خدمات مطابقة",
+    "noMatchDescription": "جرّب كلمة بحث أو فئة مختلفة.",
+    "noServicesTitle": "يتم تحديث خدمات المدينة حاليًا.",
+    "noServicesDescription": "نضيف أماكن موثوقة في جميع أنحاء هرجيسا. تحقق مرة أخرى قريبًا."
   },
   "attractionsPage": {
     "heroSubtitle": "اكتشف المعالم التاريخية والتراث الثقافي والأسواق المحلية والمتاحف والأماكن الخفية في هرجيسا.",

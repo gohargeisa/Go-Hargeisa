@@ -3,10 +3,12 @@ import { Phone, Clock, MapPin, Globe, ImageOff } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { AnimatedCard } from "./animated-card";
 import { SecondaryButton } from "./buttons";
+import { cityServiceCategoryMeta } from "@/lib/config/city-service-categories";
 import type { CityService } from "@/types";
 
 export function CityServiceCard({ service }: { service: CityService }) {
   const t = useTranslations("cityServices");
+  const { icon: CategoryIcon, titleKey } = cityServiceCategoryMeta(service.category);
 
   return (
     <AnimatedCard className="flex h-full flex-col overflow-hidden rounded-xl2 border border-ink/8 bg-white shadow-soft transition-shadow duration-300 ease-premium hover:border-primary/25 hover:shadow-card dark:border-white/10 dark:bg-white/[0.04]">
@@ -18,6 +20,10 @@ export function CityServiceCard({ service }: { service: CityService }) {
             <ImageOff size={22} aria-hidden="true" />
           </div>
         )}
+        <span className="absolute start-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-2.5 py-1 text-xs font-semibold text-ink shadow-sm backdrop-blur dark:bg-ink/85 dark:text-white">
+          <CategoryIcon size={12} className="text-primary" aria-hidden="true" />
+          {t(titleKey)}
+        </span>
       </div>
 
       <div className="flex flex-1 flex-col p-5">

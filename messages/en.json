@@ -1777,7 +1777,13 @@
     "comingSoonDescription": "Information will be added by the Go Hargeisa team.",
     "viewOnMaps": "View on Maps",
     "visitWebsite": "Visit Website",
-    "callNow": "Call"
+    "callNow": "Call",
+    "searchPlaceholder": "Search hospitals, banks, supermarkets, pharmacies…",
+    "allCategoriesLabel": "All",
+    "noMatchTitle": "No services match",
+    "noMatchDescription": "Try a different search term or category.",
+    "noServicesTitle": "City Services are being updated.",
+    "noServicesDescription": "We're adding verified places across Hargeisa. Check back soon."
   },
   "attractionsPage": {
     "heroSubtitle": "Discover historical landmarks, cultural heritage, local markets, museums and hidden gems across Hargeisa.",

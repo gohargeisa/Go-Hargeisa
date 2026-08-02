@@ -1777,7 +1777,13 @@
     "comingSoonDescription": "Xogta waxaa ku dari doona kooxda Go Hargeisa.",
     "viewOnMaps": "Ka eeg Khariidadda",
     "visitWebsite": "Booqo Websaydka",
-    "callNow": "Wac"
+    "callNow": "Wac",
+    "searchPlaceholder": "Raadi cusbitaallo, bangiyo, dukaammo waaweyn, farmashiyo…",
+    "allCategoriesLabel": "Dhammaan",
+    "noMatchTitle": "Adeeg lama helin",
+    "noMatchDescription": "Isku day eray raadin ama qaybo kale.",
+    "noServicesTitle": "Adeegyada Magaalada ayaa la cusboonaysiinayaa.",
+    "noServicesDescription": "Waxaan ku darayaa meelo la xaqiijiyay oo ku yaal Hargeysa oo dhan. Dib u eeg dhawaan."
   },
   "attractionsPage": {
     "heroSubtitle": "Baaro taallooyinka taariikhiga ah, dhaqanka hidaha, suuqyada maxalliga ah, matxafyada iyo meelaha qarsoon ee Hargeysa.",
