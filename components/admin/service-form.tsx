@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Check, Loader2 } from "lucide-react";
 import { ImageUploader } from "@/components/shared/image-uploader";
 import { GalleryManager } from "@/components/admin/gallery-manager";
+import { serviceCategorySupportsGallery } from "@/lib/config/gallery-eligibility";
 import { VideoUploader } from "@/components/shared/video-uploader";
 import { OpeningHoursEditor } from "@/components/shared/opening-hours-editor";
 import { GoogleMapsLocationField } from "@/components/admin/google-maps-location-field";
@@ -142,16 +143,20 @@ export function ServiceForm({
         <ImageUploader folder="services/logos" value={form.logo} onChange={(url) => update("logo", url)} label="Logo" rounded="rounded-full" />
       </div>
 
-      <GalleryManager
-        folder="services/gallery"
-        value={form.gallery}
-        onChange={(v) => update("gallery", v)}
-        categories={SERVICE_GALLERY_CATEGORIES}
-        coverUrl={form.coverImage}
-        onSetCover={(url) => update("coverImage", url)}
-        setCoverLabel={t("setAsCoverLabel")}
-        coverBadgeLabel={t("coverBadgeLabel")}
-      />
+      {serviceCategorySupportsGallery(form.category) ? (
+        <GalleryManager
+          folder="services/gallery"
+          value={form.gallery}
+          onChange={(v) => update("gallery", v)}
+          categories={SERVICE_GALLERY_CATEGORIES}
+          coverUrl={form.coverImage}
+          onSetCover={(url) => update("coverImage", url)}
+          setCoverLabel={t("setAsCoverLabel")}
+          coverBadgeLabel={t("coverBadgeLabel")}
+        />
+      ) : (
+        <p className="text-xs text-ink/45 dark:text-sand/45">{t("galleryNotAvailableForCategory")}</p>
+      )}
 
       <VideoUploader
         folder="services/videos"

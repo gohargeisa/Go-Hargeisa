@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut } from "lucide-react";
 import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 
 export interface LightboxSlide {
@@ -10,12 +10,16 @@ export interface LightboxSlide {
   alt: string;
 }
 
+const SWIPE_THRESHOLD_PX = 50;
+/** Double-tap window on touch devices — desktop gets a real `onDoubleClick`,
+ * which doesn't exist as a native event for touch. */
+const DOUBLE_TAP_MS = 300;
+
 /**
- * Fullscreen photo viewer shared by the hotel hero slider and the
- * categorized photo gallery — deliberately NOT the same component as the
- * lightbox baked into components/shared/hotel-gallery.tsx, since that file
- * is also used by the restaurant and cafe detail pages and must stay
- * untouched by this hotel-only redesign.
+ * Fullscreen photo viewer shared by every detail page's gallery (hotels,
+ * restaurants, cafes, attractions, services) plus any card that opens a
+ * gallery directly (e.g. eligible City Services categories) — one shared
+ * component, not a per-type copy.
  */
 export function Lightbox({
   slides,
@@ -28,6 +32,10 @@ export function Lightbox({
   onClose: () => void;
   onIndexChange: (i: number) => void;
 }) {
+  const [zoomed, setZoomed] = useState(false);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const lastTapRef = useRef(0);
+
   const goPrev = useCallback(
     () => onIndexChange((index - 1 + slides.length) % slides.length),
     [index, slides.length, onIndexChange]
@@ -35,6 +43,11 @@ export function Lightbox({
   const goNext = useCallback(() => onIndexChange((index + 1) % slides.length), [index, slides.length, onIndexChange]);
   const dialogRef = useRef<HTMLDivElement>(null);
   useFocusTrap(dialogRef);
+
+  // Zoom is per-slide — moving to a different photo always starts unzoomed.
+  useEffect(() => {
+    setZoomed(false);
+  }, [index]);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -49,6 +62,39 @@ export function Lightbox({
       document.body.style.overflow = "";
     };
   }, [onClose, goPrev, goNext]);
+
+  function onTouchStart(e: React.TouchEvent) {
+    const t = e.touches[0];
+    touchStartRef.current = { x: t.clientX, y: t.clientY };
+  }
+
+  function onTouchEnd(e: React.TouchEvent) {
+    const start = touchStartRef.current;
+    touchStartRef.current = null;
+    if (!start) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - start.x;
+    const dy = t.clientY - start.y;
+
+    // Double-tap toggles zoom before anything else — a real second tap in
+    // roughly the same spot, not a swipe (large horizontal movement rules
+    // this out on its own via the swipe branch below).
+    const now = Date.now();
+    const isDoubleTap = now - lastTapRef.current < DOUBLE_TAP_MS && Math.abs(dx) < 10 && Math.abs(dy) < 10;
+    lastTapRef.current = now;
+    if (isDoubleTap) {
+      setZoomed((z) => !z);
+      return;
+    }
+
+    // Swipe navigation only makes sense unzoomed — while zoomed a
+    // horizontal drag is for panning, not changing slides.
+    if (zoomed) return;
+    if (Math.abs(dx) > SWIPE_THRESHOLD_PX && Math.abs(dx) > Math.abs(dy)) {
+      if (dx < 0) goNext();
+      else goPrev();
+    }
+  }
 
   const slide = slides[index];
   if (!slide) return null;
@@ -66,18 +112,41 @@ export function Lightbox({
         <p className="text-sm text-white/70">
           {index + 1} / {slides.length}
         </p>
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close photo viewer"
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-white/20"
-        >
-          <X size={20} aria-hidden="true" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setZoomed((z) => !z)}
+            aria-label={zoomed ? "Zoom out" : "Zoom in"}
+            aria-pressed={zoomed}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-white/20"
+          >
+            {zoomed ? <ZoomOut size={18} aria-hidden="true" /> : <ZoomIn size={18} aria-hidden="true" />}
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close photo viewer"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-white/20"
+          >
+            <X size={20} aria-hidden="true" />
+          </button>
+        </div>
       </div>
 
-      <div className="relative flex-1">
-        <Image src={slide.url} alt={slide.alt} fill sizes="100vw" className="object-contain" priority />
+      <div
+        className={`relative flex-1 overflow-hidden ${zoomed ? "cursor-zoom-out" : "cursor-zoom-in"}`}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+        onDoubleClick={() => setZoomed((z) => !z)}
+      >
+        <Image
+          src={slide.url}
+          alt={slide.alt}
+          fill
+          sizes="100vw"
+          className={`object-contain transition-transform duration-300 ease-premium ${zoomed ? "scale-[2]" : "scale-100"}`}
+          priority
+        />
 
         {slides.length > 1 && (
           <>

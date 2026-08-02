@@ -10,6 +10,7 @@ import { Field, inputClass } from "@/components/admin/form-shared";
 import { createCityService, updateCityService } from "@/lib/actions/city-services";
 import { useUnsavedChangesWarning } from "@/lib/hooks/use-unsaved-changes-warning";
 import { CITY_SERVICE_CATEGORIES } from "@/lib/config/city-service-categories";
+import { cityServiceCategorySupportsGallery } from "@/lib/config/gallery-eligibility";
 import { SERVICE_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import type { Locale } from "@/lib/i18n/config";
 import type { EssentialServiceCategory, GalleryImage } from "@/types";
@@ -121,16 +122,20 @@ export function CityServiceForm({
     <form onSubmit={onSubmit} className="max-w-2xl space-y-6">
       <ImageUploader folder="city-services" value={form.image} onChange={(url) => update("image", url)} />
 
-      <GalleryManager
-        folder="city-services/gallery"
-        value={form.gallery}
-        onChange={(v) => update("gallery", v)}
-        categories={SERVICE_GALLERY_CATEGORIES}
-        coverUrl={form.image}
-        onSetCover={(url) => update("image", url)}
-        setCoverLabel={t("setAsCoverLabel")}
-        coverBadgeLabel={t("coverBadgeLabel")}
-      />
+      {cityServiceCategorySupportsGallery(form.category) ? (
+        <GalleryManager
+          folder="city-services/gallery"
+          value={form.gallery}
+          onChange={(v) => update("gallery", v)}
+          categories={SERVICE_GALLERY_CATEGORIES}
+          coverUrl={form.image}
+          onSetCover={(url) => update("image", url)}
+          setCoverLabel={t("setAsCoverLabel")}
+          coverBadgeLabel={t("coverBadgeLabel")}
+        />
+      ) : (
+        <p className="text-xs text-ink/45 dark:text-sand/45">{t("galleryNotAvailableForCategory")}</p>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label={t("cityServiceNameLabel")}>

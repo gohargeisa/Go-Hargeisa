@@ -17,6 +17,7 @@ import { BusinessPhotoGallery } from "@/components/shared/business-photo-gallery
 import { SERVICE_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import { ServiceActionCard } from "@/components/shared/service-action-card";
 import { ServiceCard } from "@/components/shared/service-card";
+import { serviceCategorySupportsGallery } from "@/lib/config/gallery-eligibility";
 import { ReviewsSection } from "@/components/shared/reviews-section";
 import { ReviewForm } from "@/components/shared/review-form";
 import { getMyReviewForListing } from "@/lib/data/reviews";
@@ -88,10 +89,16 @@ export default async function ServiceDetailPage({
   const googleMapsHref = resolveMapsUrl(service.location);
   const directionsHref = resolveDirectionsUrl(service.location);
 
+  // Medical/financial/civic/utility categories (hospitals, pharmacies,
+  // banks, mosques, etc.) only ever get the single cover photo — a photo
+  // gallery doesn't suit them the way it does tourism/leisure categories.
+  const galleryEligible = serviceCategorySupportsGallery(service.category);
+  const galleryImages = galleryEligible ? service.gallery : [];
+
   const navTabs: HotelNavTab[] = [
     { id: "overview", label: td("overview") },
     ...(service.services.length > 0 ? [{ id: "services", label: "Services" }] : []),
-    ...(service.gallery.length > 0 ? [{ id: "gallery", label: t("gallery") }] : []),
+    ...(galleryImages.length > 0 ? [{ id: "gallery", label: t("gallery") }] : []),
     { id: "reviews", label: t("reviews") },
     { id: "location", label: td("location") },
   ];
@@ -142,7 +149,7 @@ export default async function ServiceDetailPage({
         showPrimary={false}
       />
 
-      <HotelGallerySlider cover={service.coverImage} images={service.gallery} alt={service.name} />
+      <HotelGallerySlider cover={service.coverImage} images={galleryImages} alt={service.name} />
 
       <div className="mt-8">
         <HotelNavTabs tabs={navTabs} />
@@ -179,13 +186,13 @@ export default async function ServiceDetailPage({
             </Reveal>
           )}
 
-          {service.gallery.length > 0 && (
+          {galleryImages.length > 0 && (
             <Reveal>
               <section id="gallery" aria-labelledby="photo-gallery-heading" className="scroll-mt-36">
                 <h2 id="photo-gallery-heading" className="mb-5 font-display text-2xl font-semibold">
                   {th("photoGallery")}
                 </h2>
-                <BusinessPhotoGallery images={service.gallery} alt={service.name} categories={SERVICE_GALLERY_CATEGORIES} />
+                <BusinessPhotoGallery images={galleryImages} alt={service.name} categories={SERVICE_GALLERY_CATEGORIES} />
               </section>
             </Reveal>
           )}
