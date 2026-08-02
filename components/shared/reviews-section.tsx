@@ -7,6 +7,8 @@ import { Star, User } from "lucide-react";
 import { Lightbox, type LightboxSlide } from "@/components/shared/lightbox";
 import type { Review } from "@/types";
 
+const PAGE_SIZE = 5;
+
 export function ReviewsSection({
   rating,
   reviewCount,
@@ -21,7 +23,9 @@ export function ReviewsSection({
   // guests attach any — this renders a no-op (no thumbnails shown) on
   // restaurant/cafe/attraction pages where photos is always empty.
   const [lightbox, setLightbox] = useState<{ slides: LightboxSlide[]; index: number } | null>(null);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const t = useTranslations("review");
+  const visibleReviews = reviews.slice(0, visibleCount);
 
   return (
     <div>
@@ -47,7 +51,7 @@ export function ReviewsSection({
         {reviews.length === 0 && (
           <p className="text-sm text-ink/50 dark:text-sand/50">{t("beFirstReview")}</p>
         )}
-        {reviews.map((r) => (
+        {visibleReviews.map((r) => (
           <div key={r.id} className="rounded-xl2 border border-ink/8 dark:border-white/10 p-4">
             <div className="flex items-center gap-3">
               <span className="flex h-9 w-9 items-center justify-center rounded-full bg-ink/5 dark:bg-white/10">
@@ -87,6 +91,18 @@ export function ReviewsSection({
           </div>
         ))}
       </div>
+
+      {visibleCount < reviews.length && (
+        <div className="mt-5 text-center">
+          <button
+            type="button"
+            onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+            className="rounded-full border border-ink/12 px-5 py-2.5 text-sm font-semibold transition-colors hover:border-primary hover:text-primary dark:border-white/15"
+          >
+            {t("loadMoreReviews")}
+          </button>
+        </div>
+      )}
 
       {lightbox && (
         <Lightbox

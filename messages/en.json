@@ -1326,7 +1326,14 @@
     "somethingWentWrong": "Something went wrong.",
     "basedOnReviews": "{count, plural, =0 {No reviews yet} =1 {Based on 1 review} other {Based on # reviews}}",
     "beFirstReview": "Be the first to leave a review.",
-    "addPhotosHint": "Add up to {max} photos (optional)."
+    "addPhotosHint": "Add up to {max} photos (optional).",
+    "yourReviewLabel": "Your review",
+    "editReview": "Edit review",
+    "deleteReview": "Delete",
+    "deleteReviewConfirm": "Delete your review permanently? This can't be undone.",
+    "saveChanges": "Save Changes",
+    "cancel": "Cancel",
+    "loadMoreReviews": "Load more reviews"
   },
   "trip": {
     "addToTrip": "Add to Trip",

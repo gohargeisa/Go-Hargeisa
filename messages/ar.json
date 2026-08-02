@@ -1326,7 +1326,14 @@
     "somethingWentWrong": "حدث خطأ ما.",
     "basedOnReviews": "{count, plural, =0 {لا توجد تقييمات بعد} =1 {استنادًا إلى تقييم واحد} other {استنادًا إلى # تقييمات}}",
     "beFirstReview": "كن أول من يكتب تقييمًا.",
-    "addPhotosHint": "أضف حتى {max} صور (اختياري)."
+    "addPhotosHint": "أضف حتى {max} صور (اختياري).",
+    "yourReviewLabel": "تقييمك",
+    "editReview": "تعديل التقييم",
+    "deleteReview": "حذف",
+    "deleteReviewConfirm": "هل تريد حذف تقييمك نهائيًا؟ لا يمكن التراجع عن هذا الإجراء.",
+    "saveChanges": "حفظ التغييرات",
+    "cancel": "إلغاء",
+    "loadMoreReviews": "عرض المزيد من التقييمات"
   },
   "trip": {
     "addToTrip": "أضف إلى الرحلة",

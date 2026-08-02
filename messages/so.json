@@ -1326,7 +1326,14 @@
     "somethingWentWrong": "Wax baa qaldamay.",
     "basedOnReviews": "{count, plural, =0 {Weli qiimeyn ma jirto} =1 {Waxaa lagu saleeyay 1 qiimeyn} other {Waxaa lagu saleeyay # qiimeyn}}",
     "beFirstReview": "Noqo qofka ugu horreeya ee qiimeyn qora.",
-    "addPhotosHint": "Ku dar ilaa {max} sawir (ikhtiyaari)."
+    "addPhotosHint": "Ku dar ilaa {max} sawir (ikhtiyaari).",
+    "yourReviewLabel": "Qiimeyntaada",
+    "editReview": "Wax ka beddel Qiimeynta",
+    "deleteReview": "Tirtir",
+    "deleteReviewConfirm": "Ma hubtaa inaad tirtirto qiimeyntaada si joogto ah? Tallaabadan lama noqon karo.",
+    "saveChanges": "Kaydi Isbeddellada",
+    "cancel": "Jooji",
+    "loadMoreReviews": "Soo rar qiimeymo dheeraad ah"
   },
   "trip": {
     "addToTrip": "Ku Dar Safarka",

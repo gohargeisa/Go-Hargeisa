@@ -27,6 +27,7 @@ import { MobileBookingBar } from "@/components/shared/mobile-booking-bar";
 import { ListingCard } from "@/components/shared/listing-card";
 import { ReviewsSection } from "@/components/shared/reviews-section";
 import { ReviewForm } from "@/components/shared/review-form";
+import { getMyReviewForListing } from "@/lib/data/reviews";
 import { resolveMapsUrl, resolveDirectionsUrl } from "@/lib/utils/google-maps";
 import { Reveal } from "@/components/home/reveal";
 import { PrimaryButton, SecondaryButton } from "@/components/shared/buttons";
@@ -69,10 +70,11 @@ export default async function CafeDetailPage({
   const th = await getTranslations("hotelDetail");
   const ta = await getTranslations("cafeAmenities");
   const tw = await getTranslations("weekdays");
-  const [allCafes, siteSettings, offers] = await Promise.all([
+  const [allCafes, siteSettings, offers, myReview] = await Promise.all([
     getCafes({ locale }),
     getSiteSettings(),
     getPublicOffersForListing("cafe", cafe.id),
+    getMyReviewForListing("cafe", cafe.id),
   ]);
   const similarCafes = allCafes.filter((c) => c.id !== cafe.id).slice(0, 4);
   const whatsappFallback = (siteSettings as { whatsapp_number?: string } | null)?.whatsapp_number ?? undefined;
@@ -378,11 +380,13 @@ export default async function CafeDetailPage({
               <ReviewsSection rating={cafe.rating} reviewCount={cafe.reviewCount} reviews={cafe.reviews} />
               <div className="mt-6">
                 <ReviewForm
+                  key={myReview?.id ?? "new"}
                   listingType="cafe"
                   listingId={cafe.id}
                   locale={locale}
                   pathToRevalidate={`/${locale}/cafes/${cafe.slug}`}
                   allowPhotos
+                  existingReview={myReview}
                 />
               </div>
             </section>

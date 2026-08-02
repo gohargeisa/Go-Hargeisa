@@ -14,6 +14,7 @@ import { InfoCardsStrip, type InfoCard } from "@/components/shared/info-cards-st
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { ReviewsSection } from "@/components/shared/reviews-section";
 import { ReviewForm } from "@/components/shared/review-form";
+import { getMyReviewForListing } from "@/lib/data/reviews";
 import { AddToTripButton } from "@/components/shared/add-to-trip-button";
 import { ListingCard } from "@/components/shared/listing-card";
 import { resolveMapsUrl, resolveDirectionsUrl } from "@/lib/utils/google-maps";
@@ -61,9 +62,10 @@ export default async function AttractionDetailPage({
   const tNav = await getTranslations("nav");
   const td = await getTranslations("detail");
   const th = await getTranslations("hotelDetail");
-  const [{ restaurants: nearbyRestaurants, hotels: nearbyHotels }, allAttractions] = await Promise.all([
+  const [{ restaurants: nearbyRestaurants, hotels: nearbyHotels }, allAttractions, myReview] = await Promise.all([
     getNearbyForAttraction(attraction.id),
     getAttractions(),
+    getMyReviewForListing("attraction", attraction.id),
   ]);
   const similarAttractions = allAttractions.filter((a) => a.id !== attraction.id).slice(0, 4);
 
@@ -202,11 +204,13 @@ export default async function AttractionDetailPage({
               />
               <div className="mt-6">
                 <ReviewForm
+                  key={myReview?.id ?? "new"}
                   listingType="attraction"
                   listingId={attraction.id}
                   locale={locale}
                   pathToRevalidate={`/${locale}/attractions/${attraction.slug}`}
                   allowPhotos
+                  existingReview={myReview}
                 />
               </div>
             </section>

@@ -89,7 +89,52 @@ export async function submitReview(input: {
 
   if (error) {
     if (process.env.NODE_ENV === "development") console.error("submitReview:", error.message);
+    // 23505 = unique_violation — reviews_user_listing_unique (one review per user per listing).
+    if (error.code === "23505") return { ok: false, error: "You've already reviewed this listing — edit your existing review instead." };
     return { ok: false, error: "Could not submit your review. Please try again." };
+  }
+
+  revalidatePath(input.pathToRevalidate);
+  return { ok: true };
+}
+
+/** Edits the signed-in user's own review — RLS's "Users update own reviews"
+ * policy (auth.uid() = user_id) is the authoritative check; the explicit
+ * .eq("user_id", ...) here just avoids a confusing silent no-op if someone
+ * tampers with the reviewId. */
+export async function updateReview(input: {
+  reviewId: string;
+  rating: number;
+  comment: string;
+  locale: string;
+  pathToRevalidate: string;
+  photos?: string[];
+}): Promise<{ ok: boolean; error?: string }> {
+  if (!isSupabaseConfigured()) {
+    return { ok: false, error: "Reviews require a connected Supabase project." };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { ok: false, error: "Please sign in to edit your review." };
+  if (input.rating < 1 || input.rating > 5) return { ok: false, error: "Rating must be between 1 and 5." };
+
+  const { error } = await supabase
+    .from("reviews")
+    .update({
+      rating: input.rating,
+      comment: input.comment,
+      photos: (input.photos ?? []).map((url) => ({ url })),
+    } as never)
+    .eq("id", input.reviewId)
+    .eq("user_id", user.id);
+
+  if (error) {
+    if (process.env.NODE_ENV === "development") console.error("updateReview:", error.message);
+    return { ok: false, error: "Could not update your review. Please try again." };
   }
 
   revalidatePath(input.pathToRevalidate);
@@ -98,7 +143,8 @@ export async function submitReview(input: {
 
 export async function deleteReview(
   locale: string,
-  reviewId: string
+  reviewId: string,
+  extraPathToRevalidate?: string
 ): Promise<{ ok: boolean; error?: string }> {
   if (!isSupabaseConfigured()) return { ok: false, error: "Not configured." };
 
@@ -115,5 +161,6 @@ export async function deleteReview(
   if (error) return { ok: false, error: error.message };
 
   revalidatePath(`/${locale}/dashboard`);
+  if (extraPathToRevalidate) revalidatePath(extraPathToRevalidate);
   return { ok: true };
 }

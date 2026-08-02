@@ -4,6 +4,33 @@ import { serviceHref } from "@/lib/utils/service-categories";
 import { mapReview } from "./mappers";
 import type { Review, ServiceCategory } from "@/types";
 
+/** The signed-in visitor's own review for a specific listing, if any — used
+ * by the detail-page review form to switch from "leave a review" to "edit
+ * your review" instead of letting them hit the one-review-per-listing
+ * unique constraint blind. Returns null when signed out or not reviewed. */
+export async function getMyReviewForListing(
+  listingType: "hotel" | "restaurant" | "cafe" | "attraction" | "service",
+  listingId: string
+): Promise<Review | null> {
+  if (!isSupabaseConfigured()) return null;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data } = await supabase
+    .from("reviews")
+    .select("*")
+    .eq("user_id", user.id)
+    .eq("listing_type", listingType)
+    .eq("listing_id", listingId)
+    .maybeSingle();
+
+  return data ? mapReview(data as never) : null;
+}
+
 export interface MyReview {
   id: string;
   listingType: "hotel" | "restaurant" | "cafe" | "attraction" | "service";

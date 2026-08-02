@@ -19,6 +19,7 @@ import { ServiceActionCard } from "@/components/shared/service-action-card";
 import { ServiceCard } from "@/components/shared/service-card";
 import { ReviewsSection } from "@/components/shared/reviews-section";
 import { ReviewForm } from "@/components/shared/review-form";
+import { getMyReviewForListing } from "@/lib/data/reviews";
 import { resolveMapsUrl, resolveDirectionsUrl } from "@/lib/utils/google-maps";
 import { Reveal } from "@/components/home/reveal";
 import {
@@ -76,7 +77,11 @@ export default async function ServiceDetailPage({
   const tNav = await getTranslations("nav");
   const td = await getTranslations("detail");
   const th = await getTranslations("hotelDetail");
-  const [allServices, siteSettings] = await Promise.all([getServices({ category: service.category }), getSiteSettings()]);
+  const [allServices, siteSettings, myReview] = await Promise.all([
+    getServices({ category: service.category }),
+    getSiteSettings(),
+    getMyReviewForListing("service", service.id),
+  ]);
   const similarServices = allServices.filter((s) => s.id !== service.id).slice(0, 4);
   const whatsappFallback = (siteSettings as { whatsapp_number?: string } | null)?.whatsapp_number ?? undefined;
 
@@ -231,10 +236,12 @@ export default async function ServiceDetailPage({
               <ReviewsSection rating={service.rating} reviewCount={service.reviewCount} reviews={service.reviews} />
               <div className="mt-6">
                 <ReviewForm
+                  key={myReview?.id ?? "new"}
                   listingType="service"
                   listingId={service.id}
                   locale={locale}
                   pathToRevalidate={`/${locale}${serviceHref(service.category, service.slug)}`}
+                  existingReview={myReview}
                 />
               </div>
             </section>

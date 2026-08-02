@@ -31,6 +31,7 @@ import { MobileBookingBar } from "@/components/shared/mobile-booking-bar";
 import { HotelCard } from "@/components/shared/hotel-card";
 import { ReviewsSection } from "@/components/shared/reviews-section";
 import { ReviewForm } from "@/components/shared/review-form";
+import { getMyReviewForListing } from "@/lib/data/reviews";
 import { Reveal } from "@/components/home/reveal";
 import { PrimaryButton, SecondaryButton } from "@/components/shared/buttons";
 import { getHotelBookingCta } from "@/lib/utils/booking-cta";
@@ -84,11 +85,12 @@ export default async function HotelDetailPage({
   const tNav = await getTranslations("nav");
   const td = await getTranslations("detail");
   const th = await getTranslations("hotelDetail");
-  const [nearby, allHotels, siteSettings, offers] = await Promise.all([
+  const [nearby, allHotels, siteSettings, offers, myReview] = await Promise.all([
     getNearbyAttractionsForHotel(hotel.id),
     getHotels(),
     getSiteSettings(),
     getPublicOffersForListing("hotel", hotel.id),
+    getMyReviewForListing("hotel", hotel.id),
   ]);
   const similarHotels = filterHotelsForPresentation(allHotels)
     .filter((h) => h.id !== hotel.id)
@@ -314,11 +316,13 @@ export default async function HotelDetailPage({
               <ReviewsSection rating={hotel.rating} reviewCount={hotel.reviewCount} reviews={hotel.reviews} />
               <div className="mt-6">
                 <ReviewForm
+                  key={myReview?.id ?? "new"}
                   listingType="hotel"
                   listingId={hotel.id}
                   locale={locale}
                   pathToRevalidate={`/${locale}/hotels/${hotel.slug}`}
                   allowPhotos
+                  existingReview={myReview}
                 />
               </div>
             </section>
