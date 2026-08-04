@@ -24,6 +24,7 @@ const staticRoutes = [
   "cafes",
   "attractions",
   "city-services",
+  "city-map",
   "shopping",
   "events",
   "travel-guide",
@@ -33,6 +34,9 @@ const staticRoutes = [
   "contact",
   "join",
   "diaspora-week-2026",
+  "search",
+  "privacy",
+  "terms",
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

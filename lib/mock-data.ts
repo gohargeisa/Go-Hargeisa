@@ -811,8 +811,10 @@ export const restaurants: Restaurant[] = [
     description:
       "Sultan Restaurant is one of the best-known dining destinations in Hargeisa. It offers Somali, Arabic, grilled and seafood dishes in a modern and family-friendly atmosphere. The restaurant is popular with locals, business travelers and tourists visiting Somaliland.",
 
-    // ⬇️ ضعها هنا
-    coverImage: "/images/restaurants/sultan/hero.jpeg",
+    // No dedicated hero photo was ever uploaded (the gallery below has 6
+    // real photos, but hero.jpeg never existed) — reusing the gallery's own
+    // establishing shot rather than a generic placeholder or a broken path.
+    coverImage: "/images/restaurants/sultan/1.jpeg",
 
     gallery: [
       {
