@@ -31,10 +31,11 @@ export function CapacitorBootstrap() {
 
       const [{ App }, { SplashScreen }] = await Promise.all([import("@capacitor/app"), import("@capacitor/splash-screen")]);
 
-      // launchAutoHide is off (capacitor.config.ts) specifically so this
-      // fires once React has actually hydrated real content — a fixed
-      // timer would either cut the splash before the remote page (network-
-      // dependent load time) has painted, or linger after it's ready.
+      // Fast path: hide as soon as React has actually hydrated real
+      // content, rather than waiting for capacitor.config.ts's
+      // launchShowDuration ceiling (4s) — that ceiling is a safety net for
+      // when this call doesn't fire at all (e.g. this code not yet being
+      // deployed to the live site this app loads), not the normal case.
       await SplashScreen.hide();
 
       // Hardware back button (Android): go back in-app history if there is
