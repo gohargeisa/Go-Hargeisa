@@ -1,11 +1,13 @@
 # Go Hargeisa — Mobile App Deployment Guide
 
-This covers everything that needs a real Android SDK/Java toolchain or a Mac
-with Xcode to finish — none of which is available in the environment that
-prepared this app, so every step below is a manual action for whoever has
-access to those tools. Everything that *could* be automated without them
-(plugin config, icons/splash, manifest/Info.plist, signing-config scaffolding,
-deep-link files, ProGuard rules) is already done and committed.
+**Update:** Android Studio and a full Android SDK (platform 36, build-tools
+36.0.0) turned out to already be installed on this machine (just not on
+`PATH`), along with Android Studio's own bundled JDK 21 (`jbr/`). Using
+those, this repo now has a **verified, real Gradle build**: a signed release
+AAB and APK were both built and their signatures verified with `apksigner`
+— see §1a for exactly what that means and what you still need to do before
+a real Play Store submission. iOS still needs a Mac with Xcode — nothing in
+this environment can substitute for that (§2 unchanged).
 
 ## Architecture recap
 
@@ -25,17 +27,66 @@ native plugins, deep-link config, the app's own version number).
 
 ## 1. Android — signed release AAB/APK
 
-### Prerequisites (not available in the environment that prepared this repo)
-- JDK 17+
-- Android Studio (or just the command-line SDK tools + `ANDROID_HOME` set)
+### 1a. What already happened in this session — read this first
 
-### Generate a release keystore (one-time, keep this file forever)
+A **locally-generated, non-production keystore** (`android/release.jks`,
+git-ignored, never committed) was created purely to prove the whole release
+pipeline actually compiles, signs, and shrinks correctly — something no
+amount of source-reading could confirm on its own. With it:
+
+```
+./gradlew bundleRelease   → android/app/build/outputs/bundle/release/app-release.aab   (4.1 MB)
+./gradlew assembleRelease → android/app/build/outputs/apk/release/app-release.apk      (3.3 MB)
+```
+
+Both built with `minifyEnabled true` + `shrinkResources true` (R8) with no
+errors, and both signatures were independently verified:
+```
+apksigner verify app-release.apk   → exit code 0, no errors
+```
+`aapt2 dump badging` on the built APK also confirmed the manifest merged
+correctly — package `com.gohargeisa.app`, versionName `1.0.0`, minSdk 24,
+targetSdk 36, and every plugin's own required permission
+(`VIBRATE`/haptics, `ACCESS_NETWORK_STATE`/network,
+`WAKE_LOCK`+`c2dm.permission.RECEIVE`/push) auto-merged in alongside the two
+explicitly declared in `AndroidManifest.xml` — nothing extraneous.
+
+**This proves the build works. It does not mean you can publish this exact
+AAB.** `android/release.jks` was generated with random passwords this
+session never displays or stores anywhere else, isn't backed up, and isn't
+tied to your identity — losing access to this machine loses the key. Before
+any real Play Store upload, do one of:
+- **(recommended) Generate your own keystore** — the whole point of a
+  release key is that only you hold it. Follow the steps below exactly as
+  if §1a never happened; overwrite `android/release.jks` and
+  `android/keystore.properties`.
+- **Or keep this session's key** — if you do, immediately copy
+  `android/release.jks` and `android/keystore.properties` out of this
+  machine to secure permanent storage (password manager + encrypted
+  backup) right now, before anything deletes this working directory.
+
+### Prerequisites
+Already satisfied on this machine: JDK 21 at
+`C:\Program Files\Android\Android Studio\jbr`, Android SDK at
+`C:\Users\YASEEN\AppData\Local\Android\Sdk` (platform 36, build-tools
+36.0.0), both wired via `android/local.properties` (git-ignored,
+machine-specific — regenerate on any other machine with
+`echo sdk.dir=/path/to/Sdk > android/local.properties`). On a machine
+without Android Studio pre-installed: JDK 17+ and the Android SDK
+command-line tools are the only two prerequisites.
+
+### Generate your own release keystore (one-time, keep this file forever)
 ```bash
-keytool -genkey -v -keystore release.jks -keyalg RSA -keysize 2048 -validity 10000 -alias gohargeisa
+keytool -genkeypair -v -keystore release.jks -alias gohargeisa -keyalg RSA -keysize 2048 -validity 10000
 ```
 Move `release.jks` into `android/`. **Back it up somewhere safe outside git —
 losing it means you can never publish an update to the same Play Store
-listing again.**
+listing again.** (Note: modern `keytool` defaults to a PKCS12 keystore,
+which only supports one password for both the store and the key — if you
+pass `-storepass`/`-keypass` with different values, `keytool` silently
+ignores `-keypass` and uses the store password for both; make sure
+`android/keystore.properties`'s `keyPassword` matches `storePassword`
+exactly, or Gradle's signing step will fail with a wrong-password error.)
 
 ### Wire up signing
 ```bash
@@ -53,13 +104,25 @@ cd android
 ./gradlew bundleRelease   # produces app/build/outputs/bundle/release/app-release.aab
 ./gradlew assembleRelease # produces app/build/outputs/apk/release/app-release.apk (for direct/sideload testing)
 ```
-Both were **not run** in this session — there is no Java/Android SDK
-installed in the preparing environment. `minifyEnabled true` +
-`shrinkResources true` are already on in the `release` build type
-(`android/app/build.gradle`), with explicit Capacitor/Cordova keep rules in
-`android/app/proguard-rules.pro` as a safety net — if a real device build
-ever shows a blank WebView or a plugin silently not responding after this,
-that ProGuard config is the first place to check.
+Both commands are verified working (see §1a — that's exactly what produced
+the AAB/APK sizes quoted there, just with your own keystore instead of the
+session's temporary one). `minifyEnabled true` + `shrinkResources true` are
+on in the `release` build type (`android/app/build.gradle`), with explicit
+Capacitor/Cordova keep rules in `android/app/proguard-rules.pro` — R8
+shrinking already completed successfully against the real plugin set this
+app ships, so the keep rules are confirmed sufficient at build time. Runtime
+behavior on a real device still hasn't been checked (no emulator/device
+available in this environment) — if a real device build ever shows a blank
+WebView or a plugin silently not responding, that ProGuard config is the
+first place to check.
+
+### Install and try it (optional, before a real Play Store upload)
+```bash
+adb install android/app/build/outputs/apk/release/app-release.apk
+```
+Needs a device connected via USB debugging, or an emulator running
+(`C:\Users\<you>\AppData\Local\Android\Sdk\platform-tools\adb.exe` if not
+on `PATH`).
 
 ### App Links (verified universal links)
 1. Get your release keystore's SHA-256 fingerprint:
