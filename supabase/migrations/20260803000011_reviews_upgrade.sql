@@ -17,9 +17,15 @@ create index if not exists reviews_status_idx on reviews (status);
 
 -- ----------------------------------------------------------------------------
 -- Helpful votes — mirrors `favorites`' exact shape/RLS (schema.sql:301-308).
+-- Uses gen_random_uuid() (pgcrypto, enabled by default on every Supabase
+-- project) rather than uuid_generate_v4() (uuid-ossp) — the live database's
+-- actual applied-migration history doesn't include schema.sql's extension
+-- setup, so uuid-ossp was never enabled here despite schema.sql assuming it.
 -- ----------------------------------------------------------------------------
+create extension if not exists "pgcrypto";
+
 create table if not exists review_helpful_votes (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   review_id uuid not null references reviews(id) on delete cascade,
   user_id uuid references profiles(id) on delete cascade,
   created_at timestamptz not null default now(),
