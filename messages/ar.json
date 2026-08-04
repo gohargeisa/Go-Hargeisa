@@ -20,6 +20,14 @@
     "cityServices": "خدمات المدينة",
     "listYourBusiness": "أضف نشاطك التجاري"
   },
+  "bottomNav": {
+    "navAriaLabel": "التنقل الرئيسي",
+    "home": "الرئيسية",
+    "explore": "استكشف",
+    "saved": "المحفوظات",
+    "notifications": "التنبيهات",
+    "profile": "حسابي"
+  },
   "hero": {
     "premiumBadge": "الأول من نوعه",
     "eyebrow": "عاصمة صوماليلاند",

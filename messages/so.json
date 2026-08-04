@@ -20,6 +20,14 @@
     "cityServices": "Adeegyada Magaalada",
     "listYourBusiness": "Diiwaan Geli Ganacsigaaga"
   },
+  "bottomNav": {
+    "navAriaLabel": "Suulka Guud",
+    "home": "Guriga",
+    "explore": "Sahami",
+    "saved": "Kaydka",
+    "notifications": "Ogeysiisyo",
+    "profile": "Xisaabtayda"
+  },
   "hero": {
     "premiumBadge": "Ta Ugu Horreysay Nooceeda",
     "eyebrow": "Caasimadda Somaliland",

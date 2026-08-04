@@ -67,7 +67,7 @@ export function SiteFooter({
   ];
 
   return (
-    <footer className="mt-24 border-t border-ink/10 bg-gradient-to-b from-white to-slate-50 dark:border-white/10 dark:from-[#071321] dark:to-[#020817]">
+    <footer className="mt-24 border-t border-ink/10 bg-gradient-to-b from-white to-slate-50 pb-[max(6rem,calc(4.5rem+env(safe-area-inset-bottom)))] dark:border-white/10 dark:from-[#071321] dark:to-[#020817] lg:pb-0">
       <div className="container-px mx-auto grid grid-cols-2 gap-x-8 gap-y-12 py-16 md:grid-cols-5 md:gap-x-10 lg:gap-x-12 lg:py-20">
         <div className="col-span-2">
           <Image

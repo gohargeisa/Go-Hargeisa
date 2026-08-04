@@ -20,6 +20,14 @@
     "cityServices": "City Services",
     "listYourBusiness": "List Your Business"
   },
+  "bottomNav": {
+    "navAriaLabel": "Main navigation",
+    "home": "Home",
+    "explore": "Explore",
+    "saved": "Saved",
+    "notifications": "Alerts",
+    "profile": "Profile"
+  },
   "hero": {
     "premiumBadge": "First of Its Kind",
     "eyebrow": "The Capital of Somaliland",
