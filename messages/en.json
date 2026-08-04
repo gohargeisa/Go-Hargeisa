@@ -1447,6 +1447,16 @@
     "categoryConcert": "Concert",
     "moreEvents": "More Events"
   },
+  "eventsPage": {
+    "eyebrow": "What's On",
+    "pageTitle": "Events in Hargeisa",
+    "pageSubtitle": "Cultural festivals, national holidays, concerts and more happening around the city.",
+    "scrollHint": "Scroll to discover",
+    "sectionsTitle": "Upcoming Events",
+    "sectionsSubtitle": "Don't miss what's happening in Hargeisa.",
+    "emptyTitle": "No events scheduled yet",
+    "emptyDescription": "Check back soon — new events are added regularly."
+  },
   "share": {
     "share": "Share",
     "linkCopied": "Link copied",

@@ -1447,6 +1447,16 @@
     "categoryConcert": "Riwaayad",
     "moreEvents": "Munaasabado Dheeraad ah"
   },
+  "eventsPage": {
+    "eyebrow": "Maxaa Socda",
+    "pageTitle": "Munaasabadaha Hargeysa",
+    "pageSubtitle": "Xafladaha dhaqanka, ciidaha qaranka, kaonsarto iyo wax badan oo ka dhacaya magaalada.",
+    "scrollHint": "Dhaadhac si aad u ogaato",
+    "sectionsTitle": "Munaasabadaha Soo Socda",
+    "sectionsSubtitle": "Ha seegin waxa ka socda Hargeysa.",
+    "emptyTitle": "Wali lama qorin munaasabado",
+    "emptyDescription": "Dib u soo hubi dhawaan — munaasabado cusub ayaa si joogto ah loo daraa."
+  },
   "share": {
     "share": "La wadaag",
     "linkCopied": "Linkiga waa la koobiyeeyay",
