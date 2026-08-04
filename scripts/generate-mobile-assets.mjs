@@ -193,6 +193,60 @@ async function generateIOS(mark) {
   console.log("  Splash.imageset: 2732x2732 generated (x3 filenames)");
 }
 
+const BRAND_PRIMARY = "#0B5ED7";
+const BRAND_PRIMARY_DARK = "#084BB0";
+
+/** Play Store listing assets — not shipped inside the app itself, so these
+ * live in store-assets/ rather than android/ or ios/. Placeholders in the
+ * sense that they're programmatically composed from existing brand assets
+ * rather than custom marketing artwork, but are real, correctly-sized,
+ * presentable files — not stand-ins that need redoing before upload. */
+async function generateStoreAssets(mark) {
+  const outDir = path.join(ROOT, "store-assets");
+  await ensureDir(outDir);
+
+  // Feature graphic — Play Console requires exactly 1024x500, no alpha.
+  // Diagonal brand-gradient background (matches the primary blue used
+  // throughout the app's own UI) with the mark on the left and the
+  // wordmark rendered as crisp SVG text on the right — avoids the full
+  // logo file's baked-in vignette background, which doesn't composite
+  // cleanly onto another background.
+  const featureSvg = `
+    <svg width="1024" height="500" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="${BRAND_PRIMARY}"/>
+          <stop offset="100%" stop-color="${BRAND_PRIMARY_DARK}"/>
+        </linearGradient>
+      </defs>
+      <rect width="1024" height="500" fill="url(#bg)"/>
+      <text x="490" y="225" font-family="Georgia, 'Times New Roman', serif" font-size="68" font-weight="700" fill="#FFFFFF">Go Hargeisa</text>
+      <text x="492" y="275" font-family="Arial, Helvetica, sans-serif" font-size="28" fill="#FBF8F3" opacity="0.92">Discover · Explore · Experience</text>
+    </svg>
+  `;
+  const markForFeature = await markOnSquare({ mark, size: 380, fraction: 0.82, background: { r: 255, g: 255, b: 255, alpha: 1 } });
+  const markCircle = await sharp(markForFeature)
+    .composite([{ input: Buffer.from('<svg width="380" height="380"><circle cx="190" cy="190" r="190" fill="#fff"/></svg>'), blend: "dest-in" }])
+    .png()
+    .toBuffer();
+
+  await sharp({ create: { width: 1024, height: 500, channels: 4, background: { r: 11, g: 94, b: 215, alpha: 1 } } })
+    .composite([
+      { input: Buffer.from(featureSvg), left: 0, top: 0 },
+      { input: markCircle, left: 60, top: 60 },
+    ])
+    .flatten({ background: BRAND_PRIMARY })
+    .removeAlpha()
+    .png()
+    .toFile(path.join(outDir, "feature-graphic.png"));
+  console.log("  store-assets/feature-graphic.png: 1024x500 generated");
+
+  // Hi-res icon for the Play Console listing itself (separate field from
+  // the in-app launcher icon, same source, Play just wants its own copy).
+  await sharp(SOURCE).resize(512, 512).png().toFile(path.join(outDir, "play-store-icon-512.png"));
+  console.log("  store-assets/play-store-icon-512.png: 512x512 generated");
+}
+
 async function main() {
   if (!existsSync(SOURCE)) throw new Error(`Source icon not found: ${SOURCE}`);
   const mark = await getTrimmedMark();
@@ -203,6 +257,9 @@ async function main() {
 
   console.log("\niOS:");
   await generateIOS(mark);
+
+  console.log("\nStore listing assets:");
+  await generateStoreAssets(mark);
 
   console.log("\nDone.");
 }
