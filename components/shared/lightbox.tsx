@@ -193,7 +193,7 @@ export function Lightbox({
             onClick={toggleZoom}
             aria-label={zoomed ? "Zoom out" : "Zoom in"}
             aria-pressed={zoomed}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-white/20"
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-white/20"
           >
             {zoomed ? <ZoomOut size={18} aria-hidden="true" /> : <ZoomIn size={18} aria-hidden="true" />}
           </button>
@@ -201,7 +201,7 @@ export function Lightbox({
             type="button"
             onClick={onClose}
             aria-label="Close photo viewer"
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-white/20"
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-white/20"
           >
             <X size={20} aria-hidden="true" />
           </button>

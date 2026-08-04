@@ -64,7 +64,7 @@ export function ToastViewport({ toast, onDismiss }: { toast: ToastState; onDismi
               type="button"
               onClick={onDismiss}
               aria-label="Dismiss"
-              className="shrink-0 rounded-full p-1 text-white/70 transition-colors hover:bg-white/15 hover:text-white"
+              className="-m-2.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white/70 transition-colors hover:bg-white/15 hover:text-white"
             >
               <X size={15} aria-hidden="true" />
             </button>

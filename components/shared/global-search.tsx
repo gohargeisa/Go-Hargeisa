@@ -149,9 +149,9 @@ export function GlobalSearch({ locale, scrolled }: { locale: Locale; scrolled: b
                   type="button"
                   onClick={close}
                   aria-label={t("closeAriaLabel")}
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink/50 hover:bg-ink/5 dark:text-sand/50 dark:hover:bg-white/10"
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-ink/50 transition-colors hover:bg-ink/5 dark:text-sand/50 dark:hover:bg-white/10 lg:h-8 lg:w-8"
                 >
-                  <X size={16} />
+                  <X size={16} aria-hidden="true" />
                 </button>
               </form>
 
