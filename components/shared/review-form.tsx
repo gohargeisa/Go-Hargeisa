@@ -204,7 +204,7 @@ export function ReviewForm({
                   type="button"
                   onClick={() => setPhotos((p) => p.filter((_, pi) => pi !== i))}
                   aria-label="Remove photo"
-                  className="absolute right-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-black/60 text-white"
+                  className="absolute end-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-black/60 text-white"
                 >
                   <X size={10} />
                 </button>
