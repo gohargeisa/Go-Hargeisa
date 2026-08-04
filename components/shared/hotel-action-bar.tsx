@@ -12,7 +12,7 @@ import type { HotelBookingCta } from "@/lib/utils/booking-cta";
 import type { Locale } from "@/lib/i18n/config";
 
 const SECONDARY_CLASS =
-  "inline-flex h-12 items-center justify-center gap-2 rounded-full border border-ink/15 px-4 text-sm font-semibold text-ink transition-all duration-200 hover:-translate-y-0.5 hover:border-primary hover:text-primary hover:shadow-soft active:scale-95 dark:border-white/20 dark:text-white";
+  "inline-flex h-12 shrink-0 snap-start items-center justify-center gap-2 rounded-full border border-ink/15 px-4 text-sm font-semibold text-ink transition-all duration-200 hover:-translate-y-0.5 hover:border-primary hover:text-primary hover:shadow-soft active:scale-95 dark:border-white/20 dark:text-white";
 
 /**
  * Quick-action bar shown directly below the listing header — distinct from
@@ -30,7 +30,7 @@ const SECONDARY_CLASS =
  * booking concept).
  */
 const PRIMARY_CLASS =
-  "inline-flex h-12 items-center justify-center gap-2 rounded-full bg-primary px-8 text-[15px] font-bold text-white shadow-soft transition-all duration-300 ease-out hover:-translate-y-0.5 hover:scale-[1.03] hover:bg-primary-700 hover:shadow-card active:scale-95";
+  "inline-flex h-12 shrink-0 snap-start items-center justify-center gap-2 rounded-full bg-primary px-8 text-[15px] font-bold text-white shadow-soft transition-all duration-300 ease-out hover:-translate-y-0.5 hover:scale-[1.03] hover:bg-primary-700 hover:shadow-card active:scale-95";
 
 export async function HotelActionBar({
   locale,
@@ -80,7 +80,7 @@ export async function HotelActionBar({
 
   return (
     <Reveal delay={0.05}>
-      <div className="container-px mx-auto mt-6 flex flex-wrap items-center justify-center gap-3 sm:gap-3.5">
+      <div className="container-px mx-auto mt-6 flex snap-x snap-proximity items-center gap-3 overflow-x-auto pb-1 scrollbar-none sm:flex-wrap sm:justify-center sm:overflow-visible sm:pb-0 sm:gap-3.5">
         {showPrimary && bookingCta && (
           <HotelBookNowButton
             cta={bookingCta}

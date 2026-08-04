@@ -455,6 +455,7 @@ export default async function RestaurantDetailPage({
         phone={restaurant.phone}
         website={restaurant.website}
         whatsappFallback={whatsappFallback}
+        directionsHref={directionsHref}
         locale={locale}
         showPrimary={restaurant.reservable}
         primaryLabel={t("reserveTable")}

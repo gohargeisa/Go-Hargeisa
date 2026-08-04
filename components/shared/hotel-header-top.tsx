@@ -36,8 +36,8 @@ export async function HotelHeaderTop({
 
   return (
     <Reveal>
-      <div className="container-px mx-auto flex flex-col items-center pt-8 text-center sm:pt-12">
-        <div className="group relative mb-5 h-[120px] w-[120px] shrink-0 overflow-hidden rounded-full border border-white bg-white shadow-[0_4px_12px_rgba(15,23,42,0.10),0_14px_34px_rgba(15,23,42,0.14)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:scale-105 hover:shadow-[0_6px_16px_rgba(15,23,42,0.12),0_18px_40px_rgba(15,23,42,0.18)] dark:border-white/90 dark:bg-white/5 sm:h-[140px] sm:w-[140px]">
+      <div className="container-px mx-auto flex flex-col items-center pt-6 text-center sm:pt-12">
+        <div className="group relative mb-4 h-24 w-24 shrink-0 overflow-hidden rounded-full border border-white bg-white shadow-[0_4px_12px_rgba(15,23,42,0.10),0_14px_34px_rgba(15,23,42,0.14)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:scale-105 hover:shadow-[0_6px_16px_rgba(15,23,42,0.12),0_18px_40px_rgba(15,23,42,0.18)] dark:border-white/90 dark:bg-white/5 sm:mb-5 sm:h-[140px] sm:w-[140px]">
           {logo ? (
             <Image
               src={logo}

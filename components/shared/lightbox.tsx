@@ -15,6 +15,21 @@ const SWIPE_THRESHOLD_PX = 50;
 /** Double-tap window on touch devices — desktop gets a real `onDoubleClick`,
  * which doesn't exist as a native event for touch. */
 const DOUBLE_TAP_MS = 300;
+const MIN_SCALE = 1;
+const MAX_SCALE = 4;
+const DOUBLE_TAP_SCALE = 2.5;
+
+function touchDistance(a: React.Touch, b: React.Touch) {
+  return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+}
+
+/** Keeps the panned image from drifting past its own edges — the further
+ * zoomed in, the more room there is to pan, roughly proportional to how much
+ * the image now overhangs the viewport on each axis. */
+function clampPan(value: number, scale: number, viewportSize: number) {
+  const maxOffset = (viewportSize * (scale - 1)) / 2;
+  return Math.min(maxOffset, Math.max(-maxOffset, value));
+}
 
 /**
  * Fullscreen photo viewer shared by every detail page's gallery (hotels,
@@ -33,9 +48,14 @@ export function Lightbox({
   onClose: () => void;
   onIndexChange: (i: number) => void;
 }) {
-  const [zoomed, setZoomed] = useState(false);
+  const [scale, setScale] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const zoomed = scale > 1;
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const lastTapRef = useRef(0);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const pinchRef = useRef<{ startDist: number; startScale: number } | null>(null);
+  const panRef = useRef<{ startX: number; startY: number; startPanX: number; startPanY: number } | null>(null);
 
   const goPrev = useCallback(
     () => onIndexChange((index - 1 + slides.length) % slides.length),
@@ -47,7 +67,8 @@ export function Lightbox({
 
   // Zoom is per-slide — moving to a different photo always starts unzoomed.
   useEffect(() => {
-    setZoomed(false);
+    setScale(1);
+    setPan({ x: 0, y: 0 });
   }, [index]);
 
   useEffect(() => {
@@ -64,12 +85,65 @@ export function Lightbox({
     };
   }, [onClose, goPrev, goNext]);
 
+  function toggleZoom() {
+    if (zoomed) {
+      setScale(1);
+      setPan({ x: 0, y: 0 });
+    } else {
+      setScale(DOUBLE_TAP_SCALE);
+    }
+  }
+
   function onTouchStart(e: React.TouchEvent) {
+    if (e.touches.length === 2) {
+      pinchRef.current = { startDist: touchDistance(e.touches[0], e.touches[1]), startScale: scale };
+      panRef.current = null;
+      touchStartRef.current = null;
+      return;
+    }
+
     const t = e.touches[0];
     touchStartRef.current = { x: t.clientX, y: t.clientY };
+    if (zoomed) {
+      panRef.current = { startX: t.clientX, startY: t.clientY, startPanX: pan.x, startPanY: pan.y };
+    }
+  }
+
+  function onTouchMove(e: React.TouchEvent) {
+    if (e.touches.length === 2 && pinchRef.current) {
+      const dist = touchDistance(e.touches[0], e.touches[1]);
+      const nextScale = Math.min(
+        MAX_SCALE,
+        Math.max(MIN_SCALE, pinchRef.current.startScale * (dist / pinchRef.current.startDist))
+      );
+      setScale(nextScale);
+      return;
+    }
+
+    if (e.touches.length === 1 && panRef.current) {
+      const t = e.touches[0];
+      const viewport = viewportRef.current;
+      if (!viewport) return;
+      const dx = t.clientX - panRef.current.startX;
+      const dy = t.clientY - panRef.current.startY;
+      setPan({
+        x: clampPan(panRef.current.startPanX + dx, scale, viewport.clientWidth),
+        y: clampPan(panRef.current.startPanY + dy, scale, viewport.clientHeight),
+      });
+    }
   }
 
   function onTouchEnd(e: React.TouchEvent) {
+    if (e.touches.length > 0) return; // still mid-gesture (e.g. lifting one of two fingers)
+    pinchRef.current = null;
+    panRef.current = null;
+    // A pinch can end below MIN_SCALE's floor only if clamped already; snap
+    // fully-out pinches back to the unzoomed baseline.
+    if (scale <= MIN_SCALE) {
+      setScale(1);
+      setPan({ x: 0, y: 0 });
+    }
+
     const start = touchStartRef.current;
     touchStartRef.current = null;
     if (!start) return;
@@ -84,7 +158,7 @@ export function Lightbox({
     const isDoubleTap = now - lastTapRef.current < DOUBLE_TAP_MS && Math.abs(dx) < 10 && Math.abs(dy) < 10;
     lastTapRef.current = now;
     if (isDoubleTap) {
-      setZoomed((z) => !z);
+      toggleZoom();
       return;
     }
 
@@ -116,7 +190,7 @@ export function Lightbox({
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setZoomed((z) => !z)}
+            onClick={toggleZoom}
             aria-label={zoomed ? "Zoom out" : "Zoom in"}
             aria-pressed={zoomed}
             className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-white/20"
@@ -135,17 +209,20 @@ export function Lightbox({
       </div>
 
       <div
-        className={`relative flex-1 overflow-hidden ${zoomed ? "cursor-zoom-out" : "cursor-zoom-in"}`}
+        ref={viewportRef}
+        className={`relative flex-1 touch-none overflow-hidden ${zoomed ? "cursor-zoom-out" : "cursor-zoom-in"}`}
         onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
-        onDoubleClick={() => setZoomed((z) => !z)}
+        onDoubleClick={toggleZoom}
       >
         <Image
           src={slide.url}
           alt={slide.alt}
           fill
           sizes="100vw"
-          className={`object-contain transition-transform duration-300 ease-premium ${zoomed ? "scale-[2]" : "scale-100"}`}
+          className={`object-contain ${pinchRef.current ? "" : "transition-transform duration-300 ease-premium"}`}
+          style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${scale})` }}
           priority
         />
 

@@ -482,6 +482,7 @@ export default async function CafeDetailPage({
         name={cafe.name}
         phone={cafe.phone}
         whatsappFallback={whatsappFallback}
+        directionsHref={directionsHref}
         locale={locale}
         showPrimary={false}
       />

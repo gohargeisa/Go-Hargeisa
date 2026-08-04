@@ -511,6 +511,7 @@ export default async function HotelDetailPage({
         phone={hotel.phone}
         website={hotel.website}
         whatsappFallback={whatsappFallback}
+        directionsHref={directionsHref}
         locale={locale}
         bookingCta={bookingCta}
         rooms={hotel.rooms}

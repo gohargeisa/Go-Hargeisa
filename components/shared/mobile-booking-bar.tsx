@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { ArrowUpRight, Check, MessageCircle, Phone, Share2 } from "lucide-react";
+import { ArrowUpRight, Check, MessageCircle, Navigation, Phone, Share2 } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { getBookingHref } from "@/lib/utils/booking-href";
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
@@ -12,7 +12,7 @@ import type { HotelBookingCta } from "@/lib/utils/booking-cta";
 import type { BusinessListingType, HotelRoom } from "@/types";
 
 const ICON_BUTTON_CLASS =
-  "flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-ink/15 text-ink transition-all duration-150 hover:border-primary hover:text-primary active:scale-90 dark:border-white/20 dark:text-white";
+  "flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-ink/70 transition-all duration-150 hover:bg-ink/5 hover:text-primary active:scale-90 dark:text-white/80 dark:hover:bg-white/10";
 
 /**
  * Compact mobile bottom action bar (WhatsApp, Call, Share, Save, primary
@@ -33,6 +33,7 @@ export function MobileBookingBar({
   phone,
   website,
   whatsappFallback,
+  directionsHref,
   locale,
   initiallyFavorited = false,
   showPrimary = true,
@@ -47,6 +48,8 @@ export function MobileBookingBar({
   website?: string;
   /** site_settings.whatsapp_number — used only when the listing has no phone of its own. */
   whatsappFallback?: string;
+  /** Precomputed by the caller via lib/utils/google-maps.ts#resolveDirectionsUrl — every detail page already builds this for its own "Get Directions" button, so it's just passed through here rather than recomputed. */
+  directionsHref?: string;
   locale: Locale;
   initiallyFavorited?: boolean;
   showPrimary?: boolean;
@@ -82,29 +85,10 @@ export function MobileBookingBar({
   }
 
   return (
-    <div className="animate-fadeUp fixed inset-x-0 bottom-0 z-40 flex items-center gap-2.5 border-t border-ink/10 bg-white/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 shadow-[0_-6px_22px_rgba(20,30,45,0.08)] backdrop-blur-xl dark:border-white/10 dark:bg-ink/95 lg:hidden">
-      {whatsappHref && (
-        <a
-          href={whatsappHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={`${t("whatsapp")} — ${name}`}
-          className={`${ICON_BUTTON_CLASS} hover:!border-[#25D366] hover:!text-[#25D366]`}
-        >
-          <MessageCircle size={19} aria-hidden="true" />
-        </a>
-      )}
-
-      {phone && (
-        <a href={`tel:${phone}`} aria-label={`${t("call")} — ${name}`} className={ICON_BUTTON_CLASS}>
-          <Phone size={18} aria-hidden="true" />
-        </a>
-      )}
-
-      <button type="button" onClick={onShare} aria-label={t("share")} className={ICON_BUTTON_CLASS}>
-        {copied ? <Check size={18} aria-hidden="true" /> : <Share2 size={18} aria-hidden="true" />}
-      </button>
-
+    <div
+      className="animate-fadeUp glass fixed inset-x-3 z-40 flex items-center gap-1 rounded-[1.75rem] px-2 py-2 shadow-premium lg:hidden"
+      style={{ bottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
+    >
       <FavoriteButton
         listingType={listingType}
         listingId={listingId}
@@ -117,6 +101,40 @@ export function MobileBookingBar({
         removeLabel={t("save")}
       />
 
+      {phone && (
+        <a href={`tel:${phone}`} aria-label={`${t("call")} — ${name}`} className={ICON_BUTTON_CLASS}>
+          <Phone size={18} aria-hidden="true" />
+        </a>
+      )}
+
+      {directionsHref && (
+        <a
+          href={directionsHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`${t("directions")} — ${name}`}
+          className={ICON_BUTTON_CLASS}
+        >
+          <Navigation size={17} aria-hidden="true" />
+        </a>
+      )}
+
+      {whatsappHref && (
+        <a
+          href={whatsappHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`${t("whatsapp")} — ${name}`}
+          className={`${ICON_BUTTON_CLASS} hover:!text-[#25D366]`}
+        >
+          <MessageCircle size={18} aria-hidden="true" />
+        </a>
+      )}
+
+      <button type="button" onClick={onShare} aria-label={t("share")} className={ICON_BUTTON_CLASS}>
+        {copied ? <Check size={18} aria-hidden="true" /> : <Share2 size={18} aria-hidden="true" />}
+      </button>
+
       <div className="min-w-0 flex-1" />
 
       {showPrimary && bookingCta && (
@@ -126,7 +144,7 @@ export function MobileBookingBar({
           hotelId={listingId}
           hotelName={name}
           rooms={rooms}
-          className="inline-flex h-12 shrink-0 items-center justify-center gap-1.5 rounded-full bg-primary px-7 text-sm font-bold text-white transition-all duration-150 hover:bg-primary-700 active:scale-95"
+          className="inline-flex h-12 shrink-0 items-center justify-center gap-1.5 rounded-full bg-primary px-7 text-sm font-bold text-white shadow-soft transition-all duration-150 hover:bg-primary-700 active:scale-95"
         />
       )}
 
