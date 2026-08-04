@@ -2075,5 +2075,12 @@
     "ctaSubtitle": "Qorshee joogitaankaaga oo baaro waxa magaaladu bixiso, laga bilaabo huteelada raaxada leh ilaa cuntooyinka aan la illoobi karin.",
     "ctaBookHotel": "Balan Qaad Huteel",
     "ctaFindRestaurants": "Raadi Maqaayado"
+  },
+
+  "offline": {
+    "bannerMessage": "Internet ma haysatid. Waxaa la muujinayaa content la kaydiyay.",
+    "bannerDismissLabel": "Xir",
+    "reconnectedToast": "Internetka ayaa soo noqday — content-ku waa la cusboonaysiiyay",
+    "actionUnavailable": "Internet ma haysatid. Isku day mar kale marka aad internet heshid."
   }
 }

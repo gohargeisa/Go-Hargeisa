@@ -10,6 +10,8 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { ServiceWorkerRegister } from "@/components/shared/service-worker-register";
 import { CapacitorBootstrap } from "@/components/shared/capacitor-bootstrap";
+import { OfflineBanner } from "@/components/shared/offline-banner";
+import { NetworkSyncController } from "@/components/shared/network-sync-controller";
 import { PageTransition } from "@/components/shared/page-transition";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { SearchOverlayProvider } from "@/components/shared/search-overlay-provider";
@@ -209,6 +211,8 @@ export default async function LocaleLayout({
               />
               <ServiceWorkerRegister />
               <CapacitorBootstrap />
+              <OfflineBanner />
+              <NetworkSyncController />
               <BottomNav locale={currentLocale} />
             </SearchOverlayProvider>
           </div>

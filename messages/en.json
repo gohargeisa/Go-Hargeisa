@@ -2075,5 +2075,12 @@
     "ctaSubtitle": "Plan your stay and discover everything the city has to offer, from comfortable hotels to unforgettable meals.",
     "ctaBookHotel": "Book a Hotel",
     "ctaFindRestaurants": "Find Restaurants"
+  },
+
+  "offline": {
+    "bannerMessage": "You're offline. Showing saved content.",
+    "bannerDismissLabel": "Dismiss",
+    "reconnectedToast": "Back online — content refreshed",
+    "actionUnavailable": "You're offline. Try again once you're back online."
   }
 }
