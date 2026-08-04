@@ -15,6 +15,7 @@ import {
 
 import type { Locale } from "@/lib/i18n/config";
 import { SHIMMER_BLUR_DATA_URL } from "@/lib/utils/shimmer";
+import { useSearchOverlay } from "@/components/shared/search-overlay-provider";
 
 const categoryCards = [
   {
@@ -65,6 +66,7 @@ export function Hero({ locale }: { locale: Locale }) {
   const [category, setCategory] = useState<Category>("hotels");
 
   const router = useRouter();
+  const { open: openSearchOverlay } = useSearchOverlay();
 
   function onSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -162,17 +164,30 @@ export function Hero({ locale }: { locale: Locale }) {
           ))}
         </m.div>
 
-        <m.form
+        <m.div
           custom={6}
           initial={initial}
           animate="show"
           variants={fadeUp}
-          onSubmit={onSearch}
-          role="search"
-          aria-label={t("searchButton")}
           className="glass mt-8 w-full max-w-2xl rounded-2xl p-2 shadow-[0_20px_60px_rgba(0,0,0,0.25)] ring-1 ring-white/15 backdrop-saturate-150 sm:mt-9 md:rounded-full lg:mt-4"
         >
-          <div className="flex flex-col gap-2 md:flex-row">
+          {/* Mobile/tablet: tapping opens the full-screen native search
+              takeover (components/shared/global-search.tsx) instead of this
+              hero owning its own text field — matches the header search
+              icon and bottom-nav Explore tab, which open the same overlay. */}
+          <button
+            type="button"
+            onClick={openSearchOverlay}
+            className="flex w-full items-center gap-2.5 rounded-full bg-white/95 px-5 py-3.5 text-start dark:bg-ink/70 lg:hidden"
+          >
+            <Search size={19} aria-hidden="true" className="shrink-0 text-ink/50 dark:text-sand/50" />
+            <span className="truncate text-[15px] text-ink/45 dark:text-sand/45">{t("searchPlaceholder")}</span>
+          </button>
+
+          {/* Desktop: existing category-scoped inline search stays as-is —
+              there's no anchored header dropdown positioned near the hero
+              to hand off to at this breakpoint. */}
+          <form onSubmit={onSearch} role="search" aria-label={t("searchButton")} className="hidden lg:flex lg:flex-row lg:gap-2">
             <div className="flex flex-1 items-center gap-2.5 rounded-full bg-white/95 px-5 py-3.5 dark:bg-ink/70">
               <Search
                 size={19}
@@ -198,8 +213,8 @@ export function Hero({ locale }: { locale: Locale }) {
             >
               {t("searchButton")}
             </button>
-          </div>
-        </m.form>
+          </form>
+        </m.div>
 
         <m.div
           custom={7}
@@ -219,7 +234,7 @@ export function Hero({ locale }: { locale: Locale }) {
                   aria-label={t(titleKey)}
                   aria-pressed={active}
                   onClick={() => setCategory(key)}
-                  className={`group rounded-2xl border p-5 text-left backdrop-blur-xl transition-all duration-300 lg:p-4 ${
+                  className={`group rounded-2xl border p-5 text-start backdrop-blur-xl transition-all duration-300 lg:p-4 ${
                     active
                       ? "scale-[1.02] border-white bg-white text-ink shadow-2xl ring-4 ring-white/20"
                       : "border-white/20 bg-white/15 text-white hover:-translate-y-1 hover:border-white/40 hover:bg-white/20 hover:shadow-2xl"
