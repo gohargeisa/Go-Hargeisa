@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useNetworkStatus } from "@/lib/hooks/use-network-status";
 import { useToast, ToastViewport } from "@/components/shared/toast";
 import { refreshCurrentRoute } from "@/lib/offline/refresh-current-route";
+import { runCacheSweepIfDue } from "@/lib/offline/cache-maintenance";
 
 const SYNC_TAG = "gh-reconnect-sync";
 
@@ -39,6 +40,13 @@ export function NetworkSyncController() {
   const { toast, showToast, dismiss } = useToast();
   const wasOnlineRef = useRef(isOnline);
 
+  // Once per mount (throttled internally to once/24h regardless of how
+  // often the app is opened) — keeps the 30-day/150-entry caps enforced
+  // without waiting on a reconnect that may not happen for a while.
+  useEffect(() => {
+    runCacheSweepIfDue();
+  }, []);
+
   useEffect(() => {
     const wasOnline = wasOnlineRef.current;
     wasOnlineRef.current = isOnline;
@@ -48,6 +56,7 @@ export function NetworkSyncController() {
     refreshCurrentRoute(router);
     showToast("success", t("reconnectedToast"));
     registerBackgroundSync();
+    runCacheSweepIfDue();
   }, [isOnline, router, showToast, t]);
 
   useEffect(() => {
