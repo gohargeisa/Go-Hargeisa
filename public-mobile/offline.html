@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Go Hargeisa</title>
+<style>
+  :root {
+    color-scheme: light dark;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    margin: 0;
+    background: #FBF8F3;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  @media (prefers-color-scheme: dark) {
+    html, body { background: #12181f; }
+  }
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
+  }
+  .card {
+    max-width: 360px;
+    width: 100%;
+    text-align: center;
+  }
+  .icon-wrap {
+    width: 96px;
+    height: 96px;
+    margin: 0 auto 28px;
+    border-radius: 28px;
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.10), 0 14px 34px rgba(15, 23, 42, 0.14);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  @media (prefers-color-scheme: dark) {
+    .icon-wrap { background: #1c2530; box-shadow: 0 4px 12px rgba(0,0,0,0.3), 0 14px 34px rgba(0,0,0,0.35); }
+  }
+  .icon-wrap img { width: 68px; height: 68px; object-fit: contain; }
+  .signal {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 20px;
+    opacity: 0.55;
+  }
+  h1 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 8px;
+  }
+  @media (prefers-color-scheme: dark) { h1 { color: #f5f0e6; } }
+  p {
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: rgba(15, 23, 42, 0.6);
+    margin: 0 0 4px;
+  }
+  @media (prefers-color-scheme: dark) { p { color: rgba(245, 240, 230, 0.6); } }
+  .lang-block { margin-bottom: 22px; }
+  .lang-block:last-of-type { margin-bottom: 32px; }
+  button {
+    appearance: none;
+    border: none;
+    background: #0B5ED7;
+    color: #fff;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    padding: 13px 28px;
+    border-radius: 999px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  button:active { transform: scale(0.97); }
+  button:disabled { opacity: 0.6; cursor: default; }
+  .spinner {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: #fff;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+  .spinner.show { display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .status {
+    margin-top: 16px;
+    font-size: 0.8125rem;
+    color: rgba(15, 23, 42, 0.45);
+    min-height: 1.2em;
+  }
+  @media (prefers-color-scheme: dark) { .status { color: rgba(245, 240, 230, 0.45); } }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon-wrap"><img src="icon.png" alt="Go Hargeisa" /></div>
+
+    <svg class="signal" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M12 20.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5-1.5.67-1.5 1.5.67 1.5 1.5 1.5Z" fill="#0B5ED7"/>
+      <path d="M8.5 15.5a5 5 0 0 1 7 0" stroke="#0B5ED7" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M5 12a9.4 9.4 0 0 1 14 0" stroke="#0B5ED7" stroke-width="1.8" stroke-linecap="round" opacity="0.55"/>
+      <path d="M1.8 8.5a13.9 13.9 0 0 1 20.4 0" stroke="#0B5ED7" stroke-width="1.8" stroke-linecap="round" opacity="0.3"/>
+      <line x1="3" y1="3" x2="21" y2="21" stroke="#EF4444" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+
+    <div class="lang-block">
+      <h1>You're offline</h1>
+      <p>Go Hargeisa needs an internet connection. Check your connection and try again.</p>
+    </div>
+    <div class="lang-block" dir="rtl">
+      <p style="font-weight:600; color: inherit;">أنت غير متصل بالإنترنت</p>
+      <p>يحتاج التطبيق إلى اتصال بالإنترنت. تحقق من اتصالك وحاول مرة أخرى.</p>
+    </div>
+    <div class="lang-block">
+      <p style="font-weight:600; color: inherit;">Ma xidhna internetka</p>
+      <p>Go Hargeisa wuxuu u baahan yahay xiriir internet ah. Hubi xiriirkaaga oo isku day mar kale.</p>
+    </div>
+
+    <button id="retry-btn" type="button">
+      <span class="spinner" id="spinner"></span>
+      <span id="retry-label">Try Again</span>
+    </button>
+    <div class="status" id="status"></div>
+  </div>
+
+  <script>
+    (function () {
+      var APP_URL = 'https://gohargeisa.com/';
+      var btn = document.getElementById('retry-btn');
+      var spinner = document.getElementById('spinner');
+      var label = document.getElementById('retry-label');
+      var status = document.getElementById('status');
+      var checking = false;
+      var pollHandle = null;
+
+      function setChecking(isChecking) {
+        checking = isChecking;
+        btn.disabled = isChecking;
+        spinner.classList.toggle('show', isChecking);
+        label.textContent = isChecking ? 'Checking...' : 'Try Again';
+      }
+
+      function goToApp() {
+        window.location.href = APP_URL;
+      }
+
+      // A HEAD request to the real site is a much more reliable reachability
+      // signal than navigator.onLine, which only reflects whether the device
+      // has *an* active network interface (e.g. still "online" on wifi with
+      // no real internet route).
+      function checkAndRetry(auto) {
+        if (checking) return;
+        setChecking(true);
+        status.textContent = '';
+
+        fetch(APP_URL, { method: 'HEAD', mode: 'no-cors', cache: 'no-store' })
+          .then(function () {
+            goToApp();
+          })
+          .catch(function () {
+            setChecking(false);
+            if (!auto) status.textContent = 'Still no connection — we\'ll keep trying automatically.';
+          });
+      }
+
+      btn.addEventListener('click', function () { checkAndRetry(false); });
+
+      window.addEventListener('online', function () { checkAndRetry(true); });
+
+      // Fallback poll in case the online/offline events never fire (common
+      // on some Android OEM WebViews) — every 5s, quietly.
+      pollHandle = setInterval(function () { checkAndRetry(true); }, 5000);
+
+      window.addEventListener('beforeunload', function () {
+        if (pollHandle) clearInterval(pollHandle);
+      });
+    })();
+  </script>
+</body>
+</html>

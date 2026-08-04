@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brand colors — matches lib/config (primary blue) and manifest.json's
+         background_color (cream). styles.xml referenced colorPrimary/
+         colorPrimaryDark/colorAccent with no colors.xml defining them at
+         all, which would fail the resource-linking step at build time —
+         this file didn't exist until now. -->
+    <color name="colorPrimary">#0B5ED7</color>
+    <color name="colorPrimaryDark">#084BB0</color>
+    <color name="colorAccent">#0B5ED7</color>
+    <color name="splashBackground">#FBF8F3</color>
+    <!-- ic_launcher_background is already defined in
+         values/ic_launcher_background.xml — not repeated here, Android
+         treats a same-name resource in two files as a hard duplicate-
+         resource build error, not a harmless override. -->
+</resources>
