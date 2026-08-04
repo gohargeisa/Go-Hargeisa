@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { FileText, Mail, ShieldAlert, UserCog } from "lucide-react";
+import { FileText, Mail, ShieldAlert, UserCog, Building2, XCircle, Scale, History } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
 import { PremiumPageHero } from "@/components/shared/premium-page-hero";
@@ -31,7 +31,11 @@ export default async function TermsPage({
   const sections = [
     { icon: FileText, title: t("useOfContentTitle"), body: t("useOfContentText") },
     { icon: UserCog, title: t("userAccountsTitle"), body: t("userAccountsText") },
+    { icon: Building2, title: t("bookingsTitle"), body: t("bookingsText") },
     { icon: ShieldAlert, title: t("liabilityTitle"), body: t("liabilityText") },
+    { icon: XCircle, title: t("terminationTitle"), body: t("terminationText") },
+    { icon: Scale, title: t("governingLawTitle"), body: t("governingLawText") },
+    { icon: History, title: t("changesTitle"), body: t("changesText") },
     { icon: Mail, title: t("contactTitle"), body: t("contactText") },
   ];
 
@@ -53,7 +57,7 @@ export default async function TermsPage({
 
         <div className="mt-10 space-y-6">
           {sections.map(({ icon: Icon, title, body }, i) => (
-            <Reveal key={title} delay={Math.min(0.06 + i * 0.06, 0.24)}>
+            <Reveal key={title} delay={Math.min(0.06 + i * 0.06, 0.48)}>
               <div className="rounded-xl3 border border-ink/8 bg-white p-6 shadow-soft dark:border-white/10 dark:bg-white/[0.03] sm:p-8">
                 <div className="flex items-center gap-3">
                   <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
