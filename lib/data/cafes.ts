@@ -68,6 +68,7 @@ async function _getCafeBySlug(slug: string, locale?: string): Promise<Cafe | nul
     .select("*, profiles(full_name)")
     .eq("listing_type", "cafe")
     .eq("listing_id", cafe.id)
+    .eq("status", "published")
     .order("created_at", { ascending: false });
 
   const reviews = (reviewRows ?? []).map((r: any) => mapReview(r, r.profiles?.full_name ?? "Guest"));

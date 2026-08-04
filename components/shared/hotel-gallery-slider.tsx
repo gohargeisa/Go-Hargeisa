@@ -34,7 +34,7 @@ export function HotelGallerySlider({
 
   const slides: LightboxSlide[] = [
     { url: cover, alt },
-    ...images.map((img, i) => ({ url: img.url, alt: img.alt || `${alt} — photo ${i + 2}` })),
+    ...images.map((img, i) => ({ url: img.url, alt: img.alt || `${alt} — photo ${i + 2}`, caption: img.caption })),
   ];
 
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: slides.length > 1, align: "start" });

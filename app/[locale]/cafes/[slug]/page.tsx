@@ -2,10 +2,11 @@ import { safeJsonLd } from "@/lib/utils/json-ld";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { ExternalLink, FileText, Instagram, Facebook, MapPin, Navigation } from "lucide-react";
+import { ExternalLink, FileText, MapPin, Navigation } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
-import { getCafeBySlug, getAllCafeSlugs, getCafes } from "@/lib/data/cafes";
+import { getCafeBySlug, getAllCafeSlugs } from "@/lib/data/cafes";
+import { getRelatedListings } from "@/lib/data/related-listings";
 import { getPublicOffersForListing } from "@/lib/data/offers";
 import { getSiteSettings } from "@/lib/actions/settings";
 import { ListingOffersSection } from "@/components/shared/listing-offers-section";
@@ -18,8 +19,9 @@ import { HotelGallerySlider } from "@/components/shared/hotel-gallery-slider";
 import { HotelNavTabs, type HotelNavTab } from "@/components/shared/hotel-nav-tabs";
 import { BusinessPhotoGallery } from "@/components/shared/business-photo-gallery";
 import { CAFE_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
-import { CAFE_AMENITY_ICON, type CafeAmenityCode } from "@/lib/utils/cafe-amenities";
-import { normalizeExternalUrl } from "@/lib/utils/normalize-url";
+import { AmenitiesSection, hasAmenities } from "@/components/shared/amenities-section";
+import { SocialLinks } from "@/components/shared/social-links";
+import { VideoGallery } from "@/components/shared/video-gallery";
 import { formatDayRange, formatTime12h } from "@/lib/utils/opening-hours";
 import { OpenStatusBadge } from "@/components/shared/open-status-badge";
 import { CafeActionCard } from "@/components/shared/cafe-action-card";
@@ -28,6 +30,9 @@ import { ListingCard } from "@/components/shared/listing-card";
 import { ReviewsSection } from "@/components/shared/reviews-section";
 import { ReviewForm } from "@/components/shared/review-form";
 import { getMyReviewForListing } from "@/lib/data/reviews";
+import { isListingFavorited } from "@/lib/data/favorites";
+import { getNearbyListings } from "@/lib/data/nearby";
+import { NearbyListings } from "@/components/shared/nearby-listings";
 import { resolveMapsUrl, resolveDirectionsUrl } from "@/lib/utils/google-maps";
 import { Reveal } from "@/components/home/reveal";
 import { PrimaryButton, SecondaryButton } from "@/components/shared/buttons";
@@ -68,37 +73,35 @@ export default async function CafeDetailPage({
   const tNav = await getTranslations("nav");
   const td = await getTranslations("detail");
   const th = await getTranslations("hotelDetail");
-  const ta = await getTranslations("cafeAmenities");
   const tw = await getTranslations("weekdays");
-  const [allCafes, siteSettings, offers, myReview] = await Promise.all([
-    getCafes({ locale }),
+  const tl = await getTranslations("listings");
+  const tn = await getTranslations("nearby");
+  const [similarCafes, siteSettings, offers, myReview, isFavorited, nearbyPlaces] = await Promise.all([
+    getRelatedListings("cafe", cafe.id),
     getSiteSettings(),
     getPublicOffersForListing("cafe", cafe.id),
     getMyReviewForListing("cafe", cafe.id),
+    isListingFavorited("cafe", cafe.id),
+    getNearbyListings({ lat: cafe.location.lat, lng: cafe.location.lng, excludeType: "cafe", excludeId: cafe.id }),
   ]);
-  const similarCafes = allCafes.filter((c) => c.id !== cafe.id).slice(0, 4);
   const whatsappFallback = (siteSettings as { whatsapp_number?: string } | null)?.whatsapp_number ?? undefined;
 
   const googleMapsHref = resolveMapsUrl(cafe.location, cafe.googleMapsUrl);
   const directionsHref = resolveDirectionsUrl(cafe.location);
-  const amenityList: CafeAmenityCode[] =
-    cafe.amenities && cafe.amenities.length > 0
-      ? (cafe.amenities.filter((a): a is CafeAmenityCode => a in CAFE_AMENITY_ICON) as CafeAmenityCode[])
-      : [...(cafe.wifi ? (["wifi"] as const) : []), ...(cafe.workingSpace ? (["work_friendly"] as const) : [])];
-  const hasAmenities = amenityList.length > 0;
-  const instagramHref = cafe.socialInstagram ? normalizeExternalUrl(cafe.socialInstagram) : undefined;
-  const facebookHref = cafe.socialFacebook ? normalizeExternalUrl(cafe.socialFacebook) : undefined;
+  const showAmenities = hasAmenities(cafe.amenitiesV2);
 
   const hasStructuredHours = cafe.openingHoursStructured && cafe.openingHoursStructured.length > 0;
+  const hasHoursInfo = hasStructuredHours || cafe.is24Hours || cafe.temporarilyClosed || cafe.permanentlyClosed;
 
   const navTabs: HotelNavTab[] = [
     { id: "overview", label: td("overview") },
     ...(offers.length > 0 ? [{ id: "offers", label: td("offersTabLabel") }] : []),
-    ...(hasStructuredHours ? [{ id: "hours", label: td("openingHoursByDay") }] : []),
+    ...(hasHoursInfo ? [{ id: "hours", label: td("openingHoursByDay") }] : []),
     ...(cafe.specialDrinks.length > 0 ? [{ id: "specialties", label: td("coffeeSpecialties") }] : []),
     ...(cafe.menuHighlights.length > 0 || cafe.menuPdfUrl ? [{ id: "menu", label: td("menuHighlights") }] : []),
     ...(cafe.gallery.length > 0 ? [{ id: "gallery", label: t("gallery") }] : []),
-    ...(hasAmenities ? [{ id: "amenities", label: t("amenities") }] : []),
+    ...(cafe.videos && cafe.videos.length > 0 ? [{ id: "videos", label: td("videoGallery") }] : []),
+    ...(showAmenities ? [{ id: "amenities", label: t("amenities") }] : []),
     { id: "reviews", label: t("reviews") },
     { id: "location", label: td("location") },
   ];
@@ -151,38 +154,31 @@ export default async function CafeDetailPage({
         listingId={cafe.id}
         name={cafe.name}
         phone={cafe.phone}
+        website={cafe.website}
+        email={cafe.email}
         whatsappFallback={whatsappFallback}
         showPrimary={false}
       />
 
-      {(instagramHref || facebookHref) && (
-        <Reveal delay={0.08}>
-          <div className="container-px mx-auto mt-3 flex items-center justify-center gap-3">
-            {instagramHref && (
-              <a
-                href={instagramHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={td("followInstagram")}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-ink/15 text-ink/60 transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-sand/60"
-              >
-                <Instagram size={17} aria-hidden="true" />
-              </a>
-            )}
-            {facebookHref && (
-              <a
-                href={facebookHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={td("followFacebook")}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-ink/15 text-ink/60 transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-sand/60"
-              >
-                <Facebook size={17} aria-hidden="true" />
-              </a>
-            )}
-          </div>
-        </Reveal>
-      )}
+      <SocialLinks
+        instagram={cafe.socialInstagram}
+        facebook={cafe.socialFacebook}
+        tiktok={cafe.socialTiktok}
+        snapchat={cafe.socialSnapchat}
+        x={cafe.socialX}
+        youtube={cafe.socialYoutube}
+        telegram={cafe.socialTelegram}
+        labels={{
+          instagram: td("followInstagram"),
+          facebook: td("followFacebook"),
+          tiktok: td("followTiktok"),
+          snapchat: td("followSnapchat"),
+          x: td("followX"),
+          youtube: td("followYoutube"),
+          telegram: td("followTelegram"),
+        }}
+        className="container-px mx-auto mt-3 justify-center"
+      />
 
       <CafeQuickInfoCards
         rating={cafe.rating}
@@ -220,7 +216,7 @@ export default async function CafeDetailPage({
             </Reveal>
           )}
 
-          {hasStructuredHours && (
+          {hasHoursInfo && (
             <Reveal>
               <section id="hours" aria-labelledby="hours-heading" className="scroll-mt-36">
                 <div className="mb-5 flex flex-wrap items-center gap-3">
@@ -228,26 +224,37 @@ export default async function CafeDetailPage({
                     🕒 {td("openingHoursByDay")}
                   </h2>
                   <OpenStatusBadge
-                    groups={cafe.openingHoursStructured!}
-                    openLabel={td("openNow")}
-                    closedLabel={td("closedNow")}
+                    groups={cafe.openingHoursStructured ?? []}
+                    is24Hours={cafe.is24Hours}
+                    temporarilyClosed={cafe.temporarilyClosed}
+                    permanentlyClosed={cafe.permanentlyClosed}
+                    labels={{
+                      open: td("openNow"),
+                      closed: td("closedNow"),
+                      opensAt: (time) => td("opensAt", { time }),
+                      closesInMinutes: (minutes) => td("closesInMinutes", { minutes }),
+                      temporarilyClosed: td("temporarilyClosedNow"),
+                      permanentlyClosed: td("permanentlyClosedNow"),
+                    }}
                   />
                 </div>
-                <div className="divide-y divide-ink/8 overflow-hidden rounded-xl2 border border-ink/8 dark:divide-white/10 dark:border-white/10">
-                  {cafe.openingHoursStructured!.map((group, i) => (
-                    <div
-                      key={i}
-                      className="flex flex-col gap-1 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:p-5"
-                    >
-                      <span className="min-w-0 break-words text-sm font-semibold">
-                        {formatDayRange(group.days, tw)}
-                      </span>
-                      <span className="shrink-0 text-sm text-ink/70 dark:text-sand/70">
-                        {formatTime12h(group.open)} – {formatTime12h(group.close)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                {hasStructuredHours && (
+                  <div className="divide-y divide-ink/8 overflow-hidden rounded-xl2 border border-ink/8 dark:divide-white/10 dark:border-white/10">
+                    {cafe.openingHoursStructured!.map((group, i) => (
+                      <div
+                        key={i}
+                        className="flex flex-col gap-1 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:p-5"
+                      >
+                        <span className="min-w-0 break-words text-sm font-semibold">
+                          {formatDayRange(group.days, tw)}
+                        </span>
+                        <span className="shrink-0 text-sm text-ink/70 dark:text-sand/70">
+                          {formatTime12h(group.open)} – {formatTime12h(group.close)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </section>
             </Reveal>
           )}
@@ -320,26 +327,24 @@ export default async function CafeDetailPage({
             </Reveal>
           )}
 
-          {hasAmenities && (
+          {cafe.videos && cafe.videos.length > 0 && (
+            <Reveal>
+              <section id="videos" aria-labelledby="video-gallery-heading" className="scroll-mt-36">
+                <h2 id="video-gallery-heading" className="mb-5 font-display text-2xl font-semibold">
+                  {td("videoGallery")}
+                </h2>
+                <VideoGallery videos={cafe.videos} watchOnLabel={(platform) => td("watchOn", { platform })} />
+              </section>
+            </Reveal>
+          )}
+
+          {showAmenities && (
             <Reveal>
               <section id="amenities" aria-labelledby="amenities-heading" className="scroll-mt-36">
                 <h2 id="amenities-heading" className="mb-5 font-display text-2xl font-semibold">
                   {t("amenities")}
                 </h2>
-                <ul className="flex flex-wrap gap-2.5">
-                  {amenityList.map((code) => {
-                    const Icon = CAFE_AMENITY_ICON[code];
-                    return (
-                      <li
-                        key={code}
-                        className="inline-flex items-center gap-2 rounded-xl2 border border-ink/8 bg-white px-3.5 py-2.5 text-sm font-medium text-ink dark:border-white/10 dark:bg-white/[0.03] dark:text-sand"
-                      >
-                        <Icon size={16} className="shrink-0 text-primary" aria-hidden="true" />
-                        {ta(code)}
-                      </li>
-                    );
-                  })}
-                </ul>
+                <AmenitiesSection amenities={cafe.amenitiesV2} />
               </section>
             </Reveal>
           )}
@@ -377,7 +382,13 @@ export default async function CafeDetailPage({
               <h2 id="reviews-heading" className="mb-5 font-display text-2xl font-semibold">
                 {t("reviews")}
               </h2>
-              <ReviewsSection rating={cafe.rating} reviewCount={cafe.reviewCount} reviews={cafe.reviews} />
+              <ReviewsSection
+                rating={cafe.rating}
+                reviewCount={cafe.reviewCount}
+                reviews={cafe.reviews}
+                locale={locale}
+                pathToRevalidate={`/${locale}/cafes/${cafe.slug}`}
+              />
               <div className="mt-6">
                 <ReviewForm
                   key={myReview?.id ?? "new"}
@@ -398,13 +409,26 @@ export default async function CafeDetailPage({
             cafeId={cafe.id}
             name={cafe.name}
             openingHoursStructured={cafe.openingHoursStructured}
+            is24Hours={cafe.is24Hours}
+            temporarilyClosed={cafe.temporarilyClosed}
+            permanentlyClosed={cafe.permanentlyClosed}
             hoursLabel={t("openingHours")}
-            openNowLabel={td("openNow")}
-            closedLabel={td("closedNow")}
+            statusLabels={{
+              open: td("openNow"),
+              closed: td("closedNow"),
+              opensAt: (time) => td("opensAt", { time }),
+              closesInMinutes: (minutes) => td("closesInMinutes", { minutes }),
+              temporarilyClosed: td("temporarilyClosedNow"),
+              permanentlyClosed: td("permanentlyClosedNow"),
+            }}
             viewHoursLabel={td("viewHours")}
             phone={cafe.phone}
             locale={locale}
             callLabel={th("call")}
+            initiallyFavorited={isFavorited}
+            favoriteCount={cafe.favoriteCount}
+            addFavoriteLabel={tl("addToFavorites", { name: cafe.name })}
+            removeFavoriteLabel={tl("removeFromFavorites", { name: cafe.name })}
           />
         </aside>
       </div>
@@ -434,6 +458,19 @@ export default async function CafeDetailPage({
                   </div>
                 ))}
               </div>
+            </Reveal>
+          </div>
+        </section>
+      )}
+
+      {nearbyPlaces.length > 0 && (
+        <section className="border-t border-ink/8 bg-white py-14 dark:border-white/10 dark:bg-white/[0.03] sm:py-20">
+          <div className="container-px mx-auto">
+            <Reveal>
+              <h2 className="mb-6 font-display text-2xl font-semibold sm:text-3xl">{tn("nearbyPlaces")}</h2>
+            </Reveal>
+            <Reveal delay={0.1}>
+              <NearbyListings listings={nearbyPlaces} locale={locale} distanceLabel={(km) => tn("distanceAway", { km })} />
             </Reveal>
           </div>
         </section>

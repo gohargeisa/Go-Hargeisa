@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import Image from "next/image";
 import { Phone, Clock, MapPin, Globe, ImageOff, MessageCircle, Mail, Images } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -11,10 +12,11 @@ import { cityServiceCategoryMeta } from "@/lib/config/city-service-categories";
 import { cityServiceCategorySupportsGallery } from "@/lib/config/gallery-eligibility";
 import type { CityService } from "@/types";
 
-export function CityServiceCard({ service }: { service: CityService }) {
+export function CityServiceCard({ service, locale }: { service: CityService; locale: string }) {
   const t = useTranslations("cityServices");
   const { icon: CategoryIcon, titleKey } = cityServiceCategoryMeta(service.category);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const href = `/${locale}/city-services/${service.slug}`;
 
   // A category that doesn't support galleries only ever gets its single
   // cover photo — gallery.length is irrelevant there even if data exists.
@@ -52,19 +54,21 @@ export function CityServiceCard({ service }: { service: CityService }) {
               </span>
             </button>
           ) : (
-            <Image
-              src={service.image}
-              alt={service.name}
-              fill
-              loading="lazy"
-              sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-              className="object-cover"
-            />
+            <Link href={href} className="block h-full w-full" aria-label={service.name}>
+              <Image
+                src={service.image}
+                alt={service.name}
+                fill
+                loading="lazy"
+                sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                className="object-cover transition-transform duration-300 ease-premium hover:scale-105"
+              />
+            </Link>
           )
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-ink/25 dark:text-sand/25">
+          <Link href={href} aria-label={service.name} className="flex h-full w-full items-center justify-center text-ink/25 dark:text-sand/25">
             <ImageOff size={22} aria-hidden="true" />
-          </div>
+          </Link>
         )}
         <span className="absolute start-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-2.5 py-1 text-xs font-semibold text-ink shadow-sm backdrop-blur dark:bg-ink/85 dark:text-white">
           <CategoryIcon size={12} className="text-primary" aria-hidden="true" />
@@ -77,7 +81,9 @@ export function CityServiceCard({ service }: { service: CityService }) {
       )}
 
       <div className="flex flex-1 flex-col p-5">
-        <h3 className="font-display text-lg font-bold text-ink dark:text-white">{service.name}</h3>
+        <Link href={href}>
+          <h3 className="font-display text-lg font-bold text-ink transition-colors hover:text-primary dark:text-white">{service.name}</h3>
+        </Link>
         {service.description && (
           <p className="mt-1.5 text-sm text-ink/60 dark:text-sand/60">{service.description}</p>
         )}
@@ -120,12 +126,17 @@ export function CityServiceCard({ service }: { service: CityService }) {
           )}
         </div>
 
-        {service.mapsUrl && (
-          <SecondaryButton href={service.mapsUrl} external fullWidth className="mt-4">
-            <MapPin size={14} aria-hidden="true" />
-            {t("viewOnMaps")}
+        <div className="mt-4 flex gap-2.5">
+          <SecondaryButton href={href} fullWidth>
+            {t("viewDetails")}
           </SecondaryButton>
-        )}
+          {service.mapsUrl && (
+            <SecondaryButton href={service.mapsUrl} external fullWidth>
+              <MapPin size={14} aria-hidden="true" />
+              {t("viewOnMaps")}
+            </SecondaryButton>
+          )}
+        </div>
       </div>
     </AnimatedCard>
   );

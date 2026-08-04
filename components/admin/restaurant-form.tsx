@@ -13,6 +13,7 @@ import { createRecord, updateRecord } from "@/lib/actions/admin";
 import { useUnsavedChangesWarning } from "@/lib/hooks/use-unsaved-changes-warning";
 import { RESTAURANT_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import { OpeningHoursEditor } from "@/components/shared/opening-hours-editor";
+import { AmenitiesPicker } from "@/components/admin/amenities-picker";
 import type { Locale } from "@/lib/i18n/config";
 import type { GalleryImage, MediaVideo, OpeningHoursGroup } from "@/types";
 
@@ -35,14 +36,23 @@ export interface RestaurantFormInput {
   email?: string;
   socialInstagram?: string;
   socialFacebook?: string;
+  socialTiktok?: string;
+  socialSnapchat?: string;
+  socialX?: string;
+  socialYoutube?: string;
+  socialTelegram?: string;
   cuisine: string[];
   priceRange: "$" | "$$" | "$$$";
   openingHours: string;
   openingHoursStructured: OpeningHoursGroup[];
+  is24Hours: boolean;
+  temporarilyClosed: boolean;
+  permanentlyClosed: boolean;
   menuHighlights: { name: string; price: string; description?: string }[];
   menuPdfUrl: string;
   reservable: boolean;
   featured: boolean;
+  amenitiesV2: string[];
 }
 
 const CUISINE_SUGGESTIONS = ["Somali", "Grill", "International", "Seafood", "Fast Food", "Ethiopian"];
@@ -79,14 +89,23 @@ export function RestaurantForm({
     email: initial?.email ?? "",
     socialInstagram: initial?.socialInstagram ?? "",
     socialFacebook: initial?.socialFacebook ?? "",
+    socialTiktok: initial?.socialTiktok ?? "",
+    socialSnapchat: initial?.socialSnapchat ?? "",
+    socialX: initial?.socialX ?? "",
+    socialYoutube: initial?.socialYoutube ?? "",
+    socialTelegram: initial?.socialTelegram ?? "",
     cuisine: initial?.cuisine ?? [],
     priceRange: initial?.priceRange ?? "$$",
     openingHours: initial?.openingHours ?? "",
     openingHoursStructured: initial?.openingHoursStructured ?? [],
+    is24Hours: initial?.is24Hours ?? false,
+    temporarilyClosed: initial?.temporarilyClosed ?? false,
+    permanentlyClosed: initial?.permanentlyClosed ?? false,
     menuHighlights: initial?.menuHighlights ?? [],
     menuPdfUrl: initial?.menuPdfUrl ?? "",
     reservable: initial?.reservable ?? false,
     featured: initial?.featured ?? false,
+    amenitiesV2: initial?.amenitiesV2 ?? [],
   });
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -139,14 +158,23 @@ export function RestaurantForm({
       email: form.email || null,
       social_instagram: form.socialInstagram || null,
       social_facebook: form.socialFacebook || null,
+      social_tiktok: form.socialTiktok || null,
+      social_snapchat: form.socialSnapchat || null,
+      social_x: form.socialX || null,
+      social_youtube: form.socialYoutube || null,
+      social_telegram: form.socialTelegram || null,
       cuisine: form.cuisine,
       price_range: form.priceRange,
       opening_hours: form.openingHours,
       opening_hours_structured: form.openingHoursStructured,
+      is_24_hours: form.is24Hours,
+      temporarily_closed: form.temporarilyClosed,
+      permanently_closed: form.permanentlyClosed,
       menu: form.menuHighlights,
       menu_pdf_url: form.menuPdfUrl || null,
       reservable: form.reservable,
       featured: form.featured,
+      amenities_v2: form.amenitiesV2,
     };
     const revalidatePaths = [`/${locale}/admin/restaurants`, `/${locale}/restaurants`, `/${locale}`];
     const redirectTo = `/${locale}/admin/restaurants`;
@@ -190,6 +218,8 @@ export function RestaurantForm({
         replaceAriaLabel={t("replaceVideoAriaLabel")}
         moveEarlierAriaLabel={t("moveVideoEarlierAriaLabel")}
         moveLaterAriaLabel={t("moveVideoLaterAriaLabel")}
+        pasteUrlPlaceholder={t("pasteVideoUrlPlaceholder")}
+        addUrlLabel={t("addVideoUrlLabel")}
       />
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -246,6 +276,10 @@ export function RestaurantForm({
         </Field>
       </div>
 
+      <Field label={t("websiteLabel")}>
+        <input type="url" value={form.website} onChange={(e) => update("website", e.target.value)} className={inputClass} placeholder="https://…" />
+      </Field>
+
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label={t("socialInstagramLabel")}>
           <input type="url" value={form.socialInstagram} onChange={(e) => update("socialInstagram", e.target.value)} className={inputClass} placeholder="https://instagram.com/…" />
@@ -254,6 +288,30 @@ export function RestaurantForm({
           <input type="url" value={form.socialFacebook} onChange={(e) => update("socialFacebook", e.target.value)} className={inputClass} placeholder="https://facebook.com/…" />
         </Field>
       </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label={t("socialTiktokLabel")}>
+          <input type="url" value={form.socialTiktok} onChange={(e) => update("socialTiktok", e.target.value)} className={inputClass} placeholder="https://tiktok.com/@…" />
+        </Field>
+        <Field label={t("socialSnapchatLabel")}>
+          <input type="url" value={form.socialSnapchat} onChange={(e) => update("socialSnapchat", e.target.value)} className={inputClass} placeholder="https://snapchat.com/add/…" />
+        </Field>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label={t("socialXLabel")}>
+          <input type="url" value={form.socialX} onChange={(e) => update("socialX", e.target.value)} className={inputClass} placeholder="https://x.com/…" />
+        </Field>
+        <Field label={t("socialYoutubeLabel")}>
+          <input type="url" value={form.socialYoutube} onChange={(e) => update("socialYoutube", e.target.value)} className={inputClass} placeholder="https://youtube.com/@…" />
+        </Field>
+      </div>
+
+      <Field label={t("socialTelegramLabel")}>
+        <input type="url" value={form.socialTelegram} onChange={(e) => update("socialTelegram", e.target.value)} className={inputClass} placeholder="https://t.me/…" />
+      </Field>
+
+      <AmenitiesPicker listingType="restaurant" values={form.amenitiesV2} onChange={(v) => update("amenitiesV2", v)} label={t("amenitiesLabel")} />
 
       <OpeningHoursEditor
         value={form.openingHoursStructured}
@@ -264,6 +322,15 @@ export function RestaurantForm({
         openLabel={t("hoursOpenLabel")}
         closeLabel={t("hoursCloseLabel")}
         removeAriaLabel={t("removeHoursGroupAriaLabel")}
+        is24Hours={form.is24Hours}
+        onIs24HoursChange={(v) => update("is24Hours", v)}
+        is24HoursLabel={t("is24HoursLabel")}
+        temporarilyClosed={form.temporarilyClosed}
+        onTemporarilyClosedChange={(v) => update("temporarilyClosed", v)}
+        temporarilyClosedLabel={t("temporarilyClosedLabel")}
+        permanentlyClosed={form.permanentlyClosed}
+        onPermanentlyClosedChange={(v) => update("permanentlyClosed", v)}
+        permanentlyClosedLabel={t("permanentlyClosedLabel")}
       />
 
       <TagInput label={t("cuisineLabel")} values={form.cuisine} onChange={(v) => update("cuisine", v)} placeholder={t("tagInputPlaceholder")} suggestions={CUISINE_SUGGESTIONS} />

@@ -1,53 +1,8 @@
+import { cache } from "react";
 import { createPublicClient } from "@/lib/supabase/public";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
-import type { CityService, EssentialServiceCategory, GalleryImage } from "@/types";
-
-function toGallery(json: unknown): GalleryImage[] {
-  return Array.isArray(json) ? (json as unknown as { url: string; alt?: string; category?: string }[]) : [];
-}
-
-function mapCityService(
-  row: {
-    id: string;
-    category: EssentialServiceCategory;
-    name: string;
-    name_ar: string | null;
-    name_so: string | null;
-    description: string | null;
-    description_ar: string | null;
-    description_so: string | null;
-    phone: string | null;
-    whatsapp: string | null;
-    email: string | null;
-    opening_hours: string | null;
-    maps_url: string | null;
-    website: string | null;
-    image: string | null;
-    gallery: unknown;
-    status: "draft" | "published" | "archived";
-    featured: boolean;
-    sort_order: number;
-  },
-  locale?: string
-): CityService {
-  return {
-    id: row.id,
-    category: row.category,
-    name: (locale === "ar" && row.name_ar) || (locale === "so" && row.name_so) || row.name,
-    description: (locale === "ar" && row.description_ar) || (locale === "so" && row.description_so) || row.description,
-    phone: row.phone,
-    whatsapp: row.whatsapp,
-    email: row.email,
-    openingHours: row.opening_hours,
-    mapsUrl: row.maps_url,
-    website: row.website,
-    image: row.image,
-    gallery: toGallery(row.gallery),
-    status: row.status,
-    featured: row.featured,
-    sortOrder: row.sort_order,
-  };
-}
+import { mapCityService, mapReview } from "./mappers";
+import type { CityService, EssentialServiceCategory } from "@/types";
 
 export interface CityServiceCategoryGroup {
   category: EssentialServiceCategory;
@@ -87,7 +42,7 @@ export async function getCityServicesGroupedByCategory(locale?: string): Promise
 
   const byCategory = new Map<EssentialServiceCategory, CityService[]>();
   for (const row of data ?? []) {
-    const service = mapCityService(row, locale);
+    const service = mapCityService(row, [], locale);
     const list = byCategory.get(service.category);
     if (list) list.push(service);
     else byCategory.set(service.category, [service]);
@@ -105,4 +60,33 @@ export async function getCityServicesGroupedByCategory(locale?: string): Promise
 export async function getCityServiceCategoryCounts(): Promise<{ category: EssentialServiceCategory; count: number }[]> {
   const groups = await getCityServicesGroupedByCategory();
   return groups.map((g) => ({ category: g.category, count: g.items.length }));
+}
+
+async function _getCityServiceBySlug(slug: string, locale?: string): Promise<CityService | null> {
+  if (!isSupabaseConfigured()) return null;
+
+  const supabase = createPublicClient();
+  const { data: row, error } = await supabase.from("city_services").select("*").eq("slug", slug).single();
+  if (error || !row) return null;
+
+  const { data: reviewRows } = await supabase
+    .from("reviews")
+    .select("*, profiles(full_name)")
+    .eq("listing_type", "city_service")
+    .eq("listing_id", row.id)
+    .eq("status", "published")
+    .order("created_at", { ascending: false });
+
+  const reviews = (reviewRows ?? []).map((r: any) => mapReview(r, r.profiles?.full_name ?? "Guest"));
+  return mapCityService(row, reviews, locale);
+}
+
+/** Cached per-request: dedupes calls from generateMetadata + the page itself. */
+export const getCityServiceBySlug = cache(_getCityServiceBySlug);
+
+export async function getAllCityServiceSlugs(): Promise<string[]> {
+  if (!isSupabaseConfigured()) return [];
+  const supabase = createPublicClient();
+  const { data } = await supabase.from("city_services").select("slug").eq("status", "published");
+  return (data ?? []).map((row) => row.slug);
 }

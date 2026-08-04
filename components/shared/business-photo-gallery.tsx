@@ -44,6 +44,7 @@ export function BusinessPhotoGallery({
   const slides: LightboxSlide[] = filtered.map((img, i) => ({
     url: img.url,
     alt: img.alt || `${alt} — photo ${i + 1}`,
+    caption: img.caption,
   }));
 
   return (

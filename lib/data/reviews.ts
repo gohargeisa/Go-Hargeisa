@@ -2,14 +2,14 @@ import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { serviceHref } from "@/lib/utils/service-categories";
 import { mapReview } from "./mappers";
-import type { Review, ServiceCategory } from "@/types";
+import type { Review, ServiceCategory, PolymorphicListingType } from "@/types";
 
 /** The signed-in visitor's own review for a specific listing, if any — used
  * by the detail-page review form to switch from "leave a review" to "edit
  * your review" instead of letting them hit the one-review-per-listing
  * unique constraint blind. Returns null when signed out or not reviewed. */
 export async function getMyReviewForListing(
-  listingType: "hotel" | "restaurant" | "cafe" | "attraction" | "service",
+  listingType: PolymorphicListingType,
   listingId: string
 ): Promise<Review | null> {
   if (!isSupabaseConfigured()) return null;

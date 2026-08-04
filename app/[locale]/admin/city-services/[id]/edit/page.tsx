@@ -6,6 +6,7 @@ import type { Locale } from "@/lib/i18n/config";
 import { requireAdmin } from "@/lib/supabase/guards";
 import { createClient } from "@/lib/supabase/server";
 import { CityServiceForm } from "@/components/admin/city-service-form";
+import type { OpeningHoursGroup } from "@/types";
 
 export const metadata: Metadata = { title: "Edit City Service — Admin" };
 
@@ -47,6 +48,23 @@ export default async function EditCityServicePage({
           website: service.website ?? "",
           image: service.image ?? "",
           gallery: Array.isArray(service.gallery) ? (service.gallery as unknown as { url: string; alt?: string; category?: string }[]) : [],
+          videos: Array.isArray(service.videos) ? (service.videos as unknown as { url: string; caption?: string }[]) : [],
+          lat: service.lat,
+          lng: service.lng,
+          amenitiesV2: service.amenities_v2 ?? [],
+          openingHoursStructured: Array.isArray(service.opening_hours_structured)
+            ? (service.opening_hours_structured as unknown as OpeningHoursGroup[])
+            : [],
+          is24Hours: service.is_24_hours,
+          temporarilyClosed: service.temporarily_closed,
+          permanentlyClosed: service.permanently_closed,
+          socialInstagram: service.social_instagram ?? "",
+          socialFacebook: service.social_facebook ?? "",
+          socialTiktok: service.social_tiktok ?? "",
+          socialSnapchat: service.social_snapchat ?? "",
+          socialX: service.social_x ?? "",
+          socialYoutube: service.social_youtube ?? "",
+          socialTelegram: service.social_telegram ?? "",
           status: service.status === "archived" ? "draft" : service.status,
           featured: service.featured,
         }}

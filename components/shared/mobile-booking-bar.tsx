@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { ArrowUpRight, Check, Heart, MessageCircle, Phone, Share2 } from "lucide-react";
+import { ArrowUpRight, Check, MessageCircle, Phone, Share2 } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { getBookingHref } from "@/lib/utils/booking-href";
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
-import { toggleFavoriteAction } from "@/lib/actions/favorites";
+import { FavoriteButton } from "@/components/shared/favorite-button";
 import { HotelBookNowButton } from "@/components/shared/hotel-book-now-button";
 import type { HotelBookingCta } from "@/lib/utils/booking-cta";
 import type { BusinessListingType, HotelRoom } from "@/types";
@@ -57,27 +56,13 @@ export function MobileBookingBar({
   rooms?: HotelRoom[];
 }) {
   const t = useTranslations("hotelDetail");
-  const [favorited, setFavorited] = useState(initiallyFavorited);
   const [copied, setCopied] = useState(false);
-  const [isPending, startTransition] = useTransition();
-  const router = useRouter();
 
   const booking = getBookingHref({ website, phone });
   const whatsappNumber = phone || whatsappFallback;
   const whatsappHref = whatsappNumber
     ? toWhatsAppHref(whatsappNumber, `Hi, I'd like to know more about ${name}.`)
     : undefined;
-
-  function onSave() {
-    startTransition(async () => {
-      const result = await toggleFavoriteAction(listingType, listingId);
-      if (!result.ok) {
-        if (result.error === "sign-in-required") router.push(`/${locale}/auth/login`);
-        return;
-      }
-      setFavorited(result.favorited ?? false);
-    });
-  }
 
   async function onShare() {
     const url = typeof window !== "undefined" ? window.location.href : "";
@@ -120,20 +105,17 @@ export function MobileBookingBar({
         {copied ? <Check size={18} aria-hidden="true" /> : <Share2 size={18} aria-hidden="true" />}
       </button>
 
-      <button
-        type="button"
-        onClick={onSave}
-        disabled={isPending}
-        aria-label={t("save")}
+      <FavoriteButton
+        listingType={listingType}
+        listingId={listingId}
+        initiallyFavorited={initiallyFavorited}
+        locale={locale}
+        size={18}
+        showSpinner={false}
         className={`${ICON_BUTTON_CLASS} disabled:opacity-60`}
-      >
-        <Heart
-          size={18}
-          fill={favorited ? "#F4B400" : "none"}
-          color={favorited ? "#F4B400" : "currentColor"}
-          aria-hidden="true"
-        />
-      </button>
+        addLabel={t("save")}
+        removeLabel={t("save")}
+      />
 
       <div className="min-w-0 flex-1" />
 

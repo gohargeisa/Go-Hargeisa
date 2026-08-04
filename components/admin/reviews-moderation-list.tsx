@@ -4,8 +4,8 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { ExternalLink, Loader2, Star, Trash2, User, X } from "lucide-react";
-import { dismissReviewReport, deleteReportedReview } from "@/lib/actions/reviews-moderation";
+import { ExternalLink, EyeOff, Eye, Loader2, Star, Trash2, User, X } from "lucide-react";
+import { dismissReviewReport, deleteReportedReview, hideReview, unhideReview } from "@/lib/actions/reviews-moderation";
 import type { Locale } from "@/lib/i18n/config";
 import type { ReportedReview } from "@/lib/data/reviews";
 
@@ -61,6 +61,11 @@ export function ReviewsModerationList({ locale, reviews }: { locale: Locale; rev
 
               <div className="flex items-center gap-2">
                 <span className="rounded-full bg-red-500/10 px-2.5 py-1 text-xs font-bold text-red-600">{t("reportedBadge")}</span>
+                {review.status === "hidden" && (
+                  <span className="rounded-full bg-ink/8 px-2.5 py-1 text-xs font-bold text-ink/60 dark:bg-white/10 dark:text-sand/60">
+                    {t("hiddenBadge")}
+                  </span>
+                )}
                 <div className="flex gap-0.5 text-accent">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star key={i} size={12} fill={i < review.rating ? "currentColor" : "none"} strokeWidth={1.5} />
@@ -80,6 +85,25 @@ export function ReviewsModerationList({ locale, reviews }: { locale: Locale; rev
               >
                 {busy ? <Loader2 size={12} className="animate-spin" /> : <X size={12} />} {t("dismissReportAction")}
               </button>
+              {review.status === "hidden" ? (
+                <button
+                  type="button"
+                  onClick={() => run(review.id, () => unhideReview(review.id, revalidatePaths))}
+                  disabled={busy}
+                  className="flex h-8 items-center gap-1.5 rounded-lg border border-ink/10 px-2.5 text-xs font-semibold transition-colors hover:border-secondary-600 hover:text-secondary-700 disabled:opacity-60 dark:border-white/15"
+                >
+                  {busy ? <Loader2 size={12} className="animate-spin" /> : <Eye size={12} />} {t("unhideReviewAction")}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => run(review.id, () => hideReview(review.id, revalidatePaths))}
+                  disabled={busy}
+                  className="flex h-8 items-center gap-1.5 rounded-lg border border-ink/10 px-2.5 text-xs font-semibold transition-colors hover:border-ink/30 disabled:opacity-60 dark:border-white/15"
+                >
+                  {busy ? <Loader2 size={12} className="animate-spin" /> : <EyeOff size={12} />} {t("hideReviewAction")}
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => {

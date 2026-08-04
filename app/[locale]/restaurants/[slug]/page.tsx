@@ -5,7 +5,8 @@ import { getTranslations } from "next-intl/server";
 import { ExternalLink, FileText, MapPin, Navigation } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
-import { getRestaurantBySlug, getAllRestaurantSlugs, getRestaurants } from "@/lib/data/restaurants";
+import { getRestaurantBySlug, getAllRestaurantSlugs } from "@/lib/data/restaurants";
+import { getRelatedListings } from "@/lib/data/related-listings";
 import { getPublicOffersForListing } from "@/lib/data/offers";
 import { getSiteSettings } from "@/lib/actions/settings";
 import { ListingOffersSection } from "@/components/shared/listing-offers-section";
@@ -24,10 +25,18 @@ import { ListingCard } from "@/components/shared/listing-card";
 import { ReviewsSection } from "@/components/shared/reviews-section";
 import { ReviewForm } from "@/components/shared/review-form";
 import { getMyReviewForListing } from "@/lib/data/reviews";
+import { isListingFavorited } from "@/lib/data/favorites";
+import { getNearbyListings } from "@/lib/data/nearby";
+import { NearbyListings } from "@/components/shared/nearby-listings";
 import { resolveMapsUrl, resolveDirectionsUrl } from "@/lib/utils/google-maps";
 import { Reveal } from "@/components/home/reveal";
 import { PrimaryButton, SecondaryButton } from "@/components/shared/buttons";
 import { listingCategoryLabel } from "@/lib/utils/hotel-category";
+import { AmenitiesSection, hasAmenities } from "@/components/shared/amenities-section";
+import { SocialLinks } from "@/components/shared/social-links";
+import { VideoGallery } from "@/components/shared/video-gallery";
+import { OpenStatusBadge } from "@/components/shared/open-status-badge";
+import { formatDayRange, formatTime12h } from "@/lib/utils/opening-hours";
 
 // Public content changes infrequently; revalidate hourly instead of
 // rendering on every request (this page no longer reads cookies, so
@@ -65,20 +74,29 @@ export default async function RestaurantDetailPage({
   const tNav = await getTranslations("nav");
   const td = await getTranslations("detail");
   const th = await getTranslations("hotelDetail");
-  const [allRestaurants, siteSettings, offers, myReview] = await Promise.all([
-    getRestaurants(),
+  const tw = await getTranslations("weekdays");
+  const tl = await getTranslations("listings");
+  const tn = await getTranslations("nearby");
+  const [similarRestaurants, siteSettings, offers, myReview, isFavorited, nearbyPlaces] = await Promise.all([
+    getRelatedListings("restaurant", restaurant.id),
     getSiteSettings(),
     getPublicOffersForListing("restaurant", restaurant.id),
     getMyReviewForListing("restaurant", restaurant.id),
+    isListingFavorited("restaurant", restaurant.id),
+    getNearbyListings({ lat: restaurant.location.lat, lng: restaurant.location.lng, excludeType: "restaurant", excludeId: restaurant.id }),
   ]);
-  const similarRestaurants = allRestaurants.filter((r) => r.id !== restaurant.id).slice(0, 4);
   const whatsappFallback = (siteSettings as { whatsapp_number?: string } | null)?.whatsapp_number ?? undefined;
+  const hasStructuredHours = restaurant.openingHoursStructured && restaurant.openingHoursStructured.length > 0;
+  const hasHoursInfo = hasStructuredHours || restaurant.is24Hours || restaurant.temporarilyClosed || restaurant.permanentlyClosed;
 
   const navTabs: HotelNavTab[] = [
     { id: "overview", label: td("overview") },
     ...(offers.length > 0 ? [{ id: "offers", label: td("offersTabLabel") }] : []),
+    ...(hasHoursInfo ? [{ id: "hours", label: td("openingHoursByDay") }] : []),
     ...(restaurant.menuHighlights.length > 0 || restaurant.menuPdfUrl ? [{ id: "menu", label: td("menuHighlights") }] : []),
     ...(restaurant.gallery.length > 0 ? [{ id: "gallery", label: t("gallery") }] : []),
+    ...(restaurant.videos && restaurant.videos.length > 0 ? [{ id: "videos", label: td("videoGallery") }] : []),
+    ...(hasAmenities(restaurant.amenitiesV2) ? [{ id: "amenities", label: t("amenities") }] : []),
     { id: "reviews", label: t("reviews") },
     { id: "location", label: td("location") },
   ];
@@ -129,9 +147,30 @@ export default async function RestaurantDetailPage({
         name={restaurant.name}
         phone={restaurant.phone}
         website={restaurant.website}
+        email={restaurant.email}
         whatsappFallback={whatsappFallback}
         showPrimary={restaurant.reservable}
         primaryLabel={t("reserveTable")}
+      />
+
+      <SocialLinks
+        instagram={restaurant.socialInstagram}
+        facebook={restaurant.socialFacebook}
+        tiktok={restaurant.socialTiktok}
+        snapchat={restaurant.socialSnapchat}
+        x={restaurant.socialX}
+        youtube={restaurant.socialYoutube}
+        telegram={restaurant.socialTelegram}
+        labels={{
+          instagram: td("followInstagram"),
+          facebook: td("followFacebook"),
+          tiktok: td("followTiktok"),
+          snapchat: td("followSnapchat"),
+          x: td("followX"),
+          youtube: td("followYoutube"),
+          telegram: td("followTelegram"),
+        }}
+        className="container-px mx-auto mt-3 justify-center"
       />
 
       <RestaurantQuickInfoCards
@@ -168,6 +207,49 @@ export default async function RestaurantDetailPage({
                 couponLabel={td("offerCouponCodeLabel")}
                 validUntilLabel={(date) => td("offerValidUntil", { date })}
               />
+            </Reveal>
+          )}
+
+          {hasHoursInfo && (
+            <Reveal>
+              <section id="hours" aria-labelledby="hours-heading" className="scroll-mt-36">
+                <div className="mb-5 flex flex-wrap items-center gap-3">
+                  <h2 id="hours-heading" className="font-display text-2xl font-semibold">
+                    🕒 {td("openingHoursByDay")}
+                  </h2>
+                  <OpenStatusBadge
+                    groups={restaurant.openingHoursStructured ?? []}
+                    is24Hours={restaurant.is24Hours}
+                    temporarilyClosed={restaurant.temporarilyClosed}
+                    permanentlyClosed={restaurant.permanentlyClosed}
+                    labels={{
+                      open: td("openNow"),
+                      closed: td("closedNow"),
+                      opensAt: (time) => td("opensAt", { time }),
+                      closesInMinutes: (minutes) => td("closesInMinutes", { minutes }),
+                      temporarilyClosed: td("temporarilyClosedNow"),
+                      permanentlyClosed: td("permanentlyClosedNow"),
+                    }}
+                  />
+                </div>
+                {hasStructuredHours && (
+                  <div className="divide-y divide-ink/8 overflow-hidden rounded-xl2 border border-ink/8 dark:divide-white/10 dark:border-white/10">
+                    {restaurant.openingHoursStructured!.map((group, i) => (
+                      <div
+                        key={i}
+                        className="flex flex-col gap-1 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:p-5"
+                      >
+                        <span className="min-w-0 break-words text-sm font-semibold">
+                          {formatDayRange(group.days, tw)}
+                        </span>
+                        <span className="shrink-0 text-sm text-ink/70 dark:text-sand/70">
+                          {formatTime12h(group.open)} – {formatTime12h(group.close)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
             </Reveal>
           )}
 
@@ -223,6 +305,28 @@ export default async function RestaurantDetailPage({
             </Reveal>
           )}
 
+          {restaurant.videos && restaurant.videos.length > 0 && (
+            <Reveal>
+              <section id="videos" aria-labelledby="video-gallery-heading" className="scroll-mt-36">
+                <h2 id="video-gallery-heading" className="mb-5 font-display text-2xl font-semibold">
+                  {td("videoGallery")}
+                </h2>
+                <VideoGallery videos={restaurant.videos} watchOnLabel={(platform) => td("watchOn", { platform })} />
+              </section>
+            </Reveal>
+          )}
+
+          {hasAmenities(restaurant.amenitiesV2) && (
+            <Reveal>
+              <section id="amenities" aria-labelledby="amenities-heading" className="scroll-mt-36">
+                <h2 id="amenities-heading" className="mb-5 font-display text-2xl font-semibold">
+                  {t("amenities")}
+                </h2>
+                <AmenitiesSection amenities={restaurant.amenitiesV2} />
+              </section>
+            </Reveal>
+          )}
+
           <Reveal>
             <section id="location" aria-labelledby="location-heading" className="scroll-mt-36">
               <h2 id="location-heading" className="mb-5 font-display text-2xl font-semibold">
@@ -256,7 +360,13 @@ export default async function RestaurantDetailPage({
               <h2 id="reviews-heading" className="mb-5 font-display text-2xl font-semibold">
                 {t("reviews")}
               </h2>
-              <ReviewsSection rating={restaurant.rating} reviewCount={restaurant.reviewCount} reviews={restaurant.reviews} />
+              <ReviewsSection
+                rating={restaurant.rating}
+                reviewCount={restaurant.reviewCount}
+                reviews={restaurant.reviews}
+                locale={locale}
+                pathToRevalidate={`/${locale}/restaurants/${restaurant.slug}`}
+              />
               <div className="mt-6">
                 <ReviewForm
                   key={myReview?.id ?? "new"}
@@ -287,6 +397,10 @@ export default async function RestaurantDetailPage({
             locale={locale}
             contactLabel={tNav("contact")}
             visitWebsiteLabel={th("website")}
+            initiallyFavorited={isFavorited}
+            favoriteCount={restaurant.favoriteCount}
+            addFavoriteLabel={tl("addToFavorites", { name: restaurant.name })}
+            removeFavoriteLabel={tl("removeFromFavorites", { name: restaurant.name })}
           />
         </aside>
       </div>
@@ -316,6 +430,19 @@ export default async function RestaurantDetailPage({
                   </div>
                 ))}
               </div>
+            </Reveal>
+          </div>
+        </section>
+      )}
+
+      {nearbyPlaces.length > 0 && (
+        <section className="border-t border-ink/8 bg-white py-14 dark:border-white/10 dark:bg-white/[0.03] sm:py-20">
+          <div className="container-px mx-auto">
+            <Reveal>
+              <h2 className="mb-6 font-display text-2xl font-semibold sm:text-3xl">{tn("nearbyPlaces")}</h2>
+            </Reveal>
+            <Reveal delay={0.1}>
+              <NearbyListings listings={nearbyPlaces} locale={locale} distanceLabel={(km) => tn("distanceAway", { km })} />
             </Reveal>
           </div>
         </section>

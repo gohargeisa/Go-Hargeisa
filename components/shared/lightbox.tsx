@@ -8,6 +8,7 @@ import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 export interface LightboxSlide {
   url: string;
   alt: string;
+  caption?: string;
 }
 
 const SWIPE_THRESHOLD_PX = 50;
@@ -169,6 +170,10 @@ export function Lightbox({
           </>
         )}
       </div>
+
+      {slide.caption && (
+        <p className="px-4 pb-4 text-center text-sm text-white/70 sm:px-6">{slide.caption}</p>
+      )}
     </div>
   );
 }

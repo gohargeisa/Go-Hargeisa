@@ -10,10 +10,12 @@ import { HOTEL_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import { HotelRoomsManager, type HotelRoomManagerRow } from "@/components/admin/hotel-rooms-manager";
 import { GoogleMapsLocationField } from "@/components/admin/google-maps-location-field";
 import { Field, TagInput, inputClass } from "@/components/admin/form-shared";
+import { AmenitiesPicker } from "@/components/admin/amenities-picker";
+import { OpeningHoursEditor } from "@/components/shared/opening-hours-editor";
 import { createRecord, updateRecord } from "@/lib/actions/admin";
 import { useUnsavedChangesWarning } from "@/lib/hooks/use-unsaved-changes-warning";
 import type { Locale } from "@/lib/i18n/config";
-import type { GalleryImage, MediaVideo, HotelBookingMode, HotelExternalBookingOption } from "@/types";
+import type { GalleryImage, MediaVideo, HotelBookingMode, HotelExternalBookingOption, OpeningHoursGroup } from "@/types";
 
 const EXTERNAL_BOOKING_OPTIONS: HotelExternalBookingOption[] = ["website", "booking_com", "whatsapp", "custom_url"];
 
@@ -36,8 +38,18 @@ export interface HotelFormInput {
   email?: string;
   socialInstagram?: string;
   socialFacebook?: string;
+  socialTiktok?: string;
+  socialSnapchat?: string;
+  socialX?: string;
+  socialYoutube?: string;
+  socialTelegram?: string;
   priceRange: "$" | "$$" | "$$$" | "$$$$";
   amenities: string[];
+  amenitiesV2: string[];
+  openingHoursStructured: OpeningHoursGroup[];
+  is24Hours: boolean;
+  temporarilyClosed: boolean;
+  permanentlyClosed: boolean;
   checkInTime: string;
   checkOutTime: string;
   languages: string[];
@@ -76,6 +88,7 @@ export function HotelForm({
   initialRooms?: HotelRoomManagerRow[];
 }) {
   const t = useTranslations("admin");
+  const tw = useTranslations("weekdays");
   const [form, setForm] = useState<HotelFormInput>({
     slug: initial?.slug ?? "",
     name: initial?.name ?? "",
@@ -95,8 +108,18 @@ export function HotelForm({
     email: initial?.email ?? "",
     socialInstagram: initial?.socialInstagram ?? "",
     socialFacebook: initial?.socialFacebook ?? "",
+    socialTiktok: initial?.socialTiktok ?? "",
+    socialSnapchat: initial?.socialSnapchat ?? "",
+    socialX: initial?.socialX ?? "",
+    socialYoutube: initial?.socialYoutube ?? "",
+    socialTelegram: initial?.socialTelegram ?? "",
     priceRange: initial?.priceRange ?? "$$",
     amenities: initial?.amenities ?? [],
+    amenitiesV2: initial?.amenitiesV2 ?? [],
+    openingHoursStructured: initial?.openingHoursStructured ?? [],
+    is24Hours: initial?.is24Hours ?? false,
+    temporarilyClosed: initial?.temporarilyClosed ?? false,
+    permanentlyClosed: initial?.permanentlyClosed ?? false,
     checkInTime: initial?.checkInTime ?? "",
     checkOutTime: initial?.checkOutTime ?? "",
     languages: initial?.languages ?? [],
@@ -146,8 +169,18 @@ export function HotelForm({
       email: form.email || null,
       social_instagram: form.socialInstagram || null,
       social_facebook: form.socialFacebook || null,
+      social_tiktok: form.socialTiktok || null,
+      social_snapchat: form.socialSnapchat || null,
+      social_x: form.socialX || null,
+      social_youtube: form.socialYoutube || null,
+      social_telegram: form.socialTelegram || null,
       price_range: form.priceRange,
       amenities: form.amenities,
+      amenities_v2: form.amenitiesV2,
+      opening_hours_structured: form.openingHoursStructured,
+      is_24_hours: form.is24Hours,
+      temporarily_closed: form.temporarilyClosed,
+      permanently_closed: form.permanentlyClosed,
       check_in_time: form.checkInTime || null,
       check_out_time: form.checkOutTime || null,
       languages: form.languages,
@@ -204,6 +237,8 @@ export function HotelForm({
           replaceAriaLabel={t("replaceVideoAriaLabel")}
           moveEarlierAriaLabel={t("moveVideoEarlierAriaLabel")}
           moveLaterAriaLabel={t("moveVideoLaterAriaLabel")}
+          pasteUrlPlaceholder={t("pasteVideoUrlPlaceholder")}
+          addUrlLabel={t("addVideoUrlLabel")}
         />
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -269,6 +304,28 @@ export function HotelForm({
             <input type="url" value={form.socialFacebook} onChange={(e) => update("socialFacebook", e.target.value)} className={inputClass} placeholder="https://facebook.com/…" />
           </Field>
         </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label={t("socialTiktokLabel")}>
+            <input type="url" value={form.socialTiktok} onChange={(e) => update("socialTiktok", e.target.value)} className={inputClass} placeholder="https://tiktok.com/@…" />
+          </Field>
+          <Field label={t("socialSnapchatLabel")}>
+            <input type="url" value={form.socialSnapchat} onChange={(e) => update("socialSnapchat", e.target.value)} className={inputClass} placeholder="https://snapchat.com/add/…" />
+          </Field>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label={t("socialXLabel")}>
+            <input type="url" value={form.socialX} onChange={(e) => update("socialX", e.target.value)} className={inputClass} placeholder="https://x.com/…" />
+          </Field>
+          <Field label={t("socialYoutubeLabel")}>
+            <input type="url" value={form.socialYoutube} onChange={(e) => update("socialYoutube", e.target.value)} className={inputClass} placeholder="https://youtube.com/@…" />
+          </Field>
+        </div>
+
+        <Field label={t("socialTelegramLabel")}>
+          <input type="url" value={form.socialTelegram} onChange={(e) => update("socialTelegram", e.target.value)} className={inputClass} placeholder="https://t.me/…" />
+        </Field>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Check-in time" hint="e.g. 14:00 or 2:00 PM">
@@ -345,6 +402,28 @@ export function HotelForm({
         <TagInput label="Languages spoken" values={form.languages} onChange={(v) => update("languages", v)} placeholder="English, Somali, Arabic…" suggestions={LANGUAGE_SUGGESTIONS} />
 
         <TagInput label={t("amenitiesLabel")} values={form.amenities} onChange={(v) => update("amenities", v)} placeholder={t("tagInputPlaceholder")} suggestions={AMENITY_SUGGESTIONS} />
+
+        <AmenitiesPicker listingType="hotel" values={form.amenitiesV2} onChange={(v) => update("amenitiesV2", v)} label={t("amenitiesV2Label")} />
+
+        <OpeningHoursEditor
+          value={form.openingHoursStructured}
+          onChange={(v) => update("openingHoursStructured", v)}
+          dayLabel={tw}
+          title={t("structuredHoursLabel")}
+          addLabel={t("addHoursGroupLabel")}
+          openLabel={t("hoursOpenLabel")}
+          closeLabel={t("hoursCloseLabel")}
+          removeAriaLabel={t("removeHoursGroupAriaLabel")}
+          is24Hours={form.is24Hours}
+          onIs24HoursChange={(v) => update("is24Hours", v)}
+          is24HoursLabel={t("is24HoursLabel")}
+          temporarilyClosed={form.temporarilyClosed}
+          onTemporarilyClosedChange={(v) => update("temporarilyClosed", v)}
+          temporarilyClosedLabel={t("temporarilyClosedLabel")}
+          permanentlyClosed={form.permanentlyClosed}
+          onPermanentlyClosedChange={(v) => update("permanentlyClosed", v)}
+          permanentlyClosedLabel={t("permanentlyClosedLabel")}
+        />
 
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="On-site restaurant" hint="Optional — links to an existing restaurant listing">

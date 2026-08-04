@@ -45,3 +45,36 @@ export async function deleteReportedReview(
   for (const path of revalidatePaths) revalidatePath(path);
   return { ok: true };
 }
+
+/** Admin-only — soft-hide: the review stops appearing on the public detail
+ * page (lib/data/{hotels,restaurants,cafes,attractions,services}.ts all
+ * filter status='published') but stays in the database, reversible via
+ * unhideReview. This is the "only approved reviews are visible" mechanism —
+ * reviews still publish instantly on submission; hiding is the moderation
+ * lever, not a pre-publish queue. */
+export async function hideReview(
+  reviewId: string,
+  revalidatePaths: string[]
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await assertAdmin();
+
+  const { error } = await supabase.from("reviews").update({ status: "hidden" } as never).eq("id", reviewId);
+  if (error) return { ok: false, error: error.message };
+
+  for (const path of revalidatePaths) revalidatePath(path);
+  return { ok: true };
+}
+
+/** Admin-only — reverses hideReview. */
+export async function unhideReview(
+  reviewId: string,
+  revalidatePaths: string[]
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await assertAdmin();
+
+  const { error } = await supabase.from("reviews").update({ status: "published" } as never).eq("id", reviewId);
+  if (error) return { ok: false, error: error.message };
+
+  for (const path of revalidatePaths) revalidatePath(path);
+  return { ok: true };
+}

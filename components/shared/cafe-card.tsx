@@ -2,11 +2,10 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Coffee, Heart, Loader2, MapPin, Phone, Sparkles, Star, Wifi } from "lucide-react";
-import { toggleFavoriteAction } from "@/lib/actions/favorites";
+import { Coffee, MapPin, Phone, Sparkles, Star, Wifi } from "lucide-react";
+import { FavoriteButton } from "./favorite-button";
 import { AnimatedCard } from "./animated-card";
 import { FloatingBadge } from "./floating-badge";
 import { PrimaryButton, SecondaryButton } from "./buttons";
@@ -51,24 +50,7 @@ export function CafeCard({
   initiallyFavorited?: boolean;
 }) {
   const t = useTranslations("listings");
-  const [favorited, setFavorited] = useState(initiallyFavorited);
-  const [isPending, startTransition] = useTransition();
   const [loaded, setLoaded] = useState(false);
-  const router = useRouter();
-
-  function onToggleFavorite() {
-    if (!cafeId) return;
-    startTransition(async () => {
-      const result = await toggleFavoriteAction("cafe", cafeId);
-      if (!result.ok) {
-        if (result.error === "sign-in-required" && locale) {
-          router.push(`/${locale}/auth/login?next=${encodeURIComponent(href)}`);
-        }
-        return;
-      }
-      setFavorited(result.favorited ?? false);
-    });
-  }
 
   const allHighlights = [
     ...(wifi ? ["WiFi"] : []),
@@ -133,24 +115,15 @@ export function CafeCard({
         )}
 
         {cafeId && (
-          <button
-            type="button"
-            onClick={onToggleFavorite}
-            disabled={isPending}
-            aria-label={favorited ? t("removeFromFavorites", { name }) : t("addToFavorites", { name })}
-            className="absolute end-3.5 bottom-3.5 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white/95 text-ink shadow-sm transition-all duration-300 hover:scale-110 hover:shadow-[0_6px_16px_rgba(0,0,0,0.25)] active:scale-95 disabled:opacity-60 dark:bg-ink/90 dark:text-white"
-          >
-            {isPending ? (
-              <Loader2 size={17} className="animate-spin" aria-hidden="true" />
-            ) : (
-              <Heart
-                size={17}
-                fill={favorited ? "#F4B400" : "none"}
-                color={favorited ? "#F4B400" : "currentColor"}
-                aria-hidden="true"
-              />
-            )}
-          </button>
+          <FavoriteButton
+            listingType="cafe"
+            listingId={cafeId}
+            initiallyFavorited={initiallyFavorited}
+            locale={locale}
+            redirectPath={href}
+            addLabel={t("addToFavorites", { name })}
+            removeLabel={t("removeFromFavorites", { name })}
+          />
         )}
       </div>
 

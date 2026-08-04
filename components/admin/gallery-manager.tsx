@@ -149,7 +149,7 @@ export function GalleryManager({
                   </span>
                 )}
               </div>
-              <div className="min-w-0 flex-1 basis-full sm:basis-auto">
+              <div className="min-w-0 flex-1 basis-full space-y-1.5 sm:basis-auto">
                 <select
                   value={img.category ?? "other"}
                   onChange={(e) => updateAt(i, { category: e.target.value })}
@@ -161,6 +161,13 @@ export function GalleryManager({
                     </option>
                   ))}
                 </select>
+                <input
+                  type="text"
+                  value={img.caption ?? ""}
+                  onChange={(e) => updateAt(i, { caption: e.target.value })}
+                  placeholder="Caption (optional)"
+                  className="w-full rounded-lg border border-ink/12 bg-transparent px-2 py-2 text-xs outline-none focus:border-primary dark:border-white/15"
+                />
               </div>
               <div className="ms-auto flex shrink-0 items-center gap-0.5">
                 <button

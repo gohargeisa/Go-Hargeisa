@@ -9,7 +9,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { HotelForm } from "@/components/admin/hotel-form";
 import { getRestaurants } from "@/lib/data/restaurants";
 import { getCafes } from "@/lib/data/cafes";
-import type { MediaVideo } from "@/types";
+import type { MediaVideo, OpeningHoursGroup } from "@/types";
 
 export const metadata: Metadata = { title: "Edit Hotel — Admin" };
 
@@ -109,8 +109,20 @@ export default async function EditHotelPage({
           email: hotel.email ?? "",
           socialInstagram: hotel.social_instagram ?? "",
           socialFacebook: hotel.social_facebook ?? "",
+          socialTiktok: hotel.social_tiktok ?? "",
+          socialSnapchat: hotel.social_snapchat ?? "",
+          socialX: hotel.social_x ?? "",
+          socialYoutube: hotel.social_youtube ?? "",
+          socialTelegram: hotel.social_telegram ?? "",
           priceRange: hotel.price_range,
           amenities: hotel.amenities ?? [],
+          amenitiesV2: hotel.amenities_v2 ?? [],
+          openingHoursStructured: Array.isArray(hotel.opening_hours_structured)
+            ? (hotel.opening_hours_structured as unknown as OpeningHoursGroup[])
+            : [],
+          is24Hours: hotel.is_24_hours,
+          temporarilyClosed: hotel.temporarily_closed,
+          permanentlyClosed: hotel.permanently_closed,
           checkInTime: hotel.check_in_time ?? "",
           checkOutTime: hotel.check_out_time ?? "",
           languages: hotel.languages ?? [],

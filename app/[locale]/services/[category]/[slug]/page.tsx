@@ -240,7 +240,13 @@ export default async function ServiceDetailPage({
               <h2 id="reviews-heading" className="mb-5 font-display text-2xl font-semibold">
                 {t("reviews")}
               </h2>
-              <ReviewsSection rating={service.rating} reviewCount={service.reviewCount} reviews={service.reviews} />
+              <ReviewsSection
+                rating={service.rating}
+                reviewCount={service.reviewCount}
+                reviews={service.reviews}
+                locale={locale}
+                pathToRevalidate={`/${locale}${serviceHref(service.category, service.slug)}`}
+              />
               <div className="mt-6">
                 <ReviewForm
                   key={myReview?.id ?? "new"}

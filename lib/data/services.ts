@@ -75,6 +75,7 @@ async function _getServiceBySlug(slug: string): Promise<Service | null> {
     .select("*, profiles(full_name)")
     .eq("listing_type", "service")
     .eq("listing_id", service.id)
+    .eq("status", "published")
     .order("created_at", { ascending: false });
 
   const reviews = (reviewRows ?? []).map((r: any) => mapReview(r, r.profiles?.full_name ?? "Guest"));

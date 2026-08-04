@@ -1,4 +1,4 @@
-import { ArrowUpRight, Globe, MessageCircle, Phone } from "lucide-react";
+import { ArrowUpRight, Globe, Mail, MessageCircle, Phone } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Reveal } from "@/components/home/reveal";
 import { TrackedCtaLink } from "@/components/shared/tracked-cta-link";
@@ -41,6 +41,7 @@ export async function HotelActionBar({
   rating,
   phone,
   website,
+  email,
   whatsappFallback,
   showPrimary = true,
   primaryLabel,
@@ -57,6 +58,7 @@ export async function HotelActionBar({
   rating?: number;
   phone?: string;
   website?: string;
+  email?: string;
   whatsappFallback?: string;
   showPrimary?: boolean;
   primaryLabel?: string;
@@ -140,6 +142,13 @@ export async function HotelActionBar({
             <Globe size={15} aria-hidden="true" />
             {t("website")}
           </TrackedCtaLink>
+        )}
+
+        {email && (
+          <a href={`mailto:${email}`} className={SECONDARY_CLASS}>
+            <Mail size={15} aria-hidden="true" />
+            {t("email")}
+          </a>
         )}
 
         <ClaimBusinessButton listingType={listingType} listingId={listingId} className={SECONDARY_CLASS} />

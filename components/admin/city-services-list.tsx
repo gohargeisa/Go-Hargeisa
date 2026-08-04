@@ -21,9 +21,9 @@ export interface CityServiceListRow {
 }
 
 /** Same mobile-card / desktop-table split as AdminListTable — city_services
- * is a separate content shape (no slug, no per-item detail page) so it gets
- * its own small list component rather than being forced into the generic
- * one built for the six slug-based content types. */
+ * has its own small list component rather than being forced into the generic
+ * one built for the six other slug-based content types (different owner-only
+ * auth model, extra featured/category-group affordances). */
 export function CityServicesList({ locale, rows }: { locale: Locale; rows: CityServiceListRow[] }) {
   const t = useTranslations("admin");
   const tCityServices = useTranslations("cityServices");

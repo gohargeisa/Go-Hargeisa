@@ -25,6 +25,8 @@ type ListingBase = {
   google_maps_url: string | null;
   rating: number;
   review_count: number;
+  amenities_v2: string[];
+  favorite_count: number;
   featured: boolean;
   is_pinned: boolean;
   status: "draft" | "published" | "archived";
@@ -34,7 +36,15 @@ type ListingBase = {
 
 type PartnerStatusDb = "trial" | "official";
 
-type HotelRow = ListingBase & {
+/** The 5 social platforms added in the Phase 4 migration (Instagram/
+ * Facebook already existed per-table before this) — spread into every
+ * listing row type that has them. */
+type SocialExtra = {
+  social_tiktok: string | null; social_snapchat: string | null; social_x: string | null;
+  social_youtube: string | null; social_telegram: string | null;
+};
+
+type HotelRow = ListingBase & SocialExtra & {
   description_ar: string | null; description_so: string | null; phone: string | null;
   website: string | null; price_range: "$" | "$$" | "$$$" | "$$$$"; amenities: string[]; owner_id: string | null;
   logo_url: string | null; check_in_time: string | null; check_out_time: string | null; languages: string[];
@@ -44,6 +54,7 @@ type HotelRow = ListingBase & {
   external_booking_option: "website" | "booking_com" | "whatsapp" | "custom_url" | null;
   external_booking_url: string | null; booking_whatsapp: string | null; booking_com_url: string | null;
   partner_status: PartnerStatusDb; trial_expires_at: string | null;
+  opening_hours_structured: Json; is_24_hours: boolean; temporarily_closed: boolean; permanently_closed: boolean;
 };
 
 type RoomTypeDb = "standard" | "deluxe" | "twin" | "family" | "executive_suite";
@@ -63,21 +74,23 @@ type RoomImageRow = {
 type RoomAvailabilityRow = {
   id: string; room_id: string; date: string; is_available: boolean; note: string | null; created_at: string;
 };
-type RestaurantRow = ListingBase & {
+type RestaurantRow = ListingBase & SocialExtra & {
   phone: string | null; website: string | null; cuisine: string[]; price_range: "$" | "$$" | "$$$" | "$$$$";
   opening_hours: string | null; opening_hours_structured: Json; menu: Json; reservable: boolean; owner_id: string | null;
   logo_url: string | null; menu_pdf_url: string | null; videos: Json;
   social_instagram: string | null; social_facebook: string | null; whatsapp: string | null; email: string | null;
   partner_status: PartnerStatusDb; trial_expires_at: string | null;
+  is_24_hours: boolean; temporarily_closed: boolean; permanently_closed: boolean;
 };
-type CafeRow = ListingBase & {
+type CafeRow = ListingBase & SocialExtra & {
   description_ar: string | null; description_so: string | null;
   phone: string | null; special_drinks: string[]; wifi: boolean; working_space: boolean;
   opening_hours: string | null; opening_hours_structured: Json; owner_id: string | null;
-  price_range: "$" | "$$" | "$$$" | "$$$$"; amenities: string[]; videos: Json;
+  price_range: "$" | "$$" | "$$$" | "$$$$"; amenities: string[]; videos: Json; website: string | null;
   social_instagram: string | null; social_facebook: string | null; whatsapp: string | null; email: string | null;
   logo_url: string | null; menu: Json; menu_pdf_url: string | null;
   partner_status: PartnerStatusDb; trial_expires_at: string | null;
+  is_24_hours: boolean; temporarily_closed: boolean; permanently_closed: boolean;
 };
 
 type BusinessOfferRow = {
@@ -98,16 +111,24 @@ type CityServiceCategoryDb =
   | "visa_immigration" | "internet_telecom";
 
 type CityServiceRow = {
-  id: string; category: CityServiceCategoryDb; name: string; name_ar: string | null; name_so: string | null;
+  id: string; slug: string; category: CityServiceCategoryDb; name: string; name_ar: string | null; name_so: string | null;
   description: string | null; description_ar: string | null; description_so: string | null;
   phone: string | null; whatsapp: string | null; email: string | null;
   opening_hours: string | null; maps_url: string | null; website: string | null; image: string | null; gallery: Json;
+  videos: Json; lat: number; lng: number;
+  amenities_v2: string[]; rating: number; review_count: number; favorite_count: number;
+  opening_hours_structured: Json; is_24_hours: boolean; temporarily_closed: boolean; permanently_closed: boolean;
+  social_instagram: string | null; social_facebook: string | null; social_tiktok: string | null; social_snapchat: string | null;
+  social_x: string | null; social_youtube: string | null; social_telegram: string | null;
   status: "draft" | "published" | "archived"; featured: boolean; sort_order: number;
   created_at: string; updated_at: string;
 };
-type AttractionRow = ListingBase & {
+type AttractionRow = ListingBase & SocialExtra & {
   history: string | null; best_time_to_visit: string | null; entry_fee: string; visitor_tips: string[];
   category: "landmark" | "museum" | "market" | "nature" | "religious";
+  opening_hours_structured: Json; is_24_hours: boolean; temporarily_closed: boolean; permanently_closed: boolean;
+  phone: string | null; whatsapp: string | null; email: string | null; website: string | null;
+  social_instagram: string | null; social_facebook: string | null; videos: Json;
 };
 
 type ServiceCategoryDb =
@@ -198,11 +219,23 @@ export type Database = {
       attractions: Table<AttractionRow>;
       services: Table<ServiceRow>;
       city_services: Table<CityServiceRow>;
-      events: Table<{ id: string; slug: string; title: string; title_ar: string | null; title_so: string | null; description: string; cover_image: string; category: "cultural" | "national" | "business" | "sports" | "concert"; start_date: string; end_date: string; location: string; ticket_info: string | null; status: "draft" | "published" | "archived"; created_by: string | null; created_at: string }>;
+      events: Table<{
+        id: string; slug: string; title: string; title_ar: string | null; title_so: string | null; description: string; cover_image: string;
+        category: "cultural" | "national" | "business" | "sports" | "concert"; start_date: string; end_date: string; location: string;
+        lat: number; lng: number; gallery: Json; videos: Json; google_maps_url: string | null;
+        opening_hours_structured: Json; is_24_hours: boolean; temporarily_closed: boolean; permanently_closed: boolean;
+        phone: string | null; whatsapp: string | null; email: string | null; website: string | null;
+        social_instagram: string | null; social_facebook: string | null; social_tiktok: string | null; social_snapchat: string | null;
+        social_x: string | null; social_youtube: string | null; social_telegram: string | null;
+        favorite_count: number;
+        ticket_info: string | null; amenities_v2: string[]; rating: number; review_count: number;
+        status: "draft" | "published" | "archived"; created_by: string | null; created_at: string;
+      }>;
       articles: Table<{ id: string; slug: string; title: string; title_ar: string | null; title_so: string | null; excerpt: string; body: string; cover_image: string; category: string; author_id: string | null; read_minutes: number; status: "draft" | "published" | "archived"; published_at: string | null; created_at: string }>;
       destinations: Table<{ id: string; slug: string; name: string; description: string; image: string; place_count: number; created_at: string }>;
       map_points: Table<{ id: string; name: string; category: string; lat: number; lng: number; created_at: string }>;
-      reviews: Table<{ id: string; listing_type: "hotel" | "restaurant" | "cafe" | "attraction" | "service"; listing_id: string; user_id: string | null; rating: number; comment: string | null; photos: Json; owner_reply: string | null; owner_reply_at: string | null; is_reported: boolean; created_at: string }>;
+      reviews: Table<{ id: string; listing_type: "hotel" | "restaurant" | "cafe" | "attraction" | "service" | "event" | "city_service"; listing_id: string; user_id: string | null; rating: number; comment: string | null; title: string | null; visit_date: string | null; status: "published" | "hidden"; helpful_count: number; photos: Json; owner_reply: string | null; owner_reply_at: string | null; is_reported: boolean; created_at: string }>;
+      review_helpful_votes: Table<{ id: string; review_id: string; user_id: string | null; created_at: string }>;
       hotel_rooms: Table<HotelRoomRow>;
       room_images: Table<RoomImageRow>;
       room_availability: Table<RoomAvailabilityRow>;

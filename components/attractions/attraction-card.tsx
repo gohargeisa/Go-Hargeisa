@@ -2,11 +2,10 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Clock, Heart, Landmark, Loader2, MapPin, Navigation, Sparkles, Star, Timer } from "lucide-react";
-import { toggleFavoriteAction } from "@/lib/actions/favorites";
+import { Clock, Landmark, MapPin, Navigation, Sparkles, Star, Timer } from "lucide-react";
+import { FavoriteButton } from "@/components/shared/favorite-button";
 import { AnimatedCard } from "@/components/shared/animated-card";
 import { FloatingBadge } from "@/components/shared/floating-badge";
 import { PrimaryButton, SecondaryButton } from "@/components/shared/buttons";
@@ -51,29 +50,12 @@ export function AttractionCard({
 }) {
   const t = useTranslations("listings");
   const tp = useTranslations("attractionsPage");
-  const [favorited, setFavorited] = useState(false);
-  const [isPending, startTransition] = useTransition();
   const [loaded, setLoaded] = useState(false);
-  const router = useRouter();
   const categoryMeta = getCategoryMeta(category);
   const CategoryIcon = categoryMeta.icon;
   const categoryLabel = tp(categoryMeta.labelKey);
 
   const directionsHref = resolveDirectionsUrl(location);
-
-  function onToggleFavorite() {
-    if (!attractionId) return;
-    startTransition(async () => {
-      const result = await toggleFavoriteAction("attraction", attractionId);
-      if (!result.ok) {
-        if (result.error === "sign-in-required") {
-          router.push(`/${locale}/auth/login?next=${encodeURIComponent(href)}`);
-        }
-        return;
-      }
-      setFavorited(result.favorited ?? false);
-    });
-  }
 
   const hasRealImage = Boolean(image) && !image.includes("placehold.co");
   const imageHeight = size === "lg" ? "h-72 sm:h-80" : "h-56 sm:h-60";
@@ -116,26 +98,19 @@ export function AttractionCard({
         {featured && <FloatingBadge icon={Sparkles} position="top-end">{t("featuredBadge")}</FloatingBadge>}
 
         {attractionId && (
-          <button
-            type="button"
-            onClick={onToggleFavorite}
-            disabled={isPending}
-            aria-label={favorited ? t("removeFromFavorites", { name }) : t("addToFavorites", { name })}
+          <FavoriteButton
+            listingType="attraction"
+            listingId={attractionId}
+            initiallyFavorited={false}
+            locale={locale}
+            redirectPath={href}
+            size={16}
             className={`absolute end-3.5 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/95 text-ink shadow-sm transition-all duration-300 hover:scale-110 active:scale-95 disabled:opacity-60 dark:bg-ink/90 dark:text-white ${
               featured ? "top-14" : "top-3.5"
             }`}
-          >
-            {isPending ? (
-              <Loader2 size={16} className="animate-spin" aria-hidden="true" />
-            ) : (
-              <Heart
-                size={16}
-                fill={favorited ? "#F59E0B" : "none"}
-                color={favorited ? "#F59E0B" : "currentColor"}
-                aria-hidden="true"
-              />
-            )}
-          </button>
+            addLabel={t("addToFavorites", { name })}
+            removeLabel={t("removeFromFavorites", { name })}
+          />
         )}
 
         {reviewCount > 0 && (

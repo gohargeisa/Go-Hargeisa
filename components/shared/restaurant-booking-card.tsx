@@ -2,6 +2,7 @@ import { ArrowUpRight, Clock, Globe, Phone } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { AddToTripButton } from "@/components/shared/add-to-trip-button";
 import { ShareButton } from "@/components/shared/share-button";
+import { FavoriteButton } from "@/components/shared/favorite-button";
 import { PrimaryButton } from "@/components/shared/buttons";
 import { normalizeExternalUrl } from "@/lib/utils/normalize-url";
 import { hasMeaningfulPrice } from "@/lib/utils/price-range";
@@ -20,6 +21,10 @@ export function RestaurantBookingCard({
   locale,
   contactLabel,
   visitWebsiteLabel,
+  initiallyFavorited = false,
+  favoriteCount,
+  addFavoriteLabel,
+  removeFavoriteLabel,
 }: {
   restaurantId: string;
   name: string;
@@ -34,6 +39,10 @@ export function RestaurantBookingCard({
   locale: Locale;
   contactLabel: string;
   visitWebsiteLabel: string;
+  initiallyFavorited?: boolean;
+  favoriteCount?: number;
+  addFavoriteLabel: string;
+  removeFavoriteLabel: string;
 }) {
   const websiteHref = website ? normalizeExternalUrl(website) : undefined;
 
@@ -102,6 +111,18 @@ export function RestaurantBookingCard({
 
       <AddToTripButton locale={locale} listingType="restaurant" listingId={restaurantId} />
       <ShareButton title={name} />
+      <FavoriteButton
+        listingType="restaurant"
+        listingId={restaurantId}
+        locale={locale}
+        initiallyFavorited={initiallyFavorited}
+        count={favoriteCount}
+        showSpinner={false}
+        size={15}
+        className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-ink/15 py-3 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
+        addLabel={addFavoriteLabel}
+        removeLabel={removeFavoriteLabel}
+      />
     </div>
   );
 }

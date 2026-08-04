@@ -5,6 +5,7 @@ import { getAllRestaurantSlugs } from "@/lib/data/restaurants";
 import { getAllCafeSlugs } from "@/lib/data/cafes";
 import { getAllAttractionSlugs } from "@/lib/data/attractions";
 import { getAllEventSlugs } from "@/lib/data/events";
+import { getAllCityServiceSlugs } from "@/lib/data/city-services";
 import { getAllArticleSlugs } from "@/lib/data/articles";
 import {
   HOTELS_PRESENTATION_MODE,
@@ -35,13 +36,14 @@ const staticRoutes = [
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [hotelSlugsRaw, restaurantSlugsRaw, cafeSlugsRaw, attractionSlugs, eventSlugs, articleSlugs] =
+  const [hotelSlugsRaw, restaurantSlugsRaw, cafeSlugsRaw, attractionSlugs, eventSlugs, cityServiceSlugs, articleSlugs] =
     await Promise.all([
       getAllHotelSlugs(),
       getAllRestaurantSlugs(),
       getAllCafeSlugs(),
       getAllAttractionSlugs(),
       getAllEventSlugs(),
+      getAllCityServiceSlugs(),
       getAllArticleSlugs(),
     ]);
 
@@ -70,6 +72,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     for (const slug of cafeSlugs) entries.push(url(`${locale}/cafes/${slug}`));
     for (const slug of attractionSlugs) entries.push(url(`${locale}/attractions/${slug}`));
     for (const slug of eventSlugs) entries.push(url(`${locale}/events/${slug}`));
+    for (const slug of cityServiceSlugs) entries.push(url(`${locale}/city-services/${slug}`));
     for (const slug of articleSlugs) entries.push(url(`${locale}/blog/${slug}`));
   }
 

@@ -1,5 +1,5 @@
 import type { Database } from "@/types/database";
-import type { Hotel, HotelRoom, Restaurant, Cafe, Service, Attraction, EventItem, Article, GalleryImage, Review, BusinessOffer, MediaVideo, Notification, NotificationCategory, NotificationSeverity } from "@/types";
+import type { Hotel, HotelRoom, Restaurant, Cafe, Service, Attraction, EventItem, CityService, Article, GalleryImage, Review, BusinessOffer, MediaVideo, Notification, NotificationCategory, NotificationSeverity } from "@/types";
 
 type HotelRow = Database["public"]["Tables"]["hotels"]["Row"];
 type HotelRoomRow = Database["public"]["Tables"]["hotel_rooms"]["Row"];
@@ -8,17 +8,19 @@ type CafeRow = Database["public"]["Tables"]["cafes"]["Row"];
 type ServiceRow = Database["public"]["Tables"]["services"]["Row"];
 type AttractionRow = Database["public"]["Tables"]["attractions"]["Row"];
 type EventRow = Database["public"]["Tables"]["events"]["Row"];
+type CityServiceRow = Database["public"]["Tables"]["city_services"]["Row"];
 type ArticleRow = Database["public"]["Tables"]["articles"]["Row"];
 type ReviewRow = Database["public"]["Tables"]["reviews"]["Row"];
 
 function toGallery(json: unknown): GalleryImage[] {
   if (!Array.isArray(json)) return [];
   return json
-    .filter((g): g is { url: string; alt?: string; category?: string } => !!g && typeof g === "object" && "url" in g)
+    .filter((g): g is { url: string; alt?: string; category?: string; caption?: string } => !!g && typeof g === "object" && "url" in g)
     .map((g) => ({
       url: g.url,
       alt: g.alt ?? "",
       category: (g.category as GalleryImage["category"]) ?? undefined,
+      caption: g.caption || undefined,
     }));
 }
 
@@ -35,11 +37,15 @@ export function mapReview(row: ReviewRow, authorName = "Guest"): Review {
     authorName,
     rating: row.rating,
     comment: row.comment ?? "",
+    title: row.title ?? undefined,
+    visitDate: row.visit_date ?? undefined,
     createdAt: row.created_at,
     photos: toGallery((row as { photos?: unknown }).photos),
     ownerReply: row.owner_reply ?? undefined,
     ownerReplyAt: row.owner_reply_at ?? undefined,
     isReported: row.is_reported,
+    helpfulCount: row.helpful_count ?? 0,
+    status: row.status,
   };
 }
 
@@ -69,6 +75,9 @@ export function mapHotel(
   extras: { reviews?: Review[]; rooms?: HotelRoom[]; restaurant?: Restaurant | null; cafe?: Cafe | null } = {}
 ): Hotel {
   const { reviews = [], rooms = [], restaurant = null, cafe = null } = extras;
+  const openingHoursStructured = Array.isArray(row.opening_hours_structured)
+    ? (row.opening_hours_structured as unknown as Hotel["openingHoursStructured"])
+    : [];
   return {
     id: row.id,
     slug: row.slug,
@@ -90,13 +99,24 @@ export function mapHotel(
     email: row.email ?? undefined,
     socialInstagram: row.social_instagram ?? undefined,
     socialFacebook: row.social_facebook ?? undefined,
+    socialTiktok: row.social_tiktok ?? undefined,
+    socialSnapchat: row.social_snapchat ?? undefined,
+    socialX: row.social_x ?? undefined,
+    socialYoutube: row.social_youtube ?? undefined,
+    socialTelegram: row.social_telegram ?? undefined,
     priceRange: row.price_range,
     amenities: row.amenities ?? [],
+    amenitiesV2: row.amenities_v2 ?? [],
+    favoriteCount: row.favorite_count ?? 0,
     nearbyAttractionIds: [],
     featured: row.featured,
     logo: row.logo_url ?? undefined,
     checkInTime: row.check_in_time ?? undefined,
     checkOutTime: row.check_out_time ?? undefined,
+    openingHoursStructured,
+    is24Hours: row.is_24_hours,
+    temporarilyClosed: row.temporarily_closed,
+    permanentlyClosed: row.permanently_closed,
     languages: row.languages ?? [],
     rooms,
     restaurant,
@@ -136,16 +156,26 @@ export function mapRestaurant(row: RestaurantRow, reviews: Review[] = []): Resta
     email: row.email ?? undefined,
     socialInstagram: row.social_instagram ?? undefined,
     socialFacebook: row.social_facebook ?? undefined,
+    socialTiktok: row.social_tiktok ?? undefined,
+    socialSnapchat: row.social_snapchat ?? undefined,
+    socialX: row.social_x ?? undefined,
+    socialYoutube: row.social_youtube ?? undefined,
+    socialTelegram: row.social_telegram ?? undefined,
     cuisine: row.cuisine ?? [],
     priceRange: (row.price_range as "$" | "$$" | "$$$") ?? "$$",
     openingHours: row.opening_hours ?? "",
     openingHoursStructured,
+    is24Hours: row.is_24_hours,
+    temporarilyClosed: row.temporarily_closed,
+    permanentlyClosed: row.permanently_closed,
     menuHighlights: menu,
     reservable: row.reservable,
     featured: row.featured,
     logo: row.logo_url ?? undefined,
     menuPdfUrl: row.menu_pdf_url ?? undefined,
     partnerStatus: row.partner_status,
+    amenitiesV2: row.amenities_v2 ?? [],
+    favoriteCount: row.favorite_count ?? 0,
   };
 }
 
@@ -176,13 +206,24 @@ export function mapCafe(row: CafeRow, reviews: Review[] = [], locale?: string): 
     phone: row.phone ?? undefined,
     whatsapp: row.whatsapp ?? undefined,
     email: row.email ?? undefined,
+    website: row.website ?? undefined,
+    socialTiktok: row.social_tiktok ?? undefined,
+    socialSnapchat: row.social_snapchat ?? undefined,
+    socialX: row.social_x ?? undefined,
+    socialYoutube: row.social_youtube ?? undefined,
+    socialTelegram: row.social_telegram ?? undefined,
     specialDrinks: row.special_drinks ?? [],
     wifi: row.wifi,
     workingSpace: row.working_space,
     openingHours: row.opening_hours ?? "",
     openingHoursStructured,
+    is24Hours: row.is_24_hours,
+    temporarilyClosed: row.temporarily_closed,
+    permanentlyClosed: row.permanently_closed,
     priceRange: row.price_range,
     amenities: row.amenities ?? [],
+    amenitiesV2: row.amenities_v2 ?? [],
+    favoriteCount: row.favorite_count ?? 0,
     socialInstagram: row.social_instagram ?? undefined,
     socialFacebook: row.social_facebook ?? undefined,
     featured: row.featured,
@@ -228,6 +269,9 @@ export function mapService(row: ServiceRow, reviews: Review[] = []): Service {
 }
 
 export function mapAttraction(row: AttractionRow, reviews: Review[] = []): Attraction {
+  const openingHoursStructured = Array.isArray(row.opening_hours_structured)
+    ? (row.opening_hours_structured as unknown as Attraction["openingHoursStructured"])
+    : [];
   return {
     id: row.id,
     slug: row.slug,
@@ -236,6 +280,7 @@ export function mapAttraction(row: AttractionRow, reviews: Review[] = []): Attra
     description: row.description,
     coverImage: row.cover_image,
     gallery: toGallery(row.gallery),
+    videos: toVideos(row.videos),
     address: row.address,
     location: { lat: row.lat, lng: row.lng },
     googleMapsUrl: row.google_maps_url ?? undefined,
@@ -246,25 +291,115 @@ export function mapAttraction(row: AttractionRow, reviews: Review[] = []): Attra
     bestTimeToVisit: row.best_time_to_visit ?? "",
     entryFee: row.entry_fee,
     visitorTips: row.visitor_tips ?? [],
+    phone: row.phone ?? undefined,
+    whatsapp: row.whatsapp ?? undefined,
+    email: row.email ?? undefined,
+    website: row.website ?? undefined,
+    socialInstagram: row.social_instagram ?? undefined,
+    socialFacebook: row.social_facebook ?? undefined,
+    socialTiktok: row.social_tiktok ?? undefined,
+    socialSnapchat: row.social_snapchat ?? undefined,
+    socialX: row.social_x ?? undefined,
+    socialYoutube: row.social_youtube ?? undefined,
+    socialTelegram: row.social_telegram ?? undefined,
     nearbyRestaurantIds: [],
     nearbyHotelIds: [],
     category: row.category,
     featured: row.featured,
+    amenitiesV2: row.amenities_v2 ?? [],
+    favoriteCount: row.favorite_count ?? 0,
+    openingHoursStructured,
+    is24Hours: row.is_24_hours,
+    temporarilyClosed: row.temporarily_closed,
+    permanentlyClosed: row.permanently_closed,
   };
 }
 
-export function mapEvent(row: EventRow): EventItem {
+export function mapEvent(row: EventRow, reviews: Review[] = []): EventItem {
+  const openingHoursStructured = Array.isArray(row.opening_hours_structured)
+    ? (row.opening_hours_structured as unknown as EventItem["openingHoursStructured"])
+    : [];
   return {
     id: row.id,
     slug: row.slug,
     title: row.title,
     description: row.description,
     coverImage: row.cover_image,
+    gallery: toGallery(row.gallery),
+    videos: toVideos(row.videos),
     category: row.category,
     startDate: row.start_date,
     endDate: row.end_date,
     location: row.location,
+    coords: { lat: row.lat, lng: row.lng },
     ticketInfo: row.ticket_info ?? undefined,
+    googleMapsUrl: row.google_maps_url ?? undefined,
+    rating: Number(row.rating),
+    reviewCount: row.review_count,
+    reviews,
+    favoriteCount: row.favorite_count ?? 0,
+    amenitiesV2: row.amenities_v2 ?? [],
+    openingHoursStructured,
+    is24Hours: row.is_24_hours,
+    temporarilyClosed: row.temporarily_closed,
+    permanentlyClosed: row.permanently_closed,
+    phone: row.phone ?? undefined,
+    whatsapp: row.whatsapp ?? undefined,
+    email: row.email ?? undefined,
+    website: row.website ?? undefined,
+    socialInstagram: row.social_instagram ?? undefined,
+    socialFacebook: row.social_facebook ?? undefined,
+    socialTiktok: row.social_tiktok ?? undefined,
+    socialSnapchat: row.social_snapchat ?? undefined,
+    socialX: row.social_x ?? undefined,
+    socialYoutube: row.social_youtube ?? undefined,
+    socialTelegram: row.social_telegram ?? undefined,
+  };
+}
+
+/** locale: which of name/name_ar/name_so and description/description_ar/
+ * description_so to resolve to, matching the pre-existing (pre-Phase-11)
+ * behavior of this table's list-view mapper — kept here so both the list
+ * grouping query and the new by-slug detail query share one mapper. */
+export function mapCityService(row: CityServiceRow, reviews: Review[] = [], locale?: string): CityService {
+  const openingHoursStructured = Array.isArray(row.opening_hours_structured)
+    ? (row.opening_hours_structured as unknown as CityService["openingHoursStructured"])
+    : [];
+  return {
+    id: row.id,
+    slug: row.slug,
+    category: row.category,
+    name: (locale === "ar" && row.name_ar) || (locale === "so" && row.name_so) || row.name,
+    description: (locale === "ar" && row.description_ar) || (locale === "so" && row.description_so) || row.description,
+    phone: row.phone,
+    whatsapp: row.whatsapp,
+    email: row.email,
+    openingHours: row.opening_hours,
+    mapsUrl: row.maps_url,
+    website: row.website,
+    image: row.image,
+    gallery: toGallery(row.gallery),
+    videos: toVideos(row.videos),
+    coords: { lat: row.lat, lng: row.lng },
+    status: row.status,
+    featured: row.featured,
+    sortOrder: row.sort_order,
+    rating: Number(row.rating),
+    reviewCount: row.review_count,
+    reviews,
+    favoriteCount: row.favorite_count ?? 0,
+    amenitiesV2: row.amenities_v2 ?? [],
+    openingHoursStructured,
+    is24Hours: row.is_24_hours,
+    temporarilyClosed: row.temporarily_closed,
+    permanentlyClosed: row.permanently_closed,
+    socialInstagram: row.social_instagram ?? undefined,
+    socialFacebook: row.social_facebook ?? undefined,
+    socialTiktok: row.social_tiktok ?? undefined,
+    socialSnapchat: row.social_snapchat ?? undefined,
+    socialX: row.social_x ?? undefined,
+    socialYoutube: row.social_youtube ?? undefined,
+    socialTelegram: row.social_telegram ?? undefined,
   };
 }
 

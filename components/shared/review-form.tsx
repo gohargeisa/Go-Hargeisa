@@ -8,9 +8,9 @@ import { Star, Loader2, Camera, X, Pencil, Trash2 } from "lucide-react";
 import { submitReview, updateReview, deleteReview } from "@/lib/actions/content";
 import { uploadImage } from "@/lib/supabase/storage";
 import type { Locale } from "@/lib/i18n/config";
-import type { Review } from "@/types";
+import type { Review, PolymorphicListingType } from "@/types";
 
-type ListingType = "hotel" | "restaurant" | "cafe" | "attraction" | "service";
+type ListingType = PolymorphicListingType;
 
 const MAX_REVIEW_PHOTOS = 3;
 
@@ -40,7 +40,9 @@ export function ReviewForm({
   const isEditing = !!existingReview;
   const [editing, setEditing] = useState(false);
   const [rating, setRating] = useState(existingReview?.rating ?? 5);
+  const [title, setTitle] = useState(existingReview?.title ?? "");
   const [comment, setComment] = useState(existingReview?.comment ?? "");
+  const [visitDate, setVisitDate] = useState(existingReview?.visitDate ?? "");
   const [photos, setPhotos] = useState<string[]>((existingReview?.photos ?? []).map((p) => p.url));
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -68,13 +70,15 @@ export function ReviewForm({
     setError(null);
     startTransition(async () => {
       const result = existingReview
-        ? await updateReview({ reviewId: existingReview.id, rating, comment, locale, pathToRevalidate, photos })
-        : await submitReview({ listingType, listingId, rating, comment, locale, pathToRevalidate, photos });
+        ? await updateReview({ reviewId: existingReview.id, rating, comment, title, visitDate, locale, pathToRevalidate, photos })
+        : await submitReview({ listingType, listingId, rating, comment, title, visitDate, locale, pathToRevalidate, photos });
       if (result.ok) {
         setSuccess(true);
         setEditing(false);
         if (!existingReview) {
+          setTitle("");
           setComment("");
+          setVisitDate("");
           setPhotos([]);
         }
         router.refresh();
@@ -152,6 +156,18 @@ export function ReviewForm({
           </button>
         ))}
       </div>
+      <label htmlFor="review-title" className="sr-only">
+        {t("reviewTitleLabel")}
+      </label>
+      <input
+        id="review-title"
+        type="text"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        placeholder={t("reviewTitleLabel")}
+        className="mb-2 w-full rounded-xl border border-ink/12 dark:border-white/15 bg-transparent px-4 py-2.5 text-sm font-semibold outline-none focus:border-primary"
+      />
+
       <label htmlFor="review-comment" className="sr-only">
         {t("commentPlaceholder")}
       </label>
@@ -164,6 +180,18 @@ export function ReviewForm({
         placeholder={t("commentPlaceholder")}
         className="w-full rounded-xl border border-ink/12 dark:border-white/15 bg-transparent px-4 py-3 text-sm outline-none focus:border-primary"
       />
+
+      <label htmlFor="review-visit-date" className="mt-3 flex items-center gap-2 text-xs font-semibold text-ink/60 dark:text-sand/60">
+        {t("visitDateLabel")}
+        <input
+          id="review-visit-date"
+          type="date"
+          value={visitDate}
+          onChange={(e) => setVisitDate(e.target.value)}
+          max={new Date().toISOString().slice(0, 10)}
+          className="rounded-lg border border-ink/12 dark:border-white/15 bg-transparent px-2.5 py-1.5 text-xs font-medium outline-none focus:border-primary"
+        />
+      </label>
 
       {allowPhotos && (
         <div className="mt-3">
@@ -222,7 +250,9 @@ export function ReviewForm({
             onClick={() => {
               setEditing(false);
               setRating(existingReview.rating);
+              setTitle(existingReview.title ?? "");
               setComment(existingReview.comment);
+              setVisitDate(existingReview.visitDate ?? "");
               setPhotos((existingReview.photos ?? []).map((p) => p.url));
               setError(null);
             }}

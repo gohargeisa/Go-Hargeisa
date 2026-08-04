@@ -2,8 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import type { PolymorphicListingType } from "@/types";
 
-type ListingType = "hotel" | "restaurant" | "cafe" | "attraction" | "service";
+type ListingType = PolymorphicListingType;
 
 async function requireUserId() {
   const supabase = await createClient();

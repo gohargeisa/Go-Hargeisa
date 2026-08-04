@@ -20,12 +20,17 @@ export async function HotelHeaderTop({
   rating,
   reviewCount,
   categoryLabel,
+  showRating = true,
 }: {
   logo?: string;
   name: string;
   rating: number;
   reviewCount: number;
   categoryLabel: string;
+  /** Off for City Services categories where reviews are excluded entirely
+   * (hospital/pharmacy/mosque/bank) — a "No reviews yet" star row would be
+   * clutter on a page that will never collect reviews. */
+  showRating?: boolean;
 }) {
   const t = await getTranslations("common");
 
@@ -51,21 +56,23 @@ export async function HotelHeaderTop({
 
         <h1 className="text-balance font-display text-3xl font-bold sm:text-4xl lg:text-5xl">{name}</h1>
 
-        <div className="mt-3.5 flex items-center gap-2.5">
-          <div className={`flex gap-1 ${reviewCount > 0 ? "text-primary-600" : "text-ink/25 dark:text-sand/25"}`}>
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Star key={i} size={19} fill={i < Math.round(rating) ? "currentColor" : "none"} strokeWidth={1.5} />
-            ))}
+        {showRating && (
+          <div className="mt-3.5 flex items-center gap-2.5">
+            <div className={`flex gap-1 ${reviewCount > 0 ? "text-primary-600" : "text-ink/25 dark:text-sand/25"}`}>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Star key={i} size={19} fill={i < Math.round(rating) ? "currentColor" : "none"} strokeWidth={1.5} />
+              ))}
+            </div>
+            {reviewCount > 0 ? (
+              <>
+                <span className="text-sm font-semibold">{rating.toFixed(1)}</span>
+                <span className="text-sm text-ink/50 dark:text-sand/50">({reviewCount} reviews)</span>
+              </>
+            ) : (
+              <span className="text-sm font-semibold text-ink/50 dark:text-sand/50">{t("noReviewsYet")}</span>
+            )}
           </div>
-          {reviewCount > 0 ? (
-            <>
-              <span className="text-sm font-semibold">{rating.toFixed(1)}</span>
-              <span className="text-sm text-ink/50 dark:text-sand/50">({reviewCount} reviews)</span>
-            </>
-          ) : (
-            <span className="text-sm font-semibold text-ink/50 dark:text-sand/50">{t("noReviewsYet")}</span>
-          )}
-        </div>
+        )}
 
         <div className="mt-2.5 flex flex-col items-center gap-1">
           <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink/80 dark:text-sand/80">

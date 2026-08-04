@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/config";
 import { AddToTripButton } from "@/components/shared/add-to-trip-button";
 import { ShareButton } from "@/components/shared/share-button";
+import { FavoriteButton } from "@/components/shared/favorite-button";
 import { HotelBookNowButton } from "@/components/shared/hotel-book-now-button";
 import { normalizeExternalUrl } from "@/lib/utils/normalize-url";
 import { hasMeaningfulPrice } from "@/lib/utils/price-range";
@@ -20,6 +21,8 @@ export async function HotelBookingCard({
   locale,
   bookingCta,
   rooms,
+  initiallyFavorited = false,
+  favoriteCount,
 }: {
   hotelId: string;
   hotelSlug?: string;
@@ -31,6 +34,8 @@ export async function HotelBookingCard({
   locale: Locale;
   bookingCta: HotelBookingCta;
   rooms?: HotelRoom[];
+  initiallyFavorited?: boolean;
+  favoriteCount?: number;
 }) {
   const t = await getTranslations("listings");
   const th = await getTranslations("hotelDetail");
@@ -89,6 +94,18 @@ export async function HotelBookingCard({
 
       <AddToTripButton locale={locale} listingType="hotel" listingId={hotelId} />
       <ShareButton title={name} />
+      <FavoriteButton
+        listingType="hotel"
+        listingId={hotelId}
+        locale={locale}
+        initiallyFavorited={initiallyFavorited}
+        count={favoriteCount}
+        showSpinner={false}
+        size={15}
+        className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-ink/15 py-3 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
+        addLabel={t("addToFavorites", { name })}
+        removeLabel={t("removeFromFavorites", { name })}
+      />
     </div>
   );
 }

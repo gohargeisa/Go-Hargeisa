@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { createPublicClient } from "@/lib/supabase/public";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
-import { mapEvent } from "./mappers";
+import { mapEvent, mapReview } from "./mappers";
 import { events as mockEvents } from "@/lib/mock-data";
 import type { EventItem } from "@/types";
 
@@ -21,16 +21,26 @@ export async function getEvents(options?: { category?: string }): Promise<EventI
     if (process.env.NODE_ENV === "development") console.error("getEvents:", error.message);
     return [];
   }
-  return (data ?? []).map(mapEvent);
+  return (data ?? []).map((row) => mapEvent(row));
 }
 
 async function _getEventBySlug(slug: string): Promise<EventItem | null> {
   if (!isSupabaseConfigured()) return mockEvents.find((e) => e.slug === slug) ?? null;
 
   const supabase = createPublicClient();
-  const { data, error } = await supabase.from("events").select("*").eq("slug", slug).single();
-  if (error || !data) return null;
-  return mapEvent(data);
+  const { data: event, error } = await supabase.from("events").select("*").eq("slug", slug).single();
+  if (error || !event) return null;
+
+  const { data: reviewRows } = await supabase
+    .from("reviews")
+    .select("*, profiles(full_name)")
+    .eq("listing_type", "event")
+    .eq("listing_id", event.id)
+    .eq("status", "published")
+    .order("created_at", { ascending: false });
+
+  const reviews = (reviewRows ?? []).map((r: any) => mapReview(r, r.profiles?.full_name ?? "Guest"));
+  return mapEvent(event, reviews);
 }
 
 /** Cached per-request: dedupes calls from generateMetadata + the page itself. */

@@ -8,6 +8,9 @@ export interface GalleryImage {
   url: string;
   alt?: string;
   category?: string;
+  /** Optional short caption shown under the photo in the gallery/lightbox —
+   * distinct from `alt` (accessibility text, not necessarily shown visually). */
+  caption?: string;
 }
 
 /** Optional short video clip attached to a listing — the Media Manager's
@@ -22,15 +25,27 @@ export interface Review {
   authorName: string;
   rating: number;
   comment: string;
+  title?: string;
+  /** ISO date (no time) — when the reviewer says they visited, distinct from `createdAt`. */
+  visitDate?: string;
   createdAt: string;
   photos?: GalleryImage[];
   ownerReply?: string;
   ownerReplyAt?: string;
   isReported?: boolean;
+  helpfulCount: number;
+  status?: "published" | "hidden";
 }
 
 /** Listing types a `business_owner` profile can currently own/manage — see lib/data/business.ts. */
 export type BusinessListingType = "hotel" | "restaurant" | "cafe" | "service";
+
+/** Every listing type that participates in the polymorphic reviews/
+ * favorites/saved-trip-items system (the `listing_type` DB enum). Single
+ * source of truth for the `ListingType` alias every review/favorite/trip
+ * call site used to redeclare locally — kept in sync here instead of in
+ * ~8 separate files as new listing types (event, city_service) are added. */
+export type PolymorphicListingType = "hotel" | "restaurant" | "cafe" | "attraction" | "service" | "event" | "city_service";
 
 export type PaymentStatus = "unpaid" | "pending" | "paid" | "refunded";
 
@@ -344,13 +359,27 @@ export interface Hotel {
   email?: string;
   socialInstagram?: string;
   socialFacebook?: string;
+  socialTiktok?: string;
+  socialSnapchat?: string;
+  socialX?: string;
+  socialYoutube?: string;
+  socialTelegram?: string;
   priceRange: string;
+  /** Free-text amenity tags — powers card-preview chips and the hotel
+   * search filter only. See `amenitiesV2` for the detail-page Amenities
+   * section's fixed vocabulary (lib/config/amenities.ts). */
   amenities: string[];
+  amenitiesV2?: string[];
+  favoriteCount?: number;
   nearbyAttractionIds: string[];
   featured?: boolean;
   logo?: string;
   checkInTime?: string;
   checkOutTime?: string;
+  openingHoursStructured?: OpeningHoursGroup[];
+  is24Hours?: boolean;
+  temporarilyClosed?: boolean;
+  permanentlyClosed?: boolean;
   languages: string[];
   rooms: HotelRoom[];
   restaurant?: Restaurant | null;
@@ -391,16 +420,27 @@ export interface Restaurant {
   email?: string;
   socialInstagram?: string;
   socialFacebook?: string;
+  socialTiktok?: string;
+  socialSnapchat?: string;
+  socialX?: string;
+  socialYoutube?: string;
+  socialTelegram?: string;
   cuisine: string[];
   priceRange: "$" | "$$" | "$$$";
   openingHours: string;
   openingHoursStructured?: OpeningHoursGroup[];
+  is24Hours?: boolean;
+  temporarilyClosed?: boolean;
+  permanentlyClosed?: boolean;
   menuHighlights: RestaurantMenuItem[];
   reservable: boolean;
   featured?: boolean;
   logo?: string;
   menuPdfUrl?: string;
   partnerStatus: PartnerStatus;
+  /** Fixed-vocabulary amenities for the detail-page Amenities section (lib/config/amenities.ts). */
+  amenitiesV2?: string[];
+  favoriteCount?: number;
 }
 
 /** One opening-hours row spanning one or more days, e.g. Sat–Wed vs. a
@@ -432,13 +472,26 @@ export interface Cafe {
   phone?: string;
   whatsapp?: string;
   email?: string;
+  website?: string;
+  socialTiktok?: string;
+  socialSnapchat?: string;
+  socialX?: string;
+  socialYoutube?: string;
+  socialTelegram?: string;
   specialDrinks: string[];
   wifi: boolean;
   workingSpace: boolean;
   openingHours: string;
   openingHoursStructured?: OpeningHoursGroup[];
+  is24Hours?: boolean;
+  temporarilyClosed?: boolean;
+  permanentlyClosed?: boolean;
   priceRange?: "$" | "$$" | "$$$" | "$$$$";
+  /** Legacy free-text/fixed-enum amenity tags (kept for the old admin
+   * checklist's data, no longer rendered on the detail page). See
+   * `amenitiesV2` for the unified vocabulary (lib/config/amenities.ts). */
   amenities?: string[];
+  amenitiesV2?: string[];
   socialInstagram?: string;
   socialFacebook?: string;
   featured?: boolean;
@@ -446,6 +499,7 @@ export interface Cafe {
   menuHighlights: RestaurantMenuItem[];
   menuPdfUrl?: string;
   partnerStatus: PartnerStatus;
+  favoriteCount?: number;
 }
 
 /** Phase 2 — Essential City Services. One shared shape across all 8
@@ -514,6 +568,7 @@ export type EssentialServiceCategory =
 
 export interface CityService {
   id: string;
+  slug: string;
   category: EssentialServiceCategory;
   /** Already resolved to the request locale (falls back to English) —
    * see lib/data/city-services.ts, same pattern as Cafe.description. */
@@ -527,9 +582,27 @@ export interface CityService {
   website: string | null;
   image: string | null;
   gallery: GalleryImage[];
+  videos?: MediaVideo[];
+  coords: Coordinates;
   status: "draft" | "published" | "archived";
   featured: boolean;
   sortOrder: number;
+  rating: number;
+  reviewCount: number;
+  reviews: Review[];
+  favoriteCount?: number;
+  amenitiesV2?: string[];
+  openingHoursStructured?: OpeningHoursGroup[];
+  is24Hours?: boolean;
+  temporarilyClosed?: boolean;
+  permanentlyClosed?: boolean;
+  socialInstagram?: string;
+  socialFacebook?: string;
+  socialTiktok?: string;
+  socialSnapchat?: string;
+  socialX?: string;
+  socialYoutube?: string;
+  socialTelegram?: string;
 }
 
 export interface Attraction {
@@ -540,6 +613,7 @@ export interface Attraction {
   description: string;
   coverImage: string;
   gallery: GalleryImage[];
+  videos?: MediaVideo[];
   address: string;
   location: Coordinates;
   googleMapsUrl?: string;
@@ -550,6 +624,17 @@ export interface Attraction {
   bestTimeToVisit: string;
   entryFee: string | null;
   visitorTips: string[];
+  phone?: string;
+  whatsapp?: string;
+  email?: string;
+  website?: string;
+  socialInstagram?: string;
+  socialFacebook?: string;
+  socialTiktok?: string;
+  socialSnapchat?: string;
+  socialX?: string;
+  socialYoutube?: string;
+  socialTelegram?: string;
   nearbyRestaurantIds: string[];
   nearbyHotelIds: string[];
   category: string;
@@ -557,6 +642,13 @@ export interface Attraction {
   /** Optional — not every source (e.g. Supabase rows) populates these yet. */
   openingHours?: string;
   visitDuration?: string;
+  openingHoursStructured?: OpeningHoursGroup[];
+  is24Hours?: boolean;
+  temporarilyClosed?: boolean;
+  permanentlyClosed?: boolean;
+  /** Fixed-vocabulary amenities for the detail-page Amenities section (lib/config/amenities.ts). */
+  amenitiesV2?: string[];
+  favoriteCount?: number;
 }
 
 export interface EventItem {
@@ -565,11 +657,37 @@ export interface EventItem {
   title: string;
   description: string;
   coverImage: string;
+  gallery: GalleryImage[];
+  videos?: MediaVideo[];
   category: string;
   startDate: string;
   endDate: string | null;
   location: string;
+  /** Geo coordinates for the "Nearby Places" query — distinct from
+   * `location`, the free-text venue description (e.g. "Hargeisa Stadium"). */
+  coords: Coordinates;
   ticketInfo?: string;
+  googleMapsUrl?: string;
+  rating: number;
+  reviewCount: number;
+  reviews: Review[];
+  favoriteCount?: number;
+  amenitiesV2?: string[];
+  openingHoursStructured?: OpeningHoursGroup[];
+  is24Hours?: boolean;
+  temporarilyClosed?: boolean;
+  permanentlyClosed?: boolean;
+  phone?: string;
+  whatsapp?: string;
+  email?: string;
+  website?: string;
+  socialInstagram?: string;
+  socialFacebook?: string;
+  socialTiktok?: string;
+  socialSnapchat?: string;
+  socialX?: string;
+  socialYoutube?: string;
+  socialTelegram?: string;
 }
 
 export interface Article {

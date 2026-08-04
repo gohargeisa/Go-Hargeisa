@@ -1,8 +1,9 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { ChevronDown, ChevronUp, GripVertical, Loader2, Repeat, Video as VideoIcon, X } from "lucide-react";
+import { ChevronDown, ChevronUp, ExternalLink, GripVertical, Link2, Loader2, Repeat, Video as VideoIcon, X } from "lucide-react";
 import { uploadVideo } from "@/lib/supabase/storage";
+import { parseVideoUrl } from "@/lib/utils/video-embed";
 import type { MediaVideo } from "@/types";
 
 /**
@@ -24,6 +25,8 @@ export function VideoUploader({
   replaceAriaLabel,
   moveEarlierAriaLabel,
   moveLaterAriaLabel,
+  pasteUrlPlaceholder,
+  addUrlLabel,
 }: {
   folder: string;
   value: MediaVideo[];
@@ -36,14 +39,28 @@ export function VideoUploader({
   replaceAriaLabel: string;
   moveEarlierAriaLabel: string;
   moveLaterAriaLabel: string;
+  /** Optional — when both are provided, a URL-paste field for YouTube/
+   * Instagram/TikTok links is shown alongside the file uploader. Omitted
+   * entirely (not just hidden) when unset, so callers that don't pass
+   * translated labels don't need to think about this feature. */
+  pasteUrlPlaceholder?: string;
+  addUrlLabel?: string;
 }) {
   const [uploading, setUploading] = useState(false);
   const [replacingIndex, setReplacingIndex] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [pastedUrl, setPastedUrl] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const replaceInputRef = useRef<HTMLInputElement>(null);
+
+  function addUrl() {
+    const url = pastedUrl.trim();
+    if (!url) return;
+    onChange([...value, { url }]);
+    setPastedUrl("");
+  }
 
   async function addFiles(files: File[]) {
     const videoFiles = files.filter((f) => f.type.startsWith("video/"));
@@ -120,7 +137,9 @@ export function VideoUploader({
 
       {value.length > 0 && (
         <div className="mb-4 grid gap-3 sm:grid-cols-2">
-          {value.map((v, i) => (
+          {value.map((v, i) => {
+            const { provider } = parseVideoUrl(v.url);
+            return (
             <div
               key={`${v.url}-${i}`}
               draggable
@@ -135,7 +154,19 @@ export function VideoUploader({
               className={`rounded-xl border border-ink/10 p-2.5 dark:border-white/15 ${draggedIndex === i ? "opacity-40" : ""}`}
             >
               <div className="relative mb-2">
-                <video src={v.url} controls preload="metadata" className="aspect-video w-full rounded-lg bg-black" />
+                {provider === "mp4" ? (
+                  <video src={v.url} controls preload="metadata" className="aspect-video w-full rounded-lg bg-black" />
+                ) : (
+                  <a
+                    href={v.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex aspect-video w-full flex-col items-center justify-center gap-2 rounded-lg bg-ink/5 text-ink/50 transition-colors hover:text-primary dark:bg-white/5 dark:text-sand/50"
+                  >
+                    <ExternalLink size={20} aria-hidden="true" />
+                    <span className="text-xs font-semibold capitalize">{provider}</span>
+                  </a>
+                )}
                 <span
                   className="absolute start-1.5 top-1.5 flex h-7 w-7 shrink-0 cursor-grab items-center justify-center rounded-lg bg-black/50 text-white active:cursor-grabbing"
                   aria-hidden="true"
@@ -180,7 +211,8 @@ export function VideoUploader({
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -215,6 +247,28 @@ export function VideoUploader({
         </label>
         <p className="mt-1.5 text-xs text-ink/45 dark:text-sand/45">{hint}</p>
       </div>
+
+      {pasteUrlPlaceholder && addUrlLabel && (
+        <div className="mt-3 flex gap-2">
+          <input
+            type="url"
+            value={pastedUrl}
+            onChange={(e) => setPastedUrl(e.target.value)}
+            placeholder={pasteUrlPlaceholder}
+            className="min-w-0 flex-1 rounded-lg border border-ink/12 bg-transparent px-3 py-2 text-sm outline-none focus:border-primary dark:border-white/15"
+          />
+          <button
+            type="button"
+            onClick={addUrl}
+            disabled={!pastedUrl.trim()}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-ink/15 px-3 py-2 text-sm font-semibold transition-colors hover:border-primary hover:text-primary disabled:opacity-50 dark:border-white/20"
+          >
+            <Link2 size={14} aria-hidden="true" />
+            {addUrlLabel}
+          </button>
+        </div>
+      )}
+
       {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
     </div>
   );

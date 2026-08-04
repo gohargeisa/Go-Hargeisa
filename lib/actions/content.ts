@@ -4,6 +4,7 @@ import type { Database } from "@/types/database";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
+import type { PolymorphicListingType } from "@/types";
 
 export async function subscribeToNewsletter(email: string, locale: string): Promise<{ ok: boolean; error?: string }> {
   if (!email || !email.includes("@")) return { ok: false, error: "Enter a valid email address." };
@@ -55,13 +56,15 @@ export async function sendContactMessage(input: {
   return { ok: true };
 }
 
-type ListingType = "hotel" | "restaurant" | "cafe" | "attraction" | "service";
+type ListingType = PolymorphicListingType;
 
 export async function submitReview(input: {
   listingType: ListingType;
   listingId: string;
   rating: number;
   comment: string;
+  title?: string;
+  visitDate?: string;
   locale: string;
   pathToRevalidate: string;
   photos?: string[];
@@ -84,6 +87,8 @@ export async function submitReview(input: {
     user_id: user.id,
     rating: input.rating,
     comment: input.comment,
+    title: input.title || null,
+    visit_date: input.visitDate || null,
     photos: (input.photos ?? []).map((url) => ({ url })),
   } as never);
 
@@ -106,6 +111,8 @@ export async function updateReview(input: {
   reviewId: string;
   rating: number;
   comment: string;
+  title?: string;
+  visitDate?: string;
   locale: string;
   pathToRevalidate: string;
   photos?: string[];
@@ -127,6 +134,8 @@ export async function updateReview(input: {
     .update({
       rating: input.rating,
       comment: input.comment,
+      title: input.title || null,
+      visit_date: input.visitDate || null,
       photos: (input.photos ?? []).map((url) => ({ url })),
     } as never)
     .eq("id", input.reviewId)
@@ -162,5 +171,66 @@ export async function deleteReview(
 
   revalidatePath(`/${locale}/dashboard`);
   if (extraPathToRevalidate) revalidatePath(extraPathToRevalidate);
+  return { ok: true };
+}
+
+/** Per-user-once "helpful" vote — mirrors toggleFavoriteAction's exact
+ * shape/pattern (lib/actions/favorites.ts). helpful_count on the review
+ * itself is denormalized and synced by a DB trigger, not written here. */
+export async function toggleHelpfulVote(
+  reviewId: string,
+  pathToRevalidate?: string
+): Promise<{ ok: boolean; helpful?: boolean; error?: string }> {
+  if (!isSupabaseConfigured()) return { ok: false, error: "Not configured." };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "sign-in-required" };
+
+  const { data: existing } = await supabase
+    .from("review_helpful_votes")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("review_id", reviewId)
+    .maybeSingle();
+
+  if (existing) {
+    await supabase.from("review_helpful_votes").delete().eq("id", existing.id);
+    if (pathToRevalidate) revalidatePath(pathToRevalidate);
+    return { ok: true, helpful: false };
+  }
+
+  const { error } = await supabase.from("review_helpful_votes").insert({ user_id: user.id, review_id: reviewId });
+  if (error) return { ok: false, error: error.message };
+  if (pathToRevalidate) revalidatePath(pathToRevalidate);
+  return { ok: true, helpful: true };
+}
+
+/** Visitor-facing "Report this review" — distinct from the owner/admin-only
+ * reportReview in lib/actions/business.ts (which requires
+ * assertCanManageListing, so a regular visitor can't call it — RLS only
+ * grants review UPDATE to the review's own author, the listing's owner, or
+ * an admin). Goes through the narrow `report_review` SECURITY DEFINER RPC
+ * (see migration 20260803000011) instead of a direct table update, so a
+ * visitor can flip only the `is_reported` flag without gaining general
+ * UPDATE access to other people's reviews. The review stays publicly
+ * visible until an admin acts on it (lib/actions/reviews-moderation.ts). */
+export async function reportReviewAsVisitor(
+  reviewId: string,
+  pathToRevalidate?: string
+): Promise<{ ok: boolean; error?: string }> {
+  if (!isSupabaseConfigured()) return { ok: false, error: "Not configured." };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "sign-in-required" };
+
+  const { error } = await supabase.rpc("report_review", { p_review_id: reviewId });
+  if (error) return { ok: false, error: error.message };
+  if (pathToRevalidate) revalidatePath(pathToRevalidate);
   return { ok: true };
 }

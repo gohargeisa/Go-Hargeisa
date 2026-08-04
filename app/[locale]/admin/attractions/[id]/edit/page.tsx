@@ -7,6 +7,7 @@ import { requireAdmin } from "@/lib/supabase/guards";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { AttractionForm } from "@/components/admin/attraction-form";
+import type { MediaVideo, OpeningHoursGroup } from "@/types";
 
 export const metadata: Metadata = { title: "Edit Attraction — Admin" };
 
@@ -44,6 +45,7 @@ export default async function EditAttractionPage({
   const gallery = Array.isArray(attraction.gallery)
     ? (attraction.gallery as unknown as { url: string; alt?: string; category?: string }[])
     : [];
+  const videos = Array.isArray(attraction.videos) ? (attraction.videos as unknown as MediaVideo[]) : [];
 
   return (
     <section className="container-px mx-auto py-14">
@@ -59,6 +61,7 @@ export default async function EditAttractionPage({
           description: attraction.description,
           coverImage: attraction.cover_image,
           gallery: gallery as any,
+          videos,
           address: attraction.address,
           lat: attraction.lat,
           lng: attraction.lng,
@@ -69,6 +72,24 @@ export default async function EditAttractionPage({
           visitorTips: attraction.visitor_tips ?? [],
           category: attraction.category,
           featured: attraction.featured,
+          amenitiesV2: attraction.amenities_v2 ?? [],
+          openingHoursStructured: Array.isArray(attraction.opening_hours_structured)
+            ? (attraction.opening_hours_structured as unknown as OpeningHoursGroup[])
+            : [],
+          is24Hours: attraction.is_24_hours,
+          temporarilyClosed: attraction.temporarily_closed,
+          permanentlyClosed: attraction.permanently_closed,
+          phone: attraction.phone ?? "",
+          whatsapp: attraction.whatsapp ?? "",
+          email: attraction.email ?? "",
+          website: attraction.website ?? "",
+          socialInstagram: attraction.social_instagram ?? "",
+          socialFacebook: attraction.social_facebook ?? "",
+          socialTiktok: attraction.social_tiktok ?? "",
+          socialSnapchat: attraction.social_snapchat ?? "",
+          socialX: attraction.social_x ?? "",
+          socialYoutube: attraction.social_youtube ?? "",
+          socialTelegram: attraction.social_telegram ?? "",
         }}
       />
     </section>

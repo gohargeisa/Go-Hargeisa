@@ -73,6 +73,7 @@ async function _getHotelBySlug(slug: string): Promise<Hotel | null> {
       .select("*, profiles(full_name)")
       .eq("listing_type", "hotel")
       .eq("listing_id", hotel.id)
+      .eq("status", "published")
       .order("created_at", { ascending: false }),
     supabase
       .from("hotel_rooms" as any)

@@ -7,7 +7,8 @@ import { getTranslations } from "next-intl/server";
 import { ExternalLink, MapPin, Navigation } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
-import { getHotelBySlug, getAllHotelSlugs, getNearbyAttractionsForHotel, getHotels } from "@/lib/data/hotels";
+import { getHotelBySlug, getAllHotelSlugs, getNearbyAttractionsForHotel } from "@/lib/data/hotels";
+import { getRelatedListings } from "@/lib/data/related-listings";
 import { getPublicOffersForListing } from "@/lib/data/offers";
 import { hotelCategoryLabel } from "@/lib/utils/hotel-category";
 import { getSiteSettings } from "@/lib/actions/settings";
@@ -25,13 +26,20 @@ import { BusinessPhotoGallery } from "@/components/shared/business-photo-gallery
 import { HOTEL_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import { HotelOnsiteRestaurantCard } from "@/components/shared/hotel-onsite-restaurant-card";
 import { HotelOnsiteCafeCard } from "@/components/shared/hotel-onsite-cafe-card";
-import { HotelAmenities } from "@/components/shared/hotel-amenities";
+import { AmenitiesSection, hasAmenities } from "@/components/shared/amenities-section";
+import { SocialLinks } from "@/components/shared/social-links";
+import { VideoGallery } from "@/components/shared/video-gallery";
+import { OpenStatusBadge } from "@/components/shared/open-status-badge";
+import { formatDayRange, formatTime12h } from "@/lib/utils/opening-hours";
 import { HotelBookingCard } from "@/components/shared/hotel-booking-card";
 import { MobileBookingBar } from "@/components/shared/mobile-booking-bar";
 import { HotelCard } from "@/components/shared/hotel-card";
 import { ReviewsSection } from "@/components/shared/reviews-section";
 import { ReviewForm } from "@/components/shared/review-form";
 import { getMyReviewForListing } from "@/lib/data/reviews";
+import { isListingFavorited } from "@/lib/data/favorites";
+import { getNearbyListings, mergeCuratedNearby } from "@/lib/data/nearby";
+import { NearbyListings } from "@/components/shared/nearby-listings";
 import { Reveal } from "@/components/home/reveal";
 import { PrimaryButton, SecondaryButton } from "@/components/shared/buttons";
 import { getHotelBookingCta } from "@/lib/utils/booking-cta";
@@ -41,7 +49,6 @@ import {
   PRESENTATION_HOTEL_SLUG,
   RESTAURANTS_PUBLIC_ENABLED,
   CAFES_PUBLIC_ENABLED,
-  filterHotelsForPresentation,
 } from "@/lib/config/features";
 
 // Public content changes infrequently; revalidate hourly instead of
@@ -85,16 +92,31 @@ export default async function HotelDetailPage({
   const tNav = await getTranslations("nav");
   const td = await getTranslations("detail");
   const th = await getTranslations("hotelDetail");
-  const [nearby, allHotels, siteSettings, offers, myReview] = await Promise.all([
+  const tw = await getTranslations("weekdays");
+  const tn = await getTranslations("nearby");
+  const [nearby, similarHotels, siteSettings, offers, myReview, isFavorited, nearbyPlaces] = await Promise.all([
     getNearbyAttractionsForHotel(hotel.id),
-    getHotels(),
+    getRelatedListings("hotel", hotel.id),
     getSiteSettings(),
     getPublicOffersForListing("hotel", hotel.id),
     getMyReviewForListing("hotel", hotel.id),
+    isListingFavorited("hotel", hotel.id),
+    getNearbyListings({ lat: hotel.location.lat, lng: hotel.location.lng, excludeType: "hotel", excludeId: hotel.id }),
   ]);
-  const similarHotels = filterHotelsForPresentation(allHotels)
-    .filter((h) => h.id !== hotel.id)
-    .slice(0, 4);
+  const mergedNearby = mergeCuratedNearby(
+    nearby.map((a) => ({
+      type: "attraction" as const,
+      id: a.id,
+      slug: a.slug,
+      name: a.name,
+      image: a.coverImage,
+      rating: a.rating,
+      reviewCount: a.reviewCount,
+      location: a.location,
+    })),
+    nearbyPlaces,
+    hotel.location
+  );
   const whatsappFallback = (siteSettings as { whatsapp_number?: string } | null)?.whatsapp_number ?? undefined;
 
   const bookingCta = getHotelBookingCta(hotel, {
@@ -104,12 +126,17 @@ export default async function HotelDetailPage({
     bookOnBookingCom: t("bookOnBookingCom"),
   });
 
+  const hasStructuredHours = hotel.openingHoursStructured && hotel.openingHoursStructured.length > 0;
+  const hasHoursInfo = hasStructuredHours || hotel.is24Hours || hotel.temporarilyClosed || hotel.permanentlyClosed;
+
   const navTabs: HotelNavTab[] = [
     { id: "overview", label: td("overview") },
     ...(offers.length > 0 ? [{ id: "offers", label: td("offersTabLabel") }] : []),
     ...(hotel.rooms.length > 0 ? [{ id: "rooms", label: th("rooms") }] : []),
     ...(hotel.gallery.length > 0 ? [{ id: "gallery", label: t("gallery") }] : []),
-    { id: "amenities", label: t("amenities") },
+    ...(hotel.videos && hotel.videos.length > 0 ? [{ id: "videos", label: td("videoGallery") }] : []),
+    ...(hasHoursInfo ? [{ id: "hours", label: td("openingHoursByDay") }] : []),
+    ...(hasAmenities(hotel.amenitiesV2) ? [{ id: "amenities", label: t("amenities") }] : []),
     { id: "reviews", label: t("reviews") },
     { id: "location", label: td("location") },
   ];
@@ -161,9 +188,30 @@ export default async function HotelDetailPage({
         rating={hotel.rating}
         phone={hotel.phone}
         website={hotel.website}
+        email={hotel.email}
         whatsappFallback={whatsappFallback}
         bookingCta={bookingCta}
         rooms={hotel.rooms}
+      />
+
+      <SocialLinks
+        instagram={hotel.socialInstagram}
+        facebook={hotel.socialFacebook}
+        tiktok={hotel.socialTiktok}
+        snapchat={hotel.socialSnapchat}
+        x={hotel.socialX}
+        youtube={hotel.socialYoutube}
+        telegram={hotel.socialTelegram}
+        labels={{
+          instagram: td("followInstagram"),
+          facebook: td("followFacebook"),
+          tiktok: td("followTiktok"),
+          snapchat: td("followSnapchat"),
+          x: td("followX"),
+          youtube: td("followYoutube"),
+          telegram: td("followTelegram"),
+        }}
+        className="container-px mx-auto mt-3 justify-center"
       />
 
       <HotelQuickInfoCards
@@ -239,6 +287,17 @@ export default async function HotelDetailPage({
             </Reveal>
           )}
 
+          {hotel.videos && hotel.videos.length > 0 && (
+            <Reveal>
+              <section id="videos" aria-labelledby="video-gallery-heading" className="scroll-mt-36">
+                <h2 id="video-gallery-heading" className="mb-5 font-display text-2xl font-semibold">
+                  {td("videoGallery")}
+                </h2>
+                <VideoGallery videos={hotel.videos} watchOnLabel={(platform) => td("watchOn", { platform })} />
+              </section>
+            </Reveal>
+          )}
+
           {RESTAURANTS_PUBLIC_ENABLED && hotel.restaurant && (
             <Reveal>
               <section aria-labelledby="restaurant-heading">
@@ -261,14 +320,59 @@ export default async function HotelDetailPage({
             </Reveal>
           )}
 
-          <Reveal>
-            <section id="amenities" aria-labelledby="amenities-heading" className="scroll-mt-36">
-              <h2 id="amenities-heading" className="mb-5 font-display text-2xl font-semibold">
-                {t("amenities")}
-              </h2>
-              <HotelAmenities amenities={hotel.amenities} />
-            </section>
-          </Reveal>
+          {hasHoursInfo && (
+            <Reveal>
+              <section id="hours" aria-labelledby="hours-heading" className="scroll-mt-36">
+                <div className="mb-5 flex flex-wrap items-center gap-3">
+                  <h2 id="hours-heading" className="font-display text-2xl font-semibold">
+                    🕒 {td("openingHoursByDay")}
+                  </h2>
+                  <OpenStatusBadge
+                    groups={hotel.openingHoursStructured ?? []}
+                    is24Hours={hotel.is24Hours}
+                    temporarilyClosed={hotel.temporarilyClosed}
+                    permanentlyClosed={hotel.permanentlyClosed}
+                    labels={{
+                      open: td("openNow"),
+                      closed: td("closedNow"),
+                      opensAt: (time) => td("opensAt", { time }),
+                      closesInMinutes: (minutes) => td("closesInMinutes", { minutes }),
+                      temporarilyClosed: td("temporarilyClosedNow"),
+                      permanentlyClosed: td("permanentlyClosedNow"),
+                    }}
+                  />
+                </div>
+                {hasStructuredHours && (
+                  <div className="divide-y divide-ink/8 overflow-hidden rounded-xl2 border border-ink/8 dark:divide-white/10 dark:border-white/10">
+                    {hotel.openingHoursStructured!.map((group, i) => (
+                      <div
+                        key={i}
+                        className="flex flex-col gap-1 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:p-5"
+                      >
+                        <span className="min-w-0 break-words text-sm font-semibold">
+                          {formatDayRange(group.days, tw)}
+                        </span>
+                        <span className="shrink-0 text-sm text-ink/70 dark:text-sand/70">
+                          {formatTime12h(group.open)} – {formatTime12h(group.close)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            </Reveal>
+          )}
+
+          {hasAmenities(hotel.amenitiesV2) && (
+            <Reveal>
+              <section id="amenities" aria-labelledby="amenities-heading" className="scroll-mt-36">
+                <h2 id="amenities-heading" className="mb-5 font-display text-2xl font-semibold">
+                  {t("amenities")}
+                </h2>
+                <AmenitiesSection amenities={hotel.amenitiesV2} />
+              </section>
+            </Reveal>
+          )}
 
           <Reveal>
             <section id="location" aria-labelledby="location-heading" className="scroll-mt-36">
@@ -314,7 +418,13 @@ export default async function HotelDetailPage({
               <h2 id="reviews-heading" className="mb-5 font-display text-2xl font-semibold">
                 {t("reviews")}
               </h2>
-              <ReviewsSection rating={hotel.rating} reviewCount={hotel.reviewCount} reviews={hotel.reviews} />
+              <ReviewsSection
+                rating={hotel.rating}
+                reviewCount={hotel.reviewCount}
+                reviews={hotel.reviews}
+                locale={locale}
+                pathToRevalidate={`/${locale}/hotels/${hotel.slug}`}
+              />
               <div className="mt-6">
                 <ReviewForm
                   key={myReview?.id ?? "new"}
@@ -329,32 +439,6 @@ export default async function HotelDetailPage({
             </section>
           </Reveal>
 
-          {nearby.length > 0 && (
-            <Reveal>
-              <section aria-labelledby="nearby-heading">
-                <h2 id="nearby-heading" className="mb-5 font-display text-2xl font-semibold">
-                  {t("nearbyAttractions")}
-                </h2>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {nearby.map((a) => (
-                    <Link
-                      key={a.id}
-                      href={`/${locale}/attractions/${a.slug}`}
-                      className="flex gap-3 rounded-xl2 border border-ink/8 p-3 transition-colors hover:border-primary/40 dark:border-white/10"
-                    >
-                      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl">
-                        <Image src={a.coverImage} alt={a.name} fill sizes="64px" className="object-cover" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold">{a.name}</p>
-                        <p className="line-clamp-2 text-xs text-ink/55 dark:text-sand/55">{a.shortDescription}</p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </section>
-            </Reveal>
-          )}
         </div>
 
         <aside className="hidden h-fit rounded-xl3 border border-ink/8 p-6 shadow-premium dark:border-white/10 lg:sticky lg:top-24 lg:block">
@@ -369,6 +453,8 @@ export default async function HotelDetailPage({
             locale={locale}
             bookingCta={bookingCta}
             rooms={hotel.rooms}
+            initiallyFavorited={isFavorited}
+            favoriteCount={hotel.favoriteCount}
           />
         </aside>
       </div>
@@ -400,6 +486,19 @@ export default async function HotelDetailPage({
                   </div>
                 ))}
               </div>
+            </Reveal>
+          </div>
+        </section>
+      )}
+
+      {mergedNearby.length > 0 && (
+        <section className="border-t border-ink/8 bg-white py-14 dark:border-white/10 dark:bg-white/[0.03] sm:py-20">
+          <div className="container-px mx-auto">
+            <Reveal>
+              <h2 className="mb-6 font-display text-2xl font-semibold sm:text-3xl">{tn("nearbyPlaces")}</h2>
+            </Reveal>
+            <Reveal delay={0.1}>
+              <NearbyListings listings={mergedNearby} locale={locale} distanceLabel={(km) => tn("distanceAway", { km })} />
             </Reveal>
           </div>
         </section>

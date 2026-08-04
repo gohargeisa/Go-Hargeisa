@@ -246,10 +246,11 @@ export async function convertJoinRequest(
 
   if (request.price_range) basePayload.price_range = request.price_range;
   // Only hotels has a free-form amenities column that matches the join
-  // form's vocabulary 1:1 — restaurants has no amenities column at all, and
-  // cafes uses its own fixed CAFE_AMENITY_CODES vocabulary (see
-  // lib/utils/cafe-amenities.ts), so passing the partner-form's codes
-  // through there would just silently not match any known chip.
+  // form's vocabulary 1:1 — restaurants has no legacy amenities column at
+  // all, and cafes' amenities column is no longer admin-editable free text
+  // (see lib/config/amenities.ts for the fixed amenities_v2 vocabulary now
+  // used instead), so passing the partner-form's codes through there would
+  // just silently not match any known chip.
   if (table === "hotels" && request.amenities && request.amenities.length > 0) {
     basePayload.amenities = request.amenities;
   }

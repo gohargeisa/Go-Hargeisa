@@ -52,6 +52,7 @@ async function _getAttractionBySlug(slug: string): Promise<Attraction | null> {
     .select("*, profiles(full_name)")
     .eq("listing_type", "attraction")
     .eq("listing_id", attraction.id)
+    .eq("status", "published")
     .order("created_at", { ascending: false });
 
   const reviews = (reviewRows ?? []).map((r: any) => mapReview(r, r.profiles?.full_name ?? "Guest"));

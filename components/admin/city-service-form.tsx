@@ -6,14 +6,19 @@ import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 import { ImageUploader } from "@/components/shared/image-uploader";
 import { GalleryManager } from "@/components/admin/gallery-manager";
+import { VideoUploader } from "@/components/shared/video-uploader";
+import { GoogleMapsLocationField } from "@/components/admin/google-maps-location-field";
+import { OpeningHoursEditor } from "@/components/shared/opening-hours-editor";
+import { AmenitiesPicker } from "@/components/admin/amenities-picker";
 import { Field, inputClass } from "@/components/admin/form-shared";
 import { createCityService, updateCityService } from "@/lib/actions/city-services";
 import { useUnsavedChangesWarning } from "@/lib/hooks/use-unsaved-changes-warning";
 import { CITY_SERVICE_CATEGORIES } from "@/lib/config/city-service-categories";
 import { cityServiceCategorySupportsGallery } from "@/lib/config/gallery-eligibility";
+import { cityServiceCategorySupportsNewFeatures } from "@/lib/config/listing-feature-eligibility";
 import { SERVICE_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import type { Locale } from "@/lib/i18n/config";
-import type { EssentialServiceCategory, GalleryImage } from "@/types";
+import type { EssentialServiceCategory, GalleryImage, MediaVideo, OpeningHoursGroup } from "@/types";
 
 export interface CityServiceFormInput {
   category: EssentialServiceCategory;
@@ -31,6 +36,21 @@ export interface CityServiceFormInput {
   website: string;
   image: string;
   gallery: GalleryImage[];
+  videos: MediaVideo[];
+  lat: number;
+  lng: number;
+  amenitiesV2: string[];
+  openingHoursStructured: OpeningHoursGroup[];
+  is24Hours: boolean;
+  temporarilyClosed: boolean;
+  permanentlyClosed: boolean;
+  socialInstagram: string;
+  socialFacebook: string;
+  socialTiktok: string;
+  socialSnapchat: string;
+  socialX: string;
+  socialYoutube: string;
+  socialTelegram: string;
   status: "draft" | "published";
   featured: boolean;
 }
@@ -48,6 +68,7 @@ export function CityServiceForm({
 }) {
   const t = useTranslations("admin");
   const tCityServices = useTranslations("cityServices");
+  const tw = useTranslations("weekdays");
   const router = useRouter();
   const [form, setForm] = useState<CityServiceFormInput>({
     category: initial?.category ?? "hospital",
@@ -65,6 +86,21 @@ export function CityServiceForm({
     website: initial?.website ?? "",
     image: initial?.image ?? "",
     gallery: initial?.gallery ?? [],
+    videos: initial?.videos ?? [],
+    lat: initial?.lat ?? 9.5624,
+    lng: initial?.lng ?? 44.065,
+    amenitiesV2: initial?.amenitiesV2 ?? [],
+    openingHoursStructured: initial?.openingHoursStructured ?? [],
+    is24Hours: initial?.is24Hours ?? false,
+    temporarilyClosed: initial?.temporarilyClosed ?? false,
+    permanentlyClosed: initial?.permanentlyClosed ?? false,
+    socialInstagram: initial?.socialInstagram ?? "",
+    socialFacebook: initial?.socialFacebook ?? "",
+    socialTiktok: initial?.socialTiktok ?? "",
+    socialSnapchat: initial?.socialSnapchat ?? "",
+    socialX: initial?.socialX ?? "",
+    socialYoutube: initial?.socialYoutube ?? "",
+    socialTelegram: initial?.socialTelegram ?? "",
     status: initial?.status ?? "draft",
     featured: initial?.featured ?? false,
   });
@@ -73,6 +109,8 @@ export function CityServiceForm({
 
   const [dirty, setDirty] = useState(false);
   useUnsavedChangesWarning(dirty);
+
+  const featureEligible = cityServiceCategorySupportsNewFeatures(form.category);
 
   function update<K extends keyof CityServiceFormInput>(key: K, value: CityServiceFormInput[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -99,6 +137,21 @@ export function CityServiceForm({
       website: form.website || undefined,
       image: form.image || undefined,
       gallery: form.gallery,
+      videos: featureEligible ? form.videos : [],
+      lat: form.lat,
+      lng: form.lng,
+      amenitiesV2: featureEligible ? form.amenitiesV2 : [],
+      openingHoursStructured: featureEligible ? form.openingHoursStructured : [],
+      is24Hours: featureEligible ? form.is24Hours : false,
+      temporarilyClosed: featureEligible ? form.temporarilyClosed : false,
+      permanentlyClosed: featureEligible ? form.permanentlyClosed : false,
+      socialInstagram: featureEligible ? form.socialInstagram || undefined : undefined,
+      socialFacebook: featureEligible ? form.socialFacebook || undefined : undefined,
+      socialTiktok: featureEligible ? form.socialTiktok || undefined : undefined,
+      socialSnapchat: featureEligible ? form.socialSnapchat || undefined : undefined,
+      socialX: featureEligible ? form.socialX || undefined : undefined,
+      socialYoutube: featureEligible ? form.socialYoutube || undefined : undefined,
+      socialTelegram: featureEligible ? form.socialTelegram || undefined : undefined,
       status: form.status,
       featured: form.featured,
     };
@@ -135,6 +188,24 @@ export function CityServiceForm({
         />
       ) : (
         <p className="text-xs text-ink/45 dark:text-sand/45">{t("galleryNotAvailableForCategory")}</p>
+      )}
+
+      {featureEligible && (
+        <VideoUploader
+          folder="city-services/videos"
+          value={form.videos}
+          onChange={(v) => update("videos", v)}
+          label={t("videosLabel")}
+          addLabel={t("addVideoLabel")}
+          hint={t("videosHint")}
+          captionPlaceholder={t("videoCaptionPlaceholder")}
+          removeAriaLabel={t("removeVideoAriaLabel")}
+          replaceAriaLabel={t("replaceVideoAriaLabel")}
+          moveEarlierAriaLabel={t("moveVideoEarlierAriaLabel")}
+          moveLaterAriaLabel={t("moveVideoLaterAriaLabel")}
+          pasteUrlPlaceholder={t("pasteVideoUrlPlaceholder")}
+          addUrlLabel={t("addVideoUrlLabel")}
+        />
       )}
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -186,19 +257,74 @@ export function CityServiceForm({
         </Field>
       </div>
 
-      <Field label={t("openingHoursShortLabel")}>
+      {featureEligible && (
+        <>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label={t("socialInstagramLabel")}>
+              <input value={form.socialInstagram} onChange={(e) => update("socialInstagram", e.target.value)} className={inputClass} placeholder="https://instagram.com/…" />
+            </Field>
+            <Field label={t("socialFacebookLabel")}>
+              <input value={form.socialFacebook} onChange={(e) => update("socialFacebook", e.target.value)} className={inputClass} placeholder="https://facebook.com/…" />
+            </Field>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label={t("socialTiktokLabel")}>
+              <input value={form.socialTiktok} onChange={(e) => update("socialTiktok", e.target.value)} className={inputClass} placeholder="https://tiktok.com/@…" />
+            </Field>
+            <Field label={t("socialSnapchatLabel")}>
+              <input value={form.socialSnapchat} onChange={(e) => update("socialSnapchat", e.target.value)} className={inputClass} placeholder="https://snapchat.com/add/…" />
+            </Field>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label={t("socialXLabel")}>
+              <input value={form.socialX} onChange={(e) => update("socialX", e.target.value)} className={inputClass} placeholder="https://x.com/…" />
+            </Field>
+            <Field label={t("socialYoutubeLabel")}>
+              <input value={form.socialYoutube} onChange={(e) => update("socialYoutube", e.target.value)} className={inputClass} placeholder="https://youtube.com/@…" />
+            </Field>
+          </div>
+
+          <Field label={t("socialTelegramLabel")}>
+            <input value={form.socialTelegram} onChange={(e) => update("socialTelegram", e.target.value)} className={inputClass} placeholder="https://t.me/…" />
+          </Field>
+        </>
+      )}
+
+      <Field label={t("openingHoursShortLabel")} hint={t("openingHoursShortHint")}>
         <input value={form.openingHours} onChange={(e) => update("openingHours", e.target.value)} className={inputClass} placeholder="Sat–Thu, 8:00 AM – 6:00 PM" />
       </Field>
 
-      <Field label={t("mapsUrlLabel")}>
-        <input
-          type="url"
-          value={form.mapsUrl}
-          onChange={(e) => update("mapsUrl", e.target.value)}
-          className={inputClass}
-          placeholder="https://maps.google.com/…"
+      {featureEligible && (
+        <OpeningHoursEditor
+          value={form.openingHoursStructured}
+          onChange={(v) => update("openingHoursStructured", v)}
+          dayLabel={tw}
+          title={t("structuredHoursLabel")}
+          addLabel={t("addHoursGroupLabel")}
+          openLabel={t("hoursOpenLabel")}
+          closeLabel={t("hoursCloseLabel")}
+          removeAriaLabel={t("removeHoursGroupAriaLabel")}
+          is24Hours={form.is24Hours}
+          onIs24HoursChange={(v) => update("is24Hours", v)}
+          is24HoursLabel={t("is24HoursLabel")}
+          temporarilyClosed={form.temporarilyClosed}
+          onTemporarilyClosedChange={(v) => update("temporarilyClosed", v)}
+          temporarilyClosedLabel={t("temporarilyClosedLabel")}
+          permanentlyClosed={form.permanentlyClosed}
+          onPermanentlyClosedChange={(v) => update("permanentlyClosed", v)}
+          permanentlyClosedLabel={t("permanentlyClosedLabel")}
         />
-      </Field>
+      )}
+
+      <GoogleMapsLocationField
+        googleMapsUrl={form.mapsUrl}
+        onGoogleMapsUrlChange={(url) => update("mapsUrl", url)}
+        lat={form.lat}
+        lng={form.lng}
+        onCoordsChange={(lat, lng) => setForm((f) => ({ ...f, lat, lng }))}
+      />
 
       <Field label={t("cityServiceDescriptionLabel")}>
         <textarea
@@ -216,6 +342,10 @@ export function CityServiceForm({
       <Field label={t("fullDescriptionSoLabel")}>
         <textarea rows={3} value={form.descriptionSo} onChange={(e) => update("descriptionSo", e.target.value)} className={inputClass} />
       </Field>
+
+      {featureEligible && (
+        <AmenitiesPicker listingType="city_service" values={form.amenitiesV2} onChange={(v) => update("amenitiesV2", v)} label={t("amenitiesLabel")} />
+      )}
 
       <Field label={t("statusLabel")}>
         <select value={form.status} onChange={(e) => update("status", e.target.value as "draft" | "published")} className={inputClass}>

@@ -31,6 +31,15 @@ export function OpeningHoursEditor({
   openLabel,
   closeLabel,
   removeAriaLabel,
+  is24Hours,
+  onIs24HoursChange,
+  is24HoursLabel,
+  temporarilyClosed,
+  onTemporarilyClosedChange,
+  temporarilyClosedLabel,
+  permanentlyClosed,
+  onPermanentlyClosedChange,
+  permanentlyClosedLabel,
 }: {
   value: OpeningHoursGroup[];
   onChange: (value: OpeningHoursGroup[]) => void;
@@ -40,6 +49,18 @@ export function OpeningHoursEditor({
   openLabel: string;
   closeLabel: string;
   removeAriaLabel: string;
+  /** Closure-state toggles are optional so existing callers (which don't
+   * yet pass them) keep working unchanged — day-groups still render either
+   * way, since a caller may legitimately not offer these controls. */
+  is24Hours?: boolean;
+  onIs24HoursChange?: (value: boolean) => void;
+  is24HoursLabel?: string;
+  temporarilyClosed?: boolean;
+  onTemporarilyClosedChange?: (value: boolean) => void;
+  temporarilyClosedLabel?: string;
+  permanentlyClosed?: boolean;
+  onPermanentlyClosedChange?: (value: boolean) => void;
+  permanentlyClosedLabel?: string;
 }) {
   function addGroup() {
     onChange([...value, { days: [], open: "09:00", close: "18:00" }]);
@@ -59,61 +80,91 @@ export function OpeningHoursEditor({
   const inputClass =
     "rounded-xl border border-ink/12 bg-transparent px-3 py-2 text-sm outline-none focus:border-primary dark:border-white/15";
 
+  const showClosureToggles = onIs24HoursChange || onTemporarilyClosedChange || onPermanentlyClosedChange;
+  const hideDayGroups = is24Hours || permanentlyClosed;
+
   return (
     <div>
-      <div className="mb-2 flex items-center justify-between">
-        <label className="text-sm font-semibold">{title}</label>
-        <button type="button" onClick={addGroup} className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
-          <Plus size={13} /> {addLabel}
-        </button>
-      </div>
-      <div className="space-y-3">
-        {value.map((group, i) => (
-          <div key={i} className="rounded-xl border border-ink/12 p-3 space-y-2.5 dark:border-white/15">
-            <div className="flex flex-wrap gap-1.5">
-              {WEEKDAYS.map((day) => (
-                <button
-                  key={day}
-                  type="button"
-                  onClick={() => toggleDay(i, day)}
-                  className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
-                    group.days.includes(day)
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-ink/12 text-ink/50 dark:border-white/15 dark:text-sand/50"
-                  }`}
-                >
-                  {dayLabel(day)}
-                </button>
-              ))}
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="time"
-                value={group.open}
-                onChange={(e) => updateGroup(i, { open: e.target.value })}
-                aria-label={openLabel}
-                className={inputClass}
-              />
-              <span className="text-ink/40 dark:text-sand/40">–</span>
-              <input
-                type="time"
-                value={group.close}
-                onChange={(e) => updateGroup(i, { close: e.target.value })}
-                aria-label={closeLabel}
-                className={inputClass}
-              />
-              <button
-                type="button"
-                onClick={() => removeGroup(i)}
-                aria-label={removeAriaLabel}
-                className="ms-auto shrink-0 text-ink/40 hover:text-red-500"
-              >
-                <X size={16} />
-              </button>
-            </div>
+      {showClosureToggles && (
+        <div className="mb-4 flex flex-wrap gap-4">
+          {onIs24HoursChange && (
+            <label className="flex items-center gap-2 text-sm font-medium">
+              <input type="checkbox" checked={!!is24Hours} onChange={(e) => onIs24HoursChange(e.target.checked)} />
+              {is24HoursLabel}
+            </label>
+          )}
+          {onTemporarilyClosedChange && (
+            <label className="flex items-center gap-2 text-sm font-medium">
+              <input type="checkbox" checked={!!temporarilyClosed} onChange={(e) => onTemporarilyClosedChange(e.target.checked)} />
+              {temporarilyClosedLabel}
+            </label>
+          )}
+          {onPermanentlyClosedChange && (
+            <label className="flex items-center gap-2 text-sm font-medium">
+              <input type="checkbox" checked={!!permanentlyClosed} onChange={(e) => onPermanentlyClosedChange(e.target.checked)} />
+              {permanentlyClosedLabel}
+            </label>
+          )}
+        </div>
+      )}
+
+      {!hideDayGroups && (
+        <>
+          <div className="mb-2 flex items-center justify-between">
+            <label className="text-sm font-semibold">{title}</label>
+            <button type="button" onClick={addGroup} className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
+              <Plus size={13} /> {addLabel}
+            </button>
           </div>
-        ))}
-      </div>
+          <div className="space-y-3">
+            {value.map((group, i) => (
+              <div key={i} className="rounded-xl border border-ink/12 p-3 space-y-2.5 dark:border-white/15">
+                <div className="flex flex-wrap gap-1.5">
+                  {WEEKDAYS.map((day) => (
+                    <button
+                      key={day}
+                      type="button"
+                      onClick={() => toggleDay(i, day)}
+                      className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
+                        group.days.includes(day)
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-ink/12 text-ink/50 dark:border-white/15 dark:text-sand/50"
+                      }`}
+                    >
+                      {dayLabel(day)}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="time"
+                    value={group.open}
+                    onChange={(e) => updateGroup(i, { open: e.target.value })}
+                    aria-label={openLabel}
+                    className={inputClass}
+                  />
+                  <span className="text-ink/40 dark:text-sand/40">–</span>
+                  <input
+                    type="time"
+                    value={group.close}
+                    onChange={(e) => updateGroup(i, { close: e.target.value })}
+                    aria-label={closeLabel}
+                    className={inputClass}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeGroup(i)}
+                    aria-label={removeAriaLabel}
+                    className="ms-auto shrink-0 text-ink/40 hover:text-red-500"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }

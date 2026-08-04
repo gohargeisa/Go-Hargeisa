@@ -1,7 +1,33 @@
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { mapHotel, mapRestaurant, mapCafe, mapService, mapAttraction } from "./mappers";
-import type { Hotel, Restaurant, Cafe, Service, Attraction } from "@/types";
+import type { Hotel, Restaurant, Cafe, Service, Attraction, PolymorphicListingType } from "@/types";
+
+type ListingType = PolymorphicListingType;
+
+/** Whether the signed-in visitor has already favorited this one listing —
+ * used to seed a detail page's FavoriteButton with the right initial state
+ * (signed-out visitors always get `false`, matching how the button itself
+ * treats an unauthenticated toggle attempt). */
+export async function isListingFavorited(listingType: ListingType, listingId: string): Promise<boolean> {
+  if (!isSupabaseConfigured()) return false;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return false;
+
+  const { data } = await supabase
+    .from("favorites")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("listing_type", listingType)
+    .eq("listing_id", listingId)
+    .maybeSingle();
+
+  return !!data;
+}
 
 type FavoriteEntry =
   | { kind: "hotel"; item: Hotel }

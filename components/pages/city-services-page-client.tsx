@@ -101,7 +101,7 @@ export function CityServicesPageClient({
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                   {s.items.map((service) => (
-                    <CityServiceCard key={service.id} service={service} />
+                    <CityServiceCard key={service.id} service={service} locale={locale} />
                   ))}
                 </div>
               </div>

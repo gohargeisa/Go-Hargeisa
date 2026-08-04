@@ -61,6 +61,14 @@ export const ATTRACTION_GALLERY_CATEGORIES: GalleryCategoryOption[] = [
   { value: "other", label: "Other" },
 ];
 
+export const EVENT_GALLERY_CATEGORIES: GalleryCategoryOption[] = [
+  { value: "crowd", label: "Crowd" },
+  { value: "performers", label: "Performers" },
+  { value: "venue", label: "Venue" },
+  { value: "highlights", label: "Highlights" },
+  { value: "other", label: "Other" },
+];
+
 export function galleryCategoryLabel(categories: GalleryCategoryOption[], category?: string): string {
   return categories.find((c) => c.value === category)?.label ?? "Other";
 }

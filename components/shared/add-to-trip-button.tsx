@@ -6,8 +6,9 @@ import { useTranslations } from "next-intl";
 import { MapIcon, Plus, Check, Loader2 } from "lucide-react";
 import { addToTrip, getMyTripOptions } from "@/lib/actions/trips";
 import type { Locale } from "@/lib/i18n/config";
+import type { PolymorphicListingType } from "@/types";
 
-type ListingType = "hotel" | "restaurant" | "cafe" | "attraction" | "service";
+type ListingType = PolymorphicListingType;
 
 export function AddToTripButton({
   locale,

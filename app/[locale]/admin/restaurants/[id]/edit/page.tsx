@@ -81,6 +81,11 @@ export default async function EditRestaurantPage({
           email: restaurant.email ?? "",
           socialInstagram: restaurant.social_instagram ?? "",
           socialFacebook: restaurant.social_facebook ?? "",
+          socialTiktok: restaurant.social_tiktok ?? "",
+          socialSnapchat: restaurant.social_snapchat ?? "",
+          socialX: restaurant.social_x ?? "",
+          socialYoutube: restaurant.social_youtube ?? "",
+          socialTelegram: restaurant.social_telegram ?? "",
           cuisine: (restaurant.cuisine ?? []) as string[],
           priceRange:
             restaurant.price_range === "$$$$"
@@ -90,6 +95,9 @@ export default async function EditRestaurantPage({
           openingHoursStructured: Array.isArray(restaurant.opening_hours_structured)
             ? (restaurant.opening_hours_structured as unknown as OpeningHoursGroup[])
             : [],
+          is24Hours: restaurant.is_24_hours,
+          temporarilyClosed: restaurant.temporarily_closed,
+          permanentlyClosed: restaurant.permanently_closed,
           menuHighlights: Array.isArray(restaurant.menu)
             ? (restaurant.menu as unknown as {
                 name: string;
@@ -100,6 +108,7 @@ export default async function EditRestaurantPage({
           menuPdfUrl: restaurant.menu_pdf_url ?? "",
           reservable: restaurant.reservable,
           featured: restaurant.featured,
+          amenitiesV2: restaurant.amenities_v2 ?? [],
         }}
       />
     </section>

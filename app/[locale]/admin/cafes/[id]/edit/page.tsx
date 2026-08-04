@@ -82,10 +82,19 @@ export default async function EditCafePage({
           openingHoursStructured: Array.isArray(cafe.opening_hours_structured)
             ? (cafe.opening_hours_structured as unknown as CafeFormInput["openingHoursStructured"])
             : [],
+          is24Hours: cafe.is_24_hours,
+          temporarilyClosed: cafe.temporarily_closed,
+          permanentlyClosed: cafe.permanently_closed,
           priceRange: cafe.price_range,
-          amenities: cafe.amenities ?? [],
+          amenitiesV2: cafe.amenities_v2 ?? [],
           socialInstagram: cafe.social_instagram ?? "",
           socialFacebook: cafe.social_facebook ?? "",
+          website: cafe.website ?? "",
+          socialTiktok: cafe.social_tiktok ?? "",
+          socialSnapchat: cafe.social_snapchat ?? "",
+          socialX: cafe.social_x ?? "",
+          socialYoutube: cafe.social_youtube ?? "",
+          socialTelegram: cafe.social_telegram ?? "",
           menuHighlights: Array.isArray(cafe.menu)
             ? (cafe.menu as unknown as { name: string; price: string; description?: string }[])
             : [],

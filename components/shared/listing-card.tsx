@@ -2,16 +2,16 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { ArrowRight, Heart, Loader2, MapPin, Star } from "lucide-react";
+import { ArrowRight, MapPin, Star } from "lucide-react";
 import { RatingBadge } from "./rating-badge";
-import { toggleFavoriteAction } from "@/lib/actions/favorites";
+import { FavoriteButton } from "./favorite-button";
 import { AnimatedCard } from "./animated-card";
 import { FloatingBadge } from "./floating-badge";
+import type { PolymorphicListingType } from "@/types";
 
-type ListingType = "hotel" | "restaurant" | "cafe" | "attraction" | "service";
+type ListingType = PolymorphicListingType;
 
 export function ListingCard({
   href, image, title, subtitle, rating, reviewCount, tag, priceRange,
@@ -22,27 +22,7 @@ export function ListingCard({
   listingId?: string; initiallyFavorited?: boolean; locale?: string;
 }) {
   const t = useTranslations("listings");
-  const [favorited, setFavorited] = useState(initiallyFavorited);
-  const [isPending, startTransition] = useTransition();
   const [loaded, setLoaded] = useState(false);
-  const router = useRouter();
-
-  function onToggleFavorite(event: React.MouseEvent) {
-    event.preventDefault();
-    event.stopPropagation();
-    if (!listingType || !listingId) return;
-
-    startTransition(async () => {
-      const result = await toggleFavoriteAction(listingType, listingId);
-      if (!result.ok) {
-        if (result.error === "sign-in-required" && locale) {
-          router.push(`/${locale}/auth/login?next=${encodeURIComponent(href)}`);
-        }
-        return;
-      }
-      setFavorited(result.favorited ?? false);
-    });
-  }
 
   return (
     <AnimatedCard lift={6} className="group h-full w-full min-w-[272px]">
@@ -67,15 +47,18 @@ export function ListingCard({
             </div>
           )}
           {listingType && listingId && (
-            <button
-              type="button"
-              onClick={onToggleFavorite}
-              disabled={isPending}
-              aria-label={favorited ? t("removeFromFavorites", { name: title }) : t("addToFavorites", { name: title })}
+            <FavoriteButton
+              listingType={listingType}
+              listingId={listingId}
+              initiallyFavorited={initiallyFavorited}
+              locale={locale}
+              redirectPath={href}
+              stopPropagation
+              size={18}
               className="absolute end-3 top-3 flex h-11 w-11 items-center justify-center rounded-full bg-white/95 text-ink shadow-sm transition-all duration-300 hover:scale-110 hover:shadow-[0_6px_16px_rgba(0,0,0,0.25)] active:scale-95 disabled:opacity-60"
-            >
-              {isPending ? <Loader2 size={18} className="animate-spin" /> : <Heart size={18} fill={favorited ? "#F4B400" : "none"} color={favorited ? "#F4B400" : "#444"} />}
-            </button>
+              addLabel={t("addToFavorites", { name: title })}
+              removeLabel={t("removeFromFavorites", { name: title })}
+            />
           )}
           {tag && <FloatingBadge position="bottom-start">{tag}</FloatingBadge>}
         </div>
