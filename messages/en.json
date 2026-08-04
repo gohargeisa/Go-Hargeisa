@@ -2081,6 +2081,11 @@
     "bannerMessage": "You're offline. Showing saved content.",
     "bannerDismissLabel": "Dismiss",
     "reconnectedToast": "Back online — content refreshed",
-    "actionUnavailable": "You're offline. Try again once you're back online."
+    "actionUnavailable": "You're offline. Try again once you're back online.",
+    "savedSheetTitle": "Saved for offline",
+    "favoritesTabLabel": "Favorites",
+    "recentlyViewedTabLabel": "Recently viewed",
+    "favoritesEmpty": "No saved favorites yet. Favorite a place while online to see it here.",
+    "recentlyViewedEmpty": "Places you view will show up here for offline access."
   }
 }

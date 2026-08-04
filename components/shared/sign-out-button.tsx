@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { LogOut, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { clearOfflineFavorites } from "@/lib/offline/favorites-store";
 import type { Locale } from "@/lib/i18n/config";
 
 export function SignOutButton({ locale, className }: { locale: Locale; className?: string }) {
@@ -16,6 +17,9 @@ export function SignOutButton({ locale, className }: { locale: Locale; className
     startTransition(async () => {
       const supabase = createClient();
       await supabase.auth.signOut();
+      // Prevents the next person on a shared device from reading this
+      // user's saved businesses via the offline favorites sheet.
+      await clearOfflineFavorites();
       router.push(`/${locale}`);
       router.refresh();
     });

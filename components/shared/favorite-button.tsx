@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Heart, Loader2 } from "lucide-react";
 import { toggleFavoriteAction } from "@/lib/actions/favorites";
+import { useNetworkStatus } from "@/lib/hooks/use-network-status";
 import type { PolymorphicListingType } from "@/types";
 
 type ListingType = PolymorphicListingType;
@@ -68,12 +69,18 @@ export function FavoriteButton({
   const [favorited, setFavorited] = useState(initiallyFavorited);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  const { isOnline } = useNetworkStatus();
 
   function onToggle(e: React.MouseEvent) {
     if (stopPropagation) {
       e.preventDefault();
       e.stopPropagation();
     }
+    // Toggling favorites is a Server Action — calling it offline would just
+    // hang/fail against no network. The offline banner already explains why,
+    // so this silently no-ops rather than adding a toast dependency to
+    // every one of this button's 11+ call sites for a rare edge case.
+    if (!isOnline) return;
     startTransition(async () => {
       const result = await toggleFavoriteAction(listingType, listingId);
       if (!result.ok) {

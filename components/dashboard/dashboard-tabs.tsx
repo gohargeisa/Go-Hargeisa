@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, m } from "framer-motion";
 import { Bell, BedDouble, Compass, Heart, MapIcon, MessageSquare, Settings as SettingsIcon, User } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
+import { syncFavorites } from "@/lib/offline/favorites-store";
 import { ListingCard } from "@/components/shared/listing-card";
 import { HotelCard } from "@/components/shared/hotel-card";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -20,9 +21,13 @@ import type { MyReview } from "@/lib/data/reviews";
 import { serviceHref } from "@/lib/utils/service-categories";
 import type { Booking, Notification, ServiceCategory } from "@/types";
 
-type FavoriteEntry = { kind: "hotel" | "restaurant" | "cafe" | "attraction" | "service"; item: { id: string; slug: string; name: string; address: string; coverImage: string; rating: number; reviewCount: number; category?: string } };
+export type FavoriteEntry = { kind: "hotel" | "restaurant" | "cafe" | "attraction" | "service"; item: { id: string; slug: string; name: string; address: string; coverImage: string; rating: number; reviewCount: number; category?: string } };
 const hrefKind: Partial<Record<FavoriteEntry["kind"], string>> = { hotel: "hotels", restaurant: "restaurants", cafe: "cafes", attraction: "attractions" };
-function favoriteHref(locale: Locale, kind: FavoriteEntry["kind"], item: FavoriteEntry["item"]): string {
+/** Exported for reuse by components/shared/offline-favorites-sheet.tsx, which
+ * links to the same listing pages from an IndexedDB-backed (not RSC-prop-
+ * backed) favorites list — hence the narrower structural parameter type
+ * instead of the full FavoriteEntry["item"] shape. */
+export function favoriteHref(locale: Locale, kind: FavoriteEntry["kind"], item: { slug: string; category?: string }): string {
   if (kind === "service" && item.category) return `/${locale}${serviceHref(item.category as ServiceCategory, item.slug)}`;
   return `/${locale}/${hrefKind[kind]}/${item.slug}`;
 }
@@ -58,6 +63,16 @@ export function DashboardTabs({
     const requested = searchParams.get("tab");
     return isTabKey(requested) ? requested : "favorites";
   });
+
+  // Every /dashboard render (auth-gated, so only ever while online) is the
+  // one place favorites data reaches the client — mirror it into IndexedDB
+  // here so the offline favorites sheet (components/shared/offline-
+  // favorites-sheet.tsx) has something to read when /dashboard itself is
+  // unreachable offline (that route is intentionally excluded from the
+  // service worker's cache — see public/sw.js).
+  useEffect(() => {
+    syncFavorites(favorites, locale);
+  }, [favorites, locale]);
 
   function selectTab(key: TabKey) {
     setActive(key);

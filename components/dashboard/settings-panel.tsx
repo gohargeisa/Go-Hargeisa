@@ -21,6 +21,7 @@ import { useToast, ToastViewport } from "@/components/shared/toast";
 import { updateNotificationPreferences, deleteAccount } from "@/lib/actions/account-settings";
 import { createClient } from "@/lib/supabase/client";
 import { SecondaryButton } from "@/components/shared/buttons";
+import { clearOfflineFavorites } from "@/lib/offline/favorites-store";
 
 export function SettingsPanel({
   locale,
@@ -377,6 +378,7 @@ function DeleteAccountSection({
       }
       showToast("success", t("accountDeletedToast"));
       await createClient().auth.signOut();
+      await clearOfflineFavorites();
       router.push(`/${locale}`);
       router.refresh();
     });
@@ -441,6 +443,7 @@ function SignOutAllDevicesButton({ locale }: { locale: Locale }) {
       // the current browser's session — the "sign out all devices" case
       // regular sign-out (scope: "local", the default) doesn't cover.
       await createClient().auth.signOut({ scope: "global" });
+      await clearOfflineFavorites();
       router.push(`/${locale}`);
       router.refresh();
     });

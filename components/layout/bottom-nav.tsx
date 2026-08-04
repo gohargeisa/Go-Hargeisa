@@ -6,6 +6,8 @@ import { useTranslations } from "next-intl";
 import { Home, Compass, Heart, Bell, User } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { useSearchOverlay } from "@/components/shared/search-overlay-provider";
+import { useOfflineFavoritesSheet } from "@/components/shared/offline-favorites-provider";
+import { useNetworkStatus } from "@/lib/hooks/use-network-status";
 
 /**
  * Floating native-style bottom tab bar — Home / Explore / Saved /
@@ -33,6 +35,8 @@ export function BottomNav({ locale }: { locale: Locale }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { open: openSearch } = useSearchOverlay();
+  const { open: openOfflineFavorites } = useOfflineFavoritesSheet();
+  const { isOnline } = useNetworkStatus();
 
   if (HIDE_ON.test(pathname)) return null;
 
@@ -58,7 +62,13 @@ export function BottomNav({ locale }: { locale: Locale }) {
   }[] = [
     { key: "home", label: t("home"), icon: Home, href: `/${locale}`, active: isHome },
     { key: "explore", label: t("explore"), icon: Compass, onClick: openSearch, active: false },
-    { key: "saved", label: t("saved"), icon: Heart, href: dashboardHref("favorites"), active: isSaved },
+    // Offline: /dashboard is intentionally excluded from the service
+    // worker's cache (shared-device privacy, see public/sw.js) and would
+    // hard-fail — open the offline-reachable "Saved for offline" sheet
+    // instead. Online behavior (a plain Link) is unchanged.
+    isOnline
+      ? { key: "saved", label: t("saved"), icon: Heart, href: dashboardHref("favorites"), active: isSaved }
+      : { key: "saved", label: t("saved"), icon: Heart, onClick: openOfflineFavorites, active: false },
     { key: "notifications", label: t("notifications"), icon: Bell, href: dashboardHref("notifications"), active: isNotifications },
     { key: "profile", label: t("profile"), icon: User, href: dashboardHref("profile"), active: isProfile },
   ];

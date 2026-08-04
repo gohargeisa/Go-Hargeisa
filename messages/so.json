@@ -2081,6 +2081,11 @@
     "bannerMessage": "Internet ma haysatid. Waxaa la muujinayaa content la kaydiyay.",
     "bannerDismissLabel": "Xir",
     "reconnectedToast": "Internetka ayaa soo noqday — content-ku waa la cusboonaysiiyay",
-    "actionUnavailable": "Internet ma haysatid. Isku day mar kale marka aad internet heshid."
+    "actionUnavailable": "Internet ma haysatid. Isku day mar kale marka aad internet heshid.",
+    "savedSheetTitle": "Kaydka aan internetka lahayn",
+    "favoritesTabLabel": "Ka Bogay",
+    "recentlyViewedTabLabel": "Dhawaan la Booqday",
+    "favoritesEmpty": "Weli goob aad ka bogtay ma jirto. Marka aad internet haysato, ka bog goob si aad halkan uga aragto.",
+    "recentlyViewedEmpty": "Goobaha aad booqato halkan ayay ku soo bixi doonaan si aad internet la'aan u aragto."
   }
 }
