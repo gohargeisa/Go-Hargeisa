@@ -597,7 +597,14 @@
     "resultsTitle": "{count, plural, =0 {لا توجد نتائج} =1 {نتيجة واحدة} other {# نتيجة}}",
     "resultsSubtitle": "عرض النتائج لـ \"{query}\"",
     "searchPageTitle": "ابحث في Go Hargeisa",
-    "searchPageSubtitle": "اعثر على الفنادق والمطاعم والمقاهي والمعالم في مكان واحد."
+    "searchPageSubtitle": "اعثر على الفنادق والمطاعم والمقاهي والمعالم في مكان واحد.",
+    "recentSearches": "عمليات البحث الأخيرة",
+    "clearRecent": "مسح",
+    "popularHotels": "الفنادق الشائعة",
+    "popularRestaurants": "المطاعم الشائعة",
+    "popularCafes": "المقاهي الشائعة",
+    "popularAttractions": "المعالم الشائعة",
+    "suggestedNeighborhoods": "أحياء مقترحة"
   },
   "notifications": {
     "panelTitle": "الإشعارات",

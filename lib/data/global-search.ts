@@ -27,26 +27,13 @@ export interface SearchResults {
 
 const EMPTY: SearchResults = { hotels: [], restaurants: [], cafes: [], attractions: [], total: 0 };
 
-/**
- * Cross-category search — hotels, restaurants, cafes, and attractions in
- * parallel. Deliberately excludes the `services` table (SERVICES_PUBLIC_ENABLED
- * is false site-wide, same rule every other public surface follows — see
- * lib/config/features.ts) and city_services (no individual detail page to
- * link a result to). Respects HOTELS_PRESENTATION_MODE the same way the
- * /hotels listing page does, so search never surfaces a hotel the rest of
- * the site is hiding.
- */
-export async function searchAllListings(q: string, locale: string, limitPerType = 6): Promise<SearchResults> {
-  const trimmed = q.trim();
-  if (!trimmed) return EMPTY;
-
-  const [hotelsRaw, restaurantsRaw, cafesRaw, attractionsRaw] = await Promise.all([
-    getHotels({ q: trimmed, limit: limitPerType + 10 }),
-    RESTAURANTS_PUBLIC_ENABLED ? getRestaurants({ q: trimmed, limit: limitPerType }) : Promise.resolve([]),
-    CAFES_PUBLIC_ENABLED ? getCafes({ q: trimmed, limit: limitPerType, locale }) : Promise.resolve([]),
-    getAttractions({ q: trimmed }),
-  ]);
-
+function toResults(
+  hotelsRaw: Awaited<ReturnType<typeof getHotels>>,
+  restaurantsRaw: Awaited<ReturnType<typeof getRestaurants>>,
+  cafesRaw: Awaited<ReturnType<typeof getCafes>>,
+  attractionsRaw: Awaited<ReturnType<typeof getAttractions>>,
+  limitPerType: number
+): SearchResults {
   const hotels = filterHotelsForPresentation(hotelsRaw)
     .slice(0, limitPerType)
     .map((h) => ({
@@ -82,4 +69,46 @@ export async function searchAllListings(q: string, locale: string, limitPerType 
     attractions,
     total: hotels.length + restaurants.length + cafes.length + attractions.length,
   };
+}
+
+/**
+ * Cross-category search — hotels, restaurants, cafes, and attractions in
+ * parallel. Deliberately excludes the `services` table (SERVICES_PUBLIC_ENABLED
+ * is false site-wide, same rule every other public surface follows — see
+ * lib/config/features.ts) and city_services (no individual detail page to
+ * link a result to). Respects HOTELS_PRESENTATION_MODE the same way the
+ * /hotels listing page does, so search never surfaces a hotel the rest of
+ * the site is hiding.
+ */
+export async function searchAllListings(q: string, locale: string, limitPerType = 6): Promise<SearchResults> {
+  const trimmed = q.trim();
+  if (!trimmed) return EMPTY;
+
+  const [hotelsRaw, restaurantsRaw, cafesRaw, attractionsRaw] = await Promise.all([
+    getHotels({ q: trimmed, limit: limitPerType + 10 }),
+    RESTAURANTS_PUBLIC_ENABLED ? getRestaurants({ q: trimmed, limit: limitPerType }) : Promise.resolve([]),
+    CAFES_PUBLIC_ENABLED ? getCafes({ q: trimmed, limit: limitPerType, locale }) : Promise.resolve([]),
+    getAttractions({ q: trimmed }),
+  ]);
+
+  return toResults(hotelsRaw, restaurantsRaw, cafesRaw, attractionsRaw, limitPerType);
+}
+
+/**
+ * The empty-query state of the search takeover ("Popular Hotels/
+ * Restaurants/Cafes/Attractions") — same shape/mapping as searchAllListings,
+ * just without a `q` filter. Ordering comes from each table's own default
+ * (is_pinned/featured first — see lib/data/hotels.ts etc.), which is
+ * already this site's existing definition of "worth surfacing first," not
+ * a new rating-sort concept invented for this section.
+ */
+export async function getPopularListings(locale: string, limitPerType = 4): Promise<SearchResults> {
+  const [hotelsRaw, restaurantsRaw, cafesRaw, attractionsRaw] = await Promise.all([
+    getHotels({ limit: limitPerType + 10 }),
+    RESTAURANTS_PUBLIC_ENABLED ? getRestaurants({ limit: limitPerType }) : Promise.resolve([]),
+    CAFES_PUBLIC_ENABLED ? getCafes({ limit: limitPerType, locale }) : Promise.resolve([]),
+    getAttractions(),
+  ]);
+
+  return toResults(hotelsRaw, restaurantsRaw, cafesRaw, attractionsRaw, limitPerType);
 }

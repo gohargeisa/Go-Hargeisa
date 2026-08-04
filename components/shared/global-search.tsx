@@ -6,10 +6,13 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, m } from "framer-motion";
-import { Search, X, Loader2, Hotel, UtensilsCrossed, Coffee, Landmark } from "lucide-react";
+import { Search, X, Loader2, Hotel, UtensilsCrossed, Coffee, Landmark, Clock, MapPin, TrendingUp } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
-import { searchGlobal } from "@/lib/actions/search";
+import { searchGlobal, getPopularListingsAction, getSuggestedNeighborhoods } from "@/lib/actions/search";
 import type { SearchResultItem, SearchResults } from "@/lib/data/global-search";
+import type { Destination } from "@/types";
+import { getRecentSearches, addRecentSearch, clearRecentSearches } from "@/lib/mobile/recent-searches";
+import { useSearchOverlay } from "@/components/shared/search-overlay-provider";
 
 const TYPE_ICON = { hotel: Hotel, restaurant: UtensilsCrossed, cafe: Coffee, attraction: Landmark } as const;
 
@@ -18,16 +21,23 @@ const EMPTY: SearchResults = { hotels: [], restaurants: [], cafes: [], attractio
 export function GlobalSearch({ locale, scrolled }: { locale: Locale; scrolled: boolean }) {
   const t = useTranslations("search");
   const router = useRouter();
-  const [open, setOpen] = useState(false);
+  const { isOpen: open, open: openOverlay, close: closeOverlay } = useSearchOverlay();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResults>(EMPTY);
   const [isLoading, setIsLoading] = useState(false);
+  const [recent, setRecent] = useState<string[]>([]);
+  const [popular, setPopular] = useState<SearchResults>(EMPTY);
+  const [neighborhoods, setNeighborhoods] = useState<Destination[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
-    if (open) inputRef.current?.focus();
-  }, [open]);
+    if (!open) return;
+    inputRef.current?.focus();
+    getRecentSearches().then(setRecent);
+    getPopularListingsAction(locale).then(setPopular);
+    getSuggestedNeighborhoods().then(setNeighborhoods);
+  }, [open, locale]);
 
   useEffect(() => {
     if (!query.trim()) {
@@ -46,20 +56,27 @@ export function GlobalSearch({ locale, scrolled }: { locale: Locale; scrolled: b
   }, [query, locale]);
 
   function close() {
-    setOpen(false);
+    closeOverlay();
     setQuery("");
     setResults(EMPTY);
   }
 
-  function goToResults() {
-    if (!query.trim()) return;
-    router.push(`/${locale}/search?q=${encodeURIComponent(query.trim())}`);
+  function goToResults(q?: string) {
+    const value = (q ?? query).trim();
+    if (!value) return;
+    addRecentSearch(value);
+    router.push(`/${locale}/search?q=${encodeURIComponent(value)}`);
     close();
   }
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     goToResults();
+  }
+
+  async function onClearRecent() {
+    await clearRecentSearches();
+    setRecent([]);
   }
 
   const groups = (
@@ -71,13 +88,22 @@ export function GlobalSearch({ locale, scrolled }: { locale: Locale; scrolled: b
     ] satisfies { key: SearchResultItem["type"]; label: string; items: SearchResultItem[] }[]
   ).filter((g) => g.items.length > 0);
 
+  const popularGroups = (
+    [
+      { key: "hotel", label: t("popularHotels"), items: popular.hotels },
+      { key: "restaurant", label: t("popularRestaurants"), items: popular.restaurants },
+      { key: "cafe", label: t("popularCafes"), items: popular.cafes },
+      { key: "attraction", label: t("popularAttractions"), items: popular.attractions },
+    ] satisfies { key: SearchResultItem["type"]; label: string; items: SearchResultItem[] }[]
+  ).filter((g) => g.items.length > 0);
+
   return (
     <div className="relative">
       <button
         type="button"
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => (open ? close() : openOverlay())}
         aria-label={t("triggerAriaLabel")}
-        className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
+        className={`flex h-11 w-11 items-center justify-center rounded-full transition-colors ${
           scrolled ? "text-gray-800 hover:bg-primary/10 dark:text-white/90" : "text-white hover:bg-white/10"
         }`}
       >
@@ -87,32 +113,140 @@ export function GlobalSearch({ locale, scrolled }: { locale: Locale; scrolled: b
       <AnimatePresence>
         {open && (
           <>
-            <div className="fixed inset-0 z-40" onClick={close} aria-hidden="true" />
+            {/* Backdrop: a plain click-catcher on desktop (matches the existing small
+                anchored dropdown), a real dark blurred scrim full-viewport on mobile —
+                "dark backdrop, blur background" from the spec. */}
             <m.div
-              initial={{ opacity: 0, y: -8 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-40 bg-black/55 backdrop-blur-sm lg:bg-transparent lg:backdrop-blur-none"
+              onClick={close}
+              aria-hidden="true"
+            />
+            <m.div
+              role="dialog"
+              aria-modal="true"
+              aria-label={t("triggerAriaLabel")}
+              initial={{ opacity: 0, y: -24 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute end-0 top-12 z-50 w-[22rem] max-w-[92vw] overflow-hidden rounded-2xl border border-ink/8 bg-white shadow-premium dark:border-white/10 dark:bg-ink"
+              exit={{ opacity: 0, y: -24 }}
+              transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+              className="fixed inset-x-0 top-0 z-50 flex max-h-[100dvh] flex-col overflow-hidden bg-white pt-[env(safe-area-inset-top)] shadow-premium dark:bg-ink lg:absolute lg:inset-x-auto lg:end-0 lg:top-12 lg:max-h-[32rem] lg:w-[24rem] lg:max-w-[92vw] lg:rounded-2xl lg:border lg:border-ink/8 lg:pt-0 lg:dark:border-white/10"
             >
-              <form onSubmit={onSubmit} className="flex items-center gap-2 border-b border-ink/8 px-4 py-3 dark:border-white/10">
-                <Search size={16} className="shrink-0 text-ink/40 dark:text-sand/40" aria-hidden="true" />
+              <form onSubmit={onSubmit} className="flex shrink-0 items-center gap-2 border-b border-ink/8 px-4 py-3.5 dark:border-white/10">
+                <Search size={17} className="shrink-0 text-ink/40 dark:text-sand/40" aria-hidden="true" />
                 <input
                   ref={inputRef}
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder={t("placeholder")}
-                  className="w-full bg-transparent text-sm outline-none placeholder:text-ink/40 dark:placeholder:text-sand/40"
+                  className="w-full bg-transparent text-base outline-none placeholder:text-ink/40 dark:placeholder:text-sand/40 lg:text-sm"
                 />
                 {isLoading && <Loader2 size={14} className="shrink-0 animate-spin text-ink/40" aria-hidden="true" />}
-                <button type="button" onClick={close} aria-label={t("closeAriaLabel")} className="shrink-0 text-ink/40 hover:text-ink dark:text-sand/40">
-                  <X size={14} />
+                <button
+                  type="button"
+                  onClick={close}
+                  aria-label={t("closeAriaLabel")}
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink/50 hover:bg-ink/5 dark:text-sand/50 dark:hover:bg-white/10"
+                >
+                  <X size={16} />
                 </button>
               </form>
 
-              <div className="max-h-96 overflow-y-auto">
+              {/* Below this point is the scrollable, keyboard-safe results area —
+                  overflow-y-auto + the form above being shrink-0 is what keeps the
+                  input reachable above the on-screen keyboard (Capacitor's Keyboard
+                  plugin is already configured resize:'body', see capacitor.config.ts). */}
+              <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
                 {!query.trim() ? (
-                  <p className="px-4 py-8 text-center text-sm text-ink/45 dark:text-sand/45">{t("prompt")}</p>
+                  <div className="divide-y divide-ink/5 dark:divide-white/5">
+                    {recent.length > 0 && (
+                      <div className="px-4 py-3">
+                        <div className="mb-2 flex items-center justify-between">
+                          <p className="text-[11px] font-bold uppercase tracking-wide text-ink/40 dark:text-sand/40">{t("recentSearches")}</p>
+                          <button type="button" onClick={onClearRecent} className="text-[11px] font-semibold text-primary hover:underline">
+                            {t("clearRecent")}
+                          </button>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {recent.map((q) => (
+                            <button
+                              key={q}
+                              type="button"
+                              onClick={() => goToResults(q)}
+                              className="inline-flex items-center gap-1.5 rounded-full border border-ink/10 px-3 py-1.5 text-xs font-medium text-ink/70 hover:border-primary hover:text-primary dark:border-white/15 dark:text-sand/70"
+                            >
+                              <Clock size={12} aria-hidden="true" />
+                              {q}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {popularGroups.map((group) => {
+                      const Icon = TYPE_ICON[group.key];
+                      return (
+                        <div key={group.key} className="px-4 py-3">
+                          <p className="mb-2 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-ink/40 dark:text-sand/40">
+                            <TrendingUp size={12} aria-hidden="true" />
+                            {group.label}
+                          </p>
+                          <div className="-mx-1 flex gap-0.5 overflow-x-auto pb-1 scrollbar-none sm:mx-0 sm:flex-wrap">
+                            {group.items.map((item) => (
+                              <Link
+                                key={`${item.type}-${item.id}`}
+                                href={`/${locale}${item.href}`}
+                                onClick={close}
+                                className="flex min-w-[9.5rem] items-center gap-2.5 rounded-xl px-2 py-2 hover:bg-primary/5 sm:min-w-0 sm:w-full"
+                              >
+                                <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-ink/5 dark:bg-white/10">
+                                  {item.image ? (
+                                    <Image src={item.image} alt="" fill sizes="44px" className="object-cover" />
+                                  ) : (
+                                    <div className="flex h-full w-full items-center justify-center">
+                                      <Icon size={16} className="text-ink/30" aria-hidden="true" />
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="truncate text-sm font-semibold">{item.name}</p>
+                                  <p className="truncate text-xs text-ink/50 dark:text-sand/50">{item.subtitle}</p>
+                                </div>
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {neighborhoods.length > 0 && (
+                      <div className="px-4 py-3">
+                        <p className="mb-2 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-ink/40 dark:text-sand/40">
+                          <MapPin size={12} aria-hidden="true" />
+                          {t("suggestedNeighborhoods")}
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {neighborhoods.map((d) => (
+                            <Link
+                              key={d.id}
+                              href={`/${locale}/explore/${d.slug}`}
+                              onClick={close}
+                              className="rounded-full border border-ink/10 px-3 py-1.5 text-xs font-medium text-ink/70 hover:border-primary hover:text-primary dark:border-white/15 dark:text-sand/70"
+                            >
+                              {d.name}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {recent.length === 0 && popularGroups.length === 0 && neighborhoods.length === 0 && (
+                      <p className="px-4 py-8 text-center text-sm text-ink/45 dark:text-sand/45">{t("prompt")}</p>
+                    )}
+                  </div>
                 ) : results.total === 0 && !isLoading ? (
                   <p className="px-4 py-8 text-center text-sm text-ink/45 dark:text-sand/45">{t("noResults", { query })}</p>
                 ) : (
@@ -128,11 +262,11 @@ export function GlobalSearch({ locale, scrolled }: { locale: Locale; scrolled: b
                             key={`${item.type}-${item.id}`}
                             href={`/${locale}${item.href}`}
                             onClick={close}
-                            className="flex items-center gap-3 px-4 py-2 hover:bg-primary/5"
+                            className="flex items-center gap-3 px-4 py-2.5 hover:bg-primary/5"
                           >
-                            <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-ink/5 dark:bg-white/10">
+                            <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-ink/5 dark:bg-white/10">
                               {item.image ? (
-                                <Image src={item.image} alt="" fill sizes="40px" className="object-cover" />
+                                <Image src={item.image} alt="" fill sizes="44px" className="object-cover" />
                               ) : (
                                 <div className="flex h-full w-full items-center justify-center">
                                   <Icon size={16} className="text-ink/30" aria-hidden="true" />
@@ -154,8 +288,9 @@ export function GlobalSearch({ locale, scrolled }: { locale: Locale; scrolled: b
               {query.trim() && results.total > 0 && (
                 <button
                   type="button"
-                  onClick={goToResults}
-                  className="block w-full border-t border-ink/8 px-4 py-3 text-center text-xs font-semibold text-primary hover:bg-primary/5 dark:border-white/10"
+                  onClick={() => goToResults()}
+                  className="shrink-0 border-t border-ink/8 px-4 py-3.5 text-center text-xs font-semibold text-primary hover:bg-primary/5 dark:border-white/10"
+                  style={{ paddingBottom: "max(0.875rem, env(safe-area-inset-bottom))" }}
                 >
                   {t("viewAllResults", { query })}
                 </button>

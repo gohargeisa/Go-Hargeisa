@@ -597,7 +597,14 @@
     "resultsTitle": "{count, plural, =0 {Natiijo ma jirto} =1 {1 natiijo} other {# natiijo}}",
     "resultsSubtitle": "Natiijooyinka \"{query}\"",
     "searchPageTitle": "Raadi Go Hargeisa",
-    "searchPageSubtitle": "Ka hel huteelo, maqaayado, kafateeriyo, iyo meelo soo jiita meel keliya."
+    "searchPageSubtitle": "Ka hel huteelo, maqaayado, kafateeriyo, iyo meelo soo jiita meel keliya.",
+    "recentSearches": "Raadinnadii Dhawaa",
+    "clearRecent": "Tirtir",
+    "popularHotels": "Huteellada Caanka ah",
+    "popularRestaurants": "Maqaayadaha Caanka ah",
+    "popularCafes": "Kafateeriyada Caanka ah",
+    "popularAttractions": "Meelaha Soo Jiita ee Caanka ah",
+    "suggestedNeighborhoods": "Xaafado Lagula Talinayo"
   },
   "notifications": {
     "panelTitle": "Ogaysiisyada",
