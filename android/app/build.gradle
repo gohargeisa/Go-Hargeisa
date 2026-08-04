@@ -1,5 +1,21 @@
 apply plugin: 'com.android.application'
 
+import java.util.Properties
+
+// Release signing reads from keystore.properties (git-ignored — see
+// .gitignore and keystore.properties.example) instead of ever hardcoding a
+// keystore path/password in a committed file. Missing entirely is a normal,
+// supported state: debug builds and `./gradlew assemble`/`bundle` (no
+// variant) still work without it, only `assembleRelease`/`bundleRelease`
+// need it populated. See MOBILE_DEPLOYMENT.md for how to generate the
+// keystore itself.
+def keystorePropertiesFile = rootProject.file('keystore.properties')
+def keystoreProperties = new Properties()
+def hasSigningConfig = keystorePropertiesFile.exists()
+if (hasSigningConfig) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     namespace = "com.gohargeisa.app"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -7,8 +23,11 @@ android {
         applicationId "com.gohargeisa.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
+        // Bump versionCode by 1 for every build submitted to Play Console
+        // (it must strictly increase — Play rejects a re-upload otherwise);
+        // versionName is the human-facing "1.0.0" shown in Settings/Play Store.
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -16,10 +35,29 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        if (hasSigningConfig) {
+            release {
+                storeFile rootProject.file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            }
+        }
+    }
     buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // R8 shrinking is safe here — this app has no reflection-heavy
+            // native code of its own; Capacitor plugins ship their own
+            // consumer ProGuard rules. Cuts APK/AAB size meaningfully for a
+            // WebView-shell app where every extra megabyte is pure download
+            // weight, not functionality.
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (hasSigningConfig) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 }

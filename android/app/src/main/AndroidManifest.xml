@@ -22,6 +22,32 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!-- App Links (verified universal links): tapping a
+                 https://gohargeisa.com/... link anywhere on the device
+                 (SMS, WhatsApp, search results) opens this app directly
+                 instead of a browser, once assetlinks.json at
+                 gohargeisa.com/.well-known/assetlinks.json is live and
+                 matches this app's signing certificate — see
+                 MOBILE_DEPLOYMENT.md. autoVerify is what makes Android
+                 actually check that file instead of just registering the
+                 filter as a chooser option. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="gohargeisa.com" />
+            </intent-filter>
+
+            <!-- Custom-scheme fallback deep link — works immediately without
+                 domain verification (useful for QR codes / marketing links
+                 that don't need to also work as plain web URLs). -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="gohargeisa" />
+            </intent-filter>
+
         </activity>
 
         <provider
@@ -35,7 +61,15 @@
         </provider>
     </application>
 
-    <!-- Permissions -->
+    <!-- Permissions — kept to the minimum the app actually uses. INTERNET is
+         required by every WebView-based app; POST_NOTIFICATIONS is a
+         runtime-prompted (not auto-granted) permission needed on Android 13+
+         for push notifications (lib/mobile/push-notifications.ts) to show
+         at all. No camera/microphone/location/storage permissions: photo
+         uploads (review photos, listing galleries) go through a plain HTML
+         file input backed by the OS's own document/gallery picker, which
+         does not require a permission declaration from this app. -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 </manifest>
