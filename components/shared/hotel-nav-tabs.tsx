@@ -44,7 +44,7 @@ export function HotelNavTabs({ tabs }: { tabs: HotelNavTab[] }) {
   return (
     <nav
       aria-label="Section navigation"
-      className="sticky top-20 z-30 border-y border-ink/8 bg-white/90 backdrop-blur-xl dark:border-white/10 dark:bg-ink/90"
+      className="sticky top-[calc(5rem+env(safe-area-inset-top))] z-30 border-y border-ink/8 bg-white/90 backdrop-blur-xl dark:border-white/10 dark:bg-ink/90"
     >
       <div className="container-px mx-auto flex gap-1 overflow-x-auto scrollbar-none">
         {tabs.map((tab) => (

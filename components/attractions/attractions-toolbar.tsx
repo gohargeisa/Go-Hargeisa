@@ -56,7 +56,7 @@ export function AttractionsToolbar({
   ];
 
   return (
-    <div className="sticky top-20 z-20 rounded-xl3 border border-ink/8 bg-white/95 p-4 shadow-card backdrop-blur-md dark:border-white/10 dark:bg-ink/90 sm:p-5">
+    <div className="sticky top-[calc(5rem+env(safe-area-inset-top))] z-20 rounded-xl3 border border-ink/8 bg-white/95 p-4 shadow-card backdrop-blur-md dark:border-white/10 dark:bg-ink/90 sm:p-5">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
         <div className="flex flex-1 items-center gap-2.5 rounded-full border border-ink/12 bg-sand/60 px-4 py-3 dark:border-white/15 dark:bg-white/5">
           <Search size={17} className="shrink-0 text-ink/40 dark:text-sand/40" aria-hidden="true" />

@@ -36,7 +36,10 @@ export function useToast(durationMs = 4500) {
 
 export function ToastViewport({ toast, onDismiss }: { toast: ToastState; onDismiss: () => void }) {
   return (
-    <div aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-6 z-[100] flex justify-center px-4">
+    <div
+      aria-live="polite"
+      className="pointer-events-none fixed inset-x-0 bottom-[max(1.5rem,env(safe-area-inset-bottom))] z-[100] flex justify-center px-4"
+    >
       <AnimatePresence>
         {toast && (
           <m.div

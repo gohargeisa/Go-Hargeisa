@@ -57,7 +57,7 @@ export function BottomSheet({
             animate={{ y: 0 }}
             exit={reduceMotion ? undefined : { y: "100%" }}
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed inset-x-0 bottom-0 z-[60] max-h-[85vh] overflow-y-auto rounded-t-3xl bg-white p-6 shadow-2xl dark:bg-ink lg:hidden"
+            className="fixed inset-x-0 bottom-0 z-[60] max-h-[85vh] overflow-y-auto rounded-t-3xl bg-white p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] shadow-2xl dark:bg-ink lg:hidden"
           >
             <div className="mb-4 flex items-center justify-between gap-3">
               {title && <p className="font-display text-lg font-semibold">{title}</p>}

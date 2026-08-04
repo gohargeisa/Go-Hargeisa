@@ -69,6 +69,15 @@ const nextConfig = {
           { key: "Content-Security-Policy", value: csp },
         ],
       },
+      {
+        // iOS Universal Links: Apple's verification fetch expects this
+        // extensionless file served as application/json — Next's static
+        // file server would otherwise infer a generic content-type from
+        // the missing extension. Android's assetlinks.json already gets
+        // the right type from its .json extension, no override needed.
+        source: "/.well-known/apple-app-site-association",
+        headers: [{ key: "Content-Type", value: "application/json" }],
+      },
     ];
   },
 };

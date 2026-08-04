@@ -9,6 +9,7 @@ import { ThemeProvider } from "@/components/layout/theme-provider";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { ServiceWorkerRegister } from "@/components/shared/service-worker-register";
+import { CapacitorBootstrap } from "@/components/shared/capacitor-bootstrap";
 import { getHeaderUser } from "@/lib/supabase/guards";
 import { getSiteSettings } from "@/lib/actions/settings";
 
@@ -201,6 +202,7 @@ export default async function LocaleLayout({
               socialTiktok={siteSettings?.social_tiktok ?? undefined}
             />
             <ServiceWorkerRegister />
+            <CapacitorBootstrap />
           </div>
         </ThemeProvider>
       </LazyMotion>
