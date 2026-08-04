@@ -1,17 +1,39 @@
+"use client";
+
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { ExternalLink, MapPin, Navigation, Phone } from "lucide-react";
 import type { CityServicePoint, ServiceCategory } from "@/types";
 import { CATEGORY_CONFIG } from "@/components/city-map/category-config";
 import { ClaimBusinessButton } from "@/components/shared/claim-business-button";
+import { OpenStatusBadge } from "@/components/shared/open-status-badge";
+import type { VisitorLocation } from "@/lib/hooks/use-visitor-location";
 import { serviceHref } from "@/lib/utils/service-categories";
 import { resolveMapsUrl, resolveDirectionsUrl } from "@/lib/utils/google-maps";
+import { distanceKm } from "@/lib/utils/geo";
 
-export function PointInfoCard({ point, locale = "en" }: { point: CityServicePoint; locale?: string }) {
+export function PointInfoCard({
+  point,
+  locale = "en",
+  visitorLocation,
+}: {
+  point: CityServicePoint;
+  locale?: string;
+  /** Browser-geolocation coords, requested once by the caller (CityMapExperience)
+   * and shared across every card so only one permission prompt is ever shown. */
+  visitorLocation?: VisitorLocation | null;
+}) {
+  const t = useTranslations("nearby");
+  const td = useTranslations("detail");
   const meta = CATEGORY_CONFIG[point.category];
   const Icon = meta.icon;
   const hasCoordinates = Number.isFinite(point.location?.lat) && Number.isFinite(point.location?.lng);
   const googleMapsHref = resolveMapsUrl(point.location);
   const directionsHref = resolveDirectionsUrl(point.location);
+  const km =
+    visitorLocation && hasCoordinates
+      ? distanceKm(visitorLocation.lat, visitorLocation.lng, point.location.lat, point.location.lng)
+      : null;
 
   // Only Phase 2 `services` points carry a slug — that's what distinguishes
   // them from legacy map_points pins, which have no detail page to link to.
@@ -43,6 +65,25 @@ export function PointInfoCard({ point, locale = "en" }: { point: CityServicePoin
         </div>
       </div>
 
+      <div className="flex flex-wrap items-center gap-2">
+        <OpenStatusBadge
+          groups={point.openingHoursStructured ?? []}
+          labels={{
+            open: td("openNow"),
+            closed: td("closedNow"),
+            opensAt: (time) => td("opensAt", { time }),
+            closesInMinutes: (minutes) => td("closesInMinutes", { minutes }),
+            temporarilyClosed: td("temporarilyClosedNow"),
+            permanentlyClosed: td("permanentlyClosedNow"),
+          }}
+        />
+        {km !== null && (
+          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-ink/5 px-3 py-1 text-xs font-bold text-ink/60 dark:bg-white/10 dark:text-sand/60">
+            {t("distanceAway", { km: km < 1 ? km.toFixed(1) : km.toFixed(0) })}
+          </span>
+        )}
+      </div>
+
       {point.description && (
         <p className="text-sm leading-relaxed text-ink/70 dark:text-sand/70">{point.description}</p>
       )}
@@ -62,13 +103,26 @@ export function PointInfoCard({ point, locale = "en" }: { point: CityServicePoin
       )}
 
       {point.phone && (
-        <a
-          href={`tel:${point.phone}`}
-          className="flex items-center gap-1.5 text-xs font-semibold text-ink/70 hover:text-primary dark:text-sand/70"
-        >
-          <Phone size={13} className="shrink-0" aria-hidden="true" />
-          {point.phone}
-        </a>
+        <div className={`grid gap-2.5 ${directionsHref ? "grid-cols-2" : "grid-cols-1"}`}>
+          <a
+            href={`tel:${point.phone}`}
+            className="inline-flex h-11 items-center justify-center gap-1.5 rounded-full border border-ink/15 text-sm font-semibold text-ink transition-all duration-300 hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
+          >
+            <Phone size={14} aria-hidden="true" />
+            Call
+          </a>
+          {directionsHref && (
+            <a
+              href={directionsHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-11 items-center justify-center gap-1.5 rounded-full border border-ink/15 text-sm font-semibold text-ink transition-all duration-300 hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
+            >
+              <Navigation size={14} aria-hidden="true" />
+              Directions
+            </a>
+          )}
+        </div>
       )}
 
       <div className="space-y-2.5">
@@ -81,7 +135,7 @@ export function PointInfoCard({ point, locale = "en" }: { point: CityServicePoin
           </Link>
         )}
 
-        {directionsHref && (
+        {!point.phone && directionsHref && (
           <a
             href={directionsHref}
             target="_blank"

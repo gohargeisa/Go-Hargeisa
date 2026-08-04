@@ -2,7 +2,7 @@ import { createPublicClient } from "@/lib/supabase/public";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { mapPoints as mockMapPoints } from "@/lib/mock-data";
 import { SERVICES_PUBLIC_ENABLED } from "@/lib/config/features";
-import type { CityServiceCategory, CityServicePoint, MapPoint } from "@/types";
+import type { CityServiceCategory, CityServicePoint, MapPoint, OpeningHoursGroup } from "@/types";
 
 export async function getMapPoints(): Promise<MapPoint[]> {
   if (!isSupabaseConfigured()) return mockMapPoints;
@@ -67,7 +67,7 @@ export async function getCityServicePoints(): Promise<CityServicePoint[]> {
     SERVICES_PUBLIC_ENABLED
       ? supabase
           .from("services")
-          .select("id, slug, name, category, short_description, address, phone, lat, lng")
+          .select("id, slug, name, category, short_description, address, phone, lat, lng, opening_hours_structured")
           .eq("status", "published")
       : Promise.resolve({ data: null, error: null }),
   ]);
@@ -92,6 +92,9 @@ export async function getCityServicePoints(): Promise<CityServicePoint[]> {
     address: row.address,
     description: row.short_description,
     phone: row.phone ?? undefined,
+    openingHoursStructured: Array.isArray(row.opening_hours_structured)
+      ? (row.opening_hours_structured as unknown as OpeningHoursGroup[])
+      : [],
   }));
 
   return [...legacyPoints, ...servicePoints];

@@ -744,4 +744,9 @@ export interface CityServicePoint {
   address?: string;
   description?: string;
   phone?: string;
+  /** Phase 2 service points only — the `services` table has no is_24_hours/
+   * temporarily_closed/permanently_closed columns (unlike hotels/restaurants/
+   * cafes/attractions), so an open/closed badge here can only ever be
+   * derived from these day-groups. */
+  openingHoursStructured?: OpeningHoursGroup[];
 }

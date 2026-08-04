@@ -8,6 +8,7 @@ import { CategoryFilters } from "@/components/city-map/category-filters";
 import { CitySearchBar } from "@/components/city-map/city-search-bar";
 import { PointInfoCard } from "@/components/city-map/point-info-card";
 import { CityMapEmptyState } from "@/components/city-map/empty-state";
+import { useVisitorLocation } from "@/lib/hooks/use-visitor-location";
 
 function isCityServiceCategory(value: string | null): value is CityServiceCategory {
   return !!value && (CATEGORY_ORDER as string[]).includes(value);
@@ -29,6 +30,7 @@ export function CityMapExperience({ points, locale }: { points: CityServicePoint
     return isCityServiceCategory(requested) ? new Set([requested]) : new Set(CATEGORY_ORDER);
   });
   const [query, setQuery] = useState("");
+  const visitorLocation = useVisitorLocation();
 
   const counts = useMemo(() => {
     const record = Object.fromEntries(CATEGORY_ORDER.map((c) => [c, 0])) as Record<CityServiceCategory, number>;
@@ -85,7 +87,7 @@ export function CityMapExperience({ points, locale }: { points: CityServicePoint
               key={point.id}
               className="rounded-2xl border border-ink/8 bg-white p-5 shadow-soft transition-shadow duration-300 ease-premium hover:shadow-card dark:border-white/10 dark:bg-white/[0.03]"
             >
-              <PointInfoCard point={point} locale={locale} />
+              <PointInfoCard point={point} locale={locale} visitorLocation={visitorLocation} />
             </div>
           ))}
         </div>
