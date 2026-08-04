@@ -48,11 +48,19 @@ const config: CapacitorConfig = {
   },
   plugins: {
     SplashScreen: {
-      // Hidden manually from JS once the remote page signals it has
-      // painted (see lib/mobile/native-bootstrap.ts), rather than a fixed
-      // timer — avoids both "flash of blank white" and "splash lingers
-      // after content is ready."
-      launchAutoHide: false,
+      // Hidden manually from JS as soon as the remote page hydrates (see
+      // components/shared/capacitor-bootstrap.tsx) for the fast path, BUT
+      // launchAutoHide stays on with a real ceiling as a native-level
+      // safety net. A previous version of this config set
+      // launchAutoHide: false with no timer at all — meaning if the JS
+      // hide() call ever didn't fire for any reason (the deployed website
+      // not yet containing that code, a JS error, a slow/dead network),
+      // the splash would hang forever with nothing to recover it. This
+      // config can never fully brick the app again: SplashScreen.hide()
+      // still hides it immediately when the page is ready, and if it
+      // never fires, the plugin's own native timer force-hides at 4s.
+      launchAutoHide: true,
+      launchShowDuration: 4000,
       backgroundColor: '#FBF8F3',
       androidSplashResourceName: 'splash',
       androidScaleType: 'CENTER_CROP',
