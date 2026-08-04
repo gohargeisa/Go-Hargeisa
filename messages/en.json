@@ -2086,6 +2086,9 @@
     "favoritesTabLabel": "Favorites",
     "recentlyViewedTabLabel": "Recently viewed",
     "favoritesEmpty": "No saved favorites yet. Favorite a place while online to see it here.",
-    "recentlyViewedEmpty": "Places you view will show up here for offline access."
+    "recentlyViewedEmpty": "Places you view will show up here for offline access.",
+    "pullToRefreshHint": "Pull to refresh",
+    "pullToRefreshReleasing": "Release to refresh",
+    "pullToRefreshRefreshing": "Refreshing…"
   }
 }

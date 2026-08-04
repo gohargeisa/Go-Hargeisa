@@ -18,6 +18,7 @@ import { SearchOverlayProvider } from "@/components/shared/search-overlay-provid
 import { OfflineFavoritesProvider } from "@/components/shared/offline-favorites-provider";
 import { OfflineFavoritesSheet } from "@/components/shared/offline-favorites-sheet";
 import { RecentlyViewedTracker } from "@/components/shared/recently-viewed-tracker";
+import { PullToRefreshIndicator } from "@/components/shared/pull-to-refresh-indicator";
 import { getHeaderUser } from "@/lib/supabase/guards";
 import { getSiteSettings } from "@/lib/actions/settings";
 
@@ -217,6 +218,7 @@ export default async function LocaleLayout({
                 <CapacitorBootstrap />
                 <OfflineBanner />
                 <NetworkSyncController />
+                <PullToRefreshIndicator />
                 <RecentlyViewedTracker />
                 <OfflineFavoritesSheet />
                 <BottomNav locale={currentLocale} />

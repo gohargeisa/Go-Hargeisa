@@ -12,6 +12,12 @@
 
 html {
   scroll-behavior: smooth;
+  /* Suppresses the browser's own rubber-band/pull-to-refresh bounce at the
+     top of the page so it doesn't visually fight the app's own custom
+     pull-to-refresh gesture (lib/hooks/use-pull-to-refresh.ts) — only
+     affects overscroll physics at the scroll boundary, not normal
+     scrolling or any existing layout. */
+  overscroll-behavior-y: contain;
 }
 
 body {

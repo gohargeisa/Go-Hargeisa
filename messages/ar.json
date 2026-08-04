@@ -2086,6 +2086,9 @@
     "favoritesTabLabel": "المفضلة",
     "recentlyViewedTabLabel": "شوهد مؤخرًا",
     "favoritesEmpty": "لا توجد أماكن مفضلة بعد. أضف مكانًا للمفضلة أثناء الاتصال بالإنترنت لتراه هنا.",
-    "recentlyViewedEmpty": "الأماكن التي تزورها ستظهر هنا للوصول إليها دون اتصال."
+    "recentlyViewedEmpty": "الأماكن التي تزورها ستظهر هنا للوصول إليها دون اتصال.",
+    "pullToRefreshHint": "اسحب للتحديث",
+    "pullToRefreshReleasing": "حرر للتحديث",
+    "pullToRefreshRefreshing": "جارٍ التحديث…"
   }
 }

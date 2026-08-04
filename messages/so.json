@@ -2086,6 +2086,9 @@
     "favoritesTabLabel": "Ka Bogay",
     "recentlyViewedTabLabel": "Dhawaan la Booqday",
     "favoritesEmpty": "Weli goob aad ka bogtay ma jirto. Marka aad internet haysato, ka bog goob si aad halkan uga aragto.",
-    "recentlyViewedEmpty": "Goobaha aad booqato halkan ayay ku soo bixi doonaan si aad internet la'aan u aragto."
+    "recentlyViewedEmpty": "Goobaha aad booqato halkan ayay ku soo bixi doonaan si aad internet la'aan u aragto.",
+    "pullToRefreshHint": "Jiid si aad u cusboonaysiiso",
+    "pullToRefreshReleasing": "Sii daa si aad u cusboonaysiiso",
+    "pullToRefreshRefreshing": "Waa la cusboonaysiinayaa…"
   }
 }
