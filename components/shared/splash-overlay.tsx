@@ -115,7 +115,7 @@ export function SplashScreenOverlay() {
       </m.div>
 
       <m.p
-        className="relative z-10 mt-4 text-xs font-semibold uppercase tracking-[0.3em] text-white/85"
+        className="relative z-10 mt-4 max-w-[90vw] text-balance text-center text-xs font-semibold uppercase tracking-[0.3em] text-white/85"
         initial={{ opacity: 0 }}
         animate={{ opacity: visible ? 0.85 : 0 }}
         transition={{ duration: 0.3, delay: 0.65, ease: [0.22, 1, 0.36, 1] }}

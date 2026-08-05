@@ -18,5 +18,16 @@
 
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
         <item name="android:background">@drawable/splash</item>
+        <!-- Splash is a dark navy photo — without this, status bar icon
+             color is left to the OS default, which on a DayNight/light-app
+             device chain can default to dark icons (near-invisible against
+             the navy splash). windowLightStatusBar=false forces white
+             icons. statusBarColor/navigationBarColor are belt-and-suspenders
+             for pre-edge-to-edge devices; ignored (harmlessly) on API 35+,
+             which enforces edge-to-edge and draws system bars transparently
+             regardless of this attribute. -->
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:statusBarColor">@color/splashBackground</item>
+        <item name="android:navigationBarColor">@color/splashBackground</item>
     </style>
 </resources>

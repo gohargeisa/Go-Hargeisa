@@ -75,7 +75,19 @@ const config: CapacitorConfig = {
       // Edge-to-edge like every modern native app; the web layer pads for
       // it with env(safe-area-inset-*) (see app/globals.css).
       overlay: true,
-      style: 'DARK', // dark icons/text — the app's header is light (cream/white)
+      // Capacitor's Style.Dark ("DARK") means light/white icon+text color
+      // — the name refers to the background it's designed for (dark), not
+      // the icon color itself. Set to DARK because the very first thing a
+      // cold launch shows is the dark navy splash + Hero photo, where white
+      // icons are the only readable choice. Known limitation: this is a
+      // single static value applied once at launch, so it stays LIGHT even
+      // after the user scrolls past the Hero into a page's solid white/
+      // cream header (see components/layout/site-header.tsx's scroll-
+      // triggered background swap) — white-on-white icons there are a real,
+      // pre-existing contrast gap, not something this splash pass fixes.
+      // Correctly resolving it needs a dynamic per-scroll StatusBar.setStyle
+      // call, not a config change (a single static value can't serve both).
+      style: 'DARK',
       backgroundColor: '#00000000',
     },
     Keyboard: {

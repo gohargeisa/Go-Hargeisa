@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- android:windowLightNavigationBar requires API 27+ — a resource
+         override in a versioned qualifier folder replaces the whole style
+         for matching devices (not a per-attribute merge), so every item
+         from values/styles.xml's version of this style is repeated here,
+         plus the one API-27-only addition. Devices on API 24-26 use the
+         values/ version instead, which is functionally complete without
+         this attribute (Android only draws a system navigation bar with
+         a distinct light/dark icon mode from API 27 onward). -->
+    <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
+        <item name="android:background">@drawable/splash</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:statusBarColor">@color/splashBackground</item>
+        <item name="android:navigationBarColor">@color/splashBackground</item>
+        <item name="android:windowLightNavigationBar">false</item>
+    </style>
+</resources>
