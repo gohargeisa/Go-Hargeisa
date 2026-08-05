@@ -93,7 +93,7 @@ export function SiteFooter({
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={label}
-                className="flex h-11 w-11 items-center justify-center rounded-full border border-ink/10 bg-white shadow-sm transition-all duration-300 ease-premium hover:-translate-y-1 hover:border-primary hover:bg-primary hover:text-white hover:shadow-[0_10px_20px_rgba(245,158,11,0.3)] dark:border-white/10 dark:bg-white/5"
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-ink/10 bg-white shadow-soft transition-all duration-300 ease-premium hover:-translate-y-1 hover:border-primary hover:bg-primary hover:text-white hover:shadow-[0_10px_20px_rgba(245,158,11,0.3)] active:scale-90 dark:border-white/10 dark:bg-white/5"
               >
                 <Icon size={17} aria-hidden="true" />
               </a>

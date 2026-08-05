@@ -125,7 +125,7 @@ export function GlobalSearch({ locale, scrolled }: { locale: Locale; scrolled: b
         type="button"
         onClick={() => (open ? close() : openOverlay())}
         aria-label={t("triggerAriaLabel")}
-        className={`flex h-11 w-11 items-center justify-center rounded-full transition-colors ${
+        className={`flex h-11 w-11 items-center justify-center rounded-full transition-colors active:scale-90 ${
           scrolled ? "text-gray-800 hover:bg-primary/10 dark:text-white/90" : "text-white hover:bg-white/10"
         }`}
       >
@@ -181,7 +181,10 @@ export function GlobalSearch({ locale, scrolled }: { locale: Locale; scrolled: b
                   overflow-y-auto + the form above being shrink-0 is what keeps the
                   input reachable above the on-screen keyboard (Capacitor's Keyboard
                   plugin is already configured resize:'body', see capacitor.config.ts). */}
-              <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+              <div
+                className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+                style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }}
+              >
                 {!query.trim() ? (
                   <div className="divide-y divide-ink/5 dark:divide-white/5">
                     {recent.length > 0 && (
@@ -198,7 +201,7 @@ export function GlobalSearch({ locale, scrolled }: { locale: Locale; scrolled: b
                               key={q}
                               type="button"
                               onClick={() => goToResults(q)}
-                              className="inline-flex items-center gap-1.5 rounded-full border border-ink/10 px-3 py-1.5 text-xs font-medium text-ink/70 hover:border-primary hover:text-primary dark:border-white/15 dark:text-sand/70"
+                              className="inline-flex items-center gap-1.5 rounded-full border border-ink/10 px-3 py-1.5 text-xs font-medium text-ink/70 transition-colors hover:border-primary hover:text-primary active:bg-primary/10 dark:border-white/15 dark:text-sand/70"
                             >
                               <Clock size={12} aria-hidden="true" />
                               {q}
@@ -222,7 +225,7 @@ export function GlobalSearch({ locale, scrolled }: { locale: Locale; scrolled: b
                                 key={`${item.type}-${item.id}`}
                                 href={`/${locale}${item.href}`}
                                 onClick={close}
-                                className="flex min-w-[9.5rem] items-center gap-2.5 rounded-xl px-2 py-2 hover:bg-primary/5 sm:min-w-0 sm:w-full"
+                                className="flex min-w-[9.5rem] items-center gap-2.5 rounded-xl px-2 py-2 transition-colors hover:bg-primary/5 active:bg-primary/10 sm:min-w-0 sm:w-full"
                               >
                                 <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-ink/5 dark:bg-white/10">
                                   {item.image ? (
@@ -256,7 +259,7 @@ export function GlobalSearch({ locale, scrolled }: { locale: Locale; scrolled: b
                               key={d.id}
                               href={`/${locale}/explore/${d.slug}`}
                               onClick={close}
-                              className="rounded-full border border-ink/10 px-3 py-1.5 text-xs font-medium text-ink/70 hover:border-primary hover:text-primary dark:border-white/15 dark:text-sand/70"
+                              className="rounded-full border border-ink/10 px-3 py-1.5 text-xs font-medium text-ink/70 transition-colors hover:border-primary hover:text-primary active:bg-primary/10 dark:border-white/15 dark:text-sand/70"
                             >
                               {d.name}
                             </Link>
@@ -271,6 +274,22 @@ export function GlobalSearch({ locale, scrolled }: { locale: Locale; scrolled: b
                   </div>
                 ) : results.total === 0 && !isLoading ? (
                   <p className="px-4 py-8 text-center text-sm text-ink/45 dark:text-sand/45">{t("noResults", { query })}</p>
+                ) : results.total === 0 && isLoading ? (
+                  // Real gap this fills: while typing, isLoading is true and
+                  // results.total is still 0 from the previous (or initial)
+                  // state until the 300ms-debounced fetch resolves — without
+                  // this, the panel showed nothing at all for that window.
+                  <div className="animate-pulse space-y-1 px-4 py-3" aria-hidden="true">
+                    {[0, 1, 2, 3].map((i) => (
+                      <div key={i} className="flex items-center gap-3 py-2">
+                        <div className="skeleton h-11 w-11 shrink-0 rounded-lg" />
+                        <div className="min-w-0 flex-1 space-y-2">
+                          <div className="skeleton h-3 w-3/5 rounded-full" />
+                          <div className="skeleton h-2.5 w-2/5 rounded-full" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 ) : (
                   groups.map((group) => {
                     const Icon = TYPE_ICON[group.key];
@@ -284,7 +303,7 @@ export function GlobalSearch({ locale, scrolled }: { locale: Locale; scrolled: b
                             key={`${item.type}-${item.id}`}
                             href={`/${locale}${item.href}`}
                             onClick={close}
-                            className="flex items-center gap-3 px-4 py-2.5 hover:bg-primary/5"
+                            className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-primary/5 active:bg-primary/10"
                           >
                             <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-ink/5 dark:bg-white/10">
                               {item.image ? (
@@ -311,7 +330,7 @@ export function GlobalSearch({ locale, scrolled }: { locale: Locale; scrolled: b
                 <button
                   type="button"
                   onClick={() => goToResults()}
-                  className="shrink-0 border-t border-ink/8 px-4 py-3.5 text-center text-xs font-semibold text-primary hover:bg-primary/5 dark:border-white/10"
+                  className="shrink-0 border-t border-ink/8 px-4 py-3.5 text-center text-xs font-semibold text-primary transition-colors hover:bg-primary/5 active:bg-primary/10 dark:border-white/10"
                   style={{ paddingBottom: "max(0.875rem, env(safe-area-inset-bottom))" }}
                 >
                   {t("viewAllResults", { query })}

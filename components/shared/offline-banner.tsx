@@ -29,7 +29,7 @@ export function OfflineBanner() {
     <div
       role="status"
       aria-live="polite"
-      className="fixed inset-x-0 z-40 flex items-center gap-2.5 bg-navy px-4 py-2.5 text-sm text-white shadow-md sm:justify-center"
+      className="fixed inset-x-0 z-40 flex items-center gap-2.5 bg-navy/95 px-4 py-2.5 text-sm text-white shadow-soft backdrop-blur-md sm:justify-center"
       style={{ top: "calc(5rem + env(safe-area-inset-top))" }}
     >
       <WifiOff size={16} className="shrink-0" aria-hidden="true" />
@@ -38,7 +38,7 @@ export function OfflineBanner() {
         type="button"
         onClick={() => setDismissed(true)}
         aria-label={t("bannerDismissLabel")}
-        className="shrink-0 rounded-full p-1 hover:bg-white/15"
+        className="shrink-0 rounded-full p-1 transition-colors duration-150 hover:bg-white/15 active:bg-white/25"
       >
         <X size={15} aria-hidden="true" />
       </button>

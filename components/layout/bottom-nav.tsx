@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { m } from "framer-motion";
 import { Home, Compass, Heart, Bell, User } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { useSearchOverlay } from "@/components/shared/search-overlay-provider";
@@ -76,30 +77,41 @@ export function BottomNav({ locale }: { locale: Locale }) {
   return (
     <nav
       aria-label={t("navAriaLabel")}
-      className="glass fixed inset-x-3 z-40 flex items-center justify-around rounded-[1.75rem] px-1 py-1.5 shadow-premium lg:hidden"
+      className="glass fixed inset-x-3 z-40 flex items-center justify-around rounded-xl3 px-1 py-1.5 shadow-premium lg:hidden"
       style={{ bottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
     >
       {items.map(({ key, label, icon: Icon, href, onClick, active }) => {
         const content = (
-          <span
-            className={`flex min-w-[3.5rem] flex-col items-center gap-0.5 rounded-2xl px-2 py-2 transition-colors duration-150 ${
-              active ? "text-primary" : "text-ink/55 dark:text-sand/55"
-            }`}
-          >
-            <Icon size={22} strokeWidth={active ? 2.4 : 2} aria-hidden="true" />
-            <span className="text-[10.5px] font-semibold leading-none">{label}</span>
+          <span className="relative flex min-w-[3.5rem] flex-col items-center gap-0.5 rounded-2xl px-2 py-2">
+            {active && (
+              <m.span
+                initial={{ opacity: 0, scale: 0.7 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                className="absolute inset-0 rounded-2xl bg-primary/10 dark:bg-primary/20"
+                aria-hidden="true"
+              />
+            )}
+            <span
+              className={`relative flex flex-col items-center gap-0.5 transition-colors duration-150 ${
+                active ? "text-primary" : "text-ink/55 dark:text-sand/55"
+              }`}
+            >
+              <Icon size={22} strokeWidth={active ? 2.4 : 2} aria-hidden="true" />
+              <span className="text-[10.5px] font-semibold leading-none">{label}</span>
+            </span>
           </span>
         );
 
         if (href) {
           return (
-            <Link key={key} href={href} aria-label={label} aria-current={active ? "page" : undefined} className="active:scale-90 transition-transform">
+            <Link key={key} href={href} aria-label={label} aria-current={active ? "page" : undefined} className="active:scale-90 transition-transform ease-premium">
               {content}
             </Link>
           );
         }
         return (
-          <button key={key} type="button" onClick={onClick} aria-label={label} className="active:scale-90 transition-transform">
+          <button key={key} type="button" onClick={onClick} aria-label={label} className="active:scale-90 transition-transform ease-premium">
             {content}
           </button>
         );

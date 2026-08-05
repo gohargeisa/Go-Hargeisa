@@ -149,7 +149,7 @@ export function SiteHeader({
             aria-label="Toggle menu"
             aria-expanded={open}
             onClick={() => setOpen((o) => !o)}
-            className={`flex h-11 w-11 items-center justify-center rounded-full border transition-colors duration-300 ${
+            className={`flex h-11 w-11 items-center justify-center rounded-full border transition-colors duration-300 active:scale-90 ${
               scrolled
                 ? "border-ink/10 text-ink dark:border-white/15 dark:text-white"
                 : "border-white/30 text-white"
@@ -160,16 +160,34 @@ export function SiteHeader({
         </div>
       </div>
 
+      {/* Floating overlay sheet, not an in-flow accordion — pushing page
+          content down when the menu opens is the single biggest thing that
+          reads as "website nav" rather than a native app; every other
+          floating chrome element in this app (bottom-nav, mobile-booking-bar)
+          already uses this exact inset-x-3-floating-glass-card vocabulary,
+          so this brings the menu in line with it instead of inventing a new
+          pattern. */}
       <AnimatePresence>
         {open && (
-          <m.nav
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="lg:hidden overflow-hidden glass border-t border-ink/5 dark:border-white/10"
-          >
-            <div className="container-px mx-auto flex flex-col gap-1.5 py-4">
+          <>
+            <m.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+              onClick={() => setOpen(false)}
+              aria-hidden="true"
+              className="fixed inset-0 z-40 bg-ink/40 backdrop-blur-sm lg:hidden"
+            />
+            <m.nav
+              initial={{ opacity: 0, y: -16, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -16, scale: 0.98 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              style={{ top: "calc(5rem + env(safe-area-inset-top) + 0.75rem)" }}
+              className="glass fixed inset-x-3 z-40 max-h-[75vh] overflow-y-auto rounded-xl3 shadow-premium-lg lg:hidden"
+            >
+              <div className="container-px flex flex-col gap-1.5 py-4" style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}>
               {links.map((l) => {
                 const href = `/${locale}/${l.href}`;
                 const active = pathname === href || pathname.startsWith(`${href}/`);
@@ -247,8 +265,9 @@ export function SiteHeader({
                   </Link>
                 </div>
               )}
-            </div>
-          </m.nav>
+              </div>
+            </m.nav>
+          </>
         )}
       </AnimatePresence>
     </header>

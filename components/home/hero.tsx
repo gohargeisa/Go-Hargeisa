@@ -163,7 +163,7 @@ export function Hero({ locale }: { locale: Locale }) {
           <button
             type="button"
             onClick={openSearchOverlay}
-            className="flex w-full items-center gap-2.5 rounded-full bg-white/95 px-5 py-3.5 text-start dark:bg-ink/70 lg:hidden"
+            className="flex w-full items-center gap-2.5 rounded-full bg-white/95 px-5 py-3.5 text-start transition-transform active:scale-[0.98] dark:bg-ink/70 lg:hidden"
           >
             <Search size={19} aria-hidden="true" className="shrink-0 text-ink/50 dark:text-sand/50" />
             <span className="truncate text-[15px] text-ink/45 dark:text-sand/45">{t("searchPlaceholder")}</span>
@@ -194,7 +194,7 @@ export function Hero({ locale }: { locale: Locale }) {
 
             <button
               type="submit"
-              className="shrink-0 rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(245,158,11,0.35)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary-700 hover:shadow-[0_12px_28px_rgba(245,158,11,0.45)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="shrink-0 rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(245,158,11,0.35)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary-700 hover:shadow-[0_12px_28px_rgba(245,158,11,0.45)] active:translate-y-0 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               {t("searchButton")}
             </button>
@@ -219,7 +219,7 @@ export function Hero({ locale }: { locale: Locale }) {
                   aria-label={t(titleKey)}
                   aria-pressed={active}
                   onClick={() => setCategory(key)}
-                  className={`group rounded-2xl border p-5 text-start backdrop-blur-xl transition-all duration-300 lg:p-4 ${
+                  className={`group rounded-2xl border p-5 text-start backdrop-blur-xl transition-all duration-300 active:scale-[0.97] lg:p-4 ${
                     active
                       ? "scale-[1.02] border-white bg-white text-ink shadow-2xl ring-4 ring-white/20"
                       : "border-white/20 bg-white/15 text-white hover:-translate-y-1 hover:border-white/40 hover:bg-white/20 hover:shadow-2xl"

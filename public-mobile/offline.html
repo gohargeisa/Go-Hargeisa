@@ -17,7 +17,7 @@
     -webkit-font-smoothing: antialiased;
   }
   @media (prefers-color-scheme: dark) {
-    html, body { background: #12181f; }
+    html, body { background: #0a0f1a; }
   }
   body {
     display: flex;
@@ -43,7 +43,7 @@
     overflow: hidden;
   }
   @media (prefers-color-scheme: dark) {
-    .icon-wrap { background: #1c2530; box-shadow: 0 4px 12px rgba(0,0,0,0.3), 0 14px 34px rgba(0,0,0,0.35); }
+    .icon-wrap { background: #131c2b; box-shadow: 0 4px 12px rgba(0,0,0,0.3), 0 14px 34px rgba(0,0,0,0.35); }
   }
   .icon-wrap img { width: 68px; height: 68px; object-fit: contain; }
   .signal {
@@ -66,8 +66,9 @@
     margin: 0 0 4px;
   }
   @media (prefers-color-scheme: dark) { p { color: rgba(245, 240, 230, 0.6); } }
-  .lang-block { margin-bottom: 22px; }
-  .lang-block:last-of-type { margin-bottom: 32px; }
+  .lang-block { margin-bottom: 22px; padding-bottom: 22px; border-bottom: 1px solid rgba(15, 23, 42, 0.06); }
+  .lang-block:last-of-type { margin-bottom: 32px; padding-bottom: 0; border-bottom: none; }
+  @media (prefers-color-scheme: dark) { .lang-block { border-bottom-color: rgba(255, 255, 255, 0.07); } }
   button {
     appearance: none;
     border: none;
@@ -81,7 +82,7 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    transition: opacity 0.2s ease, transform 0.2s ease;
+    transition: opacity 0.2s cubic-bezier(0.16,1,0.3,1), transform 0.2s cubic-bezier(0.16,1,0.3,1);
   }
   button:active { transform: scale(0.97); }
   button:disabled { opacity: 0.6; cursor: default; }

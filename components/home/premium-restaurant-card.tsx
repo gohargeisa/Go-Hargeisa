@@ -68,7 +68,7 @@ function PremiumRestaurantCardBase({
         {hasRealImage ? (
           <>
             {!loaded && (
-              <div className="absolute inset-0 animate-pulse bg-ink/10 dark:bg-white/10" aria-hidden="true" />
+              <div className="skeleton absolute inset-0" aria-hidden="true" />
             )}
             <Link href={href} className="absolute inset-0 z-0" aria-label={name}>
               <Image
