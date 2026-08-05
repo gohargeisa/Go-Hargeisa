@@ -62,6 +62,7 @@ export default async function EditRestaurantPage({
         locale={locale}
         mode="edit"
         restaurantId={restaurant.id}
+        canFeature={access?.role === "owner"}
         initial={{
           slug: restaurant.slug,
           name: restaurant.name,

@@ -68,6 +68,7 @@ export default async function EditHotelPage({
         locale={locale}
         mode="edit"
         hotelId={hotel.id}
+        canFeature={access?.role === "owner"}
         restaurantOptions={restaurants.map((r) => ({ id: r.id, name: r.name }))}
         cafeOptions={cafes.map((c) => ({ id: c.id, name: c.name }))}
         initialRooms={(roomRows ?? []).map((r: any) => ({

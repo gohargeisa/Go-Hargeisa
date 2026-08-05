@@ -87,8 +87,8 @@ async function assertOwnerOrBusinessOwner(table: AllowedTable) {
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
   const role = (profile as { role: string } | null)?.role;
 
-  if (role === "owner") return supabase;
-  if (role === "business_owner" && BUSINESS_OWNER_TABLES.has(table)) return supabase;
+  if (role === "owner") return { supabase, role };
+  if (role === "business_owner" && BUSINESS_OWNER_TABLES.has(table)) return { supabase, role };
 
   throw new Error("Not authorized.");
 }
@@ -333,7 +333,7 @@ export async function updateRecord(
     throw new Error("Invalid table.");
   }
 
-  const supabase = await assertOwnerOrBusinessOwner(table);
+  const { supabase, role } = await assertOwnerOrBusinessOwner(table);
 
   // Captured before the write so the OLD slug's detail page can also be
   // revalidated below if this update changes the slug — otherwise the
@@ -342,12 +342,21 @@ export async function updateRecord(
   const { data: existing } = await supabase.from(table).select("slug").eq("id", id).single();
   const previousSlug = (existing as { slug?: string } | null)?.slug;
 
+  // Homepage featuring is the platform owner's call, not a business
+  // owner's — the edit forms already hide this checkbox for them
+  // (HotelForm/RestaurantForm/CafeForm's `canFeature` prop), but a Server
+  // Action is a real network endpoint any client can call directly with
+  // an arbitrary payload, so the actual authorization boundary has to be
+  // here, not just in the UI.
+  const { featured: _ignoredFeatured, ...restData } = data;
+  const sanitizedData = role === "owner" ? data : restData;
+
   const payload = TABLES_WITH_UPDATED_AT.has(table)
     ? {
-        ...data,
+        ...sanitizedData,
         updated_at: new Date().toISOString(),
       }
-    : data;
+    : sanitizedData;
 
   // .update() alone doesn't error when RLS silently blocks the write or
   // `id` doesn't match any row — it just affects zero rows and reports

@@ -39,7 +39,6 @@ const staticRoutes = [
   "contact",
   "join",
   "diaspora-week-2026",
-  "search",
   "privacy",
   "terms",
 ];

@@ -1450,6 +1450,7 @@
   },
   "review": {
     "leaveReview": "Ku dar faallo",
+    "ratingGroupAriaLabel": "Qiimaynta",
     "ratingAriaLabel": "Qiimee {stars} xiddigood",
     "commentPlaceholder": "La wadaag faahfaahinta khibraddaada gaarka ah…",
     "submitReview": "Gudbi Faallada",

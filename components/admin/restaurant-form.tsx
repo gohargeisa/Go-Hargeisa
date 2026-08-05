@@ -62,11 +62,16 @@ export function RestaurantForm({
   mode,
   restaurantId,
   initial,
+  canFeature = true,
 }: {
   locale: Locale;
   mode: "create" | "edit";
   restaurantId?: string;
   initial?: Partial<RestaurantFormInput>;
+  // Only the platform owner may toggle homepage featuring — business
+  // owners reach this same form (requireListingsAccess) to manage their
+  // own listing, but self-promoting to "featured" isn't theirs to grant.
+  canFeature?: boolean;
 }) {
   const t = useTranslations("admin");
   const tw = useTranslations("weekdays");
@@ -367,10 +372,12 @@ export function RestaurantForm({
           <input type="checkbox" checked={form.reservable} onChange={(e) => update("reservable", e.target.checked)} />
           {t("acceptsReservations")}
         </label>
-        <label className="flex items-center gap-2 text-sm font-medium">
-          <input type="checkbox" checked={form.featured} onChange={(e) => update("featured", e.target.checked)} />
-          {t("featureOnHomepage")}
-        </label>
+        {canFeature && (
+          <label className="flex items-center gap-2 text-sm font-medium">
+            <input type="checkbox" checked={form.featured} onChange={(e) => update("featured", e.target.checked)} />
+            {t("featureOnHomepage")}
+          </label>
+        )}
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}

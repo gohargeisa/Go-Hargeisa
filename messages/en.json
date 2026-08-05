@@ -1450,6 +1450,7 @@
   },
   "review": {
     "leaveReview": "Leave a review",
+    "ratingGroupAriaLabel": "Rating",
     "ratingAriaLabel": "Rate {stars} stars",
     "commentPlaceholder": "Share details of your own experience…",
     "submitReview": "Submit Review",

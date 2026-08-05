@@ -65,11 +65,21 @@
          required by every WebView-based app; POST_NOTIFICATIONS is a
          runtime-prompted (not auto-granted) permission needed on Android 13+
          for push notifications (lib/mobile/push-notifications.ts) to show
-         at all. No camera/microphone/location/storage permissions: photo
-         uploads (review photos, listing galleries) go through a plain HTML
-         file input backed by the OS's own document/gallery picker, which
-         does not require a permission declaration from this app. -->
+         at all. No camera/microphone/storage permissions: photo uploads
+         (review photos, listing galleries) go through a plain HTML file
+         input backed by the OS's own document/gallery picker, which does
+         not require a permission declaration from this app.
+
+         ACCESS_COARSE_LOCATION/ACCESS_FINE_LOCATION are required for
+         navigator.geolocation (lib/hooks/use-visitor-location.ts, used for
+         "X km away" distance sorting) to work at all inside an Android
+         WebView — without a manifest declaration, Android denies the
+         WebView's geolocation permission prompt outright instead of asking
+         the user, so the feature silently never works natively even though
+         it works fine on the web. -->
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 </manifest>

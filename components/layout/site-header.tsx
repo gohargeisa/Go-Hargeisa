@@ -1,12 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Menu, X } from "lucide-react";
-import { m, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence, useReducedMotion } from "framer-motion";
 import type { Locale } from "@/lib/i18n/config";
 import { LanguageSwitcher } from "./language-switcher";
 import { UserMenu } from "./user-menu";
@@ -16,6 +16,7 @@ import { SignOutButton } from "@/components/shared/sign-out-button";
 import { NotificationBell } from "@/components/shared/notification-bell";
 import { GlobalSearch } from "@/components/shared/global-search";
 import { SERVICES_PUBLIC_ENABLED } from "@/lib/config/features";
+import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 
 const links = [
   { key: "hotels", href: "hotels" },
@@ -41,6 +42,18 @@ export function SiteHeader({
   const [open, setOpen] = useState(false);
   const { user } = useHeaderUser(initialUser);
   const pathname = usePathname();
+  const mobileNavRef = useRef<HTMLElement>(null);
+  useFocusTrap(mobileNavRef, open);
+  const reduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (!open) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -171,18 +184,19 @@ export function SiteHeader({
         {open && (
           <>
             <m.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              initial={reduceMotion ? undefined : { opacity: 0 }}
+              animate={reduceMotion ? undefined : { opacity: 1 }}
+              exit={reduceMotion ? undefined : { opacity: 0 }}
               transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
               onClick={() => setOpen(false)}
               aria-hidden="true"
               className="fixed inset-0 z-40 bg-ink/40 backdrop-blur-sm lg:hidden"
             />
             <m.nav
-              initial={{ opacity: 0, y: -16, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -16, scale: 0.98 }}
+              ref={mobileNavRef}
+              initial={reduceMotion ? undefined : { opacity: 0, y: -16, scale: 0.98 }}
+              animate={reduceMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
+              exit={reduceMotion ? undefined : { opacity: 0, y: -16, scale: 0.98 }}
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
               style={{ top: "calc(5rem + env(safe-area-inset-top) + 0.75rem)" }}
               className="glass fixed inset-x-3 z-40 max-h-[75vh] overflow-y-auto rounded-xl3 shadow-premium-lg lg:hidden"

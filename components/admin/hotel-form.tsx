@@ -78,6 +78,7 @@ export function HotelForm({
   restaurantOptions = [],
   cafeOptions = [],
   initialRooms = [],
+  canFeature = true,
 }: {
   locale: Locale;
   mode: "create" | "edit";
@@ -86,6 +87,10 @@ export function HotelForm({
   restaurantOptions?: { id: string; name: string }[];
   cafeOptions?: { id: string; name: string }[];
   initialRooms?: HotelRoomManagerRow[];
+  // Only the platform owner may toggle homepage featuring — business
+  // owners reach this same form (requireListingsAccess) to manage their
+  // own listing, but self-promoting to "featured" isn't theirs to grant.
+  canFeature?: boolean;
 }) {
   const t = useTranslations("admin");
   const tw = useTranslations("weekdays");
@@ -444,10 +449,12 @@ export function HotelForm({
           </Field>
         </div>
 
-        <label className="flex items-center gap-2 text-sm font-medium">
-          <input type="checkbox" checked={form.featured} onChange={(e) => update("featured", e.target.checked)} />
-          {t("featureOnHomepage")}
-        </label>
+        {canFeature && (
+          <label className="flex items-center gap-2 text-sm font-medium">
+            <input type="checkbox" checked={form.featured} onChange={(e) => update("featured", e.target.checked)} />
+            {t("featureOnHomepage")}
+          </label>
+        )}
 
         {error && <p className="text-sm text-red-600">{error}</p>}
 

@@ -65,11 +65,16 @@ export function CafeForm({
   mode,
   cafeId,
   initial,
+  canFeature = true,
 }: {
   locale: Locale;
   mode: "create" | "edit";
   cafeId?: string;
   initial?: Partial<CafeFormInput>;
+  // Only the platform owner may toggle homepage featuring — business
+  // owners reach this same form (requireListingsAccess) to manage their
+  // own listing, but self-promoting to "featured" isn't theirs to grant.
+  canFeature?: boolean;
 }) {
   const t = useTranslations("admin");
   const tw = useTranslations("weekdays");
@@ -390,10 +395,12 @@ export function CafeForm({
           <input type="checkbox" checked={form.workingSpace} onChange={(e) => update("workingSpace", e.target.checked)} />
           {t("goodWorkingSpace")}
         </label>
-        <label className="flex items-center gap-2 text-sm font-medium">
-          <input type="checkbox" checked={form.featured} onChange={(e) => update("featured", e.target.checked)} />
-          {t("featureOnHomepage")}
-        </label>
+        {canFeature && (
+          <label className="flex items-center gap-2 text-sm font-medium">
+            <input type="checkbox" checked={form.featured} onChange={(e) => update("featured", e.target.checked)} />
+            {t("featureOnHomepage")}
+          </label>
+        )}
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}

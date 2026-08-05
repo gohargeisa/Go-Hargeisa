@@ -7,7 +7,16 @@ export interface NetworkStatus {
 }
 
 function initialOnlineGuess(): boolean {
-  if (typeof navigator === "undefined") return true;
+  // Not just `typeof navigator === "undefined"` — Node 21+ ships its own
+  // global `navigator` (for fetch/WHATWG-API compatibility) with no real
+  // `onLine` property, so during SSR `navigator` now exists but
+  // `navigator.onLine` is `undefined`. That falsy value was reaching
+  // useState's initializer directly on the server, making the very first
+  // server-rendered HTML of every single page mark the app "offline" —
+  // OfflineBanner rendered on every page load until the client-side effect
+  // below corrected it a tick later. Checking that `onLine` is actually a
+  // boolean is what distinguishes a real browser navigator from Node's.
+  if (typeof navigator === "undefined" || typeof navigator.onLine !== "boolean") return true;
   return navigator.onLine;
 }
 

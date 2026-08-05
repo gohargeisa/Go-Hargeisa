@@ -39,3 +39,6 @@ yarn-error.log*
 next-env.d.ts
 .vercel
 .env*
+
+# Ad-hoc screenshot/audit output — reproducible, not source
+/mobile-preview/

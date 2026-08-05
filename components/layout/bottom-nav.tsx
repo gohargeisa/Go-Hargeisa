@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { m } from "framer-motion";
+import { m, useReducedMotion } from "framer-motion";
 import { Home, Compass, Heart, Bell, User } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { useSearchOverlay } from "@/components/shared/search-overlay-provider";
@@ -38,6 +38,7 @@ export function BottomNav({ locale }: { locale: Locale }) {
   const { open: openSearch } = useSearchOverlay();
   const { open: openOfflineFavorites } = useOfflineFavoritesSheet();
   const { isOnline } = useNetworkStatus();
+  const reduceMotion = useReducedMotion();
 
   if (HIDE_ON.test(pathname)) return null;
 
@@ -85,8 +86,8 @@ export function BottomNav({ locale }: { locale: Locale }) {
           <span className="relative flex min-w-[3.5rem] flex-col items-center gap-0.5 rounded-2xl px-2 py-2">
             {active && (
               <m.span
-                initial={{ opacity: 0, scale: 0.7 }}
-                animate={{ opacity: 1, scale: 1 }}
+                initial={reduceMotion ? undefined : { opacity: 0, scale: 0.7 }}
+                animate={reduceMotion ? undefined : { opacity: 1, scale: 1 }}
                 transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
                 className="absolute inset-0 rounded-2xl bg-primary/10 dark:bg-primary/20"
                 aria-hidden="true"

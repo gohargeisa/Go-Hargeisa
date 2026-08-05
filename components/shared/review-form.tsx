@@ -143,11 +143,13 @@ export function ReviewForm({
   return (
     <form onSubmit={onSubmit} className="rounded-xl2 border border-ink/8 dark:border-white/10 p-5">
       <p className="text-sm font-semibold mb-3">{isEditing ? t("editReview") : t("leaveReview")}</p>
-      <div className="flex gap-1 mb-3">
+      <div role="radiogroup" aria-label={t("ratingGroupAriaLabel")} className="flex gap-1 mb-3">
         {Array.from({ length: 5 }).map((_, i) => (
           <button
             key={i}
             type="button"
+            role="radio"
+            aria-checked={i < rating}
             onClick={() => setRating(i + 1)}
             aria-label={t("ratingAriaLabel", { stars: i + 1 })}
             className="text-accent"

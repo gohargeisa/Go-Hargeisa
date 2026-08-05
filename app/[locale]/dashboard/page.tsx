@@ -12,7 +12,7 @@ import { getMyBookings } from "@/lib/data/business";
 import { getUserNotifications, getUnreadNotificationCount } from "@/lib/actions/notifications";
 import { DashboardTabs } from "@/components/dashboard/dashboard-tabs";
 
-export const metadata: Metadata = { title: "My Dashboard — Go Hargeisa" };
+export const metadata: Metadata = { title: "My Dashboard — Go Hargeisa", robots: { index: false } };
 
 export default async function DashboardPage({
   params: { locale },

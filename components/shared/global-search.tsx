@@ -13,6 +13,7 @@ import type { SearchResultItem, SearchResults } from "@/lib/data/global-search";
 import type { Destination } from "@/types";
 import { getRecentSearches, addRecentSearch, clearRecentSearches } from "@/lib/mobile/recent-searches";
 import { useSearchOverlay } from "@/components/shared/search-overlay-provider";
+import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 
 const TYPE_ICON = { hotel: Hotel, restaurant: UtensilsCrossed, cafe: Coffee, attraction: Landmark } as const;
 
@@ -29,7 +30,9 @@ export function GlobalSearch({ locale, scrolled }: { locale: Locale; scrolled: b
   const [popular, setPopular] = useState<SearchResults>(EMPTY);
   const [neighborhoods, setNeighborhoods] = useState<Destination[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  useFocusTrap(dialogRef, open);
 
   useEffect(() => {
     if (!open) return;
@@ -76,6 +79,16 @@ export function GlobalSearch({ locale, scrolled }: { locale: Locale; scrolled: b
       clearTimeout(debounceRef.current);
     };
   }, [query, locale]);
+
+  useEffect(() => {
+    if (!open) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") close();
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   function close() {
     closeOverlay();
@@ -148,6 +161,7 @@ export function GlobalSearch({ locale, scrolled }: { locale: Locale; scrolled: b
               aria-hidden="true"
             />
             <m.div
+              ref={dialogRef}
               role="dialog"
               aria-modal="true"
               aria-label={t("triggerAriaLabel")}

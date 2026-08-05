@@ -153,6 +153,28 @@ on `PATH`).
 
 ## 2. iOS — Xcode / App Store submission
 
+**Full step-by-step IPA build walkthrough: [`ios/README.md`](ios/README.md).**
+That doc is the source of truth for the archive/export/upload steps; this
+section is a shorter recap plus what changed in the most recent iOS prep
+pass.
+
+The project has since been fully configured for a first App Store
+submission: app name/display name "Go Hargeisa", bundle ID
+`com.gohargeisa.app`, version `1.0.0` build `1`, Camera/Photo
+Library/Location Info.plist usage strings (justified by the review-photo
+upload and nearby-distance features), explicit ATS with no exceptions
+(everything is HTTPS), a `PrivacyInfo.xcprivacy` manifest, and
+`ITSAppUsesNonExemptEncryption: false` pre-answered. None of that needs to
+be redone — see `ios/README.md`'s status table for the full list.
+
+One Windows-specific bug was found and fixed during that pass: `npx cap
+sync ios` run on Windows writes backslash path separators into
+`ios/App/CapApp-SPM/Package.swift`, which is invalid Swift syntax and
+breaks package resolution in Xcode. Already fixed once; **if `cap sync` is
+ever re-run from Windows again, re-check that file** (`ios/README.md` §0
+has the fix). Running `cap sync` from macOS/Linux doesn't have this
+problem.
+
 ### Prerequisites (not available in the environment that prepared this repo — Windows)
 - A Mac with Xcode 15+
 - An active Apple Developer Program membership ($99/yr) for real device
@@ -171,7 +193,9 @@ on first open.
 In Xcode: select the **App** target → **Signing & Capabilities** → set your
 Team. `CODE_SIGN_STYLE = Automatic` is already set
 (`ios/App/App.xcodeproj/project.pbxproj`), so Xcode will provision
-automatically once a team is selected.
+automatically once a team is selected. `DEVELOPMENT_TEAM` is deliberately
+left blank in the project file — it's account-specific and can only be set
+from within Xcode.
 
 ### Universal Links
 1. `ios/App/App/App.entitlements` already declares
@@ -210,7 +234,10 @@ mark ever changes.
 
 ### Build & Archive
 Xcode → Product → Archive, then use the Organizer window to upload to App
-Store Connect. Not run in this session (needs Xcode on a Mac).
+Store Connect. Not run in this session (needs Xcode on a Mac) — see
+[`ios/README.md`](ios/README.md) for the full step-by-step (destination
+selection, archive, export/upload, App Store Connect listing, App Privacy
+questionnaire answers).
 
 ---
 

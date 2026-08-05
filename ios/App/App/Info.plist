@@ -62,5 +62,16 @@
 	<string>UIStatusBarStyleLightContent</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Go Hargeisa uses your location to show how far nearby hotels, restaurants and city services are from you.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Go Hargeisa uses your camera so you can attach a photo when writing a review.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Go Hargeisa accesses your photo library so you can attach a photo when writing a review.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<false/>
+	</dict>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>

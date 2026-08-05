@@ -1450,6 +1450,7 @@
   },
   "review": {
     "leaveReview": "أضف تقييمًا",
+    "ratingGroupAriaLabel": "التقييم",
     "ratingAriaLabel": "قيّم {stars} نجوم",
     "commentPlaceholder": "شارك تفاصيل تجربتك الخاصة…",
     "submitReview": "إرسال التقييم",
