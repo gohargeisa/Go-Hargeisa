@@ -1,7 +1,6 @@
 "use client";
 
 import { useId, useState } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { m, useReducedMotion } from "framer-motion";
@@ -14,8 +13,8 @@ import {
 } from "lucide-react";
 
 import type { Locale } from "@/lib/i18n/config";
-import { SHIMMER_BLUR_DATA_URL } from "@/lib/utils/shimmer";
 import { useSearchOverlay } from "@/components/shared/search-overlay-provider";
+import { HeroBackground } from "@/components/home/hero-background";
 
 const categoryCards = [
   {
@@ -77,21 +76,7 @@ export function Hero({ locale }: { locale: Locale }) {
 
   return (
     <section className="relative flex min-h-[720px] h-auto items-start overflow-hidden pb-12 md:h-screen md:max-h-[980px] md:pb-0 md:items-center lg:h-auto lg:min-h-screen lg:max-h-none">
-      <div className="absolute inset-0 overflow-hidden">
-        <Image
-          src="/images/hero-bg.png"
-          alt="Panoramic view of Hargeisa at golden hour"
-          fill
-          priority
-          sizes="100vw"
-          placeholder="blur"
-          blurDataURL={SHIMMER_BLUR_DATA_URL}
-          className={`object-cover ${reduceMotion ? "" : "animate-kenburns"}`}
-        />
-      </div>
-
-      <div className="absolute inset-0 bg-hero-gradient" />
-      <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-ink/10" />
+      <HeroBackground reduceMotion={!!reduceMotion} priority />
 
       <div className="container-px relative z-10 mx-auto flex w-full flex-col items-center pt-24 text-center text-white sm:pt-28 md:pt-16 lg:min-w-0 lg:pt-24 lg:pb-8">
         <m.span

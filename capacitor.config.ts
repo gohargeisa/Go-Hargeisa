@@ -41,10 +41,13 @@ const config: CapacitorConfig = {
     contentInset: 'always',
     // The app already renders its own splash; suppress the extra native
     // status-bar blank flash some iOS WKWebView setups show on cold start.
-    backgroundColor: '#FBF8F3',
+    // Navy (not the old cream) so any edge visible around the splash photo
+    // or during the WebView's own first paint matches the dark splash
+    // rather than flashing pale against it.
+    backgroundColor: '#051427',
   },
   android: {
-    backgroundColor: '#FBF8F3',
+    backgroundColor: '#051427',
   },
   plugins: {
     SplashScreen: {
@@ -61,7 +64,7 @@ const config: CapacitorConfig = {
       // never fires, the plugin's own native timer force-hides at 4s.
       launchAutoHide: true,
       launchShowDuration: 4000,
-      backgroundColor: '#FBF8F3',
+      backgroundColor: '#051427',
       androidSplashResourceName: 'splash',
       androidScaleType: 'CENTER_CROP',
       splashFullScreen: true,

@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useNativeSplashGate } from "@/components/shared/native-splash-gate";
 
 /**
  * Wires up native-shell behavior when this same web app is running inside
@@ -20,6 +21,7 @@ import { useRouter } from "next/navigation";
  */
 export function CapacitorBootstrap() {
   const router = useRouter();
+  const { waitUntilReady } = useNativeSplashGate();
 
   useEffect(() => {
     let cancelled = false;
@@ -31,11 +33,13 @@ export function CapacitorBootstrap() {
 
       const [{ App }, { SplashScreen }] = await Promise.all([import("@capacitor/app"), import("@capacitor/splash-screen")]);
 
-      // Fast path: hide as soon as React has actually hydrated real
-      // content, rather than waiting for capacitor.config.ts's
-      // launchShowDuration ceiling (4s) — that ceiling is a safety net for
-      // when this call doesn't fire at all (e.g. this code not yet being
-      // deployed to the live site this app loads), not the normal case.
+      // Wait for the web splash overlay (splash-overlay.tsx, homepage-only)
+      // to report its hero/logo images have actually loaded — capped at
+      // 1200ms so a stalled or never-mounted overlay (any non-homepage cold
+      // launch) can't hang this past capacitor.config.ts's own
+      // launchShowDuration safety-net ceiling (4s, for if this JS path
+      // doesn't run at all).
+      await waitUntilReady(1200);
       await SplashScreen.hide();
 
       // Hardware back button (Android): go back in-app history if there is
@@ -70,7 +74,7 @@ export function CapacitorBootstrap() {
       cancelled = true;
       cleanups.forEach((fn) => fn());
     };
-  }, [router]);
+  }, [router, waitUntilReady]);
 
   return null;
 }

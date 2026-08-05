@@ -15,6 +15,7 @@ import { NetworkSyncController } from "@/components/shared/network-sync-controll
 import { PageTransition } from "@/components/shared/page-transition";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { SearchOverlayProvider } from "@/components/shared/search-overlay-provider";
+import { NativeSplashGateProvider } from "@/components/shared/native-splash-gate";
 import { OfflineFavoritesProvider } from "@/components/shared/offline-favorites-provider";
 import { OfflineFavoritesSheet } from "@/components/shared/offline-favorites-sheet";
 import { RecentlyViewedTracker } from "@/components/shared/recently-viewed-tracker";
@@ -195,35 +196,37 @@ export default async function LocaleLayout({
             >
               {tCommon("skipToContent")}
             </a>
-            <SearchOverlayProvider>
-              <OfflineFavoritesProvider>
-                <SiteHeader locale={currentLocale} initialUser={initialUser} logoUrl={siteSettings?.logo_url ?? undefined} />
-                <main id="main-content">
-                  <PageTransition>{children}</PageTransition>
-                </main>
-                <SiteFooter
-                  locale={currentLocale}
-                  logoUrl={siteSettings?.logo_url ?? undefined}
-                  footerText={siteSettings?.footer_text ?? undefined}
-                  contactEmail={siteSettings?.contact_email ?? undefined}
-                  contactPhone={siteSettings?.contact_phone ?? undefined}
-                  whatsappNumber={siteSettings?.whatsapp_number ?? undefined}
-                  socialFacebook={siteSettings?.social_facebook ?? undefined}
-                  socialInstagram={siteSettings?.social_instagram ?? undefined}
-                  socialTwitter={siteSettings?.social_twitter ?? undefined}
-                  socialYoutube={siteSettings?.social_youtube ?? undefined}
-                  socialTiktok={siteSettings?.social_tiktok ?? undefined}
-                />
-                <ServiceWorkerRegister />
-                <CapacitorBootstrap />
-                <OfflineBanner />
-                <NetworkSyncController />
-                <PullToRefreshIndicator />
-                <RecentlyViewedTracker />
-                <OfflineFavoritesSheet />
-                <BottomNav locale={currentLocale} />
-              </OfflineFavoritesProvider>
-            </SearchOverlayProvider>
+            <NativeSplashGateProvider>
+              <SearchOverlayProvider>
+                <OfflineFavoritesProvider>
+                  <SiteHeader locale={currentLocale} initialUser={initialUser} logoUrl={siteSettings?.logo_url ?? undefined} />
+                  <main id="main-content">
+                    <PageTransition>{children}</PageTransition>
+                  </main>
+                  <SiteFooter
+                    locale={currentLocale}
+                    logoUrl={siteSettings?.logo_url ?? undefined}
+                    footerText={siteSettings?.footer_text ?? undefined}
+                    contactEmail={siteSettings?.contact_email ?? undefined}
+                    contactPhone={siteSettings?.contact_phone ?? undefined}
+                    whatsappNumber={siteSettings?.whatsapp_number ?? undefined}
+                    socialFacebook={siteSettings?.social_facebook ?? undefined}
+                    socialInstagram={siteSettings?.social_instagram ?? undefined}
+                    socialTwitter={siteSettings?.social_twitter ?? undefined}
+                    socialYoutube={siteSettings?.social_youtube ?? undefined}
+                    socialTiktok={siteSettings?.social_tiktok ?? undefined}
+                  />
+                  <ServiceWorkerRegister />
+                  <CapacitorBootstrap />
+                  <OfflineBanner />
+                  <NetworkSyncController />
+                  <PullToRefreshIndicator />
+                  <RecentlyViewedTracker />
+                  <OfflineFavoritesSheet />
+                  <BottomNav locale={currentLocale} />
+                </OfflineFavoritesProvider>
+              </SearchOverlayProvider>
+            </NativeSplashGateProvider>
           </div>
         </ThemeProvider>
       </LazyMotion>

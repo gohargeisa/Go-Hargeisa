@@ -16,8 +16,11 @@ import path from "path";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const SOURCE = path.join(ROOT, "public/icons/icon-512.png");
-const BRAND_SPLASH_BG = "#FBF8F3"; // manifest.json background_color
+const LOGO_SOURCE = path.join(ROOT, "public/images/logo.png");
+const HERO_SOURCE = path.join(ROOT, "public/images/hero-bg.png");
 const BRAND_ICON_BG = "#FFFFFF"; // matches ic_launcher_background.xml + the source's own canvas
+const BRAND_SPLASH_NAVY = "#051427"; // tailwind.config.ts navy-900 — the splash's own scrim/background color
+const SPLASH_TAGLINE = "DISCOVER • EXPLORE • EXPERIENCE";
 
 const DENSITIES = [
   { name: "mdpi", scale: 1 },
@@ -34,6 +37,119 @@ async function ensureDir(p) {
 async function getTrimmedMark() {
   const { data, info } = await sharp(SOURCE).trim().toBuffer({ resolveWithObject: true });
   return { buffer: data, width: info.width, height: info.height };
+}
+
+/**
+ * public/images/logo.png (1536x1024) is not a clean wordmark — row-by-row
+ * alpha sampling confirms "DISCOVER • EXPLORE • EXPERIENCE" is baked into
+ * the raster as a separate pill around rows 650-680, separated from the
+ * actual logo mark (content ends ~row 622) by a fully-transparent gap
+ * (~rows 626-648). Cropping to the top 630px keeps the whole mark — which
+ * already has a soft golden glow baked in — while excluding the tagline
+ * pill entirely, so the splash overlay's own separately-animated tagline
+ * (components/shared/splash-overlay.tsx) never renders a duplicate.
+ * Written to public/images/logo-mark.png as a checked-in web asset (used
+ * by the splash overlay's <Image>) as well as returned for native
+ * compositing below.
+ */
+async function getLogoMark() {
+  // Two separate sharp pipelines rather than one chained
+  // .extract().trim() — sharp's trim() re-derives its threshold area from
+  // the pre-extract image when chained directly, throwing "bad extract
+  // area"; round-tripping through an intermediate buffer avoids that.
+  const extracted = await sharp(LOGO_SOURCE).extract({ left: 0, top: 0, width: 1536, height: 630 }).toBuffer();
+  const cropped = await sharp(extracted).trim().toBuffer();
+  const { width, height } = await sharp(cropped).metadata();
+  // Palette quantization (quality 92 — high enough to keep the mark's own
+  // soft golden glow gradient banding-free) cuts this from ~670KB to
+  // ~95KB; it's loaded with `priority` by the splash overlay, so its size
+  // directly affects perceived startup speed.
+  await sharp(cropped).png({ palette: true, quality: 92, compressionLevel: 9 }).toFile(path.join(ROOT, "public/images/logo-mark.png"));
+  console.log(`  public/images/logo-mark.png: ${width}x${height} generated (cropped from logo.png, baked tagline excluded)`);
+  return { buffer: cropped, width, height };
+}
+
+/**
+ * Native splash frame (Android Theme.SplashScreen + iOS LaunchScreen
+ * .storyboard) — both platforms hard-limit this layer to one static image,
+ * so it's designed to look like the first frame of the web splash overlay
+ * (splash-overlay.tsx) it hands off to: the same Hero photo, never hard-
+ * cropped (spec: "never crop important visual elements"), letterboxed onto
+ * a blurred/darkened full-bleed copy of itself for atmosphere, with the
+ * (cropped) logo mark + tagline in the scrimmed space below. Sizing is
+ * relative to the canvas so the same logic produces a correct frame at
+ * every density/orientation this script already loops over, and for iOS's
+ * single 2732x2732 square canvas.
+ */
+async function heroSplashComposite({ w, h, logoMark }) {
+  const heroMeta = await sharp(HERO_SOURCE).metadata();
+
+  // Backdrop: full-bleed blurred + darkened cover-crop — pure atmosphere,
+  // cropping here is invisible/fine since it's never the focal content.
+  const backdrop = await sharp(HERO_SOURCE)
+    .resize(w, h, { fit: "cover" })
+    .blur(24)
+    .modulate({ brightness: 0.55 })
+    .toBuffer();
+
+  // Foreground: the entire, uncropped photo — bounded to fit within the
+  // canvas width AND at most ~50% of the canvas height (whichever is more
+  // restrictive), never cropped, anchored near the top so the lower portion
+  // stays clear for the logo/tagline at every orientation.
+  const scale = Math.min(w / heroMeta.width, (h * 0.5) / heroMeta.height);
+  const fgWidth = Math.round(heroMeta.width * scale);
+  const fgHeight = Math.round(heroMeta.height * scale);
+  const foreground = await sharp(HERO_SOURCE).resize(fgWidth, fgHeight).toBuffer();
+  const fgLeft = Math.round((w - fgWidth) / 2);
+  const fgTop = Math.round(h * 0.07);
+
+  // Scrim — flat navy top-to-bottom gradient mirroring the web Hero's own
+  // bg-hero-gradient ramp (native drawables can't render a CSS gradient, so
+  // this bakes it as pixels instead).
+  const scrimSvg = `<svg width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="scrim" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="${BRAND_SPLASH_NAVY}" stop-opacity="0.10"/>
+        <stop offset="100%" stop-color="${BRAND_SPLASH_NAVY}" stop-opacity="0.72"/>
+      </linearGradient>
+    </defs>
+    <rect width="${w}" height="${h}" fill="url(#scrim)"/>
+  </svg>`;
+
+  // Logo mark + tagline, sized off the shorter canvas side so both read at
+  // a consistent physical size regardless of portrait/landscape orientation.
+  const shortSide = Math.min(w, h);
+  const logoW = Math.round(shortSide * 0.42);
+  const logoH = Math.round((logoMark.height / logoMark.width) * logoW);
+  const resizedLogo = await sharp(logoMark.buffer).resize(logoW, logoH, { fit: "fill" }).toBuffer();
+  const logoLeft = Math.round((w - logoW) / 2);
+  const logoTop = fgTop + fgHeight + Math.round(h * 0.05);
+
+  const taglineFontSize = Math.max(10, Math.round(shortSide * 0.032));
+  const taglineTop = logoTop + logoH + Math.round(h * 0.02);
+  const taglineSvg = `<svg width="${w}" height="${Math.round(taglineFontSize * 2.5)}" xmlns="http://www.w3.org/2000/svg">
+    <text x="50%" y="${Math.round(taglineFontSize * 1.4)}" text-anchor="middle" font-family="Arial, Helvetica, sans-serif"
+      font-size="${taglineFontSize}" letter-spacing="${Math.round(taglineFontSize * 0.3)}"
+      font-weight="600" fill="#FFFFFF" fill-opacity="0.85">${SPLASH_TAGLINE}</text>
+  </svg>`;
+
+  return sharp({ create: { width: w, height: h, channels: 4, background: BRAND_SPLASH_NAVY } })
+    .composite([
+      { input: backdrop, left: 0, top: 0 },
+      { input: foreground, left: fgLeft, top: fgTop },
+      { input: Buffer.from(scrimSvg), left: 0, top: 0 },
+      { input: resizedLogo, left: logoLeft, top: logoTop },
+      { input: Buffer.from(taglineSvg), left: 0, top: taglineTop },
+    ])
+    .flatten({ background: BRAND_SPLASH_NAVY })
+    // Palette-quantized PNG (still a valid, losslessly-decoded PNG — the
+    // format Android/iOS both require here) rather than true-color: this is
+    // a full-bleed photographic composite, which true-color PNG encodes at
+    // ~1.3MB per density/orientation (10+ copies ship in one APK). Palette
+    // quantization at quality 90 cuts that to ~300KB with no visible
+    // banding on the photo or the navy scrim gradient.
+    .png({ palette: true, quality: 90, compressionLevel: 9 })
+    .toBuffer();
 }
 
 /** The trimmed mark scaled to fit within `fraction` of a `size`x`size`
@@ -109,7 +225,7 @@ async function monochromeMark({ mark, size }) {
     .toBuffer();
 }
 
-async function generateAndroid(mark) {
+async function generateAndroid(mark, logoMark) {
   const resBase = path.join(ROOT, "android/app/src/main/res");
 
   for (const { name, scale } of DENSITIES) {
@@ -131,7 +247,7 @@ async function generateAndroid(mark) {
     console.log(`  mipmap-${name}: ic_launcher (${legacySize}px), foreground (${fgSize}px)`);
   }
 
-  // Splash screens — brand-cream background, centered mark, every
+  // Splash screens — Hero-photo composite (see heroSplashComposite), every
   // density x both orientations, matching Capacitor's default template shape.
   const PORT_BASE = { w: 320, h: 480 };
   const LAND_BASE = { w: 480, h: 320 };
@@ -141,14 +257,14 @@ async function generateAndroid(mark) {
       await ensureDir(dir);
       const w = Math.round(base.w * scale);
       const h = Math.round(base.h * scale);
-      const splash = await markOnRect({ mark, w, h, fraction: 0.34, background: BRAND_SPLASH_BG });
+      const splash = await heroSplashComposite({ w, h, logoMark });
       await sharp(splash).toFile(path.join(dir, "splash.png"));
     }
     console.log(`  drawable-{port,land}-${name}: splash generated`);
   }
 
   // Default fallback (no density/orientation qualifier — pre-API-21 devices).
-  const fallback = await markOnRect({ mark, w: 480, h: 320, fraction: 0.34, background: BRAND_SPLASH_BG });
+  const fallback = await heroSplashComposite({ w: 480, h: 320, logoMark });
   await sharp(fallback).toFile(path.join(resBase, "drawable/splash.png"));
 
   // Status-bar notification icon (small monochrome silhouette).
@@ -166,7 +282,7 @@ async function generateAndroid(mark) {
   // ic_launcher_background.xml) — nothing to generate there.
 }
 
-async function generateIOS(mark) {
+async function generateIOS(mark, logoMark) {
   const iosDir = path.join(ROOT, "ios/App/App/Assets.xcassets");
   if (!existsSync(iosDir)) {
     console.log("  ios/ project not found — skipping iOS asset generation (run `npx cap add ios` first).");
@@ -185,10 +301,9 @@ async function generateIOS(mark) {
   // at the same physical asset for the simplified single-image splash).
   const splashDir = path.join(iosDir, "Splash.imageset");
   await ensureDir(splashDir);
-  const splash = await markOnRect({ mark, w: 2732, h: 2732, fraction: 0.3, background: BRAND_SPLASH_BG });
-  const flatSplash = await sharp(splash).flatten({ background: BRAND_SPLASH_BG }).png().toBuffer();
+  const splash = await heroSplashComposite({ w: 2732, h: 2732, logoMark });
   for (const filename of ["splash-2732x2732.png", "splash-2732x2732-1.png", "splash-2732x2732-2.png"]) {
-    await sharp(flatSplash).toFile(path.join(splashDir, filename));
+    await sharp(splash).toFile(path.join(splashDir, filename));
   }
   console.log("  Splash.imageset: 2732x2732 generated (x3 filenames)");
 }
@@ -337,11 +452,14 @@ async function main() {
   const mark = await getTrimmedMark();
   console.log(`Source mark trimmed to ${mark.width}x${mark.height}`);
 
+  console.log("\nLogo mark (splash):");
+  const logoMark = await getLogoMark();
+
   console.log("\nAndroid:");
-  await generateAndroid(mark);
+  await generateAndroid(mark, logoMark);
 
   console.log("\niOS:");
-  await generateIOS(mark);
+  await generateIOS(mark, logoMark);
 
   console.log("\nStore listing assets:");
   await generateStoreAssets(mark);

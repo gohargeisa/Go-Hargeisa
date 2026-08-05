@@ -21,6 +21,7 @@ import { getFeaturedOffersForHomepage } from "@/lib/data/offers";
 import { getCityServiceCategoryCounts } from "@/lib/data/city-services";
 import { DIASPORA_WEEK_END_ISO } from "@/lib/config/diaspora-week";
 import { Hero } from "@/components/home/hero";
+import { SplashScreenOverlay } from "@/components/shared/splash-overlay";
 import { OfferCard } from "@/components/home/offer-card";
 import { AnnouncementBanner } from "@/components/home/announcement-banner";
 import { DiasporaWeekBanner } from "@/components/home/diaspora-week-banner";
@@ -79,6 +80,8 @@ export default async function HomePage({
 
   return (
     <>
+      <SplashScreenOverlay />
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

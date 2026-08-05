@@ -53,6 +53,9 @@
     "cafeCardTitle": "المقاهي",
     "cafeCardDescription": "استرخِ في أفضل المقاهي وأماكن القهوة في هرجيسا."
   },
+  "splash": {
+    "tagline": "اكتشف • استكشف • جرّب"
+  },
   "home": {
     "destinationsTitle": "أشهر الوجهات",
     "destinationsSubtitle": "أحياء ومعالم تستحق وقتك",

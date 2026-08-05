@@ -53,6 +53,9 @@
     "cafeCardTitle": "Cafés",
     "cafeCardDescription": "Relax at Hargeisa's favorite coffee spots."
   },
+  "splash": {
+    "tagline": "Discover • Explore • Experience"
+  },
   "home": {
     "destinationsTitle": "Popular Destinations",
     "destinationsSubtitle": "Neighborhoods and landmarks worth your time",

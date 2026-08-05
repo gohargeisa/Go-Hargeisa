@@ -53,6 +53,9 @@
     "cafeCardTitle": "Kafateeriyo",
     "cafeCardDescription": "Nasasho ku qaado kafateeriyada ugu wanaagsan ee Hargeysa."
   },
+  "splash": {
+    "tagline": "Ogow • Sahami • Dhadhamiso"
+  },
   "home": {
     "destinationsTitle": "Goobaha Caanka ah",
     "destinationsSubtitle": "Xaafado iyo goobo mudan in la booqdo",
