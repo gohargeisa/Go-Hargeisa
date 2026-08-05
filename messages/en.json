@@ -17,6 +17,7 @@
     "signIn": "Sign In",
     "signUp": "Sign Up",
     "signOut": "Sign Out",
+    "changeLanguage": "Change language",
     "cityServices": "City Services",
     "listYourBusiness": "List Your Business"
   },
@@ -185,7 +186,8 @@
     "submit": "Submit Claim",
     "submitting": "Submitting…",
     "success": "Thanks — we've received your claim and will be in touch by email.",
-    "error": "Something went wrong. Please try again."
+    "error": "Something went wrong. Please try again.",
+    "close": "Close"
   },
   "joinRequest": {
     "eyebrow": "Partner With Us",
@@ -385,7 +387,21 @@
     "error": "Something went wrong. Please try again.",
     "required": "Full name, phone number, and check-in/check-out dates are required.",
     "invalidRange": "Check-out must be after check-in.",
-    "roomUnavailable": "This room is currently unavailable. Please choose another room."
+    "roomUnavailable": "This room is currently unavailable. Please choose another room.",
+    "decreaseAriaLabel": "Decrease {label}",
+    "increaseAriaLabel": "Increase {label}",
+    "guestsCount": "{count, plural, one {# guest} other {# guests}}",
+    "moreFeaturesCount": "+{count} more",
+    "contactForPricing": "Contact for pricing",
+    "availableBadge": "Available",
+    "unavailableBadge": "Unavailable",
+    "errorCheckInPast": "Check-in date can't be in the past.",
+    "errorAdultsRequired": "At least 1 adult is required.",
+    "errorRoomsRequired": "At least 1 room is required.",
+    "errorSignInRequired": "Please sign in.",
+    "errorBookingNotFound": "Booking not found.",
+    "errorNoLongerCancellable": "This booking can no longer be cancelled.",
+    "errorCancellationWindow": "Bookings can only be cancelled at least {hours}h before check-in."
   },
   "auth": {
     "welcomeTitle": "Welcome to Go Hargeisa",
@@ -1457,7 +1473,9 @@
     "reportReviewConfirm": "Report this review to our moderation team?",
     "reportedReview": "Reported",
     "ratingDistribution": "Rating breakdown",
-    "starsLabel": "{stars} stars"
+    "starsLabel": "{stars} stars",
+    "removePhoto": "Remove photo",
+    "photoUploadFailed": "Photo upload failed."
   },
   "trip": {
     "addToTrip": "Add to Trip",
@@ -1610,6 +1628,7 @@
     "policies": "Policies",
     "policiesText": "Check-in/check-out times, cancellation terms and house rules can vary by property. Contact {name} directly using the details in the booking panel to confirm policies before you book.",
     "openInGoogleMaps": "Open in Google Maps",
+    "directions": "Directions",
     "bookThisHotel": "Book This Hotel",
     "youMayAlsoLike": "You may also like",
     "menuHighlights": "Menu Highlights",

@@ -17,6 +17,7 @@
     "signIn": "Gal",
     "signUp": "Isdiiwaangeli",
     "signOut": "Ka Bax",
+    "changeLanguage": "Beddel Luqadda",
     "cityServices": "Adeegyada Magaalada",
     "listYourBusiness": "Diiwaan Geli Ganacsigaaga"
   },
@@ -185,7 +186,8 @@
     "submit": "Gudbi Codsiga",
     "submitting": "Waa la gudbinayaa…",
     "success": "Mahadsanid — waan helnay codsigaaga waana kula soo xiriiri doonaa iimaylka.",
-    "error": "Wax baa qaldamay. Fadlan isku day mar kale."
+    "error": "Wax baa qaldamay. Fadlan isku day mar kale.",
+    "close": "Xir"
   },
   "joinRequest": {
     "eyebrow": "Nala Shirkeyso",
@@ -385,7 +387,21 @@
     "error": "Wax baa qaldamay. Fadlan isku day mar kale.",
     "required": "Magaca oo dhan, lambarka taleefanka, iyo taariikhda gelitaanka/bixitaanka ayaa loo baahan yahay.",
     "invalidRange": "Taariikhda bixitaanka waa inay ka dambaysaa tan gelitaanka.",
-    "roomUnavailable": "Qolkan hadda ma banaana. Fadlan dooro qol kale."
+    "roomUnavailable": "Qolkan hadda ma banaana. Fadlan dooro qol kale.",
+    "decreaseAriaLabel": "Yaree {label}",
+    "increaseAriaLabel": "Kordhi {label}",
+    "guestsCount": "{count, plural, one {# marti} other {# marti}}",
+    "moreFeaturesCount": "+{count} kale",
+    "contactForPricing": "Nala soo xiriir qiimaha",
+    "availableBadge": "Waa Banaan",
+    "unavailableBadge": "Ma Banaana",
+    "errorCheckInPast": "Taariikhda gelitaanka ma noqon karto mid tegey.",
+    "errorAdultsRequired": "Ugu yaraan 1 qof waaweyn ah ayaa loo baahan yahay.",
+    "errorRoomsRequired": "Ugu yaraan 1 qol ayaa loo baahan yahay.",
+    "errorSignInRequired": "Fadlan soo gal.",
+    "errorBookingNotFound": "Balanta lama helin.",
+    "errorNoLongerCancellable": "Balantan mar dambe lama joojin karo.",
+    "errorCancellationWindow": "Balamaha waxaa laga joojin karaa oo kaliya ugu yaraan {hours} saacadood ka hor gelitaanka."
   },
   "auth": {
     "welcomeTitle": "Ku soo dhawoow Go Hargeisa",
@@ -1457,7 +1473,9 @@
     "reportReviewConfirm": "Ma doonaysaa inaad qiimeyntan u soo sheegto kooxda dhaqan-gelinta?",
     "reportedReview": "La Soo Sheegay",
     "ratingDistribution": "Kala qaybsanaanta qiimaha",
-    "starsLabel": "{stars} xiddig"
+    "starsLabel": "{stars} xiddig",
+    "removePhoto": "Ka saar sawirka",
+    "photoUploadFailed": "Sawirka lama soo shubi karin."
   },
   "trip": {
     "addToTrip": "Ku Dar Safarka",
@@ -1610,6 +1628,7 @@
     "policies": "Siyaasadaha",
     "policiesText": "Wakhtiyada gelitaanka/bixitaanka, shuruudaha joojinta, iyo xeerarka guriga way ku kala duwanaan karaan hantida. La xiriir {name} si toos ah adigoo isticmaalaya faahfaahinta ku taal gogosha buugsiga si aad u xaqiijiso siyaasadaha ka hor inta aadan buugsan.",
     "openInGoogleMaps": "Ku fur Khariidadaha Google",
+    "directions": "Jihooyinka",
     "bookThisHotel": "Ballansanaha Huteelkan",
     "youMayAlsoLike": "Waxaa kale oo laga yaabaa inaad jeceshahay",
     "menuHighlights": "Cuntooyinka Caanka ah",

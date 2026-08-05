@@ -3,6 +3,7 @@ import { createPublicClient } from "@/lib/supabase/public";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { mapRestaurant, mapReview } from "./mappers";
 import { restaurants as mockRestaurants } from "@/lib/mock-data";
+import { sanitizeSearchQuery } from "@/lib/utils/sanitize-search-query";
 import type { Restaurant } from "@/types";
 
 export async function getRestaurants(options?: { q?: string; featuredOnly?: boolean; limit?: number }): Promise<Restaurant[]> {
@@ -31,7 +32,10 @@ export async function getRestaurants(options?: { q?: string; featuredOnly?: bool
     .order("is_pinned", { ascending: false })
     .order("featured", { ascending: false });
   if (featuredOnly) query = query.eq("featured", true);
-  if (q) query = query.or(`name.ilike.%${q}%,short_description.ilike.%${q}%,address.ilike.%${q}%`);
+  if (q) {
+    const safeQ = sanitizeSearchQuery(q);
+    if (safeQ) query = query.or(`name.ilike.%${safeQ}%,short_description.ilike.%${safeQ}%,address.ilike.%${safeQ}%`);
+  }
   if (limit) query = query.limit(limit);
 
   const { data, error } = await query;

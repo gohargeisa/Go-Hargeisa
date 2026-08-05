@@ -2,11 +2,13 @@
 
 import { useState, useRef, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Globe, Check } from "lucide-react";
 import { locales, localeConfig, type Locale } from "@/lib/i18n/config";
 import { FlagIcon } from "@/components/shared/flag-icon";
 
 export function LanguageSwitcher({ locale }: { locale: Locale }) {
+  const t = useTranslations("nav");
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
@@ -37,6 +39,7 @@ export function LanguageSwitcher({ locale }: { locale: Locale }) {
         onClick={() => setOpen((o) => !o)}
         aria-haspopup="listbox"
         aria-expanded={open}
+        aria-label={t("changeLanguage")}
         className="flex items-center gap-1.5 rounded-full border border-ink/10 dark:border-white/15 px-3 py-2 text-sm font-medium hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
       >
         <Globe size={16} />

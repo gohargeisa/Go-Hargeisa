@@ -77,7 +77,7 @@ export function ClaimBusinessButton({
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                aria-label="Close"
+                aria-label={t("close")}
                 className="flex h-11 w-11 items-center justify-center rounded-full bg-ink/5 transition-colors hover:bg-ink/10 dark:bg-white/10 dark:hover:bg-white/15"
               >
                 <X size={16} aria-hidden="true" />

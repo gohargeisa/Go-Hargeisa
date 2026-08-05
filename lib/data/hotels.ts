@@ -3,6 +3,7 @@ import { createPublicClient } from "@/lib/supabase/public";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { mapHotel, mapReview, mapHotelRoom, mapRestaurant, mapCafe } from "./mappers";
 import { hotels as mockHotels } from "@/lib/mock-data";
+import { sanitizeSearchQuery } from "@/lib/utils/sanitize-search-query";
 import type { Hotel } from "@/types";
 
 export async function getHotels(options?: { q?: string; featuredOnly?: boolean; limit?: number }): Promise<Hotel[]> {
@@ -31,24 +32,20 @@ export async function getHotels(options?: { q?: string; featuredOnly?: boolean; 
     .order("featured", { ascending: false });
 
   if (featuredOnly) query = query.eq("featured", true);
-  if (q)
-    query = query.or(
-      `name.ilike.%${q}%,short_description.ilike.%${q}%,address.ilike.%${q}%`
-    );
+  if (q) {
+    const safeQ = sanitizeSearchQuery(q);
+    if (safeQ) query = query.or(`name.ilike.%${safeQ}%,short_description.ilike.%${safeQ}%,address.ilike.%${safeQ}%`);
+  }
   if (limit) query = query.limit(limit);
 
   const { data, error } = await query;
 
   if (error) {
     if (process.env.NODE_ENV === "development") console.error("getHotels:", error.message);
-    return mockHotels;
+    return [];
   }
 
-  if (!data || data.length === 0) {
-    return mockHotels;
-  }
-
-  return data.map((row) => mapHotel(row));
+  return (data ?? []).map((row) => mapHotel(row));
 }
 
 async function _getHotelBySlug(slug: string): Promise<Hotel | null> {

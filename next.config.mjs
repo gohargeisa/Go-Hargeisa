@@ -14,7 +14,6 @@ const nextConfig = {
     minimumCacheTTL: 2678400,
     remotePatterns: [
       { protocol: "https", hostname: "**.supabase.co" },
-      { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "placehold.co" },
     ],
   },
@@ -23,8 +22,8 @@ const nextConfig = {
   },
   async headers() {
     // CSP origins are an exact inventory of what this app actually loads —
-    // verified by grep, not guessed: Supabase (API + Storage) and the two
-    // placeholder-image hosts already declared in images.remotePatterns
+    // verified by grep, not guessed: Supabase (API + Storage) and the
+    // placeholder-image host already declared in images.remotePatterns
     // above. No map SDK/embed of any kind runs in this app — every "View
     // on Map"/"Directions" action is a plain <a target="_blank"> out to
     // Google Maps (lib/utils/google-maps.ts), which needs no CSP entry
@@ -36,7 +35,6 @@ const nextConfig = {
       "data:",
       "blob:",
       "https://*.supabase.co",
-      "https://images.unsplash.com",
       "https://placehold.co",
     ];
     const csp = [
@@ -65,7 +63,12 @@ const nextConfig = {
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
           { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
-          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), interest-cohort=()" },
+          // geolocation=(self): the City Services "X km away" distance
+          // (lib/hooks/use-visitor-location.ts) calls navigator.geolocation
+          // directly — an empty allowlist here would silently block that
+          // permission prompt from ever firing. Camera/microphone stay
+          // disabled; neither is used anywhere in the app.
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(self), interest-cohort=()" },
           { key: "Content-Security-Policy", value: csp },
         ],
       },

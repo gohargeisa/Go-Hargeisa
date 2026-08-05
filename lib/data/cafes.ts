@@ -3,6 +3,7 @@ import { createPublicClient } from "@/lib/supabase/public";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { mapCafe, mapReview } from "./mappers";
 import { cafes as mockCafes } from "@/lib/mock-data";
+import { sanitizeSearchQuery } from "@/lib/utils/sanitize-search-query";
 import type { Cafe } from "@/types";
 
 export async function getCafes(options?: {
@@ -37,7 +38,10 @@ export async function getCafes(options?: {
     .order("is_pinned", { ascending: false })
     .order("featured", { ascending: false });
   if (featuredOnly) query = query.eq("featured", true);
-  if (q) query = query.or(`name.ilike.%${q}%,short_description.ilike.%${q}%,address.ilike.%${q}%`);
+  if (q) {
+    const safeQ = sanitizeSearchQuery(q);
+    if (safeQ) query = query.or(`name.ilike.%${safeQ}%,short_description.ilike.%${safeQ}%,address.ilike.%${safeQ}%`);
+  }
   if (limit) query = query.limit(limit);
 
   const { data, error } = await query;

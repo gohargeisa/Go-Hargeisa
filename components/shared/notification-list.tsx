@@ -93,7 +93,7 @@ export function NotificationList({
                       void markOneRead(n.id);
                     }}
                     aria-label={t("markRead")}
-                    className="flex h-7 w-7 items-center justify-center rounded-full border border-ink/10 text-ink/40 hover:border-primary hover:text-primary dark:border-white/15"
+                    className="flex h-11 w-11 items-center justify-center rounded-full border border-ink/10 text-ink/40 hover:border-primary hover:text-primary dark:border-white/15"
                   >
                     <Check size={13} />
                   </button>
@@ -105,7 +105,7 @@ export function NotificationList({
                     void deleteOne(n.id);
                   }}
                   aria-label={t("deleteNotification")}
-                  className="flex h-7 w-7 items-center justify-center rounded-full border border-ink/10 text-ink/40 hover:border-red-500 hover:text-red-500 dark:border-white/15"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-ink/10 text-ink/40 hover:border-red-500 hover:text-red-500 dark:border-white/15"
                 >
                   <Trash2 size={13} />
                 </button>

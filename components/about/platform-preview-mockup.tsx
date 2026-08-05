@@ -7,8 +7,8 @@ import { Landmark, MapPin, Search, Star } from "lucide-react";
  * Illustrative browser-window mockup of the Go Hargeisa listing grid for the
  * About page's "Meet the Platform" section — no dashboard/analytics numbers
  * are shown here (that would read as a fabricated site-wide metric); it's a
- * UI preview only, same spirit as components/join/floating-phone-mockup.tsx's
- * illustrative "4.9" example rating on a single mock listing card.
+ * UI preview only, with an illustrative "4.9" example rating on a single
+ * mock listing card.
  */
 export function PlatformPreviewMockup({ searchPlaceholder }: { searchPlaceholder: string }) {
   const reduceMotion = useReducedMotion();

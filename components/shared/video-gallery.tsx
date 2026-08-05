@@ -1,5 +1,3 @@
-"use client";
-
 import { ExternalLink, Play } from "lucide-react";
 import { parseVideoUrl } from "@/lib/utils/video-embed";
 import type { MediaVideo } from "@/types";

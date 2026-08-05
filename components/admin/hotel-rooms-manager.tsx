@@ -272,12 +272,12 @@ function RoomForm({
         <div className="flex flex-wrap gap-2">
           {images.map((url, i) => (
             <div key={`${url}-${i}`} className="relative h-16 w-16 overflow-hidden rounded-lg border border-ink/10 dark:border-white/15">
-              <Image src={url} alt="" fill sizes="64px" className="object-cover" />
+              <Image src={url} alt={`Room photo ${i + 1}`} fill sizes="64px" className="object-cover" />
               <button
                 type="button"
                 onClick={() => update("images", images.filter((_, idx) => idx !== i))}
                 aria-label="Remove photo"
-                className="absolute right-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-black/60 text-white"
+                className="absolute end-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-black/60 text-white"
               >
                 <X size={10} />
               </button>

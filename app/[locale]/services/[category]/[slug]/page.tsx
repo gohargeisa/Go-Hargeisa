@@ -268,6 +268,7 @@ export default async function ServiceDetailPage({
             openingHours={service.openingHours}
             hoursLabel={t("openingHours")}
             phone={service.phone}
+            callLabel={th("call")}
             locale={locale}
           />
         </aside>

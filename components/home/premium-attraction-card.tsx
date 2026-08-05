@@ -15,8 +15,7 @@ import { PrimaryButton } from "@/components/shared/buttons";
  * premium-hotel-card.tsx / premium-restaurant-card.tsx exactly.
  * Deliberately separate from components/shared/listing-card.tsx (used
  * by the attractions listing page, attraction detail "nearby" links,
- * explore pages, and dashboard favorites) and from
- * components/home/premium-card.tsx, so this redesign can't affect
+ * explore pages, and dashboard favorites), so this redesign can't affect
  * anything outside the homepage Attractions row.
  */
 function PremiumAttractionCardBase({

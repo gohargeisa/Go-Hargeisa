@@ -25,6 +25,7 @@ export function PointInfoCard({
 }) {
   const t = useTranslations("nearby");
   const td = useTranslations("detail");
+  const tl = useTranslations("listings");
   const meta = CATEGORY_CONFIG[point.category];
   const Icon = meta.icon;
   const hasCoordinates = Number.isFinite(point.location?.lat) && Number.isFinite(point.location?.lng);
@@ -109,7 +110,7 @@ export function PointInfoCard({
             className="inline-flex h-11 items-center justify-center gap-1.5 rounded-full border border-ink/15 text-sm font-semibold text-ink transition-all duration-300 hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
           >
             <Phone size={14} aria-hidden="true" />
-            Call
+            {tl("call")}
           </a>
           {directionsHref && (
             <a
@@ -119,7 +120,7 @@ export function PointInfoCard({
               className="inline-flex h-11 items-center justify-center gap-1.5 rounded-full border border-ink/15 text-sm font-semibold text-ink transition-all duration-300 hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
             >
               <Navigation size={14} aria-hidden="true" />
-              Directions
+              {td("directions")}
             </a>
           )}
         </div>
@@ -131,7 +132,7 @@ export function PointInfoCard({
             href={detailHref}
             className="inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-full bg-primary text-sm font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary-700"
           >
-            View Details
+            {tl("viewDetails")}
           </Link>
         )}
 
@@ -143,7 +144,7 @@ export function PointInfoCard({
             className="inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-full border border-ink/15 text-sm font-semibold text-ink transition-all duration-300 hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
           >
             <Navigation size={14} aria-hidden="true" />
-            Directions
+            {td("directions")}
           </a>
         )}
 
@@ -154,7 +155,7 @@ export function PointInfoCard({
             rel="noopener noreferrer"
             className="inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-full bg-primary text-sm font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary-700"
           >
-            Open in Google Maps
+            {td("openInGoogleMaps")}
             <ExternalLink size={14} aria-hidden="true" />
           </a>
         )}

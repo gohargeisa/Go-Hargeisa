@@ -9,6 +9,7 @@ export function ServiceActionCard({
   openingHours,
   hoursLabel,
   phone,
+  callLabel,
   locale,
 }: {
   serviceId: string;
@@ -16,6 +17,7 @@ export function ServiceActionCard({
   openingHours?: string;
   hoursLabel: string;
   phone?: string;
+  callLabel: string;
   locale: Locale;
 }) {
   return (
@@ -38,7 +40,7 @@ export function ServiceActionCard({
           className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-primary text-sm font-semibold text-white transition-colors hover:bg-primary-700"
         >
           <Phone size={15} aria-hidden="true" />
-          Call
+          {callLabel}
         </a>
       )}
 

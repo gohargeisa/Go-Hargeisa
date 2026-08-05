@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireListingsAccess } from "@/lib/supabase/guards";
 import { mapReview, mapBusinessOffer } from "./mappers";
 import type { Locale } from "@/lib/i18n/config";
-import type { BusinessListingType, Booking, BusinessSubscription, SubscriptionNote, BusinessMessage, Review, BusinessOffer } from "@/types";
+import type { BusinessListingType, Booking, BusinessSubscription, BusinessMessage, Review, BusinessOffer } from "@/types";
 
 export interface OwnedListing {
   listingType: BusinessListingType;
@@ -475,25 +475,6 @@ export async function getOrCreateSubscription(
     status: created?.status ?? "active",
     renewsAt: created?.renews_at ?? undefined,
   };
-}
-
-/** Owner-only — callers must already be gated by requireAdmin. RLS on
- * business_subscription_notes independently blocks a business_owner from
- * reading this even if this function were called from a non-admin path. */
-export async function getSubscriptionNotes(subscriptionId: string): Promise<SubscriptionNote[]> {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("business_subscription_notes")
-    .select("*")
-    .eq("subscription_id", subscriptionId)
-    .order("created_at", { ascending: false });
-
-  return (data ?? []).map((n) => ({
-    id: n.id,
-    subscriptionId: n.subscription_id,
-    note: n.note,
-    createdAt: n.created_at,
-  }));
 }
 
 export async function getOffersForListing(

@@ -17,9 +17,8 @@ const MAX_VISIBLE_CUISINES = 4;
  * components/home/premium-hotel-card.tsx exactly. Deliberately separate
  * from components/shared/listing-card.tsx (used by the restaurants
  * listing page, restaurant detail "You may also like", and dashboard
- * favorites) and from components/home/premium-card.tsx (still used
- * as-is for the Attractions row) so this redesign can't affect anything
- * outside the homepage Restaurants row.
+ * favorites) so this redesign can't affect anything outside the homepage
+ * Restaurants row.
  */
 function PremiumRestaurantCardBase({
   href,

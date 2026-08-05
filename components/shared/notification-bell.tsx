@@ -115,11 +115,18 @@ export function NotificationBell({
                   items.map((n) => {
                     const { title, body, href } = getNotificationText(t, locale, n);
                     return (
-                      <button
+                      <div
                         key={n.id}
-                        type="button"
+                        role="button"
+                        tabIndex={0}
                         onClick={() => onItemClick(n, href)}
-                        className={`flex w-full items-start gap-2 border-b border-ink/5 px-4 py-3 text-start last:border-0 dark:border-white/5 ${
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            onItemClick(n, href);
+                          }
+                        }}
+                        className={`flex w-full cursor-pointer items-start gap-2 border-b border-ink/5 px-4 py-3 text-start last:border-0 dark:border-white/5 ${
                           n.isRead ? "" : "bg-primary/5"
                         }`}
                       >
@@ -132,9 +139,8 @@ export function NotificationBell({
                         </div>
                         <div className="mt-0.5 flex shrink-0 items-center gap-1">
                           {!n.isRead && (
-                            <span
-                              role="button"
-                              tabIndex={-1}
+                            <button
+                              type="button"
                               aria-label={t("markRead")}
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -143,11 +149,10 @@ export function NotificationBell({
                               className="flex h-6 w-6 items-center justify-center rounded-full border border-ink/10 text-ink/40 hover:border-primary hover:text-primary dark:border-white/15"
                             >
                               <Check size={12} />
-                            </span>
+                            </button>
                           )}
-                          <span
-                            role="button"
-                            tabIndex={-1}
+                          <button
+                            type="button"
                             aria-label={t("deleteNotification")}
                             onClick={(e) => {
                               e.stopPropagation();
@@ -156,9 +161,9 @@ export function NotificationBell({
                             className="flex h-6 w-6 items-center justify-center rounded-full border border-ink/10 text-ink/40 hover:border-red-500 hover:text-red-500 dark:border-white/15"
                           >
                             <Trash2 size={12} />
-                          </span>
+                          </button>
                         </div>
-                      </button>
+                      </div>
                     );
                   })
                 )}

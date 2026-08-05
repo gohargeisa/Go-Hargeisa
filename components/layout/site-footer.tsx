@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Facebook, Instagram, Youtube } from "lucide-react";
-import { FaWhatsapp, FaTiktok, FaXTwitter } from "react-icons/fa6";
+import { WhatsAppIcon, XIcon, TikTokIcon } from "@/components/shared/brand-icons";
 import type { Locale } from "@/lib/i18n/config";
 
 export function SiteFooter({
@@ -55,14 +55,14 @@ export function SiteFooter({
 
   const socialLinks = [
     {
-      icon: FaWhatsapp,
+      icon: WhatsAppIcon,
       href: whatsappNumber ? `https://wa.me/${whatsappNumber.replace(/[^\d]/g, "")}` : "https://wa.me/252656156752",
       label: "WhatsApp",
     },
     { icon: Facebook, href: socialFacebook || "https://facebook.com/Go.Hargeisa", label: "Facebook" },
     { icon: Instagram, href: socialInstagram || "https://instagram.com/go.hargeisa", label: "Instagram" },
-    { icon: FaXTwitter, href: socialTwitter || "https://x.com/go_hargeisa", label: "X" },
-    { icon: FaTiktok, href: socialTiktok || "https://www.tiktok.com/@gohargeisa", label: "TikTok" },
+    { icon: XIcon, href: socialTwitter || "https://x.com/go_hargeisa", label: "X" },
+    { icon: TikTokIcon, href: socialTiktok || "https://www.tiktok.com/@gohargeisa", label: "TikTok" },
     { icon: Youtube, href: socialYoutube || "https://youtube.com/@go.hargeisa", label: "YouTube" },
   ];
 
@@ -75,7 +75,7 @@ export function SiteFooter({
             alt="Go Hargeisa"
             width={280}
             height={110}
-            priority
+            loading="lazy"
             className="mb-6 h-auto w-auto transition-transform duration-300 ease-premium hover:scale-105"
           />
           <p className="max-w-sm text-sm leading-7 text-ink/60 dark:text-sand/60">{footerText || t("tagline")}</p>

@@ -69,6 +69,7 @@ function computeSubtotal(room: HotelRoom | undefined, checkIn: string, checkOut:
 }
 
 function Stepper({ label, value, min, onChange }: { label: string; value: number; min: number; onChange: (next: number) => void }) {
+  const t = useTranslations("bookingRequest");
   return (
     <div className="flex items-center justify-between rounded-xl border border-ink/12 px-4 py-3 dark:border-white/15">
       <span className="text-sm font-medium">{label}</span>
@@ -77,7 +78,7 @@ function Stepper({ label, value, min, onChange }: { label: string; value: number
           type="button"
           onClick={() => onChange(Math.max(min, value - 1))}
           disabled={value <= min}
-          aria-label={`Decrease ${label}`}
+          aria-label={t("decreaseAriaLabel", { label })}
           className="flex h-11 w-11 items-center justify-center rounded-full border border-ink/15 text-ink transition-colors hover:border-primary hover:text-primary disabled:opacity-30 dark:border-white/20 dark:text-white"
         >
           <Minus size={14} aria-hidden="true" />
@@ -86,7 +87,7 @@ function Stepper({ label, value, min, onChange }: { label: string; value: number
         <button
           type="button"
           onClick={() => onChange(value + 1)}
-          aria-label={`Increase ${label}`}
+          aria-label={t("increaseAriaLabel", { label })}
           className="flex h-11 w-11 items-center justify-center rounded-full border border-ink/15 text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
         >
           <Plus size={14} aria-hidden="true" />
@@ -97,6 +98,7 @@ function Stepper({ label, value, min, onChange }: { label: string; value: number
 }
 
 function RoomOptionCard({ room, selected, onSelect }: { room: HotelRoom; selected: boolean; onSelect: () => void }) {
+  const t = useTranslations("bookingRequest");
   const visibleFeatures = room.features.slice(0, 3);
   const extraCount = room.features.length - visibleFeatures.length;
 
@@ -134,7 +136,7 @@ function RoomOptionCard({ room, selected, onSelect }: { room: HotelRoom; selecte
 
         <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink/55 dark:text-sand/55">
           <span className="inline-flex items-center gap-1">
-            <Users size={12} aria-hidden="true" /> {room.maxGuests} guests
+            <Users size={12} aria-hidden="true" /> {t("guestsCount", { count: room.maxGuests })}
           </span>
           {room.bedType && (
             <span className="inline-flex items-center gap-1">
@@ -159,7 +161,7 @@ function RoomOptionCard({ room, selected, onSelect }: { room: HotelRoom; selecte
             })}
             {extraCount > 0 && (
               <li className="inline-flex items-center rounded-full bg-ink/5 px-2 py-0.5 text-[10px] font-medium text-ink/50 dark:bg-white/10 dark:text-sand/50">
-                +{extraCount} more
+                {t("moreFeaturesCount", { count: extraCount })}
               </li>
             )}
           </ul>
@@ -179,10 +181,10 @@ function RoomOptionCard({ room, selected, onSelect }: { room: HotelRoom; selecte
               <span className="ms-1 text-xs font-medium text-ink/45 dark:text-sand/45">/night</span>
             </p>
           ) : (
-            <p className="text-xs font-semibold text-ink/40 dark:text-sand/40">Contact for pricing</p>
+            <p className="text-xs font-semibold text-ink/40 dark:text-sand/40">{t("contactForPricing")}</p>
           )}
           <span className={`text-[11px] font-semibold ${room.isAvailable ? "text-accent-700 dark:text-accent-400" : "text-red-500"}`}>
-            {room.isAvailable ? "Available" : "Unavailable"}
+            {room.isAvailable ? t("availableBadge") : t("unavailableBadge")}
           </span>
         </div>
       </div>

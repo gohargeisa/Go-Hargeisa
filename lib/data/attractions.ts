@@ -3,6 +3,7 @@ import { createPublicClient } from "@/lib/supabase/public";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { mapAttraction, mapReview } from "./mappers";
 import { attractions as mockAttractions } from "@/lib/mock-data";
+import { sanitizeSearchQuery } from "@/lib/utils/sanitize-search-query";
 import type { Attraction } from "@/types";
 
 export async function getAttractions(options?: { q?: string; category?: string }): Promise<Attraction[]> {
@@ -28,7 +29,10 @@ export async function getAttractions(options?: { q?: string; category?: string }
     .order("is_pinned", { ascending: false })
     .order("featured", { ascending: false });
   if (category) query = query.eq("category", category as any);
-  if (q) query = query.or(`name.ilike.%${q}%,short_description.ilike.%${q}%,address.ilike.%${q}%`);
+  if (q) {
+    const safeQ = sanitizeSearchQuery(q);
+    if (safeQ) query = query.or(`name.ilike.%${safeQ}%,short_description.ilike.%${safeQ}%,address.ilike.%${safeQ}%`);
+  }
 
   const { data, error } = await query;
   if (error) {

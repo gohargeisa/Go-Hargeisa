@@ -58,7 +58,7 @@ export function ReviewForm({
       const url = await uploadImage(file, { bucket: "listing-images", folder: "reviews" });
       setPhotos((p) => [...p, url]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Photo upload failed.");
+      setError(err instanceof Error ? err.message : t("photoUploadFailed"));
     } finally {
       setUploadingPhoto(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -199,11 +199,11 @@ export function ReviewForm({
             {photos.map((url, i) => (
               <div key={url} className="relative h-14 w-14 overflow-hidden rounded-lg">
                 {/* eslint-disable-next-line @next/next/no-img-element -- tiny local preview thumbnail, not worth next/image's overhead here */}
-                <img src={url} alt="" className="h-full w-full object-cover" />
+                <img src={url} alt={`Uploaded photo ${i + 1}`} className="h-full w-full object-cover" />
                 <button
                   type="button"
                   onClick={() => setPhotos((p) => p.filter((_, pi) => pi !== i))}
-                  aria-label="Remove photo"
+                  aria-label={t("removePhoto")}
                   className="absolute end-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-black/60 text-white"
                 >
                   <X size={10} />

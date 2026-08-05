@@ -247,8 +247,81 @@ async function generateStoreAssets(mark) {
   console.log("  store-assets/play-store-icon-512.png: 512x512 generated");
 }
 
+/**
+ * Fixes a real bug: public/icons/icon-192.png, icon-512.png,
+ * icon-maskable-512.png, app/apple-icon.png and public/images/og-image.png
+ * were all found to be byte-identical copies of one uncompressed 1254x1254
+ * source (~950KB each) despite manifest.json declaring 192x192/512x512 —
+ * browsers/OSes trust that declared size without necessarily re-verifying
+ * it, and og-image.png being square instead of the standard 1200x630 (1.91:1)
+ * meant link-preview crawlers were cropping it awkwardly. `originalBuffer`
+ * (captured once, before this function overwrites icon-512.png = SOURCE)
+ * preserves the existing full-bleed framing for the "any"-purpose icons;
+ * only the maskable icon and OG image need an actual redesign (real safe-
+ * zone padding / a non-square canvas), not just a resize.
+ */
+async function generatePwaAndOgAssets(mark, originalBuffer) {
+  const iconsDir = path.join(ROOT, "public/icons");
+  const imagesDir = path.join(ROOT, "public/images");
+  const appDir = path.join(ROOT, "app");
+
+  await sharp(originalBuffer).resize(512, 512).png({ compressionLevel: 9 }).toFile(path.join(iconsDir, "icon-512.png"));
+  console.log("  public/icons/icon-512.png: 512x512 generated");
+
+  await sharp(originalBuffer).resize(192, 192).png({ compressionLevel: 9 }).toFile(path.join(iconsDir, "icon-192.png"));
+  console.log("  public/icons/icon-192.png: 192x192 generated");
+
+  await sharp(originalBuffer).resize(180, 180).png({ compressionLevel: 9 }).toFile(path.join(appDir, "apple-icon.png"));
+  console.log("  app/apple-icon.png: 180x180 generated");
+
+  // Maskable — the OS applies its own mask (circle/squircle/rounded-square)
+  // that can crop up to a ~20% margin, so unlike the icons above this one
+  // needs the glyph genuinely inset (smaller fraction), not just resized.
+  const iconMaskable = await markOnSquare({ mark, size: 512, fraction: 0.5, background: { r: 255, g: 255, b: 255, alpha: 1 } });
+  await sharp(iconMaskable)
+    .flatten({ background: BRAND_ICON_BG })
+    .png({ compressionLevel: 9 })
+    .toFile(path.join(iconsDir, "icon-maskable-512.png"));
+  console.log("  public/icons/icon-maskable-512.png: 512x512 (maskable safe-zone) generated");
+
+  // Open Graph / Twitter card image — standard 1200x630 (1.91:1), same
+  // gradient-badge-plus-wordmark composition as the Play Store feature
+  // graphic below (proven layout, just re-scaled), so link previews get a
+  // correctly-cropped, on-brand image instead of an off-ratio square crop.
+  const ogSvg = `
+    <svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="${BRAND_PRIMARY}"/>
+          <stop offset="100%" stop-color="${BRAND_PRIMARY_DARK}"/>
+        </linearGradient>
+      </defs>
+      <rect width="1200" height="630" fill="url(#bg)"/>
+      <text x="370" y="345" font-family="Georgia, 'Times New Roman', serif" font-size="76" font-weight="700" fill="#FFFFFF">Go Hargeisa</text>
+      <text x="372" y="400" font-family="Arial, Helvetica, sans-serif" font-size="30" fill="#FBF8F3" opacity="0.92">Discover · Explore · Experience</text>
+    </svg>
+  `;
+  const markForOg = await markOnSquare({ mark, size: 260, fraction: 0.82, background: { r: 255, g: 255, b: 255, alpha: 1 } });
+  const markCircle = await sharp(markForOg)
+    .composite([{ input: Buffer.from('<svg width="260" height="260"><circle cx="130" cy="130" r="130" fill="#fff"/></svg>'), blend: "dest-in" }])
+    .png()
+    .toBuffer();
+
+  await sharp({ create: { width: 1200, height: 630, channels: 4, background: { r: 11, g: 94, b: 215, alpha: 1 } } })
+    .composite([
+      { input: Buffer.from(ogSvg), left: 0, top: 0 },
+      { input: markCircle, left: 80, top: 185 },
+    ])
+    .flatten({ background: BRAND_PRIMARY })
+    .removeAlpha()
+    .png({ compressionLevel: 9 })
+    .toFile(path.join(imagesDir, "og-image.png"));
+  console.log("  public/images/og-image.png: 1200x630 generated");
+}
+
 async function main() {
   if (!existsSync(SOURCE)) throw new Error(`Source icon not found: ${SOURCE}`);
+  const originalSourceBuffer = await sharp(SOURCE).png().toBuffer();
   const mark = await getTrimmedMark();
   console.log(`Source mark trimmed to ${mark.width}x${mark.height}`);
 
@@ -260,6 +333,9 @@ async function main() {
 
   console.log("\nStore listing assets:");
   await generateStoreAssets(mark);
+
+  console.log("\nPWA manifest / Apple touch icon / Open Graph image:");
+  await generatePwaAndOgAssets(mark, originalSourceBuffer);
 
   console.log("\nDone.");
 }

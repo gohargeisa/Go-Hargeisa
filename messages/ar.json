@@ -17,6 +17,7 @@
     "signIn": "تسجيل الدخول",
     "signUp": "إنشاء حساب",
     "signOut": "تسجيل الخروج",
+    "changeLanguage": "تغيير اللغة",
     "cityServices": "خدمات المدينة",
     "listYourBusiness": "أضف نشاطك التجاري"
   },
@@ -185,7 +186,8 @@
     "submit": "إرسال الطلب",
     "submitting": "جارٍ الإرسال…",
     "success": "شكرًا لك — لقد استلمنا طلبك وسنتواصل معك عبر البريد الإلكتروني.",
-    "error": "حدث خطأ ما. يرجى المحاولة مرة أخرى."
+    "error": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+    "close": "إغلاق"
   },
   "joinRequest": {
     "eyebrow": "كن شريكًا معنا",
@@ -385,7 +387,21 @@
     "error": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
     "required": "الاسم الكامل ورقم الهاتف وتاريخا الوصول والمغادرة مطلوبة.",
     "invalidRange": "يجب أن يكون تاريخ المغادرة بعد تاريخ الوصول.",
-    "roomUnavailable": "هذه الغرفة غير متاحة حاليًا. يرجى اختيار غرفة أخرى."
+    "roomUnavailable": "هذه الغرفة غير متاحة حاليًا. يرجى اختيار غرفة أخرى.",
+    "decreaseAriaLabel": "إنقاص {label}",
+    "increaseAriaLabel": "زيادة {label}",
+    "guestsCount": "{count, plural, one {# ضيف} other {# ضيوف}}",
+    "moreFeaturesCount": "+{count} أخرى",
+    "contactForPricing": "تواصل معنا للسعر",
+    "availableBadge": "متاحة",
+    "unavailableBadge": "غير متاحة",
+    "errorCheckInPast": "لا يمكن أن يكون تاريخ الوصول في الماضي.",
+    "errorAdultsRequired": "يلزم بالغ واحد على الأقل.",
+    "errorRoomsRequired": "تلزم غرفة واحدة على الأقل.",
+    "errorSignInRequired": "يرجى تسجيل الدخول.",
+    "errorBookingNotFound": "لم يتم العثور على الحجز.",
+    "errorNoLongerCancellable": "لم يعد بالإمكان إلغاء هذا الحجز.",
+    "errorCancellationWindow": "لا يمكن إلغاء الحجوزات إلا قبل {hours} ساعة على الأقل من موعد الوصول."
   },
   "auth": {
     "welcomeTitle": "مرحبًا بك في Go Hargeisa",
@@ -1457,7 +1473,9 @@
     "reportReviewConfirm": "هل تريد إبلاغ فريق الإشراف عن هذا التقييم؟",
     "reportedReview": "تم الإبلاغ",
     "ratingDistribution": "توزيع التقييمات",
-    "starsLabel": "{stars} نجوم"
+    "starsLabel": "{stars} نجوم",
+    "removePhoto": "إزالة الصورة",
+    "photoUploadFailed": "فشل تحميل الصورة."
   },
   "trip": {
     "addToTrip": "أضف إلى الرحلة",
@@ -1610,6 +1628,7 @@
     "policies": "السياسات",
     "policiesText": "قد تختلف أوقات تسجيل الوصول والمغادرة، وشروط الإلغاء، وقواعد المكان حسب العقار. تواصل مع {name} مباشرة باستخدام التفاصيل الموجودة في لوحة الحجز لتأكيد السياسات قبل الحجز.",
     "openInGoogleMaps": "فتح في خرائط Google",
+    "directions": "الاتجاهات",
     "bookThisHotel": "احجز هذا الفندق",
     "youMayAlsoLike": "قد يعجبك أيضًا",
     "menuHighlights": "أبرز أطباق القائمة",

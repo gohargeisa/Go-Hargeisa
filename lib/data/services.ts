@@ -4,6 +4,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { mapService, mapReview } from "./mappers";
 import { services as mockServices } from "@/lib/mock-data";
 import { matchCategoryFromQuery } from "@/lib/utils/service-categories";
+import { sanitizeSearchQuery } from "@/lib/utils/sanitize-search-query";
 import type { Service, ServiceCategory } from "@/types";
 
 export async function getServices(options?: {
@@ -49,7 +50,8 @@ export async function getServices(options?: {
   if (categoryFromQuery) {
     query = query.eq("category", categoryFromQuery);
   } else if (q) {
-    query = query.or(`name.ilike.%${q}%,short_description.ilike.%${q}%,address.ilike.%${q}%`);
+    const safeQ = sanitizeSearchQuery(q);
+    if (safeQ) query = query.or(`name.ilike.%${safeQ}%,short_description.ilike.%${safeQ}%,address.ilike.%${safeQ}%`);
   }
   if (limit) query = query.limit(limit);
 

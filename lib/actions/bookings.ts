@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendEmail } from "@/lib/email/send";
@@ -50,23 +51,25 @@ function isPastDate(iso: string): boolean {
  * read, confirm, or cancel bookings.
  */
 export async function submitBookingRequest(input: BookingRequestInput): Promise<BookingRequestResult> {
+  const t = await getTranslations({ locale: input.locale ?? "en", namespace: "bookingRequest" });
+
   if (!input.guestName.trim() || !input.guestPhone.trim()) {
-    return { ok: false, error: "Full name and phone number are required." };
+    return { ok: false, error: t("required") };
   }
   if (!input.checkIn || !input.checkOut) {
-    return { ok: false, error: "Check-in and check-out dates are required." };
+    return { ok: false, error: t("required") };
   }
   if (isPastDate(input.checkIn)) {
-    return { ok: false, error: "Check-in date can't be in the past." };
+    return { ok: false, error: t("errorCheckInPast") };
   }
   if (input.checkOut <= input.checkIn) {
-    return { ok: false, error: "Check-out must be after check-in." };
+    return { ok: false, error: t("invalidRange") };
   }
   if (input.adults < 1) {
-    return { ok: false, error: "At least 1 adult is required." };
+    return { ok: false, error: t("errorAdultsRequired") };
   }
   if (input.roomsCount < 1) {
-    return { ok: false, error: "At least 1 room is required." };
+    return { ok: false, error: t("errorRoomsRequired") };
   }
 
   const supabase = await createClient();
@@ -158,11 +161,12 @@ const CANCELLATION_WINDOW_HOURS = 24;
  * same window and is what's actually authoritative.
  */
 export async function cancelMyBooking(bookingId: string, locale: string): Promise<{ ok: boolean; error?: string }> {
+  const t = await getTranslations({ locale, namespace: "bookingRequest" });
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { ok: false, error: "Please sign in." };
+  if (!user) return { ok: false, error: t("errorSignInRequired") };
 
   const { data: existing } = await supabase
     .from("bookings")
@@ -172,14 +176,14 @@ export async function cancelMyBooking(bookingId: string, locale: string): Promis
   const booking = existing as { status: string; check_in: string; user_id: string | null } | null;
 
   if (!booking || booking.user_id !== user.id) {
-    return { ok: false, error: "Booking not found." };
+    return { ok: false, error: t("errorBookingNotFound") };
   }
   if (booking.status !== "pending" && booking.status !== "confirmed") {
-    return { ok: false, error: "This booking can no longer be cancelled." };
+    return { ok: false, error: t("errorNoLongerCancellable") };
   }
   const hoursUntilCheckIn = (new Date(`${booking.check_in}T00:00:00`).getTime() - Date.now()) / 3_600_000;
   if (hoursUntilCheckIn <= CANCELLATION_WINDOW_HOURS) {
-    return { ok: false, error: `Bookings can only be cancelled at least ${CANCELLATION_WINDOW_HOURS}h before check-in.` };
+    return { ok: false, error: t("errorCancellationWindow", { hours: CANCELLATION_WINDOW_HOURS }) };
   }
 
   const { error } = await supabase.from("bookings").update({ status: "cancelled" } as never).eq("id", bookingId);

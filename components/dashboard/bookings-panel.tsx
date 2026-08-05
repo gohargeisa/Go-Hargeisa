@@ -51,7 +51,7 @@ export function BookingsPanel({ locale, bookings }: { locale: Locale; bookings: 
     startTransition(async () => {
       const result = await cancelMyBooking(id, locale);
       if (result.ok) router.refresh();
-      else alert(result.error ?? t("bookingsHotel"));
+      else alert(result.error ?? t("genericError"));
       setCancellingId(null);
     });
   }

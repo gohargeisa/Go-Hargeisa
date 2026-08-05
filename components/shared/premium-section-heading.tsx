@@ -4,11 +4,6 @@
  * app/[locale]/about/page.tsx (4-5 times each). Extracted here so every
  * page redesigned after those two reuses one component instead of
  * duplicating the same three lines of markup again.
- *
- * Distinct from the older components/shared/section-header.tsx (left-aligned,
- * plain text label, optional "view all" link) — that component is still used
- * elsewhere and is left untouched; this one is for the new centered/pill
- * pattern specifically.
  */
 export function PremiumSectionHeading({
   eyebrow,
