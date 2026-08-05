@@ -6,5 +6,13 @@
 	<array>
 		<string>applinks:gohargeisa.com</string>
 	</array>
+	<!-- Prepare-only: @capacitor/push-notifications is installed and
+	     configured (capacitor.config.ts plugins.PushNotifications), but
+	     actually receiving pushes still needs the Push Notifications
+	     capability added in Xcode (Signing & Capabilities), which also
+	     re-adds/confirms this key, plus an APNs key from the Apple
+	     Developer portal — neither can be done outside Xcode/macOS. -->
+	<key>aps-environment</key>
+	<string>development</string>
 </dict>
 </plist>
