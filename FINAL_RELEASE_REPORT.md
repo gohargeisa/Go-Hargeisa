@@ -1,11 +1,14 @@
 # Go Hargeisa — Final Release Report
 
-**Date:** 2026-08-05
-**Scope:** Full production-readiness audit + fixes ahead of first public release.
+**Date:** 2026-08-05 (Pass 1), 2026-08-05 (Pass 2 — senior QA pass)
+**Scope:** Full production-readiness audit + fixes ahead of first public release, across two passes.
 
 ## How this audit was done
 
-Four parallel research passes (dead code/dependencies, accessibility/responsive, performance/images, core flows/links/i18n) read the codebase and reported findings with exact file:line references, each independently verified via grep/read before being trusted. Every finding below was either fixed directly in this pass or is listed as a known issue with a reason it wasn't. No Lighthouse run, browser automation, or real device/emulator was available in this environment — see **Performance Summary** and **Remaining Known Issues** for exactly what that does and doesn't cover.
+**Pass 1** — four parallel research passes (dead code/dependencies, accessibility/responsive, performance/images, core flows/links/i18n).
+**Pass 2** — a second, senior-QA-engineer-framed audit covering the ground Pass 1 didn't: memory leaks, console-error sources, loading/empty/error-state coverage, PWA/native Android+iOS compatibility, and a deeper SEO/broken-link/responsive pass.
+
+Both passes used the same method: parallel research agents reported findings with exact file:line references, each independently re-verified (via grep/read, and for Pass 2's TypeScript changes, via `tsc`) before being trusted or acted on. Every finding was either fixed directly or is listed in **Remaining Known Issues** with the reason it wasn't. No Lighthouse run, browser automation, or real device/emulator was available in this environment in either pass — see **Performance Summary** and **Remaining Known Issues**.
 
 ---
 
@@ -42,6 +45,43 @@ Four parallel research passes (dead code/dependencies, accessibility/responsive,
 
 ---
 
+## Pass 2 — Senior QA Audit: what was fixed
+
+### Offline behavior / unhandled promise rejections
+The offline-caching feature (service worker + IndexedDB, built in an earlier session) works correctly, but several **interactive** components called Server Actions with no `.catch()` — offline, the action's network call rejects on its own regardless of any try/catch inside the action's server-side body, so these threw unhandled rejections:
+- `components/shared/global-search.tsx` — opening search offline threw; additionally, a failed in-flight search left the loading spinner running forever instead of falling back to "no results." Both fixed.
+- `components/shared/notification-bell.tsx` — mounted **twice** per page (desktop + mobile header), so this doubled the unhandled-rejection count for any signed-in visitor loading a page offline. Fixed.
+- `components/shared/offline-favorites-sheet.tsx` — added the same unmount-guard pattern used elsewhere for consistency (its IndexedDB reads don't actually reject, but the guard was missing).
+- `lib/hooks/use-live-notifications.ts` — `markOneRead`/`markAllRead`/`deleteOne` had no try/catch around their Server Action calls; offline, this both logged an unhandled rejection **and** skipped the optimistic-UI rollback (a mark-read/delete would appear to succeed in the UI while never having happened server-side). `loadMore` had the same gap, which would have left its spinner stuck on failure. All four now roll back correctly and never throw uncaught.
+
+### Booking flow
+- `submitBookingRequest` (`lib/actions/bookings.ts`) had no top-level try/catch — only the two best-effort email-sending blocks were guarded. A genuine unexpected failure (Supabase outage, network blip) would have surfaced as an unhandled rejection instead of the form's polished inline error state. Now wrapped, returning the existing translated generic error message on any unexpected throw.
+
+### Memory leaks
+- `components/shared/hotel-gallery-slider.tsx` — the carousel's `pointerDown` listener was registered but never removed on cleanup (only `select` was); every time the effect re-ran, a new listener stacked on top of the old one. Fixed.
+- `lib/mobile/push-notifications.ts` — `requestAndRegisterPushNotifications()`'s two native listeners (`registration`/`registrationError`) were never removed; retrying (e.g. re-tapping "Enable notifications" after a failure) permanently stacked more native listeners on every attempt. Now removed as soon as either fires.
+
+### Hydration mismatch
+- `components/shared/notification-list.tsx` rendered a relative-time string (`"2 minutes ago"`) unconditionally on mount, computed independently on the server-render and client-hydration passes — a notification whose age straddled a label boundary between the two (e.g. "59s ago" → "1m ago") would produce a hydration-mismatch console error. Fixed with the same mount-guard pattern already used by `open-status-badge.tsx`.
+
+### Loading states
+Four missing `loading.tsx` files added, matching the existing skeleton-component pattern exactly: `app/[locale]/events/loading.tsx`, `app/[locale]/events/[slug]/loading.tsx`, `app/[locale]/city-services/[slug]/loading.tsx`, `app/[locale]/city-map/loading.tsx`.
+
+### SEO
+- **Sitemap gap**: `app/sitemap.ts` never listed `/services/[category]/[slug]` detail pages or `/explore/[slug]` destination pages — `getAllServiceSlugs()` existed but was never imported into the sitemap; destinations had no dedicated slug-fetcher so the sitemap only listed the static `/explore` list route. Both now included (service entries respect the existing `SERVICES_PUBLIC_ENABLED` flag, same as every other listing type).
+- **robots.txt gap**: `/*/business` was missing from the disallow list (admin/dashboard/auth were all correctly blocked, business wasn't) — inconsistent given `business/layout.tsx` already sets `noindex` at the meta level, but wasted crawl budget on 11 authenticated routes. Fixed.
+- **Blog articles had no structured data** — every other detail-page type (Hotel/Restaurant/CafeOrCoffeeShop/LocalBusiness/TouristAttraction/Event) already emits JSON-LD; blog articles didn't. Added `BlogPosting` schema to `app/[locale]/blog/[slug]/page.tsx`.
+- `public/manifest.json` was missing the `scope` and `id` fields (Lighthouse-recommended, not required for installability) — added.
+
+### What was investigated and deliberately *not* changed (with reasoning)
+- **Index-as-key on removable list rows** (`opening-hours-editor.tsx`, `restaurant-form.tsx`, `cafe-form.tsx`, `my-business-form.tsx`) — flagged as a possible silent data-corruption risk when deleting a middle row. Traced through carefully: every input in these rows is a fully-controlled component (`value={item.x}`, no local/uncontrolled state), so React's reconciliation correctly re-syncs the displayed values after a removal even with a reused DOM node under a stale key — this is a best-practice smell, not a confirmed active bug. A proper fix (stable synthetic IDs) would mean changing a data shape used across the wider opening-hours parsing/display code for a non-confirmed risk, so it's left as a hardening recommendation rather than executed.
+- **`lib/data/business.ts`/`owner-dashboard.ts` (18 call sites) never log Supabase query errors** — they already fail safe (`?? []`/`?? 0`, no throw, no user-facing breakage), the gap is purely diagnostic (no dev-console trail if a query silently starts failing). Deferred as a mechanical but non-urgent cleanup rather than a production-blocking issue.
+- **`favorite-button.tsx` gives no feedback on a genuine (non-auth) favorite-toggle failure** — the heart icon can't end up in a wrong state (it only flips after a confirmed success), the user just gets no error toast for a rare Supabase-write failure. Adding a toast here means adding a dependency to this button's 11+ call sites for an edge case rarer than the offline case already fixed elsewhere — deferred.
+- **3 admin tables have no mobile card fallback** (`admin/users`, `admin-bookings-list.tsx`, `claims-list.tsx`) — unlike `admin-list-table.tsx`/`city-services-list.tsx`, which already split into a card view under `sm:`. A real, if lower-traffic, responsive gap; deferred because building 3 new card layouts is a genuine design task, not a one-line fix, and risks a visual regression I can't check without a browser.
+- **Service worker has no update-available prompt UX** — `sw.js` already does `skipWaiting()`/`clients.claim()` correctly, so users do get new content, just without a proactive "reload to update" banner. Building that banner is UI-addition-adjacent and was judged out of scope for a bug-fix pass.
+
+---
+
 ## Performance Summary
 
 **No Lighthouse run was possible in this environment** (no browser automation available) — the numbers below are from static code review and the production build's own bundle-size output, not a live audit score. Treat this section as "what's provably correct in the code," not a Lighthouse score.
@@ -59,10 +99,12 @@ Four parallel research passes (dead code/dependencies, accessibility/responsive,
 
 ## Security Notes
 
-**Fixed this session:**
+**Fixed across both passes:**
 - PostgREST filter-injection/breakage risk in every listing-search function (comma/parenthesis in a user query could error the query).
 - `Permissions-Policy` was blocking the app's own legitimate geolocation feature (not a vulnerability, but a real functional bug with security-header root cause).
 - Search silently falling back to mock data on empty real results (data-integrity issue, not exploitable, but a real production-correctness bug).
+- Booking submission's core RPC call had no top-level try/catch (Pass 2) — an unexpected Supabase-layer failure would previously surface as an unhandled rejection rather than the form's normal error handling; not exploitable, but worth having in a security-adjacent robustness sense (predictable failure modes matter for anything handling guest PII).
+- `robots.txt` now blocks `/*/business` alongside `/*/admin`/`/*/dashboard`/`/*/auth` (Pass 2) — consistent crawl-blocking for every authenticated section, not just most of them.
 
 **Verified, not modified (already correct):**
 - Auth `?next=` redirect is validated against `startsWith(/${locale}/)` before use — no open-redirect.
@@ -89,9 +131,14 @@ Four parallel research passes (dead code/dependencies, accessibility/responsive,
 - [x] i18n: en/ar/so key parity confirmed (1922/1922/1922), zero physical-direction (non-logical) Tailwind classes remaining in every file touched this session
 - [x] `npx tsc --noEmit`, `npm run lint`, `npm run build` all clean
 - [x] Dead code and one unused dependency removed; `npm install` reconciled the lockfile
+- [x] Offline behavior: every Server-Action call site reachable from an interactive component now fails gracefully (no unhandled rejections, no unrecoverable optimistic-UI state) when offline (Pass 2)
+- [x] Memory leaks: every `useEffect` registering a listener/timer/subscription across the codebase audited; 2 real leaks found and fixed (Pass 2)
+- [x] Loading states: all 6 listing types now have both list + detail loading states, plus city-map (Pass 2)
+- [x] SEO: sitemap now includes every public listing type (services + destinations were missing), all detail-page types have JSON-LD structured data, robots.txt blocks all 4 authenticated sections (Pass 2)
+- [x] PWA manifest, service worker registration, Android manifest, iOS Info.plist/entitlements/Xcode project all re-verified intact and consistent (Pass 2 — no regressions found from prior sessions' work)
 - [ ] **Not done — requires a Mac with Xcode**: iOS Archive/IPA build, TestFlight upload (see prior session's iOS report — Xcode project is configured and ready, but the actual build step is a hard OS-level blocker in this environment)
 - [ ] **Not done**: a dedicated Next.js/next-intl/@supabase-ssr major-version security upgrade (see Security Notes)
-- [ ] **Not done**: live device/browser verification (Lighthouse score, actual gesture feel, cross-browser visual QA) — everything above was verified via code review, `tsc`/`lint`/`build`, and dev-server HTTP smoke tests, not a real browser session
+- [ ] **Not done**: live device/browser verification (Lighthouse score, actual gesture feel, cross-browser visual QA, real Android/iOS hardware) — everything above was verified via code review, `tsc`/`lint`/`build`, and dev-server HTTP smoke tests, not a real browser or device session
 
 ---
 
@@ -103,12 +150,16 @@ Four parallel research passes (dead code/dependencies, accessibility/responsive,
 4. **`formatDate` is reimplemented 6 times and `slugify` twice** across different files with near-identical logic — not broken, but worth consolidating into shared `lib/utils/` helpers in a future cleanup pass.
 5. **Contact/review/claim-business forms rely on native HTML validation** rather than styled inline field-level errors (only the booking form has full pre-submit validation with translated messages) — consistent with the app's existing pattern, not a regression, but a reasonable future polish item.
 6. **`getAllHotelSlugs()` still falls back to mock hotel slugs** if the real `hotels` table is ever briefly empty at build time (a `generateStaticParams` edge case) — low impact (those slugs would just 404 correctly when visited, since `getHotelBySlug` itself has no such fallback), left as-is rather than risking an unrelated change to static-generation behavior.
-7. **No live device/browser testing** — this entire audit was performed via source-code review, `tsc`/`lint`/`build`, and dev-server HTTP requests. Visual layout bugs, real touch-gesture feel, and an actual Lighthouse score are not verifiable from this environment and should be checked on a real device/browser before launch.
+7. **No live device/browser testing** — this entire audit (both passes) was performed via source-code review, `tsc`/`lint`/`build`, and dev-server HTTP requests. Visual layout bugs, real touch-gesture feel, and an actual Lighthouse score are not verifiable from this environment and should be checked on a real device/browser before launch.
+8. **3 admin tables have no mobile card fallback** (`admin/users`, `admin-bookings-list.tsx`, `claims-list.tsx`) — will horizontally scroll on phones instead of getting the card treatment the rest of the admin surface already has. A real UI-design task, not a one-line fix — deferred (Pass 2).
+9. **`lib/data/business.ts`/`owner-dashboard.ts` (18 call sites) never log Supabase query errors** — already fail safe with no user-facing impact, purely a diagnostic-visibility gap (Pass 2).
+10. **No service-worker "update available, reload?" prompt** — the SW already updates correctly under the hood (`skipWaiting`/`clients.claim()`), just without proactively telling the user (Pass 2).
+11. **`favorite-button.tsx` gives no error feedback on a genuine (non-auth) toggle failure** — rare edge case, heart icon never shows a wrong state, just no error toast (Pass 2).
 
 ---
 
-## Launch Readiness Score: **85%**
+## Launch Readiness Score: **88%**
 
-**Why not lower:** every core user flow (browsing all 6 listing types + events, search, booking, auth, offline caching, WhatsApp/Call/Maps actions) was traced through actual code and verified logically sound; real, concrete bugs were found and fixed rather than glossed over (search-fallback bug, PostgREST injection risk, a blocked geolocation permission, invalid interactive markup, wrong error-message fallback, incorrect manifest icon files); the build/lint/typecheck/i18n-parity pipeline is fully clean.
+**Why not lower:** every core user flow (browsing all 6 listing types + events, search, booking, auth, offline caching, favorites, WhatsApp/Call/Maps actions) was traced through actual code and verified logically sound across two independent audit passes; real, concrete bugs were found and fixed rather than glossed over — including, in Pass 2, a category of bug specifically relevant to this app's offline-first design (unhandled rejections and un-rolled-back optimistic UI when Server Actions are called offline) and a missing top-level error handler on the booking flow's core RPC call. The build/lint/typecheck/i18n-parity pipeline remains fully clean, SEO coverage is now complete (sitemap, structured data, robots.txt), and every loading-state gap found is fixed.
 
-**Why not higher:** one significant, real security item (the Next.js CVE set) is explicitly deferred pending a dedicated upgrade cycle, not resolved; a handful of lower-priority polish items remain (admin touch targets, form validation styling); and — most importantly — nothing in this report was verified in an actual browser or on a real device, only through code review and HTTP-level checks, which is a meaningfully lower bar than a true pre-launch QA pass.
+**Why not higher:** one significant, real security item (the Next.js CVE set) is still explicitly deferred pending a dedicated upgrade cycle, unchanged from Pass 1; a handful of lower-priority polish items remain, now with a fuller and more precisely-scoped list (admin table mobile fallback, diagnostic logging gaps, a missing SW update prompt); and — still the largest caveat — nothing in either pass was verified in an actual browser or on a real device, only through code review and HTTP-level checks. The 3-point increase from Pass 1 reflects real, verified fixes to real gaps (particularly around offline robustness and SEO completeness), not a change in that fundamental limitation.

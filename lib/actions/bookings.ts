@@ -72,34 +72,43 @@ export async function submitBookingRequest(input: BookingRequestInput): Promise<
     return { ok: false, error: t("errorRoomsRequired") };
   }
 
-  const supabase = await createClient();
+  let supabase: Awaited<ReturnType<typeof createClient>>;
+  let bookingReference: string;
+  try {
+    supabase = await createClient();
 
-  // Plain `.insert(...).select(...)` doesn't work here for a signed-out
-  // guest: Postgres governs INSERT ... RETURNING by the table's SELECT
-  // policies, and `bookings` only grants SELECT to the hotel's owner or the
-  // submitting user (auth.uid() = user_id) — an anonymous guest never
-  // matches that, so the RETURNING clause itself gets rejected by RLS even
-  // though the insert is allowed. This RPC (defined in
-  // supabase/migrations/20260729000007_add_submit_booking_request_rpc.sql)
-  // performs the insert with elevated privileges and hands back only the
-  // generated reference, sidestepping that conflict.
-  const { data, error } = await supabase.rpc("submit_booking_request", {
-    p_hotel_id: input.hotelId,
-    p_room_id: input.roomId || null,
-    p_guest_name: input.guestName.trim(),
-    p_guest_phone: input.guestPhone.trim(),
-    p_guest_email: input.guestEmail?.trim() || null,
-    p_adults: input.adults,
-    p_children: input.children,
-    p_rooms_count: input.roomsCount,
-    p_check_in: input.checkIn,
-    p_check_out: input.checkOut,
-    p_notes: input.notes?.trim() || null,
-    p_guest_country: input.guestCountry?.trim() || null,
-  });
+    // Plain `.insert(...).select(...)` doesn't work here for a signed-out
+    // guest: Postgres governs INSERT ... RETURNING by the table's SELECT
+    // policies, and `bookings` only grants SELECT to the hotel's owner or the
+    // submitting user (auth.uid() = user_id) — an anonymous guest never
+    // matches that, so the RETURNING clause itself gets rejected by RLS even
+    // though the insert is allowed. This RPC (defined in
+    // supabase/migrations/20260729000007_add_submit_booking_request_rpc.sql)
+    // performs the insert with elevated privileges and hands back only the
+    // generated reference, sidestepping that conflict.
+    const { data, error } = await supabase.rpc("submit_booking_request", {
+      p_hotel_id: input.hotelId,
+      p_room_id: input.roomId || null,
+      p_guest_name: input.guestName.trim(),
+      p_guest_phone: input.guestPhone.trim(),
+      p_guest_email: input.guestEmail?.trim() || null,
+      p_adults: input.adults,
+      p_children: input.children,
+      p_rooms_count: input.roomsCount,
+      p_check_in: input.checkIn,
+      p_check_out: input.checkOut,
+      p_notes: input.notes?.trim() || null,
+      p_guest_country: input.guestCountry?.trim() || null,
+    });
 
-  if (error) return { ok: false, error: error.message };
-  const bookingReference = data ?? "";
+    if (error) return { ok: false, error: error.message };
+    bookingReference = data ?? "";
+  } catch {
+    // A genuine unexpected failure (network blip, Supabase outage, etc.) —
+    // surfaced as the form's normal inline error state instead of an
+    // unhandled rejection / the nearest error boundary.
+    return { ok: false, error: t("error") };
+  }
 
   // Owner email notification — best-effort, gated by their notify_activity
   // preference, same as every other transactional email in lib/email/.

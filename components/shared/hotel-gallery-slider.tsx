@@ -50,11 +50,13 @@ export function HotelGallerySlider({
 
   useEffect(() => {
     if (!emblaApi) return;
+    const onPointerDown = () => setIsPaused(true);
     onSelect();
     emblaApi.on("select", onSelect);
-    emblaApi.on("pointerDown", () => setIsPaused(true));
+    emblaApi.on("pointerDown", onPointerDown);
     return () => {
       emblaApi.off("select", onSelect);
+      emblaApi.off("pointerDown", onPointerDown);
     };
   }, [emblaApi, onSelect]);
 

@@ -37,13 +37,30 @@ export async function requestAndRegisterPushNotifications(): Promise<PushRegistr
   }
   if (receive !== "granted") return { granted: false };
 
+  // One-shot registration — both listeners are removed as soon as either
+  // fires, so retrying (e.g. a user re-tapping "Enable notifications" after
+  // an earlier failure) doesn't keep stacking permanent native listeners.
   return new Promise((resolve) => {
+    let registrationHandle: { remove: () => void } | undefined;
+    let errorHandle: { remove: () => void } | undefined;
+
+    function cleanup() {
+      registrationHandle?.remove();
+      errorHandle?.remove();
+    }
+
     PushNotifications.addListener("registration", (token) => {
       sendTokenToServer(token.value).catch(() => {});
+      cleanup();
       resolve({ granted: true, token: token.value });
+    }).then((handle) => {
+      registrationHandle = handle;
     });
     PushNotifications.addListener("registrationError", (err) => {
+      cleanup();
       resolve({ granted: true, error: err.error });
+    }).then((handle) => {
+      errorHandle = handle;
     });
     PushNotifications.register();
   });

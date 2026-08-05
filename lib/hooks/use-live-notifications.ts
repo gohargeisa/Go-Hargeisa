@@ -116,6 +116,11 @@ export function useLiveNotifications(initialItems: Notification[], initialUnread
     });
   }, [userId]);
 
+  // Every Server Action call below is wrapped in try/catch, not just
+  // checked for `!result.ok` — offline (or any genuine network failure)
+  // makes the call itself reject, which would otherwise both throw an
+  // unhandled rejection and skip the optimistic-update rollback entirely.
+
   const markOneRead = useCallback(async (id: string) => {
     const target = items.find((n) => n.id === id);
     if (!target || target.isRead) return;
@@ -123,10 +128,16 @@ export function useLiveNotifications(initialItems: Notification[], initialUnread
     setItems((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)));
     setUnreadCount((count) => Math.max(0, count - 1));
 
-    const result = await markNotificationAsRead(id);
-    if (!result.ok) {
+    function rollback() {
       setItems((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: false } : n)));
       setUnreadCount((count) => count + 1);
+    }
+
+    try {
+      const result = await markNotificationAsRead(id);
+      if (!result.ok) rollback();
+    } catch {
+      rollback();
     }
   }, [items]);
 
@@ -135,24 +146,39 @@ export function useLiveNotifications(initialItems: Notification[], initialUnread
     setItems((prev) => prev.map((n) => ({ ...n, isRead: true })));
     setUnreadCount(0);
 
-    const result = await markAllNotificationsAsRead();
-    if (!result.ok) {
+    function rollback() {
       setItems(previous);
       setUnreadCount(previous.filter((n) => !n.isRead).length);
+    }
+
+    try {
+      const result = await markAllNotificationsAsRead();
+      if (!result.ok) rollback();
+    } catch {
+      rollback();
     }
   }, [items]);
 
   const deleteOne = useCallback(async (id: string) => {
-    const target = items.find((n) => n.id === id);
-    if (!target) return;
+    const found = items.find((n) => n.id === id);
+    if (!found) return;
+    // Rebound as a plain `Notification` (not `| undefined`) so the
+    // `rollback` closure below doesn't lose the narrowing `found` already has.
+    const target: Notification = found;
 
     setItems((prev) => prev.filter((n) => n.id !== id));
     if (!target.isRead) setUnreadCount((count) => Math.max(0, count - 1));
 
-    const result = await deleteNotification(id);
-    if (!result.ok) {
+    function rollback() {
       setItems((prev) => [...prev, target].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1)));
       if (!target.isRead) setUnreadCount((count) => count + 1);
+    }
+
+    try {
+      const result = await deleteNotification(id);
+      if (!result.ok) rollback();
+    } catch {
+      rollback();
     }
   }, [items]);
 
@@ -160,10 +186,16 @@ export function useLiveNotifications(initialItems: Notification[], initialUnread
     if (isLoadingMore || !hasMore || items.length === 0) return;
     setIsLoadingMore(true);
     const oldestCreatedAt = items[items.length - 1].createdAt;
-    const next = await getMoreNotifications(oldestCreatedAt, pageSize);
-    setItems((prev) => [...prev, ...next]);
-    setHasMore(next.length >= pageSize);
-    setIsLoadingMore(false);
+    try {
+      const next = await getMoreNotifications(oldestCreatedAt, pageSize);
+      setItems((prev) => [...prev, ...next]);
+      setHasMore(next.length >= pageSize);
+    } catch {
+      // Offline or a genuine server error — leave the existing list as-is
+      // rather than getting stuck with the "Load more" button spinning.
+    } finally {
+      setIsLoadingMore(false);
+    }
   }, [isLoadingMore, hasMore, items, pageSize]);
 
   return { items, unreadCount, markOneRead, markAllRead, deleteOne, loadMore, hasMore, isLoadingMore };

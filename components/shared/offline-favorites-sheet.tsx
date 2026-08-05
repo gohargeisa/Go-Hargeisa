@@ -83,8 +83,12 @@ export function OfflineFavoritesSheet() {
 
   useEffect(() => {
     if (!isOpen) return;
-    getOfflineFavorites().then(setFavorites);
-    getRecentlyViewed().then(setRecentlyViewed);
+    let active = true;
+    getOfflineFavorites().then((v) => active && setFavorites(v));
+    getRecentlyViewed().then((v) => active && setRecentlyViewed(v));
+    return () => {
+      active = false;
+    };
   }, [isOpen]);
 
   const tabClass = (active: boolean) =>

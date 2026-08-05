@@ -7,6 +7,7 @@ import { PremiumPageHero } from "@/components/shared/premium-page-hero";
 import { Reveal } from "@/components/home/reveal";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
+import { safeJsonLd } from "@/lib/utils/json-ld";
 
 // Public content changes infrequently; revalidate hourly instead of
 // rendering on every request (this page no longer reads cookies, so
@@ -62,8 +63,24 @@ export default async function ArticleDetailPage({
   });
   const meta = `${article.author} · ${publishedDate} · ${tBlog("minRead", { minutes: article.readMinutes })}`;
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gohargeisa.com";
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: article.title,
+    description: article.excerpt,
+    image: article.coverImage,
+    datePublished: article.publishedAt,
+    dateModified: article.publishedAt,
+    author: { "@type": "Person", name: article.author },
+    publisher: { "@type": "Organization", name: "Go Hargeisa" },
+    mainEntityOfPage: { "@type": "WebPage", "@id": `${siteUrl}/${locale}/blog/${article.slug}` },
+  };
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
+
       <Breadcrumbs
         items={[
           { label: tNav("blog"), href: `/${locale}/blog` },

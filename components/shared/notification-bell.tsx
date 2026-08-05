@@ -38,9 +38,14 @@ export function NotificationBell({
 
   useEffect(() => {
     let active = true;
-    Promise.all([getUserNotifications(10), getUnreadNotificationCount()]).then(([items, unread]) => {
-      if (active) setSeed({ items, unread });
-    });
+    // Both Server Actions reject outright when offline — caught so a
+    // signed-in visitor loading a page offline doesn't throw an unhandled
+    // rejection (this component is mounted twice per page, desktop + mobile).
+    Promise.all([getUserNotifications(10), getUnreadNotificationCount()])
+      .then(([items, unread]) => {
+        if (active) setSeed({ items, unread });
+      })
+      .catch(() => {});
     return () => {
       active = false;
     };

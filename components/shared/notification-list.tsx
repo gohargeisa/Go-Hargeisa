@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations, useFormatter } from "next-intl";
 import { Bell, Check, CheckCheck, Loader2, Sparkles, Trash2 } from "lucide-react";
@@ -27,6 +28,13 @@ export function NotificationList({
   const t = useTranslations("notifications");
   const format = useFormatter();
   const router = useRouter();
+  // "X minutes ago" depends on the render-time clock, which can differ by a
+  // few seconds between the server render and the client hydration pass —
+  // enough to land on a different label (e.g. "59s ago" vs "1m ago") and
+  // trigger a hydration-mismatch error. Rendered only after mount, like
+  // every other clock-dependent value in this codebase (open-status-badge.tsx).
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const { items, unreadCount, markOneRead, markAllRead, deleteOne, loadMore, hasMore, isLoadingMore } = useLiveNotifications(
     initialItems,
     initialUnread
@@ -82,7 +90,9 @@ export function NotificationList({
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold">{title}</p>
                 {body && <p className="mt-1 text-sm text-ink/60 dark:text-sand/60">{body}</p>}
-                <p className="mt-1.5 text-xs text-ink/35 dark:text-sand/35">{format.relativeTime(new Date(n.createdAt))}</p>
+                <p className="mt-1.5 text-xs text-ink/35 dark:text-sand/35">
+                  {mounted ? format.relativeTime(new Date(n.createdAt)) : " "}
+                </p>
               </div>
               <div className="flex shrink-0 items-center gap-1.5">
                 {!n.isRead && (

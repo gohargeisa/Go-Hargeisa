@@ -33,10 +33,21 @@ export function GlobalSearch({ locale, scrolled }: { locale: Locale; scrolled: b
 
   useEffect(() => {
     if (!open) return;
+    let active = true;
     inputRef.current?.focus();
-    getRecentSearches().then(setRecent);
-    getPopularListingsAction(locale).then(setPopular);
-    getSuggestedNeighborhoods().then(setNeighborhoods);
+    getRecentSearches().then((v) => active && setRecent(v));
+    // Server Actions reject outright when offline — caught here so opening
+    // search offline doesn't throw an unhandled rejection; the overlay just
+    // keeps its empty popular/neighborhoods state, which reads fine.
+    getPopularListingsAction(locale)
+      .then((v) => active && setPopular(v))
+      .catch(() => {});
+    getSuggestedNeighborhoods()
+      .then((v) => active && setNeighborhoods(v))
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
   }, [open, locale]);
 
   useEffect(() => {
@@ -45,14 +56,25 @@ export function GlobalSearch({ locale, scrolled }: { locale: Locale; scrolled: b
       setIsLoading(false);
       return;
     }
+    let active = true;
     setIsLoading(true);
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
-      const next = await searchGlobal(query, locale);
-      setResults(next);
-      setIsLoading(false);
+      try {
+        const next = await searchGlobal(query, locale);
+        if (active) setResults(next);
+      } catch {
+        // Offline or a genuine server error — fall back to "no results"
+        // rather than leaving the spinner running forever.
+        if (active) setResults(EMPTY);
+      } finally {
+        if (active) setIsLoading(false);
+      }
     }, 300);
-    return () => clearTimeout(debounceRef.current);
+    return () => {
+      active = false;
+      clearTimeout(debounceRef.current);
+    };
   }, [query, locale]);
 
   function close() {
