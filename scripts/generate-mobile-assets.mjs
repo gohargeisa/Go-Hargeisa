@@ -274,6 +274,18 @@ async function generatePwaAndOgAssets(mark, originalBuffer) {
   await sharp(originalBuffer).resize(180, 180).png({ compressionLevel: 9 }).toFile(path.join(appDir, "apple-icon.png"));
   console.log("  app/apple-icon.png: 180x180 generated");
 
+  // public-mobile/icon.png — the offline-fallback page's own icon
+  // (public-mobile/offline.html displays it at a CSS 68px). Same bug as the
+  // manifest icons above: this was the same untouched 1254x1254/944KB
+  // source, packaged into every native build (Capacitor bundles
+  // public-mobile/ directly into the app's assets) for a 68px image. 256px
+  // gives clean headroom for retina displays at a fraction of the size.
+  await sharp(originalBuffer)
+    .resize(256, 256)
+    .png({ compressionLevel: 9 })
+    .toFile(path.join(ROOT, "public-mobile/icon.png"));
+  console.log("  public-mobile/icon.png: 256x256 generated");
+
   // Maskable — the OS applies its own mask (circle/squircle/rounded-square)
   // that can crop up to a ~20% margin, so unlike the icons above this one
   // needs the glyph genuinely inset (smaller fraction), not just resized.
