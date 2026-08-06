@@ -228,14 +228,6 @@ export default async function CafeDetailPage({
                     is24Hours={cafe.is24Hours}
                     temporarilyClosed={cafe.temporarilyClosed}
                     permanentlyClosed={cafe.permanentlyClosed}
-                    labels={{
-                      open: td("openNow"),
-                      closed: td("closedNow"),
-                      opensAt: (time) => td("opensAt", { time }),
-                      closesInMinutes: (minutes) => td("closesInMinutes", { minutes }),
-                      temporarilyClosed: td("temporarilyClosedNow"),
-                      permanentlyClosed: td("permanentlyClosedNow"),
-                    }}
                   />
                 </div>
                 {hasStructuredHours && (
@@ -413,14 +405,6 @@ export default async function CafeDetailPage({
             temporarilyClosed={cafe.temporarilyClosed}
             permanentlyClosed={cafe.permanentlyClosed}
             hoursLabel={t("openingHours")}
-            statusLabels={{
-              open: td("openNow"),
-              closed: td("closedNow"),
-              opensAt: (time) => td("opensAt", { time }),
-              closesInMinutes: (minutes) => td("closesInMinutes", { minutes }),
-              temporarilyClosed: td("temporarilyClosedNow"),
-              permanentlyClosed: td("permanentlyClosedNow"),
-            }}
             viewHoursLabel={td("viewHours")}
             phone={cafe.phone}
             locale={locale}

@@ -4,7 +4,7 @@ import { AddToTripButton } from "@/components/shared/add-to-trip-button";
 import { ShareButton } from "@/components/shared/share-button";
 import { FavoriteButton } from "@/components/shared/favorite-button";
 import { PrimaryButton } from "@/components/shared/buttons";
-import { OpenStatusBadge, type OpenStatusLabels } from "@/components/shared/open-status-badge";
+import { OpenStatusBadge } from "@/components/shared/open-status-badge";
 import type { OpeningHoursGroup } from "@/types";
 
 export function CafeActionCard({
@@ -15,7 +15,6 @@ export function CafeActionCard({
   temporarilyClosed,
   permanentlyClosed,
   hoursLabel,
-  statusLabels,
   viewHoursLabel,
   phone,
   locale,
@@ -32,7 +31,6 @@ export function CafeActionCard({
   temporarilyClosed?: boolean;
   permanentlyClosed?: boolean;
   hoursLabel: string;
-  statusLabels: OpenStatusLabels;
   viewHoursLabel: string;
   phone?: string;
   locale: Locale;
@@ -64,7 +62,6 @@ export function CafeActionCard({
             is24Hours={is24Hours}
             temporarilyClosed={temporarilyClosed}
             permanentlyClosed={permanentlyClosed}
-            labels={statusLabels}
           />
         </div>
       )}

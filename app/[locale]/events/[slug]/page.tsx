@@ -250,14 +250,6 @@ export default async function EventDetailPage({
                     is24Hours={event.is24Hours}
                     temporarilyClosed={event.temporarilyClosed}
                     permanentlyClosed={event.permanentlyClosed}
-                    labels={{
-                      open: td("openNow"),
-                      closed: td("closedNow"),
-                      opensAt: (time) => td("opensAt", { time }),
-                      closesInMinutes: (minutes) => td("closesInMinutes", { minutes }),
-                      temporarilyClosed: td("temporarilyClosedNow"),
-                      permanentlyClosed: td("permanentlyClosedNow"),
-                    }}
                   />
                 </div>
                 {hasStructuredHours && (

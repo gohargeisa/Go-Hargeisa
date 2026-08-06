@@ -244,14 +244,6 @@ export default async function CityServiceDetailPage({
                     is24Hours={service.is24Hours}
                     temporarilyClosed={service.temporarilyClosed}
                     permanentlyClosed={service.permanentlyClosed}
-                    labels={{
-                      open: td("openNow"),
-                      closed: td("closedNow"),
-                      opensAt: (time) => td("opensAt", { time }),
-                      closesInMinutes: (minutes) => td("closesInMinutes", { minutes }),
-                      temporarilyClosed: td("temporarilyClosedNow"),
-                      permanentlyClosed: td("permanentlyClosedNow"),
-                    }}
                   />
                 </div>
                 {hasStructuredHours ? (

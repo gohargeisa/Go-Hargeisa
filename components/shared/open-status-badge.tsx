@@ -1,17 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { getOpenStatus, formatTime12h } from "@/lib/utils/opening-hours";
 import type { OpeningHoursGroup } from "@/types";
-
-export interface OpenStatusLabels {
-  open: string;
-  closed: string;
-  opensAt: (time: string) => string;
-  closesInMinutes: (minutes: number) => string;
-  temporarilyClosed: string;
-  permanentlyClosed: string;
-}
 
 /**
  * Computed on the client (not baked into the SSR/ISR html) so the badge
@@ -20,22 +12,34 @@ export interface OpenStatusLabels {
  * hydration mismatch, since the server has no reliable "now" to render
  * this with — and renders nothing at all when there's no hours data and no
  * closure override set (an unconfigured listing shouldn't claim "Closed").
+ *
+ * Translates its own label text via `useTranslations("detail")` instead of
+ * accepting formatter functions as props — every call site used to build
+ * `labels={{ opensAt: (time) => td("opensAt", { time }), ... }}` in a server
+ * component and hand it to this "use client" component, which is a plain
+ * closure crossing the Server→Client boundary. React can't serialize that:
+ * it throws "Functions cannot be passed directly to Client Components" the
+ * moment the element is actually constructed — which only happens for a
+ * listing with real hours data (open/close groups, is24Hours, or a closure
+ * override), so the bug stayed latent everywhere except Beydan Coffee (the
+ * only listing with populated opening_hours_structured at the time). Doing
+ * the translation in here, where next-intl's client hook already works,
+ * removes the closure-prop entirely instead of formatting it differently.
  */
 export function OpenStatusBadge({
   groups,
   is24Hours,
   temporarilyClosed,
   permanentlyClosed,
-  labels,
   className,
 }: {
   groups: OpeningHoursGroup[];
   is24Hours?: boolean;
   temporarilyClosed?: boolean;
   permanentlyClosed?: boolean;
-  labels: OpenStatusLabels;
   className?: string;
 }) {
+  const t = useTranslations("detail");
   const [status, setStatus] = useState<ReturnType<typeof getOpenStatus> | null>(null);
 
   useEffect(() => {
@@ -57,17 +61,17 @@ export function OpenStatusBadge({
   const label = (() => {
     switch (status.state) {
       case "open":
-        return labels.open;
+        return t("openNow");
       case "closesSoon":
-        return labels.closesInMinutes(status.minutesLeft);
+        return t("closesInMinutes", { minutes: status.minutesLeft });
       case "opensAt":
-        return labels.opensAt(formatTime12h(status.time));
+        return t("opensAt", { time: formatTime12h(status.time) });
       case "closed":
-        return labels.closed;
+        return t("closedNow");
       case "temporarilyClosed":
-        return labels.temporarilyClosed;
+        return t("temporarilyClosedNow");
       case "permanentlyClosed":
-        return labels.permanentlyClosed;
+        return t("permanentlyClosedNow");
     }
   })();
 

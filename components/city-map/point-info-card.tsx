@@ -67,17 +67,7 @@ export function PointInfoCard({
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <OpenStatusBadge
-          groups={point.openingHoursStructured ?? []}
-          labels={{
-            open: td("openNow"),
-            closed: td("closedNow"),
-            opensAt: (time) => td("opensAt", { time }),
-            closesInMinutes: (minutes) => td("closesInMinutes", { minutes }),
-            temporarilyClosed: td("temporarilyClosedNow"),
-            permanentlyClosed: td("permanentlyClosedNow"),
-          }}
-        />
+        <OpenStatusBadge groups={point.openingHoursStructured ?? []} />
         {km !== null && (
           <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-ink/5 px-3 py-1 text-xs font-bold text-ink/60 dark:bg-white/10 dark:text-sand/60">
             {t("distanceAway", { km: km < 1 ? km.toFixed(1) : km.toFixed(0) })}

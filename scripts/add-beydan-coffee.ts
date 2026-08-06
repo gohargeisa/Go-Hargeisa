@@ -11,6 +11,7 @@ dotenv.config({ path: ".env.local" });
  * Uses upsert on slug so it's safe to re-run.
  */
 import { createClient } from "@supabase/supabase-js";
+import { placeholderImage } from "../lib/placeholder-image";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -22,8 +23,14 @@ if (!url || !serviceKey) {
 
 const supabase = createClient(url, serviceKey);
 
-const PLACEHOLDER = (label: string) =>
-  `https://placehold.co/1200x800/1f2937/f5f5f4?text=${encodeURIComponent(label)}`;
+// Was previously its own inline `placehold.co` URL builder that omitted the
+// `/png` format segment, so placehold.co served SVG — which next/image's
+// remote optimizer rejects with a 400 (SVG isn't allowed without
+// `images.dangerouslyAllowSVG`). Reusing the shared helper (which does
+// include `/png`) instead of a second, slightly-different copy of the same
+// logic is both the fix and the reason it won't regress next time this
+// script runs.
+const PLACEHOLDER = (label: string) => placeholderImage(label);
 
 async function main() {
   const row = {

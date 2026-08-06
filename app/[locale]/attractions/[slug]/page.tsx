@@ -288,14 +288,6 @@ export default async function AttractionDetailPage({
                     is24Hours={attraction.is24Hours}
                     temporarilyClosed={attraction.temporarilyClosed}
                     permanentlyClosed={attraction.permanentlyClosed}
-                    labels={{
-                      open: td("openNow"),
-                      closed: td("closedNow"),
-                      opensAt: (time) => td("opensAt", { time }),
-                      closesInMinutes: (minutes) => td("closesInMinutes", { minutes }),
-                      temporarilyClosed: td("temporarilyClosedNow"),
-                      permanentlyClosed: td("permanentlyClosedNow"),
-                    }}
                   />
                 </div>
                 {hasStructuredHours && (

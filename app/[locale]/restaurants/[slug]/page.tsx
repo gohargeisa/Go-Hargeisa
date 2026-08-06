@@ -222,14 +222,6 @@ export default async function RestaurantDetailPage({
                     is24Hours={restaurant.is24Hours}
                     temporarilyClosed={restaurant.temporarilyClosed}
                     permanentlyClosed={restaurant.permanentlyClosed}
-                    labels={{
-                      open: td("openNow"),
-                      closed: td("closedNow"),
-                      opensAt: (time) => td("opensAt", { time }),
-                      closesInMinutes: (minutes) => td("closesInMinutes", { minutes }),
-                      temporarilyClosed: td("temporarilyClosedNow"),
-                      permanentlyClosed: td("permanentlyClosedNow"),
-                    }}
                   />
                 </div>
                 {hasStructuredHours && (
