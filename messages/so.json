@@ -672,12 +672,28 @@
     "deleteNotification": "Tirtir ogaysiiska",
     "loadMore": "Soo rar wax dheeraad ah"
   },
-  "diasporaWeek": {
-    "bannerEyebrow": "Munaasabad Gaar Ah",
-    "bannerTitle": "Toddobaadka Shatida Somaliland 2026",
-    "bannerSubtitle": "2 – 6 Ogosto 2026 · \"Isku-duubka Gudaha ayaa Furaha u ah Aqoonsiga\" — nagu soo biir Hargeysa.",
-    "bannerCta": "Wax Badan Ogow",
+  "businessJoinBanner": {
+    "badge": "🎉 Dalabka Furitaanka Gaarka ah",
+    "headline": "Noqo <gold>Shuraakada Aasaasayaasha</gold> Go Hargeisa",
+    "description": "Noqo mid ka mid ah 20-ka shuraako ee ugu horreeya ee la ansixiyo kana faa'iidayso diiwaangelin bilaash ah.",
+    "offerHeadline": "<free>Bilaash</free> <num>20-ka</num> <partners>Shuraako ee Ugu Horreeya</partners>",
+    "perksIntro": "Shuraako Aasaasah ahaan, waxaad heli doontaa:",
+    "perk1": "Diiwaangelin ganacsi oo bilaash ah",
+    "perk2": "Meel sare oo mudnaanta leh",
+    "perk3": "Xayaysiin gaar ah",
+    "perk4": "Summad Shuraaka Aasaasaha",
+    "perk5": "Muuqaal hore oo ganacsigaaga ah",
+    "ctaPrimary": "Qabso Booskaaga Bilaashka ah",
+    "ctaSecondary": "Wax Badan Ogow",
+    "note": "Dalabkan waxa heli doona oo keliya 20-ka shuraako ee ugu horreeya ee la ansixiyo.",
+    "trustFoundingPartner": "⭐ Shuraako Aasaasah",
+    "trustPriorityExposure": "🚀 Muuqaal Mudnaan leh",
+    "trustLanguages": "🌍 Waxaa lagu heli karaa 3 Luqadood",
+    "trustOfficial": "✅ Madal Dalxiis Rasmi ah",
+    "trustFast": "⚡ Ansixin Degdeg ah"
+  },
 
+  "diasporaWeek": {
     "heroEyebrow": "Toddobaadka Shatida Somaliland 2026",
     "heroBadge": "Munaasabad Rasmi Ah",
     "heroWelcome": "Ku Soo Dhawoow Guriga",

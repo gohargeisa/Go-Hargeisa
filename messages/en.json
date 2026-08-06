@@ -672,12 +672,28 @@
     "deleteNotification": "Delete notification",
     "loadMore": "Load more"
   },
-  "diasporaWeek": {
-    "bannerEyebrow": "Special Event",
-    "bannerTitle": "Somaliland Diaspora Week 2026",
-    "bannerSubtitle": "2 – 6 August 2026 · \"Internal Cohesion is the Key to Recognition\" — join us in Hargeisa.",
-    "bannerCta": "Learn More",
+  "businessJoinBanner": {
+    "badge": "🎉 Exclusive Launch Offer",
+    "headline": "Become a <gold>Founding Partner</gold> of Go Hargeisa",
+    "description": "Be among the first 20 approved businesses to join Go Hargeisa during our official launch.",
+    "offerHeadline": "<free>FREE</free> for the <num>First 20</num> <partners>Founding Partners</partners>",
+    "perksIntro": "As a Founding Partner you will receive:",
+    "perk1": "Free business listing",
+    "perk2": "Priority placement",
+    "perk3": "Featured promotion",
+    "perk4": "Founding Partner badge",
+    "perk5": "Early business exposure",
+    "ctaPrimary": "Claim Your Free Spot",
+    "ctaSecondary": "Learn More",
+    "note": "Offer available only for the first 20 approved Founding Partners.",
+    "trustFoundingPartner": "⭐ Founding Partner",
+    "trustPriorityExposure": "🚀 Priority Exposure",
+    "trustLanguages": "🌍 Available in 3 Languages",
+    "trustOfficial": "✅ Official Tourism Platform",
+    "trustFast": "⚡ Fast Approval"
+  },
 
+  "diasporaWeek": {
     "heroEyebrow": "Somaliland Diaspora Week 2026",
     "heroBadge": "Official Event",
     "heroWelcome": "Welcome Home",

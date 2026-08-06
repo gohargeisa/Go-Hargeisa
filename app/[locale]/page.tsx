@@ -19,12 +19,11 @@ import {
 import { getLatestAnnouncement } from "@/lib/data/announcements";
 import { getFeaturedOffersForHomepage } from "@/lib/data/offers";
 import { getCityServiceCategoryCounts } from "@/lib/data/city-services";
-import { DIASPORA_WEEK_END_ISO } from "@/lib/config/diaspora-week";
 import { Hero } from "@/components/home/hero";
 import { SplashScreenOverlay } from "@/components/shared/splash-overlay";
 import { OfferCard } from "@/components/home/offer-card";
 import { AnnouncementBanner } from "@/components/home/announcement-banner";
-import { DiasporaWeekBanner } from "@/components/home/diaspora-week-banner";
+import { BusinessJoinBanner } from "@/components/home/business-join-banner";
 import { ExploreHargeisaSection } from "@/components/home/explore-hargeisa-section";
 import { NewsletterSection } from "@/components/home/newsletter-section";
 import { Reveal } from "@/components/home/reveal";
@@ -76,7 +75,6 @@ export default async function HomePage({
   const upcomingEvents = eventsRaw
     .filter((e) => new Date(e.endDate ?? e.startDate).getTime() >= now)
     .slice(0, HOMEPAGE_PREVIEW_COUNT);
-  const showDiasporaWeekBanner = Date.now() < new Date(DIASPORA_WEEK_END_ISO).getTime();
 
   return (
     <>
@@ -100,7 +98,7 @@ export default async function HomePage({
 
       <Hero locale={locale} />
 
-      {showDiasporaWeekBanner && <DiasporaWeekBanner locale={locale} />}
+      <BusinessJoinBanner locale={locale} />
 
       {/* About Go Hargeisa */}
       <section className="mx-auto max-w-7xl px-5 pb-20 pt-2 md:px-8 md:pb-28 md:pt-12 lg:px-12">

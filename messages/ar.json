@@ -672,12 +672,28 @@
     "deleteNotification": "حذف الإشعار",
     "loadMore": "تحميل المزيد"
   },
-  "diasporaWeek": {
-    "bannerEyebrow": "فعالية خاصة",
-    "bannerTitle": "أسبوع الشتات الصومالاندي 2026",
-    "bannerSubtitle": "٢ – ٦ أغسطس ٢٠٢٦ · \"التماسك الداخلي هو مفتاح الاعتراف\" — انضموا إلينا في هرجيسا.",
-    "bannerCta": "اعرف المزيد",
+  "businessJoinBanner": {
+    "badge": "🎉 عرض الإطلاق الحصري",
+    "headline": "كن <gold>شريكًا مؤسسًا</gold> في Go Hargeisa",
+    "description": "كن من أوائل 20 نشاطًا تجاريًا يتم قبوله في Go Hargeisa واحصل على إدراج مجاني خلال الإطلاق الرسمي.",
+    "offerHeadline": "<free>مجانًا</free> <num>لأول 20</num> <partners>شريكًا مؤسسًا</partners>",
+    "perksIntro": "بصفتك شريكًا مؤسسًا، ستحصل على:",
+    "perk1": "إدراج مجاني لنشاطك التجاري",
+    "perk2": "ترتيب أولوية في الظهور",
+    "perk3": "ترويج مميز",
+    "perk4": "شارة الشريك المؤسس",
+    "perk5": "ظهور مبكر لنشاطك التجاري",
+    "ctaPrimary": "احجز مكانك المجاني",
+    "ctaSecondary": "اعرف المزيد",
+    "note": "العرض متاح فقط لأول 20 شريكًا مؤسسًا يتم قبول طلبهم.",
+    "trustFoundingPartner": "⭐ شريك مؤسس",
+    "trustPriorityExposure": "🚀 ظهور ذو أولوية",
+    "trustLanguages": "🌍 متاح بثلاث لغات",
+    "trustOfficial": "✅ منصة سياحية رسمية",
+    "trustFast": "⚡ موافقة سريعة"
+  },
 
+  "diasporaWeek": {
     "heroEyebrow": "أسبوع الشتات الصومالاندي 2026",
     "heroBadge": "فعالية رسمية",
     "heroWelcome": "أهلاً بعودتكم",

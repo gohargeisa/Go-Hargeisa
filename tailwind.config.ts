@@ -141,6 +141,10 @@ const config: Config = {
           "0%, 100%": { transform: "translateY(0)", opacity: "0.25" },
           "50%": { transform: "translateY(-18px)", opacity: "0.7" },
         },
+        glowPulse: {
+          "0%, 100%": { opacity: "0.5", transform: "scale(1)" },
+          "50%": { opacity: "0.9", transform: "scale(1.1)" },
+        },
       },
 
       animation: {
@@ -148,6 +152,7 @@ const config: Config = {
         shimmer: "shimmer 2.2s ease-in-out infinite",
         kenburns: "kenburns 20s ease-out forwards",
         float: "float 6s ease-in-out infinite",
+        glowPulse: "glowPulse 2.4s ease-in-out infinite",
       },
     },
   },
