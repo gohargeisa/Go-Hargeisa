@@ -58,6 +58,13 @@ export function SiteFooter({
       icon: WhatsAppIcon,
       href: whatsappNumber ? `https://wa.me/${whatsappNumber.replace(/[^\d]/g, "")}` : "https://wa.me/252656156752",
       label: "WhatsApp",
+      // Official WhatsApp brand green for the resting icon color only —
+      // `:not(:hover)` (rather than a plain `text-[#25D366]`) sidesteps
+      // Tailwind's undefined same-specificity cascade order between it and
+      // the shared `hover:text-white` below, which otherwise risks the
+      // arbitrary-color class silently losing and leaving the icon white
+      // on white in the resting state.
+      iconClassName: "[&:not(:hover)]:text-[#25D366]",
     },
     { icon: Facebook, href: socialFacebook || "https://facebook.com/Go.Hargeisa", label: "Facebook" },
     { icon: Instagram, href: socialInstagram || "https://instagram.com/go.hargeisa", label: "Instagram" },
@@ -86,14 +93,14 @@ export function SiteFooter({
             </p>
           )}
           <div className="mt-6 flex flex-wrap gap-2.5">
-            {socialLinks.map(({ icon: Icon, href, label }) => (
+            {socialLinks.map(({ icon: Icon, href, label, iconClassName }) => (
               <a
                 key={label}
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={label}
-                className="flex h-11 w-11 items-center justify-center rounded-full border border-ink/10 bg-white shadow-soft transition-all duration-300 ease-premium hover:-translate-y-1 hover:border-primary hover:bg-primary hover:text-white hover:shadow-[0_10px_20px_rgba(245,158,11,0.3)] active:scale-90 dark:border-white/10 dark:bg-white/5"
+                className={`flex h-11 w-11 items-center justify-center rounded-full border border-ink/10 bg-white shadow-soft transition-all duration-300 ease-premium hover:-translate-y-1 hover:border-primary hover:bg-primary hover:text-white hover:shadow-[0_10px_20px_rgba(245,158,11,0.3)] active:scale-90 dark:border-white/10 dark:bg-white/5${iconClassName ? ` ${iconClassName}` : ""}`}
               >
                 <Icon size={17} aria-hidden="true" />
               </a>
