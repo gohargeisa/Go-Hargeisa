@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { mapHotel, mapRestaurant, mapCafe, mapService, mapAttraction } from "./mappers";
+import { getServiceCategories } from "@/lib/data/categories";
 import type { Hotel, Restaurant, Cafe, Service, Attraction, PolymorphicListingType } from "@/types";
 
 type ListingType = PolymorphicListingType;
@@ -69,11 +70,16 @@ export async function getFavoritesForUser(userId: string): Promise<FavoriteEntry
       : { data: [] },
   ]);
 
+  const serviceCategoryMap = new Map((await getServiceCategories()).map((c) => [c.id, c]));
+
   return [
     ...(hotelRows.data ?? []).map((row) => ({ kind: "hotel" as const, item: mapHotel(row) })),
     ...(restaurantRows.data ?? []).map((row) => ({ kind: "restaurant" as const, item: mapRestaurant(row) })),
     ...(cafeRows.data ?? []).map((row) => ({ kind: "cafe" as const, item: mapCafe(row) })),
-    ...(serviceRows.data ?? []).map((row) => ({ kind: "service" as const, item: mapService(row) })),
+    ...(serviceRows.data ?? []).map((row) => ({
+      kind: "service" as const,
+      item: mapService(row, [], row.category_id ? serviceCategoryMap.get(row.category_id) : undefined),
+    })),
     ...(attractionRows.data ?? []).map((row) => ({ kind: "attraction" as const, item: mapAttraction(row) })),
   ];
 }

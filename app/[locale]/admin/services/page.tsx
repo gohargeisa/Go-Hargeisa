@@ -7,9 +7,8 @@ import { requireAdmin } from "@/lib/supabase/guards";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { getServices } from "@/lib/data/services";
+import { getServiceCategories } from "@/lib/data/categories";
 import { AdminListTable } from "@/components/admin/admin-list-table";
-import { SERVICE_CATEGORY_SINGULAR_LABELS } from "@/lib/utils/service-categories";
-import type { ServiceCategory } from "@/types";
 
 export const metadata: Metadata = { title: "Manage Services — Admin" };
 
@@ -21,10 +20,10 @@ export default async function AdminServicesPage({ params: { locale } }: { params
   // returns status='published' rows) so a hidden/archived service stays
   // visible here to be un-hidden — matches the hotels/restaurants/cafes/
   // attractions admin pages, which already query directly for the same reason.
-  let services: { id: string; name: string; address: string; cover_image: string; category: ServiceCategory; status: "draft" | "published" | "archived"; featured: boolean; is_pinned: boolean }[] = [];
+  let services: { id: string; name: string; address: string; cover_image: string; category_id: string | null; status: "draft" | "published" | "archived"; featured: boolean; is_pinned: boolean }[] = [];
   if (isSupabaseConfigured()) {
     const supabase = await createClient();
-    const { data } = await supabase.from("services").select("id, name, address, cover_image, category, status, featured, is_pinned");
+    const { data } = await supabase.from("services").select("id, name, address, cover_image, category_id, status, featured, is_pinned");
     services = (data ?? []) as typeof services;
   } else {
     services = (await getServices()).map((s) => ({
@@ -32,12 +31,14 @@ export default async function AdminServicesPage({ params: { locale } }: { params
       name: s.name,
       address: s.address,
       cover_image: s.coverImage,
-      category: s.category,
+      category_id: null,
       status: "published" as const,
       featured: s.featured ?? false,
       is_pinned: false,
     }));
   }
+
+  const categoryMap = new Map((await getServiceCategories()).map((c) => [c.id, c]));
 
   return (
     <section className="container-px mx-auto py-14">
@@ -67,7 +68,7 @@ export default async function AdminServicesPage({ params: { locale } }: { params
             image: s.cover_image,
             title: s.name,
             subtitle: s.address,
-            meta: SERVICE_CATEGORY_SINGULAR_LABELS[s.category] ?? s.category,
+            meta: (s.category_id ? categoryMap.get(s.category_id)?.name : undefined) ?? "Uncategorized",
             status: s.status,
             featured: s.featured,
             isPinned: s.is_pinned,

@@ -3,6 +3,7 @@ import type {
   Restaurant,
   Cafe,
   Service,
+  ServiceCategory,
   Attraction,
   EventItem,
   Article,
@@ -2244,7 +2245,30 @@ export const cafes: Cafe[] = [
 // dental clinics and money-changers with only social-media mentions, a
 // couple of car-rental names from an aggregator page) were excluded for
 // insufficient independent corroboration rather than padded in.
-export const services: Service[] = [
+/** Mirrors the `categories` table seed (supabase/migrations/20260806000001_add_categories_system.sql)
+ * just enough to give mock/offline-mode services their categorySlug/Label/Icon/Color —
+ * used only by the `services` fallback below when Supabase isn't configured. */
+const MOCK_SERVICE_CATEGORY_META: Record<ServiceCategory, { slug: string; label: string; icon: string; color: string }> = {
+  hospital: { slug: "hospitals", label: "Hospitals", icon: "Stethoscope", color: "#EF4444" },
+  pharmacy: { slug: "pharmacies", label: "Pharmacies", icon: "Pill", color: "#EC4899" },
+  dental_clinic: { slug: "dental-clinics", label: "Dental Clinics", icon: "Smile", color: "#F43F5E" },
+  bank: { slug: "banks", label: "Banks", icon: "Building2", color: "#2563EB" },
+  atm: { slug: "atms", label: "ATMs", icon: "Wallet", color: "#14B8A6" },
+  currency_exchange: { slug: "currency-exchange", label: "Currency Exchange", icon: "CreditCard", color: "#CA8A04" },
+  gas_station: { slug: "gas-stations", label: "Gas Stations", icon: "Fuel", color: "#F97316" },
+  car_rental: { slug: "car-rentals", label: "Car Rental", icon: "Car", color: "#7C3AED" },
+  mosque: { slug: "mosques", label: "Mosques", icon: "MoonStar", color: "#0D9488" },
+  school: { slug: "schools", label: "Schools", icon: "School", color: "#22C55E" },
+  university: { slug: "universities", label: "Universities", icon: "GraduationCap", color: "#059669" },
+  gym: { slug: "gyms", label: "Sports Clubs", icon: "Dumbbell", color: "#DC2626" },
+  tour_company: { slug: "tour-companies", label: "Travel Agencies", icon: "Map", color: "#0891B2" },
+  apartment: { slug: "apartments", label: "Apartments", icon: "Building", color: "#9333EA" },
+  supermarket: { slug: "supermarkets", label: "Shopping", icon: "ShoppingCart", color: "#8B5CF6" },
+  clinic: { slug: "clinics", label: "Clinics", icon: "HeartPulse", color: "#F472B6" },
+  government_office: { slug: "government-offices", label: "Government Offices", icon: "Landmark", color: "#4F46E5" },
+};
+
+const rawServices: Omit<Service, "categorySlug" | "categoryLabel" | "categoryIcon" | "categoryColor">[] = [
   // ---- Hospitals ----
   {
     id: "sv-h1",
@@ -2897,6 +2921,12 @@ export const services: Service[] = [
     featured: false,
   },
 ];
+
+export const services: Service[] = rawServices.map((s) => {
+  // Every mock entry sets a real category literal (see the array above).
+  const meta = MOCK_SERVICE_CATEGORY_META[s.category!];
+  return { ...s, categorySlug: meta.slug, categoryLabel: meta.label, categoryIcon: meta.icon, categoryColor: meta.color };
+});
 
 export const attractions: Attraction[] = [
   {

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { ExternalLink, MapPin, Navigation, Phone } from "lucide-react";
-import type { CityServicePoint, ServiceCategory } from "@/types";
+import type { CityServicePoint } from "@/types";
 import { CATEGORY_CONFIG } from "@/components/city-map/category-config";
 import { ClaimBusinessButton } from "@/components/shared/claim-business-button";
 import { OpenStatusBadge } from "@/components/shared/open-status-badge";
@@ -39,9 +39,7 @@ export function PointInfoCard({
   // Only Phase 2 `services` points carry a slug — that's what distinguishes
   // them from legacy map_points pins, which have no detail page to link to.
   const isServicePoint = Boolean(point.slug);
-  const detailHref = point.slug
-    ? `/${locale}${serviceHref(point.category as ServiceCategory, point.slug)}`
-    : undefined;
+  const detailHref = point.slug && point.categorySlug ? `/${locale}${serviceHref(point.categorySlug, point.slug)}` : undefined;
 
   return (
     <div className="space-y-4">

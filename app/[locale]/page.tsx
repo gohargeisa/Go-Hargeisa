@@ -315,13 +315,15 @@ export default async function HomePage({
                 {services.map((s) => (
                   <PremiumServiceCard
                     key={s.id}
-                    href={`/${locale}${serviceHref(s.category, s.slug)}`}
+                    href={`/${locale}${serviceHref(s.categorySlug, s.slug)}`}
                     image={s.coverImage}
                     name={s.name}
                     address={s.address}
                     rating={s.rating}
                     reviewCount={s.reviewCount}
-                    category={s.category}
+                    categoryLabel={s.categoryLabel}
+                    categoryIcon={s.categoryIcon}
+                    categoryColor={s.categoryColor}
                     featured={s.featured}
                     serviceId={s.id}
                     locale={locale}

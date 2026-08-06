@@ -138,9 +138,20 @@ type ServiceCategoryDb =
 
 type ServiceRow = ListingBase & {
   phone: string | null; website: string | null; opening_hours: string | null; services: string[];
-  category: ServiceCategoryDb; owner_id: string | null;
+  category: ServiceCategoryDb | null; category_id: string | null; owner_id: string | null;
   logo_url: string | null; videos: Json; whatsapp: string | null; email: string | null;
   social_instagram: string | null; social_facebook: string | null; opening_hours_structured: Json;
+};
+
+/** The `categories` table — single source of truth for every business
+ * category (see supabase/migrations/20260806000001_add_categories_system.sql). */
+type CategoryRow = {
+  id: string; slug: string; name: string; name_ar: string | null; name_so: string | null;
+  description: string | null; description_ar: string | null; description_so: string | null;
+  icon: string; color: string | null;
+  target_table: "hotels" | "restaurants" | "cafes" | "attractions" | "events" | "services";
+  is_active: boolean; is_pinned: boolean; sort_order: number; search_keywords: string[];
+  created_at: string; updated_at: string;
 };
 
 type BusinessListingType = "hotel" | "restaurant" | "cafe" | "service";
@@ -219,6 +230,7 @@ export type Database = {
       attractions: Table<AttractionRow>;
       services: Table<ServiceRow>;
       city_services: Table<CityServiceRow>;
+      categories: Table<CategoryRow>;
       events: Table<{
         id: string; slug: string; title: string; title_ar: string | null; title_so: string | null; description: string; cover_image: string;
         category: "cultural" | "national" | "business" | "sports" | "concert"; start_date: string; end_date: string; location: string;

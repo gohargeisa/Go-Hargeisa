@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { serviceHref } from "@/lib/utils/service-categories";
-import type { ServiceCategory } from "@/types";
+import { getServiceCategories } from "@/lib/data/categories";
 
 export interface SavedTripItem {
   id: string;
@@ -66,11 +66,12 @@ export async function getSavedTripsForUser(userId: string): Promise<SavedTrip[]>
       ? supabase.from("attractions").select("id, name, cover_image, slug").in("id", idsByType.attraction)
       : { data: [] },
     idsByType.service.length
-      ? supabase.from("services").select("id, name, cover_image, slug, category").in("id", idsByType.service)
+      ? supabase.from("services").select("id, name, cover_image, slug, category_id").in("id", idsByType.service)
       : { data: [] },
   ]);
 
-  const lookup = new Map<string, { name: string; image: string; slug: string; category?: ServiceCategory }>();
+  const serviceCategoryMap = new Map((await getServiceCategories()).map((c) => [c.id, c]));
+  const lookup = new Map<string, { name: string; image: string; slug: string; categorySlug?: string }>();
   for (const [rows] of [
     [hotelRows.data ?? []],
     [restaurantRows.data ?? []],
@@ -80,7 +81,12 @@ export async function getSavedTripsForUser(userId: string): Promise<SavedTrip[]>
     for (const row of rows) lookup.set(row.id, { name: row.name, image: row.cover_image, slug: row.slug });
   }
   for (const row of serviceRows.data ?? []) {
-    lookup.set(row.id, { name: row.name, image: row.cover_image, slug: row.slug, category: row.category as ServiceCategory });
+    lookup.set(row.id, {
+      name: row.name,
+      image: row.cover_image,
+      slug: row.slug,
+      categorySlug: row.category_id ? serviceCategoryMap.get(row.category_id)?.slug : undefined,
+    });
   }
 
   return trips.map((trip) => ({
@@ -95,8 +101,8 @@ export async function getSavedTripsForUser(userId: string): Promise<SavedTrip[]>
         const found = lookup.get(item.listing_id);
         const href = !found
           ? "#"
-          : listingType === "service" && found.category
-            ? serviceHref(found.category, found.slug)
+          : listingType === "service" && found.categorySlug
+            ? serviceHref(found.categorySlug, found.slug)
             : `/${HREF_SEGMENT[listingType]}/${found.slug}`;
         return {
           id: item.id,

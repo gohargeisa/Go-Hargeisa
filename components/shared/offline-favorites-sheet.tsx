@@ -37,7 +37,7 @@ function OfflineThumbnail({ src, alt }: { src?: string; alt: string }) {
 function FavoriteRow({ favorite, locale, onNavigate }: { favorite: OfflineFavorite; locale: Locale; onNavigate: () => void }) {
   return (
     <Link
-      href={favoriteHref(locale, favorite.kind, { slug: favorite.slug, category: favorite.category })}
+      href={favoriteHref(locale, favorite.kind, { slug: favorite.slug, categorySlug: favorite.categorySlug })}
       onClick={onNavigate}
       className="flex items-center gap-3 rounded-2xl border border-ink/8 p-2.5 transition-colors hover:border-primary/30 dark:border-white/10"
     >

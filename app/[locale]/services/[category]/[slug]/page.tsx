@@ -6,6 +6,7 @@ import { ExternalLink, MapPin, Navigation } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
 import { getServiceBySlug, getAllServiceSlugs, getServices } from "@/lib/data/services";
+import { getCategoryBySlug } from "@/lib/data/categories";
 import { getSiteSettings } from "@/lib/actions/settings";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { ViewTracker } from "@/components/shared/view-tracker";
@@ -23,13 +24,7 @@ import { ReviewForm } from "@/components/shared/review-form";
 import { getMyReviewForListing } from "@/lib/data/reviews";
 import { resolveMapsUrl, resolveDirectionsUrl } from "@/lib/utils/google-maps";
 import { Reveal } from "@/components/home/reveal";
-import {
-  categoryFromSlug,
-  serviceHref,
-  SERVICE_CATEGORY_LABELS,
-  SERVICE_CATEGORY_SINGULAR_LABELS,
-  SERVICE_CATEGORY_SLUGS,
-} from "@/lib/utils/service-categories";
+import { serviceHref, singularize } from "@/lib/utils/service-categories";
 import { SERVICES_PUBLIC_ENABLED } from "@/lib/config/features";
 
 export const revalidate = 3600;
@@ -40,7 +35,7 @@ export async function generateStaticParams() {
   // get statically generated while disabled.
   if (!SERVICES_PUBLIC_ENABLED) return [];
   const services = await getAllServiceSlugs();
-  return services.map(({ slug, category }) => ({ category: SERVICE_CATEGORY_SLUGS[category], slug }));
+  return services.map(({ slug, categorySlug }) => ({ category: categorySlug, slug }));
 }
 
 export async function generateMetadata({
@@ -52,10 +47,10 @@ export async function generateMetadata({
   const service = await getServiceBySlug(slug);
   if (!service) return {};
   return {
-    title: `${service.name} — ${SERVICE_CATEGORY_SINGULAR_LABELS[service.category]} in Hargeisa`,
+    title: `${service.name} — ${singularize(service.categoryLabel)} in Hargeisa`,
     description: service.shortDescription,
     openGraph: { images: [service.coverImage] },
-    alternates: localeAlternates(locale as Locale, serviceHref(service.category, service.slug)),
+    alternates: localeAlternates(locale as Locale, serviceHref(service.categorySlug, service.slug)),
   };
 }
 
@@ -72,14 +67,15 @@ export default async function ServiceDetailPage({
   // The category segment in the URL must actually match the service's real
   // category — otherwise /services/banks/some-hospital-slug would silently
   // render instead of 404ing.
-  if (categoryFromSlug(categorySlug) !== service.category) notFound();
+  if (categorySlug !== service.categorySlug) notFound();
 
   const t = await getTranslations("common");
   const tNav = await getTranslations("nav");
   const td = await getTranslations("detail");
   const th = await getTranslations("hotelDetail");
+  const serviceCategory = await getCategoryBySlug(service.categorySlug);
   const [allServices, siteSettings, myReview] = await Promise.all([
-    getServices({ category: service.category }),
+    serviceCategory ? getServices({ categoryId: serviceCategory.id }) : Promise.resolve([]),
     getSiteSettings(),
     getMyReviewForListing("service", service.id),
   ]);
@@ -92,7 +88,7 @@ export default async function ServiceDetailPage({
   // Medical/financial/civic/utility categories (hospitals, pharmacies,
   // banks, mosques, etc.) only ever get the single cover photo — a photo
   // gallery doesn't suit them the way it does tourism/leisure categories.
-  const galleryEligible = serviceCategorySupportsGallery(service.category);
+  const galleryEligible = service.category ? serviceCategorySupportsGallery(service.category) : false;
   const galleryImages = galleryEligible ? service.gallery : [];
 
   const navTabs: HotelNavTab[] = [
@@ -125,8 +121,8 @@ export default async function ServiceDetailPage({
       <Breadcrumbs
         items={[
           { label: tNav("services"), href: `/${locale}/services` },
-          { label: SERVICE_CATEGORY_LABELS[service.category], href: `/${locale}/services/${SERVICE_CATEGORY_SLUGS[service.category]}` },
-          { label: service.name, href: `/${locale}${serviceHref(service.category, service.slug)}` },
+          { label: service.categoryLabel, href: `/${locale}/services/${service.categorySlug}` },
+          { label: service.name, href: `/${locale}${serviceHref(service.categorySlug, service.slug)}` },
         ]}
       />
 
@@ -135,7 +131,7 @@ export default async function ServiceDetailPage({
         name={service.name}
         rating={service.rating}
         reviewCount={service.reviewCount}
-        categoryLabel={SERVICE_CATEGORY_SINGULAR_LABELS[service.category]}
+        categoryLabel={singularize(service.categoryLabel)}
       />
 
       <HotelActionBar
@@ -245,7 +241,7 @@ export default async function ServiceDetailPage({
                 reviewCount={service.reviewCount}
                 reviews={service.reviews}
                 locale={locale}
-                pathToRevalidate={`/${locale}${serviceHref(service.category, service.slug)}`}
+                pathToRevalidate={`/${locale}${serviceHref(service.categorySlug, service.slug)}`}
               />
               <div className="mt-6">
                 <ReviewForm
@@ -253,7 +249,7 @@ export default async function ServiceDetailPage({
                   listingType="service"
                   listingId={service.id}
                   locale={locale}
-                  pathToRevalidate={`/${locale}${serviceHref(service.category, service.slug)}`}
+                  pathToRevalidate={`/${locale}${serviceHref(service.categorySlug, service.slug)}`}
                   existingReview={myReview}
                 />
               </div>
@@ -285,7 +281,7 @@ export default async function ServiceDetailPage({
                 {similarServices.map((s) => (
                   <div key={s.id} className="min-w-[272px] sm:min-w-0">
                     <ServiceCard
-                      href={`/${locale}${serviceHref(s.category, s.slug)}`}
+                      href={`/${locale}${serviceHref(s.categorySlug, s.slug)}`}
                       image={s.coverImage}
                       name={s.name}
                       address={s.address}
@@ -293,7 +289,9 @@ export default async function ServiceDetailPage({
                       reviewCount={s.reviewCount}
                       services={s.services}
                       phone={s.phone}
-                      category={s.category}
+                      categoryLabel={s.categoryLabel}
+                      categoryIcon={s.categoryIcon}
+                      categoryColor={s.categoryColor}
                       serviceId={s.id}
                       locale={locale}
                     />

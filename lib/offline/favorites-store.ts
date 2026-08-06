@@ -14,7 +14,7 @@ export interface OfflineFavorite {
   image: string;
   rating: number;
   reviewCount: number;
-  category?: string;
+  categorySlug?: string;
   locale: string;
   syncedAt: number;
 }
@@ -39,7 +39,7 @@ export async function syncFavorites(entries: FavoriteEntry[], locale: string): P
         image: entry.item.coverImage,
         rating: entry.item.rating,
         reviewCount: entry.item.reviewCount,
-        category: entry.item.category,
+        categorySlug: entry.item.categorySlug,
         locale,
         syncedAt: now,
       })

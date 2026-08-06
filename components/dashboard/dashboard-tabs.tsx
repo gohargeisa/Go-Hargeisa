@@ -19,16 +19,16 @@ import { NotificationList } from "@/components/shared/notification-list";
 import type { SavedTrip } from "@/lib/data/saved-trips";
 import type { MyReview } from "@/lib/data/reviews";
 import { serviceHref } from "@/lib/utils/service-categories";
-import type { Booking, Notification, ServiceCategory } from "@/types";
+import type { Booking, Notification } from "@/types";
 
-export type FavoriteEntry = { kind: "hotel" | "restaurant" | "cafe" | "attraction" | "service"; item: { id: string; slug: string; name: string; address: string; coverImage: string; rating: number; reviewCount: number; category?: string } };
+export type FavoriteEntry = { kind: "hotel" | "restaurant" | "cafe" | "attraction" | "service"; item: { id: string; slug: string; name: string; address: string; coverImage: string; rating: number; reviewCount: number; categorySlug?: string } };
 const hrefKind: Partial<Record<FavoriteEntry["kind"], string>> = { hotel: "hotels", restaurant: "restaurants", cafe: "cafes", attraction: "attractions" };
 /** Exported for reuse by components/shared/offline-favorites-sheet.tsx, which
  * links to the same listing pages from an IndexedDB-backed (not RSC-prop-
  * backed) favorites list — hence the narrower structural parameter type
  * instead of the full FavoriteEntry["item"] shape. */
-export function favoriteHref(locale: Locale, kind: FavoriteEntry["kind"], item: { slug: string; category?: string }): string {
-  if (kind === "service" && item.category) return `/${locale}${serviceHref(item.category as ServiceCategory, item.slug)}`;
+export function favoriteHref(locale: Locale, kind: FavoriteEntry["kind"], item: { slug: string; categorySlug?: string }): string {
+  if (kind === "service" && item.categorySlug) return `/${locale}${serviceHref(item.categorySlug, item.slug)}`;
   return `/${locale}/${hrefKind[kind]}/${item.slug}`;
 }
 const tabs = [

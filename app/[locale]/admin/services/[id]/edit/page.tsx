@@ -6,6 +6,7 @@ import type { Locale } from "@/lib/i18n/config";
 import { requireAdmin } from "@/lib/supabase/guards";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
+import { getServiceCategories } from "@/lib/data/categories";
 import { ServiceForm } from "@/components/admin/service-form";
 import type { MediaVideo } from "@/types";
 
@@ -41,6 +42,7 @@ export default async function EditServicePage({
   }
 
   const service = data as unknown as Database["public"]["Tables"]["services"]["Row"];
+  const categories = await getServiceCategories();
 
   const gallery = Array.isArray(service.gallery)
     ? (service.gallery as unknown as { url: string; alt?: string; category?: string }[])
@@ -53,6 +55,7 @@ export default async function EditServicePage({
         locale={locale}
         mode="edit"
         serviceId={service.id}
+        categories={categories}
         initial={{
           slug: service.slug,
           name: service.name,
@@ -77,7 +80,7 @@ export default async function EditServicePage({
             ? (service.opening_hours_structured as never)
             : [],
           services: service.services ?? [],
-          category: service.category,
+          categoryId: service.category_id ?? categories[0]?.id ?? "",
           featured: service.featured,
         }}
       />

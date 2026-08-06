@@ -2,6 +2,7 @@ import { createPublicClient } from "@/lib/supabase/public";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { mapPoints as mockMapPoints } from "@/lib/mock-data";
 import { SERVICES_PUBLIC_ENABLED } from "@/lib/config/features";
+import { getServiceCategories } from "@/lib/data/categories";
 import type { CityServiceCategory, CityServicePoint, MapPoint, OpeningHoursGroup } from "@/types";
 
 export async function getMapPoints(): Promise<MapPoint[]> {
@@ -67,7 +68,7 @@ export async function getCityServicePoints(): Promise<CityServicePoint[]> {
     SERVICES_PUBLIC_ENABLED
       ? supabase
           .from("services")
-          .select("id, slug, name, category, short_description, address, phone, lat, lng, opening_hours_structured")
+          .select("id, slug, name, category, category_id, short_description, address, phone, lat, lng, opening_hours_structured")
           .eq("status", "published")
       : Promise.resolve({ data: null, error: null }),
   ]);
@@ -83,19 +84,26 @@ export async function getCityServicePoints(): Promise<CityServicePoint[]> {
       : [];
   });
 
-  const servicePoints: CityServicePoint[] = (serviceRows ?? []).map((row) => ({
-    id: row.id,
-    name: row.name,
-    category: row.category as CityServiceCategory,
-    location: { lat: row.lat, lng: row.lng },
-    slug: row.slug,
-    address: row.address,
-    description: row.short_description,
-    phone: row.phone ?? undefined,
-    openingHoursStructured: Array.isArray(row.opening_hours_structured)
-      ? (row.opening_hours_structured as unknown as OpeningHoursGroup[])
-      : [],
-  }));
+  const categoryMap = new Map((await getServiceCategories()).map((c) => [c.id, c]));
+  // Categories added after the legacy service_category enum (e.g. Flower
+  // Shops, Real Estate) have no CATEGORY_CONFIG entry to render a pin with —
+  // they stay on /services but don't appear on this map layer yet.
+  const servicePoints: CityServicePoint[] = (serviceRows ?? [])
+    .filter((row) => row.category !== null)
+    .map((row) => ({
+      id: row.id,
+      name: row.name,
+      category: row.category as CityServiceCategory,
+      categorySlug: row.category_id ? categoryMap.get(row.category_id)?.slug : undefined,
+      location: { lat: row.lat, lng: row.lng },
+      slug: row.slug,
+      address: row.address,
+      description: row.short_description,
+      phone: row.phone ?? undefined,
+      openingHoursStructured: Array.isArray(row.opening_hours_structured)
+        ? (row.opening_hours_structured as unknown as OpeningHoursGroup[])
+        : [],
+    }));
 
   return [...legacyPoints, ...servicePoints];
 }

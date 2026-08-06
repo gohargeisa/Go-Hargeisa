@@ -6,12 +6,11 @@ import { memo } from "react";
 import { useTranslations } from "next-intl";
 import { MapPin, Phone, Sparkles, Star } from "lucide-react";
 import { useImageLoaded } from "@/lib/hooks/use-image-loaded";
-import { CATEGORY_CONFIG } from "@/components/city-map/category-config";
+import { DynamicIcon } from "@/lib/utils/dynamic-icon";
 import { FavoriteButton } from "@/components/shared/favorite-button";
 import { AnimatedCard } from "@/components/shared/animated-card";
 import { FloatingBadge } from "@/components/shared/floating-badge";
 import { PrimaryButton, SecondaryButton } from "@/components/shared/buttons";
-import type { ServiceCategory } from "@/types";
 
 /**
  * Homepage-only service card, matching the visual language of
@@ -27,7 +26,9 @@ function PremiumServiceCardBase({
   address,
   rating,
   reviewCount,
-  category,
+  categoryLabel,
+  categoryIcon,
+  categoryColor,
   phone,
   featured = false,
   serviceId,
@@ -40,7 +41,9 @@ function PremiumServiceCardBase({
   address: string;
   rating: number;
   reviewCount: number;
-  category: ServiceCategory;
+  categoryLabel: string;
+  categoryIcon: string;
+  categoryColor: string;
   phone?: string;
   featured?: boolean;
   serviceId?: string;
@@ -50,8 +53,6 @@ function PremiumServiceCardBase({
   const t = useTranslations("listings");
   const { loaded, imgRef, onLoad } = useImageLoaded();
 
-  const meta = CATEGORY_CONFIG[category];
-  const CategoryIcon = meta.icon;
   const hasRealImage = Boolean(image) && !image.includes("placehold.co");
 
   return (
@@ -90,16 +91,16 @@ function PremiumServiceCardBase({
             aria-label={name}
             className="absolute inset-0 z-0 flex items-center justify-center bg-gradient-to-br from-primary/15 via-secondary/10 to-primary/5 transition-transform duration-500 ease-premium group-hover:scale-105 dark:from-primary/20 dark:via-secondary/20 dark:to-white/5"
           >
-            <CategoryIcon size={44} strokeWidth={1.5} className="text-primary/40" aria-hidden="true" />
+            <DynamicIcon name={categoryIcon} size={44} strokeWidth={1.5} className="text-primary/40" aria-hidden="true" />
           </Link>
         )}
 
         <span
           className="absolute start-3.5 top-3.5 z-10 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-[0_4px_14px_rgba(0,0,0,0.25)] ring-1 ring-white/30 backdrop-blur-md"
-          style={{ backgroundColor: meta.color }}
+          style={{ backgroundColor: categoryColor }}
         >
-          <CategoryIcon size={10} aria-hidden="true" />
-          {meta.label}
+          <DynamicIcon name={categoryIcon} size={10} aria-hidden="true" />
+          {categoryLabel}
         </span>
 
         {featured && (

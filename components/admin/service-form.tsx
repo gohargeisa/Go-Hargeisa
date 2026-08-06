@@ -13,9 +13,20 @@ import { Field, TagInput, inputClass } from "@/components/admin/form-shared";
 import { createRecord, updateRecord } from "@/lib/actions/admin";
 import { useUnsavedChangesWarning } from "@/lib/hooks/use-unsaved-changes-warning";
 import { SERVICE_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
-import { SERVICE_CATEGORY_ORDER, SERVICE_CATEGORY_SINGULAR_LABELS } from "@/lib/utils/service-categories";
 import type { Locale } from "@/lib/i18n/config";
-import type { GalleryImage, MediaVideo, OpeningHoursGroup, ServiceCategory } from "@/types";
+import type { Category, GalleryImage, MediaVideo, OpeningHoursGroup, ServiceCategory } from "@/types";
+
+// The legacy service_category enum has no value for categories added after
+// the `categories` table existed (Flower Shops, Real Estate, ...) — this
+// lets the form keep writing the deprecated `category` column for the
+// original categories only, purely so serviceCategorySupportsGallery (still
+// enum-keyed, out of scope for this migration) keeps working for them.
+const LEGACY_ENUM_BY_SLUG: Partial<Record<string, ServiceCategory>> = {
+  hospitals: "hospital", pharmacies: "pharmacy", "dental-clinics": "dental_clinic", banks: "bank",
+  atms: "atm", "currency-exchange": "currency_exchange", "gas-stations": "gas_station", "car-rentals": "car_rental",
+  mosques: "mosque", schools: "school", universities: "university", gyms: "gym", "tour-companies": "tour_company",
+  apartments: "apartment", supermarkets: "supermarket", clinics: "clinic", "government-offices": "government_office",
+};
 
 export interface ServiceFormInput {
   slug: string;
@@ -39,7 +50,7 @@ export interface ServiceFormInput {
   openingHours: string;
   openingHoursStructured: OpeningHoursGroup[];
   services: string[];
-  category: ServiceCategory;
+  categoryId: string;
   featured: boolean;
 }
 
@@ -48,11 +59,15 @@ export function ServiceForm({
   mode,
   serviceId,
   initial,
+  categories,
 }: {
   locale: Locale;
   mode: "create" | "edit";
   serviceId?: string;
   initial?: Partial<ServiceFormInput>;
+  /** Every `services`-vertical category from the `categories` table — the
+   * category picker below reads only from this, never a hardcoded list. */
+  categories: Category[];
 }) {
   const t = useTranslations("admin");
   const tw = useTranslations("weekdays");
@@ -78,10 +93,13 @@ export function ServiceForm({
     openingHours: initial?.openingHours ?? "",
     openingHoursStructured: initial?.openingHoursStructured ?? [],
     services: initial?.services ?? [],
-    category: initial?.category ?? "hospital",
+    categoryId: initial?.categoryId ?? categories[0]?.id ?? "",
     featured: initial?.featured ?? false,
   });
   const [error, setError] = useState<string | null>(null);
+  const selectedCategory = categories.find((c) => c.id === form.categoryId);
+  const legacyEnum = selectedCategory ? LEGACY_ENUM_BY_SLUG[selectedCategory.slug] : undefined;
+  const gallerySupported = legacyEnum ? serviceCategorySupportsGallery(legacyEnum) : false;
   const [isPending, startTransition] = useTransition();
   const [dirty, setDirty] = useState(false);
   useUnsavedChangesWarning(dirty);
@@ -121,7 +139,8 @@ export function ServiceForm({
       opening_hours: form.openingHours || null,
       opening_hours_structured: form.openingHoursStructured,
       services: form.services,
-      category: form.category,
+      category_id: form.categoryId || null,
+      category: legacyEnum ?? null,
       featured: form.featured,
     };
     const revalidatePaths = [`/${locale}/admin/services`, `/${locale}/services`, `/${locale}`];
@@ -143,7 +162,7 @@ export function ServiceForm({
         <ImageUploader folder="services/logos" value={form.logo} onChange={(url) => update("logo", url)} label="Logo" rounded="rounded-full" />
       </div>
 
-      {serviceCategorySupportsGallery(form.category) ? (
+      {gallerySupported ? (
         <GalleryManager
           folder="services/gallery"
           value={form.gallery}
@@ -182,10 +201,10 @@ export function ServiceForm({
       </div>
 
       <Field label={t("categoryLabel")}>
-        <select value={form.category} onChange={(e) => update("category", e.target.value as ServiceCategory)} className={inputClass}>
-          {SERVICE_CATEGORY_ORDER.map((cat) => (
-            <option key={cat} value={cat}>
-              {SERVICE_CATEGORY_SINGULAR_LABELS[cat]}
+        <select value={form.categoryId} onChange={(e) => update("categoryId", e.target.value)} className={inputClass}>
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
             </option>
           ))}
         </select>

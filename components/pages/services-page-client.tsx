@@ -4,14 +4,13 @@ import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { SearchX } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
-import type { ServiceCategory } from "@/types";
+import type { Category } from "@/types";
 import { ServiceCard } from "@/components/shared/service-card";
 import { SearchWithin } from "@/components/shared/search-within";
 import { ListingFilters, type FilterOptions } from "@/components/shared/listing-filters";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Reveal } from "@/components/home/reveal";
-import { CATEGORY_CONFIG } from "@/components/city-map/category-config";
-import { SERVICE_CATEGORY_ORDER, SERVICE_CATEGORY_LABELS, SERVICE_CATEGORY_SLUGS } from "@/lib/utils/service-categories";
+import { DynamicIcon } from "@/lib/utils/dynamic-icon";
 import { filterListings } from "@/lib/utils/filter-listings";
 
 interface ServiceListItem {
@@ -24,7 +23,10 @@ interface ServiceListItem {
   reviewCount: number;
   services?: string[];
   phone?: string;
-  category: ServiceCategory;
+  categorySlug: string;
+  categoryLabel: string;
+  categoryIcon: string;
+  categoryColor: string;
   featured?: boolean;
   createdAt?: string;
 }
@@ -35,16 +37,19 @@ export function ServicesPageClient({
   searchParams,
   /** Fixed category — set on /services/[category] sub-pages. When unset
    * (the /services hub), a category tab bar lets visitors switch between
-   * all 8 categories client-side without a full page navigation. */
+   * every represented category client-side without a full page navigation.
+   * `allCategories` is only needed on the hub, to render that tab bar. */
   category,
+  allCategories = [],
 }: {
   locale: Locale;
   initialServices: ServiceListItem[];
   searchParams: Record<string, string | undefined>;
-  category?: ServiceCategory;
+  category?: Category;
+  allCategories?: Category[];
 }) {
   const t = useTranslations("listings");
-  const [activeCategory, setActiveCategory] = useState<ServiceCategory | "all">(category ?? "all");
+  const [activeCategorySlug, setActiveCategorySlug] = useState<string>(category?.slug ?? "all");
 
   const filters: FilterOptions = useMemo(
     () => ({
@@ -55,9 +60,9 @@ export function ServicesPageClient({
   );
 
   const byCategory = useMemo(() => {
-    if (category || activeCategory === "all") return initialServices;
-    return initialServices.filter((s) => s.category === activeCategory);
-  }, [initialServices, activeCategory, category]);
+    if (category || activeCategorySlug === "all") return initialServices;
+    return initialServices.filter((s) => s.categorySlug === activeCategorySlug);
+  }, [initialServices, activeCategorySlug, category]);
 
   const filteredServices = useMemo(() => {
     const filtered = filterListings(byCategory, filters);
@@ -66,7 +71,14 @@ export function ServicesPageClient({
     return { featured, nonFeatured, total: filtered.length };
   }, [byCategory, filters]);
 
-  const basePath = category ? `/${locale}/services/${SERVICE_CATEGORY_SLUGS[category]}` : `/${locale}/services`;
+  // Only categories actually represented among the loaded services get a
+  // tab — no empty tabs for categories with zero listings.
+  const availableCategories = useMemo(() => {
+    const slugsWithListings = new Set(initialServices.map((s) => s.categorySlug));
+    return allCategories.filter((c) => slugsWithListings.has(c.slug));
+  }, [allCategories, initialServices]);
+
+  const basePath = category ? `/${locale}/services/${category.slug}` : `/${locale}/services`;
 
   return (
     <section className="container-px mx-auto py-10 md:py-14">
@@ -74,7 +86,7 @@ export function ServicesPageClient({
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="font-display text-2xl font-bold md:text-3xl">
-              {category ? SERVICE_CATEGORY_LABELS[category] : t("servicesCount", { count: filteredServices.total })}
+              {category ? category.name : t("servicesCount", { count: filteredServices.total })}
             </h2>
             <p className="mt-1 text-sm text-ink/60 dark:text-sand/60">
               {searchParams.q ? t("resultsFor", { query: searchParams.q }) : t("browseAllServices")}
@@ -82,37 +94,35 @@ export function ServicesPageClient({
           </div>
         </div>
 
-        {!category && (
+        {!category && availableCategories.length > 0 && (
           <div className="mb-6 flex flex-wrap gap-2" role="group" aria-label="Filter by category">
             <button
               type="button"
-              onClick={() => setActiveCategory("all")}
-              aria-pressed={activeCategory === "all"}
+              onClick={() => setActiveCategorySlug("all")}
+              aria-pressed={activeCategorySlug === "all"}
               className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-semibold shadow-sm transition-all duration-300 ease-premium ${
-                activeCategory === "all"
+                activeCategorySlug === "all"
                   ? "border-transparent bg-primary text-white"
                   : "border-ink/10 bg-white text-ink/70 hover:-translate-y-0.5 hover:border-ink/20 dark:border-white/15 dark:bg-ink/80 dark:text-sand/70"
               }`}
             >
               {t("allServices")}
             </button>
-            {SERVICE_CATEGORY_ORDER.map((c) => {
-              const meta = CATEGORY_CONFIG[c];
-              const Icon = meta.icon;
-              const isActive = activeCategory === c;
+            {availableCategories.map((c) => {
+              const isActive = activeCategorySlug === c.slug;
               return (
                 <button
-                  key={c}
+                  key={c.id}
                   type="button"
-                  onClick={() => setActiveCategory(c)}
+                  onClick={() => setActiveCategorySlug(c.slug)}
                   aria-pressed={isActive}
                   className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-semibold shadow-sm transition-all duration-300 ease-premium ${
                     isActive ? "border-transparent text-white" : "border-ink/10 bg-white text-ink/70 hover:-translate-y-0.5 hover:border-ink/20 dark:border-white/15 dark:bg-ink/80 dark:text-sand/70"
                   }`}
-                  style={isActive ? { backgroundColor: meta.color } : undefined}
+                  style={isActive ? { backgroundColor: c.color ?? undefined } : undefined}
                 >
-                  <Icon size={13} aria-hidden="true" />
-                  {meta.label}
+                  <DynamicIcon name={c.icon} size={13} aria-hidden="true" />
+                  {c.name}
                 </button>
               );
             })}
@@ -142,7 +152,7 @@ export function ServicesPageClient({
                   {filteredServices.featured.map((s) => (
                     <ServiceCard
                       key={s.id}
-                      href={`/${locale}/services/${SERVICE_CATEGORY_SLUGS[s.category]}/${s.slug}`}
+                      href={`/${locale}/services/${s.categorySlug}/${s.slug}`}
                       image={s.coverImage}
                       name={s.name}
                       address={s.address}
@@ -150,7 +160,9 @@ export function ServicesPageClient({
                       reviewCount={s.reviewCount}
                       services={s.services}
                       phone={s.phone}
-                      category={s.category}
+                      categoryLabel={s.categoryLabel}
+                      categoryIcon={s.categoryIcon}
+                      categoryColor={s.categoryColor}
                       featured
                       serviceId={s.id}
                       locale={locale}
@@ -172,7 +184,7 @@ export function ServicesPageClient({
                   {filteredServices.nonFeatured.map((s) => (
                     <ServiceCard
                       key={s.id}
-                      href={`/${locale}/services/${SERVICE_CATEGORY_SLUGS[s.category]}/${s.slug}`}
+                      href={`/${locale}/services/${s.categorySlug}/${s.slug}`}
                       image={s.coverImage}
                       name={s.name}
                       address={s.address}
@@ -180,7 +192,9 @@ export function ServicesPageClient({
                       reviewCount={s.reviewCount}
                       services={s.services}
                       phone={s.phone}
-                      category={s.category}
+                      categoryLabel={s.categoryLabel}
+                      categoryIcon={s.categoryIcon}
+                      categoryColor={s.categoryColor}
                       serviceId={s.id}
                       locale={locale}
                     />

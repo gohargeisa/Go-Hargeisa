@@ -47,6 +47,41 @@ export type BusinessListingType = "hotel" | "restaurant" | "cafe" | "service";
  * ~8 separate files as new listing types (event, city_service) are added. */
 export type PolymorphicListingType = "hotel" | "restaurant" | "cafe" | "attraction" | "service" | "event" | "city_service";
 
+/** Which real table a category's listings actually live in — see
+ * supabase/migrations/20260806000001_add_categories_system.sql for why
+ * hotels/restaurants/cafes/attractions/events keep their own dedicated
+ * tables while every other category is backed by `services`. */
+export type CategoryTargetTable = "hotels" | "restaurants" | "cafes" | "attractions" | "events" | "services";
+
+/** Single source of truth for every business category — the `categories`
+ * table. Replaces the scattered per-vocabulary config files
+ * (lib/utils/service-categories.ts, lib/utils/partner-categories.ts, etc.)
+ * as the one place the navbar, homepage, submission form, search, and
+ * admin panel all read category metadata from. */
+export interface Category {
+  id: string;
+  slug: string;
+  name: string;
+  nameAr?: string;
+  nameSo?: string;
+  description?: string;
+  descriptionAr?: string;
+  descriptionSo?: string;
+  /** lucide-react icon export name (e.g. "Hotel", "Flower2") — resolve via lib/utils/dynamic-icon.tsx. */
+  icon: string;
+  color?: string;
+  targetTable: CategoryTargetTable;
+  isActive: boolean;
+  isPinned: boolean;
+  sortOrder: number;
+  /** Extra free-text terms that should resolve a search query to this category — see matchCategoryFromQuery. */
+  searchKeywords: string[];
+  /** Populated by getCategoriesWithCounts() — the number of published listings in this category. Absent from plain getCategories(). */
+  businessCount?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type PaymentStatus = "unpaid" | "pending" | "paid" | "refunded";
 
 export interface Booking {
@@ -548,7 +583,13 @@ export interface Service {
   openingHours?: string;
   openingHoursStructured?: OpeningHoursGroup[];
   services: string[];
-  category: ServiceCategory;
+  /** @deprecated Superseded by categorySlug/categoryLabel/categoryIcon, resolved from the `categories` table. Kept only for the underlying enum column — null for any category added after the categories table existed, since the enum has no matching value for it. */
+  category: ServiceCategory | null;
+  /** Resolved from `categories` via services.category_id — see lib/data/services.ts. Falls back to the legacy `category` enum value/label only for rows a migration hasn't backfilled yet. */
+  categorySlug: string;
+  categoryLabel: string;
+  categoryIcon: string;
+  categoryColor: string;
   featured?: boolean;
   logo?: string;
 }
@@ -741,6 +782,10 @@ export interface CityServicePoint {
    * so the map popup can show full details + a working Claim button
    * without a second fetch. Absent for legacy map_points pins. */
   slug?: string;
+  /** Phase 2 service points only — the `categories` table slug (e.g.
+   * "hospitals"), for building a working /services/[category]/[slug] link.
+   * Distinct from `category` above, which is the map-pin styling taxonomy. */
+  categorySlug?: string;
   address?: string;
   description?: string;
   phone?: string;

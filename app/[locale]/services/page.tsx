@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
 import { getServices } from "@/lib/data/services";
+import { getServiceCategories } from "@/lib/data/categories";
 import { PremiumPageHero } from "@/components/shared/premium-page-hero";
 import { ServicesPageClient } from "@/components/pages/services-page-client";
 import { SERVICES_PUBLIC_ENABLED } from "@/lib/config/features";
@@ -40,7 +41,7 @@ export default async function ServicesPage({
   if (!SERVICES_PUBLIC_ENABLED) notFound();
 
   const t = await getTranslations("home");
-  const services = await getServices({ q: searchParams.q });
+  const [services, allCategories] = await Promise.all([getServices({ q: searchParams.q }), getServiceCategories()]);
 
   return (
     <>
@@ -53,7 +54,7 @@ export default async function ServicesPage({
         scrollHint={t("servicesScrollHint")}
       />
 
-      <ServicesPageClient locale={locale} initialServices={services} searchParams={searchParams} />
+      <ServicesPageClient locale={locale} initialServices={services} searchParams={searchParams} allCategories={allCategories} />
     </>
   );
 }

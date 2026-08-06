@@ -5,21 +5,19 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { MapPin, Phone, Sparkles, Star } from "lucide-react";
 import { useImageLoaded } from "@/lib/hooks/use-image-loaded";
-import { CATEGORY_CONFIG } from "@/components/city-map/category-config";
+import { DynamicIcon } from "@/lib/utils/dynamic-icon";
 import { FavoriteButton } from "./favorite-button";
 import { AnimatedCard } from "./animated-card";
 import { FloatingBadge } from "./floating-badge";
-import type { ServiceCategory } from "@/types";
 
 const MAX_VISIBLE_SERVICES = 3;
 
 /**
- * Listing-page card for the 8 Essential Services categories — matches
- * components/shared/hotel-card.tsx and cafe-card.tsx exactly (same sizing,
- * spacing, badges, hover treatment) so /services reads as the same product
- * quality as /hotels and /cafes, just with a category badge (icon + color
- * from the Interactive Map's own category config, so the two stay visually
- * consistent) instead of a price/cuisine block.
+ * Listing-page card for the `services` vertical's long-tail categories —
+ * matches components/shared/hotel-card.tsx and cafe-card.tsx exactly (same
+ * sizing, spacing, badges, hover treatment) so /services reads as the same
+ * product quality as /hotels and /cafes, just with a category badge (icon +
+ * color resolved from the `categories` table) instead of a price/cuisine block.
  */
 export function ServiceCard({
   href,
@@ -30,7 +28,9 @@ export function ServiceCard({
   reviewCount,
   services = [],
   phone,
-  category,
+  categoryLabel,
+  categoryIcon,
+  categoryColor,
   featured = false,
   serviceId,
   locale,
@@ -44,7 +44,9 @@ export function ServiceCard({
   reviewCount: number;
   services?: string[];
   phone?: string;
-  category: ServiceCategory;
+  categoryLabel: string;
+  categoryIcon: string;
+  categoryColor: string;
   featured?: boolean;
   serviceId?: string;
   locale?: string;
@@ -53,8 +55,6 @@ export function ServiceCard({
   const t = useTranslations("listings");
   const { loaded, imgRef, onLoad } = useImageLoaded();
 
-  const meta = CATEGORY_CONFIG[category];
-  const CategoryIcon = meta.icon;
   const visibleServices = services.slice(0, MAX_VISIBLE_SERVICES);
   const extraCount = services.length - visibleServices.length;
   const hasRealImage = Boolean(image) && !image.includes("placehold.co");
@@ -92,16 +92,16 @@ export function ServiceCard({
             aria-label={name}
             className="absolute inset-0 z-0 flex items-center justify-center bg-gradient-to-br from-primary/15 via-secondary/10 to-primary/5 transition-transform duration-500 ease-out group-hover:scale-105 dark:from-primary/20 dark:via-secondary/20 dark:to-white/5"
           >
-            <CategoryIcon size={40} strokeWidth={1.5} className="text-primary/40" aria-hidden="true" />
+            <DynamicIcon name={categoryIcon} size={40} strokeWidth={1.5} className="text-primary/40" aria-hidden="true" />
           </Link>
         )}
 
         <span
           className="absolute start-3.5 top-3.5 z-10 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-[0_4px_14px_rgba(0,0,0,0.25)] ring-1 ring-white/30 backdrop-blur-md"
-          style={{ backgroundColor: meta.color }}
+          style={{ backgroundColor: categoryColor }}
         >
-          <CategoryIcon size={11} aria-hidden="true" />
-          {meta.label}
+          <DynamicIcon name={categoryIcon} size={11} aria-hidden="true" />
+          {categoryLabel}
         </span>
 
         {featured && (

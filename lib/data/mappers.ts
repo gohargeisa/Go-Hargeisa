@@ -1,5 +1,5 @@
 import type { Database } from "@/types/database";
-import type { Hotel, HotelRoom, Restaurant, Cafe, Service, Attraction, EventItem, CityService, Article, GalleryImage, Review, BusinessOffer, MediaVideo, Notification, NotificationCategory, NotificationSeverity } from "@/types";
+import type { Hotel, HotelRoom, Restaurant, Cafe, Service, Attraction, EventItem, CityService, Article, GalleryImage, Review, BusinessOffer, MediaVideo, Notification, NotificationCategory, NotificationSeverity, Category } from "@/types";
 
 type HotelRow = Database["public"]["Tables"]["hotels"]["Row"];
 type HotelRoomRow = Database["public"]["Tables"]["hotel_rooms"]["Row"];
@@ -11,6 +11,7 @@ type EventRow = Database["public"]["Tables"]["events"]["Row"];
 type CityServiceRow = Database["public"]["Tables"]["city_services"]["Row"];
 type ArticleRow = Database["public"]["Tables"]["articles"]["Row"];
 type ReviewRow = Database["public"]["Tables"]["reviews"]["Row"];
+type CategoryRow = Database["public"]["Tables"]["categories"]["Row"];
 
 function toGallery(json: unknown): GalleryImage[] {
   if (!Array.isArray(json)) return [];
@@ -234,7 +235,32 @@ export function mapCafe(row: CafeRow, reviews: Review[] = [], locale?: string): 
   };
 }
 
-export function mapService(row: ServiceRow, reviews: Review[] = []): Service {
+export function mapCategory(row: CategoryRow): Category {
+  return {
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    nameAr: row.name_ar ?? undefined,
+    nameSo: row.name_so ?? undefined,
+    description: row.description ?? undefined,
+    descriptionAr: row.description_ar ?? undefined,
+    descriptionSo: row.description_so ?? undefined,
+    icon: row.icon,
+    color: row.color ?? undefined,
+    targetTable: row.target_table,
+    isActive: row.is_active,
+    isPinned: row.is_pinned,
+    sortOrder: row.sort_order,
+    searchKeywords: row.search_keywords ?? [],
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+/** `category` is the resolved `categories` row for this service's
+ * `category_id` — undefined for a row a migration hasn't backfilled yet,
+ * in which case the deprecated `category` enum column is the only fallback. */
+export function mapService(row: ServiceRow, reviews: Review[] = [], category?: Category): Service {
   const openingHoursStructured = Array.isArray(row.opening_hours_structured)
     ? (row.opening_hours_structured as unknown as Service["openingHoursStructured"])
     : [];
@@ -263,6 +289,10 @@ export function mapService(row: ServiceRow, reviews: Review[] = []): Service {
     openingHoursStructured,
     services: row.services ?? [],
     category: row.category as Service["category"],
+    categorySlug: category?.slug ?? row.category ?? "uncategorized",
+    categoryLabel: category?.name ?? row.category ?? "Uncategorized",
+    categoryIcon: category?.icon ?? "Building2",
+    categoryColor: category?.color ?? "#64748B",
     featured: row.featured,
     logo: row.logo_url ?? undefined,
   };
