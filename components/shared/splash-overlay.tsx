@@ -81,7 +81,7 @@ export function SplashScreenOverlay() {
   return (
     <m.div
       aria-hidden="true"
-      className="fixed inset-0 z-[200] flex flex-col items-center justify-center overflow-hidden"
+      className="fixed inset-0 z-splash flex flex-col items-center justify-center overflow-hidden"
       animate={{ opacity: phase === "exit" ? 0 : 1 }}
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
     >

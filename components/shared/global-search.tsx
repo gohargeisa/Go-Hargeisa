@@ -14,6 +14,7 @@ import type { Destination } from "@/types";
 import { getRecentSearches, addRecentSearch, clearRecentSearches } from "@/lib/mobile/recent-searches";
 import { useSearchOverlay } from "@/components/shared/search-overlay-provider";
 import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
+import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
 
 const TYPE_ICON = { hotel: Hotel, restaurant: UtensilsCrossed, cafe: Coffee, attraction: Landmark } as const;
 
@@ -33,6 +34,7 @@ export function GlobalSearch({ locale, scrolled }: { locale: Locale; scrolled: b
   const dialogRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   useFocusTrap(dialogRef, open);
+  useScrollLock(open);
 
   useEffect(() => {
     if (!open) return;
@@ -156,7 +158,7 @@ export function GlobalSearch({ locale, scrolled }: { locale: Locale; scrolled: b
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-40 bg-black/55 backdrop-blur-sm lg:bg-transparent lg:backdrop-blur-none"
+              className="fixed inset-0 z-overlay bg-black/55 backdrop-blur-sm lg:bg-transparent lg:backdrop-blur-none"
               onClick={close}
               aria-hidden="true"
             />
@@ -169,7 +171,7 @@ export function GlobalSearch({ locale, scrolled }: { locale: Locale; scrolled: b
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -24 }}
               transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-              className="fixed inset-x-0 top-0 z-50 flex max-h-[100dvh] flex-col overflow-hidden bg-white pt-[env(safe-area-inset-top)] shadow-premium dark:bg-ink lg:absolute lg:inset-x-auto lg:end-0 lg:top-12 lg:max-h-[32rem] lg:w-[24rem] lg:max-w-[92vw] lg:rounded-2xl lg:border lg:border-ink/8 lg:pt-0 lg:dark:border-white/10"
+              className="fixed inset-x-0 top-0 z-overlay flex max-h-[100dvh] flex-col overflow-hidden bg-white pt-[env(safe-area-inset-top)] shadow-premium dark:bg-ink lg:absolute lg:inset-x-auto lg:end-0 lg:top-12 lg:max-h-[32rem] lg:w-[24rem] lg:max-w-[92vw] lg:rounded-2xl lg:border lg:border-ink/8 lg:pt-0 lg:dark:border-white/10"
             >
               <form onSubmit={onSubmit} className="flex shrink-0 items-center gap-2 border-b border-ink/8 px-4 py-3.5 dark:border-white/10">
                 <Search size={17} className="shrink-0 text-ink/40 dark:text-sand/40" aria-hidden="true" />

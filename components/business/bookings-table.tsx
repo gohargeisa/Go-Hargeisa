@@ -7,6 +7,7 @@ import { Check, Loader2, MessageCircle, Plus, X } from "lucide-react";
 import { createBooking, updateBookingStatus, type BookingInput } from "@/lib/actions/business";
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
 import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
+import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
 import type { Booking, HotelRoom } from "@/types";
 
 const STATUS_OPTIONS: Booking["status"][] = ["pending", "confirmed", "cancelled", "completed"];
@@ -261,6 +262,7 @@ export function BookingsTable({
 function ModalShell({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
   const dialogRef = useRef<HTMLDivElement>(null);
   useFocusTrap(dialogRef);
+  useScrollLock(true);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -271,7 +273,7 @@ function ModalShell({ title, onClose, children }: { title: string; onClose: () =
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-modal flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />
       <div
         ref={dialogRef}

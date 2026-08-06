@@ -7,6 +7,7 @@ import { Check, Copy, Facebook, Mail, MessageCircle, Send, Share2 } from "lucide
 /** X has no dedicated lucide icon — reuses the same "closest stand-in"
  * approach as lib/config/social-links.ts (no new icon dependency). */
 import { Twitter } from "lucide-react";
+import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
 
 export function ShareButton({
   title,
@@ -21,6 +22,7 @@ export function ShareButton({
   const [copied, setCopied] = useState(false);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  useScrollLock(open);
 
   useEffect(() => {
     function onClick(e: MouseEvent) {
@@ -89,10 +91,12 @@ export function ShareButton({
       </button>
 
       {open && (
-        <div
-          role="menu"
-          className="absolute start-0 top-full z-50 mt-2 w-52 overflow-hidden rounded-xl2 border border-ink/10 bg-white shadow-card dark:border-white/10 dark:bg-ink"
-        >
+        <>
+          <div className="fixed inset-0 z-overlay bg-ink/40" onClick={() => setOpen(false)} aria-hidden="true" />
+          <div
+            role="menu"
+            className="absolute start-0 top-full z-overlay mt-2 w-52 overflow-hidden rounded-xl2 border border-ink/10 bg-white shadow-card dark:border-white/10 dark:bg-ink"
+          >
           {shareLinks.map(({ key, icon: Icon, href }) => (
             <a
               key={key}
@@ -114,7 +118,8 @@ export function ShareButton({
             <Copy size={15} aria-hidden="true" />
             {t("copyLink")}
           </button>
-        </div>
+          </div>
+        </>
       )}
     </div>
   );

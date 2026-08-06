@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Loader2, ShieldCheck, X } from "lucide-react";
 import { submitBusinessClaim } from "@/lib/actions/claims";
 import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
+import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
 import type { BusinessListingType } from "@/types";
 
 export function ClaimBusinessButton({
@@ -20,6 +21,7 @@ export function ClaimBusinessButton({
   const [open, setOpen] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
   useFocusTrap(dialogRef, open);
+  useScrollLock(open);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -62,7 +64,7 @@ export function ClaimBusinessButton({
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-modal flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/50" onClick={() => setOpen(false)} aria-hidden="true" />
           <div
             ref={dialogRef}

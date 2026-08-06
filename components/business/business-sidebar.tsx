@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, m, useReducedMotion } from "framer-motion";
 import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
+import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
 import {
   Home,
   Building2,
@@ -61,6 +62,7 @@ export function BusinessSidebar({ locale, listing }: { locale: Locale; listing: 
   const [mobileOpen, setMobileOpen] = useState(false);
   const mobileNavRef = useRef<HTMLDivElement>(null);
   useFocusTrap(mobileNavRef, mobileOpen);
+  useScrollLock(mobileOpen);
   const reduceMotion = useReducedMotion();
   const isRtl = locale === "ar";
   const base = `/${locale}/business`;
@@ -160,7 +162,7 @@ export function BusinessSidebar({ locale, listing }: { locale: Locale; listing: 
               initial={reduceMotion ? undefined : { opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={reduceMotion ? undefined : { opacity: 0 }}
-              className="fixed inset-0 z-[70] bg-black/50 lg:hidden"
+              className="fixed inset-0 z-drawer bg-black/50 lg:hidden"
               onClick={() => setMobileOpen(false)}
               aria-hidden="true"
             />
@@ -174,7 +176,7 @@ export function BusinessSidebar({ locale, listing }: { locale: Locale; listing: 
               animate={{ x: 0 }}
               exit={reduceMotion ? undefined : { x: isRtl ? "100%" : "-100%" }}
               transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              className="fixed inset-y-0 start-0 z-[70] flex w-[85vw] max-w-xs flex-col bg-white shadow-2xl dark:bg-ink lg:hidden"
+              className="fixed inset-y-0 start-0 z-drawer flex w-[85vw] max-w-xs flex-col bg-white shadow-2xl dark:bg-ink lg:hidden"
             >
               <div className="flex items-center justify-between px-5 py-5">
                 <span className="font-display text-lg font-bold text-primary">Go Hargeisa</span>

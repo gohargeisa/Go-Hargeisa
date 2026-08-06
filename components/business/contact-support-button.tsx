@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Loader2, X } from "lucide-react";
 import { sendContactMessage } from "@/lib/actions/content";
 import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
+import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
 
 /** Shared by SubscriptionCard's "Manage Subscription" and SupportCard's "Contact Support" — no payment gateway is integrated, so both route through the existing contact-message pipe rather than a fake checkout. */
 export function ContactSupportButton({
@@ -24,6 +25,7 @@ export function ContactSupportButton({
   const [open, setOpen] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
   useFocusTrap(dialogRef, open);
+  useScrollLock(open);
   const [message, setMessage] = useState("");
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,7 +57,7 @@ export function ContactSupportButton({
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-modal flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/50" onClick={() => setOpen(false)} aria-hidden="true" />
           <div
             ref={dialogRef}

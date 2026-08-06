@@ -86,7 +86,7 @@ export function MobileBookingBar({
 
   return (
     <div
-      className="animate-fadeUp glass fixed inset-x-3 z-40 flex items-center gap-1 rounded-[1.75rem] px-2 py-2 shadow-premium lg:hidden"
+      className="animate-fadeUp glass fixed inset-x-3 z-chrome flex items-center gap-1 rounded-[1.75rem] px-2 py-2 shadow-premium lg:hidden"
       style={{ bottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
     >
       <FavoriteButton

@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { AnimatePresence, m, useReducedMotion } from "framer-motion";
 import { X } from "lucide-react";
 import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
+import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
 import type { ReactNode } from "react";
 
 /**
@@ -25,6 +26,7 @@ export function BottomSheet({
   const reduceMotion = useReducedMotion();
   const sheetRef = useRef<HTMLDivElement>(null);
   useFocusTrap(sheetRef, open);
+  useScrollLock(open);
 
   useEffect(() => {
     if (!open) return;
@@ -43,7 +45,7 @@ export function BottomSheet({
             initial={reduceMotion ? undefined : { opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={reduceMotion ? undefined : { opacity: 0 }}
-            className="fixed inset-0 z-[60] bg-black/50 lg:hidden"
+            className="fixed inset-0 z-sheet bg-black/50 lg:hidden"
             onClick={onClose}
             aria-hidden="true"
           />
@@ -57,7 +59,7 @@ export function BottomSheet({
             animate={{ y: 0 }}
             exit={reduceMotion ? undefined : { y: "100%" }}
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed inset-x-0 bottom-0 z-[60] max-h-[85vh] overflow-y-auto rounded-t-3xl bg-white p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] shadow-2xl dark:bg-ink lg:hidden"
+            className="fixed inset-x-0 bottom-0 z-sheet max-h-[85vh] overflow-y-auto rounded-t-3xl bg-white p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] shadow-2xl dark:bg-ink lg:hidden"
           >
             <div className="mb-4 flex items-center justify-between gap-3">
               {title && <p className="font-display text-lg font-semibold">{title}</p>}

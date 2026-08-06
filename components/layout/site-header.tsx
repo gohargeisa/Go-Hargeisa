@@ -17,6 +17,7 @@ import { NotificationBell } from "@/components/shared/notification-bell";
 import { GlobalSearch } from "@/components/shared/global-search";
 import { SERVICES_PUBLIC_ENABLED } from "@/lib/config/features";
 import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
+import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
 
 const links = [
   { key: "hotels", href: "hotels" },
@@ -44,6 +45,7 @@ export function SiteHeader({
   const pathname = usePathname();
   const mobileNavRef = useRef<HTMLElement>(null);
   useFocusTrap(mobileNavRef, open);
+  useScrollLock(open);
   const reduceMotion = useReducedMotion();
 
   useEffect(() => {
@@ -66,10 +68,30 @@ export function SiteHeader({
     <header
       className={`fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top)] transition-all duration-300 ease-premium ${
         scrolled
-          ? "bg-white/95 backdrop-blur-xl shadow-[0_1px_0_rgba(15,23,42,0.06),0_12px_30px_rgba(15,23,42,0.08)] dark:bg-ink/90 dark:shadow-[0_1px_0_rgba(255,255,255,0.06),0_12px_30px_rgba(0,0,0,0.3)]"
-          : "bg-gradient-to-b from-black/35 to-transparent backdrop-blur-md"
+          ? "shadow-[0_1px_0_rgba(15,23,42,0.06),0_12px_30px_rgba(15,23,42,0.08)] dark:shadow-[0_1px_0_rgba(255,255,255,0.06),0_12px_30px_rgba(0,0,0,0.3)]"
+          : ""
       }`}
     >
+      {/* Background + blur live on their own layer behind the nav content,
+          not on <header> itself. backdrop-filter (backdrop-blur-*) on an
+          element makes it a containing block for any position:fixed
+          descendant — with it on <header>, every fixed inset-0 overlay
+          nested anywhere under this header (mobile nav backdrop, search
+          dialog, notifications backdrop) was being positioned relative to
+          this ~80px header bar instead of the real viewport, so the "dark
+          backdrop" only ever covered the header strip and every overlay
+          looked transparent with page content showing through. Moving the
+          filter to this decorative sibling (nothing needs to be fixed
+          *inside* it) keeps the exact same visual blur+tint over the same
+          header-height area while leaving <header> filter-free, so its
+          descendants' fixed positioning resolves against the true viewport
+          again. */}
+      <div
+        aria-hidden="true"
+        className={`absolute inset-0 -z-10 transition-all duration-300 ease-premium ${
+          scrolled ? "bg-white/95 backdrop-blur-xl dark:bg-ink/90" : "bg-gradient-to-b from-black/35 to-transparent backdrop-blur-md"
+        }`}
+      />
       <div className="container-px mx-auto flex h-20 items-center gap-3 md:gap-6 lg:gap-8">
         <div className="flex shrink-0 items-center">
           <Link href={`/${locale}`}>
@@ -190,7 +212,7 @@ export function SiteHeader({
               transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
               onClick={() => setOpen(false)}
               aria-hidden="true"
-              className="fixed inset-0 z-40 bg-ink/40 backdrop-blur-sm lg:hidden"
+              className="fixed inset-0 z-overlay bg-ink/40 backdrop-blur-sm lg:hidden"
             />
             <m.nav
               ref={mobileNavRef}
@@ -199,7 +221,7 @@ export function SiteHeader({
               exit={reduceMotion ? undefined : { opacity: 0, y: -16, scale: 0.98 }}
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
               style={{ top: "calc(5rem + env(safe-area-inset-top) + 0.75rem)" }}
-              className="glass fixed inset-x-3 z-40 max-h-[75vh] overflow-y-auto rounded-xl3 shadow-premium-lg lg:hidden"
+              className="glass fixed inset-x-3 z-overlay max-h-[75vh] overflow-y-auto rounded-xl3 shadow-premium-lg lg:hidden"
             >
               <div className="container-px flex flex-col gap-1.5 py-4" style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}>
               {links.map((l) => {

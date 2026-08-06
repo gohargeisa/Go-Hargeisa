@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 import { BookingForm } from "@/components/shared/booking-form";
 import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
+import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
 import type { Locale } from "@/lib/i18n/config";
 import type { HotelRoom } from "@/types";
 
@@ -40,6 +41,7 @@ export function BookingRequestModal({
   const t = useTranslations("bookingRequest");
   const dialogRef = useRef<HTMLDivElement>(null);
   useFocusTrap(dialogRef);
+  useScrollLock(true);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -50,7 +52,7 @@ export function BookingRequestModal({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center p-0 sm:p-4">
+    <div className="fixed inset-0 z-modal flex items-center justify-center p-0 sm:p-4">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />
       <div
         ref={dialogRef}

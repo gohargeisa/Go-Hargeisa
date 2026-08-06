@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { LayoutDashboard, Settings, ShieldCheck, User, ChevronDown } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { SignOutButton } from "@/components/shared/sign-out-button";
+import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
 
 export function UserMenu({
   locale,
@@ -24,6 +25,7 @@ export function UserMenu({
   const t = useTranslations("dashboard");
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  useScrollLock(open);
 
   useEffect(() => {
     function onClick(e: MouseEvent) {
@@ -32,6 +34,15 @@ export function UserMenu({
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open]);
 
   const initial = name.trim().charAt(0).toUpperCase() || "U";
 
@@ -58,10 +69,12 @@ export function UserMenu({
       </button>
 
       {open && (
-        <div
-          role="menu"
-          className="absolute end-0 mt-2 w-56 overflow-hidden rounded-xl2 border border-ink/10 dark:border-white/10 bg-white dark:bg-ink shadow-card z-50"
-        >
+        <>
+          <div className="fixed inset-0 z-overlay bg-ink/40" onClick={() => setOpen(false)} aria-hidden="true" />
+          <div
+            role="menu"
+            className="absolute end-0 mt-2 w-56 overflow-hidden rounded-xl2 border border-ink/10 dark:border-white/10 bg-white dark:bg-ink shadow-card z-overlay"
+          >
           <Link
             href={`/${locale}/dashboard`}
             onClick={() => setOpen(false)}
@@ -104,7 +117,8 @@ export function UserMenu({
           <div className="border-t border-ink/8 dark:border-white/10 px-4 py-3">
             <SignOutButton locale={locale} />
           </div>
-        </div>
+          </div>
+        </>
       )}
     </div>
   );

@@ -78,7 +78,7 @@ export function BottomNav({ locale }: { locale: Locale }) {
   return (
     <nav
       aria-label={t("navAriaLabel")}
-      className="glass fixed inset-x-3 z-40 flex items-center justify-around rounded-xl3 px-1 py-1.5 shadow-premium lg:hidden"
+      className="glass fixed inset-x-3 z-chrome flex items-center justify-around rounded-xl3 px-1 py-1.5 shadow-premium lg:hidden"
       style={{ bottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
     >
       {items.map(({ key, label, icon: Icon, href, onClick, active }) => {

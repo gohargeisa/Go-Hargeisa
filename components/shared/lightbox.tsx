@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut } from "lucide-react";
 import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
+import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
 
 export interface LightboxSlide {
   url: string;
@@ -64,6 +65,7 @@ export function Lightbox({
   const goNext = useCallback(() => onIndexChange((index + 1) % slides.length), [index, slides.length, onIndexChange]);
   const dialogRef = useRef<HTMLDivElement>(null);
   useFocusTrap(dialogRef);
+  useScrollLock(true);
 
   // Zoom is per-slide — moving to a different photo always starts unzoomed.
   useEffect(() => {
@@ -78,11 +80,7 @@ export function Lightbox({
       if (e.key === "ArrowRight") goNext();
     }
     document.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-    };
+    return () => document.removeEventListener("keydown", onKey);
   }, [onClose, goPrev, goNext]);
 
   function toggleZoom() {
@@ -181,7 +179,7 @@ export function Lightbox({
       aria-modal="true"
       aria-label="Photo viewer"
       tabIndex={-1}
-      className="fixed inset-0 z-[100] flex flex-col bg-black/95 backdrop-blur-sm"
+      className="fixed inset-0 z-lightbox flex flex-col bg-black/95 backdrop-blur-sm"
     >
       <div className="flex items-center justify-between px-4 py-3 text-white sm:px-6">
         <p className="text-sm text-white/70">

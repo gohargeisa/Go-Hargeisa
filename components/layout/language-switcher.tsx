@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { Globe, Check } from "lucide-react";
 import { locales, localeConfig, type Locale } from "@/lib/i18n/config";
 import { FlagIcon } from "@/components/shared/flag-icon";
+import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
 
 export function LanguageSwitcher({ locale }: { locale: Locale }) {
   const t = useTranslations("nav");
@@ -13,6 +14,7 @@ export function LanguageSwitcher({ locale }: { locale: Locale }) {
   const ref = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const router = useRouter();
+  useScrollLock(open);
 
   useEffect(() => {
     function onClick(e: MouseEvent) {
@@ -24,6 +26,15 @@ export function LanguageSwitcher({ locale }: { locale: Locale }) {
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open]);
 
   function switchTo(next: Locale) {
     const segments = pathname.split("/");
@@ -47,10 +58,12 @@ export function LanguageSwitcher({ locale }: { locale: Locale }) {
       </button>
 
       {open && (
-        <ul
-          role="listbox"
-          className="absolute end-0 mt-2 w-44 overflow-hidden rounded-2xl border border-ink/10 dark:border-white/10 bg-white dark:bg-ink shadow-card z-50"
-        >
+        <>
+          <div className="fixed inset-0 z-overlay bg-ink/40" onClick={() => setOpen(false)} aria-hidden="true" />
+          <ul
+            role="listbox"
+            className="absolute end-0 mt-2 w-44 overflow-hidden rounded-2xl border border-ink/10 dark:border-white/10 bg-white dark:bg-ink shadow-card z-overlay"
+          >
           {locales.map((l) => (
             <li key={l}>
               <button
@@ -71,7 +84,8 @@ export function LanguageSwitcher({ locale }: { locale: Locale }) {
               </button>
             </li>
           ))}
-        </ul>
+          </ul>
+        </>
       )}
     </div>
   );

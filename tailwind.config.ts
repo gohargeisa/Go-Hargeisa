@@ -15,6 +15,21 @@ const config: Config = {
       },
     },
     extend: {
+      // Single source of truth for stacking order across the whole app —
+      // every overlay system (side menu, search, notifications, account
+      // menu, bottom sheets, drawers, modals, lightbox, toast, native
+      // splash) uses one of these named tiers instead of ad-hoc numbers,
+      // so two unrelated overlays can never accidentally collide again.
+      zIndex: {
+        chrome: "40", // persistent app chrome: bottom nav, mobile booking bar, offline banner
+        overlay: "55", // header-triggered popups: side menu, search, notifications, account menu
+        sheet: "60", // bottom sheets
+        drawer: "70", // slide-in drawers (e.g. business dashboard sidebar)
+        modal: "80", // centered confirmation/business modals
+        lightbox: "90", // full-screen image viewer
+        toast: "100", // transient toast notifications — always on top of any open overlay
+        splash: "200", // native cold-start splash gate — always absolute top
+      },
       colors: {
         primary: {
           DEFAULT: "#F59E0B",

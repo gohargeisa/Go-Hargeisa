@@ -10,6 +10,7 @@ import type { Locale } from "@/lib/i18n/config";
 import { getUserNotifications, getUnreadNotificationCount } from "@/lib/actions/notifications";
 import { useLiveNotifications } from "@/lib/hooks/use-live-notifications";
 import { getNotificationText } from "@/lib/utils/notification-text";
+import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
 import type { Notification } from "@/types";
 
 /**
@@ -35,6 +36,16 @@ export function NotificationBell({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [seed, setSeed] = useState<{ items: Notification[]; unread: number }>({ items: [], unread: 0 });
+  useScrollLock(open);
+
+  useEffect(() => {
+    if (!open) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open]);
 
   useEffect(() => {
     let active = true;
@@ -88,13 +99,13 @@ export function NotificationBell({
       <AnimatePresence>
         {open && (
           <>
-            <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} aria-hidden="true" />
+            <div className="fixed inset-0 z-overlay bg-ink/40" onClick={() => setOpen(false)} aria-hidden="true" />
             <m.div
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute end-0 top-12 z-50 w-80 max-w-[92vw] overflow-hidden rounded-2xl border border-ink/8 bg-white shadow-premium dark:border-white/10 dark:bg-ink"
+              className="absolute end-0 top-12 z-overlay w-80 max-w-[92vw] overflow-hidden rounded-2xl border border-ink/8 bg-white shadow-premium dark:border-white/10 dark:bg-ink"
             >
               <div className="flex items-center justify-between gap-2 border-b border-ink/8 px-4 py-3 dark:border-white/10">
                 <p className="text-sm font-bold">{t("panelTitle")}</p>
