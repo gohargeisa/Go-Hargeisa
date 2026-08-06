@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { ArrowRight, MapPin, Star } from "lucide-react";
+import { useImageLoaded } from "@/lib/hooks/use-image-loaded";
 import { RatingBadge } from "./rating-badge";
 import { FavoriteButton } from "./favorite-button";
 import { AnimatedCard } from "./animated-card";
@@ -22,7 +22,7 @@ export function ListingCard({
   listingId?: string; initiallyFavorited?: boolean; locale?: string;
 }) {
   const t = useTranslations("listings");
-  const [loaded, setLoaded] = useState(false);
+  const { loaded, imgRef, onLoad } = useImageLoaded();
 
   return (
     <AnimatedCard lift={6} className="group h-full w-full min-w-[272px]">
@@ -33,11 +33,12 @@ export function ListingCard({
         <div className="relative h-52 overflow-hidden sm:h-56">
           {!loaded && <div className="skeleton absolute inset-0" aria-hidden="true" />}
           <Image
+            ref={imgRef}
             src={image}
             alt={title}
             fill
             sizes="(max-width: 767px) 78vw, (max-width: 1024px) 33vw, 25vw"
-            onLoad={() => setLoaded(true)}
+            onLoad={onLoad}
             className={`object-cover transition-all duration-500 ease-premium group-hover:scale-105 ${loaded ? "opacity-100" : "opacity-0"}`}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />

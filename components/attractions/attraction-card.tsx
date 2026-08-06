@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Clock, Landmark, MapPin, Navigation, Sparkles, Star, Timer } from "lucide-react";
 import { FavoriteButton } from "@/components/shared/favorite-button";
@@ -11,6 +10,7 @@ import { FloatingBadge } from "@/components/shared/floating-badge";
 import { PrimaryButton, SecondaryButton } from "@/components/shared/buttons";
 import { getCategoryMeta } from "@/lib/config/attraction-categories";
 import { resolveDirectionsUrl } from "@/lib/utils/google-maps";
+import { useImageLoaded } from "@/lib/hooks/use-image-loaded";
 import type { Coordinates } from "@/types";
 
 export function AttractionCard({
@@ -50,7 +50,7 @@ export function AttractionCard({
 }) {
   const t = useTranslations("listings");
   const tp = useTranslations("attractionsPage");
-  const [loaded, setLoaded] = useState(false);
+  const { loaded, imgRef, onLoad } = useImageLoaded();
   const categoryMeta = getCategoryMeta(category);
   const CategoryIcon = categoryMeta.icon;
   const categoryLabel = tp(categoryMeta.labelKey);
@@ -68,11 +68,12 @@ export function AttractionCard({
             {!loaded && <div className="skeleton absolute inset-0" aria-hidden="true" />}
             <Link href={href} className="absolute inset-0 z-0" aria-label={name}>
               <Image
+                ref={imgRef}
                 src={image}
                 alt={name}
                 fill
                 sizes="(max-width: 767px) 92vw, (max-width: 1024px) 45vw, 380px"
-                onLoad={() => setLoaded(true)}
+                onLoad={onLoad}
                 className={`object-cover transition-transform duration-500 ease-premium group-hover:scale-105 ${
                   loaded ? "opacity-100" : "opacity-0"
                 }`}

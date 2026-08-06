@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { memo, useState } from "react";
+import { memo } from "react";
 import { useTranslations } from "next-intl";
 import { ArrowUpRight, Building2, MapPin, Sparkles, Star } from "lucide-react";
 import { amenityIcon } from "@/lib/utils/amenity-icon";
+import { useImageLoaded } from "@/lib/hooks/use-image-loaded";
 import { FavoriteButton } from "@/components/shared/favorite-button";
 import { AnimatedCard } from "@/components/shared/animated-card";
 import { FloatingBadge } from "@/components/shared/floating-badge";
@@ -49,7 +50,7 @@ function PremiumHotelCardBase({
   website?: string;
 }) {
   const t = useTranslations("listings");
-  const [loaded, setLoaded] = useState(false);
+  const { loaded, imgRef, onLoad } = useImageLoaded();
 
   const visibleAmenities = amenities.slice(0, MAX_VISIBLE_AMENITIES);
   const extraAmenityCount = amenities.length - visibleAmenities.length;
@@ -66,11 +67,12 @@ function PremiumHotelCardBase({
             )}
             <Link href={href} className="absolute inset-0 z-0" aria-label={name}>
               <Image
+                ref={imgRef}
                 src={image}
                 alt={`${name} — hotel exterior`}
                 fill
                 sizes="(max-width: 767px) 88vw, (max-width: 1024px) 45vw, 340px"
-                onLoad={() => setLoaded(true)}
+                onLoad={onLoad}
                 className={`object-cover transition-transform duration-500 ease-premium group-hover:scale-105 ${
                   loaded ? "opacity-100" : "opacity-0"
                 }`}
