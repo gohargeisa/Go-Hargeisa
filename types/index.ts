@@ -51,7 +51,7 @@ export type PolymorphicListingType = "hotel" | "restaurant" | "cafe" | "attracti
  * supabase/migrations/20260806000001_add_categories_system.sql for why
  * hotels/restaurants/cafes/attractions/events keep their own dedicated
  * tables while every other category is backed by `services`. */
-export type CategoryTargetTable = "hotels" | "restaurants" | "cafes" | "attractions" | "events" | "services";
+export type CategoryTargetTable = "hotels" | "restaurants" | "cafes" | "attractions" | "events" | "services" | "city_services";
 
 /** Single source of truth for every business category — the `categories`
  * table. Replaces the scattered per-vocabulary config files

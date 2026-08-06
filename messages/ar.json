@@ -19,7 +19,12 @@
     "signOut": "تسجيل الخروج",
     "changeLanguage": "تغيير اللغة",
     "cityServices": "خدمات المدينة",
-    "listYourBusiness": "أضف نشاطك التجاري"
+    "listYourBusiness": "أضف نشاطك التجاري",
+    "more": "المزيد",
+    "searchCategoriesPlaceholder": "البحث عن الفئات…",
+    "noCategoriesFound": "لم يتم العثور على فئات.",
+    "moreCategoriesLabel": "فئات إضافية",
+    "browseAllCategories": "تصفح جميع الخدمات"
   },
   "bottomNav": {
     "navAriaLabel": "التنقل الرئيسي",
@@ -110,6 +115,10 @@
     "exploreHargeisaEyebrow": "بالقرب منك",
     "exploreHargeisaTitle": "استكشف هرجيسا",
     "exploreHargeisaSubtitle": "كل ما تحتاجه حول المدينة.",
+    "browseCategoriesEyebrow": "تصفح",
+    "browseCategoriesTitle": "تصفح حسب الفئة",
+    "browseCategoriesSubtitle": "كل فئة، محدثة مباشرة — اختر واحدة لتبدأ الاستكشاف.",
+    "browseAllCategoriesCta": "تصفح جميع الفئات",
     "exploreHargeisaEmptyTitle": "يتم حاليًا تحديث الخدمات المدينية.",
     "exploreHargeisaEmptyDescription": "نعمل على إضافة أماكن موثوقة في جميع أنحاء هرجيسا. تفضل بزيارتنا مرة أخرى قريبًا.",
     "exploreCta": "استكشف",

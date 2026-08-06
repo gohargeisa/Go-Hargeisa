@@ -149,7 +149,7 @@ type CategoryRow = {
   id: string; slug: string; name: string; name_ar: string | null; name_so: string | null;
   description: string | null; description_ar: string | null; description_so: string | null;
   icon: string; color: string | null;
-  target_table: "hotels" | "restaurants" | "cafes" | "attractions" | "events" | "services";
+  target_table: "hotels" | "restaurants" | "cafes" | "attractions" | "events" | "services" | "city_services";
   is_active: boolean; is_pinned: boolean; sort_order: number; search_keywords: string[];
   created_at: string; updated_at: string;
 };

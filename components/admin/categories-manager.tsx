@@ -8,7 +8,7 @@ import { DynamicIcon } from "@/lib/utils/dynamic-icon";
 import type { Locale } from "@/lib/i18n/config";
 import type { Category, CategoryTargetTable } from "@/types";
 
-const TARGET_TABLES: CategoryTargetTable[] = ["hotels", "restaurants", "cafes", "attractions", "events", "services"];
+const TARGET_TABLES: CategoryTargetTable[] = ["hotels", "restaurants", "cafes", "attractions", "events", "services", "city_services"];
 
 const EMPTY_FORM: CategoryInput = {
   slug: "",

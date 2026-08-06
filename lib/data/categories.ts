@@ -2,6 +2,7 @@ import { cache } from "react";
 import { createPublicClient } from "@/lib/supabase/public";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
+import { SERVICES_PUBLIC_ENABLED, RESTAURANTS_PUBLIC_ENABLED, CAFES_PUBLIC_ENABLED } from "@/lib/config/features";
 import { mapCategory } from "./mappers";
 import type { Category, CategoryTargetTable } from "@/types";
 
@@ -25,6 +26,20 @@ async function _getCategories(targetTable?: CategoryTargetTable): Promise<Catego
 }
 
 export const getCategories = cache(_getCategories);
+
+/** getCategories(), minus whichever verticals are currently feature-flagged
+ * off (lib/config/features.ts) — the single filter the navbar and homepage
+ * category grid both apply, so a disabled vertical's categories can't leak
+ * into either surface while still existing (and manageable) in the DB. */
+export async function getVisibleCategories(): Promise<Category[]> {
+  const categories = await getCategories();
+  return categories.filter((c) => {
+    if (c.targetTable === "services") return SERVICES_PUBLIC_ENABLED;
+    if (c.targetTable === "restaurants") return RESTAURANTS_PUBLIC_ENABLED;
+    if (c.targetTable === "cafes") return CAFES_PUBLIC_ENABLED;
+    return true;
+  });
+}
 
 /** Every category the long-tail `services` vertical uses — its category
  * pages, submission form, search, sitemap, and admin dropdown all share
@@ -109,6 +124,12 @@ export async function attachBusinessCounts(categories: Category[]): Promise<Cate
     ...c,
     businessCount: c.targetTable === "services" ? (serviceCounts.get(c.id) ?? 0) : (verticalCounts.get(c.targetTable) ?? 0),
   }));
+}
+
+/** getVisibleCategories() with businessCount populated — what the homepage
+ * category grid renders. */
+export async function getVisibleCategoriesWithCounts(): Promise<Category[]> {
+  return attachBusinessCounts(await getVisibleCategories());
 }
 
 /** Resolves a free-text search query to a category when the query is really

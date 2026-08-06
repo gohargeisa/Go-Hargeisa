@@ -19,7 +19,12 @@
     "signOut": "Sign Out",
     "changeLanguage": "Change language",
     "cityServices": "City Services",
-    "listYourBusiness": "List Your Business"
+    "listYourBusiness": "List Your Business",
+    "more": "More",
+    "searchCategoriesPlaceholder": "Search categories…",
+    "noCategoriesFound": "No categories found.",
+    "moreCategoriesLabel": "More categories",
+    "browseAllCategories": "Browse all services"
   },
   "bottomNav": {
     "navAriaLabel": "Main navigation",
@@ -110,6 +115,10 @@
     "exploreHargeisaEyebrow": "Around You",
     "exploreHargeisaTitle": "Explore Hargeisa",
     "exploreHargeisaSubtitle": "Everything you need around the city.",
+    "browseCategoriesEyebrow": "Browse",
+    "browseCategoriesTitle": "Browse by Category",
+    "browseCategoriesSubtitle": "Every category, updated live — pick one to start exploring.",
+    "browseAllCategoriesCta": "Browse all categories",
     "exploreHargeisaEmptyTitle": "City Services are being updated.",
     "exploreHargeisaEmptyDescription": "We're adding verified places across Hargeisa. Check back soon.",
     "exploreCta": "Explore",

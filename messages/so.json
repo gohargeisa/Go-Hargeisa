@@ -19,7 +19,12 @@
     "signOut": "Ka Bax",
     "changeLanguage": "Beddel Luqadda",
     "cityServices": "Adeegyada Magaalada",
-    "listYourBusiness": "Diiwaan Geli Ganacsigaaga"
+    "listYourBusiness": "Diiwaan Geli Ganacsigaaga",
+    "more": "Wax Dheeraad ah",
+    "searchCategoriesPlaceholder": "Raadi qaybaha…",
+    "noCategoriesFound": "Qayb lama helin.",
+    "moreCategoriesLabel": "Qaybo dheeraad ah",
+    "browseAllCategories": "Eeg dhammaan adeegyada"
   },
   "bottomNav": {
     "navAriaLabel": "Suulka Guud",
@@ -110,6 +115,10 @@
     "exploreHargeisaEyebrow": "Agtaada",
     "exploreHargeisaTitle": "Sahami Hargeysa",
     "exploreHargeisaSubtitle": "Wax kasta oo aad u baahan tahay ee magaalada ku wareegsan.",
+    "browseCategoriesEyebrow": "Sahami",
+    "browseCategoriesTitle": "Sahami Qaybaha",
+    "browseCategoriesSubtitle": "Qayb kasta, si toos ah loo cusboonaysiiyay — dooro mid si aad u bilowdo sahaminta.",
+    "browseAllCategoriesCta": "Eeg dhammaan qaybaha",
     "exploreHargeisaEmptyTitle": "Adeegyada Magaalada ayaa la cusboonaysiinayaa.",
     "exploreHargeisaEmptyDescription": "Waxaan ku darayaa goobo la xaqiijiyay oo ku baahsan Hargeysa oo dhan. Dib u soo booqo dhawaan.",
     "exploreCta": "Baadh",

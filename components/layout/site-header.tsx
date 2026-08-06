@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ArrowRight } from "lucide-react";
 import { m, AnimatePresence, useReducedMotion } from "framer-motion";
 import type { Locale } from "@/lib/i18n/config";
 import { LanguageSwitcher } from "./language-switcher";
@@ -15,29 +15,30 @@ import type { HeaderUser } from "@/lib/supabase/header-user";
 import { SignOutButton } from "@/components/shared/sign-out-button";
 import { NotificationBell } from "@/components/shared/notification-bell";
 import { GlobalSearch } from "@/components/shared/global-search";
-import { SERVICES_PUBLIC_ENABLED } from "@/lib/config/features";
+import { NavMegaMenu, MegaMenuGrid } from "@/components/layout/nav-mega-menu";
+import { categoryHref, categoryDisplayName } from "@/lib/utils/category-href";
 import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
-
-const links = [
-  { key: "hotels", href: "hotels" },
-  { key: "restaurants", href: "restaurants" },
-  { key: "cafes", href: "cafes" },
-  { key: "cityServices", href: "city-services" },
-  ...(SERVICES_PUBLIC_ENABLED ? [{ key: "services", href: "services" }] : []),
-] as const;
+import type { Category } from "@/types";
 
 export function SiteHeader({
   locale,
   initialUser,
   logoUrl,
+  categories,
 }: {
   locale: Locale;
   initialUser: HeaderUser | null;
   /** Admin-editable override from site_settings.logo_url — falls back to the built-in logo when unset. */
   logoUrl?: string;
+  /** Every active, feature-flag-visible category (lib/data/categories.ts
+   * getVisibleCategories) — pinned ones render directly in the nav, the
+   * rest live in the "More" mega menu. Single source of truth for both. */
+  categories: Category[];
 }) {
   const t = useTranslations("nav");
+  const pinnedCategories = categories.filter((c) => c.isPinned);
+  const moreCategories = categories.filter((c) => !c.isPinned);
   const td = useTranslations("dashboard");
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
@@ -107,12 +108,12 @@ export function SiteHeader({
         </div>
 
         <nav className="hidden lg:flex flex-1 items-center justify-center gap-2">
-          {links.map((l) => {
-            const href = `/${locale}/${l.href}`;
+          {pinnedCategories.map((category) => {
+            const href = categoryHref(locale, category);
             const active = pathname === href || pathname.startsWith(`${href}/`);
             return (
               <Link
-                key={l.key}
+                key={category.id}
                 href={href}
                 aria-current={active ? "page" : undefined}
                 className={`relative rounded-full px-4 py-2 text-[15px] font-medium transition-all duration-300 ease-premium ${
@@ -125,7 +126,7 @@ export function SiteHeader({
                       : "text-white hover:text-primary hover:bg-white/10"
                 }`}
               >
-                {t(l.key)}
+                {categoryDisplayName(category, locale)}
                 {active && (
                   <span
                     aria-hidden="true"
@@ -135,6 +136,7 @@ export function SiteHeader({
               </Link>
             );
           })}
+          {moreCategories.length > 0 && <NavMegaMenu locale={locale} categories={moreCategories} scrolled={scrolled} />}
         </nav>
 
         <div className="hidden lg:flex shrink-0 items-center gap-3 ms-auto">
@@ -224,12 +226,12 @@ export function SiteHeader({
               className="glass fixed inset-x-3 z-overlay max-h-[75vh] overflow-y-auto rounded-xl3 shadow-premium-lg lg:hidden"
             >
               <div className="container-px flex flex-col gap-1.5 py-4" style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}>
-              {links.map((l) => {
-                const href = `/${locale}/${l.href}`;
+              {pinnedCategories.map((category) => {
+                const href = categoryHref(locale, category);
                 const active = pathname === href || pathname.startsWith(`${href}/`);
                 return (
                   <Link
-                    key={l.key}
+                    key={category.id}
                     href={href}
                     onClick={() => setOpen(false)}
                     aria-current={active ? "page" : undefined}
@@ -239,10 +241,27 @@ export function SiteHeader({
                         : "text-ink hover:bg-primary/5 hover:text-primary dark:text-white"
                     }`}
                   >
-                    {t(l.key)}
+                    {categoryDisplayName(category, locale)}
                   </Link>
                 );
               })}
+
+              {moreCategories.length > 0 && (
+                <div className="mt-1 border-t border-ink/8 pt-3 dark:border-white/10">
+                  <p className="px-1 pb-2 text-xs font-bold uppercase tracking-[0.14em] text-ink/40 dark:text-sand/40">
+                    {t("moreCategoriesLabel")}
+                  </p>
+                  <MegaMenuGrid locale={locale} categories={moreCategories} onNavigate={() => setOpen(false)} />
+                  <Link
+                    href={`/${locale}/services`}
+                    onClick={() => setOpen(false)}
+                    className="mt-2 flex items-center justify-between rounded-2xl px-3 py-2.5 text-sm font-semibold text-primary"
+                  >
+                    {t("browseAllCategories")}
+                    <ArrowRight size={14} aria-hidden="true" />
+                  </Link>
+                </div>
+              )}
 
               {user ? (
                 <div className="mt-3 space-y-2 border-t border-ink/8 px-1 pt-3 dark:border-white/10">

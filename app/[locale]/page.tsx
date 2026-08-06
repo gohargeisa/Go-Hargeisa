@@ -19,12 +19,14 @@ import {
 import { getLatestAnnouncement } from "@/lib/data/announcements";
 import { getFeaturedOffersForHomepage } from "@/lib/data/offers";
 import { getCityServiceCategoryCounts } from "@/lib/data/city-services";
+import { getVisibleCategoriesWithCounts } from "@/lib/data/categories";
 import { Hero } from "@/components/home/hero";
 import { SplashScreenOverlay } from "@/components/shared/splash-overlay";
 import { OfferCard } from "@/components/home/offer-card";
 import { AnnouncementBanner } from "@/components/home/announcement-banner";
 import { BusinessJoinBanner } from "@/components/home/business-join-banner";
 import { ExploreHargeisaSection } from "@/components/home/explore-hargeisa-section";
+import { CategoriesGridSection } from "@/components/home/categories-grid-section";
 import { NewsletterSection } from "@/components/home/newsletter-section";
 import { Reveal } from "@/components/home/reveal";
 import { ScrollRow } from "@/components/shared/scroll-row";
@@ -56,17 +58,19 @@ export default async function HomePage({
 }) {
   const t = await getTranslations("home");
 
-  const [hotelsRaw, restaurants, cafes, services, attractions, eventsRaw, announcement, featuredOffers, cityServiceCategoryCounts] = await Promise.all([
-    getHotels({ limit: HOMEPAGE_PREVIEW_COUNT }),
-    RESTAURANTS_PUBLIC_ENABLED ? getRestaurants({ limit: HOMEPAGE_PREVIEW_COUNT }) : Promise.resolve([]),
-    CAFES_PUBLIC_ENABLED ? getCafes({ limit: HOMEPAGE_PREVIEW_COUNT, locale }) : Promise.resolve([]),
-    SERVICES_PUBLIC_ENABLED ? getServices({ limit: HOMEPAGE_SERVICES_PREVIEW_COUNT }) : Promise.resolve([]),
-    getAttractions(),
-    getEvents(),
-    getLatestAnnouncement(),
-    getFeaturedOffersForHomepage(),
-    getCityServiceCategoryCounts(),
-  ]);
+  const [hotelsRaw, restaurants, cafes, services, attractions, eventsRaw, announcement, featuredOffers, cityServiceCategoryCounts, categories] =
+    await Promise.all([
+      getHotels({ limit: HOMEPAGE_PREVIEW_COUNT }),
+      RESTAURANTS_PUBLIC_ENABLED ? getRestaurants({ limit: HOMEPAGE_PREVIEW_COUNT }) : Promise.resolve([]),
+      CAFES_PUBLIC_ENABLED ? getCafes({ limit: HOMEPAGE_PREVIEW_COUNT, locale }) : Promise.resolve([]),
+      SERVICES_PUBLIC_ENABLED ? getServices({ limit: HOMEPAGE_SERVICES_PREVIEW_COUNT }) : Promise.resolve([]),
+      getAttractions(),
+      getEvents(),
+      getLatestAnnouncement(),
+      getFeaturedOffersForHomepage(),
+      getCityServiceCategoryCounts(),
+      getVisibleCategoriesWithCounts(),
+    ]);
   const hotels = filterHotelsForPresentation(hotelsRaw);
   const now = Date.now();
   // getEvents() already sorts by start_date ascending — only the "still
@@ -99,6 +103,8 @@ export default async function HomePage({
       <Hero locale={locale} />
 
       <BusinessJoinBanner locale={locale} />
+
+      <CategoriesGridSection locale={locale} categories={categories} />
 
       {/* About Go Hargeisa */}
       <section className="mx-auto max-w-7xl px-5 pb-20 pt-2 md:px-8 md:pb-28 md:pt-12 lg:px-12">

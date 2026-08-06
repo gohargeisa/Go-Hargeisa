@@ -22,6 +22,7 @@ import { RecentlyViewedTracker } from "@/components/shared/recently-viewed-track
 import { PullToRefreshIndicator } from "@/components/shared/pull-to-refresh-indicator";
 import { getHeaderUser } from "@/lib/supabase/guards";
 import { getSiteSettings } from "@/lib/actions/settings";
+import { getVisibleCategories } from "@/lib/data/categories";
 
 // next-intl's request-based APIs read headers in the installed version, so
 // these locale routes must render dynamically instead of being prerendered.
@@ -168,11 +169,12 @@ export default async function LocaleLayout({
   if (!locales.includes(locale as Locale)) notFound();
 
   const currentLocale = locale as Locale;
-  const [messages, initialUser, tCommon, siteSettings] = await Promise.all([
+  const [messages, initialUser, tCommon, siteSettings, categories] = await Promise.all([
     getMessages(),
     getHeaderUser(),
     getTranslations({ locale: currentLocale, namespace: "common" }),
     getSiteSettings(),
+    getVisibleCategories(),
   ]);
 
   return (
@@ -199,7 +201,12 @@ export default async function LocaleLayout({
             <NativeSplashGateProvider>
               <SearchOverlayProvider>
                 <OfflineFavoritesProvider>
-                  <SiteHeader locale={currentLocale} initialUser={initialUser} logoUrl={siteSettings?.logo_url ?? undefined} />
+                  <SiteHeader
+                    locale={currentLocale}
+                    initialUser={initialUser}
+                    logoUrl={siteSettings?.logo_url ?? undefined}
+                    categories={categories}
+                  />
                   <main id="main-content">
                     <PageTransition>{children}</PageTransition>
                   </main>
