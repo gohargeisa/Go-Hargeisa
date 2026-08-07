@@ -2,21 +2,26 @@ import { cache } from "react";
 import { createPublicClient } from "@/lib/supabase/public";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { mapCityService, mapReview } from "./mappers";
-import type { CityService, EssentialServiceCategory } from "@/types";
+import { getCategories } from "./categories";
+import type { CityService, Category } from "@/types";
 
 export interface CityServiceCategoryGroup {
-  category: EssentialServiceCategory;
+  category: Category;
   items: CityService[];
 }
 
 /**
- * Fully dynamic — this is the ONLY query City Services' public surfaces run:
- * one fetch of every published row (regardless of category), grouped in JS
- * and sorted by real listing count, descending. A category with zero
- * published rows simply never appears in the result — no hardcoded category
- * list gates this, and no code change is ever needed when the first listing
- * in a new category goes live or the last one is removed. Within a category,
- * featured listings sort first, then by sort_order/created_at.
+ * Fully dynamic — group membership comes entirely from `city_services.category_id`
+ * joined against the `categories` table (target_table='city_services'), the
+ * same single source of truth every other listing type uses — see
+ * docs and lib/data/categories.ts. One fetch of every published row
+ * (regardless of category), grouped in JS and sorted by real listing count,
+ * descending. A category with zero published rows, or one that's been
+ * deactivated in the admin panel, simply never appears in the result — no
+ * hardcoded category list gates this, and no code change is ever needed
+ * when the first listing in a new category goes live, the last one is
+ * removed, or an admin creates a brand-new City Services category. Within a
+ * category, featured listings sort first, then by sort_order/created_at.
  *
  * No mock-data fallback: unlike every other content type, this directory is
  * meant to ship empty until the owner adds real entries, so "not
@@ -27,37 +32,46 @@ export async function getCityServicesGroupedByCategory(locale?: string): Promise
   if (!isSupabaseConfigured()) return [];
 
   const supabase = createPublicClient();
-  const { data, error } = await supabase
-    .from("city_services")
-    .select("*")
-    .eq("status", "published")
-    .order("featured", { ascending: false })
-    .order("sort_order", { ascending: true })
-    .order("created_at", { ascending: true });
+  const [{ data, error }, allCategories] = await Promise.all([
+    supabase
+      .from("city_services")
+      .select("*")
+      .eq("status", "published")
+      .order("featured", { ascending: false })
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: true }),
+    getCategories("city_services"),
+  ]);
 
   if (error) {
     if (process.env.NODE_ENV === "development") console.error("getCityServicesGroupedByCategory:", error.message);
     return [];
   }
 
-  const byCategory = new Map<EssentialServiceCategory, CityService[]>();
+  // Excludes the single is_pinned "City Services" nav-entry row — only the
+  // (is_pinned=false) sub-categories group listings. getCategories() already
+  // filters to is_active=true, so a deactivated category's listings are
+  // excluded even though the rows themselves are still published.
+  const categoryById = new Map(allCategories.filter((c) => !c.isPinned).map((c) => [c.id, c]));
+
+  const byCategory = new Map<string, { category: Category; items: CityService[] }>();
   for (const row of data ?? []) {
+    const category = categoryById.get(row.category_id);
+    if (!category) continue;
     const service = mapCityService(row, [], locale);
-    const list = byCategory.get(service.category);
-    if (list) list.push(service);
-    else byCategory.set(service.category, [service]);
+    const group = byCategory.get(category.id);
+    if (group) group.items.push(service);
+    else byCategory.set(category.id, { category, items: [service] });
   }
 
-  return Array.from(byCategory.entries())
-    .map(([category, items]) => ({ category, items }))
-    .sort((a, b) => b.items.length - a.items.length);
+  return Array.from(byCategory.values()).sort((a, b) => b.items.length - a.items.length);
 }
 
 /** Category + count only (no item details) — used wherever only the
  * "which categories are non-empty, and how many places in each" summary is
  * needed (homepage tiles), so callers that don't need full listing details
  * aren't forced to also fetch/pass them around. */
-export async function getCityServiceCategoryCounts(): Promise<{ category: EssentialServiceCategory; count: number }[]> {
+export async function getCityServiceCategoryCounts(): Promise<{ category: Category; count: number }[]> {
   const groups = await getCityServicesGroupedByCategory();
   return groups.map((g) => ({ category: g.category, count: g.items.length }));
 }

@@ -18,7 +18,6 @@ import { BusinessPhotoGallery } from "@/components/shared/business-photo-gallery
 import { SERVICE_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import { ServiceActionCard } from "@/components/shared/service-action-card";
 import { ServiceCard } from "@/components/shared/service-card";
-import { serviceCategorySupportsGallery } from "@/lib/config/gallery-eligibility";
 import { ReviewsSection } from "@/components/shared/reviews-section";
 import { ReviewForm } from "@/components/shared/review-form";
 import { getMyReviewForListing } from "@/lib/data/reviews";
@@ -89,7 +88,7 @@ export default async function ServiceDetailPage({
   // Medical/financial/civic/utility categories (hospitals, pharmacies,
   // banks, mosques, etc.) only ever get the single cover photo — a photo
   // gallery doesn't suit them the way it does tourism/leisure categories.
-  const galleryEligible = service.category ? serviceCategorySupportsGallery(service.category) : false;
+  const galleryEligible = serviceCategory?.supportsGallery ?? false;
   const galleryImages = galleryEligible ? service.gallery : [];
 
   const hasDetails = Boolean(

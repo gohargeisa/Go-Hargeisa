@@ -33,13 +33,20 @@ export function CapacitorBootstrap() {
 
       const [{ App }, { SplashScreen }] = await Promise.all([import("@capacitor/app"), import("@capacitor/splash-screen")]);
 
-      // Wait for the web splash overlay (splash-overlay.tsx, homepage-only)
-      // to report its hero/logo images have actually loaded — capped at
-      // 1200ms so a stalled or never-mounted overlay (any non-homepage cold
-      // launch) can't hang this past capacitor.config.ts's own
-      // launchShowDuration safety-net ceiling (4s, for if this JS path
-      // doesn't run at all).
-      await waitUntilReady(1200);
+      if (Capacitor.getPlatform() === "android") {
+        // Android: show the native splash for exactly 2000ms, then hide —
+        // no readiness race. Distinct from the iOS/web path below since
+        // there's no per-platform branch here otherwise.
+        await new Promise<void>((resolve) => setTimeout(resolve, 2000));
+      } else {
+        // iOS/web: wait for the web splash overlay (splash-overlay.tsx,
+        // homepage-only) to report its hero/logo images have actually
+        // loaded — capped at 1200ms so a stalled or never-mounted overlay
+        // (any non-homepage cold launch) can't hang this past
+        // capacitor.config.ts's own launchShowDuration safety-net ceiling
+        // (4s, for if this JS path doesn't run at all).
+        await waitUntilReady(1200);
+      }
       await SplashScreen.hide();
 
       // Hardware back button (Android): go back in-app history if there is

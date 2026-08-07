@@ -6,6 +6,7 @@ import type { Locale } from "@/lib/i18n/config";
 import { requireAdmin } from "@/lib/supabase/guards";
 import { createClient } from "@/lib/supabase/server";
 import { CityServiceForm } from "@/components/admin/city-service-form";
+import { getCityServiceCategories } from "@/lib/data/categories";
 import type { OpeningHoursGroup } from "@/types";
 
 export const metadata: Metadata = { title: "Edit City Service — Admin" };
@@ -24,6 +25,7 @@ export default async function EditCityServicePage({
   if (error || !data) notFound();
 
   const service = data as unknown as Database["public"]["Tables"]["city_services"]["Row"];
+  const categories = await getCityServiceCategories();
 
   return (
     <section className="container-px mx-auto py-14">
@@ -32,8 +34,9 @@ export default async function EditCityServicePage({
         locale={locale}
         mode="edit"
         serviceId={service.id}
+        categories={categories}
         initial={{
-          category: service.category,
+          categoryId: service.category_id,
           name: service.name,
           nameAr: service.name_ar ?? "",
           nameSo: service.name_so ?? "",

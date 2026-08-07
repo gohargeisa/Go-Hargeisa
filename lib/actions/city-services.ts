@@ -3,7 +3,21 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { logActivity } from "./activity";
-import type { EssentialServiceCategory, GalleryImage, MediaVideo, OpeningHoursGroup } from "@/types";
+import type { GalleryImage, MediaVideo, OpeningHoursGroup } from "@/types";
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+/** Every City Services category's `categories.slug` is its legacy
+ * `city_service_category` enum value with underscores in place of dashes
+ * (e.g. "gas-station" -> "gas_station") — see the seed migration
+ * (20260807000008_city_services_category_migration.sql). Used to keep
+ * writing the still-NOT-NULL legacy `category` column from the real
+ * `categoryId` FK, since owner-dashboard.ts's City Coverage KPI widget
+ * still reads it directly. */
+async function legacyCategoryEnum(supabase: SupabaseClient, categoryId: string): Promise<string> {
+  const { data } = await supabase.from("categories").select("slug").eq("id", categoryId).single();
+  const slug = (data as { slug?: string } | null)?.slug ?? "";
+  return slug.replace(/-/g, "_");
+}
 
 /** Same shape as the slug backfill in the Phase 11 migration
  * (20260803000016_city_services_upgrade.sql) — slugified name + a short
@@ -34,7 +48,7 @@ async function assertOwner() {
 }
 
 export interface CityServiceInput {
-  category: EssentialServiceCategory;
+  categoryId: string;
   name: string;
   nameAr?: string;
   nameSo?: string;
@@ -74,10 +88,12 @@ export async function createCityService(
 ): Promise<{ ok: boolean; error?: string }> {
   const supabase = await assertOwner();
   const slug = slugify(input.name);
+  const category = await legacyCategoryEnum(supabase, input.categoryId);
 
   const { error } = await supabase.from("city_services").insert({
     slug,
-    category: input.category,
+    category_id: input.categoryId,
+    category,
     name: input.name.trim(),
     name_ar: input.nameAr?.trim() || null,
     name_so: input.nameSo?.trim() || null,
@@ -113,7 +129,7 @@ export async function createCityService(
 
   if (error) return { ok: false, error: error.message };
 
-  await logActivity("create", "city_service", undefined, { name: input.name, category: input.category });
+  await logActivity("create", "city_service", undefined, { name: input.name, categoryId: input.categoryId });
   revalidatePath(`/${locale}/admin/city-services`);
   revalidatePath(`/${locale}/city-services`);
   revalidatePath(`/${locale}/city-services/${slug}`);
@@ -127,11 +143,13 @@ export async function updateCityService(
   input: CityServiceInput
 ): Promise<{ ok: boolean; error?: string }> {
   const supabase = await assertOwner();
+  const category = await legacyCategoryEnum(supabase, input.categoryId);
 
   const { error } = await supabase
     .from("city_services")
     .update({
-      category: input.category,
+      category_id: input.categoryId,
+      category,
       name: input.name.trim(),
       name_ar: input.nameAr?.trim() || null,
       name_so: input.nameSo?.trim() || null,

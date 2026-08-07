@@ -103,6 +103,17 @@ export interface Category {
   searchKeywords: string[];
   /** Admin-defined extra submission/detail-page fields for this category — empty for most categories. */
   customFieldsSchema: CategoryCustomField[];
+  /** Replaces lib/config/gallery-eligibility.ts — whether this category's listings get the multi-image gallery UI. */
+  supportsGallery: boolean;
+  /** Replaces lib/config/listing-feature-eligibility.ts — whether this category's listings show reviews/opening-hours badge/amenities/video gallery/social links. */
+  supportsNewFeatures: boolean;
+  /** schema.org @type for JSON-LD (e.g. "Hospital"). Falls back to "LocalBusiness" when unset. */
+  schemaOrgType?: string;
+  /** Computed, never stored — `targetTable !== "city_services"`. True for every category with its own reachable page
+   * (hotels/restaurants/cafes/attractions/events/services); false only for City Services' internal groupings, which
+   * exist solely to be grouped inside the City Services hub and must never also appear as a standalone page. Deriving
+   * this from targetTable (rather than a separate stored flag) is what guarantees it can never drift out of sync. */
+  isStandaloneSection: boolean;
   /** Populated by getCategoriesWithCounts() — the number of published listings in this category. Absent from plain getCategories(). */
   businessCount?: number;
   createdAt: string;
@@ -650,6 +661,8 @@ export interface CityService {
   id: string;
   slug: string;
   category: EssentialServiceCategory;
+  /** FK into the `categories` table (target_table='city_services') — the real source of truth for grouping/display metadata. */
+  categoryId: string;
   /** Already resolved to the request locale (falls back to English) —
    * see lib/data/city-services.ts, same pattern as Cafe.description. */
   name: string;

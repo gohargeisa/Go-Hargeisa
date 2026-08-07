@@ -253,6 +253,10 @@ export function mapCategory(row: CategoryRow): Category {
     sortOrder: row.sort_order,
     searchKeywords: row.search_keywords ?? [],
     customFieldsSchema: (row.custom_fields_schema as unknown as Category["customFieldsSchema"]) ?? [],
+    supportsGallery: row.supports_gallery,
+    supportsNewFeatures: row.supports_new_features,
+    schemaOrgType: row.schema_org_type ?? undefined,
+    isStandaloneSection: row.target_table !== "city_services",
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -401,6 +405,7 @@ export function mapCityService(row: CityServiceRow, reviews: Review[] = [], loca
     id: row.id,
     slug: row.slug,
     category: row.category,
+    categoryId: row.category_id,
     name: (locale === "ar" && row.name_ar) || (locale === "so" && row.name_so) || row.name,
     description: (locale === "ar" && row.description_ar) || (locale === "so" && row.description_so) || row.description,
     phone: row.phone,

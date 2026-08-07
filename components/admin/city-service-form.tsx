@@ -13,15 +13,13 @@ import { AmenitiesPicker } from "@/components/admin/amenities-picker";
 import { Field, inputClass } from "@/components/admin/form-shared";
 import { createCityService, updateCityService } from "@/lib/actions/city-services";
 import { useUnsavedChangesWarning } from "@/lib/hooks/use-unsaved-changes-warning";
-import { CITY_SERVICE_CATEGORIES } from "@/lib/config/city-service-categories";
-import { cityServiceCategorySupportsGallery } from "@/lib/config/gallery-eligibility";
-import { cityServiceCategorySupportsNewFeatures } from "@/lib/config/listing-feature-eligibility";
 import { SERVICE_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
+import { categoryDisplayName } from "@/lib/utils/category-href";
 import type { Locale } from "@/lib/i18n/config";
-import type { EssentialServiceCategory, GalleryImage, MediaVideo, OpeningHoursGroup } from "@/types";
+import type { Category, GalleryImage, MediaVideo, OpeningHoursGroup } from "@/types";
 
 export interface CityServiceFormInput {
-  category: EssentialServiceCategory;
+  categoryId: string;
   name: string;
   nameAr: string;
   nameSo: string;
@@ -60,18 +58,23 @@ export function CityServiceForm({
   mode,
   serviceId,
   initial,
+  categories,
 }: {
   locale: Locale;
   mode: "create" | "edit";
   serviceId?: string;
   initial?: Partial<CityServiceFormInput>;
+  /** Every City Services category (target_table='city_services', excluding
+   * the single "City Services" nav-entry row) — the picker below reads only
+   * from this, never a hardcoded list. See lib/data/categories.ts's
+   * getCityServiceCategories(). */
+  categories: Category[];
 }) {
   const t = useTranslations("admin");
-  const tCityServices = useTranslations("cityServices");
   const tw = useTranslations("weekdays");
   const router = useRouter();
   const [form, setForm] = useState<CityServiceFormInput>({
-    category: initial?.category ?? "hospital",
+    categoryId: initial?.categoryId ?? categories[0]?.id ?? "",
     name: initial?.name ?? "",
     nameAr: initial?.nameAr ?? "",
     nameSo: initial?.nameSo ?? "",
@@ -110,7 +113,9 @@ export function CityServiceForm({
   const [dirty, setDirty] = useState(false);
   useUnsavedChangesWarning(dirty);
 
-  const featureEligible = cityServiceCategorySupportsNewFeatures(form.category);
+  const selectedCategory = categories.find((c) => c.id === form.categoryId);
+  const featureEligible = selectedCategory?.supportsNewFeatures ?? true;
+  const gallerySupported = selectedCategory?.supportsGallery ?? false;
 
   function update<K extends keyof CityServiceFormInput>(key: K, value: CityServiceFormInput[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -122,7 +127,7 @@ export function CityServiceForm({
     setError(null);
 
     const payload = {
-      category: form.category,
+      categoryId: form.categoryId,
       name: form.name,
       nameAr: form.nameAr || undefined,
       nameSo: form.nameSo || undefined,
@@ -175,7 +180,7 @@ export function CityServiceForm({
     <form onSubmit={onSubmit} className="max-w-2xl space-y-6">
       <ImageUploader folder="city-services" value={form.image} onChange={(url) => update("image", url)} />
 
-      {cityServiceCategorySupportsGallery(form.category) ? (
+      {gallerySupported ? (
         <GalleryManager
           folder="city-services/gallery"
           value={form.gallery}
@@ -213,14 +218,10 @@ export function CityServiceForm({
           <input required value={form.name} onChange={(e) => update("name", e.target.value)} className={inputClass} />
         </Field>
         <Field label={t("cityServiceCategoryLabel")}>
-          <select
-            value={form.category}
-            onChange={(e) => update("category", e.target.value as EssentialServiceCategory)}
-            className={inputClass}
-          >
-            {CITY_SERVICE_CATEGORIES.map((c) => (
-              <option key={c.key} value={c.key}>
-                {tCityServices(c.titleKey)}
+          <select value={form.categoryId} onChange={(e) => update("categoryId", e.target.value)} className={inputClass}>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {categoryDisplayName(c, locale)}
               </option>
             ))}
           </select>

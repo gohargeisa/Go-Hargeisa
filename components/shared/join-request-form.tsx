@@ -11,13 +11,11 @@ import { VideoUploader } from "@/components/shared/video-uploader-lazy";
 import { DocumentsUploader } from "@/components/shared/documents-uploader-lazy";
 import { CoordinatesInput } from "@/components/shared/coordinates-input";
 import { CustomFieldsEditor, type CustomFieldValues } from "@/components/shared/custom-fields-editor";
-import {
-  PARTNER_CATEGORIES,
-  PARTNER_CATEGORY_ICON,
-  PARTNER_AMENITIES,
-  PARTNER_AMENITY_ICON,
-} from "@/lib/utils/partner-categories";
+import { PARTNER_AMENITIES, PARTNER_AMENITY_ICON, targetTableToJoinCategory } from "@/lib/utils/partner-categories";
+import { DynamicIcon } from "@/lib/utils/dynamic-icon";
+import { categoryDisplayName } from "@/lib/utils/category-href";
 import { WEEK_DAYS_SAT_FIRST, defaultWeeklyHours } from "@/lib/utils/weekly-hours";
+import type { Locale } from "@/lib/i18n/config";
 import type { JoinRequestCategory, GalleryImage, MediaVideo, BusinessDocument, Coordinates, WeeklyHoursDay, Category } from "@/types";
 
 type PriceRange = "$" | "$$" | "$$$" | "$$$$";
@@ -27,9 +25,18 @@ const inputClass =
   "w-full rounded-2xl border border-ink/12 bg-transparent px-4 py-3 text-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/15 dark:border-white/15";
 const labelClass = "mb-2 block text-sm font-semibold text-ink/85 dark:text-sand/85";
 
-export function JoinRequestForm({ serviceCategories }: { serviceCategories: Category[] }) {
+export function JoinRequestForm({
+  locale,
+  serviceCategories,
+  coreCategories,
+}: {
+  locale: Locale;
+  serviceCategories: Category[];
+  /** The 3 owner-claimable core categories (Hotels/Restaurants/Cafes), fed
+   * live from the `categories` table — see CORE_JOIN_TARGET_TABLES. */
+  coreCategories: Category[];
+}) {
   const t = useTranslations("joinRequest");
-  const tc = useTranslations("partnerCategories");
   const ta = useTranslations("partnerAmenities");
   const tw = useTranslations("weekdays");
   // Reuses the admin panel's own video-uploader strings (identical UI,
@@ -152,12 +159,12 @@ export function JoinRequestForm({ serviceCategories }: { serviceCategories: Cate
       <div id="business-type" className="scroll-mt-24">
         <label className={labelClass}>{t("categoryLabel")}</label>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {PARTNER_CATEGORIES.map((cat) => {
-            const Icon = PARTNER_CATEGORY_ICON[cat];
+          {coreCategories.map((c) => {
+            const cat = targetTableToJoinCategory(c.targetTable);
             const active = category === cat;
             return (
               <button
-                key={cat}
+                key={c.id}
                 type="button"
                 onClick={() => selectCategory(cat)}
                 aria-pressed={active}
@@ -172,10 +179,10 @@ export function JoinRequestForm({ serviceCategories }: { serviceCategories: Cate
                     active ? "bg-primary text-white" : "bg-ink/5 text-ink/60 dark:bg-white/10 dark:text-sand/60"
                   }`}
                 >
-                  <Icon size={20} aria-hidden="true" />
+                  <DynamicIcon name={c.icon} size={20} aria-hidden="true" />
                 </span>
                 <span className={`text-xs font-semibold ${active ? "text-primary-700" : "text-ink/75 dark:text-sand/75"}`}>
-                  {tc(cat)}
+                  {categoryDisplayName(c, locale)}
                 </span>
               </button>
             );

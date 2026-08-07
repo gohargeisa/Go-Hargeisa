@@ -8,19 +8,19 @@ import { useTranslations } from "next-intl";
 import { AnimatedCard } from "./animated-card";
 import { SecondaryButton } from "./buttons";
 import { Lightbox } from "./lightbox";
-import { cityServiceCategoryMeta } from "@/lib/config/city-service-categories";
-import { cityServiceCategorySupportsGallery } from "@/lib/config/gallery-eligibility";
-import type { CityService } from "@/types";
+import { DynamicIcon } from "@/lib/utils/dynamic-icon";
+import { categoryDisplayName } from "@/lib/utils/category-href";
+import type { Locale } from "@/lib/i18n/config";
+import type { CityService, Category } from "@/types";
 
-export function CityServiceCard({ service, locale }: { service: CityService; locale: string }) {
+export function CityServiceCard({ service, category, locale }: { service: CityService; category: Category; locale: string }) {
   const t = useTranslations("cityServices");
-  const { icon: CategoryIcon, titleKey } = cityServiceCategoryMeta(service.category);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const href = `/${locale}/city-services/${service.slug}`;
 
   // A category that doesn't support galleries only ever gets its single
   // cover photo — gallery.length is irrelevant there even if data exists.
-  const galleryEligible = cityServiceCategorySupportsGallery(service.category);
+  const galleryEligible = category.supportsGallery;
   const photos = galleryEligible
     ? [
         ...(service.image ? [{ url: service.image, alt: service.name }] : []),
@@ -71,8 +71,8 @@ export function CityServiceCard({ service, locale }: { service: CityService; loc
           </Link>
         )}
         <span className="absolute start-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-2.5 py-1 text-xs font-semibold text-ink shadow-sm backdrop-blur dark:bg-ink/85 dark:text-white">
-          <CategoryIcon size={12} className="text-primary" aria-hidden="true" />
-          {t(titleKey)}
+          <DynamicIcon name={category.icon} size={12} className="text-primary" aria-hidden="true" />
+          {categoryDisplayName(category, locale as Locale)}
         </span>
       </div>
 

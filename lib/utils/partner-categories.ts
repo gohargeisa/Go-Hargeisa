@@ -1,5 +1,4 @@
 import {
-  Building2,
   UtensilsCrossed,
   Coffee,
   Dumbbell,
@@ -19,20 +18,29 @@ import {
   DoorClosed,
   type LucideIcon,
 } from "lucide-react";
-import type { JoinRequestCategory } from "@/types";
+import type { CategoryTargetTable, JoinRequestCategory } from "@/types";
 
-/** The 3 fixed business types with their own dedicated listing table —
- * offered as selectable cards on /join. Every other business type is
- * sourced live from the `categories` table (see getServiceCategories in
- * lib/data/categories.ts) and submitted with category="other" + a
- * categoryId, not from this list. */
-export const PARTNER_CATEGORIES: Array<"hotel" | "restaurant" | "cafe"> = ["hotel", "restaurant", "cafe"];
+/** The 3 owner-claimable core tables with a fixed-card treatment on /join —
+ * a small, justified structural constant (which *tables* have their own
+ * dedicated listing type + ownership/claims workflow), not a hardcoded
+ * category name/icon/label list — every card's label/icon comes live from
+ * that table's `categories` row (see app/[locale]/join/page.tsx). Every
+ * other business type is sourced live from the `categories` table (see
+ * getServiceCategories in lib/data/categories.ts) and submitted with
+ * category="other" + a categoryId, not from this list. */
+export const CORE_JOIN_TARGET_TABLES: Array<"hotels" | "restaurants" | "cafes"> = ["hotels", "restaurants", "cafes"];
 
-export const PARTNER_CATEGORY_ICON: Record<"hotel" | "restaurant" | "cafe", LucideIcon> = {
-  hotel: Building2,
-  restaurant: UtensilsCrossed,
-  cafe: Coffee,
+/** "hotels" -> "hotel" — CategoryTargetTable (plural, DB) to
+ * JoinRequestCategory (singular, the /join form's own submission enum). */
+const TARGET_TABLE_TO_JOIN_CATEGORY: Record<"hotels" | "restaurants" | "cafes", "hotel" | "restaurant" | "cafe"> = {
+  hotels: "hotel",
+  restaurants: "restaurant",
+  cafes: "cafe",
 };
+
+export function targetTableToJoinCategory(targetTable: CategoryTargetTable): "hotel" | "restaurant" | "cafe" {
+  return TARGET_TABLE_TO_JOIN_CATEGORY[targetTable as "hotels" | "restaurants" | "cafes"];
+}
 
 /** A request is convertible into a real listing iff it's hotel/restaurant/
  * cafe (their own dedicated tables), or it's category="other" with a

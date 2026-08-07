@@ -14,7 +14,7 @@ import {
   setRequestStatus, addRequestNote, convertJoinRequest, updateJoinRequest,
 } from "@/lib/actions/business-requests";
 import { DeleteListingButton } from "@/components/shared/delete-listing-button";
-import { isConvertibleCategory, PARTNER_CATEGORY_ICON } from "@/lib/utils/partner-categories";
+import { isConvertibleCategory } from "@/lib/utils/partner-categories";
 import { formatTime12h } from "@/lib/utils/opening-hours";
 import { buildGoogleMapsUrl } from "@/lib/utils/google-maps";
 import type { Locale } from "@/lib/i18n/config";

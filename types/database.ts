@@ -111,7 +111,7 @@ type CityServiceCategoryDb =
   | "visa_immigration" | "internet_telecom";
 
 type CityServiceRow = {
-  id: string; slug: string; category: CityServiceCategoryDb; name: string; name_ar: string | null; name_so: string | null;
+  id: string; slug: string; category: CityServiceCategoryDb; category_id: string; name: string; name_ar: string | null; name_so: string | null;
   description: string | null; description_ar: string | null; description_so: string | null;
   phone: string | null; whatsapp: string | null; email: string | null;
   opening_hours: string | null; maps_url: string | null; website: string | null; image: string | null; gallery: Json;
@@ -153,6 +153,7 @@ type CategoryRow = {
   target_table: "hotels" | "restaurants" | "cafes" | "attractions" | "events" | "services" | "city_services";
   is_active: boolean; is_pinned: boolean; sort_order: number; search_keywords: string[];
   custom_fields_schema: Json;
+  supports_gallery: boolean; supports_new_features: boolean; schema_org_type: string | null;
   created_at: string; updated_at: string;
 };
 

@@ -5,12 +5,11 @@ import { MapPin, Navigation, ExternalLink, Phone as PhoneIcon, MessageCircle, Ma
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
 import { getCityServiceBySlug, getAllCityServiceSlugs, getCityServicesGroupedByCategory } from "@/lib/data/city-services";
+import { getCategoryById } from "@/lib/data/categories";
+import { categoryDisplayName } from "@/lib/utils/category-href";
 import { getMyReviewForListing } from "@/lib/data/reviews";
 import { isListingFavorited } from "@/lib/data/favorites";
 import { getNearbyListings } from "@/lib/data/nearby";
-import { cityServiceCategoryMeta } from "@/lib/config/city-service-categories";
-import { cityServiceCategorySupportsGallery } from "@/lib/config/gallery-eligibility";
-import { cityServiceCategorySupportsNewFeatures } from "@/lib/config/listing-feature-eligibility";
 import { HotelHeaderTop } from "@/components/shared/hotel-header-top";
 import { HotelGallerySlider } from "@/components/shared/hotel-gallery-slider";
 import { HotelNavTabs, type HotelNavTab } from "@/components/shared/hotel-nav-tabs";
@@ -65,6 +64,9 @@ export default async function CityServiceDetailPage({
   const service = await getCityServiceBySlug(slug, locale);
   if (!service) notFound();
 
+  const category = await getCategoryById(service.categoryId);
+  if (!category) notFound();
+
   const t = await getTranslations("common");
   const tNav = await getTranslations("nav");
   const td = await getTranslations("detail");
@@ -72,12 +74,10 @@ export default async function CityServiceDetailPage({
   const tw = await getTranslations("weekdays");
   const tl = await getTranslations("listings");
   const tn = await getTranslations("nearby");
-  const tcs = await getTranslations("cityServices");
 
-  const featureEligible = cityServiceCategorySupportsNewFeatures(service.category);
-  const galleryEligible = cityServiceCategorySupportsGallery(service.category);
-  const { titleKey } = cityServiceCategoryMeta(service.category);
-  const categoryLabel = tcs(titleKey);
+  const featureEligible = category.supportsNewFeatures;
+  const galleryEligible = category.supportsGallery;
+  const categoryLabel = categoryDisplayName(category, locale);
 
   const [myReview, isFavorited, nearbyPlaces, allGroups] = await Promise.all([
     featureEligible ? getMyReviewForListing("city_service", service.id) : Promise.resolve(null),
@@ -85,7 +85,7 @@ export default async function CityServiceDetailPage({
     getNearbyListings({ lat: service.coords.lat, lng: service.coords.lng, excludeType: "city_service", excludeId: service.id }),
     getCityServicesGroupedByCategory(locale),
   ]);
-  const moreInCategory = (allGroups.find((g) => g.category === service.category)?.items ?? [])
+  const moreInCategory = (allGroups.find((g) => g.category.id === service.categoryId)?.items ?? [])
     .filter((s) => s.id !== service.id)
     .slice(0, 4);
 
@@ -373,7 +373,7 @@ export default async function CityServiceDetailPage({
             <Reveal delay={0.1}>
               <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
                 {moreInCategory.map((s) => (
-                  <CityServiceCard key={s.id} service={s} locale={locale} />
+                  <CityServiceCard key={s.id} service={s} category={category} locale={locale} />
                 ))}
               </div>
             </Reveal>

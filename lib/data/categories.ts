@@ -63,6 +63,15 @@ export function getServiceCategories(): Promise<Category[]> {
   return getCategories("services");
 }
 
+/** Every City Services sub-category (Hospitals, Banks, ...) — the grouping
+ * used by /city-services and its admin form. Excludes the single is_pinned
+ * row representing the "City Services" nav entry itself, which isn't a
+ * grouping category. Replaces the hardcoded lib/config/city-service-categories.ts list. */
+export async function getCityServiceCategories(): Promise<Category[]> {
+  const categories = await getCategories("city_services");
+  return categories.filter((c) => !c.isPinned);
+}
+
 async function _getCategoryBySlug(slug: string): Promise<Category | null> {
   if (!isSupabaseConfigured()) return null;
 
@@ -109,6 +118,16 @@ export async function getCategoriesWithCounts(targetTable?: CategoryTargetTable)
   return attachBusinessCounts(await getCategories(targetTable));
 }
 
+/** target_table values whose listings table has its own `category_id`
+ * column — every category sharing one of these tables needs a per-category
+ * grouped tally, not a table-wide head-count (unlike hotels/restaurants/
+ * cafes/attractions/events, which each have exactly one implicit category). */
+const GROUPED_COUNT_TABLES = ["services", "city_services"] as const;
+type GroupedCountTable = (typeof GROUPED_COUNT_TABLES)[number];
+function isGroupedCountTable(table: CategoryTargetTable): table is GroupedCountTable {
+  return (GROUPED_COUNT_TABLES as readonly string[]).includes(table);
+}
+
 /** Shared by getCategoriesWithCounts (active-only) and the admin list (which
  * also needs counts for inactive categories) — takes whatever category list
  * the caller already has instead of re-fetching it. */
@@ -116,15 +135,21 @@ export async function attachBusinessCounts(categories: Category[]): Promise<Cate
   if (categories.length === 0 || !isSupabaseConfigured()) return categories;
 
   const supabase = createPublicClient();
-  const needsServiceCounts = categories.some((c) => c.targetTable === "services");
-  const verticalTables = Array.from(
-    new Set(categories.filter((c) => c.targetTable !== "services").map((c) => c.targetTable))
-  );
+  const groupedTables = Array.from(new Set(categories.map((c) => c.targetTable).filter(isGroupedCountTable)));
+  const verticalTables = Array.from(new Set(categories.map((c) => c.targetTable).filter((t) => !isGroupedCountTable(t))));
 
-  const [serviceRows, verticalCountEntries] = await Promise.all([
-    needsServiceCounts
-      ? supabase.from("services").select("category_id").eq("status", "published")
-      : Promise.resolve({ data: [] as { category_id: string | null }[] }),
+  const [groupedCountMaps, verticalCountEntries] = await Promise.all([
+    Promise.all(
+      groupedTables.map(async (table) => {
+        const { data } = await supabase.from(table).select("category_id").eq("status", "published");
+        const counts = new Map<string, number>();
+        for (const row of (data ?? []) as { category_id: string | null }[]) {
+          if (!row.category_id) continue;
+          counts.set(row.category_id, (counts.get(row.category_id) ?? 0) + 1);
+        }
+        return counts;
+      })
+    ),
     Promise.all(
       verticalTables.map(async (table) => {
         const { count } = await supabase.from(table).select("id", { count: "exact", head: true }).eq("status", "published");
@@ -133,23 +158,35 @@ export async function attachBusinessCounts(categories: Category[]): Promise<Cate
     ),
   ]);
 
-  const serviceCounts = new Map<string, number>();
-  for (const row of serviceRows.data ?? []) {
-    if (!row.category_id) continue;
-    serviceCounts.set(row.category_id, (serviceCounts.get(row.category_id) ?? 0) + 1);
+  const groupedCounts = new Map<string, number>();
+  for (const counts of groupedCountMaps) {
+    for (const [id, n] of counts) groupedCounts.set(id, n);
   }
   const verticalCounts = new Map(verticalCountEntries);
 
   return categories.map((c) => ({
     ...c,
-    businessCount: c.targetTable === "services" ? (serviceCounts.get(c.id) ?? 0) : (verticalCounts.get(c.targetTable) ?? 0),
+    businessCount: isGroupedCountTable(c.targetTable) ? (groupedCounts.get(c.id) ?? 0) : (verticalCounts.get(c.targetTable) ?? 0),
   }));
 }
 
-/** getVisibleCategories() with businessCount populated — what the homepage
- * category grid renders. */
+/** getVisibleCategories() with businessCount populated, filtered to
+ * categories that actually have at least one published listing — what the
+ * navbar and homepage category grid render. A category with zero listings
+ * (never published anything yet, or just had its last listing removed) is
+ * automatically excluded here with no code change ever needed elsewhere.
+ * Cached (short TTL, not just React's per-request cache()) since this now
+ * runs on every single page via the navbar — see CATEGORIES_CACHE_TAG. */
+const _getVisibleCategoriesWithCountsDurable = unstable_cache(
+  async () => attachBusinessCounts(await getVisibleCategories()),
+  ["visible-categories-with-counts"],
+  { tags: [CATEGORIES_CACHE_TAG], revalidate: 60 }
+);
+const getVisibleCategoriesWithCountsCached = cache(_getVisibleCategoriesWithCountsDurable);
+
 export async function getVisibleCategoriesWithCounts(): Promise<Category[]> {
-  return attachBusinessCounts(await getVisibleCategories());
+  const categories = await getVisibleCategoriesWithCountsCached();
+  return categories.filter((c) => (c.businessCount ?? 0) > 0);
 }
 
 /** Resolves a free-text search query to a category when the query is really

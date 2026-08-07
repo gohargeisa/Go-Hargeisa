@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 import { Check, Loader2 } from "lucide-react";
 import { ImageUploader } from "@/components/shared/image-uploader";
 import { GalleryManager } from "@/components/admin/gallery-manager-lazy";
-import { serviceCategorySupportsGallery } from "@/lib/config/gallery-eligibility";
 import { VideoUploader } from "@/components/shared/video-uploader-lazy";
 import { OpeningHoursEditor } from "@/components/shared/opening-hours-editor";
 import { GoogleMapsLocationField } from "@/components/admin/google-maps-location-field";
@@ -15,19 +14,7 @@ import { useUnsavedChangesWarning } from "@/lib/hooks/use-unsaved-changes-warnin
 import { SERVICE_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import { CustomFieldsEditor, type CustomFieldValues } from "@/components/shared/custom-fields-editor";
 import type { Locale } from "@/lib/i18n/config";
-import type { Category, GalleryImage, MediaVideo, OpeningHoursGroup, ServiceCategory } from "@/types";
-
-// The legacy service_category enum has no value for categories added after
-// the `categories` table existed (Flower Shops, Real Estate, ...) — this
-// lets the form keep writing the deprecated `category` column for the
-// original categories only, purely so serviceCategorySupportsGallery (still
-// enum-keyed, out of scope for this migration) keeps working for them.
-const LEGACY_ENUM_BY_SLUG: Partial<Record<string, ServiceCategory>> = {
-  hospitals: "hospital", pharmacies: "pharmacy", "dental-clinics": "dental_clinic", banks: "bank",
-  atms: "atm", "currency-exchange": "currency_exchange", "gas-stations": "gas_station", "car-rentals": "car_rental",
-  mosques: "mosque", schools: "school", universities: "university", gyms: "gym", "tour-companies": "tour_company",
-  apartments: "apartment", supermarkets: "supermarket", clinics: "clinic", "government-offices": "government_office",
-};
+import type { Category, GalleryImage, MediaVideo, OpeningHoursGroup } from "@/types";
 
 export interface ServiceFormInput {
   slug: string;
@@ -101,8 +88,7 @@ export function ServiceForm({
   });
   const [error, setError] = useState<string | null>(null);
   const selectedCategory = categories.find((c) => c.id === form.categoryId);
-  const legacyEnum = selectedCategory ? LEGACY_ENUM_BY_SLUG[selectedCategory.slug] : undefined;
-  const gallerySupported = legacyEnum ? serviceCategorySupportsGallery(legacyEnum) : false;
+  const gallerySupported = selectedCategory?.supportsGallery ?? false;
   const [isPending, startTransition] = useTransition();
   const [dirty, setDirty] = useState(false);
   useUnsavedChangesWarning(dirty);
@@ -143,7 +129,6 @@ export function ServiceForm({
       opening_hours_structured: form.openingHoursStructured,
       services: form.services,
       category_id: form.categoryId || null,
-      category: legacyEnum ?? null,
       custom_fields: form.customFields,
       featured: form.featured,
     };
