@@ -29,7 +29,7 @@ export function PinListingButton({ table, id, pinned }: { table: FeaturableTable
       aria-label={pinned ? t("unpinAriaLabel") : t("pinAriaLabel")}
       aria-pressed={pinned}
       className={`flex h-8 w-8 items-center justify-center rounded-lg border transition-colors disabled:opacity-60 ${
-        pinned ? "border-primary bg-primary/10 text-primary" : "border-ink/10 dark:border-white/15 hover:border-primary hover:text-primary"
+        pinned ? "border-primary bg-primary/10 text-primary-800" : "border-ink/10 dark:border-white/15 hover:border-primary hover:text-primary"
       }`}
     >
       {isPending ? <Loader2 size={13} className="animate-spin" /> : <Pin size={13} fill={pinned ? "currentColor" : "none"} />}

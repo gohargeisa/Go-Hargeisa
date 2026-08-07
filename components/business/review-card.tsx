@@ -74,7 +74,7 @@ export function ReviewCard({
 
       {review.ownerReply && !replying && (
         <div className="mt-3 rounded-xl2 border-s-2 border-primary bg-primary/[0.04] p-3 dark:bg-primary/[0.08]">
-          <p className="text-xs font-semibold text-primary">{t("yourReply")}</p>
+          <p className="text-xs font-semibold text-primary-700">{t("yourReply")}</p>
           <p className="mt-1 text-sm text-ink/75 dark:text-sand/75">{review.ownerReply}</p>
         </div>
       )}

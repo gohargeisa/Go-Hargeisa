@@ -43,12 +43,12 @@ export default async function LoginPage({
         </div>
 
         <p className="mt-3 text-end text-sm">
-          <Link href={`/${locale}/auth/forgot-password`} className="text-primary hover:underline">
+          <Link href={`/${locale}/auth/forgot-password`} className="text-primary-700 hover:underline">
             {t("forgotPassword")}
           </Link>
         </p>
 
-        <div className="my-6 flex items-center gap-3 text-xs font-medium uppercase tracking-wide text-ink/40 dark:text-sand/40">
+        <div className="my-6 flex items-center gap-3 text-xs font-medium uppercase tracking-wide text-ink/70 dark:text-sand/70">
           <span className="h-px flex-1 bg-ink/10 dark:bg-white/10" />
           {t("or")}
           <span className="h-px flex-1 bg-ink/10 dark:bg-white/10" />
@@ -60,7 +60,7 @@ export default async function LoginPage({
 
         <p className="mt-6 text-center text-sm text-ink/60 dark:text-sand/60">
           {t("dontHaveAccount")}{" "}
-          <Link href={`/${locale}/auth/register`} className="font-semibold text-primary hover:underline">
+          <Link href={`/${locale}/auth/register`} className="font-semibold text-primary-700 hover:underline">
             {t("signUp")}
           </Link>
         </p>

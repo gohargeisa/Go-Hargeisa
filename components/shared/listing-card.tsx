@@ -73,7 +73,7 @@ export function ListingCard({
                 <span className="line-clamp-1">{subtitle}</span>
               </p>
             </div>
-            {priceRange && <span className="rounded-lg bg-primary/10 px-2.5 py-1.5 text-sm font-bold text-primary">{priceRange}</span>}
+            {priceRange && <span className="rounded-lg bg-primary/10 px-2.5 py-1.5 text-sm font-bold text-primary-800">{priceRange}</span>}
           </div>
           <div className="mt-auto flex items-center justify-between border-t border-ink/8 pt-4 dark:border-white/10">
             <RatingBadge rating={rating} reviewCount={reviewCount} />

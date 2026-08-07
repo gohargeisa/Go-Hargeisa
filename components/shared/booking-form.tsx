@@ -169,7 +169,7 @@ function RoomOptionCard({ room, selected, onSelect }: { room: HotelRoom; selecte
 
         <div className="mt-2 flex items-center justify-between">
           {room.pricePerNight ? (
-            <p className="text-sm font-bold text-primary">
+            <p className="text-sm font-bold text-primary-700">
               {room.discountPrice ? (
                 <>
                   {money(room.discountPrice)}
@@ -368,7 +368,7 @@ export function BookingForm({
         <div className="flex flex-wrap items-center gap-2">
           <h2 className="font-display text-lg font-bold sm:text-xl">{hotelName}</h2>
           {typeof hotelRating === "number" && hotelRating > 0 && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">
+            <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary-800">
               <Star size={12} fill="currentColor" aria-hidden="true" />
               {hotelRating.toFixed(1)}
             </span>
@@ -476,7 +476,7 @@ export function BookingForm({
               />
             </div>
           </div>
-          {nights > 0 && <p className="mt-2 text-xs font-semibold text-primary">{t("nightsCount", { count: nights })}</p>}
+          {nights > 0 && <p className="mt-2 text-xs font-semibold text-primary-700">{t("nightsCount", { count: nights })}</p>}
 
           <div className="mt-4 grid gap-2.5 sm:grid-cols-3">
             <Stepper label={t("adultsLabel")} value={adults} min={1} onChange={setAdults} />

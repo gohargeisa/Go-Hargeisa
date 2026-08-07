@@ -21,7 +21,7 @@ export function MyBusinessesPanel({ locale, listings }: { locale: Locale; listin
     <div>
       <div className="mb-6 flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{t("myBusinessesEyebrow")}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary-700">{t("myBusinessesEyebrow")}</p>
           <h2 className="mt-1 font-display text-2xl font-semibold">{t("myBusinessesTitle")}</h2>
         </div>
         <Building2 size={22} className="text-primary" />

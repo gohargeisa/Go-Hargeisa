@@ -81,7 +81,13 @@ export function CityMapExperience({ points, locale }: { points: CityServicePoint
           <CityMapEmptyState />
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <>
+          {/* sr-only — the visible results count/filters live in
+              CitySearchBar/CategoryFilters above; this exists only so the
+              PointInfoCard h3s below don't skip from the page's h1
+              straight to h3 (axe heading-order). */}
+          <h2 className="sr-only">Results</h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {visible.map((point) => (
             <div
               key={point.id}
@@ -90,7 +96,8 @@ export function CityMapExperience({ points, locale }: { points: CityServicePoint
               <PointInfoCard point={point} locale={locale} visitorLocation={visitorLocation} />
             </div>
           ))}
-        </div>
+          </div>
+        </>
       )}
     </div>
   );

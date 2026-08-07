@@ -121,7 +121,7 @@ export function OffersManager({
         <button
           type="button"
           onClick={startCreate}
-          className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-700"
+          className="inline-flex items-center gap-2 rounded-full bg-primary-700 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-800"
         >
           <Plus size={15} aria-hidden="true" /> {t("addOfferButton")}
         </button>
@@ -156,7 +156,7 @@ export function OffersManager({
                     onClick={() => setDraft((d) => ({ ...d, discountType: type }))}
                     className={`rounded-xl border py-2.5 text-sm font-semibold transition-colors ${
                       draft.discountType === type
-                        ? "border-primary bg-primary/8 text-primary"
+                        ? "border-primary bg-primary/8 text-primary-800"
                         : "border-ink/12 text-ink/60 hover:border-primary/40 dark:border-white/15 dark:text-sand/60"
                     }`}
                   >
@@ -255,7 +255,7 @@ export function OffersManager({
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="font-semibold">{offer.title}</p>
                       {discountLabel && (
-                        <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">{discountLabel}</span>
+                        <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary-800">{discountLabel}</span>
                       )}
                       <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${approvalBadgeClass[offer.approvalStatus]}`}>
                         {t(`offerApproval_${offer.approvalStatus}` as "offerApproval_pending")}

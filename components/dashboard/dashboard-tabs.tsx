@@ -145,7 +145,7 @@ export function DashboardTabs({
           {active === "overview" && <OverviewPanel userName={userName} stats={overviewStats} onNavigate={(key) => selectTab(key as TabKey)} />}
           {active === "myBusinesses" && <MyBusinessesPanel locale={locale} listings={ownedListings} />}
           {active === "favorites" && <div>
-            <div className="mb-6 flex items-center justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{t("favoritesEyebrow")}</p><h2 className="mt-1 font-display text-2xl font-semibold">{t("favoritesTitle")}</h2></div><Heart size={22} className="text-primary" /></div>
+            <div className="mb-6 flex items-center justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary-700">{t("favoritesEyebrow")}</p><h2 className="mt-1 font-display text-2xl font-semibold">{t("favoritesTitle")}</h2></div><Heart size={22} className="text-primary" /></div>
             {favorites.length === 0 ? <EmptyState icon={Compass} title={t("emptyFavoritesTitle")} description={t("emptyFavoritesDescription")} /> : <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{favorites.map(({ kind, item }) => kind === "hotel" ? <HotelCard key={item.id} href={`/${locale}/hotels/${item.slug}`} image={item.coverImage} name={item.name} address={item.address} rating={item.rating} reviewCount={item.reviewCount} hotelId={item.id} initiallyFavorited locale={locale} /> : <ListingCard key={item.id} href={favoriteHref(locale, kind, item)} image={item.coverImage} title={item.name} subtitle={item.address} rating={item.rating} reviewCount={item.reviewCount} listingType={kind} listingId={item.id} initiallyFavorited locale={locale} />)}</div>}
           </div>}
           {active === "trips" && <SavedTripsPanel locale={locale} trips={trips} />}
@@ -177,7 +177,7 @@ export function DashboardTabs({
           )}
           {active === "security" && <SecurityPanel locale={locale} hasPassword={hasPassword} />}
           {active === "notifications" && <div>
-            <div className="mb-6 flex items-center justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{t("notificationsEyebrow")}</p><h2 className="mt-1 font-display text-2xl font-semibold">{t("notificationsTitle")}</h2></div><Bell size={22} className="text-primary" /></div>
+            <div className="mb-6 flex items-center justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary-700">{t("notificationsEyebrow")}</p><h2 className="mt-1 font-display text-2xl font-semibold">{t("notificationsTitle")}</h2></div><Bell size={22} className="text-primary" /></div>
             <NotificationList locale={locale} initialItems={notifications} initialUnread={unreadNotifications} />
           </div>}
           {active === "support" && supportSlot}

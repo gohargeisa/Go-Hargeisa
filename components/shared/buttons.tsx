@@ -47,7 +47,12 @@ function sizeClass(size: Size, compact: boolean) {
  * coming-soon-section.tsx and section-header.tsx.
  */
 export function PrimaryButton({ children, size = "md", compact = false, fullWidth = false, className = "", external, ...rest }: ButtonProps) {
-  const classes = `group inline-flex items-center justify-center gap-2 rounded-full bg-primary font-semibold text-white shadow-soft transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-primary-700 hover:shadow-card active:scale-95 disabled:opacity-70 disabled:pointer-events-none ${sizeClass(size, compact)} ${fullWidth ? "w-full" : ""} ${className}`;
+  // bg-primary (#F59E0B) with white text measures ~2.14:1 — badly fails
+  // WCAG AA's 4.5:1 for normal text. primary-700 (#B45309, already used as
+  // the hover shade) measures ~5.08:1 and passes; hover moves one step
+  // further to primary-800 so the hover state still reads as a visible
+  // change instead of matching the resting color exactly.
+  const classes = `group inline-flex items-center justify-center gap-2 rounded-full bg-primary-700 font-semibold text-white shadow-soft transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-primary-800 hover:shadow-card active:scale-95 disabled:opacity-70 disabled:pointer-events-none ${sizeClass(size, compact)} ${fullWidth ? "w-full" : ""} ${className}`;
 
   if ("href" in rest && rest.href) {
     const { href, ...anchorRest } = rest as LinkButtonProps;

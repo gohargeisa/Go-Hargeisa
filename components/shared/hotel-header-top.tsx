@@ -66,10 +66,10 @@ export async function HotelHeaderTop({
             {reviewCount > 0 ? (
               <>
                 <span className="text-sm font-semibold">{rating.toFixed(1)}</span>
-                <span className="text-sm text-ink/50 dark:text-sand/50">({reviewCount} reviews)</span>
+                <span className="text-sm text-ink/70 dark:text-sand/70">({reviewCount} reviews)</span>
               </>
             ) : (
-              <span className="text-sm font-semibold text-ink/50 dark:text-sand/50">{t("noReviewsYet")}</span>
+              <span className="text-sm font-semibold text-ink/70 dark:text-sand/70">{t("noReviewsYet")}</span>
             )}
           </div>
         )}
@@ -79,7 +79,7 @@ export async function HotelHeaderTop({
             <MapPin size={14} className="shrink-0 text-primary" aria-hidden="true" />
             Hargeisa, Somaliland
           </span>
-          <span className="text-xs font-medium uppercase tracking-wide text-ink/45 dark:text-sand/45">
+          <span className="text-xs font-medium uppercase tracking-wide text-ink/70 dark:text-sand/70">
             {categoryLabel}
           </span>
         </div>

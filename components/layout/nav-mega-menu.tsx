@@ -148,7 +148,7 @@ export function NavMegaMenu({
         className={`relative flex items-center gap-1 rounded-full px-4 py-2 text-[15px] font-medium transition-all duration-300 ease-premium ${
           scrolled
             ? open
-              ? "bg-primary/10 text-primary"
+              ? "bg-primary/10 text-primary-800"
               : "text-gray-800 hover:text-primary hover:bg-primary/10 dark:text-white/90"
             : open
               ? "bg-white/10 text-white"

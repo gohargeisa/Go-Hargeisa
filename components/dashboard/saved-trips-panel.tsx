@@ -53,7 +53,7 @@ export function SavedTripsPanel({ locale, trips }: { locale: Locale; trips: Save
     <div>
       <div className="mb-6 flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{t("tripsEyebrow")}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary-700">{t("tripsEyebrow")}</p>
           <h2 className="mt-1 font-display text-2xl font-semibold">{t("tripsTitle")}</h2>
         </div>
         <PrimaryButton onClick={() => setCreating((c) => !c)} size="sm">

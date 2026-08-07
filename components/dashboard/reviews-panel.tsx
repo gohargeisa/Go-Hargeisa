@@ -22,7 +22,7 @@ export function ReviewsPanel({ locale, reviews }: { locale: Locale; reviews: MyR
 
   return (
     <div>
-      <div className="mb-6"><p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{t("reviewsEyebrow")}</p><h2 className="mt-1 font-display text-2xl font-semibold">{t("reviewsTitle")}</h2></div>
+      <div className="mb-6"><p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary-700">{t("reviewsEyebrow")}</p><h2 className="mt-1 font-display text-2xl font-semibold">{t("reviewsTitle")}</h2></div>
       {reviews.length === 0 ? (
         <EmptyState icon={MessageSquareText} title={t("emptyReviewsTitle")} description={t("emptyReviewsDescription")} />
       ) : (

@@ -58,7 +58,7 @@ export function UserMenu({
             <Image src={avatarUrl} alt={name} fill sizes="28px" className="object-cover" />
           </span>
         ) : (
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white">
+          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary-700 text-xs font-semibold text-white">
             {initial}
           </span>
         )}

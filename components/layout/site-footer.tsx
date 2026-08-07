@@ -153,7 +153,12 @@ function FooterCol({
 }) {
   return (
     <div>
-      <h4 className="font-display text-sm font-bold uppercase tracking-[0.1em] text-ink/80 dark:text-sand/80">{title}</h4>
+      {/* Not a heading — the footer is rendered on every page with a
+          different heading outline, so a fixed level here would always
+          risk skipping levels somewhere (axe heading-order). The `<footer>`
+          landmark + this column's own link list already make it navigable
+          without needing a heading role. */}
+      <p className="font-display text-sm font-bold uppercase tracking-[0.1em] text-ink/80 dark:text-sand/80">{title}</p>
       <ul className="mt-5 space-y-3">
         {links.map(([key, href]) => (
           <li key={key}>

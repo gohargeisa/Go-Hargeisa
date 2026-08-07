@@ -62,7 +62,7 @@ function ContactRow({ icon: Icon, label, value }: { icon: typeof Mail; label: st
         <Icon size={18} aria-hidden="true" />
       </span>
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-ink/45 dark:text-sand/45">{label}</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-ink/70 dark:text-sand/70">{label}</p>
         <p className="text-sm font-medium">{value}</p>
       </div>
     </div>

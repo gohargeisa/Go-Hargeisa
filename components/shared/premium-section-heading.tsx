@@ -24,7 +24,7 @@ export function PremiumSectionHeading({
       {eyebrow && (
         <span
           className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] ${
-            dark ? "border border-white/20 bg-white/10 text-white" : "bg-primary/10 text-primary"
+            dark ? "border border-white/20 bg-white/10 text-white" : "bg-primary/10 text-primary-800"
           }`}
         >
           {eyebrow}

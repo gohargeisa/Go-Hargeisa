@@ -163,7 +163,7 @@ export function JoinRequestForm() {
                 >
                   <Icon size={20} aria-hidden="true" />
                 </span>
-                <span className={`text-xs font-semibold ${active ? "text-primary" : "text-ink/75 dark:text-sand/75"}`}>
+                <span className={`text-xs font-semibold ${active ? "text-primary-700" : "text-ink/75 dark:text-sand/75"}`}>
                   {tc(cat)}
                 </span>
               </button>
@@ -174,16 +174,17 @@ export function JoinRequestForm() {
 
       {/* Business Information */}
       <div>
-        <h3 className="mb-5 font-display text-lg font-bold">{t("businessInfoTitle")}</h3>
+        <h2 className="mb-5 font-display text-lg font-bold">{t("businessInfoTitle")}</h2>
         <div className="space-y-5">
           <div>
-            <label className={labelClass}>{t("businessNameLabel")}</label>
-            <input required value={businessName} onChange={(e) => setBusinessName(e.target.value)} className={inputClass} />
+            <label htmlFor="jr-businessName" className={labelClass}>{t("businessNameLabel")}</label>
+            <input id="jr-businessName" required value={businessName} onChange={(e) => setBusinessName(e.target.value)} className={inputClass} />
           </div>
 
           <div>
-            <label className={labelClass}>{t("descriptionLabel")}</label>
+            <label htmlFor="jr-description" className={labelClass}>{t("descriptionLabel")}</label>
             <textarea
+              id="jr-description"
               required
               rows={4}
               value={description}
@@ -194,31 +195,31 @@ export function JoinRequestForm() {
 
           <div className="grid gap-5 sm:grid-cols-3">
             <div>
-              <label className={labelClass}>{t("phoneLabel")}</label>
-              <input required type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className={inputClass} placeholder="+252 63 000 0000" />
+              <label htmlFor="jr-phone" className={labelClass}>{t("phoneLabel")}</label>
+              <input id="jr-phone" required type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className={inputClass} placeholder="+252 63 000 0000" />
             </div>
             <div>
-              <label className={labelClass}>{t("whatsappLabel")}</label>
-              <input type="tel" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} className={inputClass} placeholder="+252 63 000 0000" />
+              <label htmlFor="jr-whatsapp" className={labelClass}>{t("whatsappLabel")}</label>
+              <input id="jr-whatsapp" type="tel" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} className={inputClass} placeholder="+252 63 000 0000" />
             </div>
             <div>
-              <label className={labelClass}>{t("emailLabel")}</label>
-              <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} />
+              <label htmlFor="jr-email" className={labelClass}>{t("emailLabel")}</label>
+              <input id="jr-email" required type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} />
             </div>
           </div>
 
           <div className="grid gap-5 sm:grid-cols-3">
             <div>
-              <label className={labelClass}>{t("websiteLabel")}</label>
-              <input type="url" value={website} onChange={(e) => setWebsite(e.target.value)} className={inputClass} placeholder="https://…" />
+              <label htmlFor="jr-website" className={labelClass}>{t("websiteLabel")}</label>
+              <input id="jr-website" type="url" value={website} onChange={(e) => setWebsite(e.target.value)} className={inputClass} placeholder="https://…" />
             </div>
             <div>
-              <label className={labelClass}>{t("instagramLabel")}</label>
-              <input type="url" value={instagram} onChange={(e) => setInstagram(e.target.value)} className={inputClass} placeholder="https://instagram.com/…" />
+              <label htmlFor="jr-instagram" className={labelClass}>{t("instagramLabel")}</label>
+              <input id="jr-instagram" type="url" value={instagram} onChange={(e) => setInstagram(e.target.value)} className={inputClass} placeholder="https://instagram.com/…" />
             </div>
             <div>
-              <label className={labelClass}>{t("facebookLabel")}</label>
-              <input type="url" value={facebook} onChange={(e) => setFacebook(e.target.value)} className={inputClass} placeholder="https://facebook.com/…" />
+              <label htmlFor="jr-facebook" className={labelClass}>{t("facebookLabel")}</label>
+              <input id="jr-facebook" type="url" value={facebook} onChange={(e) => setFacebook(e.target.value)} className={inputClass} placeholder="https://facebook.com/…" />
             </div>
           </div>
 
@@ -228,8 +229,8 @@ export function JoinRequestForm() {
 
           {category === "hotel" && (
             <div>
-              <label className={labelClass}>{t("bookingUrlLabel")}</label>
-              <input type="url" value={bookingUrl} onChange={(e) => setBookingUrl(e.target.value)} className={inputClass} placeholder="https://…" />
+              <label htmlFor="jr-bookingUrl" className={labelClass}>{t("bookingUrlLabel")}</label>
+              <input id="jr-bookingUrl" type="url" value={bookingUrl} onChange={(e) => setBookingUrl(e.target.value)} className={inputClass} placeholder="https://…" />
             </div>
           )}
         </div>
@@ -237,22 +238,22 @@ export function JoinRequestForm() {
 
       {/* Address */}
       <div>
-        <h3 className="mb-5 font-display text-lg font-bold">{t("addressTitle")}</h3>
+        <h2 className="mb-5 font-display text-lg font-bold">{t("addressTitle")}</h2>
         <div className="space-y-5">
           <div className="grid gap-5 sm:grid-cols-2">
             <div>
-              <label className={labelClass}>{t("cityLabel")}</label>
-              <input required value={city} onChange={(e) => setCity(e.target.value)} className={inputClass} />
+              <label htmlFor="jr-city" className={labelClass}>{t("cityLabel")}</label>
+              <input id="jr-city" required value={city} onChange={(e) => setCity(e.target.value)} className={inputClass} />
             </div>
             <div>
-              <label className={labelClass}>{t("districtLabel")}</label>
-              <input value={district} onChange={(e) => setDistrict(e.target.value)} className={inputClass} placeholder={t("districtPlaceholder")} />
+              <label htmlFor="jr-district" className={labelClass}>{t("districtLabel")}</label>
+              <input id="jr-district" value={district} onChange={(e) => setDistrict(e.target.value)} className={inputClass} placeholder={t("districtPlaceholder")} />
             </div>
           </div>
 
           <div>
-            <label className={labelClass}>{t("addressLabel")}</label>
-            <input required value={address} onChange={(e) => setAddress(e.target.value)} className={inputClass} placeholder={t("addressPlaceholder")} />
+            <label htmlFor="jr-address" className={labelClass}>{t("addressLabel")}</label>
+            <input id="jr-address" required value={address} onChange={(e) => setAddress(e.target.value)} className={inputClass} placeholder={t("addressPlaceholder")} />
           </div>
 
           <div>
@@ -270,15 +271,15 @@ export function JoinRequestForm() {
           </div>
 
           <div>
-            <label className={labelClass}>{t("mapsUrlLabel")}</label>
-            <input type="url" value={mapsUrl} onChange={(e) => setMapsUrl(e.target.value)} className={inputClass} placeholder="https://maps.google.com/…" />
+            <label htmlFor="jr-mapsUrl" className={labelClass}>{t("mapsUrlLabel")}</label>
+            <input id="jr-mapsUrl" type="url" value={mapsUrl} onChange={(e) => setMapsUrl(e.target.value)} className={inputClass} placeholder="https://maps.google.com/…" />
           </div>
         </div>
       </div>
 
       {/* Images */}
       <div>
-        <h3 className="mb-5 font-display text-lg font-bold">{t("imagesTitle")}</h3>
+        <h2 className="mb-5 font-display text-lg font-bold">{t("imagesTitle")}</h2>
         <div className="space-y-5">
           <div className="grid gap-6 sm:grid-cols-2">
             <ImageUploader folder="join-requests/logos" value={logo} onChange={setLogo} label={t("logoLabel")} rounded="rounded-full" />
@@ -295,7 +296,7 @@ export function JoinRequestForm() {
 
       {/* Videos */}
       <div>
-        <h3 className="mb-5 font-display text-lg font-bold">{t("videosTitle")}</h3>
+        <h2 className="mb-5 font-display text-lg font-bold">{t("videosTitle")}</h2>
         <VideoUploader
           folder="join-requests/videos"
           value={videos}
@@ -313,7 +314,7 @@ export function JoinRequestForm() {
 
       {/* Documents */}
       <div>
-        <h3 className="mb-5 font-display text-lg font-bold">{t("documentsTitle")}</h3>
+        <h2 className="mb-5 font-display text-lg font-bold">{t("documentsTitle")}</h2>
         <DocumentsUploader
           folder="join-requests/documents"
           value={documents}
@@ -325,7 +326,7 @@ export function JoinRequestForm() {
 
       {/* Opening Hours */}
       <div>
-        <h3 className="mb-5 font-display text-lg font-bold">{t("openingHoursTitle")}</h3>
+        <h2 className="mb-5 font-display text-lg font-bold">{t("openingHoursTitle")}</h2>
         <div className="divide-y divide-ink/8 overflow-hidden rounded-2xl border border-ink/12 dark:divide-white/10 dark:border-white/15">
           {WEEK_DAYS_SAT_FIRST.map((day) => {
             const entry = openingHours.find((h) => h.day === day)!;
@@ -335,6 +336,7 @@ export function JoinRequestForm() {
                 <div className="flex flex-1 flex-wrap items-center gap-3">
                   <input
                     type="time"
+                    aria-label={`${tw(day)} ${tAdmin("hoursOpenLabel")}`}
                     value={entry.open}
                     disabled={entry.closed}
                     onChange={(e) => updateHoursDay(day, { open: e.target.value })}
@@ -343,6 +345,7 @@ export function JoinRequestForm() {
                   <span className="text-ink/40 dark:text-sand/40">–</span>
                   <input
                     type="time"
+                    aria-label={`${tw(day)} ${tAdmin("hoursCloseLabel")}`}
                     value={entry.close}
                     disabled={entry.closed}
                     onChange={(e) => updateHoursDay(day, { close: e.target.value })}
@@ -366,7 +369,7 @@ export function JoinRequestForm() {
       {/* Amenities */}
       {categoryAmenities && categoryAmenities.length > 0 && (
         <div>
-          <h3 className="mb-5 font-display text-lg font-bold">{t("amenitiesTitle")}</h3>
+          <h2 className="mb-5 font-display text-lg font-bold">{t("amenitiesTitle")}</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {categoryAmenities.map((code) => {
               const Icon = PARTNER_AMENITY_ICON[code];
@@ -379,7 +382,7 @@ export function JoinRequestForm() {
                   aria-pressed={active}
                   className={`flex items-center gap-2.5 rounded-2xl border p-3.5 text-start text-sm font-medium transition-colors ${
                     active
-                      ? "border-primary bg-primary/8 text-primary"
+                      ? "border-primary bg-primary/8 text-primary-800"
                       : "border-ink/10 text-ink/70 hover:border-primary/40 dark:border-white/15 dark:text-sand/70"
                   }`}
                 >
@@ -394,7 +397,7 @@ export function JoinRequestForm() {
 
       {/* Pricing */}
       <div>
-        <h3 className="mb-5 font-display text-lg font-bold">{t("pricingTitle")}</h3>
+        <h2 className="mb-5 font-display text-lg font-bold">{t("pricingTitle")}</h2>
         <div className="grid grid-cols-4 gap-3">
           {PRICE_LEVELS.map((level) => (
             <button
@@ -404,7 +407,7 @@ export function JoinRequestForm() {
               aria-pressed={priceRange === level}
               className={`rounded-2xl border p-4 text-center font-display text-lg font-bold transition-colors ${
                 priceRange === level
-                  ? "border-primary bg-primary/8 text-primary"
+                  ? "border-primary bg-primary/8 text-primary-800"
                   : "border-ink/10 text-ink/60 hover:border-primary/40 dark:border-white/15 dark:text-sand/60"
               }`}
             >

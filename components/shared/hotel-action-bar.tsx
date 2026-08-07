@@ -30,7 +30,7 @@ const SECONDARY_CLASS =
  * booking concept).
  */
 const PRIMARY_CLASS =
-  "inline-flex h-12 shrink-0 snap-start items-center justify-center gap-2 rounded-full bg-primary px-8 text-[15px] font-bold text-white shadow-soft transition-all duration-300 ease-out hover:-translate-y-0.5 hover:scale-[1.03] hover:bg-primary-700 hover:shadow-card active:scale-95";
+  "inline-flex h-12 shrink-0 snap-start items-center justify-center gap-2 rounded-full bg-primary-700 px-8 text-[15px] font-bold text-white shadow-soft transition-all duration-300 ease-out hover:-translate-y-0.5 hover:scale-[1.03] hover:bg-primary-800 hover:shadow-card active:scale-95";
 
 export async function HotelActionBar({
   locale,

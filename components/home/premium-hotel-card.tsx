@@ -164,7 +164,7 @@ function PremiumHotelCardBase({
               {t("startingFrom")}
             </p>
             {priceRange ? (
-              <p className="font-display text-2xl font-bold text-primary">
+              <p className="font-display text-2xl font-bold text-primary-700">
                 {priceRange}
                 <span className="ms-1 text-sm font-medium text-ink/50 dark:text-sand/50">{t("perNight")}</span>
               </p>

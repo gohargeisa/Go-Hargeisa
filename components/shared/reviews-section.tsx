@@ -199,7 +199,7 @@ function ReviewCard({
 
       {r.ownerReply && (
         <div className="mt-3 rounded-xl border border-primary/15 bg-primary/5 p-3">
-          <p className="text-xs font-bold uppercase tracking-wide text-primary">{t("ownerReplyLabel")}</p>
+          <p className="text-xs font-bold uppercase tracking-wide text-primary-700">{t("ownerReplyLabel")}</p>
           <p className="mt-1 text-sm text-ink/75 dark:text-sand/75">{r.ownerReply}</p>
         </div>
       )}
@@ -210,7 +210,7 @@ function ReviewCard({
           onClick={onToggleHelpful}
           disabled={isPending}
           className={`inline-flex items-center gap-1.5 font-semibold transition-colors disabled:opacity-60 ${
-            helpful ? "text-primary" : "text-ink/50 hover:text-primary dark:text-sand/50"
+            helpful ? "text-primary-700" : "text-ink/50 hover:text-primary dark:text-sand/50"
           }`}
         >
           <ThumbsUp size={13} fill={helpful ? "currentColor" : "none"} aria-hidden="true" />

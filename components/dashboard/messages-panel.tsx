@@ -22,7 +22,7 @@ export function MessagesPanel({
     <div>
       <div className="mb-6 flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{t("messagesEyebrow")}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary-700">{t("messagesEyebrow")}</p>
           <h2 className="mt-1 font-display text-2xl font-semibold">{t("messagesTitle")}</h2>
         </div>
         <MessageSquare size={22} className="text-primary" />

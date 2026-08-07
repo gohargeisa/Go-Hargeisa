@@ -24,7 +24,7 @@ export function ComingSoonSection({ locale, type = "restaurants" }: { locale: Lo
           />
 
           <div className="relative mx-auto max-w-xl">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-primary-800">
               <Sparkles size={13} aria-hidden="true" />
               {t("badge")}
             </span>

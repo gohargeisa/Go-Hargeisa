@@ -85,7 +85,7 @@ export function PointInfoCard({
       )}
 
       {!point.address && hasCoordinates && (
-        <p className="flex items-center gap-1.5 text-xs text-ink/50 dark:text-sand/50">
+        <p className="flex items-center gap-1.5 text-xs text-ink/70 dark:text-sand/70">
           <MapPin size={13} className="shrink-0" aria-hidden="true" />
           {point.location.lat.toFixed(5)}, {point.location.lng.toFixed(5)}
         </p>

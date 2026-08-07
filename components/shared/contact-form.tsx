@@ -75,7 +75,7 @@ export function ContactForm() {
       <button
         type="submit"
         disabled={isPending}
-        className="inline-flex h-12 items-center gap-2 rounded-full bg-primary px-6 text-sm font-semibold text-white shadow-soft transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-primary-700 hover:shadow-card active:scale-95 disabled:opacity-70"
+        className="inline-flex h-12 items-center gap-2 rounded-full bg-primary-700 px-6 text-sm font-semibold text-white shadow-soft transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-primary-800 hover:shadow-card active:scale-95 disabled:opacity-70"
       >
         {isPending && <Loader2 size={14} className="animate-spin" aria-hidden="true" />}
         {t("sendMessage")}

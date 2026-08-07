@@ -46,7 +46,7 @@ export default async function AdminAttractionsPage({ params: { locale } }: { par
         </div>
         <Link
           href={`/${locale}/admin/attractions/new`}
-          className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-700 transition-colors"
+          className="inline-flex items-center gap-2 rounded-full bg-primary-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-800 transition-colors"
         >
           <Plus size={16} /> {t("addAttraction")}
         </Link>

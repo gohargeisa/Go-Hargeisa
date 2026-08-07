@@ -24,7 +24,11 @@ export function EmptyState({
       <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-primary shadow-soft ring-1 ring-primary/10 dark:bg-ink dark:ring-white/10">
         <Icon size={24} aria-hidden="true" />
       </span>
-      <h3 className="mt-5 font-display text-xl font-semibold">{title}</h3>
+      {/* Not a heading — this component is reused across 20+ places
+          (dashboard panels, listing pages, search, admin) each with a
+          different heading outline, so a fixed level here would always
+          risk skipping levels somewhere (axe heading-order). */}
+      <p className="mt-5 font-display text-xl font-semibold">{title}</p>
       <p className="mt-2 max-w-sm text-sm leading-6 text-ink/55 dark:text-sand/60">{description}</p>
     </div>
   );

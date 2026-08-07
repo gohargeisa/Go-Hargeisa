@@ -12,7 +12,7 @@ export function MissionProgress({ items }: { items: MissionChecklistItem[] }) {
     <div className="rounded-2xl border border-ink/8 bg-white p-5 dark:border-white/10 dark:bg-white/[0.03] sm:p-6">
       <div className="flex items-center justify-between gap-3">
         <h3 className="font-display text-lg font-bold">Mission Progress</h3>
-        <span className="font-display text-xl font-bold text-primary">{percent}%</span>
+        <span className="font-display text-xl font-bold text-primary-700">{percent}%</span>
       </div>
       <div className="mt-3 h-2 overflow-hidden rounded-full bg-ink/8 dark:bg-white/10">
         <div

@@ -81,7 +81,7 @@ export function HotelGallerySlider({
       <h2 className="mb-2.5 font-display text-lg font-semibold text-ink dark:text-white sm:mb-3 sm:text-xl">
         {tc("gallery")}
         {slides.length > 1 && (
-          <span className="ms-2 font-body text-sm font-medium text-ink/45 dark:text-sand/45">
+          <span className="ms-2 font-body text-sm font-medium text-ink/70 dark:text-sand/70">
             ({t("photosCount", { count: slides.length })})
           </span>
         )}

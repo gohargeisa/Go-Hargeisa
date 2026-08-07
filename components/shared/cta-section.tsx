@@ -49,7 +49,7 @@ export function CTASection({
           {eyebrow && (
             <span
               className={`inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] ${
-                dark ? "border-white/25 bg-white/10 text-white" : "border-primary/20 bg-primary/10 text-primary"
+                dark ? "border-white/25 bg-white/10 text-white" : "border-primary/20 bg-primary/10 text-primary-800"
               }`}
             >
               {eyebrow}

@@ -120,7 +120,7 @@ export default async function AboutPage({ params: { locale } }: { params: { loca
         <div className="container-px mx-auto">
           <Reveal>
             <div className="mx-auto mb-10 max-w-2xl text-center md:mb-14">
-              <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary">
+              <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary-800">
                 {t("missionEyebrow")}
               </span>
               <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">
@@ -139,7 +139,7 @@ export default async function AboutPage({ params: { locale } }: { params: { loca
       <section className="container-px mx-auto py-16 md:py-24">
         <Reveal>
           <div className="mx-auto mb-10 max-w-2xl text-center md:mb-14">
-            <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary">
+            <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary-800">
               {t("whyEyebrow")}
             </span>
             <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">
@@ -158,7 +158,7 @@ export default async function AboutPage({ params: { locale } }: { params: { loca
         <div className="container-px mx-auto">
           <Reveal>
             <div className="mx-auto mb-10 max-w-2xl text-center md:mb-14">
-              <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary">
+              <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary-800">
                 {t("statsEyebrow")}
               </span>
               <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">
@@ -204,7 +204,7 @@ export default async function AboutPage({ params: { locale } }: { params: { loca
         <div className="container-px mx-auto">
           <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
             <Reveal>
-              <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary">
+              <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary-800">
                 {t("platformEyebrow")}
               </span>
               <h2 className="mt-4 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">

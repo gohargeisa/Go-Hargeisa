@@ -73,7 +73,7 @@ export default async function BlogPage({ params: { locale } }: { params: { local
                       {a.title}
                     </h2>
                     <p className="mt-1.5 line-clamp-2 text-sm text-ink/60 dark:text-sand/60">{a.excerpt}</p>
-                    <p className="mt-3 border-t border-ink/8 pt-3 text-xs font-medium text-ink/45 dark:border-white/10 dark:text-sand/45">
+                    <p className="mt-3 border-t border-ink/8 pt-3 text-xs font-medium text-ink/70 dark:border-white/10 dark:text-sand/70">
                       {a.author} · {t("minRead", { minutes: a.readMinutes })}
                     </p>
                   </div>

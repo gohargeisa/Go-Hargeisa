@@ -32,10 +32,10 @@ export function Timeline({ steps, className = "" }: { steps: TimelineStep[]; cla
 
       {steps.map(({ icon: Icon, label, title, description }, i) => (
         <Reveal key={title} delay={i * 0.12} className="relative text-center">
-          <div className="relative z-10 mx-auto flex h-16 w-16 items-center justify-center rounded-full border-4 border-sand bg-primary text-white shadow-[0_10px_24px_rgba(245,158,11,0.35)] dark:border-ink">
+          <div className="relative z-10 mx-auto flex h-16 w-16 items-center justify-center rounded-full border-4 border-sand bg-primary-700 text-white shadow-[0_10px_24px_rgba(245,158,11,0.35)] dark:border-ink">
             <Icon size={26} aria-hidden="true" />
           </div>
-          <span className="mt-4 inline-block font-display text-sm font-bold uppercase tracking-[0.18em] text-primary">
+          <span className="mt-4 inline-block font-display text-sm font-bold uppercase tracking-[0.18em] text-primary-700">
             {label}
           </span>
           <h3 className="mt-2 font-display text-xl font-bold">{title}</h3>

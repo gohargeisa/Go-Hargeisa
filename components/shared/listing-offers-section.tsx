@@ -49,7 +49,7 @@ export function ListingOffersSection({
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="font-semibold">{offer.title}</p>
                   {discountLabel && (
-                    <span className="rounded-full bg-primary px-2.5 py-0.5 text-xs font-bold text-white">{discountLabel}</span>
+                    <span className="rounded-full bg-primary-700 px-2.5 py-0.5 text-xs font-bold text-white">{discountLabel}</span>
                   )}
                 </div>
                 {offer.description && (
@@ -58,7 +58,7 @@ export function ListingOffersSection({
                 <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-ink/50 dark:text-sand/50">
                   {offer.endsAt && <span>{validUntilLabel(offer.endsAt)}</span>}
                   {offer.couponCode && (
-                    <span className="flex items-center gap-1 font-semibold text-primary">
+                    <span className="flex items-center gap-1 font-semibold text-primary-700">
                       <Ticket size={12} aria-hidden="true" /> {couponLabel}: {offer.couponCode}
                     </span>
                   )}

@@ -30,7 +30,7 @@ export function OverviewPanel({
   return (
     <div>
       <div className="mb-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{t("overviewEyebrow")}</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary-700">{t("overviewEyebrow")}</p>
         <h2 className="mt-1 font-display text-2xl font-semibold">{t("overviewWelcome", { name: userName })}</h2>
       </div>
 

@@ -54,7 +54,7 @@ export function CityServicesPageClient({
               onClick={() => setActiveCategory("all")}
               className={`inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
                 activeCategory === "all"
-                  ? "border-primary bg-primary/10 text-primary"
+                  ? "border-primary bg-primary/10 text-primary-800"
                   : "border-ink/12 text-ink/60 hover:border-primary/40 dark:border-white/15 dark:text-sand/60"
               }`}
             >
@@ -70,7 +70,7 @@ export function CityServicesPageClient({
                   onClick={() => setActiveCategory(g.category)}
                   className={`inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
                     activeCategory === g.category
-                      ? "border-primary bg-primary/10 text-primary"
+                      ? "border-primary bg-primary/10 text-primary-800"
                       : "border-ink/12 text-ink/60 hover:border-primary/40 dark:border-white/15 dark:text-sand/60"
                   }`}
                 >

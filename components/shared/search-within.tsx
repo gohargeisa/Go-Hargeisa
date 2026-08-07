@@ -46,7 +46,7 @@ export function SearchWithin({
       </div>
       <button
         type="submit"
-        className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-700 transition-colors"
+        className="rounded-full bg-primary-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-800 transition-colors"
       >
         {t("searchButton")}
       </button>

@@ -12,7 +12,7 @@ export function ViewAllButton({ href, label }: { href: string; label: string }) 
     <div className="mt-10 flex justify-center md:mt-14">
       <Link
         href={href}
-        className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-8 py-4 text-[15px] font-semibold text-white shadow-[0_10px_30px_rgba(245,158,11,0.3)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-primary-700 hover:shadow-[0_16px_40px_rgba(245,158,11,0.4)] active:translate-y-0 sm:w-auto sm:min-w-[280px]"
+        className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary-700 px-8 py-4 text-[15px] font-semibold text-white shadow-[0_10px_30px_rgba(245,158,11,0.3)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-primary-800 hover:shadow-[0_16px_40px_rgba(245,158,11,0.4)] active:translate-y-0 sm:w-auto sm:min-w-[280px]"
       >
         {label}
         <ArrowRight

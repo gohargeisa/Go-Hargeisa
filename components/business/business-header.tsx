@@ -41,7 +41,7 @@ export function BusinessHeader({
         >
           <Bell size={18} aria-hidden="true" />
           {unreadCount > 0 && (
-            <span className="absolute -end-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-white">
+            <span className="absolute -end-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary-700 px-1 text-[10px] font-bold text-white">
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           )}

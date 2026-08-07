@@ -159,8 +159,9 @@ export function ListingFilters({
       <div className="space-y-6">
         {/* Sort By */}
         <div>
-          <label className="text-sm font-semibold text-ink dark:text-white">{t("sortByLabel")}</label>
+          <label htmlFor="listing-filters-sort" className="text-sm font-semibold text-ink dark:text-white">{t("sortByLabel")}</label>
           <select
+            id="listing-filters-sort"
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as FilterOptions["sortBy"])}
             className="mt-2 w-full rounded-xl border border-ink/12 bg-white px-3 py-2.5 text-sm outline-none transition-colors focus:border-primary dark:border-white/15 dark:bg-white/5"
@@ -213,8 +214,9 @@ export function ListingFilters({
           </div>
           <div className="mt-4 space-y-3">
             <div>
-              <label className="text-xs text-ink/60 dark:text-white/60">{t("minPriceLabel")}</label>
+              <label htmlFor="listing-filters-min-price" className="text-xs text-ink/60 dark:text-white/60">{t("minPriceLabel")}</label>
               <input
+                id="listing-filters-min-price"
                 type="range"
                 min="0"
                 max={maxPrice}
@@ -224,8 +226,9 @@ export function ListingFilters({
               />
             </div>
             <div>
-              <label className="text-xs text-ink/60 dark:text-white/60">{t("maxPriceLabel")}</label>
+              <label htmlFor="listing-filters-max-price" className="text-xs text-ink/60 dark:text-white/60">{t("maxPriceLabel")}</label>
               <input
+                id="listing-filters-max-price"
                 type="range"
                 min="0"
                 max={maxPrice}

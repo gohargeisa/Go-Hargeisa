@@ -10,6 +10,7 @@ export interface Crumb {
 
 export function Breadcrumbs({ items }: { items: Crumb[] }) {
   const t = useTranslations("common");
+  const tNav = useTranslations("nav");
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -24,10 +25,14 @@ export function Breadcrumbs({ items }: { items: Crumb[] }) {
   return (
     <nav aria-label={t("breadcrumbAriaLabel")} className="container-px mx-auto pt-5">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
-      <ol className="flex flex-wrap items-center gap-1.5 text-xs text-ink/50 dark:text-sand/50">
+      <ol className="flex flex-wrap items-center gap-1.5 text-xs text-ink/70 dark:text-sand/70">
         <li className="flex items-center gap-1.5">
-          <Link href={items[0]?.href.split("/").slice(0, 2).join("/") || "/"} className="hover:text-primary">
-            <Home size={12} />
+          <Link
+            href={items[0]?.href.split("/").slice(0, 2).join("/") || "/"}
+            aria-label={tNav("home")}
+            className="hover:text-primary"
+          >
+            <Home size={12} aria-hidden="true" />
           </Link>
           <ChevronRight size={12} className="rtl:rotate-180" />
         </li>

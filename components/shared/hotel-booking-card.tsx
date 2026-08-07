@@ -45,16 +45,16 @@ export async function HotelBookingCard({
   return (
     <div className="space-y-5">
       <div>
-        <p className="text-[11px] font-semibold uppercase tracking-wide text-ink/45 dark:text-sand/45">
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-ink/70 dark:text-sand/70">
           {t("startingFrom")}
         </p>
         {hasMeaningfulPrice(priceRange) ? (
-          <p className="font-display text-2xl font-bold text-primary">
+          <p className="font-display text-2xl font-bold text-primary-700">
             {priceRange}
             <span className="ms-1 text-sm font-medium text-ink/50 dark:text-sand/50">{t("perNight")}</span>
           </p>
         ) : (
-          <p className="font-display text-lg font-semibold text-ink/35 dark:text-sand/40">{th("contactForPricing")}</p>
+          <p className="font-display text-lg font-semibold text-ink/70 dark:text-sand/70">{th("contactForPricing")}</p>
         )}
       </div>
 
@@ -66,12 +66,12 @@ export async function HotelBookingCard({
         hotelRating={rating}
         hotelSlug={hotelSlug}
         rooms={rooms}
-        className="flex h-12 w-full items-center justify-center gap-1.5 rounded-full bg-primary text-sm font-semibold text-white shadow-soft transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-primary-700 hover:shadow-card active:scale-95"
+        className="flex h-12 w-full items-center justify-center gap-1.5 rounded-full bg-primary-700 text-sm font-semibold text-white shadow-soft transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-primary-800 hover:shadow-card active:scale-95"
       />
 
       {(phone || website) && (
         <div className="space-y-2.5 rounded-2xl border border-ink/8 p-4 dark:border-white/10">
-          <p className="text-xs font-semibold uppercase tracking-wide text-ink/45 dark:text-sand/45">
+          <p className="text-xs font-semibold uppercase tracking-wide text-ink/70 dark:text-sand/70">
             {tNav("contact")}
           </p>
           {phone && (

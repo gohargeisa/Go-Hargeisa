@@ -112,7 +112,7 @@ export function OpeningHoursEditor({
         <>
           <div className="mb-2 flex items-center justify-between">
             <label className="text-sm font-semibold">{title}</label>
-            <button type="button" onClick={addGroup} className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
+            <button type="button" onClick={addGroup} className="inline-flex items-center gap-1 text-xs font-semibold text-primary-700">
               <Plus size={13} /> {addLabel}
             </button>
           </div>
@@ -127,7 +127,7 @@ export function OpeningHoursEditor({
                       onClick={() => toggleDay(i, day)}
                       className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
                         group.days.includes(day)
-                          ? "border-primary bg-primary/10 text-primary"
+                          ? "border-primary bg-primary/10 text-primary-800"
                           : "border-ink/12 text-ink/50 dark:border-white/15 dark:text-sand/50"
                       }`}
                     >

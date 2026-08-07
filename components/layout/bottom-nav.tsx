@@ -95,7 +95,11 @@ export function BottomNav({ locale }: { locale: Locale }) {
             )}
             <span
               className={`relative flex flex-col items-center gap-0.5 transition-colors duration-150 ${
-                active ? "text-primary" : "text-ink/55 dark:text-sand/55"
+                // /55 measured below the 4.5:1 contrast axe requires at this
+                // 10.5px size (small text doesn't get the "large text" 3:1
+                // relaxation even at font-semibold) — /70 matches the
+                // opacity already used site-wide for secondary text.
+                active ? "text-primary-700" : "text-ink/70 dark:text-sand/70"
               }`}
             >
               <Icon size={22} strokeWidth={active ? 2.4 : 2} aria-hidden="true" />

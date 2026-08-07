@@ -201,7 +201,7 @@ export function AuthForm({ mode, locale }: { mode: "login" | "register"; locale:
                     ) : (
                       <X size={14} className="text-ink/30 dark:text-white/30 shrink-0" />
                     )}
-                    <span className={req.check(password) ? "text-ink/60 dark:text-white/60" : "text-ink/40 dark:text-white/40"}>
+                    <span className={req.check(password) ? "text-ink/60 dark:text-white/60" : "text-ink/70 dark:text-white/70"}>
                       {req.label}
                     </span>
                   </div>

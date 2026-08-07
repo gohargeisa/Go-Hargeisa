@@ -27,7 +27,7 @@ export function CityCoverageProgress({
     <div className="rounded-2xl border border-ink/8 bg-white p-5 dark:border-white/10 dark:bg-white/[0.03] sm:p-6">
       <div className="flex items-center justify-between gap-3">
         <h3 className="font-display text-lg font-bold">City Coverage</h3>
-        <span className="font-display text-xl font-bold text-primary">
+        <span className="font-display text-xl font-bold text-primary-700">
           {totalPublished}/{totalTarget}
         </span>
       </div>

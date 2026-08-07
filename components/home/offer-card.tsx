@@ -32,7 +32,7 @@ export function OfferCard({ offer, locale }: { offer: OfferWithListing; locale: 
           </div>
         )}
         {discountLabel && (
-          <span className="absolute start-3 top-3 rounded-full bg-primary px-3 py-1 text-xs font-bold text-white shadow-sm">
+          <span className="absolute start-3 top-3 rounded-full bg-primary-700 px-3 py-1 text-xs font-bold text-white shadow-sm">
             {discountLabel}
           </span>
         )}

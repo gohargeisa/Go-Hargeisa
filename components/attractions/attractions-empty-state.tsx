@@ -19,7 +19,7 @@ export function AttractionsEmptyState({ locale }: { locale: string }) {
           </span>
         </div>
 
-        <h3 className="mt-8 font-display text-2xl font-bold text-ink dark:text-white">{tp("emptyTitle")}</h3>
+        <h2 className="mt-8 font-display text-2xl font-bold text-ink dark:text-white">{tp("emptyTitle")}</h2>
         <p className="mt-3 max-w-md text-balance text-sm leading-6 text-ink/60 dark:text-sand/60">
           {tp("emptyDescription")}
         </p>

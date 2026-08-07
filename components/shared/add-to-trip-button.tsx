@@ -110,7 +110,7 @@ export function AddToTripButton({
                   type="button"
                   disabled={isPending || !newTitle}
                   onClick={() => submit(undefined)}
-                  className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
+                  className="inline-flex items-center gap-1 rounded-lg bg-primary-700 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
                 >
                   <Plus size={12} /> {t("add")}
                 </button>

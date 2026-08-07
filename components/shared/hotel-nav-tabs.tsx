@@ -53,8 +53,8 @@ export function HotelNavTabs({ tabs }: { tabs: HotelNavTab[] }) {
             href={`#${tab.id}`}
             className={`relative shrink-0 whitespace-nowrap px-4 py-3.5 text-sm font-semibold transition-colors ${
               activeId === tab.id
-                ? "text-primary"
-                : "text-ink/55 hover:text-ink dark:text-sand/55 dark:hover:text-white"
+                ? "text-primary-700"
+                : "text-ink/70 hover:text-ink dark:text-sand/70 dark:hover:text-white"
             }`}
           >
             {tab.label}

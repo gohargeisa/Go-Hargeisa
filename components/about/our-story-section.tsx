@@ -30,7 +30,7 @@ export async function OurStorySection({ steps }: { steps: TimelineStep[] }) {
         </Reveal>
 
         <Reveal delay={0.1}>
-          <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary">
+          <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary-800">
             {t("storyEyebrow")}
           </span>
           <h2 className="mt-4 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">
@@ -40,12 +40,12 @@ export async function OurStorySection({ steps }: { steps: TimelineStep[] }) {
           <div className="mt-6 space-y-5 text-base leading-relaxed text-ink/70 dark:text-sand/70">
             <p>
               {t.rich("paragraph1", {
-                highlight: (chunks) => <strong className="font-semibold text-primary">{chunks}</strong>,
+                highlight: (chunks) => <strong className="font-semibold text-primary-700">{chunks}</strong>,
               })}
             </p>
             <p>
               {t.rich("paragraph2", {
-                highlight: (chunks) => <strong className="font-semibold text-primary">{chunks}</strong>,
+                highlight: (chunks) => <strong className="font-semibold text-primary-700">{chunks}</strong>,
               })}
             </p>
           </div>

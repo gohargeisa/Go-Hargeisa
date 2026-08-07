@@ -106,7 +106,7 @@ function LanguageOptions({ locale }: { locale: Locale }) {
           aria-pressed={l === locale}
           className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-all duration-300 ease-premium ${
             l === locale
-              ? "border-primary bg-primary/10 text-primary"
+              ? "border-primary bg-primary/10 text-primary-800"
               : "border-ink/12 hover:-translate-y-0.5 hover:border-primary/40 dark:border-white/15"
           }`}
         >

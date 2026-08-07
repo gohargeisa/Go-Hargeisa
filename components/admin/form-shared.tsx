@@ -59,7 +59,7 @@ export function TagInput({
         {values.map((v) => (
           <span
             key={v}
-            className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary"
+            className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary-800"
           >
             {v}
             <button type="button" onClick={() => onChange(values.filter((x) => x !== v))} aria-label={t("removeTagAriaLabel", { value: v })}>

@@ -43,7 +43,7 @@ export function RestaurantsEmptyState({ locale }: { locale: Locale }) {
             <div className="mt-8 flex justify-center">
               <Link
                 href={`/${locale}/join`}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-primary-700 hover:shadow-card sm:w-auto"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary-700 px-7 py-3.5 text-sm font-semibold text-white shadow-soft transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-primary-800 hover:shadow-card sm:w-auto"
               >
                 <Star size={16} aria-hidden="true" />
                 {t("joinButton")}

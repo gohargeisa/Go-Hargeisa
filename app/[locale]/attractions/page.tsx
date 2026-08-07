@@ -63,7 +63,7 @@ export default async function AttractionsPage({
         <div className="container-px mx-auto">
           <Reveal>
             <div className="mx-auto mb-10 max-w-2xl text-center md:mb-14">
-              <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary">
+              <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary-800">
                 {tp("whyVisitEyebrow")}
               </span>
               <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">

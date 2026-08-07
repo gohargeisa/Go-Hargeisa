@@ -227,7 +227,7 @@ export function MyBusinessForm({
                 onClick={() => update("priceRange", level)}
                 className={`rounded-xl border py-2 text-center font-display text-sm font-bold transition-colors ${
                   form.priceRange === level
-                    ? "border-primary bg-primary/8 text-primary"
+                    ? "border-primary bg-primary/8 text-primary-800"
                     : "border-ink/12 text-ink/60 hover:border-primary/40 dark:border-white/15 dark:text-sand/60"
                 }`}
               >
@@ -291,7 +291,7 @@ export function MyBusinessForm({
             <button
               type="button"
               onClick={addMenuItem}
-              className="inline-flex items-center gap-1 text-xs font-semibold text-primary"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-primary-700"
             >
               <Plus size={13} /> {t("addItemLabel")}
             </button>

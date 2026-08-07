@@ -34,7 +34,7 @@ export default async function RegisterPage({
           </Suspense>
         </div>
 
-        <div className="my-6 flex items-center gap-3 text-xs font-medium uppercase tracking-wide text-ink/40 dark:text-sand/40">
+        <div className="my-6 flex items-center gap-3 text-xs font-medium uppercase tracking-wide text-ink/70 dark:text-sand/70">
           <span className="h-px flex-1 bg-ink/10 dark:bg-white/10" />
           {t("or")}
           <span className="h-px flex-1 bg-ink/10 dark:bg-white/10" />
@@ -46,7 +46,7 @@ export default async function RegisterPage({
 
         <p className="mt-6 text-center text-sm text-ink/60 dark:text-sand/60">
           {t("alreadyHaveAccount")}{" "}
-          <Link href={`/${locale}/auth/login`} className="font-semibold text-primary hover:underline">
+          <Link href={`/${locale}/auth/login`} className="font-semibold text-primary-700 hover:underline">
             {t("signIn")}
           </Link>
         </p>

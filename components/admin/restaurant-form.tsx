@@ -343,7 +343,7 @@ export function RestaurantForm({
       <div>
         <div className="flex items-center justify-between mb-2">
           <label className="text-sm font-semibold">{t("menuHighlightsLabel")}</label>
-          <button type="button" onClick={addMenuItem} className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
+          <button type="button" onClick={addMenuItem} className="inline-flex items-center gap-1 text-xs font-semibold text-primary-700">
             <Plus size={13} /> {t("addItemLabel")}
           </button>
         </div>

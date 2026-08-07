@@ -18,7 +18,7 @@ export function RatingBadge({
   return (
     <div
       className={`inline-flex items-center gap-1 rounded-full font-semibold ${
-        noReviews ? "bg-ink/8 text-ink/50 dark:bg-white/10 dark:text-sand/50" : "bg-primary/10 text-primary-700"
+        noReviews ? "bg-ink/8 text-ink/50 dark:bg-white/10 dark:text-sand/50" : "bg-primary/10 text-primary-800"
       } ${size === "sm" ? "px-2 py-0.5 text-xs" : "px-3 py-1 text-sm"}`}
     >
       {noReviews ? (

@@ -81,7 +81,7 @@ export function OffersModerationList({ locale, offers }: { locale: Locale; offer
 
               <div className="flex flex-wrap items-center gap-2">
                 {discountLabel && (
-                  <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-bold text-primary">{discountLabel}</span>
+                  <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-bold text-primary-800">{discountLabel}</span>
                 )}
                 <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${APPROVAL_BADGE[offer.approvalStatus]}`}>
                   {t(`offerApproval_${offer.approvalStatus}` as "offerApproval_pending")}
@@ -136,7 +136,7 @@ export function OffersModerationList({ locale, offers }: { locale: Locale; offer
                   aria-label={offer.featured ? t("unfeatureAriaLabel") : t("featureAriaLabel")}
                   className={`flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-semibold transition-colors disabled:opacity-60 ${
                     offer.featured
-                      ? "border-primary/40 bg-primary/5 text-primary"
+                      ? "border-primary/40 bg-primary/5 text-primary-800"
                       : "border-ink/10 hover:border-primary hover:text-primary dark:border-white/15"
                   }`}
                 >

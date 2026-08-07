@@ -82,7 +82,7 @@ export function HotelRoomCard({
         <div className="mt-auto flex items-center justify-between gap-3 border-t border-ink/8 pt-4 dark:border-white/10">
           <div>
             {room.pricePerNight ? (
-              <p className="font-display text-xl font-bold text-primary">
+              <p className="font-display text-xl font-bold text-primary-700">
                 ${room.pricePerNight}
                 <span className="ms-1 text-xs font-medium text-ink/50 dark:text-sand/50">/night</span>
               </p>

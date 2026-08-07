@@ -165,7 +165,7 @@ function PremiumRestaurantCardBase({
               <p className="text-[11px] font-semibold uppercase tracking-wide text-ink/45 dark:text-sand/45">
                 {tc("priceRange")}
               </p>
-              <p className="font-display text-2xl font-bold text-primary">{priceRange}</p>
+              <p className="font-display text-2xl font-bold text-primary-700">{priceRange}</p>
             </div>
           )}
 

@@ -68,7 +68,7 @@ export async function JoinHero({ locale }: { locale: Locale }) {
         <Reveal delay={0.24}>
           <a
             href="#business-type"
-            className="mt-9 inline-flex items-center gap-2 rounded-full bg-primary px-9 py-4 text-base font-semibold text-white shadow-[0_10px_30px_rgba(245,158,11,0.4)] transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-primary-700 hover:shadow-[0_16px_44px_rgba(245,158,11,0.5)]"
+            className="mt-9 inline-flex items-center gap-2 rounded-full bg-primary-700 px-9 py-4 text-base font-semibold text-white shadow-[0_10px_30px_rgba(245,158,11,0.4)] transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-primary-800 hover:shadow-[0_16px_44px_rgba(245,158,11,0.5)]"
           >
             {t("heroCtaButton")}
             <ArrowRight size={19} aria-hidden="true" />
@@ -85,10 +85,13 @@ export async function JoinHero({ locale }: { locale: Locale }) {
                 <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 text-white">
                   <Icon size={22} aria-hidden="true" />
                 </span>
-                <h3 className="mt-4 font-display text-base font-bold text-white">
+                {/* Not a heading — see hero.tsx's category cards for the
+                    same reasoning (axe heading-order: nothing between this
+                    page's h1 and an h3 otherwise). */}
+                <p className="mt-4 font-display text-base font-bold text-white">
                   <span aria-hidden="true">{emoji} </span>
                   {t(`heroBenefit${key}Title` as "heroBenefit1Title")}
-                </h3>
+                </p>
                 <p className="mt-1.5 text-sm text-white/70">{t(`heroBenefit${key}Description` as "heroBenefit1Description")}</p>
               </div>
             ))}

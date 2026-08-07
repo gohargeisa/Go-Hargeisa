@@ -148,7 +148,7 @@ export function BusinessSidebar({ locale, listing }: { locale: Locale; listing: 
 
       <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-e border-ink/8 bg-white dark:border-white/10 dark:bg-ink lg:flex">
         <div className="flex items-center gap-2 px-5 py-5">
-          <span className="font-display text-lg font-bold text-primary">Go Hargeisa</span>
+          <span className="font-display text-lg font-bold text-primary-700">Go Hargeisa</span>
           <span className="text-xs font-semibold text-ink/40 dark:text-sand/40">{t("businessBadge")}</span>
         </div>
         {nav}
@@ -179,7 +179,7 @@ export function BusinessSidebar({ locale, listing }: { locale: Locale; listing: 
               className="fixed inset-y-0 start-0 z-drawer flex w-[85vw] max-w-xs flex-col bg-white shadow-2xl dark:bg-ink lg:hidden"
             >
               <div className="flex items-center justify-between px-5 py-5">
-                <span className="font-display text-lg font-bold text-primary">Go Hargeisa</span>
+                <span className="font-display text-lg font-bold text-primary-700">Go Hargeisa</span>
                 <button
                   type="button"
                   onClick={() => setMobileOpen(false)}

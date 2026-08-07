@@ -22,7 +22,7 @@ export function AnnouncementBanner({ announcement }: { announcement: SiteAnnounc
   if (dismissed) return null;
 
   return (
-    <div className="relative flex items-center gap-3 bg-primary px-5 py-3 text-sm text-white sm:justify-center">
+    <div className="relative flex items-center gap-3 bg-primary-700 px-5 py-3 text-sm text-white sm:justify-center">
       <Megaphone size={16} className="shrink-0" aria-hidden="true" />
       <p className="min-w-0 flex-1 truncate sm:flex-none">
         <span className="font-semibold">{announcement.title}</span>

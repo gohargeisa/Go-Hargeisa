@@ -33,7 +33,11 @@ export function FeatureGrid({
           <span className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary">
             <Icon size={20} aria-hidden="true" />
           </span>
-          <h3 className="mt-4 font-display text-base font-semibold">{title}</h3>
+          {/* Not a heading — this component is reused across 5 different
+              pages, each with a different heading outline, so a fixed
+              level here would always risk skipping levels somewhere
+              (axe heading-order). */}
+          <p className="mt-4 font-display text-base font-semibold">{title}</p>
           <p className="mt-1.5 text-sm leading-relaxed text-ink/65 dark:text-sand/65">{body}</p>
         </div>
       ))}

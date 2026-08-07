@@ -38,7 +38,7 @@ export async function SubscriptionCard({
           </p>
         </div>
         {subscription.planTier !== "basic" && (
-          <span className="rounded-full bg-primary px-3 py-1 text-xs font-bold text-white">★</span>
+          <span className="rounded-full bg-primary-700 px-3 py-1 text-xs font-bold text-white">★</span>
         )}
       </div>
 

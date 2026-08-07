@@ -194,7 +194,7 @@ export function Hero({ locale }: { locale: Locale }) {
 
             <button
               type="submit"
-              className="shrink-0 rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(245,158,11,0.35)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary-700 hover:shadow-[0_12px_28px_rgba(245,158,11,0.45)] active:translate-y-0 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="shrink-0 rounded-full bg-primary-700 px-7 py-3.5 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(245,158,11,0.35)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary-800 hover:shadow-[0_12px_28px_rgba(245,158,11,0.45)] active:translate-y-0 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               {t("searchButton")}
             </button>
@@ -235,7 +235,11 @@ export function Hero({ locale }: { locale: Locale }) {
                     <Icon size={28} strokeWidth={2.2} aria-hidden="true" />
                   </div>
 
-                  <h3 className="text-lg font-bold">{t(titleKey)}</h3>
+                  {/* Not a heading — this is a button caption (the button
+                      already has an equivalent aria-label above), and a
+                      fixed heading level here would skip past the hero's
+                      own h1 with nothing in between (axe heading-order). */}
+                  <p className="text-lg font-bold">{t(titleKey)}</p>
 
                   <p
                     className={`mt-2 text-sm leading-relaxed ${

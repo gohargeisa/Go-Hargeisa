@@ -59,7 +59,7 @@ export function BookingsPanel({ locale, bookings }: { locale: Locale; bookings: 
   return (
     <div>
       <div className="mb-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{t("bookingsEyebrow")}</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary-700">{t("bookingsEyebrow")}</p>
         <h2 className="mt-1 font-display text-2xl font-semibold">{t("bookingsTitle")}</h2>
       </div>
 

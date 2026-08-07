@@ -131,7 +131,7 @@ export function SiteHeader({
                 className={`relative rounded-full px-4 py-2 text-[15px] font-medium transition-all duration-300 ease-premium ${
                   scrolled
                     ? active
-                      ? "text-primary"
+                      ? "text-primary-700"
                       : "text-gray-800 hover:text-primary hover:bg-primary/10 dark:text-white/90"
                     : active
                       ? "text-white"
@@ -192,7 +192,7 @@ export function SiteHeader({
             aria-label="Toggle menu"
             aria-expanded={open}
             onClick={() => setOpen((o) => !o)}
-            className={`flex h-11 w-11 items-center justify-center rounded-full border transition-colors duration-300 active:scale-90 ${
+            className={`relative z-sheet flex h-11 w-11 items-center justify-center rounded-full border transition-colors duration-300 active:scale-90 ${
               scrolled
                 ? "border-ink/10 text-ink dark:border-white/15 dark:text-white"
                 : "border-white/30 text-white"
@@ -243,7 +243,7 @@ export function SiteHeader({
                     aria-current={active ? "page" : undefined}
                     className={`rounded-2xl px-4 py-3 text-[15px] font-semibold transition-colors ${
                       active
-                        ? "bg-primary/10 text-primary"
+                        ? "bg-primary/10 text-primary-800"
                         : "text-ink hover:bg-primary/5 hover:text-primary dark:text-white"
                     }`}
                   >
@@ -261,7 +261,7 @@ export function SiteHeader({
                   <Link
                     href={`/${locale}/services`}
                     onClick={() => setOpen(false)}
-                    className="mt-2 flex items-center justify-between rounded-2xl px-3 py-2.5 text-sm font-semibold text-primary"
+                    className="mt-2 flex items-center justify-between rounded-2xl px-3 py-2.5 text-sm font-semibold text-primary-700"
                   >
                     {t("browseAllCategories")}
                     <ArrowRight size={14} aria-hidden="true" />
@@ -289,7 +289,7 @@ export function SiteHeader({
                     </Link>
                   )}
 
-                  <SignOutButton locale={locale} className="w-full flex items-center justify-center gap-2 rounded-full bg-primary py-2.5 text-sm font-semibold text-white" />
+                  <SignOutButton locale={locale} className="w-full flex items-center justify-center gap-2 rounded-full bg-primary-700 py-2.5 text-sm font-semibold text-white" />
                 </div>
               ) : (
                 <div className="mt-3 border-t border-ink/8 pt-3 dark:border-white/10">

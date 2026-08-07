@@ -28,7 +28,7 @@ export async function ExploreHargeisaSection({
       <div className="container-px mx-auto">
         <Reveal>
           <div className="mx-auto max-w-2xl text-center">
-            <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary">
+            <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary-800">
               {t("exploreHargeisaEyebrow")}
             </span>
             <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">
@@ -64,7 +64,7 @@ export async function ExploreHargeisaSection({
                     <p className="mt-1.5 flex-1 text-sm leading-relaxed text-ink/60 dark:text-sand/60">
                       {t("placesCount", { count })}
                     </p>
-                    <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
+                    <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary-700">
                       {t("exploreCta")}
                       <ArrowRight size={14} className="transition-transform duration-300 ease-premium group-hover:translate-x-1" aria-hidden="true" />
                     </span>

@@ -160,7 +160,7 @@ export default async function HomePage({
           <div className="container-px mx-auto">
             <Reveal>
               <div className="mx-auto mb-10 max-w-2xl text-center md:mb-14">
-                <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary">
+                <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary-800">
                   {t("offersEyebrow")}
                 </span>
                 <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">
@@ -185,7 +185,7 @@ export default async function HomePage({
           <div className="container-px mx-auto">
             <Reveal>
               <div className="mx-auto mb-10 max-w-2xl text-center md:mb-14">
-                <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary">
+                <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary-800">
                   {t("hotelsEyebrow")}
                 </span>
                 <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">
@@ -225,7 +225,7 @@ export default async function HomePage({
           <div className="container-px mx-auto">
             <Reveal>
               <div className="mx-auto mb-10 max-w-2xl text-center md:mb-14">
-                <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary">
+                <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary-800">
                   {t("restaurantsEyebrow")}
                 </span>
                 <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">
@@ -266,7 +266,7 @@ export default async function HomePage({
           <div className="container-px mx-auto">
             <Reveal>
               <div className="mx-auto mb-10 max-w-2xl text-center md:mb-14">
-                <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary">
+                <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary-800">
                   {t("cafesEyebrow")}
                 </span>
                 <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">
@@ -307,7 +307,7 @@ export default async function HomePage({
           <div className="container-px mx-auto">
             <Reveal>
               <div className="mx-auto mb-10 max-w-2xl text-center md:mb-14">
-                <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary">
+                <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary-800">
                   {t("servicesEyebrow")}
                 </span>
                 <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">
@@ -349,7 +349,7 @@ export default async function HomePage({
             <Reveal>
               <div className="mb-10 flex flex-col gap-5 md:mb-14 md:flex-row md:items-end md:justify-between">
                 <div>
-                  <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary">
+                  <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary-800">
                     {t("attractionsEyebrow")}
                   </span>
                   <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">
@@ -394,7 +394,7 @@ export default async function HomePage({
             <Reveal>
               <div className="mb-10 flex flex-col gap-5 md:mb-14 md:flex-row md:items-end md:justify-between">
                 <div>
-                  <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary">
+                  <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary-800">
                     {t("eventsEyebrow")}
                   </span>
                   <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">
