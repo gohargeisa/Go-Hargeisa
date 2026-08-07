@@ -111,7 +111,14 @@ export async function submitJoinRequest(input: JoinRequestInput): Promise<{ ok: 
       .select("id, target_table, is_active")
       .eq("id", input.categoryId)
       .maybeSingle();
-    if (!cat || !cat.is_active || cat.target_table !== "services") {
+    // Long-tail `services` categories (Flower Shops, Real Estate, ...) and
+    // City Services categories (Hospitals & Clinics, Pharmacies, ...) are
+    // both valid "other" selections — the same dynamic category source the
+    // /join form's dropdown reads from (see app/[locale]/join/page.tsx).
+    // A City Services selection is never auto-convertible into a listing
+    // (see isConvertibleCategory) — it stays an admin-reviewed lead, same
+    // as any other non-convertible category.
+    if (!cat || !cat.is_active || (cat.target_table !== "services" && cat.target_table !== "city_services")) {
       return { ok: false, error: "Invalid category." };
     }
   }
@@ -245,8 +252,20 @@ export async function convertJoinRequest(
 
   if (fetchError || !request) return { ok: false, error: "Request not found." };
   if (request.converted_listing_id) return { ok: false, error: "This request was already converted." };
-  if (!isConvertibleCategory(request.category, request.category_id)) {
-    return { ok: false, error: "This business type has no matching listing table to convert into." };
+
+  // Resolved once, up front, so both the convertibility check and (for
+  // "other" requests) the actual insert branch below share the same
+  // category lookup instead of duplicating it.
+  const resolvedCategory = request.category_id ? await getCategoryById(request.category_id) : null;
+
+  if (!isConvertibleCategory(request.category, request.category_id, resolvedCategory?.targetTable)) {
+    return {
+      ok: false,
+      error:
+        resolvedCategory?.targetTable === "city_services"
+          ? "City Services categories aren't converted into listings — create the City Services entry directly in /admin/city-services instead."
+          : "This business type has no matching listing table to convert into.",
+    };
   }
 
   let table: "hotels" | "restaurants" | "cafes" | "services";
@@ -257,7 +276,7 @@ export async function convertJoinRequest(
   else if (request.category === "cafe") table = "cafes";
   else {
     table = "services";
-    servicesCategory = request.category_id ? await getCategoryById(request.category_id) : null;
+    servicesCategory = resolvedCategory;
     if (!servicesCategory || servicesCategory.targetTable !== "services" || !servicesCategory.isActive) {
       return { ok: false, error: "This request's category is no longer available — check /admin/categories." };
     }

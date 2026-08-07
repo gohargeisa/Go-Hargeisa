@@ -18,7 +18,7 @@ import { isConvertibleCategory } from "@/lib/utils/partner-categories";
 import { formatTime12h } from "@/lib/utils/opening-hours";
 import { buildGoogleMapsUrl } from "@/lib/utils/google-maps";
 import type { Locale } from "@/lib/i18n/config";
-import type { BusinessRequestStatus, JoinRequestCategory, WeeklyHoursDay } from "@/types";
+import type { BusinessRequestStatus, CategoryTargetTable, JoinRequestCategory, WeeklyHoursDay } from "@/types";
 
 export interface RequestNote {
   id: string;
@@ -32,6 +32,10 @@ export interface RequestRow {
   categoryId: string | null;
   categoryName: string | null;
   categorySlug: string | null;
+  /** The resolved category's target_table — lets us tell a convertible
+   * `services` "other" selection apart from a City Services one (never
+   * auto-convertible; stays an admin-reviewed lead). See isConvertibleCategory. */
+  categoryTargetTable: CategoryTargetTable | null;
   customFields: Record<string, string | number | boolean>;
   businessName: string;
   ownerName: string | null;
@@ -362,7 +366,7 @@ export function RequestsList({ locale, rows }: { locale: Locale; rows: RequestRo
                     />
                   )}
                 </span>
-              ) : isConvertibleCategory(row.category, row.categoryId) && !converting ? (
+              ) : isConvertibleCategory(row.category, row.categoryId, row.categoryTargetTable) && !converting ? (
                 <button
                   type="button"
                   onClick={() => onStartConvert(row)}
@@ -371,7 +375,7 @@ export function RequestsList({ locale, rows }: { locale: Locale; rows: RequestRo
                 >
                   {t("convertAction")}
                 </button>
-              ) : !isConvertibleCategory(row.category, row.categoryId) && row.status === "approved" ? (
+              ) : !isConvertibleCategory(row.category, row.categoryId, row.categoryTargetTable) && row.status === "approved" ? (
                 <span className="flex items-center gap-1.5 rounded-lg bg-secondary/10 px-2.5 py-1.5 text-xs font-semibold text-secondary-700 dark:text-sand/70">
                   <BadgeCheck size={12} /> {t("verifiedPartnerLabel")}
                 </span>

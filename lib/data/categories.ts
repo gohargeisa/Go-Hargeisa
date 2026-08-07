@@ -43,12 +43,20 @@ const getCategoriesDurable = unstable_cache(_getCategories, ["categories-list"],
 export const getCategories = cache(getCategoriesDurable);
 
 /** getCategories(), minus whichever verticals are currently feature-flagged
- * off (lib/config/features.ts) — the single filter the navbar and homepage
- * category grid both apply, so a disabled vertical's categories can't leak
- * into either surface while still existing (and manageable) in the DB. */
+ * off (lib/config/features.ts), minus every City Services SUB-category
+ * (target_table='city_services', is_pinned=false — Hospitals, Pharmacies,
+ * etc.). Those exist only to be grouped inside the City Services hub (see
+ * getCityServiceCategories) and must never independently appear as a
+ * top-level browsable category — the single "City Services" umbrella row
+ * (is_pinned=true) still passes through here as one entry, same as every
+ * other pinned top-level category. This is the one filter the navbar and
+ * homepage "Browse by Category" grid both apply, so a disabled vertical —
+ * or a City Services sub-category — can't leak into either surface while
+ * still existing (and manageable) in the DB. */
 export async function getVisibleCategories(): Promise<Category[]> {
   const categories = await getCategories();
   return categories.filter((c) => {
+    if (c.targetTable === "city_services" && !c.isPinned) return false;
     if (c.targetTable === "services") return SERVICES_PUBLIC_ENABLED;
     if (c.targetTable === "restaurants") return RESTAURANTS_PUBLIC_ENABLED;
     if (c.targetTable === "cafes") return CAFES_PUBLIC_ENABLED;
@@ -138,16 +146,17 @@ export async function attachBusinessCounts(categories: Category[]): Promise<Cate
   const groupedTables = Array.from(new Set(categories.map((c) => c.targetTable).filter(isGroupedCountTable)));
   const verticalTables = Array.from(new Set(categories.map((c) => c.targetTable).filter((t) => !isGroupedCountTable(t))));
 
-  const [groupedCountMaps, verticalCountEntries] = await Promise.all([
+  const [groupedResultEntries, verticalCountEntries] = await Promise.all([
     Promise.all(
       groupedTables.map(async (table) => {
         const { data } = await supabase.from(table).select("category_id").eq("status", "published");
+        const rows = (data ?? []) as { category_id: string | null }[];
         const counts = new Map<string, number>();
-        for (const row of (data ?? []) as { category_id: string | null }[]) {
+        for (const row of rows) {
           if (!row.category_id) continue;
           counts.set(row.category_id, (counts.get(row.category_id) ?? 0) + 1);
         }
-        return counts;
+        return [table, { counts, total: rows.length }] as const;
       })
     ),
     Promise.all(
@@ -158,16 +167,22 @@ export async function attachBusinessCounts(categories: Category[]): Promise<Cate
     ),
   ]);
 
-  const groupedCounts = new Map<string, number>();
-  for (const counts of groupedCountMaps) {
-    for (const [id, n] of counts) groupedCounts.set(id, n);
-  }
+  const groupedByTable = new Map(groupedResultEntries);
   const verticalCounts = new Map(verticalCountEntries);
 
-  return categories.map((c) => ({
-    ...c,
-    businessCount: isGroupedCountTable(c.targetTable) ? (groupedCounts.get(c.id) ?? 0) : (verticalCounts.get(c.targetTable) ?? 0),
-  }));
+  return categories.map((c) => {
+    if (!isGroupedCountTable(c.targetTable)) {
+      return { ...c, businessCount: verticalCounts.get(c.targetTable) ?? 0 };
+    }
+    const group = groupedByTable.get(c.targetTable);
+    // A pinned row inside a grouped table (e.g. the single "City Services"
+    // nav-entry row) represents the WHOLE vertical, not one sub-grouping
+    // within it — no listing's category_id ever points at the umbrella row
+    // itself, so a per-id tally would always read 0 for it. Its count is
+    // every published row in the table instead.
+    const businessCount = c.isPinned ? (group?.total ?? 0) : (group?.counts.get(c.id) ?? 0);
+    return { ...c, businessCount };
+  });
 }
 
 /** getVisibleCategories() with businessCount populated, filtered to

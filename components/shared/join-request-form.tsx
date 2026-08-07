@@ -31,6 +31,13 @@ export function JoinRequestForm({
   coreCategories,
 }: {
   locale: Locale;
+  /** Every long-tail `services` category PLUS every City Services category
+   * (Hospitals & Clinics, Pharmacies, ...) — the "other" dropdown's full
+   * dynamic source, combined at the call site (app/[locale]/join/page.tsx)
+   * from getServiceCategories() + getCityServiceCategories(), the exact
+   * same source City Services itself reads from. A City Services selection
+   * is never auto-convertible (see isConvertibleCategory) — it stays an
+   * admin-reviewed lead. */
   serviceCategories: Category[];
   /** The 3 owner-claimable core categories (Hotels/Restaurants/Cafes), fed
    * live from the `categories` table — see CORE_JOIN_TARGET_TABLES. */

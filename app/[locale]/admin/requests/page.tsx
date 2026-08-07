@@ -30,8 +30,8 @@ export default async function AdminRequestsPage({ params: { locale } }: { params
   const categoryIds = Array.from(new Set((requests ?? []).map((r) => r.category_id).filter((v): v is string => !!v)));
   const { data: categoryRows } =
     categoryIds.length > 0
-      ? await supabase.from("categories").select("id, slug, name").in("id", categoryIds)
-      : { data: [] as { id: string; slug: string; name: string }[] };
+      ? await supabase.from("categories").select("id, slug, name, target_table").in("id", categoryIds)
+      : { data: [] as { id: string; slug: string; name: string; target_table: string }[] };
   const categoryById = new Map((categoryRows ?? []).map((c) => [c.id, c]));
 
   const rows: RequestRow[] = (requests ?? []).map((r) => ({
@@ -40,6 +40,7 @@ export default async function AdminRequestsPage({ params: { locale } }: { params
     categoryId: r.category_id,
     categoryName: r.category_id ? (categoryById.get(r.category_id)?.name ?? null) : null,
     categorySlug: r.category_id ? (categoryById.get(r.category_id)?.slug ?? null) : null,
+    categoryTargetTable: r.category_id ? (categoryById.get(r.category_id)?.target_table ?? null) : null,
     customFields: r.custom_fields ?? {},
     businessName: r.business_name,
     ownerName: r.owner_name,

@@ -44,13 +44,24 @@ export function targetTableToJoinCategory(targetTable: CategoryTargetTable): "ho
 
 /** A request is convertible into a real listing iff it's hotel/restaurant/
  * cafe (their own dedicated tables), or it's category="other" with a
- * categoryId set (resolved into a `categories` row with
- * target_table='services' at conversion time — this predicate doesn't hit
- * the DB, so it can't confirm that category is still active; convertJoinRequest
- * re-checks that server-side before actually converting). */
-export function isConvertibleCategory(category: JoinRequestCategory, categoryId: string | null): boolean {
+ * categoryId resolved to a `categories` row with target_table='services'.
+ * City Services categories (target_table='city_services' — Hospitals &
+ * Clinics, Pharmacies, ...) are deliberately never convertible: that table
+ * has no owner_id/claims workflow, so there's no listing shape to convert
+ * into — those requests stay admin-reviewed leads, same as any other
+ * non-convertible category, surfaced as "Verified Partner" once approved.
+ * `categoryTargetTable` is optional (older/other callers may not have it
+ * yet) — omitting it falls back to the pre-target-table-aware check, so
+ * this doesn't hit the DB itself; convertJoinRequest re-validates
+ * everything server-side before actually converting either way. */
+export function isConvertibleCategory(
+  category: JoinRequestCategory,
+  categoryId: string | null,
+  categoryTargetTable?: CategoryTargetTable | null
+): boolean {
   if (category === "hotel" || category === "restaurant" || category === "cafe") return true;
-  return category === "other" && categoryId !== null;
+  if (category !== "other" || categoryId === null) return false;
+  return categoryTargetTable === undefined || categoryTargetTable === "services";
 }
 
 /**
