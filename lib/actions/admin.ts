@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { logActivity } from "./activity";
 
 const ALLOWED_TABLES = ["hotels", "restaurants", "cafes", "services", "attractions", "events", "articles"] as const;
@@ -163,9 +164,20 @@ export async function deleteListing(
       .eq("id", id)
       .single();
 
+    // The dependent-row cleanup below has to reach rows owned by OTHER
+    // users (e.g. a favorite belonging to some customer, not the admin
+    // running this delete) — `favorites` only has a
+    // "Users manage own favorites" RLS policy (auth.uid() = user_id), no
+    // owner-role bypass, so the regular cookie-scoped `supabase` client
+    // would silently no-op on every favorite it doesn't own. The
+    // service-role admin client is the one already-established way in this
+    // codebase to intentionally bypass RLS for genuinely privileged cleanup
+    // (see lib/supabase/admin.ts).
+    const adminClient = createAdminClient();
+
     await Promise.all(
       SERVICE_DEPENDENT_TABLES.map((depTable) =>
-        bestEffortDelete(supabase.from(depTable).delete().eq("listing_type", "service").eq("listing_id", id))
+        bestEffortDelete(adminClient.from(depTable).delete().eq("listing_type", "service").eq("listing_id", id))
       )
     );
 
@@ -181,7 +193,7 @@ export async function deleteListing(
       ];
       const paths = urls.map((url) => extractStoragePath(url, "listing-images")).filter((path): path is string => !!path);
       if (paths.length > 0) {
-        await bestEffortDelete(supabase.storage.from("listing-images").remove(paths));
+        await bestEffortDelete(adminClient.storage.from("listing-images").remove(paths));
       }
     }
   } else {
