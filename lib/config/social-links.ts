@@ -1,10 +1,18 @@
-import { Instagram, Facebook, Music2, Ghost, Twitter, Youtube, Globe, MessageCircle, Send, Mail, Phone, type LucideIcon } from "lucide-react";
+import { Instagram, Facebook, Youtube, Globe, Mail, Phone } from "lucide-react";
+import { WhatsAppIcon, XIcon, TikTokIcon, SnapchatIcon, TelegramIcon } from "@/components/shared/brand-icons";
 
-/** Every platform the "Social Links" icon row supports — icons resolved
- * from this string key (not passed as a prop) so this stays safe to import
- * from both server and client components. lucide-react has no dedicated
- * TikTok/Snapchat/X marks; Music2/Ghost/Twitter are the closest stand-ins
- * without pulling in a new icon-library dependency. */
+/**
+ * Every platform the "Social Links" icon row supports, and the SINGLE
+ * reusable icon mapping for all of them — every consumer (site-footer.tsx,
+ * share-button.tsx, and every listing detail page via
+ * components/shared/social-links.tsx: Hotels/Restaurants/Cafes/Attractions/
+ * Events/City Services, and any future listing type) reads icons from
+ * SOCIAL_ICON below rather than importing or redefining its own mapping.
+ * Facebook/Instagram/YouTube already have proper brand-shaped icons in
+ * lucide-react; WhatsApp/X/TikTok/Snapchat/Telegram don't, so those five
+ * come from components/shared/brand-icons.tsx (inline official-mark SVGs)
+ * instead of lucide's generic stand-ins.
+ */
 export const SOCIAL_PLATFORMS = [
   "instagram",
   "facebook",
@@ -21,16 +29,16 @@ export const SOCIAL_PLATFORMS = [
 
 export type SocialPlatform = (typeof SOCIAL_PLATFORMS)[number];
 
-export const SOCIAL_ICON: Record<SocialPlatform, LucideIcon> = {
+export const SOCIAL_ICON = {
   instagram: Instagram,
   facebook: Facebook,
-  tiktok: Music2,
-  snapchat: Ghost,
-  x: Twitter,
+  tiktok: TikTokIcon,
+  snapchat: SnapchatIcon,
+  x: XIcon,
   youtube: Youtube,
   website: Globe,
-  whatsapp: MessageCircle,
-  telegram: Send,
+  whatsapp: WhatsAppIcon,
+  telegram: TelegramIcon,
   email: Mail,
   phone: Phone,
-};
+} satisfies Record<SocialPlatform, unknown>;

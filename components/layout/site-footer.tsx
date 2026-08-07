@@ -1,8 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { Facebook, Instagram, Youtube } from "lucide-react";
-import { WhatsAppIcon, XIcon, TikTokIcon } from "@/components/shared/brand-icons";
+import { SOCIAL_ICON } from "@/lib/config/social-links";
 import type { Locale } from "@/lib/i18n/config";
 
 export function SiteFooter({
@@ -55,7 +54,7 @@ export function SiteFooter({
 
   const socialLinks = [
     {
-      icon: WhatsAppIcon,
+      icon: SOCIAL_ICON.whatsapp,
       href: whatsappNumber ? `https://wa.me/${whatsappNumber.replace(/[^\d]/g, "")}` : "https://wa.me/252656156752",
       label: "WhatsApp",
       // Official WhatsApp brand green for the resting icon color only —
@@ -66,11 +65,11 @@ export function SiteFooter({
       // on white in the resting state.
       iconClassName: "[&:not(:hover)]:text-[#25D366]",
     },
-    { icon: Facebook, href: socialFacebook || "https://facebook.com/Go.Hargeisa", label: "Facebook" },
-    { icon: Instagram, href: socialInstagram || "https://instagram.com/go.hargeisa", label: "Instagram" },
-    { icon: XIcon, href: socialTwitter || "https://x.com/go_hargeisa", label: "X" },
-    { icon: TikTokIcon, href: socialTiktok || "https://www.tiktok.com/@gohargeisa", label: "TikTok" },
-    { icon: Youtube, href: socialYoutube || "https://youtube.com/@go.hargeisa", label: "YouTube" },
+    { icon: SOCIAL_ICON.facebook, href: socialFacebook || "https://facebook.com/Go.Hargeisa", label: "Facebook" },
+    { icon: SOCIAL_ICON.instagram, href: socialInstagram || "https://instagram.com/go.hargeisa", label: "Instagram" },
+    { icon: SOCIAL_ICON.x, href: socialTwitter || "https://x.com/go_hargeisa", label: "X" },
+    { icon: SOCIAL_ICON.tiktok, href: socialTiktok || "https://www.tiktok.com/@gohargeisa", label: "TikTok" },
+    { icon: SOCIAL_ICON.youtube, href: socialYoutube || "https://youtube.com/@go.hargeisa", label: "YouTube" },
   ];
 
   return (

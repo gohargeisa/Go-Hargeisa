@@ -1,13 +1,16 @@
 import type { SVGProps } from "react";
 
 /**
- * Inline SVG brand glyphs for the 3 social icons lucide-react doesn't ship
- * (WhatsApp, X, TikTok) — replaces react-icons/fa6, which was installed as
- * a whole extra icon-library dependency for exactly these 3 icons in
- * components/layout/site-footer.tsx and nowhere else. `size` mirrors
- * lucide-react's own icon prop so both families drop into the same
- * `{ icon: Icon }` array/`<Icon size={17} />` call pattern without changes
- * at the call site.
+ * Inline SVG brand glyphs for the social icons lucide-react doesn't ship
+ * (WhatsApp, X, TikTok, Snapchat, Telegram) — replaces react-icons/fa6,
+ * which was installed as a whole extra icon-library dependency for exactly
+ * these icons. `size` mirrors lucide-react's own icon prop so both families
+ * drop into the same `{ icon: Icon }` array/`<Icon size={17} />` call
+ * pattern without changes at the call site. This is the ONE place these
+ * glyphs are defined — lib/config/social-links.ts's SOCIAL_ICON map is the
+ * one place they're wired to a platform key; every consumer (footer, share
+ * menu, every listing detail page's SocialLinks row) reads from that map
+ * rather than importing or redefining icons itself.
  */
 type BrandIconProps = { size?: number } & Omit<SVGProps<SVGSVGElement>, "width" | "height">;
 
@@ -31,6 +34,22 @@ export function TikTokIcon({ size = 24, ...props }: BrandIconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" {...props}>
       <path d="M16.6 5.82a4.278 4.278 0 0 1-1.06-2.82h-3.09v12.4a2.592 2.592 0 0 1-2.59 2.5c-1.42 0-2.6-1.16-2.6-2.6 0-1.72 1.66-3.01 3.37-2.48V9.66c-3.45-.46-6.47 2.22-6.47 5.64 0 3.33 2.76 5.7 5.69 5.7 3.14 0 5.69-2.55 5.69-5.7V9.01a7.35 7.35 0 0 0 4.3 1.38V7.3s-1.88.09-3.24-1.48z" />
+    </svg>
+  );
+}
+
+export function SnapchatIcon({ size = 24, ...props }: BrandIconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" {...props}>
+      <path d="M12.031.002c-.947 0-4.024.259-5.36 3.828a11.086 11.086 0 0 0-.611 3.312c-.014.746-.03 1.446-.06 2.06-.012.031-.132.096-.212.115-.109.031-.221.043-.33.043-.417 0-.85-.194-1.201-.407a1.026 1.026 0 0 0-.542-.16c-.174 0-.35.028-.499.08-.334.117-.55.331-.56.55.058.343-.089.685.245.909.192.184.517.317.804.436.201.083.43.169.559.29.16.15.16.395.106.646-.36 1.688-1.635 3.145-3.398 3.799a.393.393 0 0 0-.24.404c.058.523.923.906 2.68 1.174.03.09.075.36.113.567.048.263.15.482.472.482.045 0 .098-.005.157-.014.352-.058.75-.117 1.192-.117.696 0 1.238.156 1.735.454.75.45 1.6 1.55 3.51 1.55h.02c1.91 0 2.76-1.1 3.51-1.55.497-.298 1.039-.454 1.735-.454.442 0 .84.06 1.192.117.06.009.112.014.157.014.322 0 .424-.219.472-.482.038-.207.083-.478.113-.567 1.757-.268 2.622-.65 2.68-1.174a.393.393 0 0 0-.24-.404c-1.763-.654-3.038-2.111-3.398-3.799-.054-.251-.054-.496.106-.646.13-.121.358-.207.559-.29.287-.119.612-.252.804-.436.334-.224.187-.566.245-.909-.01-.219-.226-.433-.56-.55a1.647 1.647 0 0 0-.499-.08c-.19 0-.379.058-.542.16-.35.213-.784.407-1.2.407-.11 0-.222-.012-.33-.043-.081-.019-.201-.084-.213-.115-.03-.614-.046-1.314-.06-2.06a11.086 11.086 0 0 0-.61-3.312C16.055.261 12.978.002 12.031.002z" />
+    </svg>
+  );
+}
+
+export function TelegramIcon({ size = 24, ...props }: BrandIconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" {...props}>
+      <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
     </svg>
   );
 }

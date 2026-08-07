@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Check, Copy, Facebook, Mail, Send, Share2 } from "lucide-react";
-import { WhatsAppIcon, XIcon } from "@/components/shared/brand-icons";
+import { Check, Copy, Share2 } from "lucide-react";
+import { SOCIAL_ICON } from "@/lib/config/social-links";
 import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
 
 export function ShareButton({
@@ -63,11 +63,11 @@ export function ShareButton({
 
   const url = getUrl();
   const shareLinks = [
-    { key: "whatsapp", icon: WhatsAppIcon, href: `https://wa.me/?text=${encodeURIComponent(`${title} ${url}`)}` },
-    { key: "facebook", icon: Facebook, href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}` },
-    { key: "x", icon: XIcon, href: `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}` },
-    { key: "telegram", icon: Send, href: `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}` },
-    { key: "email", icon: Mail, href: `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(url)}` },
+    { key: "whatsapp", icon: SOCIAL_ICON.whatsapp, href: `https://wa.me/?text=${encodeURIComponent(`${title} ${url}`)}` },
+    { key: "facebook", icon: SOCIAL_ICON.facebook, href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}` },
+    { key: "x", icon: SOCIAL_ICON.x, href: `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}` },
+    { key: "telegram", icon: SOCIAL_ICON.telegram, href: `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}` },
+    { key: "email", icon: SOCIAL_ICON.email, href: `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(url)}` },
   ] as const;
 
   return (
