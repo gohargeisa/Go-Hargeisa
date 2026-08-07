@@ -72,12 +72,13 @@ export interface RequestRow {
 
 // Matches the admin route segment (and DeleteListingButton's `table` prop)
 // each convertedListingType maps to — kept in one place since both the
-// "View listing" link and the "Delete listing" button need it.
-function convertedListingTable(type: JoinRequestCategory | null): "hotels" | "restaurants" | "cafes" | "services" {
-  if (type === "hotel") return "hotels";
+// "View listing" link and the "Delete listing" button need it. Only
+// hotel/restaurant/cafe are convertible (see isConvertibleCategory), so
+// those are the only tables an already-converted row can ever resolve to.
+function convertedListingTable(type: JoinRequestCategory | null): "hotels" | "restaurants" | "cafes" {
   if (type === "restaurant") return "restaurants";
   if (type === "cafe") return "cafes";
-  return "services";
+  return "hotels";
 }
 
 const STATUS_STYLE: Record<BusinessRequestStatus, string> = {

@@ -7,7 +7,7 @@ import { Trash2, Loader2 } from "lucide-react";
 import { deleteListing } from "@/lib/actions/admin";
 import { useToast, ToastViewport } from "@/components/shared/toast";
 
-const ALLOWED = ["hotels", "restaurants", "cafes", "attractions", "events", "articles", "services"] as const;
+const ALLOWED = ["hotels", "restaurants", "cafes", "attractions", "events", "articles"] as const;
 type Table = (typeof ALLOWED)[number];
 
 export function DeleteListingButton({ table, id, name }: { table: Table; id: string; name: string }) {

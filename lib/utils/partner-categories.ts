@@ -43,25 +43,19 @@ export function targetTableToJoinCategory(targetTable: CategoryTargetTable): "ho
 }
 
 /** A request is convertible into a real listing iff it's hotel/restaurant/
- * cafe (their own dedicated tables), or it's category="other" with a
- * categoryId resolved to a `categories` row with target_table='services'.
- * City Services categories (target_table='city_services' — Hospitals &
- * Clinics, Pharmacies, ...) are deliberately never convertible: that table
- * has no owner_id/claims workflow, so there's no listing shape to convert
- * into — those requests stay admin-reviewed leads, same as any other
- * non-convertible category, surfaced as "Verified Partner" once approved.
- * `categoryTargetTable` is optional (older/other callers may not have it
- * yet) — omitting it falls back to the pre-target-table-aware check, so
- * this doesn't hit the DB itself; convertJoinRequest re-validates
- * everything server-side before actually converting either way. */
+ * cafe — the only categories with their own dedicated table + owner_id/
+ * claims workflow to convert into. Every "other" selection (long-tail
+ * `services` categories and City Services categories alike) stays an
+ * admin-reviewed lead, surfaced as "Verified Partner" once approved, since
+ * there is no admin Services module to convert into anymore. `categoryId`/
+ * `categoryTargetTable` are unused now but kept in the signature so every
+ * call site (which still resolves and passes them) doesn't need to change. */
 export function isConvertibleCategory(
   category: JoinRequestCategory,
-  categoryId: string | null,
-  categoryTargetTable?: CategoryTargetTable | null
+  _categoryId: string | null,
+  _categoryTargetTable?: CategoryTargetTable | null
 ): boolean {
-  if (category === "hotel" || category === "restaurant" || category === "cafe") return true;
-  if (category !== "other" || categoryId === null) return false;
-  return categoryTargetTable === undefined || categoryTargetTable === "services";
+  return category === "hotel" || category === "restaurant" || category === "cafe";
 }
 
 /**

@@ -81,7 +81,7 @@ pre-existing, separate features and are **not** part of this module:
 /supermarket/cart
 /supermarket/checkout
 /supermarket/dashboard/*                         — owner dashboard (fully separate from /business/*)
-/admin/supermarket/*                             — admin moderation (fully separate from /admin/services, /admin/city-services)
+/admin/supermarket/*                             — admin moderation (fully separate from /admin/city-services)
 ```
 
 ## Planned DB schema (not created yet)

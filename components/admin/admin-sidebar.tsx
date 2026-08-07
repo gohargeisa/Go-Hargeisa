@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
   Inbox, LayoutGrid, Building2, Users, Star, Flag, BarChart3, Settings,
-  Hotel, UtensilsCrossed, Coffee, Landmark, CalendarDays, Stethoscope, Newspaper,
+  Hotel, UtensilsCrossed, Coffee, Landmark, CalendarDays, Newspaper,
   CalendarCheck, Handshake, Megaphone, Tag, Bell,
 } from "lucide-react";
 import { SidebarNav, type SidebarNavItem } from "@/components/shared/sidebar-nav";
@@ -34,7 +34,6 @@ export function AdminSidebar({ locale }: { locale: Locale }) {
     { key: "cafes", label: t("cafesNavShort"), icon: Coffee, href: `/${locale}/admin/cafes`, isActive: isActive("/admin/cafes"), indent: true },
     { key: "attractions", label: t("attractionsNavShort"), icon: Landmark, href: `/${locale}/admin/attractions`, isActive: isActive("/admin/attractions"), indent: true },
     { key: "events", label: t("eventsNavShort"), icon: CalendarDays, href: `/${locale}/admin/events`, isActive: isActive("/admin/events"), indent: true },
-    { key: "services", label: t("servicesNavShort"), icon: Stethoscope, href: `/${locale}/admin/services`, isActive: isActive("/admin/services"), indent: true },
     { key: "cityServices", label: t("cityServicesNav"), icon: Building2, href: `/${locale}/admin/city-services`, isActive: isActive("/admin/city-services"), indent: true },
     { key: "articles", label: t("articlesNavShort"), icon: Newspaper, href: `/${locale}/admin/articles`, isActive: isActive("/admin/articles"), indent: true },
     { key: "users", label: t("usersNav"), icon: Users, href: `/${locale}/admin/users`, isActive: isActive("/admin/users") },

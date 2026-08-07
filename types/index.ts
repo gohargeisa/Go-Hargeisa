@@ -271,11 +271,12 @@ export type JoinRequestCategory =
   | "other";
 
 /** The subset of JoinRequestCategory that convertJoinRequest can actually
- * turn into a real listing row: hotel/restaurant/cafe (their own dedicated
- * tables) plus "service" — any other category, resolved via categoryId into
- * a `categories` row with target_table='services'. Stored as the value of
- * `converted_listing_type` once a request is converted. */
-export type ConvertibleJoinRequestCategory = "hotel" | "restaurant" | "cafe" | "service";
+ * turn into a real listing row: hotel/restaurant/cafe, their own dedicated
+ * tables. Stored as the value of `converted_listing_type` once a request is
+ * converted. ("service" was a legacy possibility from the now-removed admin
+ * Services module — the DB enum still allows it for historical rows, but no
+ * live request has that value and nothing writes it anymore.) */
+export type ConvertibleJoinRequestCategory = "hotel" | "restaurant" | "cafe";
 
 export type BusinessRequestStatus = "pending" | "approved" | "rejected" | "needs_info" | "archived";
 

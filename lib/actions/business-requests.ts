@@ -7,7 +7,6 @@ import { placeholderImage } from "@/lib/placeholder-image";
 import { logActivity } from "./activity";
 import { isConvertibleCategory } from "@/lib/utils/partner-categories";
 import { getCategoryById } from "@/lib/data/categories";
-import { formatTime12h } from "@/lib/utils/opening-hours";
 import type { JoinRequestCategory, BusinessRequestStatus, GalleryImage, MediaVideo, BusinessDocument, WeeklyHoursDay } from "@/types";
 
 async function assertOwner() {
@@ -268,19 +267,11 @@ export async function convertJoinRequest(
     };
   }
 
-  let table: "hotels" | "restaurants" | "cafes" | "services";
-  let servicesCategory: Awaited<ReturnType<typeof getCategoryById>> = null;
+  let table: "hotels" | "restaurants" | "cafes";
 
   if (request.category === "hotel") table = "hotels";
   else if (request.category === "restaurant") table = "restaurants";
-  else if (request.category === "cafe") table = "cafes";
-  else {
-    table = "services";
-    servicesCategory = resolvedCategory;
-    if (!servicesCategory || servicesCategory.targetTable !== "services" || !servicesCategory.isActive) {
-      return { ok: false, error: "This request's category is no longer available — check /admin/categories." };
-    }
-  }
+  else table = "cafes";
 
   const { data: slugTaken } = await supabase.from(table).select("id").eq("slug", slug).maybeSingle();
   if (slugTaken) return { ok: false, error: "That slug is already in use — please choose another." };
@@ -288,75 +279,6 @@ export async function convertJoinRequest(
   const gallery = (request.gallery as { url: string; alt?: string; category?: string }[] | null) ?? [];
   const coverImage = request.cover_image || gallery[0]?.url || request.logo || placeholderImage(request.business_name);
   const shortDescription = request.description.length > 160 ? `${request.description.slice(0, 157)}...` : request.description;
-
-  // Long-tail categories (anything that isn't hotel/restaurant/cafe) all
-  // share the one `services` table, keyed by category_id — a genuinely
-  // different insert shape (no partner_status/amenities/booking_mode
-  // columns; has category_id/custom_fields instead) from the 3 dedicated
-  // tables below, so it gets its own branch rather than being squeezed into
-  // basePayload. WeeklyHoursDay[] (join form) has no lossless mapping onto
-  // services.opening_hours_structured's grouped-days shape, so it's folded
-  // into the legacy free-text opening_hours column instead of being dropped.
-  if (table === "services") {
-    if (!servicesCategory) {
-      return { ok: false, error: "This request's category is no longer available — check /admin/categories." };
-    }
-
-    const openingHoursText = ((request.opening_hours as WeeklyHoursDay[] | null) ?? [])
-      .map((h) => `${h.day}: ${h.closed ? "Closed" : `${formatTime12h(h.open)}–${formatTime12h(h.close)}`}`)
-      .join(", ");
-
-    const servicesPayload: Record<string, unknown> = {
-      slug,
-      name: request.business_name,
-      short_description: shortDescription,
-      description: request.description,
-      cover_image: coverImage,
-      logo_url: request.logo,
-      gallery,
-      videos: request.videos ?? [],
-      address: request.address,
-      lat: completion.lat,
-      lng: completion.lng,
-      google_maps_url: request.maps_url,
-      phone: request.phone,
-      whatsapp: request.whatsapp,
-      email: request.email,
-      website: request.website,
-      social_instagram: request.instagram,
-      social_facebook: request.facebook,
-      opening_hours: openingHoursText || null,
-      opening_hours_structured: [],
-      services: [],
-      category_id: request.category_id,
-      category: null,
-      custom_fields: request.custom_fields ?? {},
-      featured: false,
-    };
-
-    const { data: created, error: insertError } = await supabase.from("services").insert(servicesPayload as never).select("id").single();
-    if (insertError || !created) return { ok: false, error: insertError?.message ?? "Could not create the listing." };
-
-    await supabase
-      .from("business_join_requests")
-      .update({
-        status: "approved",
-        converted_listing_type: "service",
-        converted_listing_id: created.id,
-        converted_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      } as never)
-      .eq("id", requestId);
-
-    await logActivity("create", "services", created.id, { fromJoinRequest: requestId, partnerStatus: targetPartnerStatus });
-    revalidatePath(`/${locale}/admin/requests`);
-    revalidatePath(`/${locale}/admin/partners`);
-    revalidatePath(`/${locale}/admin/services`);
-    revalidatePath(`/${locale}/services`);
-    revalidatePath(`/${locale}/services/${servicesCategory.slug}`);
-
-    return { ok: true, listingId: created.id, table: "services" };
-  }
 
   const basePayload: Record<string, unknown> = {
     slug,

@@ -3,7 +3,6 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { logActivity } from "./activity";
 
 const ALLOWED_TABLES = ["hotels", "restaurants", "cafes", "services", "attractions", "events", "articles"] as const;
@@ -23,47 +22,6 @@ const TABLES_WITH_UPDATED_AT = new Set(["hotels", "restaurants", "cafes", "servi
 // can't precisely target a service's live detail page. Its ISR cache still
 // self-heals on the normal revalidate=3600 window; only the "revalidate
 // instantly on save" behavior the other tables get is missing for services.
-// A service row has no FK/cascade to the polymorphic listing_type/listing_id
-// tables that can reference it (confirmed: no `references services(id)`
-// constraint exists anywhere in the schema — every other listing type has
-// the same gap, but only services' delete path is being rewritten here).
-// Deleting a service without also clearing these leaves orphaned rows behind
-// forever, so deleteListing's services case does this cleanup itself.
-// (`bookings` is deliberately excluded — it's hotel-specific, keyed on
-// `hotel_id` with its own `on delete cascade`, not a polymorphic
-// listing_type/listing_id table, so it can never reference a service.)
-const SERVICE_DEPENDENT_TABLES = [
-  "reviews",
-  "favorites",
-  "business_claims",
-  "business_metric_events",
-  "business_subscriptions",
-  "business_messages",
-] as const;
-
-async function bestEffortDelete(promise: PromiseLike<unknown>) {
-  try {
-    await promise;
-  } catch {
-    // Cleanup only — a missing/renamed dependent table must never block
-    // deleting the service row itself.
-  }
-}
-
-function extractStoragePath(url: string, bucket: string): string | null {
-  const marker = `/storage/v1/object/public/${bucket}/`;
-  const idx = url.indexOf(marker);
-  if (idx === -1) return null;
-  return decodeURIComponent(url.slice(idx + marker.length));
-}
-
-function collectImageUrls(json: unknown): string[] {
-  if (!Array.isArray(json)) return [];
-  return json
-    .filter((item): item is { url: string } => !!item && typeof item === "object" && typeof (item as { url?: unknown }).url === "string")
-    .map((item) => item.url);
-}
-
 const TABLE_DETAIL_SEGMENT: Record<AllowedTable, string> = {
   hotels: "hotels",
   restaurants: "restaurants",
@@ -155,68 +113,25 @@ export async function deleteListing(
   let error = null;
   let data: { id: string } | null = null;
 
-  if (table === "services") {
-    // Fetch the image fields before deleting so the storage files can be
-    // cleaned up afterward — once the row is gone, so are these URLs.
-    const { data: existing } = await supabase
-      .from("services")
-      .select("cover_image, logo_url, gallery, videos")
-      .eq("id", id)
-      .single();
-
-    // The dependent-row cleanup below has to reach rows owned by OTHER
-    // users (e.g. a favorite belonging to some customer, not the admin
-    // running this delete) — `favorites` only has a
-    // "Users manage own favorites" RLS policy (auth.uid() = user_id), no
-    // owner-role bypass, so the regular cookie-scoped `supabase` client
-    // would silently no-op on every favorite it doesn't own. The
-    // service-role admin client is the one already-established way in this
-    // codebase to intentionally bypass RLS for genuinely privileged cleanup
-    // (see lib/supabase/admin.ts).
-    const adminClient = createAdminClient();
-
-    await Promise.all(
-      SERVICE_DEPENDENT_TABLES.map((depTable) =>
-        bestEffortDelete(adminClient.from(depTable).delete().eq("listing_type", "service").eq("listing_id", id))
-      )
-    );
-
-    ({ data, error } = await supabase.from("services").delete().eq("id", id).select("id").single());
-
-    if (!error && data && existing) {
-      const row = existing as { cover_image: string | null; logo_url: string | null; gallery: unknown; videos: unknown };
-      const urls = [
-        ...(row.cover_image ? [row.cover_image] : []),
-        ...(row.logo_url ? [row.logo_url] : []),
-        ...collectImageUrls(row.gallery),
-        ...collectImageUrls(row.videos),
-      ];
-      const paths = urls.map((url) => extractStoragePath(url, "listing-images")).filter((path): path is string => !!path);
-      if (paths.length > 0) {
-        await bestEffortDelete(adminClient.storage.from("listing-images").remove(paths));
-      }
-    }
-  } else {
-    switch (table) {
-      case "hotels":
-        ({ data, error } = await supabase.from("hotels").delete().eq("id", id).select("id").single());
-        break;
-      case "restaurants":
-        ({ data, error } = await supabase.from("restaurants").delete().eq("id", id).select("id").single());
-        break;
-      case "cafes":
-        ({ data, error } = await supabase.from("cafes").delete().eq("id", id).select("id").single());
-        break;
-      case "attractions":
-        ({ data, error } = await supabase.from("attractions").delete().eq("id", id).select("id").single());
-        break;
-      case "events":
-        ({ data, error } = await supabase.from("events").delete().eq("id", id).select("id").single());
-        break;
-      case "articles":
-        ({ data, error } = await supabase.from("articles").delete().eq("id", id).select("id").single());
-        break;
-    }
+  switch (table) {
+    case "hotels":
+      ({ data, error } = await supabase.from("hotels").delete().eq("id", id).select("id").single());
+      break;
+    case "restaurants":
+      ({ data, error } = await supabase.from("restaurants").delete().eq("id", id).select("id").single());
+      break;
+    case "cafes":
+      ({ data, error } = await supabase.from("cafes").delete().eq("id", id).select("id").single());
+      break;
+    case "attractions":
+      ({ data, error } = await supabase.from("attractions").delete().eq("id", id).select("id").single());
+      break;
+    case "events":
+      ({ data, error } = await supabase.from("events").delete().eq("id", id).select("id").single());
+      break;
+    case "articles":
+      ({ data, error } = await supabase.from("articles").delete().eq("id", id).select("id").single());
+      break;
   }
 
   if (error || !data) {
@@ -275,9 +190,6 @@ export async function toggleListingVisibility(
     case "articles":
       ({ data, error } = await supabase.from("articles").update({ status: nextStatus } as never).eq("id", id).select("id").single());
       break;
-    case "services":
-      ({ data, error } = await supabase.from("services").update({ status: nextStatus } as never).eq("id", id).select("id").single());
-      break;
   }
 
   if (error || !data) {
@@ -290,10 +202,10 @@ export async function toggleListingVisibility(
 }
 
 // Feature/Pin only apply to the tables built on the shared listing shape
-// (hotels/restaurants/cafes/attractions/services all carry `featured` and
+// (hotels/restaurants/cafes/attractions all carry `featured` and
 // `is_pinned`) — events/articles use a different, simpler row shape and
 // have neither column.
-const FEATURABLE_TABLES = ["hotels", "restaurants", "cafes", "attractions", "services"] as const;
+const FEATURABLE_TABLES = ["hotels", "restaurants", "cafes", "attractions"] as const;
 export type FeaturableTable = (typeof FEATURABLE_TABLES)[number];
 
 /** Owner-only one-click "Feature" toggle — the column already existed and
@@ -386,9 +298,6 @@ export async function createRecord(
       break;
     case "articles":
       ({ data: inserted, error } = await supabase.from("articles").insert(payload as never).select("slug").single());
-      break;
-    case "services":
-      ({ data: inserted, error } = await supabase.from("services").insert(payload as never).select("slug").single());
       break;
   }
 
