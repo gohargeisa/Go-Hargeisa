@@ -1183,6 +1183,7 @@
     "convertToTrialAction": "تحويل إلى تجريبي",
     "convertToOfficialAction": "تحويل إلى رسمي",
     "convertedLabel": "تم التحويل",
+    "convertedOnLabel": "تم التحويل بتاريخ {date}",
     "viewListingLabel": "عرض القائمة",
     "offersNav": "العروض",
     "notificationsNav": "الإشعارات",
@@ -1675,6 +1676,7 @@
     "deletingLabel": "جارٍ الحذف…",
     "confirmLabel": "تأكيد",
     "deleteError": "تعذّر حذف هذه القائمة.",
+    "deleteSuccess": "تم حذف «{name}».",
 
     "featuredBadge": "مميز",
     "viewDetails": "عرض التفاصيل",

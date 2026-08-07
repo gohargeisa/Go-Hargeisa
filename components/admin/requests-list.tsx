@@ -13,6 +13,7 @@ import {
 import {
   setRequestStatus, addRequestNote, convertJoinRequest, updateJoinRequest,
 } from "@/lib/actions/business-requests";
+import { DeleteListingButton } from "@/components/shared/delete-listing-button";
 import { isConvertibleCategory, PARTNER_CATEGORY_ICON } from "@/lib/utils/partner-categories";
 import { formatTime12h } from "@/lib/utils/opening-hours";
 import { buildGoogleMapsUrl } from "@/lib/utils/google-maps";
@@ -60,8 +61,19 @@ export interface RequestRow {
   status: BusinessRequestStatus;
   convertedListingType: JoinRequestCategory | null;
   convertedListingId: string | null;
+  convertedAt: string | null;
   createdAt: string;
   notes: RequestNote[];
+}
+
+// Matches the admin route segment (and DeleteListingButton's `table` prop)
+// each convertedListingType maps to — kept in one place since both the
+// "View listing" link and the "Delete listing" button need it.
+function convertedListingTable(type: JoinRequestCategory | null): "hotels" | "restaurants" | "cafes" | "services" {
+  if (type === "hotel") return "hotels";
+  if (type === "restaurant") return "restaurants";
+  if (type === "cafe") return "cafes";
+  return "services";
 }
 
 const STATUS_STYLE: Record<BusinessRequestStatus, string> = {
@@ -330,21 +342,25 @@ export function RequestsList({ locale, rows }: { locale: Locale; rows: RequestRo
 
               {alreadyConverted ? (
                 <span className="flex items-center gap-1.5 rounded-lg bg-secondary/10 px-2.5 py-1.5 text-xs font-semibold text-secondary-700 dark:text-sand/70">
-                  <Check size={12} /> {t("convertedLabel")}
+                  <Check size={12} />
+                  {row.convertedAt
+                    ? t("convertedOnLabel", {
+                        date: new Date(row.convertedAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }),
+                      })
+                    : t("convertedLabel")}
                   <Link
-                    href={`/${locale}/admin/${
-                      row.convertedListingType === "hotel"
-                        ? "hotels"
-                        : row.convertedListingType === "restaurant"
-                          ? "restaurants"
-                          : row.convertedListingType === "cafe"
-                            ? "cafes"
-                            : "services"
-                    }/${row.convertedListingId}/edit`}
+                    href={`/${locale}/admin/${convertedListingTable(row.convertedListingType)}/${row.convertedListingId}/edit`}
                     className="inline-flex items-center gap-0.5 underline hover:text-primary"
                   >
                     {t("viewListingLabel")} <ExternalLink size={11} />
                   </Link>
+                  {row.convertedListingId && (
+                    <DeleteListingButton
+                      table={convertedListingTable(row.convertedListingType)}
+                      id={row.convertedListingId}
+                      name={row.businessName}
+                    />
+                  )}
                 </span>
               ) : isConvertibleCategory(row.category, row.categoryId) && !converting ? (
                 <button

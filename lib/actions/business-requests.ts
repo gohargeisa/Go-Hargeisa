@@ -324,6 +324,7 @@ export async function convertJoinRequest(
         status: "approved",
         converted_listing_type: "service",
         converted_listing_id: created.id,
+        converted_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       } as never)
       .eq("id", requestId);
@@ -389,6 +390,7 @@ export async function convertJoinRequest(
       status: "approved",
       converted_listing_type: request.category,
       converted_listing_id: created.id,
+      converted_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     } as never)
     .eq("id", requestId);

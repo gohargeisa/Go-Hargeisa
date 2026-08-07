@@ -314,6 +314,7 @@ export interface BusinessJoinRequest {
   status: BusinessRequestStatus;
   convertedListingType: ConvertibleJoinRequestCategory | null;
   convertedListingId: string | null;
+  convertedAt: string | null;
   createdAt: string;
 }
 

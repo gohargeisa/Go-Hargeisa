@@ -204,7 +204,8 @@ type BusinessJoinRequestRow = {
   instagram: string | null; facebook: string | null; city: string; district: string | null;
   lat: number | null; lng: number | null; cover_image: string | null;
   opening_hours: Json; amenities: string[]; price_range: "$" | "$$" | "$$$" | "$$$$" | null;
-  converted_listing_type: "hotel" | "restaurant" | "cafe" | null; converted_listing_id: string | null;
+  converted_listing_type: "hotel" | "restaurant" | "cafe" | "service" | null; converted_listing_id: string | null;
+  converted_at: string | null;
   videos: Json; documents: Json;
   created_at: string; updated_at: string;
 };

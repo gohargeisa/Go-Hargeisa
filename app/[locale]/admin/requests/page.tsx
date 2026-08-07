@@ -69,6 +69,7 @@ export default async function AdminRequestsPage({ params: { locale } }: { params
     status: r.status,
     convertedListingType: r.converted_listing_type,
     convertedListingId: r.converted_listing_id,
+    convertedAt: r.converted_at,
     createdAt: r.created_at,
     notes: (notesRaw ?? [])
       .filter((n) => n.request_id === r.id)

@@ -1183,6 +1183,7 @@
     "convertToTrialAction": "U Beddel Tijaabo",
     "convertToOfficialAction": "U Beddel Rasmi",
     "convertedLabel": "La Beddelay",
+    "convertedOnLabel": "Waxaa la beddelay {date}",
     "viewListingLabel": "Arag Liiska",
     "offersNav": "Dallacaadaha",
     "notificationsNav": "Ogaysiisyada",
@@ -1675,6 +1676,7 @@
     "deletingLabel": "Tirtirid…",
     "confirmLabel": "Xaqiiji",
     "deleteError": "Lama tirtiri karin liistadan.",
+    "deleteSuccess": "\"{name}\" waa la tirtiray.",
 
     "featuredBadge": "La Xushay",
     "viewDetails": "Fiiri Faahfaahinta",

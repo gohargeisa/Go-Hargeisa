@@ -1183,6 +1183,7 @@
     "convertToTrialAction": "Convert to Trial",
     "convertToOfficialAction": "Convert to Official",
     "convertedLabel": "Converted",
+    "convertedOnLabel": "Converted {date}",
     "viewListingLabel": "View listing",
     "offersNav": "Offers",
     "notificationsNav": "Notifications",
@@ -1675,6 +1676,7 @@
     "deletingLabel": "Deleting…",
     "confirmLabel": "Confirm",
     "deleteError": "Could not delete this listing.",
+    "deleteSuccess": "\"{name}\" was deleted.",
 
     "featuredBadge": "Featured",
     "viewDetails": "View Details",
