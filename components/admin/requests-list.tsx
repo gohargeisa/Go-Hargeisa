@@ -28,6 +28,10 @@ export interface RequestNote {
 export interface RequestRow {
   id: string;
   category: JoinRequestCategory;
+  categoryId: string | null;
+  categoryName: string | null;
+  categorySlug: string | null;
+  customFields: Record<string, string | number | boolean>;
   businessName: string;
   ownerName: string | null;
   phone: string;
@@ -249,7 +253,8 @@ export function RequestsList({ locale, rows }: { locale: Locale; rows: RequestRo
                 <div className="min-w-0">
                   <p className="truncate font-display font-semibold">{row.businessName}</p>
                   <p className="text-xs capitalize text-ink/45 dark:text-sand/45">
-                    {row.category} · {new Date(row.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+                    {row.category === "other" && row.categoryName ? row.categoryName : row.category} ·{" "}
+                    {new Date(row.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
                   </p>
                 </div>
               </div>
@@ -327,13 +332,21 @@ export function RequestsList({ locale, rows }: { locale: Locale; rows: RequestRo
                 <span className="flex items-center gap-1.5 rounded-lg bg-secondary/10 px-2.5 py-1.5 text-xs font-semibold text-secondary-700 dark:text-sand/70">
                   <Check size={12} /> {t("convertedLabel")}
                   <Link
-                    href={`/${locale}/admin/${row.convertedListingType === "hotel" ? "hotels" : row.convertedListingType === "restaurant" ? "restaurants" : "cafes"}/${row.convertedListingId}/edit`}
+                    href={`/${locale}/admin/${
+                      row.convertedListingType === "hotel"
+                        ? "hotels"
+                        : row.convertedListingType === "restaurant"
+                          ? "restaurants"
+                          : row.convertedListingType === "cafe"
+                            ? "cafes"
+                            : "services"
+                    }/${row.convertedListingId}/edit`}
                     className="inline-flex items-center gap-0.5 underline hover:text-primary"
                   >
                     {t("viewListingLabel")} <ExternalLink size={11} />
                   </Link>
                 </span>
-              ) : isConvertibleCategory(row.category) && !converting ? (
+              ) : isConvertibleCategory(row.category, row.categoryId) && !converting ? (
                 <button
                   type="button"
                   onClick={() => onStartConvert(row)}
@@ -342,7 +355,7 @@ export function RequestsList({ locale, rows }: { locale: Locale; rows: RequestRo
                 >
                   {t("convertAction")}
                 </button>
-              ) : !isConvertibleCategory(row.category) && row.status === "approved" ? (
+              ) : !isConvertibleCategory(row.category, row.categoryId) && row.status === "approved" ? (
                 <span className="flex items-center gap-1.5 rounded-lg bg-secondary/10 px-2.5 py-1.5 text-xs font-semibold text-secondary-700 dark:text-sand/70">
                   <BadgeCheck size={12} /> {t("verifiedPartnerLabel")}
                 </span>

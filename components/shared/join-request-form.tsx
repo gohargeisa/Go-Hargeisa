@@ -10,6 +10,7 @@ import { PdfUploader } from "@/components/admin/pdf-uploader-lazy";
 import { VideoUploader } from "@/components/shared/video-uploader-lazy";
 import { DocumentsUploader } from "@/components/shared/documents-uploader-lazy";
 import { CoordinatesInput } from "@/components/shared/coordinates-input";
+import { CustomFieldsEditor, type CustomFieldValues } from "@/components/shared/custom-fields-editor";
 import {
   PARTNER_CATEGORIES,
   PARTNER_CATEGORY_ICON,
@@ -17,7 +18,7 @@ import {
   PARTNER_AMENITY_ICON,
 } from "@/lib/utils/partner-categories";
 import { WEEK_DAYS_SAT_FIRST, defaultWeeklyHours } from "@/lib/utils/weekly-hours";
-import type { JoinRequestCategory, GalleryImage, MediaVideo, BusinessDocument, Coordinates, WeeklyHoursDay } from "@/types";
+import type { JoinRequestCategory, GalleryImage, MediaVideo, BusinessDocument, Coordinates, WeeklyHoursDay, Category } from "@/types";
 
 type PriceRange = "$" | "$$" | "$$$" | "$$$$";
 const PRICE_LEVELS: PriceRange[] = ["$", "$$", "$$$", "$$$$"];
@@ -26,7 +27,7 @@ const inputClass =
   "w-full rounded-2xl border border-ink/12 bg-transparent px-4 py-3 text-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/15 dark:border-white/15";
 const labelClass = "mb-2 block text-sm font-semibold text-ink/85 dark:text-sand/85";
 
-export function JoinRequestForm() {
+export function JoinRequestForm({ serviceCategories }: { serviceCategories: Category[] }) {
   const t = useTranslations("joinRequest");
   const tc = useTranslations("partnerCategories");
   const ta = useTranslations("partnerAmenities");
@@ -59,16 +60,20 @@ export function JoinRequestForm() {
   const [openingHours, setOpeningHours] = useState<WeeklyHoursDay[]>(defaultWeeklyHours());
   const [amenities, setAmenities] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<PriceRange | undefined>(undefined);
+  const [serviceCategoryId, setServiceCategoryId] = useState<string>(serviceCategories[0]?.id ?? "");
+  const [customFields, setCustomFields] = useState<CustomFieldValues>({});
   const [confirmed, setConfirmed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const categoryAmenities = PARTNER_AMENITIES[category];
+  const selectedServiceCategory = serviceCategories.find((c) => c.id === serviceCategoryId);
 
   function selectCategory(next: JoinRequestCategory) {
     setCategory(next);
     setAmenities([]);
+    setCustomFields({});
   }
 
   function toggleAmenity(code: string) {
@@ -86,9 +91,15 @@ export function JoinRequestForm() {
       setError(t("confirmationRequiredError"));
       return;
     }
+    if (category === "other" && !serviceCategoryId) {
+      setError(t("selectCategoryError"));
+      return;
+    }
     startTransition(async () => {
       const result = await submitJoinRequest({
         category,
+        categoryId: category === "other" ? serviceCategoryId || undefined : undefined,
+        customFields: category === "other" ? customFields : undefined,
         businessName,
         phone,
         whatsapp: whatsapp || undefined,
@@ -170,6 +181,26 @@ export function JoinRequestForm() {
             );
           })}
         </div>
+
+        {serviceCategories.length > 0 && (
+          <div className="mt-4">
+            <label htmlFor="jr-other-category" className={labelClass}>{t("otherCategoryLabel")}</label>
+            <select
+              id="jr-other-category"
+              value={category === "other" ? serviceCategoryId : ""}
+              onChange={(e) => {
+                selectCategory("other");
+                setServiceCategoryId(e.target.value);
+              }}
+              className={inputClass}
+            >
+              <option value="" disabled>{t("selectCategoryPlaceholder")}</option>
+              {serviceCategories.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {/* Business Information */}
@@ -232,6 +263,15 @@ export function JoinRequestForm() {
               <label htmlFor="jr-bookingUrl" className={labelClass}>{t("bookingUrlLabel")}</label>
               <input id="jr-bookingUrl" type="url" value={bookingUrl} onChange={(e) => setBookingUrl(e.target.value)} className={inputClass} placeholder="https://…" />
             </div>
+          )}
+
+          {category === "other" && selectedServiceCategory && selectedServiceCategory.customFieldsSchema.length > 0 && (
+            <CustomFieldsEditor
+              schema={selectedServiceCategory.customFieldsSchema}
+              values={customFields}
+              onChange={setCustomFields}
+              inputClass={inputClass}
+            />
           )}
         </div>
       </div>

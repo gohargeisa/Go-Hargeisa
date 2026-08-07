@@ -1,15 +1,14 @@
 import type { Hotel } from "@/types";
 
 /**
- * Temporary kill switch for the public-facing Services feature (Phase 2).
- * Every public surface that shows or links to Services — the nav, the
- * homepage section, the Explore Hargeisa cards, the /services routes, and
- * the Interactive Map — reads this one flag, so re-enabling the feature is
- * a single-line flip back to `true`. Nothing about the underlying data,
- * schema, or components changes: the business dashboard, admin tools, and
- * the `services` table are untouched and keep working normally.
+ * Public-facing Services feature switch. Every public surface that shows or
+ * links to Services — the nav, the homepage section, the Explore Hargeisa
+ * cards, the /services routes, and the Interactive Map — reads this one
+ * flag. Re-enabled so long-tail categories (Flower Shops, Travel Agencies,
+ * Real Estate, ...) converted from /join business requests are publicly
+ * discoverable immediately, matching every other category's behavior.
  */
-export const SERVICES_PUBLIC_ENABLED = false;
+export const SERVICES_PUBLIC_ENABLED = true;
 
 /**
  * Hotel presentation mode — temporarily restricts the public site to a

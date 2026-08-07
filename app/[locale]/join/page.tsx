@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
+import { getServiceCategories } from "@/lib/data/categories";
 import { JoinRequestForm } from "@/components/shared/join-request-form";
 import { JoinHero } from "@/components/join/join-hero";
 import { WhyJoinSection } from "@/components/join/why-join-section";
@@ -25,6 +26,7 @@ export async function generateMetadata({
 
 export default async function JoinPage({ params: { locale } }: { params: { locale: Locale } }) {
   const t = await getTranslations({ locale, namespace: "joinRequest" });
+  const serviceCategories = await getServiceCategories();
 
   return (
     <>
@@ -42,7 +44,7 @@ export default async function JoinPage({ params: { locale } }: { params: { local
 
         <Reveal delay={0.1} className="mt-10">
           <div className="rounded-[2rem] border border-ink/8 bg-white p-6 shadow-card dark:border-white/10 dark:bg-white/[0.03] sm:p-9">
-            <JoinRequestForm />
+            <JoinRequestForm serviceCategories={serviceCategories} />
           </div>
         </Reveal>
       </section>

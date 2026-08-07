@@ -5,7 +5,9 @@ import { createClient } from "@/lib/supabase/server";
 import { createPublicClient } from "@/lib/supabase/public";
 import { placeholderImage } from "@/lib/placeholder-image";
 import { logActivity } from "./activity";
-import { PARTNER_CATEGORIES, isConvertibleCategory } from "@/lib/utils/partner-categories";
+import { isConvertibleCategory } from "@/lib/utils/partner-categories";
+import { getCategoryById } from "@/lib/data/categories";
+import { formatTime12h } from "@/lib/utils/opening-hours";
 import type { JoinRequestCategory, BusinessRequestStatus, GalleryImage, MediaVideo, BusinessDocument, WeeklyHoursDay } from "@/types";
 
 async function assertOwner() {
@@ -29,6 +31,11 @@ function digitsOnly(value: string): string {
 
 export interface JoinRequestInput {
   category: JoinRequestCategory;
+  /** Required, and must reference an active category with target_table
+   * 'services', when category === "other". Ignored for hotel/restaurant/cafe. */
+  categoryId?: string;
+  /** Values for the referenced category's customFieldsSchema. Ignored unless categoryId is set. */
+  customFields?: Record<string, string | number | boolean>;
   businessName: string;
   phone: string;
   whatsapp?: string;
@@ -78,8 +85,12 @@ export async function submitJoinRequest(input: JoinRequestInput): Promise<{ ok: 
   if (digitsOnly(phone).length < 7) {
     return { ok: false, error: "Please enter a valid phone number." };
   }
-  if (!PARTNER_CATEGORIES.includes(input.category)) {
+  const isFixedCategory = input.category === "hotel" || input.category === "restaurant" || input.category === "cafe";
+  if (!isFixedCategory && input.category !== "other") {
     return { ok: false, error: "Invalid category." };
+  }
+  if (input.category === "other" && !input.categoryId) {
+    return { ok: false, error: "Please choose a business category." };
   }
   if (input.lat !== undefined && (input.lat < -90 || input.lat > 90)) {
     return { ok: false, error: "Invalid location." };
@@ -89,9 +100,21 @@ export async function submitJoinRequest(input: JoinRequestInput): Promise<{ ok: 
   }
 
   // Public client — this table's RLS grants anonymous INSERT, but every
-  // other query here (the duplicate check) should use the same
-  // unauthenticated path rather than assuming a signed-in session exists.
+  // other query here (the duplicate check, the category check below) should
+  // use the same unauthenticated path rather than assuming a signed-in
+  // session exists.
   const supabase = createPublicClient();
+
+  if (input.category === "other" && input.categoryId) {
+    const { data: cat } = await supabase
+      .from("categories")
+      .select("id, target_table, is_active")
+      .eq("id", input.categoryId)
+      .maybeSingle();
+    if (!cat || !cat.is_active || cat.target_table !== "services") {
+      return { ok: false, error: "Invalid category." };
+    }
+  }
 
   const { data: existing } = await supabase
     .from("business_join_requests")
@@ -107,6 +130,8 @@ export async function submitJoinRequest(input: JoinRequestInput): Promise<{ ok: 
 
   const { error } = await supabase.from("business_join_requests").insert({
     category: input.category,
+    category_id: input.category === "other" ? (input.categoryId ?? null) : null,
+    custom_fields: input.category === "other" ? (input.customFields ?? {}) : {},
     business_name: businessName,
     phone,
     whatsapp: input.whatsapp?.trim() || null,
@@ -220,11 +245,23 @@ export async function convertJoinRequest(
 
   if (fetchError || !request) return { ok: false, error: "Request not found." };
   if (request.converted_listing_id) return { ok: false, error: "This request was already converted." };
-  if (!isConvertibleCategory(request.category)) {
+  if (!isConvertibleCategory(request.category, request.category_id)) {
     return { ok: false, error: "This business type has no matching listing table to convert into." };
   }
 
-  const table = request.category === "hotel" ? "hotels" : request.category === "restaurant" ? "restaurants" : "cafes";
+  let table: "hotels" | "restaurants" | "cafes" | "services";
+  let servicesCategory: Awaited<ReturnType<typeof getCategoryById>> = null;
+
+  if (request.category === "hotel") table = "hotels";
+  else if (request.category === "restaurant") table = "restaurants";
+  else if (request.category === "cafe") table = "cafes";
+  else {
+    table = "services";
+    servicesCategory = request.category_id ? await getCategoryById(request.category_id) : null;
+    if (!servicesCategory || servicesCategory.targetTable !== "services" || !servicesCategory.isActive) {
+      return { ok: false, error: "This request's category is no longer available — check /admin/categories." };
+    }
+  }
 
   const { data: slugTaken } = await supabase.from(table).select("id").eq("slug", slug).maybeSingle();
   if (slugTaken) return { ok: false, error: "That slug is already in use — please choose another." };
@@ -232,6 +269,74 @@ export async function convertJoinRequest(
   const gallery = (request.gallery as { url: string; alt?: string; category?: string }[] | null) ?? [];
   const coverImage = request.cover_image || gallery[0]?.url || request.logo || placeholderImage(request.business_name);
   const shortDescription = request.description.length > 160 ? `${request.description.slice(0, 157)}...` : request.description;
+
+  // Long-tail categories (anything that isn't hotel/restaurant/cafe) all
+  // share the one `services` table, keyed by category_id — a genuinely
+  // different insert shape (no partner_status/amenities/booking_mode
+  // columns; has category_id/custom_fields instead) from the 3 dedicated
+  // tables below, so it gets its own branch rather than being squeezed into
+  // basePayload. WeeklyHoursDay[] (join form) has no lossless mapping onto
+  // services.opening_hours_structured's grouped-days shape, so it's folded
+  // into the legacy free-text opening_hours column instead of being dropped.
+  if (table === "services") {
+    if (!servicesCategory) {
+      return { ok: false, error: "This request's category is no longer available — check /admin/categories." };
+    }
+
+    const openingHoursText = ((request.opening_hours as WeeklyHoursDay[] | null) ?? [])
+      .map((h) => `${h.day}: ${h.closed ? "Closed" : `${formatTime12h(h.open)}–${formatTime12h(h.close)}`}`)
+      .join(", ");
+
+    const servicesPayload: Record<string, unknown> = {
+      slug,
+      name: request.business_name,
+      short_description: shortDescription,
+      description: request.description,
+      cover_image: coverImage,
+      logo_url: request.logo,
+      gallery,
+      videos: request.videos ?? [],
+      address: request.address,
+      lat: completion.lat,
+      lng: completion.lng,
+      google_maps_url: request.maps_url,
+      phone: request.phone,
+      whatsapp: request.whatsapp,
+      email: request.email,
+      website: request.website,
+      social_instagram: request.instagram,
+      social_facebook: request.facebook,
+      opening_hours: openingHoursText || null,
+      opening_hours_structured: [],
+      services: [],
+      category_id: request.category_id,
+      category: null,
+      custom_fields: request.custom_fields ?? {},
+      featured: false,
+    };
+
+    const { data: created, error: insertError } = await supabase.from("services").insert(servicesPayload as never).select("id").single();
+    if (insertError || !created) return { ok: false, error: insertError?.message ?? "Could not create the listing." };
+
+    await supabase
+      .from("business_join_requests")
+      .update({
+        status: "approved",
+        converted_listing_type: "service",
+        converted_listing_id: created.id,
+        updated_at: new Date().toISOString(),
+      } as never)
+      .eq("id", requestId);
+
+    await logActivity("create", "services", created.id, { fromJoinRequest: requestId, partnerStatus: targetPartnerStatus });
+    revalidatePath(`/${locale}/admin/requests`);
+    revalidatePath(`/${locale}/admin/partners`);
+    revalidatePath(`/${locale}/admin/services`);
+    revalidatePath(`/${locale}/services`);
+    revalidatePath(`/${locale}/services/${servicesCategory.slug}`);
+
+    return { ok: true, listingId: created.id, table: "services" };
+  }
 
   const basePayload: Record<string, unknown> = {
     slug,

@@ -260,8 +260,11 @@ export type JoinRequestCategory =
   | "other";
 
 /** The subset of JoinRequestCategory that convertJoinRequest can actually
- * turn into a real listing row (hotels/restaurants/cafes tables only). */
-export type ConvertibleJoinRequestCategory = "hotel" | "restaurant" | "cafe";
+ * turn into a real listing row: hotel/restaurant/cafe (their own dedicated
+ * tables) plus "service" — any other category, resolved via categoryId into
+ * a `categories` row with target_table='services'. Stored as the value of
+ * `converted_listing_type` once a request is converted. */
+export type ConvertibleJoinRequestCategory = "hotel" | "restaurant" | "cafe" | "service";
 
 export type BusinessRequestStatus = "pending" | "approved" | "rejected" | "needs_info" | "archived";
 
@@ -280,6 +283,12 @@ export interface WeeklyHoursDay {
 export interface BusinessJoinRequest {
   id: string;
   category: JoinRequestCategory;
+  /** Set only when category === "other" — references a `categories` row
+   * (target_table='services'). Null for hotel/restaurant/cafe requests. */
+  categoryId: string | null;
+  /** Per-category custom field values, keyed by the referenced category's
+   * customFieldsSchema field keys. Empty for hotel/restaurant/cafe requests. */
+  customFields: Record<string, string | number | boolean>;
   businessName: string;
   ownerName: string | null;
   phone: string;

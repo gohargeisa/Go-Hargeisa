@@ -2,16 +2,7 @@ import {
   Building2,
   UtensilsCrossed,
   Coffee,
-  Map,
-  Briefcase,
-  Car,
-  Building,
-  Store,
-  Cross,
-  Pill,
   Dumbbell,
-  Scissors,
-  MoreHorizontal,
   Wifi,
   SquareParking,
   Waves,
@@ -28,48 +19,30 @@ import {
   DoorClosed,
   type LucideIcon,
 } from "lucide-react";
-import type { JoinRequestCategory, ConvertibleJoinRequestCategory } from "@/types";
+import type { JoinRequestCategory } from "@/types";
 
-/** Every business type the /join form accepts, in the order they should be
- * offered as selectable cards. */
-export const PARTNER_CATEGORIES: JoinRequestCategory[] = [
-  "hotel",
-  "restaurant",
-  "cafe",
-  "tour_company",
-  "travel_agency",
-  "car_rental",
-  "apartment",
-  "shopping_mall",
-  "hospital",
-  "pharmacy",
-  "gym",
-  "beauty_salon",
-  "other",
-];
+/** The 3 fixed business types with their own dedicated listing table —
+ * offered as selectable cards on /join. Every other business type is
+ * sourced live from the `categories` table (see getServiceCategories in
+ * lib/data/categories.ts) and submitted with category="other" + a
+ * categoryId, not from this list. */
+export const PARTNER_CATEGORIES: Array<"hotel" | "restaurant" | "cafe"> = ["hotel", "restaurant", "cafe"];
 
-export const PARTNER_CATEGORY_ICON: Record<JoinRequestCategory, LucideIcon> = {
+export const PARTNER_CATEGORY_ICON: Record<"hotel" | "restaurant" | "cafe", LucideIcon> = {
   hotel: Building2,
   restaurant: UtensilsCrossed,
   cafe: Coffee,
-  tour_company: Map,
-  travel_agency: Briefcase,
-  car_rental: Car,
-  apartment: Building,
-  shopping_mall: Store,
-  hospital: Cross,
-  pharmacy: Pill,
-  gym: Dumbbell,
-  beauty_salon: Scissors,
-  other: MoreHorizontal,
 };
 
-const CONVERTIBLE_SET = new Set<ConvertibleJoinRequestCategory>(["hotel", "restaurant", "cafe"]);
-
-/** Only hotel/restaurant/cafe requests can become a real listing row — the
- * other 10 categories have no matching listing table yet. */
-export function isConvertibleCategory(category: JoinRequestCategory): category is ConvertibleJoinRequestCategory {
-  return CONVERTIBLE_SET.has(category as ConvertibleJoinRequestCategory);
+/** A request is convertible into a real listing iff it's hotel/restaurant/
+ * cafe (their own dedicated tables), or it's category="other" with a
+ * categoryId set (resolved into a `categories` row with
+ * target_table='services' at conversion time — this predicate doesn't hit
+ * the DB, so it can't confirm that category is still active; convertJoinRequest
+ * re-checks that server-side before actually converting). */
+export function isConvertibleCategory(category: JoinRequestCategory, categoryId: string | null): boolean {
+  if (category === "hotel" || category === "restaurant" || category === "cafe") return true;
+  return category === "other" && categoryId !== null;
 }
 
 /**
