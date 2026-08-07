@@ -16,6 +16,7 @@ import {
   RESTAURANTS_PUBLIC_ENABLED,
   CAFES_PUBLIC_ENABLED,
   SERVICES_PUBLIC_ENABLED,
+  SUPERMARKET_ENABLED,
 } from "@/lib/config/features";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gohargeisa.com";
@@ -41,6 +42,7 @@ const staticRoutes = [
   "diaspora-week-2026",
   "privacy",
   "terms",
+  ...(SUPERMARKET_ENABLED ? ["supermarket"] : []),
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

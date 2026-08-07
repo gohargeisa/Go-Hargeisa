@@ -39,3 +39,12 @@ export function filterHotelsForPresentation<T extends Pick<Hotel, "slug">>(hotel
  */
 export const RESTAURANTS_PUBLIC_ENABLED = true;
 export const CAFES_PUBLIC_ENABLED = true;
+
+/**
+ * Supermarket — a deliberately independent module (own future routes/data
+ * layer, never the `categories`/`services` system — see
+ * docs/supermarket-architecture.md). Currently only gates the static nav
+ * link in site-header.tsx and the /supermarket placeholder page; there is
+ * no listing data to filter yet.
+ */
+export const SUPERMARKET_ENABLED = true;

@@ -19,6 +19,7 @@
     "signOut": "تسجيل الخروج",
     "changeLanguage": "تغيير اللغة",
     "cityServices": "خدمات المدينة",
+    "supermarketLabel": "سوبر ماركت",
     "listYourBusiness": "أضف نشاطك التجاري",
     "more": "المزيد",
     "searchCategoriesPlaceholder": "البحث عن الفئات…",
@@ -141,7 +142,9 @@
     "restaurantsTitle": "🍽️ المطاعم قريبًا",
     "restaurantsDescription": "نتعاون حاليًا مع أفضل المطاعم في هرجيسا. ترقبوا إضافة مطاعم جديدة قريبًا.",
     "cafesTitle": "☕ المقاهي قريبًا",
-    "cafesDescription": "نعمل مع المقاهي في جميع أنحاء هرجيسا لنقدّم لكم أفضل تجارب القهوة."
+    "cafesDescription": "نعمل مع المقاهي في جميع أنحاء هرجيسا لنقدّم لكم أفضل تجارب القهوة.",
+    "supermarketTitle": "🛒 سوبر ماركت قريبًا",
+    "supermarketDescription": "نعمل على بناء سوبر ماركت إلكتروني لطلب البقالة والاحتياجات اليومية وتوصيلها في جميع أنحاء هرجيسا. ترقبوا ذلك."
   },
   "restaurantsEmptyState": {
     "title": "⭐ كن أول شريك مطعم في Go Hargeisa",

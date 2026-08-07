@@ -19,6 +19,7 @@
     "signOut": "Sign Out",
     "changeLanguage": "Change language",
     "cityServices": "City Services",
+    "supermarketLabel": "Supermarket",
     "listYourBusiness": "List Your Business",
     "more": "More",
     "searchCategoriesPlaceholder": "Search categories…",
@@ -141,7 +142,9 @@
     "restaurantsTitle": "🍽️ Restaurants Coming Soon",
     "restaurantsDescription": "We are currently partnering with the best restaurants in Hargeisa. Stay tuned as new restaurants will be added soon.",
     "cafesTitle": "☕ Cafés Coming Soon",
-    "cafesDescription": "We're working with cafés across Hargeisa to bring you the best coffee experiences."
+    "cafesDescription": "We're working with cafés across Hargeisa to bring you the best coffee experiences.",
+    "supermarketTitle": "🛒 Supermarket Coming Soon",
+    "supermarketDescription": "We're building an online supermarket so you can order groceries and everyday essentials for delivery across Hargeisa. Stay tuned."
   },
   "restaurantsEmptyState": {
     "title": "⭐ Be the First Restaurant Partner in Go Hargeisa",

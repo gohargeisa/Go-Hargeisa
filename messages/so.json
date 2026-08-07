@@ -19,6 +19,7 @@
     "signOut": "Ka Bax",
     "changeLanguage": "Beddel Luqadda",
     "cityServices": "Adeegyada Magaalada",
+    "supermarketLabel": "Supermarket",
     "listYourBusiness": "Diiwaan Geli Ganacsigaaga",
     "more": "Wax Dheeraad ah",
     "searchCategoriesPlaceholder": "Raadi qaybaha…",
@@ -141,7 +142,9 @@
     "restaurantsTitle": "🍽️ Maqaayadaha Dhawaan Ayay Iman Doonaan",
     "restaurantsDescription": "Waxaan hadda la shaqaynaynaa maqaayadaha ugu fiican ee Hargeysa. Sug, maqaayado cusub ayaa dhawaan lagu dari doonaa.",
     "cafesTitle": "☕ Kafateeriyada Dhawaan Ayay Iman Doonaan",
-    "cafesDescription": "Waxaan la shaqaynaynaa kafateeriyada Hargeysa si aan idiin keeno waayo-aragnimada qaxwaha ugu fiican."
+    "cafesDescription": "Waxaan la shaqaynaynaa kafateeriyada Hargeysa si aan idiin keeno waayo-aragnimada qaxwaha ugu fiican.",
+    "supermarketTitle": "🛒 Supermarket-ka Dhawaan Ayuu Iman Doonaa",
+    "supermarketDescription": "Waxaan dhisaynaa supermarket online ah si aad u dalban karto cuntada iyo alaabta maalinlaha ah oo lagu geynayo guud ahaan Hargeysa. Sug."
   },
   "restaurantsEmptyState": {
     "title": "⭐ Noqo Macaamilka Maqaayadda ee Ugu Horreeya ee Go Hargeisa",

@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Menu, X, ArrowRight } from "lucide-react";
+import { Menu, X, ArrowRight, ShoppingCart } from "lucide-react";
 import { m, AnimatePresence, useReducedMotion } from "framer-motion";
 import type { Locale } from "@/lib/i18n/config";
 import { LanguageSwitcher } from "./language-switcher";
@@ -20,6 +20,7 @@ import { MegaMenuGrid } from "@/components/layout/nav-mega-menu";
 import { categoryHref, categoryDisplayName } from "@/lib/utils/category-href";
 import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
+import { SUPERMARKET_ENABLED } from "@/lib/config/features";
 import type { Category } from "@/types";
 
 // Rendered on every single page (part of the shared header), but its
@@ -56,6 +57,8 @@ export function SiteHeader({
   const [open, setOpen] = useState(false);
   const { user } = useHeaderUser(initialUser);
   const pathname = usePathname();
+  const supermarketHref = `/${locale}/supermarket`;
+  const supermarketActive = pathname === supermarketHref || pathname.startsWith(`${supermarketHref}/`);
   const mobileNavRef = useRef<HTMLElement>(null);
   useFocusTrap(mobileNavRef, open);
   useScrollLock(open);
@@ -148,6 +151,30 @@ export function SiteHeader({
               </Link>
             );
           })}
+          {SUPERMARKET_ENABLED && (
+            <Link
+              href={supermarketHref}
+              aria-current={supermarketActive ? "page" : undefined}
+              className={`relative flex items-center gap-1.5 rounded-full px-4 py-2 text-[15px] font-medium transition-all duration-300 ease-premium ${
+                scrolled
+                  ? supermarketActive
+                    ? "text-primary-700"
+                    : "text-gray-800 hover:text-primary hover:bg-primary/10 dark:text-white/90"
+                  : supermarketActive
+                    ? "text-white"
+                    : "text-white hover:text-primary hover:bg-white/10"
+              }`}
+            >
+              <ShoppingCart size={15} aria-hidden="true" />
+              {t("supermarketLabel")}
+              {supermarketActive && (
+                <span
+                  aria-hidden="true"
+                  className={`absolute inset-x-4 -bottom-0.5 h-0.5 rounded-full ${scrolled ? "bg-primary" : "bg-white"}`}
+                />
+              )}
+            </Link>
+          )}
           {moreCategories.length > 0 && <NavMegaMenu locale={locale} categories={moreCategories} scrolled={scrolled} />}
         </nav>
 
@@ -251,6 +278,22 @@ export function SiteHeader({
                   </Link>
                 );
               })}
+
+              {SUPERMARKET_ENABLED && (
+                <Link
+                  href={supermarketHref}
+                  onClick={() => setOpen(false)}
+                  aria-current={supermarketActive ? "page" : undefined}
+                  className={`flex items-center gap-2 rounded-2xl px-4 py-3 text-[15px] font-semibold transition-colors ${
+                    supermarketActive
+                      ? "bg-primary/10 text-primary-800"
+                      : "text-ink hover:bg-primary/5 hover:text-primary dark:text-white"
+                  }`}
+                >
+                  <ShoppingCart size={16} aria-hidden="true" />
+                  {t("supermarketLabel")}
+                </Link>
+              )}
 
               {moreCategories.length > 0 && (
                 <div className="mt-1 border-t border-ink/8 pt-3 dark:border-white/10">
