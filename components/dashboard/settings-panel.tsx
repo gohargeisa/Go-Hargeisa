@@ -1,27 +1,14 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import {
-  AlertTriangle,
-  Check,
-  Globe,
-  LogOut,
-  Loader2,
-  Mail,
-  ShieldCheck,
-  Trash2,
-} from "lucide-react";
+import { Check, Globe, Mail } from "lucide-react";
 import { locales, localeConfig, type Locale } from "@/lib/i18n/config";
 import { FlagIcon } from "@/components/shared/flag-icon";
-import { SignOutButton } from "@/components/shared/sign-out-button";
 import { useToast, ToastViewport } from "@/components/shared/toast";
-import { updateNotificationPreferences, deleteAccount } from "@/lib/actions/account-settings";
-import { createClient } from "@/lib/supabase/client";
-import { SecondaryButton } from "@/components/shared/buttons";
-import { clearOfflineFavorites } from "@/lib/offline/favorites-store";
+import { updateNotificationPreferences } from "@/lib/actions/account-settings";
+import { SettingsSection } from "@/components/dashboard/settings-section";
 
 export function SettingsPanel({
   locale,
@@ -94,68 +81,8 @@ export function SettingsPanel({
         />
       </SettingsSection>
 
-      <SettingsSection icon={ShieldCheck} title={t("privacySecurityTitle")}>
-        <p className="text-sm leading-relaxed text-ink/60 dark:text-sand/65">
-          {hasPassword ? t("privacySecurityPasswordHint") : t("privacySecurityGoogleHint")}
-        </p>
-        {hasPassword && (
-          <Link
-            href={`/${locale}/dashboard?tab=profile`}
-            className="mt-2 inline-flex text-sm font-semibold text-primary hover:underline"
-          >
-            {t("goToProfileForPassword")}
-          </Link>
-        )}
-        <p className="mt-3 text-sm leading-relaxed text-ink/60 dark:text-sand/65">
-          {t("privacyPolicyHint")}{" "}
-          <Link href={`/${locale}/privacy`} className="font-semibold text-primary hover:underline">
-            {t("privacyPolicyLink")}
-          </Link>
-        </p>
-        <div className="mt-4 flex flex-wrap gap-3">
-          <SignOutButton locale={locale} className="inline-flex items-center gap-2 rounded-full border border-ink/15 px-5 py-2.5 text-sm font-semibold transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:border-primary hover:text-primary dark:border-white/20" />
-          <SignOutAllDevicesButton locale={locale} />
-        </div>
-      </SettingsSection>
-
-      <SettingsSection icon={AlertTriangle} title={t("dangerZoneTitle")} tone="danger">
-        <DeleteAccountSection locale={locale} showToast={showToast} />
-      </SettingsSection>
-
       <ToastViewport toast={toast} onDismiss={dismiss} />
     </div>
-  );
-}
-
-function SettingsSection({
-  icon: Icon,
-  title,
-  tone = "default",
-  children,
-}: {
-  icon: typeof Mail;
-  title: string;
-  tone?: "default" | "danger";
-  children: React.ReactNode;
-}) {
-  return (
-    <section
-      className={`rounded-xl2 border p-5 shadow-soft transition-shadow duration-300 ease-premium sm:p-6 ${
-        tone === "danger"
-          ? "border-red-500/25 bg-red-500/[0.03] dark:bg-red-500/[0.06]"
-          : "border-ink/8 hover:shadow-card dark:border-white/10"
-      }`}
-    >
-      <h3
-        className={`flex items-center gap-2 font-display text-base font-semibold ${
-          tone === "danger" ? "text-red-600 dark:text-red-400" : ""
-        }`}
-      >
-        <Icon size={16} className={tone === "danger" ? "text-red-600 dark:text-red-400" : "text-primary"} />
-        {title}
-      </h3>
-      <div className="mt-4">{children}</div>
-    </section>
   );
 }
 
@@ -351,108 +278,5 @@ function ToggleRow({
         />
       </button>
     </div>
-  );
-}
-
-function DeleteAccountSection({
-  locale,
-  showToast,
-}: {
-  locale: Locale;
-  showToast: (type: "success" | "error", message: string) => void;
-}) {
-  const t = useTranslations("dashboard");
-  const router = useRouter();
-  const [confirming, setConfirming] = useState(false);
-  const [confirmationText, setConfirmationText] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
-
-  function onDelete() {
-    setError(null);
-    startTransition(async () => {
-      const result = await deleteAccount(confirmationText);
-      if (!result.ok) {
-        setError(result.error ?? t("genericError"));
-        return;
-      }
-      showToast("success", t("accountDeletedToast"));
-      await createClient().auth.signOut();
-      await clearOfflineFavorites();
-      router.push(`/${locale}`);
-      router.refresh();
-    });
-  }
-
-  return (
-    <div>
-      <p className="text-sm leading-relaxed text-ink/70 dark:text-sand/70">{t("deleteAccountWarning")}</p>
-
-      {!confirming ? (
-        <button
-          type="button"
-          onClick={() => setConfirming(true)}
-          className="mt-4 inline-flex items-center gap-2 rounded-full border border-red-500/40 px-5 py-2.5 text-sm font-semibold text-red-600 transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-red-500/10 dark:text-red-400"
-        >
-          <Trash2 size={15} aria-hidden="true" /> {t("deleteAccountButton")}
-        </button>
-      ) : (
-        <div className="mt-4 space-y-3 rounded-xl2 border border-red-500/25 bg-white p-4 dark:bg-ink">
-          <p className="text-sm font-semibold text-red-600 dark:text-red-400">{t("deleteAccountConfirmPrompt")}</p>
-          <input
-            value={confirmationText}
-            onChange={(e) => setConfirmationText(e.target.value)}
-            placeholder="DELETE"
-            className="w-full max-w-xs rounded-xl border border-ink/12 bg-transparent px-4 py-2.5 text-sm outline-none transition-colors focus:border-red-500 dark:border-white/15"
-          />
-          {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
-          <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={onDelete}
-              disabled={isPending || confirmationText.trim().toUpperCase() !== "DELETE"}
-              className="inline-flex items-center gap-2 rounded-full bg-red-600 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-red-700 disabled:opacity-50 disabled:pointer-events-none"
-            >
-              {isPending && <Loader2 size={14} className="animate-spin" aria-hidden="true" />}
-              {t("deleteAccountConfirmButton")}
-            </button>
-            <SecondaryButton
-              onClick={() => {
-                setConfirming(false);
-                setConfirmationText("");
-                setError(null);
-              }}
-            >
-              {t("cancel")}
-            </SecondaryButton>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function SignOutAllDevicesButton({ locale }: { locale: Locale }) {
-  const t = useTranslations("dashboard");
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
-
-  function onClick() {
-    startTransition(async () => {
-      // scope: "global" revokes every refresh token for this user, not just
-      // the current browser's session — the "sign out all devices" case
-      // regular sign-out (scope: "local", the default) doesn't cover.
-      await createClient().auth.signOut({ scope: "global" });
-      await clearOfflineFavorites();
-      router.push(`/${locale}`);
-      router.refresh();
-    });
-  }
-
-  return (
-    <SecondaryButton onClick={onClick} disabled={isPending}>
-      {isPending ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <LogOut size={14} aria-hidden="true" />}
-      {t("signOutAllDevices")}
-    </SecondaryButton>
   );
 }

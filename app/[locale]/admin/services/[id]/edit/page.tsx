@@ -81,6 +81,7 @@ export default async function EditServicePage({
             : [],
           services: service.services ?? [],
           categoryId: service.category_id ?? categories[0]?.id ?? "",
+          customFields: (service.custom_fields as Record<string, string | number | boolean>) ?? {},
           featured: service.featured,
         }}
       />

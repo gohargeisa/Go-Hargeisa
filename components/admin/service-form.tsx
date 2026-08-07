@@ -4,15 +4,16 @@ import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { Check, Loader2 } from "lucide-react";
 import { ImageUploader } from "@/components/shared/image-uploader";
-import { GalleryManager } from "@/components/admin/gallery-manager";
+import { GalleryManager } from "@/components/admin/gallery-manager-lazy";
 import { serviceCategorySupportsGallery } from "@/lib/config/gallery-eligibility";
-import { VideoUploader } from "@/components/shared/video-uploader";
+import { VideoUploader } from "@/components/shared/video-uploader-lazy";
 import { OpeningHoursEditor } from "@/components/shared/opening-hours-editor";
 import { GoogleMapsLocationField } from "@/components/admin/google-maps-location-field";
 import { Field, TagInput, inputClass } from "@/components/admin/form-shared";
 import { createRecord, updateRecord } from "@/lib/actions/admin";
 import { useUnsavedChangesWarning } from "@/lib/hooks/use-unsaved-changes-warning";
 import { SERVICE_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
+import { CustomFieldsEditor, type CustomFieldValues } from "@/components/shared/custom-fields-editor";
 import type { Locale } from "@/lib/i18n/config";
 import type { Category, GalleryImage, MediaVideo, OpeningHoursGroup, ServiceCategory } from "@/types";
 
@@ -51,6 +52,7 @@ export interface ServiceFormInput {
   openingHoursStructured: OpeningHoursGroup[];
   services: string[];
   categoryId: string;
+  customFields: CustomFieldValues;
   featured: boolean;
 }
 
@@ -94,6 +96,7 @@ export function ServiceForm({
     openingHoursStructured: initial?.openingHoursStructured ?? [],
     services: initial?.services ?? [],
     categoryId: initial?.categoryId ?? categories[0]?.id ?? "",
+    customFields: initial?.customFields ?? {},
     featured: initial?.featured ?? false,
   });
   const [error, setError] = useState<string | null>(null);
@@ -141,6 +144,7 @@ export function ServiceForm({
       services: form.services,
       category_id: form.categoryId || null,
       category: legacyEnum ?? null,
+      custom_fields: form.customFields,
       featured: form.featured,
     };
     const revalidatePaths = [`/${locale}/admin/services`, `/${locale}/services`, `/${locale}`];
@@ -209,6 +213,15 @@ export function ServiceForm({
           ))}
         </select>
       </Field>
+
+      {selectedCategory && selectedCategory.customFieldsSchema.length > 0 && (
+        <CustomFieldsEditor
+          schema={selectedCategory.customFieldsSchema}
+          values={form.customFields}
+          onChange={(v) => update("customFields", v)}
+          inputClass={inputClass}
+        />
+      )}
 
       <Field label={t("shortDescriptionLabel")}>
         <input required value={form.shortDescription} onChange={(e) => update("shortDescription", e.target.value)} className={inputClass} />

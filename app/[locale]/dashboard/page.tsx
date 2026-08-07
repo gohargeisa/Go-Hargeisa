@@ -8,9 +8,10 @@ import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { getFavoritesForUser } from "@/lib/data/favorites";
 import { getSavedTripsForUser } from "@/lib/data/saved-trips";
 import { getReviewsForUser } from "@/lib/data/reviews";
-import { getMyBookings } from "@/lib/data/business";
+import { getMyBookings, getOwnedListings, getMyRecentMessages } from "@/lib/data/business";
 import { getUserNotifications, getUnreadNotificationCount } from "@/lib/actions/notifications";
 import { DashboardTabs } from "@/components/dashboard/dashboard-tabs";
+import { SupportCard } from "@/components/business/support-card";
 
 export const metadata: Metadata = { title: "My Dashboard — Go Hargeisa", robots: { index: false } };
 
@@ -39,7 +40,7 @@ export default async function DashboardPage({
         : (data as unknown as Database["public"]["Tables"]["profiles"]["Row"]);
   }
 
-  const [favorites, trips, reviews, bookings, notifications, unreadNotifications] = user
+  const [favorites, trips, reviews, bookings, notifications, unreadNotifications, ownedListings] = user
     ? await Promise.all([
         getFavoritesForUser(user.id),
         getSavedTripsForUser(user.id),
@@ -47,8 +48,16 @@ export default async function DashboardPage({
         getMyBookings(),
         getUserNotifications(20),
         getUnreadNotificationCount(),
+        getOwnedListings(user.id),
       ])
-    : [[], [], [], [], [], 0];
+    : [[], [], [], [], [], 0, []];
+
+  // Only fetch messages once we know whether there's anything to fetch them
+  // for — an unconditional getMyRecentMessages() would otherwise still run
+  // getOwnedListings() a second time (it's cache()-deduped, but the
+  // messages fan-out itself is real per-listing work worth skipping).
+  const { messages, unreadCount: unreadMessages } =
+    user && ownedListings.length > 0 ? await getMyRecentMessages(user.id) : { messages: [], unreadCount: 0 };
 
   const userName =
     profile?.full_name || user?.email?.split("@")[0] || "there";
@@ -94,6 +103,10 @@ export default async function DashboardPage({
         notifyMarketing={notifyMarketing}
         notifyInApp={notifyInApp}
         notifyCategories={notifyCategories}
+        ownedListings={ownedListings}
+        messages={messages}
+        unreadMessages={unreadMessages}
+        supportSlot={<SupportCard ownerName={userName} ownerEmail={user?.email ?? ""} />}
       />
     </section>
   );

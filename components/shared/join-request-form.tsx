@@ -5,8 +5,10 @@ import { useTranslations } from "next-intl";
 import { Check, Loader2, AlertCircle } from "lucide-react";
 import { submitJoinRequest } from "@/lib/actions/business-requests";
 import { ImageUploader } from "@/components/shared/image-uploader";
-import { GalleryManager } from "@/components/admin/gallery-manager";
-import { PdfUploader } from "@/components/admin/pdf-uploader";
+import { GalleryManager } from "@/components/admin/gallery-manager-lazy";
+import { PdfUploader } from "@/components/admin/pdf-uploader-lazy";
+import { VideoUploader } from "@/components/shared/video-uploader-lazy";
+import { DocumentsUploader } from "@/components/shared/documents-uploader-lazy";
 import { CoordinatesInput } from "@/components/shared/coordinates-input";
 import {
   PARTNER_CATEGORIES,
@@ -15,7 +17,7 @@ import {
   PARTNER_AMENITY_ICON,
 } from "@/lib/utils/partner-categories";
 import { WEEK_DAYS_SAT_FIRST, defaultWeeklyHours } from "@/lib/utils/weekly-hours";
-import type { JoinRequestCategory, GalleryImage, Coordinates, WeeklyHoursDay } from "@/types";
+import type { JoinRequestCategory, GalleryImage, MediaVideo, BusinessDocument, Coordinates, WeeklyHoursDay } from "@/types";
 
 type PriceRange = "$" | "$$" | "$$$" | "$$$$";
 const PRICE_LEVELS: PriceRange[] = ["$", "$$", "$$$", "$$$$"];
@@ -29,6 +31,9 @@ export function JoinRequestForm() {
   const tc = useTranslations("partnerCategories");
   const ta = useTranslations("partnerAmenities");
   const tw = useTranslations("weekdays");
+  // Reuses the admin panel's own video-uploader strings (identical UI,
+  // already translated in all 3 locales) instead of duplicating them here.
+  const tAdmin = useTranslations("admin");
 
   const [category, setCategory] = useState<JoinRequestCategory>("hotel");
   const [businessName, setBusinessName] = useState("");
@@ -47,6 +52,8 @@ export function JoinRequestForm() {
   const [logo, setLogo] = useState("");
   const [coverImage, setCoverImage] = useState("");
   const [gallery, setGallery] = useState<GalleryImage[]>([]);
+  const [videos, setVideos] = useState<MediaVideo[]>([]);
+  const [documents, setDocuments] = useState<BusinessDocument[]>([]);
   const [menuPdfUrl, setMenuPdfUrl] = useState("");
   const [bookingUrl, setBookingUrl] = useState("");
   const [openingHours, setOpeningHours] = useState<WeeklyHoursDay[]>(defaultWeeklyHours());
@@ -99,6 +106,8 @@ export function JoinRequestForm() {
         logo: logo || undefined,
         coverImage: coverImage || undefined,
         gallery,
+        videos,
+        documents,
         menuPdfUrl: menuPdfUrl || undefined,
         bookingUrl: bookingUrl || undefined,
         openingHours,
@@ -282,6 +291,36 @@ export function JoinRequestForm() {
             categories={[{ value: "photo", label: t("galleryPhotoCategoryLabel") }]}
           />
         </div>
+      </div>
+
+      {/* Videos */}
+      <div>
+        <h3 className="mb-5 font-display text-lg font-bold">{t("videosTitle")}</h3>
+        <VideoUploader
+          folder="join-requests/videos"
+          value={videos}
+          onChange={setVideos}
+          label={tAdmin("videosLabel")}
+          addLabel={tAdmin("addVideoLabel")}
+          hint={tAdmin("videosHint")}
+          captionPlaceholder={tAdmin("videoCaptionPlaceholder")}
+          removeAriaLabel={tAdmin("removeVideoAriaLabel")}
+          replaceAriaLabel={tAdmin("replaceVideoAriaLabel")}
+          moveEarlierAriaLabel={tAdmin("moveVideoEarlierAriaLabel")}
+          moveLaterAriaLabel={tAdmin("moveVideoLaterAriaLabel")}
+        />
+      </div>
+
+      {/* Documents */}
+      <div>
+        <h3 className="mb-5 font-display text-lg font-bold">{t("documentsTitle")}</h3>
+        <DocumentsUploader
+          folder="join-requests/documents"
+          value={documents}
+          onChange={setDocuments}
+          label={t("documentsLabel")}
+          hint={t("documentsHint")}
+        />
       </div>
 
       {/* Opening Hours */}

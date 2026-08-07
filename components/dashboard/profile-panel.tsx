@@ -2,13 +2,13 @@
 
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { Check, Loader2, Lock } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 import { ImageUploader } from "@/components/shared/image-uploader";
 import { useToast, ToastViewport } from "@/components/shared/toast";
-import { updateProfile, changePassword } from "@/lib/actions/profile";
+import { updateProfile } from "@/lib/actions/profile";
 import { createClient } from "@/lib/supabase/client";
 import { useUnsavedChangesWarning } from "@/lib/hooks/use-unsaved-changes-warning";
-import { PrimaryButton, SecondaryButton } from "@/components/shared/buttons";
+import { PrimaryButton } from "@/components/shared/buttons";
 import type { Locale } from "@/lib/i18n/config";
 
 const BIO_MAX_LENGTH = 280;
@@ -21,7 +21,6 @@ export function ProfilePanel({
   initialAvatar,
   initialPhone,
   initialBio,
-  hasPassword,
 }: {
   locale: Locale;
   userId: string;
@@ -30,7 +29,6 @@ export function ProfilePanel({
   initialAvatar: string;
   initialPhone: string;
   initialBio: string;
-  hasPassword: boolean;
 }) {
   const t = useTranslations("dashboard");
   const [fullName, setFullName] = useState(initialName);
@@ -151,97 +149,7 @@ export function ProfilePanel({
         </PrimaryButton>
       </form>
 
-      <div className="mt-10 max-w-lg border-t border-ink/8 pt-8 dark:border-white/10">
-        <h3 className="flex items-center gap-2 font-display text-base font-semibold">
-          <Lock size={16} className="text-primary" /> {t("changePasswordTitle")}
-        </h3>
-        {hasPassword ? (
-          <ChangePasswordForm />
-        ) : (
-          <p className="mt-2 text-sm text-ink/55 dark:text-sand/60">{t("googleOnlyPasswordNote")}</p>
-        )}
-      </div>
-
       <ToastViewport toast={toast} onDismiss={dismiss} />
     </div>
-  );
-}
-
-function ChangePasswordForm() {
-  const t = useTranslations("dashboard");
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-  const [isPending, startTransition] = useTransition();
-
-  function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
-    setSuccess(false);
-
-    if (newPassword.length < 8) {
-      setError(t("passwordMinLengthError"));
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      setError(t("passwordsDoNotMatchError"));
-      return;
-    }
-
-    startTransition(async () => {
-      const result = await changePassword(currentPassword, newPassword);
-      if (!result.ok) {
-        setError(result.error ?? t("genericError"));
-        return;
-      }
-      setSuccess(true);
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-    });
-  }
-
-  return (
-    <form onSubmit={onSubmit} className="mt-4 space-y-3">
-      <input
-        required
-        type="password"
-        autoComplete="current-password"
-        value={currentPassword}
-        onChange={(e) => setCurrentPassword(e.target.value)}
-        placeholder={t("currentPasswordPlaceholder")}
-        className="w-full rounded-xl border border-ink/12 dark:border-white/15 bg-transparent px-4 py-2.5 text-sm outline-none focus:border-primary"
-      />
-      <input
-        required
-        type="password"
-        autoComplete="new-password"
-        minLength={8}
-        value={newPassword}
-        onChange={(e) => setNewPassword(e.target.value)}
-        placeholder={t("newPasswordPlaceholder")}
-        className="w-full rounded-xl border border-ink/12 dark:border-white/15 bg-transparent px-4 py-2.5 text-sm outline-none focus:border-primary"
-      />
-      <input
-        required
-        type="password"
-        autoComplete="new-password"
-        minLength={8}
-        value={confirmPassword}
-        onChange={(e) => setConfirmPassword(e.target.value)}
-        placeholder={t("confirmNewPasswordPlaceholder")}
-        className="w-full rounded-xl border border-ink/12 dark:border-white/15 bg-transparent px-4 py-2.5 text-sm outline-none focus:border-primary"
-      />
-
-      {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
-      {success && <p className="text-sm text-emerald-600">{t("passwordChangedSuccess")}</p>}
-
-      <SecondaryButton type="submit" disabled={isPending}>
-        {isPending && <Loader2 size={14} className="animate-spin" aria-hidden="true" />}
-        {isPending ? t("saving") : t("changePasswordButton")}
-      </SecondaryButton>
-    </form>
   );
 }

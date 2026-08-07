@@ -6,7 +6,9 @@ import { Loader2, Trash2, Pencil, Eye, EyeOff, Pin, PinOff, ChevronUp, ChevronDo
 import { createCategory, updateCategory, setCategoryActive, setCategoryPinned, reorderCategories, deleteCategory, type CategoryInput } from "@/lib/actions/categories";
 import { DynamicIcon } from "@/lib/utils/dynamic-icon";
 import type { Locale } from "@/lib/i18n/config";
-import type { Category, CategoryTargetTable } from "@/types";
+import type { Category, CategoryCustomField, CategoryTargetTable } from "@/types";
+
+const FIELD_TYPES: CategoryCustomField["type"][] = ["text", "number", "select", "boolean", "textarea"];
 
 const TARGET_TABLES: CategoryTargetTable[] = ["hotels", "restaurants", "cafes", "attractions", "events", "services", "city_services"];
 
@@ -23,7 +25,16 @@ const EMPTY_FORM: CategoryInput = {
   isPinned: false,
   sortOrder: 0,
   searchKeywords: [],
+  customFieldsSchema: [],
 };
+
+function slugifyKey(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
 
 export function CategoriesManager({ locale, categories }: { locale: Locale; categories: Category[] }) {
   const router = useRouter();
@@ -62,6 +73,7 @@ export function CategoriesManager({ locale, categories }: { locale: Locale; cate
       isPinned: category.isPinned,
       sortOrder: category.sortOrder,
       searchKeywords: category.searchKeywords,
+      customFieldsSchema: category.customFieldsSchema,
     });
     setKeywordsText(category.searchKeywords.join(", "));
     setError(null);
@@ -242,6 +254,117 @@ export function CategoriesManager({ locale, categories }: { locale: Locale; cate
           <div>
             <label className="mb-1.5 block text-sm font-semibold">Search Keywords (comma-separated)</label>
             <input value={keywordsText} onChange={(e) => setKeywordsText(e.target.value)} placeholder="hospital, hospitals, clinic" className={inputClass} />
+          </div>
+
+          <div>
+            <div className="mb-1.5 flex items-center justify-between">
+              <label className="block text-sm font-semibold">Custom Fields</label>
+              <button
+                type="button"
+                onClick={() =>
+                  setForm((f) => ({
+                    ...f,
+                    customFieldsSchema: [...f.customFieldsSchema, { key: "", label: "", type: "text", required: false }],
+                  }))
+                }
+                className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+              >
+                <Plus size={12} /> Add field
+              </button>
+            </div>
+            <p className="mb-2 text-xs text-ink/45 dark:text-sand/45">
+              Extra fields shown on this category&apos;s submission form and listing detail page — e.g. &quot;Property Type&quot; for Real Estate.
+            </p>
+            {form.customFieldsSchema.length > 0 && (
+              <div className="space-y-2">
+                {form.customFieldsSchema.map((field, index) => (
+                  <div key={index} className="rounded-xl border border-ink/10 p-3 dark:border-white/15">
+                    <div className="grid gap-2 sm:grid-cols-[1fr_1fr_auto_auto_auto]">
+                      <input
+                        value={field.label}
+                        onChange={(e) => {
+                          const label = e.target.value;
+                          setForm((f) => ({
+                            ...f,
+                            customFieldsSchema: f.customFieldsSchema.map((cf, i) =>
+                              i === index ? { ...cf, label, key: cf.key || slugifyKey(label) } : cf
+                            ),
+                          }));
+                        }}
+                        placeholder="Label (e.g. Property Type)"
+                        className={inputClass}
+                      />
+                      <input
+                        value={field.key}
+                        onChange={(e) => {
+                          const key = slugifyKey(e.target.value);
+                          setForm((f) => ({
+                            ...f,
+                            customFieldsSchema: f.customFieldsSchema.map((cf, i) => (i === index ? { ...cf, key } : cf)),
+                          }));
+                        }}
+                        placeholder="key"
+                        className={inputClass}
+                      />
+                      <select
+                        value={field.type}
+                        onChange={(e) => {
+                          const type = e.target.value as CategoryCustomField["type"];
+                          setForm((f) => ({
+                            ...f,
+                            customFieldsSchema: f.customFieldsSchema.map((cf, i) => (i === index ? { ...cf, type } : cf)),
+                          }));
+                        }}
+                        className={inputClass}
+                      >
+                        {FIELD_TYPES.map((type) => (
+                          <option key={type} value={type}>
+                            {type}
+                          </option>
+                        ))}
+                      </select>
+                      <label className="flex items-center gap-1.5 whitespace-nowrap px-1 text-xs font-medium">
+                        <input
+                          type="checkbox"
+                          checked={field.required}
+                          onChange={(e) => {
+                            const required = e.target.checked;
+                            setForm((f) => ({
+                              ...f,
+                              customFieldsSchema: f.customFieldsSchema.map((cf, i) => (i === index ? { ...cf, required } : cf)),
+                            }));
+                          }}
+                        />
+                        Required
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setForm((f) => ({ ...f, customFieldsSchema: f.customFieldsSchema.filter((_, i) => i !== index) }))
+                        }
+                        className="flex h-9 w-9 items-center justify-center rounded-lg text-ink/40 hover:bg-red-500/10 hover:text-red-500"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                    {field.type === "select" && (
+                      <input
+                        value={(field.options ?? []).join(", ")}
+                        onChange={(e) => {
+                          const options = e.target.value.split(",").map((o) => o.trim()).filter(Boolean);
+                          setForm((f) => ({
+                            ...f,
+                            customFieldsSchema: f.customFieldsSchema.map((cf, i) => (i === index ? { ...cf, options } : cf)),
+                          }));
+                        }}
+                        placeholder="Options, comma-separated (e.g. Apartment, House, Villa)"
+                        className={`${inputClass} mt-2`}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-6">

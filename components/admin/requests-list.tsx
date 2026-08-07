@@ -8,7 +8,7 @@ import { useTranslations } from "next-intl";
 import {
   Loader2, ChevronDown, ChevronUp, Phone, Mail, MapPin, Globe, FileText,
   Check, X, MessageSquareWarning, Archive, ExternalLink, Instagram, Facebook,
-  Pencil, BadgeCheck, Clock,
+  Pencil, BadgeCheck, Clock, Video,
 } from "lucide-react";
 import {
   setRequestStatus, addRequestNote, convertJoinRequest, updateJoinRequest,
@@ -43,6 +43,8 @@ export interface RequestRow {
   logo: string | null;
   coverImage: string | null;
   gallery: string[];
+  videos: { url: string; caption?: string }[];
+  documents: { url: string; name: string }[];
   menuPdfUrl: string | null;
   bookingUrl: string | null;
   website: string | null;
@@ -563,6 +565,21 @@ export function RequestsList({ locale, rows }: { locale: Locale; rows: RequestRo
                       <div key={url} className="relative h-16 w-16 overflow-hidden rounded-lg bg-ink/5 dark:bg-white/10">
                         <Image src={url} alt={row.businessName} fill sizes="64px" className="object-cover" />
                       </div>
+                    ))}
+                  </div>
+                )}
+
+                {(row.videos.length > 0 || row.documents.length > 0) && (
+                  <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs">
+                    {row.videos.map((v, i) => (
+                      <a key={v.url} href={v.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-primary underline">
+                        <Video size={12} /> {v.caption || `Video ${i + 1}`}
+                      </a>
+                    ))}
+                    {row.documents.map((d) => (
+                      <a key={d.url} href={d.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-primary underline">
+                        <FileText size={12} /> {d.name}
+                      </a>
                     ))}
                   </div>
                 )}

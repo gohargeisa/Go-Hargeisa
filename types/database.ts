@@ -139,6 +139,7 @@ type ServiceCategoryDb =
 type ServiceRow = ListingBase & {
   phone: string | null; website: string | null; opening_hours: string | null; services: string[];
   category: ServiceCategoryDb | null; category_id: string | null; owner_id: string | null;
+  custom_fields: Json;
   logo_url: string | null; videos: Json; whatsapp: string | null; email: string | null;
   social_instagram: string | null; social_facebook: string | null; opening_hours_structured: Json;
 };
@@ -151,6 +152,7 @@ type CategoryRow = {
   icon: string; color: string | null;
   target_table: "hotels" | "restaurants" | "cafes" | "attractions" | "events" | "services" | "city_services";
   is_active: boolean; is_pinned: boolean; sort_order: number; search_keywords: string[];
+  custom_fields_schema: Json;
   created_at: string; updated_at: string;
 };
 
@@ -203,6 +205,7 @@ type BusinessJoinRequestRow = {
   lat: number | null; lng: number | null; cover_image: string | null;
   opening_hours: Json; amenities: string[]; price_range: "$" | "$$" | "$$$" | "$$$$" | null;
   converted_listing_type: "hotel" | "restaurant" | "cafe" | null; converted_listing_id: string | null;
+  videos: Json; documents: Json;
   created_at: string; updated_at: string;
 };
 

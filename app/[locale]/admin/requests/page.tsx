@@ -45,6 +45,8 @@ export default async function AdminRequestsPage({ params: { locale } }: { params
     logo: r.logo,
     coverImage: r.cover_image,
     gallery: ((r.gallery as { url: string; alt?: string; category?: string }[] | null) ?? []).map((g) => g.url),
+    videos: (r.videos as { url: string; caption?: string }[] | null) ?? [],
+    documents: (r.documents as { url: string; name: string }[] | null) ?? [],
     menuPdfUrl: r.menu_pdf_url,
     bookingUrl: r.booking_url,
     website: r.website,

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -15,11 +16,22 @@ import type { HeaderUser } from "@/lib/supabase/header-user";
 import { SignOutButton } from "@/components/shared/sign-out-button";
 import { NotificationBell } from "@/components/shared/notification-bell";
 import { GlobalSearch } from "@/components/shared/global-search";
-import { NavMegaMenu, MegaMenuGrid } from "@/components/layout/nav-mega-menu";
+import { MegaMenuGrid } from "@/components/layout/nav-mega-menu";
 import { categoryHref, categoryDisplayName } from "@/lib/utils/category-href";
 import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
 import type { Category } from "@/types";
+
+// Rendered on every single page (part of the shared header), but its
+// contents (search input, grid, keyboard-nav handling) are only needed once
+// a visitor actually clicks "More" — code-split out of the main header
+// bundle rather than shipped unconditionally on first paint.
+const NavMegaMenu = dynamic(() => import("@/components/layout/nav-mega-menu").then((m) => m.NavMegaMenu), {
+  ssr: false,
+  loading: () => (
+    <span className="inline-flex h-9 w-20 animate-pulse rounded-full bg-white/10" aria-hidden="true" />
+  ),
+});
 
 export function SiteHeader({
   locale,
@@ -155,13 +167,7 @@ export function SiteHeader({
           )}
 
           {user ? (
-            <UserMenu
-              locale={locale}
-              name={user.name}
-              isOwner={user.isOwner}
-              isBusinessOwner={user.isBusinessOwner}
-              avatarUrl={user.avatarUrl}
-            />
+            <UserMenu locale={locale} name={user.name} isOwner={user.isOwner} avatarUrl={user.avatarUrl} />
           ) : (
             <Link
               href={`/${locale}/auth/login`}
@@ -273,31 +279,6 @@ export function SiteHeader({
                     {td("myDashboard")}
                   </Link>
 
-                  <Link
-                    href={`/${locale}/dashboard?tab=profile`}
-                    onClick={() => setOpen(false)}
-                    className="block rounded-full border border-ink/15 py-2.5 text-center text-sm font-semibold transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white dark:hover:border-primary"
-                  >
-                    {td("tabProfile")}
-                  </Link>
-
-                  <Link
-                    href={`/${locale}/dashboard?tab=settings`}
-                    onClick={() => setOpen(false)}
-                    className="block rounded-full border border-ink/15 py-2.5 text-center text-sm font-semibold transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white dark:hover:border-primary"
-                  >
-                    {td("settings")}
-                  </Link>
-
-                  {user.isBusinessOwner && (
-                    <Link
-                      href={`/${locale}/business`}
-                      onClick={() => setOpen(false)}
-                      className="block rounded-full border border-ink/15 py-2.5 text-center text-sm font-semibold transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white dark:hover:border-primary"
-                    >
-                      {td("manageListings")}
-                    </Link>
-                  )}
                   {user.isOwner && (
                     <Link
                       href={`/${locale}/admin`}

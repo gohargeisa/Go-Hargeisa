@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { createPublicClient } from "@/lib/supabase/public";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
@@ -6,10 +7,19 @@ import { SERVICES_PUBLIC_ENABLED, RESTAURANTS_PUBLIC_ENABLED, CAFES_PUBLIC_ENABL
 import { mapCategory } from "./mappers";
 import type { Category, CategoryTargetTable } from "@/types";
 
+/** The one tag every category-mutating action (lib/actions/categories.ts)
+ * revalidates on write — keeps the unstable_cache below fresh the moment an
+ * admin creates/edits/reorders/hides a category, not just after it expires. */
+export const CATEGORIES_CACHE_TAG = "categories";
+
 /** Public, active-only categories — the navbar, homepage, submission form,
  * and search all read from this instead of a hardcoded per-vocabulary list.
- * Cached per-request since most pages that need one category also render
- * the full list (nav + page body). */
+ * Wrapped in unstable_cache (not just React's per-request cache()) since
+ * this is genuinely "frequently used, rarely changing" data read on nearly
+ * every request (the root layout fetches it for the navbar alone) — a
+ * 5-minute safety-net revalidate plus tag-based invalidation from the admin
+ * write side means visitors never wait on this query except right after
+ * the cache is cold or an admin just changed something. */
 async function _getCategories(targetTable?: CategoryTargetTable): Promise<Category[]> {
   if (!isSupabaseConfigured()) return [];
 
@@ -25,7 +35,12 @@ async function _getCategories(targetTable?: CategoryTargetTable): Promise<Catego
   return (data ?? []).map(mapCategory);
 }
 
-export const getCategories = cache(_getCategories);
+const getCategoriesDurable = unstable_cache(_getCategories, ["categories-list"], {
+  tags: [CATEGORIES_CACHE_TAG],
+  revalidate: 300,
+});
+
+export const getCategories = cache(getCategoriesDurable);
 
 /** getCategories(), minus whichever verticals are currently feature-flagged
  * off (lib/config/features.ts) — the single filter the navbar and homepage
@@ -57,7 +72,12 @@ async function _getCategoryBySlug(slug: string): Promise<Category | null> {
   return mapCategory(data);
 }
 
-export const getCategoryBySlug = cache(_getCategoryBySlug);
+const getCategoryBySlugDurable = unstable_cache(_getCategoryBySlug, ["category-by-slug"], {
+  tags: [CATEGORIES_CACHE_TAG],
+  revalidate: 300,
+});
+
+export const getCategoryBySlug = cache(getCategoryBySlugDurable);
 
 /** Admin-only: every category regardless of is_active, for the management list. */
 export async function getCategoriesForAdmin(): Promise<Category[]> {

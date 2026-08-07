@@ -4,8 +4,7 @@ import { getTranslations } from "next-intl/server";
 import {
   Hotel, UtensilsCrossed, Coffee, Landmark, CalendarDays, Newspaper,
   Users, BarChart3, Plus, ArrowRight, TrendingUp, Handshake, Building,
-  Eye, MousePointerClick, CalendarCheck, Inbox, Megaphone, Tag, Bell, Star,
-  Stethoscope, Settings, ShieldCheck, LayoutGrid,
+  Eye, MousePointerClick, CalendarCheck, Stethoscope,
 } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { requireOwner } from "@/lib/supabase/guards";
@@ -96,95 +95,12 @@ export default async function OwnerDashboardPage({ params: { locale } }: { param
         />
 
         <div className="container-px relative mx-auto">
-          <div className="flex flex-col items-start justify-between gap-5 sm:flex-row sm:items-center">
-            <div>
-              <span className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-white/80 backdrop-blur-sm">
-                Owner Control Center
-              </span>
-              <h1 className="mt-3 font-display text-3xl font-bold text-white md:text-4xl">{t("dashboardTitle")}</h1>
-              <p className="mt-2 text-sm text-white/70">{t("dashboardSubtitle")}</p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <Link
-                href={`/${locale}/admin/notifications`}
-                className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-xl transition-colors hover:bg-white/20"
-              >
-                <Bell size={16} /> {t("notificationsNav")}
-              </Link>
-              <Link
-                href={`/${locale}/admin/requests`}
-                className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-xl transition-colors hover:bg-white/20"
-              >
-                <Inbox size={16} /> {t("requestsNav")}
-              </Link>
-              <Link
-                href={`/${locale}/admin/offers`}
-                className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-xl transition-colors hover:bg-white/20"
-              >
-                <Tag size={16} /> {t("offersNav")}
-              </Link>
-              <Link
-                href={`/${locale}/admin/reviews`}
-                className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-xl transition-colors hover:bg-white/20"
-              >
-                <Star size={16} /> {t("reviewsNav")}
-              </Link>
-              <Link
-                href={`/${locale}/admin/bookings`}
-                className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-xl transition-colors hover:bg-white/20"
-              >
-                <CalendarCheck size={16} /> {t("bookingsAdminTitle")}
-              </Link>
-              <Link
-                href={`/${locale}/admin/partners`}
-                className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-xl transition-colors hover:bg-white/20"
-              >
-                <Handshake size={16} /> {t("partnersNav")}
-              </Link>
-              <Link
-                href={`/${locale}/admin/claims`}
-                className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-xl transition-colors hover:bg-white/20"
-              >
-                <ShieldCheck size={16} /> {t("claimsNav")}
-              </Link>
-              <Link
-                href={`/${locale}/admin/city-services`}
-                className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-xl transition-colors hover:bg-white/20"
-              >
-                <Building size={16} /> {t("cityServicesNav")}
-              </Link>
-              <Link
-                href={`/${locale}/admin/services`}
-                className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-xl transition-colors hover:bg-white/20"
-              >
-                <Stethoscope size={16} /> {t("manageServices")}
-              </Link>
-              <Link
-                href={`/${locale}/admin/users`}
-                className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-xl transition-colors hover:bg-white/20"
-              >
-                <Users size={16} /> {t("usersNav")}
-              </Link>
-              <Link
-                href={`/${locale}/admin/announcements`}
-                className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-xl transition-colors hover:bg-white/20"
-              >
-                <Megaphone size={16} /> {t("announcementsNav")}
-              </Link>
-              <Link
-                href={`/${locale}/admin/settings`}
-                className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-xl transition-colors hover:bg-white/20"
-              >
-                <Settings size={16} /> {t("settingsNav")}
-              </Link>
-              <Link
-                href={`/${locale}/admin/categories`}
-                className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-xl transition-colors hover:bg-white/20"
-              >
-                <LayoutGrid size={16} /> Categories
-              </Link>
-            </div>
+          <div>
+            <span className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-white/80 backdrop-blur-sm">
+              Owner Control Center
+            </span>
+            <h1 className="mt-3 font-display text-3xl font-bold text-white md:text-4xl">{t("dashboardTitle")}</h1>
+            <p className="mt-2 text-sm text-white/70">{t("dashboardSubtitle")}</p>
           </div>
 
           <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">

@@ -6,7 +6,7 @@ import { createPublicClient } from "@/lib/supabase/public";
 import { placeholderImage } from "@/lib/placeholder-image";
 import { logActivity } from "./activity";
 import { PARTNER_CATEGORIES, isConvertibleCategory } from "@/lib/utils/partner-categories";
-import type { JoinRequestCategory, BusinessRequestStatus, GalleryImage, WeeklyHoursDay } from "@/types";
+import type { JoinRequestCategory, BusinessRequestStatus, GalleryImage, MediaVideo, BusinessDocument, WeeklyHoursDay } from "@/types";
 
 async function assertOwner() {
   const supabase = await createClient();
@@ -46,6 +46,8 @@ export interface JoinRequestInput {
   logo?: string;
   coverImage?: string;
   gallery?: GalleryImage[];
+  videos?: MediaVideo[];
+  documents?: BusinessDocument[];
   menuPdfUrl?: string;
   bookingUrl?: string;
   openingHours?: WeeklyHoursDay[];
@@ -122,6 +124,8 @@ export async function submitJoinRequest(input: JoinRequestInput): Promise<{ ok: 
     logo: input.logo || null,
     cover_image: input.coverImage || null,
     gallery: input.gallery ?? [],
+    videos: input.videos ?? [],
+    documents: input.documents ?? [],
     menu_pdf_url: input.menuPdfUrl || null,
     booking_url: input.bookingUrl?.trim() || null,
     opening_hours: input.openingHours ?? [],
@@ -236,6 +240,7 @@ export async function convertJoinRequest(
     description: request.description,
     cover_image: coverImage,
     gallery,
+    videos: request.videos ?? [],
     address: request.address,
     lat: completion.lat,
     lng: completion.lng,

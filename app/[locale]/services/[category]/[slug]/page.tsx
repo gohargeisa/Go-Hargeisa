@@ -25,6 +25,7 @@ import { getMyReviewForListing } from "@/lib/data/reviews";
 import { resolveMapsUrl, resolveDirectionsUrl } from "@/lib/utils/google-maps";
 import { Reveal } from "@/components/home/reveal";
 import { serviceHref, singularize } from "@/lib/utils/service-categories";
+import { CustomFieldsDisplay } from "@/components/shared/custom-fields-display";
 import { SERVICES_PUBLIC_ENABLED } from "@/lib/config/features";
 
 export const revalidate = 3600;
@@ -91,8 +92,13 @@ export default async function ServiceDetailPage({
   const galleryEligible = service.category ? serviceCategorySupportsGallery(service.category) : false;
   const galleryImages = galleryEligible ? service.gallery : [];
 
+  const hasDetails = Boolean(
+    serviceCategory && serviceCategory.customFieldsSchema.some((f) => service.customFields[f.key] !== undefined && service.customFields[f.key] !== "")
+  );
+
   const navTabs: HotelNavTab[] = [
     { id: "overview", label: td("overview") },
+    ...(hasDetails ? [{ id: "details", label: td("details") }] : []),
     ...(service.services.length > 0 ? [{ id: "services", label: "Services" }] : []),
     ...(galleryImages.length > 0 ? [{ id: "gallery", label: t("gallery") }] : []),
     { id: "reviews", label: t("reviews") },
@@ -161,6 +167,17 @@ export default async function ServiceDetailPage({
               <p className="leading-relaxed text-ink/75 dark:text-sand/75">{service.description}</p>
             </section>
           </Reveal>
+
+          {hasDetails && serviceCategory && (
+            <Reveal>
+              <section id="details" aria-labelledby="details-heading" className="scroll-mt-36">
+                <h2 id="details-heading" className="mb-5 font-display text-2xl font-semibold">
+                  {td("details")}
+                </h2>
+                <CustomFieldsDisplay category={serviceCategory} values={service.customFields} />
+              </section>
+            </Reveal>
+          )}
 
           {service.services.length > 0 && (
             <Reveal>

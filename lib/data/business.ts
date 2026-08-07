@@ -514,6 +514,30 @@ export async function getMessagesForListing(listingType: BusinessListingType, li
   }));
 }
 
+export interface OwnedListingMessage extends BusinessMessage {
+  listingName: string;
+}
+
+/** Every inquiry message across every listing this user owns, newest
+ * first — the personal Dashboard's Messages tab reuses the same per-listing
+ * query the /business dashboard already has (getMessagesForListing) rather
+ * than duplicating the fetch logic, just fanned out across owned listings
+ * and merged. */
+export async function getMyRecentMessages(userId: string, limit = 8): Promise<{ messages: OwnedListingMessage[]; unreadCount: number }> {
+  const listings = await getOwnedListings(userId);
+  if (listings.length === 0) return { messages: [], unreadCount: 0 };
+
+  const perListing = await Promise.all(
+    listings.map(async (listing) => {
+      const messages = await getMessagesForListing(listing.listingType, listing.id);
+      return messages.map((m) => ({ ...m, listingName: listing.name }));
+    })
+  );
+
+  const all = perListing.flat().sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+  return { messages: all.slice(0, limit), unreadCount: all.filter((m) => !m.isRead).length };
+}
+
 export interface BusinessSummaryStats {
   totalViews: number;
   totalBookings: number;

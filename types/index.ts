@@ -20,6 +20,14 @@ export interface MediaVideo {
   caption?: string;
 }
 
+/** A verification document (business license, registration, etc.) attached
+ * to a /join submission — admin-review-only, never copied onto the public
+ * listing when a request is converted. */
+export interface BusinessDocument {
+  url: string;
+  name: string;
+}
+
 export interface Review {
   id: string;
   authorName: string;
@@ -53,6 +61,23 @@ export type PolymorphicListingType = "hotel" | "restaurant" | "cafe" | "attracti
  * tables while every other category is backed by `services`. */
 export type CategoryTargetTable = "hotels" | "restaurants" | "cafes" | "attractions" | "events" | "services" | "city_services";
 
+/** One admin-defined extra field a category's listings can capture — e.g.
+ * Real Estate's "Property Type", Travel Agencies' "Destinations Covered".
+ * Purely data-driven (no per-category code) so it works for "any future
+ * category" an admin creates, not just the ones seeded at launch. Rendered
+ * as a form input on submission (matching `type`) and as a labeled row in
+ * the listing detail page's Details section. */
+export interface CategoryCustomField {
+  /** Stable identifier — the key under which the value is stored in a
+   * listing's `customFields` map. Never changes once fields have data. */
+  key: string;
+  label: string;
+  type: "text" | "number" | "select" | "boolean" | "textarea";
+  required: boolean;
+  /** Only meaningful when type === "select". */
+  options?: string[];
+}
+
 /** Single source of truth for every business category — the `categories`
  * table. Replaces the scattered per-vocabulary config files
  * (lib/utils/service-categories.ts, lib/utils/partner-categories.ts, etc.)
@@ -76,6 +101,8 @@ export interface Category {
   sortOrder: number;
   /** Extra free-text terms that should resolve a search query to this category — see matchCategoryFromQuery. */
   searchKeywords: string[];
+  /** Admin-defined extra submission/detail-page fields for this category — empty for most categories. */
+  customFieldsSchema: CategoryCustomField[];
   /** Populated by getCategoriesWithCounts() — the number of published listings in this category. Absent from plain getCategories(). */
   businessCount?: number;
   createdAt: string;
@@ -590,6 +617,8 @@ export interface Service {
   categoryLabel: string;
   categoryIcon: string;
   categoryColor: string;
+  /** Values for the category's customFieldsSchema, keyed by field `key` — empty for categories with no schema. */
+  customFields: Record<string, string | number | boolean>;
   featured?: boolean;
   logo?: string;
 }

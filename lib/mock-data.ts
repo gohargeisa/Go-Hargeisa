@@ -2268,7 +2268,7 @@ const MOCK_SERVICE_CATEGORY_META: Record<ServiceCategory, { slug: string; label:
   government_office: { slug: "government-offices", label: "Government Offices", icon: "Landmark", color: "#4F46E5" },
 };
 
-const rawServices: Omit<Service, "categorySlug" | "categoryLabel" | "categoryIcon" | "categoryColor">[] = [
+const rawServices: Omit<Service, "categorySlug" | "categoryLabel" | "categoryIcon" | "categoryColor" | "customFields">[] = [
   // ---- Hospitals ----
   {
     id: "sv-h1",
@@ -2925,7 +2925,7 @@ const rawServices: Omit<Service, "categorySlug" | "categoryLabel" | "categoryIco
 export const services: Service[] = rawServices.map((s) => {
   // Every mock entry sets a real category literal (see the array above).
   const meta = MOCK_SERVICE_CATEGORY_META[s.category!];
-  return { ...s, categorySlug: meta.slug, categoryLabel: meta.label, categoryIcon: meta.icon, categoryColor: meta.color };
+  return { ...s, categorySlug: meta.slug, categoryLabel: meta.label, categoryIcon: meta.icon, categoryColor: meta.color, customFields: {} };
 });
 
 export const attractions: Attraction[] = [

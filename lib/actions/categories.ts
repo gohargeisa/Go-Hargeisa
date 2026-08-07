@@ -1,8 +1,9 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import type { CategoryTargetTable } from "@/types";
+import { CATEGORIES_CACHE_TAG } from "@/lib/data/categories";
+import type { CategoryTargetTable, CategoryCustomField } from "@/types";
 import { logActivity } from "./activity";
 
 async function assertOwner() {
@@ -27,6 +28,11 @@ function slugify(value: string): string {
 }
 
 function revalidateCategoryPaths(locale: string) {
+  // Tag first — every unstable_cache()-wrapped category read (navbar,
+  // homepage grid, /services routing) shares this one tag, so an admin
+  // edit is visible on the next request instead of waiting out the
+  // 5-minute safety-net revalidate window.
+  revalidateTag(CATEGORIES_CACHE_TAG);
   revalidatePath(`/${locale}/admin/categories`);
   revalidatePath(`/${locale}`);
   revalidatePath(`/${locale}/services`, "layout");
@@ -47,6 +53,7 @@ export interface CategoryInput {
   isPinned: boolean;
   sortOrder: number;
   searchKeywords: string[];
+  customFieldsSchema: CategoryCustomField[];
 }
 
 export async function createCategory(locale: string, input: CategoryInput): Promise<{ ok: boolean; error?: string; id?: string }> {
@@ -74,6 +81,7 @@ export async function createCategory(locale: string, input: CategoryInput): Prom
       is_pinned: input.isPinned,
       sort_order: input.sortOrder,
       search_keywords: input.searchKeywords,
+      custom_fields_schema: input.customFieldsSchema,
     } as never)
     .select("id")
     .single();
@@ -113,6 +121,7 @@ export async function updateCategory(locale: string, id: string, input: Category
       is_pinned: input.isPinned,
       sort_order: input.sortOrder,
       search_keywords: input.searchKeywords,
+      custom_fields_schema: input.customFieldsSchema,
       updated_at: new Date().toISOString(),
     } as never)
     .eq("id", id);

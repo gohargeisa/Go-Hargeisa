@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { LayoutDashboard, Settings, ShieldCheck, User, ChevronDown } from "lucide-react";
+import { LayoutDashboard, ShieldCheck, ChevronDown } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { SignOutButton } from "@/components/shared/sign-out-button";
 import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
@@ -13,13 +13,11 @@ export function UserMenu({
   locale,
   name,
   isOwner,
-  isBusinessOwner = false,
   avatarUrl,
 }: {
   locale: Locale;
   name: string;
   isOwner: boolean;
-  isBusinessOwner?: boolean;
   avatarUrl?: string;
 }) {
   const t = useTranslations("dashboard");
@@ -82,29 +80,6 @@ export function UserMenu({
           >
             <LayoutDashboard size={15} /> {t("myDashboard")}
           </Link>
-          <Link
-            href={`/${locale}/dashboard?tab=profile`}
-            onClick={() => setOpen(false)}
-            className="flex items-center gap-2.5 px-4 py-3 text-sm hover:bg-ink/5 dark:hover:bg-white/10"
-          >
-            <User size={15} /> {t("tabProfile")}
-          </Link>
-          <Link
-            href={`/${locale}/dashboard?tab=settings`}
-            onClick={() => setOpen(false)}
-            className="flex items-center gap-2.5 px-4 py-3 text-sm hover:bg-ink/5 dark:hover:bg-white/10"
-          >
-            <Settings size={15} /> {t("settings")}
-          </Link>
-          {isBusinessOwner && (
-            <Link
-              href={`/${locale}/business`}
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-2.5 px-4 py-3 text-sm hover:bg-ink/5 dark:hover:bg-white/10"
-            >
-              <ShieldCheck size={15} /> {t("manageListings")}
-            </Link>
-          )}
           {isOwner && (
             <Link
               href={`/${locale}/admin`}

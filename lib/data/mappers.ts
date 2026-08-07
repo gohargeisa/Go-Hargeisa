@@ -252,6 +252,7 @@ export function mapCategory(row: CategoryRow): Category {
     isPinned: row.is_pinned,
     sortOrder: row.sort_order,
     searchKeywords: row.search_keywords ?? [],
+    customFieldsSchema: (row.custom_fields_schema as unknown as Category["customFieldsSchema"]) ?? [],
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -293,6 +294,7 @@ export function mapService(row: ServiceRow, reviews: Review[] = [], category?: C
     categoryLabel: category?.name ?? row.category ?? "Uncategorized",
     categoryIcon: category?.icon ?? "Building2",
     categoryColor: category?.color ?? "#64748B",
+    customFields: (row.custom_fields as Record<string, string | number | boolean>) ?? {},
     featured: row.featured,
     logo: row.logo_url ?? undefined,
   };
