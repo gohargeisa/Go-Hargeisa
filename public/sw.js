@@ -2,7 +2,7 @@
 // offline app). Four cache buckets, replacing the single network-first
 // "visit-hargeisa-v2" cache this file used to have:
 //   - gh-shell-v1:   install-time precache, last-resort fallback only
-//   - gh-content-v1: navigations + Next.js RSC differential fetches — Stale-While-Revalidate
+//   - gh-content-v2: navigations + Next.js RSC differential fetches — Stale-While-Revalidate
 //   - gh-images-v1:  /_next/image + <img>/<Image> requests — Cache-First + background revalidate
 //   - gh-static-v1:  /_next/static/* hashed build assets — Cache-First
 //
@@ -13,10 +13,19 @@
 //
 // Bumping any cache name purges it for existing visitors on the next
 // `activate` (see below) — the same one-time mechanism the old v1→v2 bump
-// used to clear out indefinitely-pinned auth/profile data.
+// used to clear out indefinitely-pinned auth/profile data. gh-content
+// bumped v1->v2 here: a deploy changed the shape of server-rendered data
+// for a stale-while-revalidate'd page (City Services' category grouping,
+// enum string -> full category object) without this cache version
+// changing, so any visitor whose browser served a pre-deploy cached
+// response paired it with post-deploy client JS that expected the new
+// shape, e.g. `group.category.id` reads on a plain string. Bumping forces
+// every cached navigation/RSC entry to be dropped and re-fetched fresh —
+// data and code are always from the same deploy again, permanently, for
+// this and every future shape-changing deploy, not just this one incident.
 
 const SHELL_CACHE = "gh-shell-v1";
-const CONTENT_CACHE = "gh-content-v1";
+const CONTENT_CACHE = "gh-content-v2";
 const IMAGES_CACHE = "gh-images-v1";
 const STATIC_CACHE = "gh-static-v1";
 const ALL_CACHES = [SHELL_CACHE, CONTENT_CACHE, IMAGES_CACHE, STATIC_CACHE];

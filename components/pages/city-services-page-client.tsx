@@ -32,7 +32,7 @@ export function CityServicesPageClient({
 
   const sections = useMemo(() => {
     return groups
-      .filter((g) => activeCategoryId === "all" || activeCategoryId === g.category.id)
+      .filter((g) => activeCategoryId === "all" || activeCategoryId === g.category?.id)
       .map((g) => {
         const items = g.items.filter(
           (s) => !needle || s.name.toLowerCase().includes(needle) || (s.description ?? "").toLowerCase().includes(needle)
