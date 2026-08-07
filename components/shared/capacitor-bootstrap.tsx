@@ -34,10 +34,10 @@ export function CapacitorBootstrap() {
       const [{ App }, { SplashScreen }] = await Promise.all([import("@capacitor/app"), import("@capacitor/splash-screen")]);
 
       if (Capacitor.getPlatform() === "android") {
-        // Android: show the native splash for exactly 2000ms, then hide —
+        // Android: show the native splash for exactly 3000ms, then hide —
         // no readiness race. Distinct from the iOS/web path below since
         // there's no per-platform branch here otherwise.
-        await new Promise<void>((resolve) => setTimeout(resolve, 2000));
+        await new Promise<void>((resolve) => setTimeout(resolve, 3000));
       } else {
         // iOS/web: wait for the web splash overlay (splash-overlay.tsx,
         // homepage-only) to report its hero/logo images have actually
