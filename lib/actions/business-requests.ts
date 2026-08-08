@@ -267,18 +267,155 @@ export async function convertJoinRequest(
     };
   }
 
+  const gallery =
+    (request.gallery as { url: string; alt?: string; category?: string }[] | null) ?? [];
+  const coverImage =
+    request.cover_image ||
+    gallery[0]?.url ||
+    request.logo ||
+    placeholderImage(request.business_name);
+  const shortDescription =
+    request.description.length > 160
+      ? `${request.description.slice(0, 157)}...`
+      : request.description;
+
+  // ---------------------------------------------------------------------------
+  // DYNAMIC "OTHER" CATEGORIES -> SERVICES
+  //
+  // Dynamic business categories are submitted as:
+  //   category    = "other"
+  //   category_id = the selected category UUID
+  //   custom_fields = values entered for that category
+  //
+  // IMPORTANT:
+  // Do not fall through to the cafe branch. "other" categories such as
+  // Perfume Shops, Flower Shops, Real Estate, etc. belong in "services".
+  // ---------------------------------------------------------------------------
+  if (request.category === "other") {
+    if (
+      !request.category_id ||
+      resolvedCategory?.targetTable !== "services"
+    ) {
+      return {
+        ok: false,
+        error: "This business category cannot be converted into a service listing.",
+      };
+    }
+
+    const { data: slugTaken } = await supabase
+      .from("services")
+      .select("id")
+      .eq("slug", slug)
+      .maybeSingle();
+
+    if (slugTaken) {
+      return {
+        ok: false,
+        error: "That slug is already in use — please choose another.",
+      };
+    }
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    const categoryName =
+      typeof (resolvedCategory as { name?: unknown } | null)?.name === "string"
+        ? (resolvedCategory as { name: string }).name
+        : null;
+
+    const servicePayload: Record<string, unknown> = {
+      slug,
+      name: request.business_name,
+      short_description: shortDescription,
+      description: request.description,
+      cover_image: coverImage,
+      gallery,
+      address: request.address,
+      lat: completion.lat,
+      lng: completion.lng,
+      phone: request.phone,
+      website: request.website ?? null,
+      owner_id: user?.id ?? null,
+
+      // Preserve the selected dynamic category and its custom form data.
+      category_id: request.category_id,
+      custom_fields: request.custom_fields ?? {},
+
+      // The services dashboard reads this field as its service/category tags.
+      services: categoryName ? [categoryName] : [],
+    };
+
+    const { data: created, error: insertError } = await supabase
+      .from("services")
+      .insert(servicePayload as never)
+      .select("id")
+      .single();
+
+    if (insertError || !created) {
+      return {
+        ok: false,
+        error:
+          insertError?.message ??
+          "Could not create the service listing.",
+      };
+    }
+
+    await supabase
+      .from("business_join_requests")
+      .update({
+        status: "approved",
+        converted_listing_type: "service",
+        converted_listing_id: created.id,
+        converted_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      } as never)
+      .eq("id", requestId);
+
+    await logActivity("create", "services", created.id, {
+      fromJoinRequest: requestId,
+      categoryId: request.category_id,
+      partnerStatus: targetPartnerStatus,
+    });
+
+    revalidatePath(`/${locale}/admin/requests`);
+    revalidatePath(`/${locale}/admin/partners`);
+    revalidatePath(`/${locale}/admin/services`);
+    revalidatePath(`/${locale}/services`);
+
+    return {
+      ok: true,
+      listingId: created.id,
+      table: "services",
+    };
+  }
+
+  // ---------------------------------------------------------------------------
+  // FIXED CATEGORIES: HOTEL / RESTAURANT / CAFE
+  // ---------------------------------------------------------------------------
+
   let table: "hotels" | "restaurants" | "cafes";
 
-  if (request.category === "hotel") table = "hotels";
-  else if (request.category === "restaurant") table = "restaurants";
-  else table = "cafes";
+  if (request.category === "hotel") {
+    table = "hotels";
+  } else if (request.category === "restaurant") {
+    table = "restaurants";
+  } else {
+    table = "cafes";
+  }
 
-  const { data: slugTaken } = await supabase.from(table).select("id").eq("slug", slug).maybeSingle();
-  if (slugTaken) return { ok: false, error: "That slug is already in use — please choose another." };
+  const { data: slugTaken } = await supabase
+    .from(table)
+    .select("id")
+    .eq("slug", slug)
+    .maybeSingle();
 
-  const gallery = (request.gallery as { url: string; alt?: string; category?: string }[] | null) ?? [];
-  const coverImage = request.cover_image || gallery[0]?.url || request.logo || placeholderImage(request.business_name);
-  const shortDescription = request.description.length > 160 ? `${request.description.slice(0, 157)}...` : request.description;
+  if (slugTaken) {
+    return {
+      ok: false,
+      error: "That slug is already in use — please choose another.",
+    };
+  }
 
   const basePayload: Record<string, unknown> = {
     slug,
@@ -296,19 +433,23 @@ export async function convertJoinRequest(
     partner_status: targetPartnerStatus,
   };
 
-  if (request.price_range) basePayload.price_range = request.price_range;
+  if (request.price_range) {
+    basePayload.price_range = request.price_range;
+  }
+
   // Only hotels has a free-form amenities column that matches the join
-  // form's vocabulary 1:1 — restaurants has no legacy amenities column at
-  // all, and cafes' amenities column is no longer admin-editable free text
-  // (see lib/config/amenities.ts for the fixed amenities_v2 vocabulary now
-  // used instead), so passing the partner-form's codes through there would
-  // just silently not match any known chip.
-  if (table === "hotels" && request.amenities && request.amenities.length > 0) {
+  // form's vocabulary 1:1. Restaurants/cafes use their own fixed fields.
+  if (
+    table === "hotels" &&
+    request.amenities &&
+    request.amenities.length > 0
+  ) {
     basePayload.amenities = request.amenities;
   }
 
   if (table === "hotels") {
     basePayload.website = request.website;
+
     if (request.booking_url) {
       basePayload.booking_mode = "external";
       basePayload.external_booking_option = "custom_url";
@@ -321,9 +462,20 @@ export async function convertJoinRequest(
     basePayload.menu_pdf_url = request.menu_pdf_url;
   }
 
-  const { data: created, error: insertError } = await supabase.from(table).insert(basePayload as never).select("id").single();
+  const { data: created, error: insertError } = await supabase
+    .from(table)
+    .insert(basePayload as never)
+    .select("id")
+    .single();
 
-  if (insertError || !created) return { ok: false, error: insertError?.message ?? "Could not create the listing." };
+  if (insertError || !created) {
+    return {
+      ok: false,
+      error:
+        insertError?.message ??
+        "Could not create the listing.",
+    };
+  }
 
   await supabase
     .from("business_join_requests")
@@ -336,13 +488,21 @@ export async function convertJoinRequest(
     } as never)
     .eq("id", requestId);
 
-  await logActivity("create", table, created.id, { fromJoinRequest: requestId, partnerStatus: targetPartnerStatus });
+  await logActivity("create", table, created.id, {
+    fromJoinRequest: requestId,
+    partnerStatus: targetPartnerStatus,
+  });
+
   revalidatePath(`/${locale}/admin/requests`);
   revalidatePath(`/${locale}/admin/partners`);
   revalidatePath(`/${locale}/admin/${table}`);
   revalidatePath(`/${locale}/${table}`);
 
-  return { ok: true, listingId: created.id, table };
+  return {
+    ok: true,
+    listingId: created.id,
+    table,
+  };
 }
 
 export interface JoinRequestEditInput {
