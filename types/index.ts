@@ -824,7 +824,8 @@ export type CityServiceCategory =
   | "tour_company"
   | "apartment"
   | "clinic"
-  | "government_office";
+  | "government_office"
+  | "auto_repair";
 
 export interface CityServicePoint {
   id: string;

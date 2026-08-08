@@ -21,6 +21,7 @@ import {
   Wallet,
   Building,
   Map,
+  Wrench,
 } from "lucide-react";
 import type { CityServiceCategory } from "@/types";
 
@@ -55,6 +56,7 @@ export const CATEGORY_CONFIG: Record<CityServiceCategory, CategoryMeta> = {
   apartment: { label: "Apartments", icon: Building, color: "#9333EA" },
   clinic: { label: "Clinics", icon: HeartPulse, color: "#BE185D" },
   government_office: { label: "Government Offices", icon: Briefcase, color: "#4F46E5" },
+  auto_repair: { label: "Auto Repair & Car Services", icon: Wrench, color: "#475569" },
 };
 
 export const CATEGORY_ORDER = Object.keys(CATEGORY_CONFIG) as CityServiceCategory[];
