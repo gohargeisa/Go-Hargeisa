@@ -2,7 +2,7 @@
 // offline app). Four cache buckets, replacing the single network-first
 // "visit-hargeisa-v2" cache this file used to have:
 //   - gh-shell-v1:   install-time precache, last-resort fallback only
-//   - gh-content-v2: navigations + Next.js RSC differential fetches — Stale-While-Revalidate
+//   - gh-content-v3: navigations + Next.js RSC differential fetches — Network-First, cache is a fallback only
 //   - gh-images-v1:  /_next/image + <img>/<Image> requests — Cache-First + background revalidate
 //   - gh-static-v1:  /_next/static/* hashed build assets — Cache-First
 //
@@ -14,18 +14,27 @@
 // Bumping any cache name purges it for existing visitors on the next
 // `activate` (see below) — the same one-time mechanism the old v1→v2 bump
 // used to clear out indefinitely-pinned auth/profile data. gh-content
-// bumped v1->v2 here: a deploy changed the shape of server-rendered data
-// for a stale-while-revalidate'd page (City Services' category grouping,
-// enum string -> full category object) without this cache version
-// changing, so any visitor whose browser served a pre-deploy cached
-// response paired it with post-deploy client JS that expected the new
-// shape, e.g. `group.category.id` reads on a plain string. Bumping forces
-// every cached navigation/RSC entry to be dropped and re-fetched fresh —
-// data and code are always from the same deploy again, permanently, for
-// this and every future shape-changing deploy, not just this one incident.
+// bumped v1->v2 for exactly this class of incident once already: a deploy
+// changed the shape of server-rendered data for a stale-while-revalidate'd
+// page (City Services' category grouping, enum string -> full category
+// object) without this cache version changing, so any visitor whose
+// browser served a pre-deploy cached response paired it with post-deploy
+// client JS that expected the new shape, e.g. `group.category.id` reads on
+// a plain string. A one-time version bump only fixes the visitors affected
+// at that moment — it does nothing to prevent the same class recurring on
+// the next deploy, which is exactly what happened again (reported as a
+// white/blank screen on desktop browsers that self-corrected only once
+// navigation hit a URL not already in this cache, e.g. switching locale).
+// gh-content bumped v2->v3 here alongside the real fix: navigations/RSC
+// fetches are no longer served stale-first at all (see networkFirst below)
+// — an online visitor now always gets the document that matches the
+// currently-deployed build, and the cache is purely an offline fallback,
+// never a source of truth while online. The version bump just clears out
+// every stale v2 entry already sitting in returning visitors' caches so
+// they don't have to wait for that entry to individually get overwritten.
 
 const SHELL_CACHE = "gh-shell-v1";
-const CONTENT_CACHE = "gh-content-v2";
+const CONTENT_CACHE = "gh-content-v3";
 const IMAGES_CACHE = "gh-images-v1";
 const STATIC_CACHE = "gh-static-v1";
 const ALL_CACHES = [SHELL_CACHE, CONTENT_CACHE, IMAGES_CACHE, STATIC_CACHE];
@@ -102,31 +111,27 @@ function notifyClientsIfChanged(url, previousResponse, nextResponse) {
   });
 }
 
-function staleWhileRevalidate(request, cacheName) {
+/** Navigations + RSC fetches: always try the network first, so an online
+ * visitor's document always matches the currently-deployed build — never
+ * served from a cache that could be one or more deploys behind. The cache
+ * is written only as an offline fallback (and to feed
+ * notifyClientsIfChanged, unchanged from before) and is only ever *read*
+ * back when the network fetch itself fails, e.g. genuinely offline. */
+function networkFirst(request, cacheName) {
   return caches.open(cacheName).then((cache) =>
-    cache.match(request).then((cached) => {
-      const networkFetch = fetch(request)
-        .then((response) => {
-          if (!response || !response.ok) return response;
-          const stamped = withCachedAtHeader(response.clone());
-          notifyClientsIfChanged(request.url, cached, stamped);
+    fetch(request)
+      .then((response) => {
+        if (!response || !response.ok) return response;
+        const stamped = withCachedAtHeader(response.clone());
+        return cache.match(request).then((previouslyCached) => {
+          notifyClientsIfChanged(request.url, previouslyCached, stamped);
           cache.put(request, stamped);
           return response;
-        })
-        .catch(() => undefined);
-
-      if (cached) {
-        // Serve the stale copy immediately; the fetch above updates the
-        // cache in the background for next time — the caller never waits on it.
-        networkFetch.catch(() => {});
-        return cached;
-      }
-
-      return networkFetch.then((response) => {
-        if (response) return response;
-        return request.mode === "navigate" ? caches.match("/en") : undefined;
-      });
-    })
+        });
+      })
+      .catch(() =>
+        cache.match(request).then((cached) => cached || (request.mode === "navigate" ? caches.match("/en") : undefined))
+      )
   );
 }
 
@@ -169,7 +174,7 @@ self.addEventListener("fetch", (event) => {
     // Covers Home, Hotels, Restaurants, Cafes, Attractions, City Services,
     // and every business detail page with one rule — none of their
     // pathnames match isExcludedPath, so they all land here automatically.
-    event.respondWith(staleWhileRevalidate(request, CONTENT_CACHE));
+    event.respondWith(networkFirst(request, CONTENT_CACHE));
   }
 });
 
