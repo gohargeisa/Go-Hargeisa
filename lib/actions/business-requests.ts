@@ -257,13 +257,25 @@ export async function convertJoinRequest(
   // category lookup instead of duplicating it.
   const resolvedCategory = request.category_id ? await getCategoryById(request.category_id) : null;
 
-  if (!isConvertibleCategory(request.category, request.category_id, resolvedCategory?.targetTable)) {
+  // Dynamic categories can live in either the general services table or
+  // the City Services table. Both are valid conversion targets now.
+  const isDynamicCategory =
+    request.category === "other" &&
+    Boolean(request.category_id) &&
+    (resolvedCategory?.targetTable === "services" ||
+      resolvedCategory?.targetTable === "city_services");
+
+  if (
+    !isDynamicCategory &&
+    !isConvertibleCategory(
+      request.category,
+      request.category_id,
+      resolvedCategory?.targetTable
+    )
+  ) {
     return {
       ok: false,
-      error:
-        resolvedCategory?.targetTable === "city_services"
-          ? "City Services categories aren't converted into listings — create the City Services entry directly in /admin/city-services instead."
-          : "This business type has no matching listing table to convert into.",
+      error: "This business type has no matching listing table to convert into.",
     };
   }
 
@@ -280,22 +292,123 @@ export async function convertJoinRequest(
       : request.description;
 
   // ---------------------------------------------------------------------------
-  // DYNAMIC "OTHER" CATEGORIES -> SERVICES
+  // DYNAMIC "OTHER" CATEGORIES
   //
-  // Dynamic business categories are submitted as:
+  // Categories submitted from the join form carry:
   //   category    = "other"
   //   category_id = the selected category UUID
   //   custom_fields = values entered for that category
   //
-  // IMPORTANT:
-  // Do not fall through to the cafe branch. "other" categories such as
-  // Perfume Shops, Flower Shops, Real Estate, etc. belong in "services".
+  // The selected category decides where the listing belongs:
+  //   target_table = "services"      -> services
+  //   target_table = "city_services" -> city_services
+  //
+  // This is important for categories such as Perfumes, which are currently
+  // stored in categories.target_table = "city_services".
   // ---------------------------------------------------------------------------
   if (request.category === "other") {
-    if (
-      !request.category_id ||
-      resolvedCategory?.targetTable !== "services"
-    ) {
+    if (!request.category_id || !resolvedCategory?.targetTable) {
+      return {
+        ok: false,
+        error: "This business category cannot be converted into a listing.",
+      };
+    }
+
+    const targetTable = resolvedCategory.targetTable;
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    const categoryName =
+      typeof (resolvedCategory as { name?: unknown } | null)?.name === "string"
+        ? (resolvedCategory as { name: string }).name
+        : null;
+
+    if (targetTable === "city_services") {
+      // City Services uses the category UUID as the authoritative grouping.
+      // Keep this payload intentionally small so it relies on the current
+      // city_services defaults for optional columns.
+      const { data: slugTaken } = await supabase
+        .from("city_services")
+        .select("id")
+        .eq("slug", slug)
+        .maybeSingle();
+
+      if (slugTaken) {
+        return {
+          ok: false,
+          error: "That slug is already in use — please choose another.",
+        };
+      }
+
+      const cityServicePayload: Record<string, unknown> = {
+        slug,
+        name: request.business_name,
+        category_id: request.category_id,
+        description: request.description,
+        address: request.address,
+        lat: completion.lat,
+        lng: completion.lng,
+        phone: request.phone,
+        website: request.website ?? null,
+        cover_image: coverImage,
+        gallery,
+        owner_id: user?.id ?? null,
+        custom_fields: request.custom_fields ?? {},
+      };
+
+      const { data: created, error: insertError } = await supabase
+        .from("city_services")
+        .insert(cityServicePayload as never)
+        .select("id")
+        .single();
+
+      if (insertError || !created) {
+        return {
+          ok: false,
+          error:
+            insertError?.message ??
+            "Could not create the City Services listing.",
+        };
+      }
+
+      const { error: updateError } = await supabase
+        .from("business_join_requests")
+        .update({
+          status: "approved",
+          converted_listing_type: "city_service",
+          converted_listing_id: created.id,
+          converted_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        } as never)
+        .eq("id", requestId);
+
+      if (updateError) {
+        return { ok: false, error: updateError.message };
+      }
+
+      await logActivity("create", "city_services", created.id, {
+        fromJoinRequest: requestId,
+        categoryId: request.category_id,
+        categoryName,
+        partnerStatus: targetPartnerStatus,
+      });
+
+      revalidatePath(`/${locale}/admin/requests`);
+      revalidatePath(`/${locale}/admin/partners`);
+      revalidatePath(`/${locale}/admin/city-services`);
+      revalidatePath(`/${locale}/city-services`);
+      revalidatePath(`/${locale}/services`);
+
+      return {
+        ok: true,
+        listingId: created.id,
+        table: "city_services",
+      };
+    }
+
+    if (targetTable !== "services") {
       return {
         ok: false,
         error: "This business category cannot be converted into a service listing.",
@@ -315,15 +428,6 @@ export async function convertJoinRequest(
       };
     }
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    const categoryName =
-      typeof (resolvedCategory as { name?: unknown } | null)?.name === "string"
-        ? (resolvedCategory as { name: string }).name
-        : null;
-
     const servicePayload: Record<string, unknown> = {
       slug,
       name: request.business_name,
@@ -337,12 +441,8 @@ export async function convertJoinRequest(
       phone: request.phone,
       website: request.website ?? null,
       owner_id: user?.id ?? null,
-
-      // Preserve the selected dynamic category and its custom form data.
       category_id: request.category_id,
       custom_fields: request.custom_fields ?? {},
-
-      // The services dashboard reads this field as its service/category tags.
       services: categoryName ? [categoryName] : [],
     };
 
@@ -361,7 +461,7 @@ export async function convertJoinRequest(
       };
     }
 
-    await supabase
+    const { error: updateError } = await supabase
       .from("business_join_requests")
       .update({
         status: "approved",
@@ -371,6 +471,10 @@ export async function convertJoinRequest(
         updated_at: new Date().toISOString(),
       } as never)
       .eq("id", requestId);
+
+    if (updateError) {
+      return { ok: false, error: updateError.message };
+    }
 
     await logActivity("create", "services", created.id, {
       fromJoinRequest: requestId,
