@@ -120,7 +120,7 @@ export interface CityCoverageCategory {
   target: number;
 }
 
-const CITY_SERVICE_CATEGORIES: EssentialServiceCategory[] = ["hospital", "bank", "mosque", "pharmacy"];
+const CITY_SERVICE_CATEGORIES: EssentialServiceCategory[] = ["hospital", "school", "mosque", "pharmacy"];
 const CITY_SERVICE_TARGET_PER_CATEGORY = 4;
 
 export async function getCityCoverage(): Promise<{ categories: CityCoverageCategory[]; totalPublished: number; totalTarget: number }> {

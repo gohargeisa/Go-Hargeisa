@@ -30,12 +30,11 @@ export async function getMapPoints(): Promise<MapPoint[]> {
 
 // The `map_points` table's `category` column is constrained to a fixed set
 // (see supabase/schema.sql). Only these overlap with the Smart City Map's
-// category taxonomy — the rest (pharmacy, gas_station, police, government,
-// school, university, airport, parking) have no matching column value yet,
-// so they render as empty categories in the UI rather than fake points.
+// category taxonomy — the rest (pharmacy, school, university, airport,
+// parking) have no matching column value yet, so they render as empty
+// categories in the UI rather than fake points.
 const CITY_SERVICE_DB_CATEGORY: Partial<Record<CityServiceCategory, string>> = {
   hospital: "hospital",
-  atm: "atm",
   mosque: "mosque",
   supermarket: "shopping",
 };
@@ -47,10 +46,10 @@ function toCityServiceCategory(dbCategory: string): CityServiceCategory | null {
 
 /** Smart City Map data — deliberately separate from getMapPoints() above,
  * which mixes in hotels/restaurants/attractions for the listings map.
- * Combines the legacy `map_points` table (mosques/ATMs/shopping/etc.) with
- * the Phase 2 `services` table (hospitals/pharmacies/dental clinics/banks/
- * ATMs/currency exchange/gas stations/car rentals), whose 8 categories are
- * a strict subset of CityServiceCategory so no mapping is needed. */
+ * Combines the legacy `map_points` table (mosques/shopping/etc.) with the
+ * Phase 2 `services` table (hospitals/pharmacies/dental clinics/car
+ * rentals), whose categories are a strict subset of CityServiceCategory so
+ * no mapping is needed. */
 export async function getCityServicePoints(): Promise<CityServicePoint[]> {
   if (!isSupabaseConfigured()) {
     return mockMapPoints.flatMap((p) => {

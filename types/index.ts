@@ -807,15 +807,9 @@ export type CityServiceCategory =
   | "hospital"
   | "pharmacy"
   | "dental_clinic"
-  | "bank"
-  | "atm"
-  | "currency_exchange"
-  | "gas_station"
   | "car_rental"
   | "mosque"
   | "supermarket"
-  | "police"
-  | "government"
   | "school"
   | "university"
   | "airport"
@@ -823,8 +817,6 @@ export type CityServiceCategory =
   | "gym"
   | "tour_company"
   | "apartment"
-  | "clinic"
-  | "government_office"
   | "auto_repair";
 
 export interface CityServicePoint {
