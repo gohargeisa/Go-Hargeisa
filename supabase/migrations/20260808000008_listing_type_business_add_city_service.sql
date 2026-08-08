@@ -1,0 +1,21 @@
+-- ============================================================================
+-- Go Hargeisa — Add 'city_service' to the listing_type_business enum
+--
+-- convertJoinRequest's city_services branch (lib/actions/business-requests.ts)
+-- writes converted_listing_type = 'city_service' once a City Services listing
+-- is created from an approved request. The enum never gained this value —
+-- only 'service' was added before (20260729000001/20260801000002, for the
+-- now-removed admin Services module) — so that write fails outright with
+-- "invalid input value for enum listing_type_business" every time it runs.
+-- Confirmed by testing directly against prod (read-only otherwise) while
+-- investigating why "Pinnacle Perfumes" never got its business_join_requests
+-- row linked to the city_services listing that exists for it.
+--
+-- Additive, same pattern as the two prior 'service' additions. Safe to
+-- re-run.
+--
+-- NOT applied to production by this session — write for review; push
+-- manually (`supabase db push`) when ready.
+-- ============================================================================
+
+alter type listing_type_business add value if not exists 'city_service';

@@ -3,7 +3,7 @@ import { unstable_cache } from "next/cache";
 import { createPublicClient } from "@/lib/supabase/public";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
-import { SERVICES_PUBLIC_ENABLED, RESTAURANTS_PUBLIC_ENABLED, CAFES_PUBLIC_ENABLED } from "@/lib/config/features";
+import { SERVICES_PUBLIC_ENABLED, RESTAURANTS_PUBLIC_ENABLED, CAFES_PUBLIC_ENABLED, ATTRACTIONS_PUBLIC_ENABLED } from "@/lib/config/features";
 import { mapCategory } from "./mappers";
 import type { Category, CategoryTargetTable } from "@/types";
 
@@ -60,6 +60,11 @@ export async function getVisibleCategories(): Promise<Category[]> {
     if (c.targetTable === "services") return SERVICES_PUBLIC_ENABLED;
     if (c.targetTable === "restaurants") return RESTAURANTS_PUBLIC_ENABLED;
     if (c.targetTable === "cafes") return CAFES_PUBLIC_ENABLED;
+    // Keyed on slug, not targetTable — the live 'attractions' row's
+    // target_table is currently corrupted to 'city_services' (see the
+    // categories.target_table fix migration, not yet pushed), so this stays
+    // effective regardless of whether that migration has been applied yet.
+    if (c.slug === "attractions") return ATTRACTIONS_PUBLIC_ENABLED;
     return true;
   });
 }

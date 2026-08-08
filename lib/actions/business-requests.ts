@@ -326,9 +326,14 @@ export async function convertJoinRequest(
         : null;
 
     if (targetTable === "city_services") {
-      // City Services uses the category UUID as the authoritative grouping.
-      // Keep this payload intentionally small so it relies on the current
-      // city_services defaults for optional columns.
+      // city_services has its own narrower schema (see
+      // lib/actions/city-services.ts's createCityService, the admin-form
+      // insert path) — no address/owner_id/custom_fields columns exist on
+      // this table (it predates the owner-claims model), and its image
+      // column is named `image`, not `cover_image`. The legacy
+      // `category` enum column is still NOT NULL (owner-dashboard.ts's
+      // City Coverage KPI reads it directly) and must be derived from the
+      // resolved category's slug, same as createCityService does.
       const { data: slugTaken } = await supabase
         .from("city_services")
         .select("id")
@@ -342,20 +347,20 @@ export async function convertJoinRequest(
         };
       }
 
+      const legacyCategoryEnum = resolvedCategory.slug.replace(/-/g, "_");
+
       const cityServicePayload: Record<string, unknown> = {
         slug,
         name: request.business_name,
         category_id: request.category_id,
+        category: legacyCategoryEnum,
         description: request.description,
-        address: request.address,
         lat: completion.lat,
         lng: completion.lng,
         phone: request.phone,
         website: request.website ?? null,
-        cover_image: coverImage,
+        image: coverImage,
         gallery,
-        owner_id: user?.id ?? null,
-        custom_fields: request.custom_fields ?? {},
       };
 
       const { data: created, error: insertError } = await supabase

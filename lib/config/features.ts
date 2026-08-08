@@ -41,6 +41,18 @@ export const RESTAURANTS_PUBLIC_ENABLED = true;
 export const CAFES_PUBLIC_ENABLED = true;
 
 /**
+ * Tourist Attractions — removed from the main nav/mega-menu, homepage
+ * "Browse by Category" grid, and footer "Explore" links per explicit
+ * request (2026-08-08). Nothing is deleted: the `attractions` table, its
+ * rows, /[locale]/attractions routes, and the admin CRUD are all untouched
+ * — this only gates the categories-table-driven nav surfaces (see
+ * getVisibleCategories in lib/data/categories.ts), same mechanism as
+ * SERVICES_PUBLIC_ENABLED above. Flip back to `true` to restore the nav
+ * entry — no other change needed.
+ */
+export const ATTRACTIONS_PUBLIC_ENABLED = false;
+
+/**
  * Supermarket — a deliberately independent module (own future routes/data
  * layer, never the `categories`/`services` system — see
  * docs/supermarket-architecture.md). Currently only gates the static nav

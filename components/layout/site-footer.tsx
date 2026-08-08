@@ -37,7 +37,6 @@ export function SiteFooter({
     ["hotels", "hotels"],
     ["restaurants", "restaurants"],
     ["cafes", "cafes"],
-    ["attractions", "attractions"],
   ] as const;
 
   const companyLinks = [
