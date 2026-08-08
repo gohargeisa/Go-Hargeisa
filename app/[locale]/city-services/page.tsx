@@ -21,8 +21,8 @@ export async function generateMetadata({
   params: { locale: string };
 }): Promise<Metadata> {
   return {
-    title: "City Services — Hospitals, Banks, Supermarkets & Pharmacies",
-    description: "Essential city services in Hargeisa: hospitals, banks, supermarkets, and pharmacies.",
+    title: "City Services — Hospitals, Mosques, Pharmacies & More",
+    description: "Essential city services in Hargeisa: hospitals, mosques, pharmacies, schools, and more.",
     alternates: localeAlternates(locale as Locale, "/city-services"),
   };
 }

@@ -1,14 +1,16 @@
-import { Hospital, Landmark, ShoppingCart, Pill } from "lucide-react";
+import { Hospital, Landmark, MoonStar, Pill } from "lucide-react";
 import type { CityCoverageCategory } from "@/lib/data/owner-dashboard";
 
 /** This widget always tracks the same 4 priority categories regardless of
  * how many City Services categories exist overall (see the fixed
  * CITY_SERVICE_CATEGORIES list in getCityCoverage) — it's a curated growth
- * KPI, not a reflection of every category. */
-const META: Record<"hospital" | "bank" | "supermarket" | "pharmacy", { label: string; icon: typeof Hospital }> = {
+ * KPI, not a reflection of every category. Supermarket is deliberately
+ * excluded — it's a separate top-level module, not a City Services
+ * category (see docs/supermarket-architecture.md). */
+const META: Record<"hospital" | "bank" | "mosque" | "pharmacy", { label: string; icon: typeof Hospital }> = {
   hospital: { label: "Hospitals", icon: Hospital },
   bank: { label: "Banks", icon: Landmark },
-  supermarket: { label: "Supermarkets", icon: ShoppingCart },
+  mosque: { label: "Mosques", icon: MoonStar },
   pharmacy: { label: "Pharmacies", icon: Pill },
 };
 
