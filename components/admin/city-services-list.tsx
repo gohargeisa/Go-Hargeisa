@@ -19,6 +19,10 @@ export interface CityServiceListRow {
   status: "draft" | "published" | "archived";
   featured: boolean;
   createdAt: string;
+  /** Assigned owner's display name — admin view only (null for a
+   * business_owner's own rows, which the page never bothers resolving since
+   * they already know it's them) or when unassigned. */
+  ownerName?: string | null;
 }
 
 const STATUS_FILTERS = ["all", "draft", "published", "archived"] as const;
@@ -34,6 +38,8 @@ export function CityServicesList({
   locale,
   rows,
   categories,
+  canManage = true,
+  emptyLabel,
 }: {
   locale: Locale;
   rows: CityServiceListRow[];
@@ -41,6 +47,14 @@ export function CityServicesList({
    * existing listings needs to find one even under a category they've since
    * deactivated (e.g. Mosques). */
   categories: { id: string; name: string }[];
+  /** False for a business_owner viewing only their own assigned listings —
+   * hides delete/feature/hide (RLS only grants them UPDATE, never
+   * INSERT/DELETE, same restriction as the hotels admin list). Editing via
+   * the pencil icon stays available either way. */
+  canManage?: boolean;
+  /** Overrides the "no rows" message — e.g. "No city services assigned to
+   * you yet" for a business_owner instead of the admin-wide empty state. */
+  emptyLabel?: string;
 }) {
   const t = useTranslations("admin");
   const tListings = useTranslations("listings");
@@ -118,48 +132,52 @@ export function CityServicesList({
       >
         <Pencil size={13} />
       </Link>
-      <button
-        type="button"
-        onClick={() => onToggleFeatured(row)}
-        disabled={isPending && pendingId === row.id}
-        aria-label={row.featured ? t("unfeatureAriaLabel") : t("featureAriaLabel")}
-        aria-pressed={row.featured}
-        className={`flex h-8 w-8 items-center justify-center rounded-lg border transition-colors disabled:opacity-60 ${
-          row.featured
-            ? "border-amber-400 bg-amber-400/10 text-amber-500"
-            : "border-ink/10 dark:border-white/15 hover:border-amber-400 hover:text-amber-500"
-        }`}
-      >
-        <Star size={13} fill={row.featured ? "currentColor" : "none"} />
-      </button>
-      <button
-        type="button"
-        onClick={() => onToggle(row)}
-        disabled={isPending && pendingId === row.id}
-        className="flex h-8 w-8 items-center justify-center rounded-lg border border-ink/10 dark:border-white/15 hover:border-amber-500 hover:text-amber-600 disabled:opacity-60"
-      >
-        {isPending && pendingId === row.id ? (
-          <Loader2 size={13} className="animate-spin" />
-        ) : row.status === "published" ? (
-          <Eye size={13} />
-        ) : (
-          <EyeOff size={13} />
-        )}
-      </button>
-      <button
-        type="button"
-        onClick={() => onDelete(row)}
-        onBlur={() => setConfirmDeleteId(null)}
-        disabled={isPending && pendingId === row.id}
-        aria-label={confirmDeleteId === row.id ? tListings("deleteConfirmTooltip", { name: row.name }) : tListings("deleteLabel")}
-        className={`flex h-8 items-center gap-1.5 rounded-lg border px-2 text-xs font-semibold transition-colors disabled:opacity-60 ${
-          confirmDeleteId === row.id
-            ? "border-red-500 bg-red-500 text-white"
-            : "border-ink/10 dark:border-white/15 hover:border-red-500 hover:text-red-500"
-        }`}
-      >
-        <Trash2 size={13} />
-      </button>
+      {canManage && (
+        <>
+          <button
+            type="button"
+            onClick={() => onToggleFeatured(row)}
+            disabled={isPending && pendingId === row.id}
+            aria-label={row.featured ? t("unfeatureAriaLabel") : t("featureAriaLabel")}
+            aria-pressed={row.featured}
+            className={`flex h-8 w-8 items-center justify-center rounded-lg border transition-colors disabled:opacity-60 ${
+              row.featured
+                ? "border-amber-400 bg-amber-400/10 text-amber-500"
+                : "border-ink/10 dark:border-white/15 hover:border-amber-400 hover:text-amber-500"
+            }`}
+          >
+            <Star size={13} fill={row.featured ? "currentColor" : "none"} />
+          </button>
+          <button
+            type="button"
+            onClick={() => onToggle(row)}
+            disabled={isPending && pendingId === row.id}
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-ink/10 dark:border-white/15 hover:border-amber-500 hover:text-amber-600 disabled:opacity-60"
+          >
+            {isPending && pendingId === row.id ? (
+              <Loader2 size={13} className="animate-spin" />
+            ) : row.status === "published" ? (
+              <Eye size={13} />
+            ) : (
+              <EyeOff size={13} />
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={() => onDelete(row)}
+            onBlur={() => setConfirmDeleteId(null)}
+            disabled={isPending && pendingId === row.id}
+            aria-label={confirmDeleteId === row.id ? tListings("deleteConfirmTooltip", { name: row.name }) : tListings("deleteLabel")}
+            className={`flex h-8 items-center gap-1.5 rounded-lg border px-2 text-xs font-semibold transition-colors disabled:opacity-60 ${
+              confirmDeleteId === row.id
+                ? "border-red-500 bg-red-500 text-white"
+                : "border-ink/10 dark:border-white/15 hover:border-red-500 hover:text-red-500"
+            }`}
+          >
+            <Trash2 size={13} />
+          </button>
+        </>
+      )}
     </>
   );
 
@@ -210,7 +228,7 @@ export function CityServicesList({
 
       {filtered.length === 0 ? (
         <p className="rounded-xl2 border border-dashed border-ink/15 dark:border-white/15 p-10 text-center text-sm text-ink/50 dark:text-sand/50">
-          {rows.length === 0 ? t("noCityServicesYet") : tListings("noServicesMatch")}
+          {rows.length === 0 ? emptyLabel ?? t("noCityServicesYet") : tListings("noServicesMatch")}
         </p>
       ) : (
         <>
@@ -234,6 +252,11 @@ export function CityServicesList({
                       )}
                       <span className="text-[11px] text-ink/45 dark:text-sand/45">{row.categoryName}</span>
                     </div>
+                    {canManage && (
+                      <p className="mt-1 text-[11px] text-ink/40 dark:text-sand/40">
+                        {t("assignedOwnerLabel")}: {row.ownerName ?? t("noOwnerAssignedLabel")}
+                      </p>
+                    )}
                     <p className="mt-1 text-[11px] text-ink/40 dark:text-sand/40">
                       {t("colCreated")}: {new Date(row.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
                     </p>
@@ -255,6 +278,7 @@ export function CityServicesList({
                 <tr>
                   <th className="px-5 py-3 text-start font-semibold">{t("colName")}</th>
                   <th className="px-5 py-3 text-start font-semibold">{t("cityServiceCategoryLabel")}</th>
+                  {canManage && <th className="px-5 py-3 text-start font-semibold">{t("assignedOwnerLabel")}</th>}
                   <th className="px-5 py-3 text-start font-semibold">{t("colStatus")}</th>
                   <th className="px-5 py-3 text-start font-semibold">{t("colCreated")}</th>
                   <th className="px-5 py-3 text-end font-semibold">{t("colActions")}</th>
@@ -272,6 +296,9 @@ export function CityServicesList({
                       </div>
                     </td>
                     <td className="px-5 py-3">{row.categoryName}</td>
+                    {canManage && (
+                      <td className="px-5 py-3 text-ink/60 dark:text-sand/60">{row.ownerName ?? t("noOwnerAssignedLabel")}</td>
+                    )}
                     <td className="px-5 py-3">
                       <div className="flex flex-wrap items-center gap-1.5">
                         <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusClass[row.status]}`}>

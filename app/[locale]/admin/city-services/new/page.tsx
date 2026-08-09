@@ -15,7 +15,7 @@ export default async function NewCityServicePage({ params: { locale } }: { param
   return (
     <section className="container-px mx-auto py-14">
       <h1 className="font-display text-2xl font-semibold mb-8">{t("addCityServiceTitle")}</h1>
-      <CityServiceForm locale={locale} mode="create" categories={categories} />
+      <CityServiceForm locale={locale} mode="create" categories={categories} canAssignOwner />
     </section>
   );
 }

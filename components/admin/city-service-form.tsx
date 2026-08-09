@@ -11,6 +11,7 @@ import { GoogleMapsLocationField } from "@/components/admin/google-maps-location
 import { OpeningHoursEditor } from "@/components/shared/opening-hours-editor";
 import { AmenitiesPicker } from "@/components/admin/amenities-picker";
 import { Field, inputClass } from "@/components/admin/form-shared";
+import { AssignedOwnerField, type AssignedOwner } from "@/components/admin/assigned-owner-field";
 import { createCityService, updateCityService } from "@/lib/actions/city-services";
 import { useUnsavedChangesWarning } from "@/lib/hooks/use-unsaved-changes-warning";
 import { SERVICE_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
@@ -59,6 +60,8 @@ export function CityServiceForm({
   serviceId,
   initial,
   categories,
+  canAssignOwner = false,
+  initialOwner = null,
 }: {
   locale: Locale;
   mode: "create" | "edit";
@@ -69,10 +72,16 @@ export function CityServiceForm({
    * from this, never a hardcoded list. See lib/data/categories.ts's
    * getCityServiceCategories(). */
   categories: Category[];
+  /** Only true for role='owner' (site admin) — a business_owner editing
+   * their own assigned listing never sees the Assigned Owner field at all,
+   * so they have no way to reassign ownership themselves. */
+  canAssignOwner?: boolean;
+  initialOwner?: AssignedOwner | null;
 }) {
   const t = useTranslations("admin");
   const tw = useTranslations("weekdays");
   const router = useRouter();
+  const [owner, setOwner] = useState<AssignedOwner | null>(initialOwner);
   const [form, setForm] = useState<CityServiceFormInput>({
     categoryId: initial?.categoryId ?? categories[0]?.id ?? "",
     name: initial?.name ?? "",
@@ -128,6 +137,12 @@ export function CityServiceForm({
 
     const payload = {
       categoryId: form.categoryId,
+      // Only meaningful on create — an edit's owner changes are persisted
+      // immediately by AssignedOwnerField via transferOwnership/
+      // removeOwnership, not through this payload (updateCityService never
+      // reads ownerId at all, so a business_owner submitting this form has
+      // no field here that could change ownership).
+      ownerId: mode === "create" ? owner?.id ?? null : undefined,
       name: form.name,
       nameAr: form.nameAr || undefined,
       nameSo: form.nameSo || undefined,
@@ -210,6 +225,17 @@ export function CityServiceForm({
           moveLaterAriaLabel={t("moveVideoLaterAriaLabel")}
           pasteUrlPlaceholder={t("pasteVideoUrlPlaceholder")}
           addUrlLabel={t("addVideoUrlLabel")}
+        />
+      )}
+
+      {canAssignOwner && (
+        <AssignedOwnerField
+          locale={locale}
+          mode={mode}
+          listingType="city_service"
+          listingId={serviceId}
+          value={owner}
+          onChange={setOwner}
         />
       )}
 

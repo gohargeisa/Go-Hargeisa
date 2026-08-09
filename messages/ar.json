@@ -17,6 +17,7 @@
     "signIn": "تسجيل الدخول",
     "signUp": "إنشاء حساب",
     "signOut": "تسجيل الخروج",
+    "backToSite": "العودة إلى الموقع",
     "changeLanguage": "تغيير اللغة",
     "cityServices": "خدمات المدينة",
     "supermarketLabel": "سوبر ماركت",
@@ -1137,6 +1138,8 @@
     "cityServiceNameSoLabel": "الاسم (بالصومالية)",
     "cityServiceCategoryLabel": "الفئة",
     "noCityServicesYet": "لا توجد خدمات مدينة بعد — أضف أول خدمة للبدء.",
+    "noCityServicesAssigned": "لا توجد خدمات مدينة مسندة إليك بعد.",
+    "ofYourCityServices": "من خدمات المدينة الخاصة بك",
     "mapsUrlLabel": "رابط خرائط جوجل",
     "resolvingMapsLink": "جارٍ تحديد الموقع…",
     "locationDetected": "تم تحديد الموقع: {lat}, {lng}",
@@ -1281,7 +1284,14 @@
     "statusApproved": "مقبولة",
     "statusRejected": "مرفوضة",
     "searchUserPlaceholder": "ابحث بالاسم أو البريد الإلكتروني…",
-    "linkAccountLabel": "ربط بحساب يدويًا"
+    "linkAccountLabel": "ربط بحساب يدويًا",
+    "assignedOwnerLabel": "المالك المعيَّن",
+    "assignedOwnerHint": "حساب صاحب النشاط التجاري الذي يمكنه إدارة هذا العنصر. يمكنك أنت (المسؤول) فقط تغيير هذا.",
+    "noOwnerAssignedLabel": "لا يوجد مالك معيَّن",
+    "assignOwnerAction": "تعيين مالك",
+    "changeOwnerAction": "تغيير المالك",
+    "removeOwnerAction": "إزالة المالك",
+    "unnamedOwnerLabel": "مالك بدون اسم"
   },
   "about": {
     "eyebrow": "قصتنا",

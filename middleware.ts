@@ -10,10 +10,12 @@ const intlMiddleware = createMiddleware({
 });
 
 // Admin sub-sections business owners may also manage (their own listings
-// only — see the "Owners manage their {hotels,restaurants,cafes}" RLS
-// policies in supabase/schema.sql). Every other /admin section (users,
-// articles, attractions, events, the dashboard index) is owner-only.
-const BUSINESS_OWNER_ADMIN_SECTIONS = new Set(["hotels", "restaurants", "cafes"]);
+// only — see the "Owners manage their {hotels,restaurants,cafes,city
+// services}" RLS policies in supabase/schema.sql and
+// supabase/migrations/20260809000001_city_services_owner_id.sql). Every
+// other /admin section (users, articles, attractions, events, the dashboard
+// index) is owner-only.
+const BUSINESS_OWNER_ADMIN_SECTIONS = new Set(["hotels", "restaurants", "cafes", "city-services"]);
 
 export default async function middleware(request: NextRequest) {
   // Locale routing runs first and produces the response we'll actually

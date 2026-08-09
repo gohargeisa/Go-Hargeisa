@@ -35,10 +35,10 @@ t=0 is the instant both the hero photo and the logo image fire their `onLoad` �
 | Backdrop | Ken Burns (scale 1→1.08/20s) | 0ms | continuous, ~1.35s visible | `ease-out` |
 | Logo | opacity 0→1, scale 0.96→1.00 | 0ms | 500ms | `[0.16,1,0.3,1]` |
 | Tagline | opacity 0→0.85 | 650ms | 300ms | `[0.22,1,0.36,1]` |
-| Hold | — | 950ms | 50ms | — |
-| Exit (whole overlay) | opacity 1→0 | 1000ms | 350ms | `[0.16,1,0.3,1]` |
+| Hold | — | 950ms | 1050ms | — |
+| Exit (whole overlay) | opacity 1→0 | 2000ms | 350ms | `[0.16,1,0.3,1]` |
 
-Total visible ≈1350ms — inside the requested 1.2–1.5s window.
+Total visible ≈2350ms — retuned 2026-08-09 from the original ~1350ms (1.2–1.5s window above) to land in a ~2–3s window per updated product direction, without going long enough to read as a stall.
 
 **Reduced motion** (`useReducedMotion()`): fades still play in full; only transforms drop — the backdrop skips `animate-kenburns` (stays at `scale-100`), the logo skips its scale animation (stays at `scale-100`), both still fade in/out normally.
 

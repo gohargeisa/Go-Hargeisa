@@ -17,6 +17,7 @@
     "signIn": "Sign In",
     "signUp": "Sign Up",
     "signOut": "Sign Out",
+    "backToSite": "Back to site",
     "changeLanguage": "Change language",
     "cityServices": "City Services",
     "supermarketLabel": "Supermarket",
@@ -1137,6 +1138,8 @@
     "cityServiceNameSoLabel": "Name (Somali)",
     "cityServiceCategoryLabel": "Category",
     "noCityServicesYet": "No city services yet — add your first one to get started.",
+    "noCityServicesAssigned": "No city services assigned to you yet.",
+    "ofYourCityServices": "of your city services",
     "mapsUrlLabel": "Google Maps link",
     "resolvingMapsLink": "Looking up location…",
     "locationDetected": "Location detected: {lat}, {lng}",
@@ -1281,7 +1284,14 @@
     "statusApproved": "Approved",
     "statusRejected": "Rejected",
     "searchUserPlaceholder": "Search by name or email…",
-    "linkAccountLabel": "Link to an account manually"
+    "linkAccountLabel": "Link to an account manually",
+    "assignedOwnerLabel": "Assigned Owner",
+    "assignedOwnerHint": "The business owner account that can manage this listing. Only you (admin) can change this.",
+    "noOwnerAssignedLabel": "No owner assigned",
+    "assignOwnerAction": "Assign owner",
+    "changeOwnerAction": "Change owner",
+    "removeOwnerAction": "Remove owner",
+    "unnamedOwnerLabel": "Unnamed owner"
   },
   "about": {
     "eyebrow": "Our Story",

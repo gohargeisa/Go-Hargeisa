@@ -63,7 +63,12 @@ export function SplashScreenOverlay() {
 
   useEffect(() => {
     if (phase !== "enter") return;
-    const timer = setTimeout(() => setPhase("exit"), 1000);
+    // This timer starts the same instant the fade-in above does (both fire
+    // from the same "enter" transition), so total on-screen time for the
+    // logo is this 2000ms (which the 500ms fade-in ramps up within) plus
+    // the 350ms fade-out below — ~2.35s end to end, landing in the
+    // "roughly 2-3 seconds, not excessive" range.
+    const timer = setTimeout(() => setPhase("exit"), 2000);
     return () => clearTimeout(timer);
   }, [phase]);
 

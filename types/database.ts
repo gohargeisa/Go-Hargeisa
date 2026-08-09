@@ -111,7 +111,7 @@ type CityServiceCategoryDb =
   | "visa_immigration" | "internet_telecom";
 
 type CityServiceRow = {
-  id: string; slug: string; category: CityServiceCategoryDb; category_id: string; name: string; name_ar: string | null; name_so: string | null;
+  id: string; slug: string; category: CityServiceCategoryDb; category_id: string; owner_id: string | null; name: string; name_ar: string | null; name_so: string | null;
   description: string | null; description_ar: string | null; description_so: string | null;
   phone: string | null; whatsapp: string | null; email: string | null;
   opening_hours: string | null; maps_url: string | null; website: string | null; image: string | null; gallery: Json;

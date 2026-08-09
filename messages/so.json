@@ -17,6 +17,7 @@
     "signIn": "Gal",
     "signUp": "Isdiiwaangeli",
     "signOut": "Ka Bax",
+    "backToSite": "Ku noqo bogga",
     "changeLanguage": "Beddel Luqadda",
     "cityServices": "Adeegyada Magaalada",
     "supermarketLabel": "Supermarket",
@@ -1137,6 +1138,8 @@
     "cityServiceNameSoLabel": "Magaca (Soomaali)",
     "cityServiceCategoryLabel": "Qaybta",
     "noCityServicesYet": "Weli adeeg magaalo ma jiro — ku dar kii ugu horreeyay si aad u bilowdo.",
+    "noCityServicesAssigned": "Wali adeeg magaalo lagugu meeleeyay kuma jiro.",
+    "ofYourCityServices": "adeegyadaada magaalada ka mid ah",
     "mapsUrlLabel": "Xiriirka Google Maps",
     "resolvingMapsLink": "Baaraya goobta…",
     "locationDetected": "Goobta waa la helay: {lat}, {lng}",
@@ -1281,7 +1284,14 @@
     "statusApproved": "La Ansixiyay",
     "statusRejected": "La Diiday",
     "searchUserPlaceholder": "Ku raadi magaca ama email-ka…",
-    "linkAccountLabel": "Kuxidh account gacanta"
+    "linkAccountLabel": "Kuxidh account gacanta",
+    "assignedOwnerLabel": "Mulkiilaha La Meeleeyay",
+    "assignedOwnerHint": "Account-ka mulkiilaha ganacsiga ee maamuli kara xayeysiiskan. Adiga (maamulaha) oo keliya ayaa beddeli kara tan.",
+    "noOwnerAssignedLabel": "Mulkiile lama meeleynin",
+    "assignOwnerAction": "U meeleeye mulkiile",
+    "changeOwnerAction": "Beddel mulkiilaha",
+    "removeOwnerAction": "Ka saar mulkiilaha",
+    "unnamedOwnerLabel": "Mulkiile magac la'aan"
   },
   "about": {
     "eyebrow": "Sheekadayada",

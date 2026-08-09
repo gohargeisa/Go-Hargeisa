@@ -45,8 +45,17 @@ export interface Review {
   status?: "published" | "hidden";
 }
 
-/** Listing types a `business_owner` profile can currently own/manage — see lib/data/business.ts. */
+/** Listing types with a full /business dashboard (bookings, offers,
+ * analytics, gallery manager, messages) — see lib/data/business.ts. */
 export type BusinessListingType = "hotel" | "restaurant" | "cafe" | "service";
+
+/** Listing types the admin ownership-assignment system (lib/actions/claims.ts:
+ * getOwnedListings/transferOwnership/removeOwnership) can operate on. A
+ * superset of BusinessListingType — city_services has an owner_id and shows
+ * up in admin ownership tools, but (unlike hotels/restaurants/cafes/services)
+ * has no /business dashboard of its own, so it's kept out of the narrower
+ * BusinessListingType used throughout that dashboard's exhaustive Record maps. */
+export type OwnableListingType = BusinessListingType | "city_service";
 
 /** Every listing type that participates in the polymorphic reviews/
  * favorites/saved-trip-items system (the `listing_type` DB enum). Single

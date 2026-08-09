@@ -20,8 +20,46 @@ import { MegaMenuGrid } from "@/components/layout/nav-mega-menu";
 import { categoryHref, categoryDisplayName } from "@/lib/utils/category-href";
 import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
+import { useAdminNavItems } from "@/lib/hooks/use-admin-nav-items";
 import { SUPERMARKET_ENABLED } from "@/lib/config/features";
+import type { SidebarNavItem } from "@/components/shared/sidebar-nav";
 import type { Category } from "@/types";
+
+/** Same row markup as SidebarNavRow (components/shared/sidebar-nav.tsx),
+ * just Link-based with an onClick to close the sheet on navigate — the
+ * mobile admin menu needs its own copy since SidebarNavRow's own <Link>
+ * doesn't take an onClick, and this list also needs the group-label/indent
+ * treatment that the public mobile nav links never use. */
+function AdminMobileNavRow({ item, onNavigate }: { item: SidebarNavItem; onNavigate: () => void }) {
+  const Icon = item.icon;
+
+  if (item.isGroupLabel) {
+    return (
+      <div className="flex items-center gap-2 px-4 pb-1 pt-3 text-xs font-bold uppercase tracking-[0.1em] text-ink/40 first:pt-0 dark:text-sand/40">
+        <Icon size={13} aria-hidden="true" />
+        {item.label}
+      </div>
+    );
+  }
+
+  return (
+    <Link
+      href={item.href!}
+      onClick={onNavigate}
+      aria-current={item.isActive ? "page" : undefined}
+      className={`flex items-center gap-3 rounded-2xl text-[15px] font-semibold transition-colors ${
+        item.indent ? "ms-2 px-4 py-2 text-sm" : "px-4 py-3"
+      } ${
+        item.isActive
+          ? "bg-primary/10 text-primary-800"
+          : "text-ink hover:bg-primary/5 hover:text-primary dark:text-white"
+      }`}
+    >
+      <Icon size={item.indent ? 15 : 17} aria-hidden="true" />
+      {item.label}
+    </Link>
+  );
+}
 
 // Rendered on every single page (part of the shared header), but its
 // contents (search input, grid, keyboard-nav handling) are only needed once
@@ -63,6 +101,17 @@ export function SiteHeader({
   useFocusTrap(mobileNavRef, open);
   useScrollLock(open);
   const reduceMotion = useReducedMotion();
+
+  // On any /admin/* page the desktop layout shows the full AdminSidebar in
+  // its own <aside>, which on mobile collapses to a cramped horizontal
+  // scroll strip — not a real substitute for navigating ~19 sections. While
+  // in this section, the hamburger opens the same admin nav list instead of
+  // the public site menu (categories/supermarket/sign-in), so every desktop
+  // section (Requests, Categories, Businesses group, Users, Reviews,
+  // Reports, Analytics, Settings, Bookings, Partners, Announcements,
+  // Offers, Notifications) stays reachable on mobile too.
+  const isAdminSection = pathname === `/${locale}/admin` || pathname.startsWith(`/${locale}/admin/`);
+  const { primaryItems: adminPrimaryItems, moreItems: adminMoreItems } = useAdminNavItems(locale);
 
   useEffect(() => {
     if (!open) return;
@@ -259,6 +308,29 @@ export function SiteHeader({
               className="glass fixed inset-x-3 z-overlay max-h-[75vh] overflow-y-auto rounded-xl3 shadow-premium-lg lg:hidden"
             >
               <div className="container-px flex flex-col gap-1.5 py-4" style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}>
+              {isAdminSection ? (
+                <>
+                  {adminPrimaryItems.map((item) => (
+                    <AdminMobileNavRow key={item.key} item={item} onNavigate={() => setOpen(false)} />
+                  ))}
+                  <div className="mt-1 border-t border-ink/8 pt-3 dark:border-white/10">
+                    {adminMoreItems.map((item) => (
+                      <AdminMobileNavRow key={item.key} item={item} onNavigate={() => setOpen(false)} />
+                    ))}
+                  </div>
+                  <div className="mt-3 space-y-2 border-t border-ink/8 px-1 pt-3 dark:border-white/10">
+                    <Link
+                      href={`/${locale}`}
+                      onClick={() => setOpen(false)}
+                      className="block rounded-full border border-ink/15 py-2.5 text-center text-sm font-semibold transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white dark:hover:border-primary"
+                    >
+                      {t("backToSite")}
+                    </Link>
+                    <SignOutButton locale={locale} className="w-full flex items-center justify-center gap-2 rounded-full bg-primary-700 py-2.5 text-sm font-semibold text-white" />
+                  </div>
+                </>
+              ) : (
+                <>
               {pinnedCategories.map((category) => {
                 const href = categoryHref(locale, category);
                 const active = pathname === href || pathname.startsWith(`${href}/`);
@@ -343,6 +415,8 @@ export function SiteHeader({
                     {t("signIn")}
                   </Link>
                 </div>
+              )}
+                </>
               )}
               </div>
             </m.nav>

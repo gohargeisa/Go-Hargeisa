@@ -7,7 +7,7 @@ import { sendEmail } from "@/lib/email/send";
 import { accountVerifiedEmail } from "@/lib/email/templates";
 import { logActivity } from "./activity";
 import type { Locale } from "@/lib/i18n/config";
-import type { BusinessListingType } from "@/types";
+import type { BusinessListingType, OwnableListingType } from "@/types";
 
 export interface BusinessClaimInput {
   listingType: BusinessListingType;
@@ -52,11 +52,12 @@ export async function submitBusinessClaim(
   return { ok: true };
 }
 
-const LISTING_TABLE: Record<BusinessListingType, "hotels" | "restaurants" | "cafes" | "services"> = {
+const LISTING_TABLE: Record<OwnableListingType, "hotels" | "restaurants" | "cafes" | "services" | "city_services"> = {
   hotel: "hotels",
   restaurant: "restaurants",
   cafe: "cafes",
   service: "services",
+  city_service: "city_services",
 };
 
 /** Only hotels/restaurants/cafes carry partner_status — services don't. */
@@ -190,10 +191,31 @@ export async function searchUsersForLinking(query: string): Promise<UserSearchRe
     .slice(0, 20);
 }
 
+/** Admin-only. Resolves one already-known user id's display name/email —
+ * same admin-client email lookup as searchUsersForLinking, just for a
+ * single id instead of a search. Used to show the currently-assigned owner
+ * on a listing's edit form without re-running a search. */
+export async function getUserDisplayInfo(userId: string): Promise<UserSearchResult | null> {
+  await assertOwner();
+  const supabase = await createClient();
+  const admin = createAdminClient();
+
+  const [{ data: authUser }, { data: profile }] = await Promise.all([
+    admin.auth.admin.getUserById(userId),
+    supabase.from("profiles").select("full_name, role").eq("id", userId).single(),
+  ]);
+  if (!authUser?.user) return null;
+
+  const p = profile as { full_name: string | null; role: UserSearchResult["role"] } | null;
+  return { id: userId, email: authUser.user.email ?? "", fullName: p?.full_name ?? null, role: p?.role ?? "user" };
+}
+
 /** Shared by approve/transfer — upgrades a user to business_owner only if
  * they're currently a plain 'user' (never touches an existing 'owner'
- * site-admin, and leaves an already-business_owner account as is). */
-async function upgradeToBusinessOwner(supabase: Awaited<ReturnType<typeof createClient>>, userId: string) {
+ * site-admin, and leaves an already-business_owner account as is). Exported
+ * so lib/actions/city-services.ts can reuse it when an admin assigns an
+ * owner at creation time, rather than duplicating this rule. */
+export async function upgradeToBusinessOwner(supabase: Awaited<ReturnType<typeof createClient>>, userId: string) {
   await supabase.from("profiles").update({ role: "business_owner" } as never).eq("id", userId).eq("role", "user");
 }
 
@@ -205,14 +227,15 @@ async function downgradeIfNoListingsLeft(supabase: Awaited<ReturnType<typeof cre
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", userId).single();
   if ((profile as { role: string } | null)?.role !== "business_owner") return;
 
-  const [{ count: hotels }, { count: restaurants }, { count: cafes }, { count: services }] = await Promise.all([
+  const [{ count: hotels }, { count: restaurants }, { count: cafes }, { count: services }, { count: cityServices }] = await Promise.all([
     supabase.from("hotels").select("id", { count: "exact", head: true }).eq("owner_id", userId),
     supabase.from("restaurants").select("id", { count: "exact", head: true }).eq("owner_id", userId),
     supabase.from("cafes").select("id", { count: "exact", head: true }).eq("owner_id", userId),
     supabase.from("services").select("id", { count: "exact", head: true }).eq("owner_id", userId),
+    supabase.from("city_services").select("id", { count: "exact", head: true }).eq("owner_id", userId),
   ]);
 
-  const total = (hotels ?? 0) + (restaurants ?? 0) + (cafes ?? 0) + (services ?? 0);
+  const total = (hotels ?? 0) + (restaurants ?? 0) + (cafes ?? 0) + (services ?? 0) + (cityServices ?? 0);
   if (total === 0) {
     await supabase.from("profiles").update({ role: "user" } as never).eq("id", userId).eq("role", "business_owner");
   }
@@ -329,7 +352,7 @@ export async function rejectBusinessClaim(
 }
 
 export interface OwnedListingRow {
-  listingType: BusinessListingType;
+  listingType: OwnableListingType;
   listingId: string;
   name: string;
   ownerId: string;
@@ -337,24 +360,27 @@ export interface OwnedListingRow {
   ownerName: string | null;
 }
 
-/** Admin-only. Every hotel/restaurant/cafe/service with an owner assigned —
- * feeds the "Transfer Ownership" section, which isn't limited to listings
- * that came through a claim (an owner_id can be set other ways too). */
+/** Admin-only. Every hotel/restaurant/cafe/service/city_service with an
+ * owner assigned — feeds the "Transfer Ownership" section, which isn't
+ * limited to listings that came through a claim (an owner_id can be set
+ * other ways too). */
 export async function getOwnedListings(): Promise<OwnedListingRow[]> {
   const { supabase } = await assertOwner();
 
-  const [{ data: hotels }, { data: restaurants }, { data: cafes }, { data: services }] = await Promise.all([
+  const [{ data: hotels }, { data: restaurants }, { data: cafes }, { data: services }, { data: cityServices }] = await Promise.all([
     supabase.from("hotels").select("id, name, owner_id").not("owner_id", "is", null),
     supabase.from("restaurants").select("id, name, owner_id").not("owner_id", "is", null),
     supabase.from("cafes").select("id, name, owner_id").not("owner_id", "is", null),
     supabase.from("services").select("id, name, owner_id").not("owner_id", "is", null),
+    supabase.from("city_services").select("id, name, owner_id").not("owner_id", "is", null),
   ]);
 
-  const entries: { listingType: BusinessListingType; table: string; id: string; name: string; owner_id: string }[] = [
+  const entries: { listingType: OwnableListingType; table: string; id: string; name: string; owner_id: string }[] = [
     ...((hotels ?? []) as { id: string; name: string; owner_id: string }[]).map((r) => ({ listingType: "hotel" as const, table: "hotels", ...r })),
     ...((restaurants ?? []) as { id: string; name: string; owner_id: string }[]).map((r) => ({ listingType: "restaurant" as const, table: "restaurants", ...r })),
     ...((cafes ?? []) as { id: string; name: string; owner_id: string }[]).map((r) => ({ listingType: "cafe" as const, table: "cafes", ...r })),
     ...((services ?? []) as { id: string; name: string; owner_id: string }[]).map((r) => ({ listingType: "service" as const, table: "services", ...r })),
+    ...((cityServices ?? []) as { id: string; name: string; owner_id: string }[]).map((r) => ({ listingType: "city_service" as const, table: "city_services", ...r })),
   ];
 
   if (entries.length === 0) return [];
@@ -380,7 +406,7 @@ export async function getOwnedListings(): Promise<OwnedListingRow[]> {
  * if this was their last remaining listing. */
 export async function transferOwnership(
   locale: string,
-  listingType: BusinessListingType,
+  listingType: OwnableListingType,
   listingId: string,
   newUserId: string
 ): Promise<{ ok: boolean; error?: string }> {
@@ -413,5 +439,34 @@ export async function transferOwnership(
   await logActivity("update", "ownership_transfer", listingId, { listingType, newUserId });
   revalidatePath(`/${locale}/admin/claims`);
   revalidatePath(`/${locale}/admin/partners`);
+  if (listingType === "city_service") revalidatePath(`/${locale}/admin/city-services`);
+  return { ok: true };
+}
+
+/** Admin-only. Unassigns a listing's owner entirely (owner_id -> null) —
+ * the one gap transferOwnership doesn't cover, since it always requires a
+ * new account to hand the listing to. Downgrades the former owner back to
+ * 'user' if this was their last remaining listing, same as a transfer away. */
+export async function removeOwnership(
+  locale: string,
+  listingType: OwnableListingType,
+  listingId: string
+): Promise<{ ok: boolean; error?: string }> {
+  const { supabase } = await assertOwner();
+  const table = LISTING_TABLE[listingType];
+
+  const { data: before } = await supabase.from(table).select("owner_id").eq("id", listingId).single();
+  const previous = before as { owner_id: string | null } | null;
+  if (!previous) return { ok: false, error: "Listing not found." };
+  if (!previous.owner_id) return { ok: true };
+
+  const { error } = await supabase.from(table).update({ owner_id: null } as never).eq("id", listingId);
+  if (error) return { ok: false, error: error.message };
+
+  await downgradeIfNoListingsLeft(supabase, previous.owner_id);
+
+  await logActivity("update", "ownership_removed", listingId, { listingType });
+  revalidatePath(`/${locale}/admin/claims`);
+  if (listingType === "city_service") revalidatePath(`/${locale}/admin/city-services`);
   return { ok: true };
 }

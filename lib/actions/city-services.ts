@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { logActivity } from "./activity";
+import { upgradeToBusinessOwner } from "./claims";
 import type { GalleryImage, MediaVideo, OpeningHoursGroup } from "@/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -47,8 +48,43 @@ async function assertOwner() {
   return supabase;
 }
 
+/**
+ * Same shape as lib/actions/business.ts's assertCanManageListing: a platform
+ * admin (role='owner') may edit any city service; a business_owner may only
+ * edit the one(s) assigned to them via owner_id. Used only by
+ * updateCityService — create/delete/feature/visibility toggles stay
+ * admin-only (assertOwner), same as hotels/restaurants/cafes/services only
+ * grant business_owner an UPDATE, never INSERT/DELETE. RLS's "Owners manage
+ * their city services" policy (owner_id = auth.uid()) backs this up server-side.
+ */
+async function assertCanEditCityService(id: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not signed in.");
+
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  const role = (profile as { role: string } | null)?.role;
+
+  if (role === "owner") return supabase;
+
+  if (role === "business_owner") {
+    const { data: listing } = await supabase.from("city_services").select("owner_id").eq("id", id).single();
+    if ((listing as { owner_id: string | null } | null)?.owner_id === user.id) return supabase;
+  }
+
+  throw new Error("Not authorized.");
+}
+
 export interface CityServiceInput {
   categoryId: string;
+  /** Only ever read by createCityService — assigning/changing/removing an
+   * owner on an EXISTING listing goes through lib/actions/claims.ts's
+   * transferOwnership/removeOwnership instead (admin-only there too), so a
+   * business_owner editing their own listing has no owner_id in their
+   * update payload at all to tamper with. */
+  ownerId?: string | null;
   name: string;
   nameAr?: string;
   nameSo?: string;
@@ -94,6 +130,7 @@ export async function createCityService(
     slug,
     category_id: input.categoryId,
     category,
+    owner_id: input.ownerId || null,
     name: input.name.trim(),
     name_ar: input.nameAr?.trim() || null,
     name_so: input.nameSo?.trim() || null,
@@ -129,7 +166,9 @@ export async function createCityService(
 
   if (error) return { ok: false, error: error.message };
 
-  await logActivity("create", "city_service", undefined, { name: input.name, categoryId: input.categoryId });
+  if (input.ownerId) await upgradeToBusinessOwner(supabase, input.ownerId);
+
+  await logActivity("create", "city_service", undefined, { name: input.name, categoryId: input.categoryId, ownerId: input.ownerId });
   revalidatePath(`/${locale}/admin/city-services`);
   revalidatePath(`/${locale}/city-services`);
   revalidatePath(`/${locale}/city-services/${slug}`);
@@ -147,7 +186,7 @@ export async function updateCityService(
   id: string,
   input: CityServiceInput
 ): Promise<{ ok: boolean; error?: string }> {
-  const supabase = await assertOwner();
+  const supabase = await assertCanEditCityService(id);
   const category = await legacyCategoryEnum(supabase, input.categoryId);
 
   const { error } = await supabase

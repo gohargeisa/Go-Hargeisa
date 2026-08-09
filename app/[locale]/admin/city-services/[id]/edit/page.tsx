@@ -3,10 +3,11 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/config";
-import { requireAdmin } from "@/lib/supabase/guards";
+import { requireListingsAccess } from "@/lib/supabase/guards";
 import { createClient } from "@/lib/supabase/server";
 import { CityServiceForm } from "@/components/admin/city-service-form";
 import { getCityServiceCategories } from "@/lib/data/categories";
+import { getUserDisplayInfo } from "@/lib/actions/claims";
 import type { OpeningHoursGroup } from "@/types";
 
 export const metadata: Metadata = { title: "Edit City Service — Admin" };
@@ -16,7 +17,7 @@ export default async function EditCityServicePage({
 }: {
   params: { locale: Locale; id: string };
 }) {
-  await requireAdmin(locale, `/${locale}/admin/city-services/${id}/edit`);
+  const access = await requireListingsAccess(locale, `/${locale}/admin/city-services/${id}/edit`);
   const t = await getTranslations({ locale, namespace: "admin" });
 
   const supabase = await createClient();
@@ -25,7 +26,22 @@ export default async function EditCityServicePage({
   if (error || !data) notFound();
 
   const service = data as unknown as Database["public"]["Tables"]["city_services"]["Row"];
+
+  // Business owners may only edit city services assigned to them — RLS
+  // enforces this on the actual write, but block the read here too so they
+  // can't view another owner's listing details in the form (same as
+  // app/[locale]/admin/hotels/[id]/edit/page.tsx).
+  if (access?.role === "business_owner" && service.owner_id !== access.userId) {
+    notFound();
+  }
+
   const categories = await getCityServiceCategories();
+
+  // Only a site admin may see/change the Assigned Owner field —
+  // getUserDisplayInfo is itself admin-gated (assertOwner), so this only
+  // ever runs for role='owner'.
+  const canAssignOwner = access?.role === "owner";
+  const initialOwner = canAssignOwner && service.owner_id ? await getUserDisplayInfo(service.owner_id) : null;
 
   return (
     <section className="container-px mx-auto py-14">
@@ -35,6 +51,8 @@ export default async function EditCityServicePage({
         mode="edit"
         serviceId={service.id}
         categories={categories}
+        canAssignOwner={canAssignOwner}
+        initialOwner={initialOwner ? { id: initialOwner.id, name: initialOwner.fullName, email: initialOwner.email } : null}
         initial={{
           categoryId: service.category_id,
           name: service.name,
