@@ -15,11 +15,12 @@ function localeFromRevalidatePaths(paths: string[]): Locale {
   return (paths[0]?.match(/^\/([a-z]{2})\//)?.[1] as Locale) ?? "en";
 }
 
-const LISTING_TABLE: Record<BusinessListingType, "hotels" | "restaurants" | "cafes" | "services"> = {
+const LISTING_TABLE: Record<BusinessListingType, "hotels" | "restaurants" | "cafes" | "services" | "city_services"> = {
   hotel: "hotels",
   restaurant: "restaurants",
   cafe: "cafes",
   service: "services",
+  city_service: "city_services",
 };
 
 /**

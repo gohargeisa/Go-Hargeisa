@@ -157,7 +157,7 @@ type CategoryRow = {
   created_at: string; updated_at: string;
 };
 
-type BusinessListingType = "hotel" | "restaurant" | "cafe" | "service";
+type BusinessListingType = "hotel" | "restaurant" | "cafe" | "service" | "city_service";
 
 type BookingRow = {
   id: string; hotel_id: string; room_id: string | null; guest_name: string; guest_phone: string | null;

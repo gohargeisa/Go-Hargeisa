@@ -43,11 +43,12 @@ function galleryLength(gallery: unknown): number {
 async function _getOwnedListings(userId: string): Promise<OwnedListing[]> {
   const supabase = await createClient();
 
-  const [{ data: hotels }, { data: restaurants }, { data: cafes }, { data: services }] = await Promise.all([
+  const [{ data: hotels }, { data: restaurants }, { data: cafes }, { data: services }, { data: cityServices }] = await Promise.all([
     supabase.from("hotels").select("*").eq("owner_id", userId),
     supabase.from("restaurants").select("*").eq("owner_id", userId),
     supabase.from("cafes").select("*").eq("owner_id", userId),
     supabase.from("services").select("*").eq("owner_id", userId),
+    supabase.from("city_services").select("*").eq("owner_id", userId),
   ]);
 
   const out: OwnedListing[] = [];
@@ -133,6 +134,31 @@ async function _getOwnedListings(userId: string): Promise<OwnedListing[]> {
       serviceTags: s.services ?? [],
       hasDescription: Boolean(s.description?.trim()),
       galleryCount: galleryLength(s.gallery),
+      partnerStatus: "official",
+    });
+  }
+  // city_services has no partner_status column and no trial flow, same
+  // rationale as `services` above — owner_id is set directly by an admin
+  // (transferOwnership), so it's always "official". No address column
+  // either (city_services only stores lat/lng + maps_url) — "" rather than
+  // undefined since OwnedListing.address is required.
+  for (const cs of cityServices ?? []) {
+    out.push({
+      listingType: "city_service",
+      id: cs.id,
+      slug: cs.slug,
+      name: cs.name,
+      logo: undefined,
+      coverImage: cs.image ?? "",
+      address: "",
+      phone: cs.phone ?? undefined,
+      website: cs.website ?? undefined,
+      rating: Number(cs.rating),
+      reviewCount: cs.review_count,
+      createdAt: cs.created_at,
+      serviceTags: cs.amenities_v2 ?? [],
+      hasDescription: Boolean(cs.description?.trim()),
+      galleryCount: galleryLength(cs.gallery),
       partnerStatus: "official",
     });
   }

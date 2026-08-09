@@ -2,14 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { getOpenStatus, formatTime12h } from "@/lib/utils/opening-hours";
+import { getOpenStatus, getHargeisaNow, formatTime12h } from "@/lib/utils/opening-hours";
 import type { OpeningHoursGroup } from "@/types";
 
 /**
- * Computed on the client (not baked into the SSR/ISR html) so the badge
- * reflects the visitor's own clock/timezone, not the last hourly revalidate
- * or a fixed business-local time. Renders nothing until mounted to avoid a
- * hydration mismatch, since the server has no reliable "now" to render
+ * Computed on the client (not baked into the SSR/ISR html) against
+ * getHargeisaNow() — Africa/Mogadishu time (Hargeisa/Somaliland's real UTC
+ * offset, no DST) — rather than the visitor's own device clock, since a
+ * business's Open/Closed state is a fact about Hargeisa local time, not
+ * about whichever timezone happens to be reading the page. Still computed
+ * client-side (not baked into the SSR/ISR html) so the badge doesn't go
+ * stale between hourly revalidates. Renders nothing until mounted to avoid
+ * a hydration mismatch, since the server has no reliable "now" to render
  * this with — and renders nothing at all when there's no hours data and no
  * closure override set (an unconfigured listing shouldn't claim "Closed").
  *
@@ -43,7 +47,7 @@ export function OpenStatusBadge({
   const [status, setStatus] = useState<ReturnType<typeof getOpenStatus> | null>(null);
 
   useEffect(() => {
-    setStatus(getOpenStatus(groups, { is24Hours, temporarilyClosed, permanentlyClosed }));
+    setStatus(getOpenStatus(groups, { is24Hours, temporarilyClosed, permanentlyClosed }, getHargeisaNow()));
   }, [groups, is24Hours, temporarilyClosed, permanentlyClosed]);
 
   if (status === null) return null;

@@ -7,21 +7,28 @@ import { ImageUploader } from "@/components/shared/image-uploader";
 import { GalleryManager } from "@/components/admin/gallery-manager-lazy";
 import { VideoUploader } from "@/components/shared/video-uploader-lazy";
 import { updateRecord } from "@/lib/actions/admin";
+import { updateCityServicePartial } from "@/lib/actions/city-services";
 import { HOTEL_GALLERY_CATEGORIES, RESTAURANT_GALLERY_CATEGORIES, CAFE_GALLERY_CATEGORIES, SERVICE_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import type { BusinessListingType, GalleryImage, MediaVideo } from "@/types";
 
-const TABLE_BY_TYPE: Record<BusinessListingType, "hotels" | "restaurants" | "cafes" | "services"> = {
+const TABLE_BY_TYPE: Record<BusinessListingType, "hotels" | "restaurants" | "cafes" | "services" | "city_services"> = {
   hotel: "hotels",
   restaurant: "restaurants",
   cafe: "cafes",
   service: "services",
+  city_service: "city_services",
 };
-const CATEGORIES_BY_TYPE = {
+const CATEGORIES_BY_TYPE: Record<BusinessListingType, typeof SERVICE_GALLERY_CATEGORIES> = {
   hotel: HOTEL_GALLERY_CATEGORIES,
   restaurant: RESTAURANT_GALLERY_CATEGORIES,
   cafe: CAFE_GALLERY_CATEGORIES,
   service: SERVICE_GALLERY_CATEGORIES,
+  city_service: SERVICE_GALLERY_CATEGORIES,
 };
+
+function localeFromPath(path: string): string {
+  return path.match(/^\/([a-z]{2})\//)?.[1] ?? "en";
+}
 
 /**
  * The Media Manager: cover image (upload fresh, or promote an existing
@@ -58,17 +65,29 @@ export function GalleryManagerPanel({
   function onSave() {
     setError(null);
     startTransition(async () => {
-      const payload = { cover_image: cover, logo_url: logo || null, gallery, videos };
-      const result = await updateRecord(TABLE_BY_TYPE[listingType], listingId, payload, [currentPath], currentPath);
+      // city_services has no logo_url column and its cover field is called
+      // `image`, not `cover_image` — see updateCityServicePartial's comment.
+      const result =
+        listingType === "city_service"
+          ? await updateCityServicePartial(localeFromPath(currentPath), listingId, { image: cover, gallery, videos })
+          : await updateRecord(
+              TABLE_BY_TYPE[listingType] as "hotels" | "restaurants" | "cafes" | "services",
+              listingId,
+              { cover_image: cover, logo_url: logo || null, gallery, videos },
+              [currentPath],
+              currentPath
+            );
       if (result && !result.ok) setError(result.error ?? "Something went wrong.");
     });
   }
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-6 rounded-2xl border border-ink/8 bg-white p-5 dark:border-white/10 dark:bg-white/[0.03] sm:grid-cols-2 sm:p-6">
+      <div className={`grid gap-6 rounded-2xl border border-ink/8 bg-white p-5 dark:border-white/10 dark:bg-white/[0.03] sm:p-6 ${listingType === "city_service" ? "" : "sm:grid-cols-2"}`}>
         <ImageUploader folder={`${listingType}s`} value={cover} onChange={setCover} label={t("coverImage")} />
-        <ImageUploader folder={`${listingType}s/logos`} value={logo} onChange={setLogo} label={t("businessLogo")} rounded="rounded-full" />
+        {listingType !== "city_service" && (
+          <ImageUploader folder={`${listingType}s/logos`} value={logo} onChange={setLogo} label={t("businessLogo")} rounded="rounded-full" />
+        )}
       </div>
 
       <div className="rounded-2xl border border-ink/8 bg-white p-5 dark:border-white/10 dark:bg-white/[0.03] sm:p-6">

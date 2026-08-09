@@ -11,11 +11,12 @@ import type { HotelBookingMode, HotelExternalBookingOption, BusinessListingType 
 
 export const metadata: Metadata = { title: "My Business — Dashboard", robots: { index: false } };
 
-const TABLE_BY_TYPE: Record<BusinessListingType, "hotels" | "restaurants" | "cafes" | "services"> = {
+const TABLE_BY_TYPE: Record<BusinessListingType, "hotels" | "restaurants" | "cafes" | "services" | "city_services"> = {
   hotel: "hotels",
   restaurant: "restaurants",
   cafe: "cafes",
   service: "services",
+  city_service: "city_services",
 };
 
 export default async function MyBusinessPage({ params: { locale } }: { params: { locale: Locale } }) {
@@ -55,7 +56,11 @@ export default async function MyBusinessPage({ params: { locale } }: { params: {
           email: (row as { email?: string })?.email ?? "",
           socialInstagram: (row as { social_instagram?: string })?.social_instagram ?? "",
           socialFacebook: (row as { social_facebook?: string })?.social_facebook ?? "",
-          googleMapsUrl: (row as { google_maps_url?: string })?.google_maps_url ?? "",
+          // city_services' equivalent column is `maps_url`, not `google_maps_url`.
+          googleMapsUrl:
+            listing.listingType === "city_service"
+              ? ((row as { maps_url?: string })?.maps_url ?? "")
+              : ((row as { google_maps_url?: string })?.google_maps_url ?? ""),
           priceRange: (row as { price_range?: "$" | "$$" | "$$$" | "$$$$" })?.price_range ?? "$$",
           checkInTime: (row as { check_in_time?: string })?.check_in_time ?? "",
           checkOutTime: (row as { check_out_time?: string })?.check_out_time ?? "",

@@ -13,7 +13,13 @@ export default async function BusinessSettingsPage({ params: { locale } }: { par
   if (!listing) return null;
 
   const t = await getTranslations({ locale, namespace: "businessDashboard" });
-  const typeLabel = { hotel: t("typeHotel"), restaurant: t("typeRestaurant"), cafe: t("typeCafe"), service: t("typeService") }[listing.listingType];
+  const typeLabel = {
+    hotel: t("typeHotel"),
+    restaurant: t("typeRestaurant"),
+    cafe: t("typeCafe"),
+    service: t("typeService"),
+    city_service: t("typeCityService"),
+  }[listing.listingType];
 
   const links = [
     { href: `/${locale}/business/listing`, icon: Building2, title: t("navMyBusiness"), description: t("settingsLinkListingDescription") },

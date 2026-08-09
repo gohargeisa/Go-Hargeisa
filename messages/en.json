@@ -1882,6 +1882,7 @@
     "typeRestaurant": "Restaurant",
     "typeCafe": "Café",
     "typeService": "Service",
+    "typeCityService": "City Service",
     "ownerLabel": "Owner:",
     "notifications": "Notifications",
     "noBusinessTitle": "No business assigned yet",

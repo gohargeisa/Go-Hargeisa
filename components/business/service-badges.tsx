@@ -6,6 +6,7 @@ import { Loader2, Settings2 } from "lucide-react";
 import { amenityIcon } from "@/lib/utils/amenity-icon";
 import { TagInput } from "@/components/admin/form-shared";
 import { updateRecord } from "@/lib/actions/admin";
+import { updateCityServicePartial } from "@/lib/actions/city-services";
 import type { BusinessListingType } from "@/types";
 
 const FIELD_BY_TYPE: Record<BusinessListingType, string> = {
@@ -13,12 +14,14 @@ const FIELD_BY_TYPE: Record<BusinessListingType, string> = {
   restaurant: "cuisine",
   cafe: "special_drinks",
   service: "services",
+  city_service: "amenities_v2",
 };
-const TABLE_BY_TYPE: Record<BusinessListingType, "hotels" | "restaurants" | "cafes" | "services"> = {
+const TABLE_BY_TYPE: Record<BusinessListingType, "hotels" | "restaurants" | "cafes" | "services" | "city_services"> = {
   hotel: "hotels",
   restaurant: "restaurants",
   cafe: "cafes",
   service: "services",
+  city_service: "city_services",
 };
 const SUGGESTIONS_BY_TYPE: Record<BusinessListingType, string[]> = {
   hotel: [
@@ -35,7 +38,12 @@ const SUGGESTIONS_BY_TYPE: Record<BusinessListingType, string[]> = {
   restaurant: ["Somali", "Grill", "International", "Seafood", "Fast Food", "Ethiopian"],
   cafe: ["Somali Spiced Coffee", "Somali Tea (Shaah)", "Iced Caramel Macchiato", "Cold Brew"],
   service: ["24/7", "Emergency", "Card Payment", "Cash Only", "Home Delivery", "Wheelchair Accessible"],
+  city_service: ["24/7", "Emergency", "Card Payment", "Cash Only", "Home Delivery", "Wheelchair Accessible"],
 };
+
+function localeFromPath(path: string): string {
+  return path.match(/^\/([a-z]{2})\//)?.[1] ?? "en";
+}
 
 /**
  * Reads/writes the exact same field HotelForm/RestaurantForm/CafeForm
@@ -66,8 +74,17 @@ export function ServiceBadges({
     setError(null);
     startTransition(async () => {
       const field = FIELD_BY_TYPE[listingType];
-      const result = await updateRecord(TABLE_BY_TYPE[listingType], listingId, { [field]: values }, [currentPath], currentPath);
-      // updateRecord redirects server-side on success and never returns here.
+      const result =
+        listingType === "city_service"
+          ? await updateCityServicePartial(localeFromPath(currentPath), listingId, { [field]: values })
+          : await updateRecord(
+              TABLE_BY_TYPE[listingType] as "hotels" | "restaurants" | "cafes" | "services",
+              listingId,
+              { [field]: values },
+              [currentPath],
+              currentPath
+            );
+      // updateRecord redirects server-side on success and never returns here; updateCityServicePartial always returns.
       if (result && !result.ok) setError(result.error ?? "Something went wrong.");
     });
   }

@@ -241,6 +241,41 @@ export async function updateCityService(
   return { ok: true };
 }
 
+/**
+ * Partial update for the /business dashboard's per-section forms (profile,
+ * gallery, service tags) — same "just PATCH the touched columns" shape as
+ * lib/actions/admin.ts's updateRecord, but scoped to city_services with
+ * assertCanEditCityService's owner_id-aware authorization. updateRecord
+ * itself doesn't support city_services at all (see its ALLOWED_TABLES —
+ * city_services was deliberately left off since its schema differs from
+ * hotels/restaurants/cafes/services: `image` not `cover_image`, no
+ * `logo_url`/`address`, `maps_url` not `google_maps_url`, `amenities_v2`
+ * for tags), so a full generic reuse isn't a safe drop-in. Column names are
+ * the caller's responsibility, same contract as updateRecord.
+ */
+export async function updateCityServicePartial(
+  locale: string,
+  id: string,
+  patch: Record<string, unknown>
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await assertCanEditCityService(id);
+
+  const { error } = await supabase
+    .from("city_services")
+    .update({ ...patch, updated_at: new Date().toISOString() } as never)
+    .eq("id", id);
+
+  if (error) return { ok: false, error: error.message };
+
+  await logActivity("update", "city_service", id);
+  revalidatePath(`/${locale}/city-services`);
+  const { data: row } = await supabase.from("city_services").select("slug").eq("id", id).single();
+  if (row?.slug) revalidatePath(`/${locale}/city-services/${row.slug}`);
+  revalidatePath(`/${locale}/services`);
+  revalidatePath(`/${locale}`);
+  return { ok: true };
+}
+
 /** Owner-only quick toggle from the list view — purely a "highlight within
  * its category" flag now (sort/visual emphasis), not a public-visibility
  * gate: every published listing shows regardless of this flag. */

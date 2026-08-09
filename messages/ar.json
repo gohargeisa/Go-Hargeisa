@@ -1882,6 +1882,7 @@
     "typeRestaurant": "مطعم",
     "typeCafe": "مقهى",
     "typeService": "خدمة",
+    "typeCityService": "خدمة مدينة",
     "ownerLabel": "المالك:",
     "notifications": "الإشعارات",
     "noBusinessTitle": "لا يوجد نشاط تجاري مرتبط بعد",

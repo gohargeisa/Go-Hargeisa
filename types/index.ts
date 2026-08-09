@@ -46,16 +46,20 @@ export interface Review {
 }
 
 /** Listing types with a full /business dashboard (bookings, offers,
- * analytics, gallery manager, messages) — see lib/data/business.ts. */
-export type BusinessListingType = "hotel" | "restaurant" | "cafe" | "service";
+ * analytics, gallery manager, messages) — see lib/data/business.ts.
+ * city_service joined this union 2026-08-09: it has its own dedicated
+ * server actions (lib/actions/city-services.ts's updateCityServicePartial)
+ * rather than the shared updateRecord/ALLOWED_TABLES pipeline the other
+ * four use, since its schema (image not cover_image, no logo_url/address,
+ * maps_url not google_maps_url, amenities_v2 for tags) differs from theirs. */
+export type BusinessListingType = "hotel" | "restaurant" | "cafe" | "service" | "city_service";
 
 /** Listing types the admin ownership-assignment system (lib/actions/claims.ts:
- * getOwnedListings/transferOwnership/removeOwnership) can operate on. A
- * superset of BusinessListingType — city_services has an owner_id and shows
- * up in admin ownership tools, but (unlike hotels/restaurants/cafes/services)
- * has no /business dashboard of its own, so it's kept out of the narrower
- * BusinessListingType used throughout that dashboard's exhaustive Record maps. */
-export type OwnableListingType = BusinessListingType | "city_service";
+ * getOwnedListings/transferOwnership/removeOwnership) can operate on. Kept as
+ * its own alias (rather than inlining BusinessListingType at each call site)
+ * since claims.ts predates city_service's /business dashboard support and
+ * this reads clearer at those call sites either way. */
+export type OwnableListingType = BusinessListingType;
 
 /** Every listing type that participates in the polymorphic reviews/
  * favorites/saved-trip-items system (the `listing_type` DB enum). Single

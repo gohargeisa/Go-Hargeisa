@@ -4,26 +4,36 @@ import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { Loader2, Plus, X } from "lucide-react";
 import { updateRecord } from "@/lib/actions/admin";
+import { updateCityServicePartial } from "@/lib/actions/city-services";
 import { ImageUploader } from "@/components/shared/image-uploader";
 import { OpeningHoursEditor } from "@/components/shared/opening-hours-editor";
 import type { BusinessListingType, OpeningHoursGroup } from "@/types";
 
-const TABLE_BY_TYPE: Record<BusinessListingType, "hotels" | "restaurants" | "cafes" | "services"> = {
+const TABLE_BY_TYPE: Record<BusinessListingType, "hotels" | "restaurants" | "cafes" | "services" | "city_services"> = {
   hotel: "hotels",
   restaurant: "restaurants",
   cafe: "cafes",
   service: "services",
+  city_service: "city_services",
 };
 
 /** whatsapp/email/social columns exist on all four listing tables (services
  * gained them in the Phase 9 CMS expansion) — price_range is the one field
- * among this group that services genuinely doesn't have. */
+ * among this group that services/city_service genuinely don't have. */
 const HAS_PRICE_RANGE: Record<BusinessListingType, boolean> = {
   hotel: true,
   restaurant: true,
   cafe: true,
   service: false,
+  city_service: false,
 };
+
+/** Extracts the locale segment from currentPath (`/${locale}/business/...`)
+ * — same convention as lib/actions/business.ts's localeFromRevalidatePaths,
+ * needed here only for city_service's updateCityServicePartial call. */
+function localeFromPath(path: string): string {
+  return path.match(/^\/([a-z]{2})\//)?.[1] ?? "en";
+}
 
 export interface MyBusinessFormInitial {
   name: string;
@@ -92,6 +102,28 @@ export function MyBusinessForm({
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+
+    if (listingType === "city_service") {
+      const patch: Record<string, unknown> = {
+        name: form.name,
+        description: form.description,
+        phone: form.phone || null,
+        whatsapp: form.whatsapp || null,
+        email: form.email || null,
+        social_instagram: form.socialInstagram || null,
+        social_facebook: form.socialFacebook || null,
+        maps_url: form.googleMapsUrl || null,
+        website: form.website || null,
+        opening_hours: form.openingHours || null,
+        opening_hours_structured: form.openingHoursStructured ?? [],
+      };
+      startTransition(async () => {
+        const result = await updateCityServicePartial(localeFromPath(currentPath), listingId, patch);
+        if (result && !result.ok) setError(result.error ?? "Something went wrong.");
+      });
+      return;
+    }
+
     const payload: Record<string, unknown> = {
       name: form.name,
       short_description: form.shortDescription,
@@ -129,7 +161,13 @@ export function MyBusinessForm({
       // On success updateRecord redirects server-side (to this same page,
       // since currentPath is both the revalidate target and redirectTo) and
       // never returns here — only the failure path reaches this line.
-      const result = await updateRecord(TABLE_BY_TYPE[listingType], listingId, payload, [currentPath], currentPath);
+      const result = await updateRecord(
+        TABLE_BY_TYPE[listingType] as "hotels" | "restaurants" | "cafes" | "services",
+        listingId,
+        payload,
+        [currentPath],
+        currentPath
+      );
       if (result && !result.ok) setError(result.error ?? "Something went wrong.");
     });
   }
@@ -146,15 +184,17 @@ export function MyBusinessForm({
         <label className="mb-1.5 block text-sm font-semibold">{t("businessName")}</label>
         <input required value={form.name} onChange={(e) => update("name", e.target.value)} className={inputClass} />
       </div>
-      <div>
-        <label className="mb-1.5 block text-sm font-semibold">{t("shortDescription")}</label>
-        <input
-          required
-          value={form.shortDescription}
-          onChange={(e) => update("shortDescription", e.target.value)}
-          className={inputClass}
-        />
-      </div>
+      {listingType !== "city_service" && (
+        <div>
+          <label className="mb-1.5 block text-sm font-semibold">{t("shortDescription")}</label>
+          <input
+            required
+            value={form.shortDescription}
+            onChange={(e) => update("shortDescription", e.target.value)}
+            className={inputClass}
+          />
+        </div>
+      )}
       <div>
         <label className="mb-1.5 block text-sm font-semibold">{t("fullDescription")}</label>
         <textarea
@@ -165,10 +205,12 @@ export function MyBusinessForm({
           className={inputClass}
         />
       </div>
-      <div>
-        <label className="mb-1.5 block text-sm font-semibold">{t("addressLabel")}</label>
-        <input required value={form.address} onChange={(e) => update("address", e.target.value)} className={inputClass} />
-      </div>
+      {listingType !== "city_service" && (
+        <div>
+          <label className="mb-1.5 block text-sm font-semibold">{t("addressLabel")}</label>
+          <input required value={form.address} onChange={(e) => update("address", e.target.value)} className={inputClass} />
+        </div>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
@@ -271,7 +313,7 @@ export function MyBusinessForm({
         </div>
       )}
 
-      {(listingType === "restaurant" || listingType === "cafe") && (
+      {(listingType === "restaurant" || listingType === "cafe" || listingType === "city_service") && (
         <OpeningHoursEditor
           value={form.openingHoursStructured ?? []}
           onChange={(v) => update("openingHoursStructured", v)}
@@ -284,7 +326,7 @@ export function MyBusinessForm({
         />
       )}
 
-      {listingType !== "hotel" && listingType !== "service" && (
+      {listingType !== "hotel" && listingType !== "service" && listingType !== "city_service" && (
         <div>
           <div className="mb-1.5 flex items-center justify-between">
             <label className="text-sm font-semibold">{t("menuHighlightsLabel")}</label>
