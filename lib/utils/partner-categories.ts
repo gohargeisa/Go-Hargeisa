@@ -43,19 +43,26 @@ export function targetTableToJoinCategory(targetTable: CategoryTargetTable): "ho
 }
 
 /** A request is convertible into a real listing iff it's hotel/restaurant/
- * cafe — the only categories with their own dedicated table + owner_id/
- * claims workflow to convert into. Every "other" selection (long-tail
- * `services` categories and City Services categories alike) stays an
- * admin-reviewed lead, surfaced as "Verified Partner" once approved, since
- * there is no admin Services module to convert into anymore. `categoryId`/
- * `categoryTargetTable` are unused now but kept in the signature so every
- * call site (which still resolves and passes them) doesn't need to change. */
+ * cafe (their own dedicated table + owner_id/claims workflow) or a
+ * category="other" selection whose resolved category targets
+ * city_services (categoryId present and resolved to target_table
+ * 'city_services') — city_services still has a full admin CRUD
+ * (/admin/city-services, lib/actions/city-services.ts) to convert into,
+ * unlike the generic `services`-vertical long-tail categories (Real
+ * Estate, Flower Shops, ...), which stay admin-reviewed leads since that
+ * admin module was intentionally removed and has no create/delete/edit
+ * surface left to manage a converted row through. A missing/unresolved
+ * categoryId or any other target_table is never convertible — this
+ * function must never guess; convertJoinRequest's own checks mirror this
+ * exactly so the "Convert" button and what the server action will
+ * actually accept can never disagree. */
 export function isConvertibleCategory(
   category: JoinRequestCategory,
-  _categoryId: string | null,
-  _categoryTargetTable?: CategoryTargetTable | null
+  categoryId: string | null,
+  categoryTargetTable?: CategoryTargetTable | null
 ): boolean {
-  return category === "hotel" || category === "restaurant" || category === "cafe";
+  if (category === "hotel" || category === "restaurant" || category === "cafe") return true;
+  return category === "other" && Boolean(categoryId) && categoryTargetTable === "city_services";
 }
 
 /**

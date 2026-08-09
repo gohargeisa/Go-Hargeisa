@@ -5,12 +5,26 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Trash2, Loader2 } from "lucide-react";
 import { deleteListing } from "@/lib/actions/admin";
+import { deleteCityService } from "@/lib/actions/city-services";
 import { useToast, ToastViewport } from "@/components/shared/toast";
 
-const ALLOWED = ["hotels", "restaurants", "cafes", "attractions", "events", "articles"] as const;
+const ALLOWED = ["hotels", "restaurants", "cafes", "attractions", "events", "articles", "city_services"] as const;
 type Table = (typeof ALLOWED)[number];
 
-export function DeleteListingButton({ table, id, name }: { table: Table; id: string; name: string }) {
+export function DeleteListingButton({
+  table,
+  id,
+  name,
+  locale,
+}: {
+  table: Table;
+  id: string;
+  name: string;
+  /** Required only for table="city_services" — deleteCityService (unlike
+   * the generic deleteListing) revalidates locale-specific paths itself,
+   * so it needs one. Every other table ignores this. */
+  locale?: string;
+}) {
   const t = useTranslations("listings");
   const [confirming, setConfirming] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -23,7 +37,10 @@ export function DeleteListingButton({ table, id, name }: { table: Table; id: str
       return;
     }
     startTransition(async () => {
-      const result = await deleteListing(table, id, window.location.pathname);
+      const result =
+        table === "city_services"
+          ? await deleteCityService(locale ?? "en", id)
+          : await deleteListing(table, id, window.location.pathname);
       if (result.ok) {
         showToast("success", t("deleteSuccess", { name }));
         router.refresh();

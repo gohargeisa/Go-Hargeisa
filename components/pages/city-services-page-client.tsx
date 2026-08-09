@@ -16,6 +16,7 @@ export function CityServicesPageClient({
   groups,
   locale,
   initialQuery,
+  basePath,
 }: {
   /** Already filtered to non-empty, active categories, sorted by listing
    * count descending — see getCityServicesGroupedByCategory. This component
@@ -24,6 +25,11 @@ export function CityServicesPageClient({
   groups: CityServiceCategoryGroup[];
   locale: string;
   initialQuery?: string;
+  /** Where the search box submits `?q=`. Defaults to /city-services (this
+   * component's original, only caller) — /services reuses this same
+   * component against the same city_services data and passes its own path
+   * here so search stays on the page the visitor is actually on. */
+  basePath?: string;
 }) {
   const t = useTranslations("cityServices");
   const [activeCategoryId, setActiveCategoryId] = useState<string | "all">("all");
@@ -47,7 +53,7 @@ export function CityServicesPageClient({
   return (
     <div>
       <div className="mb-8 flex flex-col gap-4">
-        <SearchWithin basePath={`/${locale}/city-services`} placeholder={t("searchPlaceholder")} defaultValue={initialQuery} />
+        <SearchWithin basePath={basePath ?? `/${locale}/city-services`} placeholder={t("searchPlaceholder")} defaultValue={initialQuery} />
 
         {groups.length > 1 && (
           <div className="flex flex-wrap gap-2">

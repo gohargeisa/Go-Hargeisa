@@ -18,7 +18,7 @@ import { isConvertibleCategory } from "@/lib/utils/partner-categories";
 import { formatTime12h } from "@/lib/utils/opening-hours";
 import { buildGoogleMapsUrl } from "@/lib/utils/google-maps";
 import type { Locale } from "@/lib/i18n/config";
-import type { BusinessRequestStatus, CategoryTargetTable, JoinRequestCategory, WeeklyHoursDay } from "@/types";
+import type { BusinessRequestStatus, CategoryTargetTable, ConvertibleJoinRequestCategory, JoinRequestCategory, WeeklyHoursDay } from "@/types";
 
 export interface RequestNote {
   id: string;
@@ -63,22 +63,41 @@ export interface RequestRow {
   amenities: string[];
   priceRange: "$" | "$$" | "$$$" | "$$$$" | null;
   status: BusinessRequestStatus;
-  convertedListingType: JoinRequestCategory | null;
+  convertedListingType: ConvertibleJoinRequestCategory | null;
   convertedListingId: string | null;
   convertedAt: string | null;
   createdAt: string;
   notes: RequestNote[];
 }
 
-// Matches the admin route segment (and DeleteListingButton's `table` prop)
-// each convertedListingType maps to — kept in one place since both the
-// "View listing" link and the "Delete listing" button need it. Only
-// hotel/restaurant/cafe are convertible (see isConvertibleCategory), so
-// those are the only tables an already-converted row can ever resolve to.
-function convertedListingTable(type: JoinRequestCategory | null): "hotels" | "restaurants" | "cafes" {
+// DeleteListingButton's `table` prop, per convertedListingType. "service"
+// (legacy, admin Services module removed) has no delete route left at
+// all — null on purpose, so the UI simply doesn't render a delete action
+// for it rather than pointing at a table with no admin CRUD.
+function convertedListingTable(
+  type: ConvertibleJoinRequestCategory | null
+): "hotels" | "restaurants" | "cafes" | "city_services" | null {
+  if (type === "hotel") return "hotels";
   if (type === "restaurant") return "restaurants";
   if (type === "cafe") return "cafes";
-  return "hotels";
+  if (type === "city_service") return "city_services";
+  return null;
+}
+
+// city_services' admin route segment is "city-services" (dash) even
+// though the table itself is "city_services" (underscore) — every other
+// table's route segment matches its table name exactly, so this is the
+// one exception worth a lookup rather than assuming they always match.
+const ADMIN_ROUTE_SEGMENT: Record<"hotels" | "restaurants" | "cafes" | "city_services", string> = {
+  hotels: "hotels",
+  restaurants: "restaurants",
+  cafes: "cafes",
+  city_services: "city-services",
+};
+
+function convertedListingEditHref(locale: Locale, type: ConvertibleJoinRequestCategory | null, id: string): string | null {
+  const table = convertedListingTable(type);
+  return table ? `/${locale}/admin/${ADMIN_ROUTE_SEGMENT[table]}/${id}/edit` : null;
 }
 
 const STATUS_STYLE: Record<BusinessRequestStatus, string> = {
@@ -353,19 +372,22 @@ export function RequestsList({ locale, rows }: { locale: Locale; rows: RequestRo
                         date: new Date(row.convertedAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }),
                       })
                     : t("convertedLabel")}
-                  <Link
-                    href={`/${locale}/admin/${convertedListingTable(row.convertedListingType)}/${row.convertedListingId}/edit`}
-                    className="inline-flex items-center gap-0.5 underline hover:text-primary"
-                  >
-                    {t("viewListingLabel")} <ExternalLink size={11} />
-                  </Link>
-                  {row.convertedListingId && (
-                    <DeleteListingButton
-                      table={convertedListingTable(row.convertedListingType)}
-                      id={row.convertedListingId}
-                      name={row.businessName}
-                    />
-                  )}
+                  {(() => {
+                    const editHref = convertedListingEditHref(locale, row.convertedListingType, row.convertedListingId!);
+                    const deleteTable = convertedListingTable(row.convertedListingType);
+                    return (
+                      <>
+                        {editHref && (
+                          <Link href={editHref} className="inline-flex items-center gap-0.5 underline hover:text-primary">
+                            {t("viewListingLabel")} <ExternalLink size={11} />
+                          </Link>
+                        )}
+                        {row.convertedListingId && deleteTable && (
+                          <DeleteListingButton table={deleteTable} id={row.convertedListingId} name={row.businessName} locale={locale} />
+                        )}
+                      </>
+                    );
+                  })()}
                 </span>
               ) : isConvertibleCategory(row.category, row.categoryId, row.categoryTargetTable) && !converting ? (
                 <button
