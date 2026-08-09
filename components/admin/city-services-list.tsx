@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Pencil, Trash2, Eye, EyeOff, Star, Loader2 } from "lucide-react";
+import { Pencil, Trash2, Eye, EyeOff, Star, Loader2, Search } from "lucide-react";
 import { deleteCityService, toggleCityServiceVisibility, toggleCityServiceFeatured } from "@/lib/actions/city-services";
 import type { Locale } from "@/lib/i18n/config";
 
@@ -13,22 +13,44 @@ export interface CityServiceListRow {
   id: string;
   name: string;
   image: string | null;
+  categoryId: string;
   /** Already-resolved localized display name of the joined `categories` row. */
   categoryName: string;
   status: "draft" | "published" | "archived";
   featured: boolean;
+  createdAt: string;
 }
+
+const STATUS_FILTERS = ["all", "draft", "published", "archived"] as const;
 
 /** Same mobile-card / desktop-table split as AdminListTable — city_services
  * has its own small list component rather than being forced into the generic
  * one built for the six other slug-based content types (different owner-only
- * auth model, extra featured/category-group affordances). */
-export function CityServicesList({ locale, rows }: { locale: Locale; rows: CityServiceListRow[] }) {
+ * auth model, extra featured/category-group affordances). Filters are
+ * client-side (same pattern as ServicesPageClient/admin-bookings-list.tsx) —
+ * the page already fetches every row in one query, so there's no separate
+ * server round-trip to add. */
+export function CityServicesList({
+  locale,
+  rows,
+  categories,
+}: {
+  locale: Locale;
+  rows: CityServiceListRow[];
+  /** Every city_services sub-category, active or not — an admin managing
+   * existing listings needs to find one even under a category they've since
+   * deactivated (e.g. Mosques). */
+  categories: { id: string; name: string }[];
+}) {
   const t = useTranslations("admin");
+  const tListings = useTranslations("listings");
   const router = useRouter();
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<(typeof STATUS_FILTERS)[number]>("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
 
   const statusLabel = { draft: t("statusDraft"), published: t("statusPublished"), archived: t("statusArchived") };
   const statusClass = {
@@ -37,9 +59,23 @@ export function CityServicesList({ locale, rows }: { locale: Locale; rows: CityS
     archived: "bg-ink/10 text-ink/60 dark:bg-white/10 dark:text-sand/60",
   };
 
+  const filtered = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    return rows.filter((row) => {
+      if (statusFilter !== "all" && row.status !== statusFilter) return false;
+      if (categoryFilter !== "all" && row.categoryId !== categoryFilter) return false;
+      if (needle && !row.name.toLowerCase().includes(needle)) return false;
+      return true;
+    });
+  }, [rows, query, statusFilter, categoryFilter]);
+
   function onToggle(row: CityServiceListRow) {
     setPendingId(row.id);
     startTransition(async () => {
+      // Cycles published <-> archived; a draft row also moves to published
+      // on click, same single-action affordance as every other admin list
+      // here. Archived -> published is how a restore happens — no separate
+      // "restore" action needed, the toggle already covers it both ways.
       const nextStatus = row.status === "published" ? "archived" : "published";
       const result = await toggleCityServiceVisibility(locale, row.id, nextStatus);
       if (result.ok) router.refresh();
@@ -71,14 +107,6 @@ export function CityServicesList({ locale, rows }: { locale: Locale; rows: CityS
       setPendingId(null);
       setConfirmDeleteId(null);
     });
-  }
-
-  if (rows.length === 0) {
-    return (
-      <p className="rounded-xl2 border border-dashed border-ink/15 dark:border-white/15 p-10 text-center text-sm text-ink/50 dark:text-sand/50">
-        {t("noCityServicesYet")}
-      </p>
-    );
   }
 
   const Actions = ({ row }: { row: CityServiceListRow }) => (
@@ -123,6 +151,7 @@ export function CityServicesList({ locale, rows }: { locale: Locale; rows: CityS
         onClick={() => onDelete(row)}
         onBlur={() => setConfirmDeleteId(null)}
         disabled={isPending && pendingId === row.id}
+        aria-label={confirmDeleteId === row.id ? tListings("deleteConfirmTooltip", { name: row.name }) : tListings("deleteLabel")}
         className={`flex h-8 items-center gap-1.5 rounded-lg border px-2 text-xs font-semibold transition-colors disabled:opacity-60 ${
           confirmDeleteId === row.id
             ? "border-red-500 bg-red-500 text-white"
@@ -135,80 +164,146 @@ export function CityServicesList({ locale, rows }: { locale: Locale; rows: CityS
   );
 
   return (
-    <>
-      <div className="flex flex-col gap-3 sm:hidden">
-        {rows.map((row) => (
-          <div key={row.id} className="rounded-xl2 border border-ink/8 bg-white p-4 dark:border-white/10 dark:bg-white/[0.03]">
-            <div className="flex items-center gap-3">
-              <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-ink/5 dark:bg-white/10">
-                {row.image && <Image src={row.image} alt={row.name} fill sizes="56px" className="object-cover" />}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate font-semibold">{row.name}</p>
-                <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                  <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${statusClass[row.status]}`}>
-                    {statusLabel[row.status]}
-                  </span>
-                  {row.featured && (
-                    <span className="rounded-full bg-amber-400/10 px-2 py-0.5 text-[11px] font-semibold text-amber-600 dark:text-amber-400">
-                      {t("featuredBadge")}
-                    </span>
-                  )}
-                  <span className="text-[11px] text-ink/45 dark:text-sand/45">{row.categoryName}</span>
-                </div>
-              </div>
-            </div>
-            <div className="mt-3 flex items-center justify-end gap-2 border-t border-ink/8 pt-3 dark:border-white/10">
-              <Actions row={row} />
-            </div>
-          </div>
+    <div>
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="flex flex-1 items-center gap-2 rounded-full border border-ink/12 bg-white px-4 py-2.5 dark:border-white/15 dark:bg-white/5 sm:max-w-sm">
+          <Search size={16} className="shrink-0 text-ink/40 dark:text-sand/40" aria-hidden="true" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={t("cityServicesSearchPlaceholder")}
+            className="w-full bg-transparent text-sm outline-none placeholder:text-ink/40 dark:placeholder:text-sand/40"
+          />
+        </div>
+        {categories.length > 0 && (
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="h-10 rounded-full border border-ink/12 bg-white px-3.5 text-sm dark:border-white/15 dark:bg-white/5"
+          >
+            <option value="all">{t("allCategoriesFilter")}</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
+
+      <div className="mb-5 flex flex-wrap items-center gap-2">
+        {STATUS_FILTERS.map((s) => (
+          <button
+            key={s}
+            type="button"
+            onClick={() => setStatusFilter(s)}
+            className={`inline-flex items-center rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors ${
+              statusFilter === s
+                ? "border-transparent bg-primary text-white"
+                : "border-ink/10 text-ink/60 hover:border-primary/40 dark:border-white/15 dark:text-sand/60"
+            }`}
+          >
+            {s === "all" ? t("allStatuses") : statusLabel[s]}
+          </button>
         ))}
       </div>
 
-      <div className="hidden overflow-x-auto rounded-xl2 border border-ink/8 dark:border-white/10 sm:block">
-        <table className="w-full text-sm">
-          <thead className="bg-ink/[0.03] dark:bg-white/5">
-            <tr>
-              <th className="px-5 py-3 text-start font-semibold">{t("colName")}</th>
-              <th className="px-5 py-3 text-start font-semibold">{t("cityServiceCategoryLabel")}</th>
-              <th className="px-5 py-3 text-start font-semibold">{t("colStatus")}</th>
-              <th className="px-5 py-3 text-end font-semibold">{t("colActions")}</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-ink/8 dark:divide-white/10">
-            {rows.map((row) => (
-              <tr key={row.id}>
-                <td className="px-5 py-3">
-                  <div className="flex items-center gap-3">
-                    <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-ink/5 dark:bg-white/10">
-                      {row.image && <Image src={row.image} alt={row.name} fill sizes="40px" className="object-cover" />}
-                    </div>
-                    <p className="font-medium">{row.name}</p>
+      {filtered.length === 0 ? (
+        <p className="rounded-xl2 border border-dashed border-ink/15 dark:border-white/15 p-10 text-center text-sm text-ink/50 dark:text-sand/50">
+          {rows.length === 0 ? t("noCityServicesYet") : tListings("noServicesMatch")}
+        </p>
+      ) : (
+        <>
+          <div className="flex flex-col gap-3 sm:hidden">
+            {filtered.map((row) => (
+              <div key={row.id} className="rounded-xl2 border border-ink/8 bg-white p-4 dark:border-white/10 dark:bg-white/[0.03]">
+                <div className="flex items-center gap-3">
+                  <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-ink/5 dark:bg-white/10">
+                    {row.image && <Image src={row.image} alt={row.name} fill sizes="56px" className="object-cover" />}
                   </div>
-                </td>
-                <td className="px-5 py-3">{row.categoryName}</td>
-                <td className="px-5 py-3">
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusClass[row.status]}`}>
-                      {statusLabel[row.status]}
-                    </span>
-                    {row.featured && (
-                      <span className="rounded-full bg-amber-400/10 px-2.5 py-1 text-xs font-semibold text-amber-600 dark:text-amber-400">
-                        {t("featuredBadge")}
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-semibold">{row.name}</p>
+                    <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                      <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${statusClass[row.status]}`}>
+                        {statusLabel[row.status]}
                       </span>
-                    )}
+                      {row.featured && (
+                        <span className="rounded-full bg-amber-400/10 px-2 py-0.5 text-[11px] font-semibold text-amber-600 dark:text-amber-400">
+                          {t("featuredBadge")}
+                        </span>
+                      )}
+                      <span className="text-[11px] text-ink/45 dark:text-sand/45">{row.categoryName}</span>
+                    </div>
+                    <p className="mt-1 text-[11px] text-ink/40 dark:text-sand/40">
+                      {t("colCreated")}: {new Date(row.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+                    </p>
                   </div>
-                </td>
-                <td className="px-5 py-3">
-                  <div className="flex justify-end gap-2">
-                    <Actions row={row} />
-                  </div>
-                </td>
-              </tr>
+                </div>
+                {confirmDeleteId === row.id && (
+                  <p className="mt-2 text-xs font-medium text-red-600">{tListings("deleteConfirmTooltip", { name: row.name })}</p>
+                )}
+                <div className="mt-3 flex items-center justify-end gap-2 border-t border-ink/8 pt-3 dark:border-white/10">
+                  <Actions row={row} />
+                </div>
+              </div>
             ))}
-          </tbody>
-        </table>
-      </div>
-    </>
+          </div>
+
+          <div className="hidden overflow-x-auto rounded-xl2 border border-ink/8 dark:border-white/10 sm:block">
+            <table className="w-full text-sm">
+              <thead className="bg-ink/[0.03] dark:bg-white/5">
+                <tr>
+                  <th className="px-5 py-3 text-start font-semibold">{t("colName")}</th>
+                  <th className="px-5 py-3 text-start font-semibold">{t("cityServiceCategoryLabel")}</th>
+                  <th className="px-5 py-3 text-start font-semibold">{t("colStatus")}</th>
+                  <th className="px-5 py-3 text-start font-semibold">{t("colCreated")}</th>
+                  <th className="px-5 py-3 text-end font-semibold">{t("colActions")}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-ink/8 dark:divide-white/10">
+                {filtered.map((row) => (
+                  <tr key={row.id}>
+                    <td className="px-5 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-ink/5 dark:bg-white/10">
+                          {row.image && <Image src={row.image} alt={row.name} fill sizes="40px" className="object-cover" />}
+                        </div>
+                        <p className="font-medium">{row.name}</p>
+                      </div>
+                    </td>
+                    <td className="px-5 py-3">{row.categoryName}</td>
+                    <td className="px-5 py-3">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusClass[row.status]}`}>
+                          {statusLabel[row.status]}
+                        </span>
+                        {row.featured && (
+                          <span className="rounded-full bg-amber-400/10 px-2.5 py-1 text-xs font-semibold text-amber-600 dark:text-amber-400">
+                            {t("featuredBadge")}
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-5 py-3 whitespace-nowrap text-ink/60 dark:text-sand/60">
+                      {new Date(row.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+                    </td>
+                    <td className="px-5 py-3">
+                      <div className="flex flex-col items-end gap-1">
+                        <div className="flex justify-end gap-2">
+                          <Actions row={row} />
+                        </div>
+                        {confirmDeleteId === row.id && (
+                          <p className="text-xs font-medium text-red-600">{tListings("deleteConfirmTooltip", { name: row.name })}</p>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+    </div>
   );
 }

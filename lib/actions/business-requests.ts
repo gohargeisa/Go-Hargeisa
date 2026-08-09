@@ -336,15 +336,49 @@ export async function convertJoinRequest(
       // resolved category's slug, same as createCityService does.
       const { data: slugTaken } = await supabase
         .from("city_services")
-        .select("id")
+        .select("id, name, category_id")
         .eq("slug", slug)
         .maybeSingle();
 
       if (slugTaken) {
-        return {
-          ok: false,
-          error: "That slug is already in use — please choose another.",
-        };
+        // Same slug + same business name + same category is the exact
+        // fingerprint of THIS request's own earlier attempt having already
+        // created the listing but failed to link back to it (see below —
+        // the listing_type_business enum write) rather than a genuinely
+        // different business independently choosing the same slug. Link
+        // the existing row instead of erroring or creating a duplicate.
+        // Any other match (different name/category) is a real collision —
+        // never silently attach an unrelated business to someone else's
+        // listing.
+        const sameBusiness = slugTaken.name === request.business_name && slugTaken.category_id === request.category_id;
+
+        if (!sameBusiness) {
+          return {
+            ok: false,
+            error: "That slug is already in use — please choose another.",
+          };
+        }
+
+        const { error: linkError } = await supabase
+          .from("business_join_requests")
+          .update({
+            status: "approved",
+            converted_listing_id: slugTaken.id,
+            converted_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          } as never)
+          .eq("id", requestId);
+
+        if (linkError) {
+          return { ok: false, error: linkError.message };
+        }
+
+        revalidatePath(`/${locale}/admin/requests`);
+        revalidatePath(`/${locale}/admin/city-services`);
+        revalidatePath(`/${locale}/city-services`);
+        revalidatePath(`/${locale}/services`);
+
+        return { ok: true, listingId: slugTaken.id, table: "city_services" };
       }
 
       const legacyCategoryEnum = resolvedCategory.slug.replace(/-/g, "_");
@@ -378,11 +412,24 @@ export async function convertJoinRequest(
         };
       }
 
+      // converted_listing_type is deliberately NOT set to "city_service"
+      // here: the listing_type_business Postgres enum was never extended
+      // with that value (a migration for it exists but is not yet
+      // applied), so writing it fails outright — confirmed by a real
+      // production incident where this exact insert succeeded but this
+      // update then failed, leaving the request's converted_listing_id
+      // NULL despite the listing existing (the slugTaken branch above
+      // exists specifically to self-heal that state on a retry). Leaving
+      // converted_listing_type NULL lets converted_listing_id — the one
+      // idempotency actually depends on — get set successfully today,
+      // at the cost of the admin requests list not being able to build a
+      // direct "View listing" link for city_service rows until that
+      // migration lands (the listing itself remains fully manageable via
+      // /admin/city-services in the meantime).
       const { error: updateError } = await supabase
         .from("business_join_requests")
         .update({
           status: "approved",
-          converted_listing_type: "city_service",
           converted_listing_id: created.id,
           converted_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
@@ -390,6 +437,11 @@ export async function convertJoinRequest(
         .eq("id", requestId);
 
       if (updateError) {
+        // Keep the two tables consistent — an unlinked listing is exactly
+        // the broken state this whole branch exists to avoid, and leaving
+        // it in place would only surface as a confusing slug collision on
+        // the next retry.
+        await supabase.from("city_services").delete().eq("id", created.id);
         return { ok: false, error: updateError.message };
       }
 

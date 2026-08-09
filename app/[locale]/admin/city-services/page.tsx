@@ -17,7 +17,11 @@ export default async function AdminCityServicesPage({ params: { locale } }: { pa
 
   const supabase = await createClient();
   const [{ data }, allCategories] = await Promise.all([
-    supabase.from("city_services").select("id, name, image, category_id, status, featured").order("category_id").order("sort_order"),
+    supabase
+      .from("city_services")
+      .select("id, name, image, category_id, status, featured, created_at")
+      .order("category_id")
+      .order("sort_order"),
     getCategoriesForAdmin(),
   ]);
   const categoryById = new Map(allCategories.map((c) => [c.id, c]));
@@ -27,11 +31,22 @@ export default async function AdminCityServicesPage({ params: { locale } }: { pa
       id: row.id,
       name: row.name,
       image: row.image,
+      categoryId: row.category_id,
       categoryName: category ? categoryDisplayName(category, locale) : "—",
       status: row.status,
       featured: row.featured,
+      createdAt: row.created_at,
     };
   });
+
+  // Every real City Services sub-category (Hospitals, Pharmacies, ...) —
+  // same target_table='city_services', is_pinned=false shape
+  // getCityServiceCategories() uses, except this admin filter dropdown
+  // also needs currently-inactive categories (e.g. Mosques, deactivated
+  // but still owning existing listings an admin may need to find/manage).
+  const filterCategories = allCategories
+    .filter((c) => c.targetTable === "city_services" && !c.isPinned)
+    .map((c) => ({ id: c.id, name: categoryDisplayName(c, locale) }));
 
   return (
     <section className="container-px mx-auto py-14">
@@ -49,7 +64,7 @@ export default async function AdminCityServicesPage({ params: { locale } }: { pa
       </div>
 
       <div className="mt-8">
-        <CityServicesList locale={locale} rows={rows} />
+        <CityServicesList locale={locale} rows={rows} categories={filterCategories} />
       </div>
     </section>
   );

@@ -70,17 +70,30 @@ export interface RequestRow {
   notes: RequestNote[];
 }
 
-// DeleteListingButton's `table` prop, per convertedListingType. "service"
-// (legacy, admin Services module removed) has no delete route left at
-// all — null on purpose, so the UI simply doesn't render a delete action
-// for it rather than pointing at a table with no admin CRUD.
-function convertedListingTable(
-  type: ConvertibleJoinRequestCategory | null
-): "hotels" | "restaurants" | "cafes" | "city_services" | null {
-  if (type === "hotel") return "hotels";
-  if (type === "restaurant") return "restaurants";
-  if (type === "cafe") return "cafes";
-  if (type === "city_service") return "city_services";
+// DeleteListingButton's `table` prop / the "View listing" link's target
+// table, resolved for an already-converted row. Prefers convertedListingType
+// when it's set (hotel/restaurant/cafe always have it — those are valid
+// listing_type_business enum values). City Service conversions leave it
+// NULL on purpose (the enum has no 'city_service' value — see
+// lib/actions/business-requests.ts — and adding it needs a migration this
+// project isn't applying yet), so for those we fall back to a signal that
+// doesn't depend on the enum at all: a category="other" request whose OWN
+// selected category resolves to target_table='city_services' can only ever
+// have been converted into city_services — that's the only table
+// isConvertibleCategory/convertJoinRequest ever send an "other" request to
+// besides the (currently unreachable) generic services table. "service"
+// (legacy, admin Services module removed) has no delete/edit route left at
+// all — null on purpose, so the UI simply doesn't render an action for it.
+function convertedListingTable(row: {
+  convertedListingType: ConvertibleJoinRequestCategory | null;
+  category: JoinRequestCategory;
+  categoryTargetTable: CategoryTargetTable | null;
+}): "hotels" | "restaurants" | "cafes" | "city_services" | null {
+  if (row.convertedListingType === "hotel") return "hotels";
+  if (row.convertedListingType === "restaurant") return "restaurants";
+  if (row.convertedListingType === "cafe") return "cafes";
+  if (row.convertedListingType === "city_service") return "city_services";
+  if (row.category === "other" && row.categoryTargetTable === "city_services") return "city_services";
   return null;
 }
 
@@ -95,8 +108,12 @@ const ADMIN_ROUTE_SEGMENT: Record<"hotels" | "restaurants" | "cafes" | "city_ser
   city_services: "city-services",
 };
 
-function convertedListingEditHref(locale: Locale, type: ConvertibleJoinRequestCategory | null, id: string): string | null {
-  const table = convertedListingTable(type);
+function convertedListingEditHref(
+  locale: Locale,
+  row: { convertedListingType: ConvertibleJoinRequestCategory | null; category: JoinRequestCategory; categoryTargetTable: CategoryTargetTable | null },
+  id: string
+): string | null {
+  const table = convertedListingTable(row);
   return table ? `/${locale}/admin/${ADMIN_ROUTE_SEGMENT[table]}/${id}/edit` : null;
 }
 
@@ -373,8 +390,8 @@ export function RequestsList({ locale, rows }: { locale: Locale; rows: RequestRo
                       })
                     : t("convertedLabel")}
                   {(() => {
-                    const editHref = convertedListingEditHref(locale, row.convertedListingType, row.convertedListingId!);
-                    const deleteTable = convertedListingTable(row.convertedListingType);
+                    const editHref = convertedListingEditHref(locale, row, row.convertedListingId!);
+                    const deleteTable = convertedListingTable(row);
                     return (
                       <>
                         {editHref && (
