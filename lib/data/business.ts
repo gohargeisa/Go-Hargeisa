@@ -27,6 +27,14 @@ export interface OwnedListing {
   /** 'trial' listings have a linked owner_id but no dashboard access yet —
    * see app/[locale]/business/layout.tsx, which is what actually enforces this. */
   partnerStatus: "trial" | "official";
+  /** Phase 4 — only ever true for city_service listings whose category has
+   * the matching categories.supports_products/supports_appointments flag
+   * (see lib/data/categories.ts's mapCategory). Always false for
+   * hotel/restaurant/cafe/service, which have no such flag. Drives the
+   * conditional "Products"/"Doctors"/"Appointments" nav items in
+   * business-sidebar.tsx. */
+  supportsProducts: boolean;
+  supportsAppointments: boolean;
 }
 
 function galleryLength(gallery: unknown): number {
@@ -48,7 +56,10 @@ async function _getOwnedListings(userId: string): Promise<OwnedListing[]> {
     supabase.from("restaurants").select("*").eq("owner_id", userId),
     supabase.from("cafes").select("*").eq("owner_id", userId),
     supabase.from("services").select("*").eq("owner_id", userId),
-    supabase.from("city_services").select("*").eq("owner_id", userId),
+    supabase
+      .from("city_services")
+      .select("*, categories(supports_products, supports_appointments)")
+      .eq("owner_id", userId),
   ]);
 
   const out: OwnedListing[] = [];
@@ -71,6 +82,8 @@ async function _getOwnedListings(userId: string): Promise<OwnedListing[]> {
       hasDescription: Boolean(h.description?.trim()),
       galleryCount: galleryLength(h.gallery),
       partnerStatus: h.partner_status,
+      supportsProducts: false,
+      supportsAppointments: false,
     });
   }
   for (const r of restaurants ?? []) {
@@ -91,6 +104,8 @@ async function _getOwnedListings(userId: string): Promise<OwnedListing[]> {
       hasDescription: Boolean(r.description?.trim()),
       galleryCount: galleryLength(r.gallery),
       partnerStatus: r.partner_status,
+      supportsProducts: false,
+      supportsAppointments: false,
     });
   }
   for (const c of cafes ?? []) {
@@ -111,6 +126,8 @@ async function _getOwnedListings(userId: string): Promise<OwnedListing[]> {
       hasDescription: Boolean(c.description?.trim()),
       galleryCount: galleryLength(c.gallery),
       partnerStatus: c.partner_status,
+      supportsProducts: false,
+      supportsAppointments: false,
     });
   }
   // Services has no partner_status/logo_url column — there's no trial
@@ -135,6 +152,8 @@ async function _getOwnedListings(userId: string): Promise<OwnedListing[]> {
       hasDescription: Boolean(s.description?.trim()),
       galleryCount: galleryLength(s.gallery),
       partnerStatus: "official",
+      supportsProducts: false,
+      supportsAppointments: false,
     });
   }
   // city_services has no partner_status column and no trial flow, same
@@ -143,6 +162,7 @@ async function _getOwnedListings(userId: string): Promise<OwnedListing[]> {
   // either (city_services only stores lat/lng + maps_url) — "" rather than
   // undefined since OwnedListing.address is required.
   for (const cs of cityServices ?? []) {
+    const category = (cs as unknown as { categories: { supports_products: boolean; supports_appointments: boolean } | null }).categories;
     out.push({
       listingType: "city_service",
       id: cs.id,
@@ -160,6 +180,8 @@ async function _getOwnedListings(userId: string): Promise<OwnedListing[]> {
       hasDescription: Boolean(cs.description?.trim()),
       galleryCount: galleryLength(cs.gallery),
       partnerStatus: "official",
+      supportsProducts: category?.supports_products ?? false,
+      supportsAppointments: category?.supports_appointments ?? false,
     });
   }
 

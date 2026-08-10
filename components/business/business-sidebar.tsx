@@ -24,12 +24,16 @@ import {
   ExternalLink,
   Tag,
   Bell,
+  Package,
+  Users,
+  Stethoscope,
+  CalendarCheck,
 } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { SignOutButton } from "@/components/shared/sign-out-button";
 import type { OwnedListing } from "@/lib/data/business";
 
-const NAV_ITEMS = [
+const BASE_NAV_ITEMS = [
   { href: "", icon: Home, key: "navDashboard" },
   { href: "/listing", icon: Building2, key: "navMyBusiness" },
   { href: "/offers", icon: Tag, key: "navOffers" },
@@ -43,6 +47,28 @@ const NAV_ITEMS = [
   { href: "/settings", icon: Settings, key: "navSettings" },
   { href: "/support", icon: HelpCircle, key: "navSupport" },
 ] as const;
+
+/** Phase 4 — inserted right after "My Business" only for the listing types
+ * that actually have these engines wired up (categories.supports_products/
+ * supports_appointments), so every hotel/restaurant/cafe/service owner's
+ * sidebar is completely unaffected. */
+const PRODUCTS_NAV_ITEM = { href: "/products", icon: Package, key: "navProducts" } as const;
+const APPOINTMENTS_NAV_ITEMS = [
+  { href: "/departments", icon: Users, key: "navDepartments" },
+  { href: "/doctors", icon: Stethoscope, key: "navDoctors" },
+  { href: "/appointments", icon: CalendarCheck, key: "navAppointments" },
+] as const;
+
+function getNavItems(listing: OwnedListing) {
+  const items: { href: string; icon: typeof Home; key: string }[] = [...BASE_NAV_ITEMS];
+  const myBusinessIndex = items.findIndex((i) => i.key === "navMyBusiness");
+  const inserts = [
+    ...(listing.supportsProducts ? [PRODUCTS_NAV_ITEM] : []),
+    ...(listing.supportsAppointments ? APPOINTMENTS_NAV_ITEMS : []),
+  ];
+  if (inserts.length > 0) items.splice(myBusinessIndex + 1, 0, ...inserts);
+  return items;
+}
 
 const PUBLIC_SEGMENT: Record<OwnedListing["listingType"], string> = {
   hotel: "hotels",
@@ -81,10 +107,11 @@ export function BusinessSidebar({ locale, listing }: { locale: Locale; listing: 
     city_service: t("typeCityService"),
   }[listing.listingType];
   const publicHref = `/${locale}/${PUBLIC_SEGMENT[listing.listingType]}/${listing.slug}`;
+  const navItems = getNavItems(listing);
 
   const nav = (
     <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-      {NAV_ITEMS.map(({ href, icon: Icon, key }) => (
+      {navItems.map(({ href, icon: Icon, key }) => (
         <Link
           key={key}
           href={`${base}${href}`}

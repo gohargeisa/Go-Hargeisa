@@ -1,5 +1,5 @@
 import type { Database } from "@/types/database";
-import type { Hotel, HotelRoom, Restaurant, Cafe, Service, Attraction, EventItem, CityService, Article, GalleryImage, Review, BusinessOffer, MediaVideo, Notification, NotificationCategory, NotificationSeverity, Category } from "@/types";
+import type { Hotel, HotelRoom, Restaurant, Cafe, Service, Attraction, EventItem, CityService, Article, GalleryImage, Review, BusinessOffer, MediaVideo, Notification, NotificationCategory, NotificationSeverity, Category, Product, Department, Doctor, Appointment, OpeningHoursGroup } from "@/types";
 
 type HotelRow = Database["public"]["Tables"]["hotels"]["Row"];
 type HotelRoomRow = Database["public"]["Tables"]["hotel_rooms"]["Row"];
@@ -12,6 +12,10 @@ type CityServiceRow = Database["public"]["Tables"]["city_services"]["Row"];
 type ArticleRow = Database["public"]["Tables"]["articles"]["Row"];
 type ReviewRow = Database["public"]["Tables"]["reviews"]["Row"];
 type CategoryRow = Database["public"]["Tables"]["categories"]["Row"];
+type ProductRow = Database["public"]["Tables"]["products"]["Row"];
+type DepartmentRow = Database["public"]["Tables"]["departments"]["Row"];
+type DoctorRow = Database["public"]["Tables"]["doctors"]["Row"];
+type AppointmentRow = Database["public"]["Tables"]["appointments"]["Row"];
 
 function toGallery(json: unknown): GalleryImage[] {
   if (!Array.isArray(json)) return [];
@@ -256,6 +260,8 @@ export function mapCategory(row: CategoryRow): Category {
     supportsGallery: row.supports_gallery,
     supportsNewFeatures: row.supports_new_features,
     schemaOrgType: row.schema_org_type ?? undefined,
+    supportsProducts: row.supports_products ?? false,
+    supportsAppointments: row.supports_appointments ?? false,
     isStandaloneSection: row.target_table !== "city_services",
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -437,6 +443,81 @@ export function mapCityService(row: CityServiceRow, reviews: Review[] = [], loca
     socialX: row.social_x ?? undefined,
     socialYoutube: row.social_youtube ?? undefined,
     socialTelegram: row.social_telegram ?? undefined,
+  };
+}
+
+export function mapProduct(row: ProductRow): Product {
+  return {
+    id: row.id,
+    listingType: "city_service",
+    listingId: row.listing_id,
+    name: row.name,
+    nameAr: row.name_ar ?? undefined,
+    nameSo: row.name_so ?? undefined,
+    description: row.description ?? undefined,
+    descriptionAr: row.description_ar ?? undefined,
+    descriptionSo: row.description_so ?? undefined,
+    brand: row.brand ?? undefined,
+    category: row.category ?? undefined,
+    gender: row.gender ?? undefined,
+    price: row.price != null ? Number(row.price) : undefined,
+    currency: row.currency,
+    image: row.image ?? undefined,
+    gallery: toGallery(row.gallery),
+    isAvailable: row.is_available,
+    isFeatured: row.is_featured,
+    isHidden: row.is_hidden,
+    sortOrder: row.sort_order,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+export function mapDepartment(row: DepartmentRow): Department {
+  return {
+    id: row.id,
+    cityServiceId: row.city_service_id,
+    name: row.name,
+    nameAr: row.name_ar ?? undefined,
+    nameSo: row.name_so ?? undefined,
+    sortOrder: row.sort_order,
+  };
+}
+
+export function mapDoctor(row: DoctorRow): Doctor {
+  return {
+    id: row.id,
+    cityServiceId: row.city_service_id,
+    departmentId: row.department_id ?? undefined,
+    name: row.name,
+    photo: row.photo ?? undefined,
+    specialty: row.specialty ?? undefined,
+    specialtyAr: row.specialty_ar ?? undefined,
+    specialtySo: row.specialty_so ?? undefined,
+    bio: row.bio ?? undefined,
+    bioAr: row.bio_ar ?? undefined,
+    bioSo: row.bio_so ?? undefined,
+    languages: row.languages ?? [],
+    workingHours: Array.isArray(row.working_hours) ? (row.working_hours as unknown as OpeningHoursGroup[]) : [],
+    appointmentDurationMinutes: row.appointment_duration_minutes,
+    isActive: row.is_active,
+    sortOrder: row.sort_order,
+  };
+}
+
+export function mapAppointment(row: AppointmentRow): Appointment {
+  return {
+    id: row.id,
+    doctorId: row.doctor_id,
+    patientName: row.patient_name,
+    patientPhone: row.patient_phone,
+    patientEmail: row.patient_email ?? undefined,
+    userId: row.user_id ?? undefined,
+    appointmentDate: row.appointment_date,
+    appointmentTime: row.appointment_time,
+    status: row.status,
+    notes: row.notes ?? undefined,
+    createdAt: row.created_at,
   };
 }
 

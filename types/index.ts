@@ -61,6 +61,90 @@ export type BusinessListingType = "hotel" | "restaurant" | "cafe" | "service" | 
  * this reads clearer at those call sites either way. */
 export type OwnableListingType = BusinessListingType;
 
+/** Fixed vocabulary for products.category — a CHECK constraint in the DB, not
+ * a free-text field or a managed CRUD table (Phase 4 design decision). Labels
+ * live in lib/config/product-categories.ts. */
+export type ProductCategory =
+  | "perfume" | "oud" | "bakhoor" | "attar" | "body_mist" | "cosmetics" | "makeup"
+  | "body_care" | "hair_care" | "gift_sets" | "accessories";
+
+export type ProductGender = "men" | "women" | "unisex" | "kids";
+
+/** Phase 4 Catalog/Product Engine — polymorphic owner (listingType/listingId),
+ * same pattern as reviews/business_metric_events, currently only wired up for
+ * listingType='city_service' (Perfume & Cosmetics shops). */
+export interface Product {
+  id: string;
+  listingType: "city_service";
+  listingId: string;
+  name: string;
+  nameAr?: string;
+  nameSo?: string;
+  description?: string;
+  descriptionAr?: string;
+  descriptionSo?: string;
+  brand?: string;
+  category?: ProductCategory;
+  gender?: ProductGender;
+  price?: number;
+  currency: string;
+  image?: string;
+  gallery: GalleryImage[];
+  isAvailable: boolean;
+  isFeatured: boolean;
+  isHidden: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Phase 4 Medical Appointment Engine — one shared engine for Hospitals,
+ * Clinics, and Dental Clinics. */
+export interface Department {
+  id: string;
+  cityServiceId: string;
+  name: string;
+  nameAr?: string;
+  nameSo?: string;
+  sortOrder: number;
+}
+
+export interface Doctor {
+  id: string;
+  cityServiceId: string;
+  departmentId?: string;
+  name: string;
+  photo?: string;
+  specialty?: string;
+  specialtyAr?: string;
+  specialtySo?: string;
+  bio?: string;
+  bioAr?: string;
+  bioSo?: string;
+  languages: string[];
+  /** Same OpeningHoursGroup[] shape as every other "hours" field on the platform. */
+  workingHours: OpeningHoursGroup[];
+  appointmentDurationMinutes: number;
+  isActive: boolean;
+  sortOrder: number;
+}
+
+export type AppointmentStatus = "pending" | "confirmed" | "cancelled" | "completed";
+
+export interface Appointment {
+  id: string;
+  doctorId: string;
+  patientName: string;
+  patientPhone: string;
+  patientEmail?: string;
+  userId?: string;
+  appointmentDate: string;
+  appointmentTime: string;
+  status: AppointmentStatus;
+  notes?: string;
+  createdAt: string;
+}
+
 /** Every listing type that participates in the polymorphic reviews/
  * favorites/saved-trip-items system (the `listing_type` DB enum). Single
  * source of truth for the `ListingType` alias every review/favorite/trip
@@ -122,6 +206,10 @@ export interface Category {
   supportsNewFeatures: boolean;
   /** schema.org @type for JSON-LD (e.g. "Hospital"). Falls back to "LocalBusiness" when unset. */
   schemaOrgType?: string;
+  /** Phase 4 — whether this category's city_services listings get the Products catalog UI (currently just perfume-shop). */
+  supportsProducts: boolean;
+  /** Phase 4 — whether this category's city_services listings get the Medical Appointment Engine (Book a Doctor/Dentist, currently hospital/clinic/dental-clinic). */
+  supportsAppointments: boolean;
   /** Computed, never stored — `targetTable !== "city_services"`. True for every category with its own reachable page
    * (hotels/restaurants/cafes/attractions/events/services); false only for City Services' internal groupings, which
    * exist solely to be grouped inside the City Services hub and must never also appear as a standalone page. Deriving

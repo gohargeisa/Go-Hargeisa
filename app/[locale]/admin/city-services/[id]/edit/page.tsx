@@ -6,8 +6,12 @@ import type { Locale } from "@/lib/i18n/config";
 import { requireListingsAccess } from "@/lib/supabase/guards";
 import { createClient } from "@/lib/supabase/server";
 import { CityServiceForm } from "@/components/admin/city-service-form";
-import { getCityServiceCategories } from "@/lib/data/categories";
+import { getCityServiceCategories, getCategoryById } from "@/lib/data/categories";
 import { getUserDisplayInfo } from "@/lib/actions/claims";
+import { ProductsManager, type ProductManagerRow } from "@/components/business/products-manager";
+import { DepartmentsManager, type DepartmentManagerRow } from "@/components/business/departments-manager";
+import { DoctorsManager, type DoctorManagerRow } from "@/components/business/doctors-manager";
+import { mapProduct, mapDepartment, mapDoctor } from "@/lib/data/mappers";
 import type { OpeningHoursGroup } from "@/types";
 
 export const metadata: Metadata = { title: "Edit City Service — Admin" };
@@ -42,6 +46,56 @@ export default async function EditCityServicePage({
   // ever runs for role='owner'.
   const canAssignOwner = access?.role === "owner";
   const initialOwner = canAssignOwner && service.owner_id ? await getUserDisplayInfo(service.owner_id) : null;
+
+  // Phase 4 — only Perfume & Cosmetics shops (categories.supports_products)
+  // get the Products manager embedded here, same gating as /business/products.
+  const category = await getCategoryById(service.category_id);
+  const productRows: ProductManagerRow[] = [];
+  if (category?.supportsProducts) {
+    const { data: productData } = await supabase
+      .from("products")
+      .select("*")
+      .eq("listing_type", "city_service")
+      .eq("listing_id", service.id)
+      .order("sort_order", { ascending: true });
+    for (const row of productData ?? []) {
+      const p = mapProduct(row);
+      productRows.push({
+        id: p.id, name: p.name, nameAr: p.nameAr, nameSo: p.nameSo,
+        description: p.description, descriptionAr: p.descriptionAr, descriptionSo: p.descriptionSo,
+        brand: p.brand, category: p.category, gender: p.gender, price: p.price, currency: p.currency,
+        image: p.image, gallery: p.gallery, isAvailable: p.isAvailable, isFeatured: p.isFeatured,
+        isHidden: p.isHidden, sortOrder: p.sortOrder,
+      });
+    }
+  }
+
+  // Phase 4 — only Hospitals/Clinics/Dental Clinics (categories.supports_appointments)
+  // get Departments/Doctors managers embedded here, same gating as
+  // /business/departments and /business/doctors.
+  const departmentRows: DepartmentManagerRow[] = [];
+  const doctorRows: DoctorManagerRow[] = [];
+  if (category?.supportsAppointments) {
+    const [{ data: departmentData }, { data: doctorData }] = await Promise.all([
+      supabase.from("departments").select("*").eq("city_service_id", service.id).order("sort_order", { ascending: true }),
+      supabase.from("doctors").select("*").eq("city_service_id", service.id).order("sort_order", { ascending: true }),
+    ]);
+    for (const row of departmentData ?? []) {
+      const d = mapDepartment(row);
+      departmentRows.push({ id: d.id, name: d.name, nameAr: d.nameAr, nameSo: d.nameSo, sortOrder: d.sortOrder });
+    }
+    for (const row of doctorData ?? []) {
+      const doc = mapDoctor(row);
+      doctorRows.push({
+        id: doc.id, name: doc.name, photo: doc.photo,
+        specialty: doc.specialty, specialtyAr: doc.specialtyAr, specialtySo: doc.specialtySo,
+        bio: doc.bio, bioAr: doc.bioAr, bioSo: doc.bioSo,
+        languages: doc.languages, workingHours: doc.workingHours,
+        appointmentDurationMinutes: doc.appointmentDurationMinutes, isActive: doc.isActive,
+        departmentId: doc.departmentId, sortOrder: doc.sortOrder,
+      });
+    }
+  }
 
   return (
     <section className="container-px mx-auto py-14">
@@ -90,6 +144,33 @@ export default async function EditCityServicePage({
           featured: service.featured,
         }}
       />
+
+      {category?.supportsProducts && (
+        <div className="mt-8">
+          <ProductsManager
+            listingId={service.id}
+            initialProducts={productRows}
+            revalidatePaths={[`/${locale}/admin/city-services/${service.id}/edit`]}
+            locale={locale}
+          />
+        </div>
+      )}
+
+      {category?.supportsAppointments && (
+        <div className="mt-8 space-y-6">
+          <DepartmentsManager
+            cityServiceId={service.id}
+            initialDepartments={departmentRows}
+            revalidatePaths={[`/${locale}/admin/city-services/${service.id}/edit`]}
+          />
+          <DoctorsManager
+            cityServiceId={service.id}
+            initialDoctors={doctorRows}
+            departments={departmentRows}
+            revalidatePaths={[`/${locale}/admin/city-services/${service.id}/edit`]}
+          />
+        </div>
+      )}
     </section>
   );
 }

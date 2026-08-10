@@ -154,6 +154,7 @@ type CategoryRow = {
   is_active: boolean; is_pinned: boolean; sort_order: number; search_keywords: string[];
   custom_fields_schema: Json;
   supports_gallery: boolean; supports_new_features: boolean; schema_org_type: string | null;
+  supports_products: boolean; supports_appointments: boolean;
   created_at: string; updated_at: string;
 };
 
@@ -171,6 +172,53 @@ type BookingRow = {
 
 type BookingStatusHistoryRow = {
   id: string; booking_id: string;
+  old_status: "pending" | "confirmed" | "cancelled" | "completed" | null;
+  new_status: "pending" | "confirmed" | "cancelled" | "completed";
+  changed_by: string | null; created_at: string;
+};
+
+type ProductRow = {
+  id: string; listing_type: string; listing_id: string;
+  name: string; name_ar: string | null; name_so: string | null;
+  description: string | null; description_ar: string | null; description_so: string | null;
+  brand: string | null;
+  category:
+    | "perfume" | "oud" | "bakhoor" | "attar" | "body_mist" | "cosmetics" | "makeup"
+    | "body_care" | "hair_care" | "gift_sets" | "accessories" | null;
+  gender: "men" | "women" | "unisex" | "kids" | null;
+  price: number | null; currency: string;
+  image: string | null; gallery: Json;
+  is_available: boolean; is_featured: boolean; is_hidden: boolean;
+  sort_order: number; created_at: string; updated_at: string;
+};
+
+type DepartmentRow = {
+  id: string; city_service_id: string;
+  name: string; name_ar: string | null; name_so: string | null;
+  sort_order: number; created_at: string;
+};
+
+type DoctorRow = {
+  id: string; city_service_id: string; department_id: string | null;
+  name: string; photo: string | null;
+  specialty: string | null; specialty_ar: string | null; specialty_so: string | null;
+  bio: string | null; bio_ar: string | null; bio_so: string | null;
+  languages: string[]; working_hours: Json;
+  appointment_duration_minutes: number; is_active: boolean; sort_order: number;
+  created_at: string; updated_at: string;
+};
+
+type AppointmentRow = {
+  id: string; doctor_id: string;
+  patient_name: string; patient_phone: string; patient_email: string | null;
+  user_id: string | null;
+  appointment_date: string; appointment_time: string;
+  status: "pending" | "confirmed" | "cancelled" | "completed";
+  notes: string | null; created_at: string; updated_at: string;
+};
+
+type AppointmentStatusHistoryRow = {
+  id: string; appointment_id: string;
   old_status: "pending" | "confirmed" | "cancelled" | "completed" | null;
   new_status: "pending" | "confirmed" | "cancelled" | "completed";
   changed_by: string | null; created_at: string;
@@ -279,6 +327,11 @@ export type Database = {
       notifications: Table<{ id: string; user_id: string | null; title: string; message: string | null; type: string; action_url: string | null; category: string | null; data: Json; is_read: boolean; created_at: string; read_at: string | null }>;
       business_hours: Table<{ id: string; entity_type: string; entity_id: string; day_of_week: number; opens_at: string | null; closes_at: string | null; is_closed: boolean; special_note: string | null; created_at: string; updated_at: string }>;
       amenity_categories: Table<{ id: string; name: string; icon: string | null; sort_order: number; created_at: string }>;
+      products: Table<ProductRow>;
+      departments: Table<DepartmentRow>;
+      doctors: Table<DoctorRow>;
+      appointments: Table<AppointmentRow>;
+      appointment_status_history: Table<AppointmentStatusHistoryRow>;
     } & Record<string, Table<Record<string, unknown>, Record<string, unknown>, Record<string, unknown>>>;
     Views: Record<string, never>;
     Functions: {

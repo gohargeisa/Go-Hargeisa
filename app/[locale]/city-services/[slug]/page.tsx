@@ -6,6 +6,10 @@ import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
 import { getCityServiceBySlug, getAllCityServiceSlugs, getCityServicesGroupedByCategory } from "@/lib/data/city-services";
 import { getCategoryById } from "@/lib/data/categories";
+import { getProductsForListing } from "@/lib/data/products";
+import { ProductsSection } from "@/components/shared/products-section";
+import { getDoctorsForListing, getDepartmentsForListing } from "@/lib/data/doctors";
+import { DoctorsSection } from "@/components/shared/doctors-section";
 import { categoryDisplayName } from "@/lib/utils/category-href";
 import { getMyReviewForListing } from "@/lib/data/reviews";
 import { isListingFavorited } from "@/lib/data/favorites";
@@ -74,16 +78,24 @@ export default async function CityServiceDetailPage({
   const tw = await getTranslations("weekdays");
   const tl = await getTranslations("listings");
   const tn = await getTranslations("nearby");
+  const tp = await getTranslations("products");
+  const ta = await getTranslations("appointments");
 
   const featureEligible = category.supportsNewFeatures;
   const galleryEligible = category.supportsGallery;
   const categoryLabel = categoryDisplayName(category, locale);
+  const productsEligible = category.supportsProducts;
+  const appointmentsEligible = category.supportsAppointments;
+  const isDental = category.slug === "dental-clinic";
 
-  const [myReview, isFavorited, nearbyPlaces, allGroups] = await Promise.all([
+  const [myReview, isFavorited, nearbyPlaces, allGroups, products, doctors, departments] = await Promise.all([
     featureEligible ? getMyReviewForListing("city_service", service.id) : Promise.resolve(null),
     featureEligible ? isListingFavorited("city_service", service.id) : Promise.resolve(false),
     getNearbyListings({ lat: service.coords.lat, lng: service.coords.lng, excludeType: "city_service", excludeId: service.id }),
     getCityServicesGroupedByCategory(locale),
+    productsEligible ? getProductsForListing(service.id) : Promise.resolve([]),
+    appointmentsEligible ? getDoctorsForListing(service.id) : Promise.resolve([]),
+    appointmentsEligible ? getDepartmentsForListing(service.id) : Promise.resolve([]),
   ]);
   const moreInCategory = (allGroups.find((g) => g.category.id === service.categoryId)?.items ?? [])
     .filter((s) => s.id !== service.id)
@@ -96,6 +108,8 @@ export default async function CityServiceDetailPage({
 
   const navTabs: HotelNavTab[] = [
     { id: "overview", label: td("overview") },
+    ...(productsEligible && products.length > 0 ? [{ id: "products", label: tp("title") }] : []),
+    ...(appointmentsEligible && doctors.length > 0 ? [{ id: "doctors", label: ta("doctorsTitle") }] : []),
     ...(galleryEligible && service.gallery.length > 0 ? [{ id: "gallery", label: t("gallery") }] : []),
     ...(featureEligible && service.videos && service.videos.length > 0 ? [{ id: "videos", label: td("videoGallery") }] : []),
     ...(hasHoursInfo ? [{ id: "hours", label: td("openingHoursByDay") }] : []),
@@ -138,9 +152,14 @@ export default async function CityServiceDetailPage({
         showRating={featureEligible}
       />
 
-      {(service.phone || serviceWhatsappHref || service.email || serviceWebsiteHref) && (
+      {(appointmentsEligible && doctors.length > 0) || service.phone || serviceWhatsappHref || service.email || serviceWebsiteHref ? (
         <Reveal delay={0.05}>
           <div className="container-px mx-auto mt-6 flex flex-wrap items-center justify-center gap-3">
+            {appointmentsEligible && doctors.length > 0 && (
+              <PrimaryButton href={`/${locale}/city-services/${service.slug}/book`} size="sm">
+                {isDental ? ta("bookADentist") : ta("bookADoctor")}
+              </PrimaryButton>
+            )}
             {service.phone && (
               <SecondaryButton href={`tel:${service.phone}`} size="sm">
                 <PhoneIcon size={15} aria-hidden="true" />
@@ -167,7 +186,7 @@ export default async function CityServiceDetailPage({
             )}
           </div>
         </Reveal>
-      )}
+      ) : null}
 
       {featureEligible && (
         <SocialLinks
@@ -206,6 +225,34 @@ export default async function CityServiceDetailPage({
                   {td("overview")}
                 </h2>
                 <p className="leading-relaxed text-ink/75 dark:text-sand/75">{service.description}</p>
+              </section>
+            </Reveal>
+          )}
+
+          {productsEligible && products.length > 0 && (
+            <Reveal>
+              <section id="products" aria-labelledby="products-heading" className="scroll-mt-36">
+                <h2 id="products-heading" className="mb-5 font-display text-2xl font-semibold">
+                  {tp("title")}
+                </h2>
+                <ProductsSection products={products} storeName={service.name} locale={locale} />
+              </section>
+            </Reveal>
+          )}
+
+          {appointmentsEligible && doctors.length > 0 && (
+            <Reveal>
+              <section id="doctors" aria-labelledby="doctors-heading" className="scroll-mt-36">
+                <h2 id="doctors-heading" className="mb-5 font-display text-2xl font-semibold">
+                  {ta("doctorsTitle")}
+                </h2>
+                <DoctorsSection
+                  doctors={doctors}
+                  departments={departments}
+                  locale={locale}
+                  bookHref={(doctorId) => `/${locale}/city-services/${service.slug}/book?doctor=${doctorId}`}
+                  bookLabel={ta("bookAppointment")}
+                />
               </section>
             </Reveal>
           )}
