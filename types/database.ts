@@ -120,6 +120,7 @@ type CityServiceRow = {
   opening_hours_structured: Json; is_24_hours: boolean; temporarily_closed: boolean; permanently_closed: boolean;
   social_instagram: string | null; social_facebook: string | null; social_tiktok: string | null; social_snapchat: string | null;
   social_x: string | null; social_youtube: string | null; social_telegram: string | null;
+  service_tags: string[];
   status: "draft" | "published" | "archived"; featured: boolean; sort_order: number;
   created_at: string; updated_at: string;
 };
@@ -256,6 +257,7 @@ type BusinessJoinRequestRow = {
   converted_listing_type: "hotel" | "restaurant" | "cafe" | "service" | "city_service" | null; converted_listing_id: string | null;
   converted_at: string | null;
   videos: Json; documents: Json;
+  category_id: string | null; custom_fields: Json; service_tags: string[];
   created_at: string; updated_at: string;
 };
 

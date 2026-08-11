@@ -35,6 +35,13 @@ export interface JoinRequestInput {
   categoryId?: string;
   /** Values for the referenced category's customFieldsSchema. Ignored unless categoryId is set. */
   customFields?: Record<string, string | number | boolean>;
+  /** Selected codes from the referenced category's subcategory vocabulary —
+   * either the services-offered vocabulary (Beauty Salons/Men's
+   * Barbershops/Auto Repair & Services, see lib/config/service-tags.ts) or,
+   * for Cosmetics & Women's Beauty, a curated subset of product categories
+   * (see COSMETICS_SPECIALTY_CATEGORIES in lib/config/product-categories.ts).
+   * Ignored unless categoryId is set. */
+  serviceTags?: string[];
   businessName: string;
   phone: string;
   whatsapp?: string;
@@ -138,6 +145,7 @@ export async function submitJoinRequest(input: JoinRequestInput): Promise<{ ok: 
     category: input.category,
     category_id: input.category === "other" ? (input.categoryId ?? null) : null,
     custom_fields: input.category === "other" ? (input.customFields ?? {}) : {},
+    service_tags: input.category === "other" ? (input.serviceTags ?? []) : [],
     business_name: businessName,
     phone,
     whatsapp: input.whatsapp?.trim() || null,
@@ -395,6 +403,7 @@ export async function convertJoinRequest(
         website: request.website ?? null,
         image: coverImage,
         gallery,
+        service_tags: request.service_tags ?? [],
       };
 
       const { data: created, error: insertError } = await supabase

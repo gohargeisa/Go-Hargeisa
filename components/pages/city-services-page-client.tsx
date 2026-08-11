@@ -9,6 +9,7 @@ import { SearchWithin } from "@/components/shared/search-within";
 import { Reveal } from "@/components/home/reveal";
 import { DynamicIcon } from "@/lib/utils/dynamic-icon";
 import { categoryDisplayName } from "@/lib/utils/category-href";
+import { SERVICE_TAGS_BY_CATEGORY_SLUG, SERVICE_TAG_ICON, type ServiceTagCode } from "@/lib/config/service-tags";
 import type { CityServiceCategoryGroup } from "@/lib/data/city-services";
 import type { Locale } from "@/lib/i18n/config";
 
@@ -32,21 +33,52 @@ export function CityServicesPageClient({
   basePath?: string;
 }) {
   const t = useTranslations("cityServices");
+  const tt = useTranslations("serviceTags");
   const [activeCategoryId, setActiveCategoryId] = useState<string | "all">("all");
+  const [tagFilter, setTagFilter] = useState<ServiceTagCode | "all">("all");
+
+  function selectCategory(id: string | "all") {
+    setActiveCategoryId(id);
+    setTagFilter("all");
+  }
 
   const needle = (initialQuery ?? "").trim().toLowerCase();
 
-  const sections = useMemo(() => {
+  // Category + text-search filtering only (no tag filter yet) — this is
+  // what tag-pill availability is computed from, same as ProductsSection
+  // computing categoriesPresent from its unfiltered `visible` list rather
+  // than its already-filtered `filtered` list, so picking a tag narrows the
+  // grid without also making the other pills disappear.
+  const textFilteredSections = useMemo(() => {
     return groups
       .filter((g) => activeCategoryId === "all" || activeCategoryId === g.category?.id)
-      .map((g) => {
-        const items = g.items.filter(
+      .map((g) => ({
+        ...g,
+        items: g.items.filter(
           (s) => !needle || s.name.toLowerCase().includes(needle) || (s.description ?? "").toLowerCase().includes(needle)
-        );
-        return { ...g, items };
-      })
-      .filter((g) => g.items.length > 0);
+        ),
+      }));
   }, [groups, activeCategoryId, needle]);
+
+  // Only meaningful when exactly one category is active — the "all
+  // categories" view never shows tag pills, same as ProductsSection only
+  // showing category pills once you're looking at one store's catalog.
+  const activeCategorySlug = activeCategoryId === "all" ? undefined : groups.find((g) => g.category?.id === activeCategoryId)?.category?.slug;
+  const tagsPresent = useMemo(() => {
+    const availableTags = activeCategorySlug ? SERVICE_TAGS_BY_CATEGORY_SLUG[activeCategorySlug] ?? [] : [];
+    if (availableTags.length === 0) return [];
+    const present = new Set(textFilteredSections.flatMap((g) => g.items).flatMap((s) => s.serviceTags ?? []));
+    return availableTags.filter((code) => present.has(code));
+  }, [activeCategorySlug, textFilteredSections]);
+
+  const sections = useMemo(() => {
+    return textFilteredSections
+      .map((g) => ({
+        ...g,
+        items: g.items.filter((s) => tagFilter === "all" || (s.serviceTags ?? []).includes(tagFilter)),
+      }))
+      .filter((g) => g.items.length > 0);
+  }, [textFilteredSections, tagFilter]);
 
   const totalMatches = sections.reduce((sum, s) => sum + s.items.length, 0);
 
@@ -59,7 +91,7 @@ export function CityServicesPageClient({
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
-              onClick={() => setActiveCategoryId("all")}
+              onClick={() => selectCategory("all")}
               className={`inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
                 activeCategoryId === "all"
                   ? "border-primary bg-primary/10 text-primary-800"
@@ -73,7 +105,7 @@ export function CityServicesPageClient({
               <button
                 key={g.category.id}
                 type="button"
-                onClick={() => setActiveCategoryId(g.category.id)}
+                onClick={() => selectCategory(g.category.id)}
                 className={`inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
                   activeCategoryId === g.category.id
                     ? "border-primary bg-primary/10 text-primary-800"
@@ -84,6 +116,40 @@ export function CityServicesPageClient({
                 {categoryDisplayName(g.category, locale as Locale)}
               </button>
             ))}
+          </div>
+        )}
+
+        {tagsPresent.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setTagFilter("all")}
+              className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
+                tagFilter === "all"
+                  ? "bg-primary text-white"
+                  : "border border-ink/12 text-ink/60 hover:border-primary/40 hover:text-primary dark:border-white/15 dark:text-sand/60"
+              }`}
+            >
+              {t("allServiceTagsLabel")}
+            </button>
+            {tagsPresent.map((code) => {
+              const Icon = SERVICE_TAG_ICON[code];
+              return (
+                <button
+                  key={code}
+                  type="button"
+                  onClick={() => setTagFilter(code)}
+                  className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
+                    tagFilter === code
+                      ? "bg-primary text-white"
+                      : "border border-ink/12 text-ink/60 hover:border-primary/40 hover:text-primary dark:border-white/15 dark:text-sand/60"
+                  }`}
+                >
+                  <Icon size={12} aria-hidden="true" />
+                  {tt(code)}
+                </button>
+              );
+            })}
           </div>
         )}
       </div>

@@ -10,6 +10,7 @@ import { VideoUploader } from "@/components/shared/video-uploader-lazy";
 import { GoogleMapsLocationField } from "@/components/admin/google-maps-location-field";
 import { OpeningHoursEditor } from "@/components/shared/opening-hours-editor";
 import { AmenitiesPicker } from "@/components/admin/amenities-picker";
+import { ServiceTagsPicker } from "@/components/admin/service-tags-picker";
 import { Field, inputClass } from "@/components/admin/form-shared";
 import { AssignedOwnerField, type AssignedOwner } from "@/components/admin/assigned-owner-field";
 import { createCityService, updateCityService } from "@/lib/actions/city-services";
@@ -39,6 +40,7 @@ export interface CityServiceFormInput {
   lat: number;
   lng: number;
   amenitiesV2: string[];
+  serviceTags: string[];
   openingHoursStructured: OpeningHoursGroup[];
   is24Hours: boolean;
   temporarilyClosed: boolean;
@@ -102,6 +104,7 @@ export function CityServiceForm({
     lat: initial?.lat ?? 9.5624,
     lng: initial?.lng ?? 44.065,
     amenitiesV2: initial?.amenitiesV2 ?? [],
+    serviceTags: initial?.serviceTags ?? [],
     openingHoursStructured: initial?.openingHoursStructured ?? [],
     is24Hours: initial?.is24Hours ?? false,
     temporarilyClosed: initial?.temporarilyClosed ?? false,
@@ -161,6 +164,7 @@ export function CityServiceForm({
       lat: form.lat,
       lng: form.lng,
       amenitiesV2: featureEligible ? form.amenitiesV2 : [],
+      serviceTags: form.serviceTags,
       openingHoursStructured: featureEligible ? form.openingHoursStructured : [],
       is24Hours: featureEligible ? form.is24Hours : false,
       temporarilyClosed: featureEligible ? form.temporarilyClosed : false,
@@ -373,6 +377,14 @@ export function CityServiceForm({
       {featureEligible && (
         <AmenitiesPicker listingType="city_service" values={form.amenitiesV2} onChange={(v) => update("amenitiesV2", v)} label={t("amenitiesLabel")} />
       )}
+
+      <ServiceTagsPicker
+        categorySlug={selectedCategory?.slug}
+        locale={locale}
+        values={form.serviceTags}
+        onChange={(v) => update("serviceTags", v)}
+        label={selectedCategory?.slug === "cosmetics-beauty" ? t("businessSpecialtiesLabel") : t("serviceTagsLabel")}
+      />
 
       <Field label={t("statusLabel")}>
         <select value={form.status} onChange={(e) => update("status", e.target.value as "draft" | "published")} className={inputClass}>

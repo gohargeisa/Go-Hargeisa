@@ -66,7 +66,10 @@ export type OwnableListingType = BusinessListingType;
  * live in lib/config/product-categories.ts. */
 export type ProductCategory =
   | "perfume" | "oud" | "bakhoor" | "attar" | "body_mist" | "cosmetics" | "makeup"
-  | "body_care" | "hair_care" | "gift_sets" | "accessories";
+  | "body_care" | "hair_care" | "gift_sets" | "accessories"
+  | "skincare_creams" | "hair_extensions_wigs" | "perfumes_fragrances" | "bath_body"
+  | "nail_care" | "beauty_tools_accessories" | "womens_personal_care"
+  | "spare_parts";
 
 export type ProductGender = "men" | "women" | "unisex" | "kids";
 
@@ -790,6 +793,10 @@ export interface CityService {
   reviews: Review[];
   favoriteCount?: number;
   amenitiesV2?: string[];
+  /** "Services offered" tags for categories with a services-offered
+   * vocabulary (Beauty Salons, Men's Barbershops, Auto Repair & Services) —
+   * see lib/config/service-tags.ts. Empty/absent for every other category. */
+  serviceTags?: string[];
   openingHoursStructured?: OpeningHoursGroup[];
   is24Hours?: boolean;
   temporarilyClosed?: boolean;

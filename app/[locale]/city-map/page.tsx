@@ -22,7 +22,7 @@ export async function generateMetadata({
   return {
     title: "Smart City Map — Hargeisa Services",
     description:
-      "Find hospitals, pharmacies, mosques, ATMs, schools and other essential city services around Hargeisa, each with directions straight to Google Maps.",
+      "Find hospitals, pharmacies, mosques, supermarkets, schools and other essential city services around Hargeisa, each with directions straight to Google Maps.",
     alternates: localeAlternates(locale as Locale, "/city-map"),
   };
 }

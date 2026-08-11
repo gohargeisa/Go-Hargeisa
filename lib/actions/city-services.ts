@@ -103,6 +103,15 @@ export interface CityServiceInput {
   lat?: number;
   lng?: number;
   amenitiesV2?: string[];
+  /** Only meaningful for categories with a subcategory picker wired up in
+   * components/admin/service-tags-picker.tsx — Beauty Salons, Men's
+   * Barbershops, Auto Repair & Services (a services-offered vocabulary, see
+   * lib/config/service-tags.ts) and Cosmetics & Women's Beauty (a curated
+   * subset of product categories, see COSMETICS_SPECIALTY_CATEGORIES in
+   * lib/config/product-categories.ts — a declared-specialties signal,
+   * distinct from the Products Engine's own per-product category field).
+   * Ignored (stored as []) for every other category. */
+  serviceTags?: string[];
   openingHoursStructured?: OpeningHoursGroup[];
   is24Hours?: boolean;
   temporarilyClosed?: boolean;
@@ -149,6 +158,7 @@ export async function createCityService(
     lat: input.lat ?? 9.5624,
     lng: input.lng ?? 44.065,
     amenities_v2: input.amenitiesV2 ?? [],
+    service_tags: input.serviceTags ?? [],
     opening_hours_structured: input.openingHoursStructured ?? [],
     is_24_hours: input.is24Hours ?? false,
     temporarily_closed: input.temporarilyClosed ?? false,
@@ -212,6 +222,7 @@ export async function updateCityService(
       lat: input.lat ?? 9.5624,
       lng: input.lng ?? 44.065,
       amenities_v2: input.amenitiesV2 ?? [],
+    service_tags: input.serviceTags ?? [],
       opening_hours_structured: input.openingHoursStructured ?? [],
       is_24_hours: input.is24Hours ?? false,
       temporarily_closed: input.temporarilyClosed ?? false,

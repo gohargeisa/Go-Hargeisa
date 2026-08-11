@@ -11,6 +11,7 @@ import { VideoUploader } from "@/components/shared/video-uploader-lazy";
 import { DocumentsUploader } from "@/components/shared/documents-uploader-lazy";
 import { CoordinatesInput } from "@/components/shared/coordinates-input";
 import { CustomFieldsEditor, type CustomFieldValues } from "@/components/shared/custom-fields-editor";
+import { ServiceTagsPicker } from "@/components/admin/service-tags-picker";
 import { PARTNER_AMENITIES, PARTNER_AMENITY_ICON, targetTableToJoinCategory } from "@/lib/utils/partner-categories";
 import { DynamicIcon } from "@/lib/utils/dynamic-icon";
 import { categoryDisplayName } from "@/lib/utils/category-href";
@@ -76,6 +77,7 @@ export function JoinRequestForm({
   const [priceRange, setPriceRange] = useState<PriceRange | undefined>(undefined);
   const [serviceCategoryId, setServiceCategoryId] = useState<string>(serviceCategories[0]?.id ?? "");
   const [customFields, setCustomFields] = useState<CustomFieldValues>({});
+  const [serviceTags, setServiceTags] = useState<string[]>([]);
   const [confirmed, setConfirmed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
@@ -88,6 +90,7 @@ export function JoinRequestForm({
     setCategory(next);
     setAmenities([]);
     setCustomFields({});
+    setServiceTags([]);
   }
 
   function toggleAmenity(code: string) {
@@ -114,6 +117,7 @@ export function JoinRequestForm({
         category,
         categoryId: category === "other" ? serviceCategoryId || undefined : undefined,
         customFields: category === "other" ? customFields : undefined,
+        serviceTags: category === "other" ? serviceTags : undefined,
         businessName,
         phone,
         whatsapp: whatsapp || undefined,
@@ -210,7 +214,7 @@ export function JoinRequestForm({
             >
               <option value="" disabled>{t("selectCategoryPlaceholder")}</option>
               {serviceCategories.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
+                <option key={c.id} value={c.id}>{categoryDisplayName(c, locale)}</option>
               ))}
             </select>
           </div>
@@ -285,6 +289,16 @@ export function JoinRequestForm({
               values={customFields}
               onChange={setCustomFields}
               inputClass={inputClass}
+            />
+          )}
+
+          {category === "other" && selectedServiceCategory && (
+            <ServiceTagsPicker
+              categorySlug={selectedServiceCategory.slug}
+              locale={locale}
+              values={serviceTags}
+              onChange={setServiceTags}
+              label={selectedServiceCategory.slug === "cosmetics-beauty" ? tAdmin("businessSpecialtiesLabel") : tAdmin("serviceTagsLabel")}
             />
           )}
         </div>

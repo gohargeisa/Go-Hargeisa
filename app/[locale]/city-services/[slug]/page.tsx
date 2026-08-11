@@ -22,6 +22,7 @@ import { BusinessPhotoGallery } from "@/components/shared/business-photo-gallery
 import { SERVICE_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import { VideoGallery } from "@/components/shared/video-gallery";
 import { AmenitiesSection, hasAmenities } from "@/components/shared/amenities-section";
+import { ServiceTagsSection, hasServiceTags } from "@/components/shared/service-tags-section";
 import { SocialLinks } from "@/components/shared/social-links";
 import { OpenStatusBadge } from "@/components/shared/open-status-badge";
 import { formatDayRange, formatTime12h } from "@/lib/utils/opening-hours";
@@ -113,6 +114,7 @@ export default async function CityServiceDetailPage({
     ...(galleryEligible && service.gallery.length > 0 ? [{ id: "gallery", label: t("gallery") }] : []),
     ...(featureEligible && service.videos && service.videos.length > 0 ? [{ id: "videos", label: td("videoGallery") }] : []),
     ...(hasHoursInfo ? [{ id: "hours", label: td("openingHoursByDay") }] : []),
+    ...(hasServiceTags(service.serviceTags) ? [{ id: "services-offered", label: t("servicesOffered") }] : []),
     ...(featureEligible && hasAmenities(service.amenitiesV2) ? [{ id: "amenities", label: t("amenities") }] : []),
     { id: "location", label: td("location") },
     ...(featureEligible ? [{ id: "reviews", label: t("reviews") }] : []),
@@ -307,6 +309,17 @@ export default async function CityServiceDetailPage({
                 ) : service.openingHours ? (
                   <p className="text-sm text-ink/70 dark:text-sand/70">{service.openingHours}</p>
                 ) : null}
+              </section>
+            </Reveal>
+          )}
+
+          {hasServiceTags(service.serviceTags) && (
+            <Reveal>
+              <section id="services-offered" aria-labelledby="services-offered-heading" className="scroll-mt-36">
+                <h2 id="services-offered-heading" className="mb-5 font-display text-2xl font-semibold">
+                  {t("servicesOffered")}
+                </h2>
+                <ServiceTagsSection tags={service.serviceTags} />
               </section>
             </Reveal>
           )}

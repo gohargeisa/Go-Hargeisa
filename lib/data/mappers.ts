@@ -432,6 +432,7 @@ export function mapCityService(row: CityServiceRow, reviews: Review[] = [], loca
     reviews,
     favoriteCount: row.favorite_count ?? 0,
     amenitiesV2: row.amenities_v2 ?? [],
+    serviceTags: row.service_tags ?? [],
     openingHoursStructured,
     is24Hours: row.is_24_hours,
     temporarilyClosed: row.temporarily_closed,
