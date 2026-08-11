@@ -852,6 +852,22 @@ export interface CityService {
   staffCount?: number;
   walkInsAccepted?: boolean;
   homeServiceAvailable?: boolean;
+  // Cosmetics & Women's Beauty + Perfumes
+  storeType?: "boutique" | "multi_brand" | "kiosk" | "online_and_physical" | "other";
+  brands?: string[];
+  // Car Rental
+  rentalType?: "self_drive" | "with_driver" | "both" | "other";
+  vehicleTypes?: string[];
+  minimumRentalPeriod?: string;
+  driversLicenseRequired?: boolean;
+  depositRequired?: boolean;
+  fleetSize?: number;
+  // Dental Clinics (clinic-level fields only)
+  clinicType?: "general_dentistry" | "orthodontics" | "pediatric_dentistry" | "multi_specialty" | "other";
+  numberOfTreatmentRooms?: number;
+  insuranceAccepted?: string[];
+  // Auto Repair & Car Services
+  garageType?: "general_repair" | "specialized" | "dealership_affiliated" | "mobile_repair" | "other";
 }
 
 export interface Attraction {

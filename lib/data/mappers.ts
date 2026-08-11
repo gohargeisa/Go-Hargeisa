@@ -480,6 +480,18 @@ export function mapCityService(row: CityServiceRow, reviews: Review[] = [], loca
     staffCount: row.staff_count ?? undefined,
     walkInsAccepted: row.walk_ins_accepted ?? undefined,
     homeServiceAvailable: row.home_service_available ?? undefined,
+    storeType: (row.store_type as CityService["storeType"]) ?? undefined,
+    brands: row.brands ?? [],
+    rentalType: (row.rental_type as CityService["rentalType"]) ?? undefined,
+    vehicleTypes: row.vehicle_types ?? [],
+    minimumRentalPeriod: row.minimum_rental_period ?? undefined,
+    driversLicenseRequired: row.drivers_license_required ?? undefined,
+    depositRequired: row.deposit_required ?? undefined,
+    fleetSize: row.fleet_size ?? undefined,
+    clinicType: (row.clinic_type as CityService["clinicType"]) ?? undefined,
+    numberOfTreatmentRooms: row.number_of_treatment_rooms ?? undefined,
+    insuranceAccepted: row.insurance_accepted ?? [],
+    garageType: (row.garage_type as CityService["garageType"]) ?? undefined,
   };
 }
 

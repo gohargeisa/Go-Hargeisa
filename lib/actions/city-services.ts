@@ -155,6 +155,22 @@ export interface CityServiceInput {
   staffCount?: number;
   walkInsAccepted?: boolean;
   homeServiceAvailable?: boolean;
+  // Cosmetics & Women's Beauty + Perfumes — ignored for every other category.
+  storeType?: string;
+  brands?: string[];
+  // Car Rental — ignored for every other category.
+  rentalType?: string;
+  vehicleTypes?: string[];
+  minimumRentalPeriod?: string;
+  driversLicenseRequired?: boolean;
+  depositRequired?: boolean;
+  fleetSize?: number;
+  // Dental Clinics (clinic-level fields only) — ignored for every other category.
+  clinicType?: string;
+  numberOfTreatmentRooms?: number;
+  insuranceAccepted?: string[];
+  // Auto Repair & Car Services — ignored for every other category.
+  garageType?: string;
 }
 
 export async function createCityService(
@@ -227,6 +243,18 @@ export async function createCityService(
     staff_count: input.staffCount ?? null,
     walk_ins_accepted: input.walkInsAccepted ?? null,
     home_service_available: input.homeServiceAvailable ?? null,
+    store_type: input.storeType || null,
+    brands: input.brands ?? [],
+    rental_type: input.rentalType || null,
+    vehicle_types: input.vehicleTypes ?? [],
+    minimum_rental_period: input.minimumRentalPeriod?.trim() || null,
+    drivers_license_required: input.driversLicenseRequired ?? null,
+    deposit_required: input.depositRequired ?? null,
+    fleet_size: input.fleetSize ?? null,
+    clinic_type: input.clinicType || null,
+    number_of_treatment_rooms: input.numberOfTreatmentRooms ?? null,
+    insurance_accepted: input.insuranceAccepted ?? [],
+    garage_type: input.garageType || null,
   } as never);
 
   if (error) return { ok: false, error: error.message };
@@ -316,6 +344,18 @@ export async function updateCityService(
       staff_count: input.staffCount ?? null,
       walk_ins_accepted: input.walkInsAccepted ?? null,
       home_service_available: input.homeServiceAvailable ?? null,
+      store_type: input.storeType || null,
+      brands: input.brands ?? [],
+      rental_type: input.rentalType || null,
+      vehicle_types: input.vehicleTypes ?? [],
+      minimum_rental_period: input.minimumRentalPeriod?.trim() || null,
+      drivers_license_required: input.driversLicenseRequired ?? null,
+      deposit_required: input.depositRequired ?? null,
+      fleet_size: input.fleetSize ?? null,
+      clinic_type: input.clinicType || null,
+      number_of_treatment_rooms: input.numberOfTreatmentRooms ?? null,
+      insurance_accepted: input.insuranceAccepted ?? [],
+      garage_type: input.garageType || null,
       updated_at: new Date().toISOString(),
     } as never)
     .eq("id", id);

@@ -57,6 +57,16 @@ export const COSMETICS_SPECIALTY_CATEGORIES: ProductCategory[] = [
   "nail_care", "beauty_tools_accessories", "womens_personal_care",
 ];
 
+/** The subset of ProductCategory specific to Perfume shops — the exact
+ * vocabulary already reserved as "Perfume & Cosmetics shops' own vocabulary"
+ * (see the comment above) but never actually surfaced as a declared-
+ * specialties picker until now. Same reuse pattern as
+ * COSMETICS_SPECIALTY_CATEGORIES: no new labels, reuses PRODUCT_CATEGORY_LABELS
+ * as-is, stored in the same `service_tags` intake slot. */
+export const PERFUME_SPECIALTY_CATEGORIES: ProductCategory[] = [
+  "perfume", "oud", "bakhoor", "attar", "body_mist",
+];
+
 export function productCategoryLabel(category: ProductCategory | undefined, locale: string): string | undefined {
   if (!category) return undefined;
   const entry = PRODUCT_CATEGORY_LABELS[category];

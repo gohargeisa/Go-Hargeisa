@@ -27,6 +27,11 @@ import {
   Settings,
   CircleDot,
   LifeBuoy,
+  Stethoscope,
+  Syringe,
+  Smile,
+  SmilePlus,
+  AlertCircle,
   type LucideIcon,
 } from "lucide-react";
 
@@ -81,6 +86,17 @@ export const SERVICE_TAG_CODES = [
   "transmission_repair",
   "suspension_steering",
   "roadside_assistance",
+  // Dental Clinics
+  "general_checkups",
+  "teeth_cleaning",
+  "fillings",
+  "root_canal",
+  "teeth_whitening",
+  "orthodontics_braces",
+  "dental_implants",
+  "tooth_extraction",
+  "pediatric_dentistry",
+  "emergency_dental_care",
 ] as const;
 
 export type ServiceTagCode = (typeof SERVICE_TAG_CODES)[number];
@@ -120,6 +136,17 @@ export const SERVICE_TAG_ICON: Record<ServiceTagCode, LucideIcon> = {
   transmission_repair: Settings,
   suspension_steering: CircleDot,
   roadside_assistance: LifeBuoy,
+
+  general_checkups: Stethoscope,
+  teeth_cleaning: Sparkles,
+  fillings: Syringe,
+  root_canal: Zap,
+  teeth_whitening: Smile,
+  orthodontics_braces: SmilePlus,
+  dental_implants: Wrench,
+  tooth_extraction: Scissors,
+  pediatric_dentistry: Baby,
+  emergency_dental_care: AlertCircle,
 };
 
 /** Which codes are offered as choices for a given City Services category —
@@ -138,6 +165,10 @@ export const SERVICE_TAGS_BY_CATEGORY_SLUG: Record<string, ServiceTagCode[]> = {
     "general_car_repair", "engine_repair", "electrical_diagnostics", "oil_change_filters", "tire_services",
     "brake_services", "ac_cooling_system", "battery_services", "car_wash_detailing", "body_repair_painting",
     "transmission_repair", "suspension_steering", "roadside_assistance",
+  ],
+  "dental-clinic": [
+    "general_checkups", "teeth_cleaning", "fillings", "root_canal", "teeth_whitening",
+    "orthodontics_braces", "dental_implants", "tooth_extraction", "pediatric_dentistry", "emergency_dental_care",
   ],
 };
 

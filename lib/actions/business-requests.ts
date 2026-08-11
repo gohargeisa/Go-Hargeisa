@@ -122,10 +122,27 @@ export interface JoinRequestInput {
   salonType?: string;
   /** Men's Barbershop-only intake field (men-only category). */
   shopType?: string;
-  /** Shared by Salon + Barbershop. */
+  /** Shared by Salon + Barbershop + Auto Repair. */
   staffCount?: number;
   walkInsAccepted?: boolean;
   homeServiceAvailable?: boolean;
+  /** Shared by Cosmetics & Women's Beauty + Perfumes + Auto Repair. */
+  storeType?: string;
+  brands?: string[];
+  /** Car Rental-only intake fields. */
+  rentalType?: string;
+  vehicleTypes?: string[];
+  minimumRentalPeriod?: string;
+  driversLicenseRequired?: boolean;
+  depositRequired?: boolean;
+  fleetSize?: number;
+  /** Dental Clinic-only intake fields (clinic-level; the per-doctor
+   * Medical Appointment Engine is untouched). */
+  clinicType?: string;
+  numberOfTreatmentRooms?: number;
+  insuranceAccepted?: string[];
+  /** Auto Repair-only intake field. */
+  garageType?: string;
 }
 
 /**
@@ -200,6 +217,11 @@ export async function submitJoinRequest(input: JoinRequestInput): Promise<{ ok: 
   const isUniversity = resolvedOtherSlug === "university";
   const isSalon = resolvedOtherSlug === "beauty-salon";
   const isBarbershop = resolvedOtherSlug === "men-barbershop";
+  const isCosmetics = resolvedOtherSlug === "cosmetics-beauty";
+  const isPerfume = resolvedOtherSlug === "perfume-shop";
+  const isCarRental = resolvedOtherSlug === "car-rental";
+  const isDentalClinic = resolvedOtherSlug === "dental-clinic";
+  const isAutoRepair = resolvedOtherSlug === "auto-repair";
 
   const { data: existing } = await supabase
     .from("business_join_requests")
@@ -249,7 +271,7 @@ export async function submitJoinRequest(input: JoinRequestInput): Promise<{ ok: 
     room_types_offered: input.category === "hotel" ? input.roomTypesOffered ?? [] : [],
     number_of_floors: input.category === "hotel" || isSchool || isUniversity ? input.numberOfFloors ?? null : null,
     year_established: input.category === "hotel" || isSchool || isUniversity ? input.yearEstablished ?? null : null,
-    languages: input.category === "hotel" || input.category === "restaurant" || isSchool || isUniversity ? input.languagesSpoken ?? [] : [],
+    languages: input.category === "hotel" || input.category === "restaurant" || isSchool || isUniversity || isDentalClinic ? input.languagesSpoken ?? [] : [],
     opening_hours: input.openingHours ?? [],
     amenities: input.amenities ?? [],
     price_range: input.priceRange ?? null,
@@ -287,10 +309,26 @@ export async function submitJoinRequest(input: JoinRequestInput): Promise<{ ok: 
     salon_type: isSalon ? input.salonType || null : null,
     // Men's Barbershop (men-only)
     shop_type: isBarbershop ? input.shopType || null : null,
-    // Salon + Barbershop
-    staff_count: isSalon || isBarbershop ? input.staffCount ?? null : null,
-    walk_ins_accepted: isSalon || isBarbershop ? input.walkInsAccepted ?? null : null,
-    home_service_available: isSalon || isBarbershop ? input.homeServiceAvailable ?? null : null,
+    // Salon + Barbershop + Auto Repair
+    staff_count: isSalon || isBarbershop || isAutoRepair ? input.staffCount ?? null : null,
+    walk_ins_accepted: isSalon || isBarbershop || isAutoRepair ? input.walkInsAccepted ?? null : null,
+    home_service_available: isSalon || isBarbershop || isAutoRepair ? input.homeServiceAvailable ?? null : null,
+    // Cosmetics + Perfumes + Auto Repair
+    store_type: isCosmetics || isPerfume ? input.storeType || null : null,
+    brands: isCosmetics || isPerfume || isAutoRepair ? input.brands ?? [] : [],
+    // Car Rental
+    rental_type: isCarRental ? input.rentalType || null : null,
+    vehicle_types: isCarRental ? input.vehicleTypes ?? [] : [],
+    minimum_rental_period: isCarRental ? input.minimumRentalPeriod?.trim() || null : null,
+    drivers_license_required: isCarRental ? input.driversLicenseRequired ?? null : null,
+    deposit_required: isCarRental ? input.depositRequired ?? null : null,
+    fleet_size: isCarRental ? input.fleetSize ?? null : null,
+    // Dental Clinics
+    clinic_type: isDentalClinic ? input.clinicType || null : null,
+    number_of_treatment_rooms: isDentalClinic ? input.numberOfTreatmentRooms ?? null : null,
+    insurance_accepted: isDentalClinic ? input.insuranceAccepted ?? [] : [],
+    // Auto Repair
+    garage_type: isAutoRepair ? input.garageType || null : null,
   } as never);
 
   if (error) return { ok: false, error: error.message };
@@ -577,6 +615,46 @@ export async function convertJoinRequest(
       }
       if (resolvedCategory.slug === "men-barbershop" && request.shop_type) {
         cityServicePayload.shop_type = request.shop_type;
+      }
+
+      // Cosmetics & Women's Beauty + Perfumes — shared retail fields.
+      if (resolvedCategory.slug === "cosmetics-beauty" || resolvedCategory.slug === "perfume-shop") {
+        if (request.store_type) cityServicePayload.store_type = request.store_type;
+      }
+      // Cosmetics + Perfumes + Auto Repair share the same `brands` column
+      // (declared "brands carried"/"brands serviced" — same shape, different label per category).
+      if (
+        resolvedCategory.slug === "cosmetics-beauty" ||
+        resolvedCategory.slug === "perfume-shop" ||
+        resolvedCategory.slug === "auto-repair"
+      ) {
+        if (request.brands && request.brands.length > 0) cityServicePayload.brands = request.brands;
+      }
+
+      // Car Rental
+      if (resolvedCategory.slug === "car-rental") {
+        if (request.rental_type) cityServicePayload.rental_type = request.rental_type;
+        if (request.vehicle_types && request.vehicle_types.length > 0) cityServicePayload.vehicle_types = request.vehicle_types;
+        if (request.minimum_rental_period) cityServicePayload.minimum_rental_period = request.minimum_rental_period;
+        if (request.drivers_license_required !== null) cityServicePayload.drivers_license_required = request.drivers_license_required;
+        if (request.deposit_required !== null) cityServicePayload.deposit_required = request.deposit_required;
+        if (request.fleet_size) cityServicePayload.fleet_size = request.fleet_size;
+      }
+
+      // Dental Clinics — clinic-level fields only; doctors/departments/
+      // appointments are managed separately and untouched by conversion.
+      if (resolvedCategory.slug === "dental-clinic") {
+        if (request.clinic_type) cityServicePayload.clinic_type = request.clinic_type;
+        if (request.number_of_treatment_rooms) cityServicePayload.number_of_treatment_rooms = request.number_of_treatment_rooms;
+        if (request.insurance_accepted && request.insurance_accepted.length > 0) {
+          cityServicePayload.insurance_accepted = request.insurance_accepted;
+        }
+        if (request.languages && request.languages.length > 0) cityServicePayload.languages = request.languages;
+      }
+
+      // Auto Repair & Car Services
+      if (resolvedCategory.slug === "auto-repair" && request.garage_type) {
+        cityServicePayload.garage_type = request.garage_type;
       }
 
       const { data: created, error: insertError } = await supabase

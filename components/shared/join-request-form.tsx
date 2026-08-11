@@ -13,6 +13,7 @@ import { CoordinatesInput } from "@/components/shared/coordinates-input";
 import { CustomFieldsEditor, type CustomFieldValues } from "@/components/shared/custom-fields-editor";
 import { ServiceTagsPicker } from "@/components/admin/service-tags-picker";
 import { PARTNER_AMENITIES, PARTNER_AMENITY_ICON, targetTableToJoinCategory } from "@/lib/utils/partner-categories";
+import { TagInput } from "@/components/admin/form-shared";
 import { DynamicIcon } from "@/lib/utils/dynamic-icon";
 import { categoryDisplayName } from "@/lib/utils/category-href";
 import { WEEK_DAYS_SAT_FIRST, defaultWeeklyHours } from "@/lib/utils/weekly-hours";
@@ -68,6 +69,17 @@ import {
   type SalonType,
   type ShopType,
 } from "@/lib/config/salon-attributes";
+import { STORE_TYPE_ORDER, storeTypeLabel, type StoreType } from "@/lib/config/retail-store-attributes";
+import {
+  RENTAL_TYPE_ORDER,
+  rentalTypeLabel,
+  VEHICLE_TYPE_ORDER,
+  vehicleTypeLabel,
+  type RentalType,
+  type VehicleType,
+} from "@/lib/config/car-rental-attributes";
+import { CLINIC_TYPE_ORDER, clinicTypeLabel, type ClinicType } from "@/lib/config/dental-attributes";
+import { GARAGE_TYPE_ORDER, garageTypeLabel, type GarageType } from "@/lib/config/auto-repair-attributes";
 import { AMENITIES_BY_LISTING_TYPE, AMENITY_ICON } from "@/lib/config/amenities";
 import type { Locale } from "@/lib/i18n/config";
 import type { JoinRequestCategory, GalleryImage, MediaVideo, BusinessDocument, Coordinates, WeeklyHoursDay, Category, RoomType } from "@/types";
@@ -172,10 +184,26 @@ export function JoinRequestForm({
   const [salonType, setSalonType] = useState<SalonType | "">("");
   // Men's Barbershops (men-only)
   const [shopType, setShopType] = useState<ShopType | "">("");
-  // Salons + Barbershops (shared columns)
+  // Salons + Barbershops + Auto Repair (shared columns)
   const [staffCount, setStaffCount] = useState<number | undefined>(undefined);
   const [walkInsAccepted, setWalkInsAccepted] = useState(false);
   const [homeServiceAvailable, setHomeServiceAvailable] = useState(false);
+  // Cosmetics & Women's Beauty + Perfumes + Auto Repair (shared columns)
+  const [storeType, setStoreType] = useState<StoreType | "">("");
+  const [brands, setBrands] = useState<string[]>([]);
+  // Car Rental
+  const [rentalType, setRentalType] = useState<RentalType | "">("");
+  const [vehicleTypes, setVehicleTypes] = useState<VehicleType[]>([]);
+  const [minimumRentalPeriod, setMinimumRentalPeriod] = useState("");
+  const [driversLicenseRequired, setDriversLicenseRequired] = useState(false);
+  const [depositRequired, setDepositRequired] = useState(false);
+  const [fleetSize, setFleetSize] = useState<number | undefined>(undefined);
+  // Dental Clinics (clinic-level fields only)
+  const [clinicType, setClinicType] = useState<ClinicType | "">("");
+  const [numberOfTreatmentRooms, setNumberOfTreatmentRooms] = useState<number | undefined>(undefined);
+  const [insuranceAccepted, setInsuranceAccepted] = useState<string[]>([]);
+  // Auto Repair & Car Services
+  const [garageType, setGarageType] = useState<GarageType | "">("");
   const [openingHours, setOpeningHours] = useState<WeeklyHoursDay[]>(defaultWeeklyHours());
   const [amenities, setAmenities] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<PriceRange | undefined>(undefined);
@@ -197,6 +225,11 @@ export function JoinRequestForm({
   const isUniversity = category === "other" && selectedServiceCategory?.slug === "university";
   const isSalon = category === "other" && selectedServiceCategory?.slug === "beauty-salon";
   const isBarbershop = category === "other" && selectedServiceCategory?.slug === "men-barbershop";
+  const isCosmetics = category === "other" && selectedServiceCategory?.slug === "cosmetics-beauty";
+  const isPerfume = category === "other" && selectedServiceCategory?.slug === "perfume-shop";
+  const isCarRental = category === "other" && selectedServiceCategory?.slug === "car-rental";
+  const isDentalClinic = category === "other" && selectedServiceCategory?.slug === "dental-clinic";
+  const isAutoRepair = category === "other" && selectedServiceCategory?.slug === "auto-repair";
 
   /** Clears every field specific to Restaurant/Cafe/School/University/Salon/
    * Barbershop — called on any category or "other"-subcategory change so
@@ -233,6 +266,18 @@ export function JoinRequestForm({
     setStaffCount(undefined);
     setWalkInsAccepted(false);
     setHomeServiceAvailable(false);
+    setStoreType("");
+    setBrands([]);
+    setRentalType("");
+    setVehicleTypes([]);
+    setMinimumRentalPeriod("");
+    setDriversLicenseRequired(false);
+    setDepositRequired(false);
+    setFleetSize(undefined);
+    setClinicType("");
+    setNumberOfTreatmentRooms(undefined);
+    setInsuranceAccepted([]);
+    setGarageType("");
   }
 
   function selectCategory(next: JoinRequestCategory) {
@@ -296,6 +341,10 @@ export function JoinRequestForm({
     setEducationFacilities((codes) => (codes.includes(code) ? codes.filter((c) => c !== code) : [...codes, code]));
   }
 
+  function toggleVehicleType(type: VehicleType) {
+    setVehicleTypes((types) => (types.includes(type) ? types.filter((t) => t !== type) : [...types, type]));
+  }
+
   function updateHoursDay(day: WeeklyHoursDay["day"], patch: Partial<WeeklyHoursDay>) {
     setOpeningHours((hours) => hours.map((h) => (h.day === day ? { ...h, ...patch } : h)));
   }
@@ -348,7 +397,7 @@ export function JoinRequestForm({
         roomTypesOffered: isHotel ? roomTypesOffered : undefined,
         numberOfFloors: isHotel || isSchool || isUniversity ? numberOfFloors : undefined,
         yearEstablished: isHotel || isSchool || isUniversity ? yearEstablished : undefined,
-        languagesSpoken: isHotel || isRestaurant || isSchool || isUniversity ? languagesSpoken : undefined,
+        languagesSpoken: isHotel || isRestaurant || isSchool || isUniversity || isDentalClinic ? languagesSpoken : undefined,
         openingHours,
         amenities,
         priceRange,
@@ -386,10 +435,26 @@ export function JoinRequestForm({
         salonType: isSalon ? salonType || undefined : undefined,
         // Men's Barbershops
         shopType: isBarbershop ? shopType || undefined : undefined,
-        // Salons + Barbershops
-        staffCount: isSalon || isBarbershop ? staffCount : undefined,
-        walkInsAccepted: isSalon || isBarbershop ? walkInsAccepted : undefined,
-        homeServiceAvailable: isSalon || isBarbershop ? homeServiceAvailable : undefined,
+        // Salons + Barbershops + Auto Repair
+        staffCount: isSalon || isBarbershop || isAutoRepair ? staffCount : undefined,
+        walkInsAccepted: isSalon || isBarbershop || isAutoRepair ? walkInsAccepted : undefined,
+        homeServiceAvailable: isSalon || isBarbershop || isAutoRepair ? homeServiceAvailable : undefined,
+        // Cosmetics + Perfumes + Auto Repair
+        storeType: isCosmetics || isPerfume ? storeType || undefined : undefined,
+        brands: isCosmetics || isPerfume || isAutoRepair ? brands : undefined,
+        // Car Rental
+        rentalType: isCarRental ? rentalType || undefined : undefined,
+        vehicleTypes: isCarRental ? vehicleTypes : undefined,
+        minimumRentalPeriod: isCarRental ? minimumRentalPeriod || undefined : undefined,
+        driversLicenseRequired: isCarRental ? driversLicenseRequired : undefined,
+        depositRequired: isCarRental ? depositRequired : undefined,
+        fleetSize: isCarRental ? fleetSize : undefined,
+        // Dental Clinics
+        clinicType: isDentalClinic ? clinicType || undefined : undefined,
+        numberOfTreatmentRooms: isDentalClinic ? numberOfTreatmentRooms : undefined,
+        insuranceAccepted: isDentalClinic ? insuranceAccepted : undefined,
+        // Auto Repair
+        garageType: isAutoRepair ? garageType || undefined : undefined,
       });
 
       if (result.ok) {
@@ -1117,6 +1182,151 @@ export function JoinRequestForm({
                 <label className="flex items-center gap-2 text-sm font-medium">
                   <input type="checkbox" checked={homeServiceAvailable} onChange={(e) => setHomeServiceAvailable(e.target.checked)} />
                   {t("homeServiceAvailableLabel")}
+                </label>
+              </div>
+            </div>
+          )}
+
+          {(isCosmetics || isPerfume) && (
+            <div className="space-y-5">
+              <div>
+                <label htmlFor="jr-storeType" className={labelClass}>{t("storeTypeLabel")}</label>
+                <select id="jr-storeType" value={storeType} onChange={(e) => setStoreType(e.target.value as StoreType | "")} className={inputClass}>
+                  <option value="" disabled>{t("selectStoreTypePlaceholder")}</option>
+                  {STORE_TYPE_ORDER.map((type) => (
+                    <option key={type} value={type}>{storeTypeLabel(type, locale)}</option>
+                  ))}
+                </select>
+              </div>
+              <TagInput
+                label={t("brandsCarriedLabel")}
+                values={brands}
+                onChange={setBrands}
+                placeholder={tAdmin("tagInputPlaceholder")}
+              />
+            </div>
+          )}
+
+          {isCarRental && (
+            <div className="space-y-5">
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="jr-rentalType" className={labelClass}>{t("rentalTypeLabel")}</label>
+                  <select id="jr-rentalType" value={rentalType} onChange={(e) => setRentalType(e.target.value as RentalType | "")} className={inputClass}>
+                    <option value="" disabled>{t("selectRentalTypePlaceholder")}</option>
+                    {RENTAL_TYPE_ORDER.map((type) => (
+                      <option key={type} value={type}>{rentalTypeLabel(type, locale)}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="jr-fleetSize" className={labelClass}>{t("fleetSizeLabel")}</label>
+                  <input id="jr-fleetSize" type="number" min={0} value={fleetSize ?? ""} onChange={(e) => setFleetSize(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClass}>{t("vehicleTypesLabel")}</label>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {VEHICLE_TYPE_ORDER.map((type) => (
+                    <label key={type} className="flex items-center gap-2 text-sm font-medium">
+                      <input type="checkbox" checked={vehicleTypes.includes(type)} onChange={() => toggleVehicleType(type)} />
+                      {vehicleTypeLabel(type, locale)}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="jr-minimumRentalPeriod" className={labelClass}>{t("minimumRentalPeriodLabel")}</label>
+                <input id="jr-minimumRentalPeriod" value={minimumRentalPeriod} onChange={(e) => setMinimumRentalPeriod(e.target.value)} className={inputClass} placeholder={t("minimumRentalPeriodPlaceholder")} />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="flex items-center gap-2 text-sm font-medium">
+                  <input type="checkbox" checked={driversLicenseRequired} onChange={(e) => setDriversLicenseRequired(e.target.checked)} />
+                  {t("driversLicenseRequiredLabel")}
+                </label>
+                <label className="flex items-center gap-2 text-sm font-medium">
+                  <input type="checkbox" checked={depositRequired} onChange={(e) => setDepositRequired(e.target.checked)} />
+                  {t("depositRequiredLabel")}
+                </label>
+              </div>
+            </div>
+          )}
+
+          {isDentalClinic && (
+            <div className="space-y-5">
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="jr-clinicType" className={labelClass}>{t("clinicTypeLabel")}</label>
+                  <select id="jr-clinicType" value={clinicType} onChange={(e) => setClinicType(e.target.value as ClinicType | "")} className={inputClass}>
+                    <option value="" disabled>{t("selectClinicTypePlaceholder")}</option>
+                    {CLINIC_TYPE_ORDER.map((type) => (
+                      <option key={type} value={type}>{clinicTypeLabel(type, locale)}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="jr-treatmentRooms" className={labelClass}>{t("numberOfTreatmentRoomsLabel")}</label>
+                  <input id="jr-treatmentRooms" type="number" min={0} value={numberOfTreatmentRooms ?? ""} onChange={(e) => setNumberOfTreatmentRooms(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+              </div>
+
+              <TagInput
+                label={t("insuranceAcceptedLabel")}
+                values={insuranceAccepted}
+                onChange={setInsuranceAccepted}
+                placeholder={tAdmin("tagInputPlaceholder")}
+              />
+
+              <div>
+                <label className={labelClass}>{t("languagesSpokenLabel")}</label>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {LANGUAGE_SPOKEN_OPTIONS.map((value) => (
+                    <label key={value} className="flex items-center gap-2 text-sm font-medium">
+                      <input type="checkbox" checked={languagesSpoken.includes(value)} onChange={() => toggleLanguageSpoken(value)} />
+                      {languageSpokenLabel(value, locale)}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {isAutoRepair && (
+            <div className="space-y-5">
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="jr-garageType" className={labelClass}>{t("garageTypeLabel")}</label>
+                  <select id="jr-garageType" value={garageType} onChange={(e) => setGarageType(e.target.value as GarageType | "")} className={inputClass}>
+                    <option value="" disabled>{t("selectGarageTypePlaceholder")}</option>
+                    {GARAGE_TYPE_ORDER.map((type) => (
+                      <option key={type} value={type}>{garageTypeLabel(type, locale)}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="jr-staffCountAuto" className={labelClass}>{t("numberOfMechanicsLabel")}</label>
+                  <input id="jr-staffCountAuto" type="number" min={0} value={staffCount ?? ""} onChange={(e) => setStaffCount(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+              </div>
+
+              <TagInput
+                label={t("brandsServicedLabel")}
+                values={brands}
+                onChange={setBrands}
+                placeholder={tAdmin("tagInputPlaceholder")}
+              />
+
+              <div className="flex flex-col gap-2">
+                <label className="flex items-center gap-2 text-sm font-medium">
+                  <input type="checkbox" checked={walkInsAccepted} onChange={(e) => setWalkInsAccepted(e.target.checked)} />
+                  {t("walkInsAcceptedLabel")}
+                </label>
+                <label className="flex items-center gap-2 text-sm font-medium">
+                  <input type="checkbox" checked={homeServiceAvailable} onChange={(e) => setHomeServiceAvailable(e.target.checked)} />
+                  {t("mobileServiceAvailableLabel")}
                 </label>
               </div>
             </div>

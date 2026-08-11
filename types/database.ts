@@ -140,6 +140,15 @@ type CityServiceRow = {
   // Women's Beauty Salons + Men's Barbershops
   salon_type: string | null; shop_type: string | null;
   staff_count: number | null; walk_ins_accepted: boolean | null; home_service_available: boolean | null;
+  // Cosmetics & Women's Beauty + Perfumes
+  store_type: string | null; brands: string[];
+  // Car Rental
+  rental_type: string | null; vehicle_types: string[]; minimum_rental_period: string | null;
+  drivers_license_required: boolean | null; deposit_required: boolean | null; fleet_size: number | null;
+  // Dental Clinics (clinic-level fields only; doctors/departments/appointments unaffected)
+  clinic_type: string | null; number_of_treatment_rooms: number | null; insurance_accepted: string[];
+  // Auto Repair & Car Services
+  garage_type: string | null;
 };
 type AttractionRow = ListingBase & SocialExtra & {
   history: string | null; best_time_to_visit: string | null; entry_fee: string; visitor_tips: string[];
@@ -299,6 +308,15 @@ type BusinessJoinRequestRow = {
   // Women's Beauty Salons + Men's Barbershops
   salon_type: string | null; shop_type: string | null;
   staff_count: number | null; walk_ins_accepted: boolean | null; home_service_available: boolean | null;
+  // Cosmetics & Women's Beauty + Perfumes
+  store_type: string | null; brands: string[];
+  // Car Rental
+  rental_type: string | null; vehicle_types: string[]; minimum_rental_period: string | null;
+  drivers_license_required: boolean | null; deposit_required: boolean | null; fleet_size: number | null;
+  // Dental Clinics
+  clinic_type: string | null; number_of_treatment_rooms: number | null; insurance_accepted: string[];
+  // Auto Repair & Car Services
+  garage_type: string | null;
   created_at: string; updated_at: string;
 };
 
