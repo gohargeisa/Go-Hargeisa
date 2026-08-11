@@ -582,6 +582,12 @@ export interface Hotel {
   bookingWhatsapp?: string;
   bookingComUrl?: string;
   partnerStatus: PartnerStatus;
+  /** Self-declared classification, distinct from `rating` (a guest-review
+   * score) — see lib/config/hotel-attributes.ts. */
+  hotelType?: "hotel" | "boutique" | "resort" | "guesthouse" | "hostel" | "apartment_hotel";
+  starRating?: number;
+  numberOfFloors?: number;
+  yearEstablished?: number;
 }
 
 export interface RestaurantMenuItem {

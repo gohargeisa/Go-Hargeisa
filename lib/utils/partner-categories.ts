@@ -16,6 +16,10 @@ import {
   Truck,
   ShoppingBag,
   DoorClosed,
+  Presentation,
+  BellRing,
+  CreditCard,
+  Banknote,
   type LucideIcon,
 } from "lucide-react";
 import type { CategoryTargetTable, JoinRequestCategory } from "@/types";
@@ -71,7 +75,7 @@ export function isConvertibleCategory(
  * no Amenities section on the form rather than an invented one.
  */
 export const PARTNER_AMENITIES: Partial<Record<JoinRequestCategory, string[]>> = {
-  hotel: ["wifi", "parking", "restaurant", "pool", "gym", "breakfast", "airport_shuttle"],
+  hotel: ["wifi", "parking", "restaurant", "pool", "gym", "breakfast", "airport_shuttle", "meeting_rooms", "room_service", "card_payment", "cash_accepted"],
   cafe: ["wifi", "workspace", "outdoor_seating", "coffee", "tea", "desserts", "meeting_space"],
   restaurant: ["family", "delivery", "takeaway", "outdoor_seating", "private_dining", "parking"],
 };
@@ -94,4 +98,8 @@ export const PARTNER_AMENITY_ICON: Record<string, LucideIcon> = {
   delivery: Truck,
   takeaway: ShoppingBag,
   private_dining: DoorClosed,
+  meeting_rooms: Presentation,
+  room_service: BellRing,
+  card_payment: CreditCard,
+  cash_accepted: Banknote,
 };

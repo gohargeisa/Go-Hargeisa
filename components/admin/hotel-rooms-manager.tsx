@@ -8,7 +8,8 @@ import { createHotelRoom, deleteHotelRoom, updateHotelRoom, type HotelRoomInput 
 import { ImageUploader } from "@/components/shared/image-uploader";
 import { uploadImage } from "@/lib/supabase/storage";
 import { Field, TagInput, inputClass } from "@/components/admin/form-shared";
-import { ROOM_TYPE_LABELS, ROOM_TYPE_ORDER } from "@/lib/utils/room-type";
+import { roomTypeLabel, ROOM_TYPE_ORDER } from "@/lib/utils/room-type";
+import type { Locale } from "@/lib/i18n/config";
 import type { RoomType } from "@/types";
 
 export interface HotelRoomManagerRow extends HotelRoomInput {
@@ -53,10 +54,12 @@ const FEATURE_SUGGESTIONS = [
  */
 export function HotelRoomsManager({
   hotelId,
+  locale,
   initialRooms,
   revalidatePaths,
 }: {
   hotelId: string;
+  locale: Locale;
   initialRooms: HotelRoomManagerRow[];
   revalidatePaths: string[];
 }) {
@@ -150,6 +153,7 @@ export function HotelRoomsManager({
             <RoomForm
               key={room.id}
               draft={draft}
+              locale={locale}
               setDraft={setDraft}
               onSave={save}
               onCancel={() => setEditingId(null)}
@@ -168,7 +172,7 @@ export function HotelRoomsManager({
                 <div className="flex items-center gap-1.5">
                   <p className="truncate text-sm font-semibold">{room.name}</p>
                   <span className="inline-flex shrink-0 items-center rounded-full bg-ink/8 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-ink/60 dark:bg-white/10 dark:text-sand/60">
-                    {ROOM_TYPE_LABELS[room.roomType]}
+                    {roomTypeLabel(room.roomType, locale)}
                   </span>
                   <span
                     className={`inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-[10px] font-bold ${
@@ -215,6 +219,7 @@ export function HotelRoomsManager({
         {editingId === "new" && (
           <RoomForm
             draft={draft}
+            locale={locale}
             setDraft={setDraft}
             onSave={save}
             onCancel={() => setEditingId(null)}
@@ -229,6 +234,7 @@ export function HotelRoomsManager({
 
 function RoomForm({
   draft,
+  locale,
   setDraft,
   onSave,
   onCancel,
@@ -236,6 +242,7 @@ function RoomForm({
   error,
 }: {
   draft: HotelRoomInput;
+  locale: Locale;
   setDraft: (d: HotelRoomInput) => void;
   onSave: () => void;
   onCancel: () => void;
@@ -317,7 +324,7 @@ function RoomForm({
           >
             {ROOM_TYPE_ORDER.map((type) => (
               <option key={type} value={type}>
-                {ROOM_TYPE_LABELS[type]}
+                {roomTypeLabel(type, locale)}
               </option>
             ))}
           </select>

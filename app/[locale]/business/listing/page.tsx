@@ -90,6 +90,7 @@ export default async function MyBusinessPage({ params: { locale } }: { params: {
       {listing.listingType === "hotel" && (
         <HotelRoomsManager
           hotelId={listing.id}
+          locale={locale}
           initialRooms={(roomRows ?? []).map((r: any) => ({
             id: r.id,
             name: r.name,

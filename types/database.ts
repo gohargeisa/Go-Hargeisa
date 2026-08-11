@@ -55,6 +55,8 @@ type HotelRow = ListingBase & SocialExtra & {
   external_booking_url: string | null; booking_whatsapp: string | null; booking_com_url: string | null;
   partner_status: PartnerStatusDb; trial_expires_at: string | null;
   opening_hours_structured: Json; is_24_hours: boolean; temporarily_closed: boolean; permanently_closed: boolean;
+  hotel_type: string | null; star_rating: number | null;
+  number_of_floors: number | null; year_established: number | null;
 };
 
 type RoomTypeDb = "standard" | "deluxe" | "twin" | "family" | "executive_suite";
@@ -258,6 +260,11 @@ type BusinessJoinRequestRow = {
   converted_at: string | null;
   videos: Json; documents: Json;
   category_id: string | null; custom_fields: Json; service_tags: string[];
+  booking_whatsapp: string | null; booking_com_url: string | null;
+  check_in_time: string | null; check_out_time: string | null;
+  hotel_type: string | null; star_rating: number | null;
+  estimated_room_count: number | null; room_types_offered: string[];
+  number_of_floors: number | null; year_established: number | null; languages: string[];
   created_at: string; updated_at: string;
 };
 

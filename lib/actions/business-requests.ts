@@ -63,6 +63,23 @@ export interface JoinRequestInput {
   documents?: BusinessDocument[];
   menuPdfUrl?: string;
   bookingUrl?: string;
+  /** Hotel-only intake fields — ignored for every other category. Mirror
+   * real hotels columns/concepts 1:1 (see lib/config/hotel-attributes.ts,
+   * lib/utils/room-type.ts) so conversion can map them directly; carried
+   * only on business_join_requests until then — the real per-room-type
+   * rows still get created properly via HotelRoomsManager after approval,
+   * this is just an admin-review hint of what the owner intends to offer. */
+  bookingWhatsapp?: string;
+  bookingComUrl?: string;
+  checkInTime?: string;
+  checkOutTime?: string;
+  hotelType?: string;
+  starRating?: number;
+  estimatedRoomCount?: number;
+  roomTypesOffered?: string[];
+  numberOfFloors?: number;
+  yearEstablished?: number;
+  languagesSpoken?: string[];
   openingHours?: WeeklyHoursDay[];
   amenities?: string[];
   priceRange?: "$" | "$$" | "$$$" | "$$$$";
@@ -167,6 +184,17 @@ export async function submitJoinRequest(input: JoinRequestInput): Promise<{ ok: 
     documents: input.documents ?? [],
     menu_pdf_url: input.menuPdfUrl || null,
     booking_url: input.bookingUrl?.trim() || null,
+    booking_whatsapp: input.category === "hotel" ? input.bookingWhatsapp?.trim() || null : null,
+    booking_com_url: input.category === "hotel" ? input.bookingComUrl?.trim() || null : null,
+    check_in_time: input.category === "hotel" ? input.checkInTime?.trim() || null : null,
+    check_out_time: input.category === "hotel" ? input.checkOutTime?.trim() || null : null,
+    hotel_type: input.category === "hotel" ? input.hotelType || null : null,
+    star_rating: input.category === "hotel" ? input.starRating ?? null : null,
+    estimated_room_count: input.category === "hotel" ? input.estimatedRoomCount ?? null : null,
+    room_types_offered: input.category === "hotel" ? input.roomTypesOffered ?? [] : [],
+    number_of_floors: input.category === "hotel" ? input.numberOfFloors ?? null : null,
+    year_established: input.category === "hotel" ? input.yearEstablished ?? null : null,
+    languages: input.category === "hotel" ? input.languagesSpoken ?? [] : [],
     opening_hours: input.openingHours ?? [],
     amenities: input.amenities ?? [],
     price_range: input.priceRange ?? null,
@@ -620,11 +648,36 @@ export async function convertJoinRequest(
   if (table === "hotels") {
     basePayload.website = request.website;
 
+    // Priority mirrors the join form's field order (custom URL first, since
+    // it's the original/most specific option) — a business owner who filled
+    // in more than one gets whichever is highest priority as the default
+    // guest-facing option; admin can change this later in the real edit form.
     if (request.booking_url) {
       basePayload.booking_mode = "external";
       basePayload.external_booking_option = "custom_url";
       basePayload.external_booking_url = request.booking_url;
+    } else if (request.booking_com_url) {
+      basePayload.booking_mode = "external";
+      basePayload.external_booking_option = "booking_com";
+      basePayload.booking_com_url = request.booking_com_url;
+    } else if (request.booking_whatsapp) {
+      basePayload.booking_mode = "external";
+      basePayload.external_booking_option = "whatsapp";
+      basePayload.booking_whatsapp = request.booking_whatsapp;
     }
+    // Any additionally-provided contact fields are still carried onto the
+    // real row even when not the chosen default option, so the admin can
+    // switch between them later without re-entering data.
+    if (request.booking_com_url) basePayload.booking_com_url = request.booking_com_url;
+    if (request.booking_whatsapp) basePayload.booking_whatsapp = request.booking_whatsapp;
+
+    if (request.check_in_time) basePayload.check_in_time = request.check_in_time;
+    if (request.check_out_time) basePayload.check_out_time = request.check_out_time;
+    if (request.hotel_type) basePayload.hotel_type = request.hotel_type;
+    if (request.star_rating) basePayload.star_rating = request.star_rating;
+    if (request.number_of_floors) basePayload.number_of_floors = request.number_of_floors;
+    if (request.year_established) basePayload.year_established = request.year_established;
+    if (request.languages && request.languages.length > 0) basePayload.languages = request.languages;
   } else if (table === "restaurants") {
     basePayload.website = request.website;
     basePayload.menu_pdf_url = request.menu_pdf_url;

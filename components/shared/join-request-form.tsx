@@ -16,8 +16,18 @@ import { PARTNER_AMENITIES, PARTNER_AMENITY_ICON, targetTableToJoinCategory } fr
 import { DynamicIcon } from "@/lib/utils/dynamic-icon";
 import { categoryDisplayName } from "@/lib/utils/category-href";
 import { WEEK_DAYS_SAT_FIRST, defaultWeeklyHours } from "@/lib/utils/weekly-hours";
+import {
+  HOTEL_TYPE_ORDER,
+  hotelTypeLabel,
+  starRatingLabel,
+  STAR_RATING_OPTIONS,
+  LANGUAGE_SPOKEN_OPTIONS,
+  languageSpokenLabel,
+  type HotelType,
+} from "@/lib/config/hotel-attributes";
+import { ROOM_TYPE_ORDER, roomTypeLabel } from "@/lib/utils/room-type";
 import type { Locale } from "@/lib/i18n/config";
-import type { JoinRequestCategory, GalleryImage, MediaVideo, BusinessDocument, Coordinates, WeeklyHoursDay, Category } from "@/types";
+import type { JoinRequestCategory, GalleryImage, MediaVideo, BusinessDocument, Coordinates, WeeklyHoursDay, Category, RoomType } from "@/types";
 
 type PriceRange = "$" | "$$" | "$$$" | "$$$$";
 const PRICE_LEVELS: PriceRange[] = ["$", "$$", "$$$", "$$$$"];
@@ -72,6 +82,17 @@ export function JoinRequestForm({
   const [documents, setDocuments] = useState<BusinessDocument[]>([]);
   const [menuPdfUrl, setMenuPdfUrl] = useState("");
   const [bookingUrl, setBookingUrl] = useState("");
+  const [bookingWhatsapp, setBookingWhatsapp] = useState("");
+  const [bookingComUrl, setBookingComUrl] = useState("");
+  const [checkInTime, setCheckInTime] = useState("");
+  const [checkOutTime, setCheckOutTime] = useState("");
+  const [hotelType, setHotelType] = useState<HotelType | "">("");
+  const [starRating, setStarRating] = useState<number | undefined>(undefined);
+  const [estimatedRoomCount, setEstimatedRoomCount] = useState<number | undefined>(undefined);
+  const [roomTypesOffered, setRoomTypesOffered] = useState<RoomType[]>([]);
+  const [numberOfFloors, setNumberOfFloors] = useState<number | undefined>(undefined);
+  const [yearEstablished, setYearEstablished] = useState<number | undefined>(undefined);
+  const [languagesSpoken, setLanguagesSpoken] = useState<string[]>([]);
   const [openingHours, setOpeningHours] = useState<WeeklyHoursDay[]>(defaultWeeklyHours());
   const [amenities, setAmenities] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<PriceRange | undefined>(undefined);
@@ -91,10 +112,31 @@ export function JoinRequestForm({
     setAmenities([]);
     setCustomFields({});
     setServiceTags([]);
+    if (next !== "hotel") {
+      setBookingWhatsapp("");
+      setBookingComUrl("");
+      setCheckInTime("");
+      setCheckOutTime("");
+      setHotelType("");
+      setStarRating(undefined);
+      setEstimatedRoomCount(undefined);
+      setRoomTypesOffered([]);
+      setNumberOfFloors(undefined);
+      setYearEstablished(undefined);
+      setLanguagesSpoken([]);
+    }
   }
 
   function toggleAmenity(code: string) {
     setAmenities((a) => (a.includes(code) ? a.filter((x) => x !== code) : [...a, code]));
+  }
+
+  function toggleRoomType(type: RoomType) {
+    setRoomTypesOffered((types) => (types.includes(type) ? types.filter((t) => t !== type) : [...types, type]));
+  }
+
+  function toggleLanguageSpoken(value: string) {
+    setLanguagesSpoken((values) => (values.includes(value) ? values.filter((v) => v !== value) : [...values, value]));
   }
 
   function updateHoursDay(day: WeeklyHoursDay["day"], patch: Partial<WeeklyHoursDay>) {
@@ -139,6 +181,17 @@ export function JoinRequestForm({
         documents,
         menuPdfUrl: menuPdfUrl || undefined,
         bookingUrl: bookingUrl || undefined,
+        bookingWhatsapp: category === "hotel" ? bookingWhatsapp || undefined : undefined,
+        bookingComUrl: category === "hotel" ? bookingComUrl || undefined : undefined,
+        checkInTime: category === "hotel" ? checkInTime || undefined : undefined,
+        checkOutTime: category === "hotel" ? checkOutTime || undefined : undefined,
+        hotelType: category === "hotel" ? hotelType || undefined : undefined,
+        starRating: category === "hotel" ? starRating : undefined,
+        estimatedRoomCount: category === "hotel" ? estimatedRoomCount : undefined,
+        roomTypesOffered: category === "hotel" ? roomTypesOffered : undefined,
+        numberOfFloors: category === "hotel" ? numberOfFloors : undefined,
+        yearEstablished: category === "hotel" ? yearEstablished : undefined,
+        languagesSpoken: category === "hotel" ? languagesSpoken : undefined,
         openingHours,
         amenities,
         priceRange,
@@ -277,9 +330,126 @@ export function JoinRequestForm({
           )}
 
           {category === "hotel" && (
-            <div>
-              <label htmlFor="jr-bookingUrl" className={labelClass}>{t("bookingUrlLabel")}</label>
-              <input id="jr-bookingUrl" type="url" value={bookingUrl} onChange={(e) => setBookingUrl(e.target.value)} className={inputClass} placeholder="https://…" />
+            <div className="space-y-5">
+              <div>
+                <label htmlFor="jr-bookingUrl" className={labelClass}>{t("bookingUrlLabel")}</label>
+                <input id="jr-bookingUrl" type="url" value={bookingUrl} onChange={(e) => setBookingUrl(e.target.value)} className={inputClass} placeholder="https://…" />
+              </div>
+
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="jr-bookingWhatsapp" className={labelClass}>{tAdmin("bookingWhatsappLabel")}</label>
+                  <input id="jr-bookingWhatsapp" type="tel" value={bookingWhatsapp} onChange={(e) => setBookingWhatsapp(e.target.value)} className={inputClass} placeholder="+252 63 000 0000" />
+                </div>
+                <div>
+                  <label htmlFor="jr-bookingComUrl" className={labelClass}>{tAdmin("bookingComUrlLabel")}</label>
+                  <input id="jr-bookingComUrl" type="url" value={bookingComUrl} onChange={(e) => setBookingComUrl(e.target.value)} className={inputClass} placeholder="https://booking.com/…" />
+                </div>
+              </div>
+
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="jr-checkIn" className={labelClass}>{t("checkInLabel")}</label>
+                  <input id="jr-checkIn" value={checkInTime} onChange={(e) => setCheckInTime(e.target.value)} className={inputClass} placeholder="14:00" />
+                </div>
+                <div>
+                  <label htmlFor="jr-checkOut" className={labelClass}>{t("checkOutLabel")}</label>
+                  <input id="jr-checkOut" value={checkOutTime} onChange={(e) => setCheckOutTime(e.target.value)} className={inputClass} placeholder="12:00" />
+                </div>
+              </div>
+
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="jr-hotelType" className={labelClass}>{t("hotelTypeLabel")}</label>
+                  <select
+                    id="jr-hotelType"
+                    value={hotelType}
+                    onChange={(e) => setHotelType(e.target.value as HotelType | "")}
+                    className={inputClass}
+                  >
+                    <option value="" disabled>{t("selectHotelTypePlaceholder")}</option>
+                    {HOTEL_TYPE_ORDER.map((type) => (
+                      <option key={type} value={type}>{hotelTypeLabel(type, locale)}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="jr-starRating" className={labelClass}>{t("starRatingLabel")}</label>
+                  <select
+                    id="jr-starRating"
+                    value={starRating ?? ""}
+                    onChange={(e) => setStarRating(e.target.value ? Number(e.target.value) : undefined)}
+                    className={inputClass}
+                  >
+                    <option value="" disabled>{t("selectStarRatingPlaceholder")}</option>
+                    {STAR_RATING_OPTIONS.map((n) => (
+                      <option key={n} value={n}>{starRatingLabel(n, locale)}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="jr-roomCount" className={labelClass}>{t("roomCountLabel")}</label>
+                <input
+                  id="jr-roomCount"
+                  type="number"
+                  min={1}
+                  value={estimatedRoomCount ?? ""}
+                  onChange={(e) => setEstimatedRoomCount(e.target.value ? Number(e.target.value) : undefined)}
+                  className={inputClass}
+                />
+              </div>
+
+              <div>
+                <label className={labelClass}>{t("roomTypesLabel")}</label>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {ROOM_TYPE_ORDER.map((type) => (
+                    <label key={type} className="flex items-center gap-2 text-sm font-medium">
+                      <input type="checkbox" checked={roomTypesOffered.includes(type)} onChange={() => toggleRoomType(type)} />
+                      {roomTypeLabel(type, locale)}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="jr-numberOfFloors" className={labelClass}>{t("numberOfFloorsLabel")}</label>
+                  <input
+                    id="jr-numberOfFloors"
+                    type="number"
+                    min={1}
+                    value={numberOfFloors ?? ""}
+                    onChange={(e) => setNumberOfFloors(e.target.value ? Number(e.target.value) : undefined)}
+                    className={inputClass}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="jr-yearEstablished" className={labelClass}>{t("yearEstablishedLabel")}</label>
+                  <input
+                    id="jr-yearEstablished"
+                    type="number"
+                    min={1900}
+                    max={new Date().getFullYear()}
+                    value={yearEstablished ?? ""}
+                    onChange={(e) => setYearEstablished(e.target.value ? Number(e.target.value) : undefined)}
+                    className={inputClass}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClass}>{t("languagesSpokenLabel")}</label>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {LANGUAGE_SPOKEN_OPTIONS.map((value) => (
+                    <label key={value} className="flex items-center gap-2 text-sm font-medium">
+                      <input type="checkbox" checked={languagesSpoken.includes(value)} onChange={() => toggleLanguageSpoken(value)} />
+                      {languageSpokenLabel(value, locale)}
+                    </label>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
 

@@ -132,6 +132,10 @@ export function mapHotel(
     bookingWhatsapp: row.booking_whatsapp ?? undefined,
     bookingComUrl: row.booking_com_url ?? undefined,
     partnerStatus: row.partner_status,
+    hotelType: (row.hotel_type as Hotel["hotelType"]) ?? undefined,
+    starRating: row.star_rating ?? undefined,
+    numberOfFloors: row.number_of_floors ?? undefined,
+    yearEstablished: row.year_established ?? undefined,
   };
 }
 

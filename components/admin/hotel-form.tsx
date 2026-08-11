@@ -14,6 +14,7 @@ import { AmenitiesPicker } from "@/components/admin/amenities-picker";
 import { OpeningHoursEditor } from "@/components/shared/opening-hours-editor";
 import { createRecord, updateRecord } from "@/lib/actions/admin";
 import { useUnsavedChangesWarning } from "@/lib/hooks/use-unsaved-changes-warning";
+import { HOTEL_TYPE_ORDER, hotelTypeLabel, starRatingLabel, STAR_RATING_OPTIONS, type HotelType } from "@/lib/config/hotel-attributes";
 import type { Locale } from "@/lib/i18n/config";
 import type { GalleryImage, MediaVideo, HotelBookingMode, HotelExternalBookingOption, OpeningHoursGroup } from "@/types";
 
@@ -61,6 +62,10 @@ export interface HotelFormInput {
   externalBookingUrl: string;
   bookingWhatsapp: string;
   bookingComUrl: string;
+  hotelType: HotelType | "";
+  starRating: number | "";
+  numberOfFloors: number | "";
+  yearEstablished: number | "";
 }
 
 const AMENITY_SUGGESTIONS = [
@@ -136,6 +141,10 @@ export function HotelForm({
     externalBookingUrl: initial?.externalBookingUrl ?? "",
     bookingWhatsapp: initial?.bookingWhatsapp ?? "",
     bookingComUrl: initial?.bookingComUrl ?? "",
+    hotelType: initial?.hotelType ?? "",
+    starRating: initial?.starRating ?? "",
+    numberOfFloors: initial?.numberOfFloors ?? "",
+    yearEstablished: initial?.yearEstablished ?? "",
   });
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -197,6 +206,10 @@ export function HotelForm({
       external_booking_url: form.externalBookingUrl || null,
       booking_whatsapp: form.bookingWhatsapp || null,
       booking_com_url: form.bookingComUrl || null,
+      hotel_type: form.hotelType || null,
+      star_rating: form.starRating || null,
+      number_of_floors: form.numberOfFloors || null,
+      year_established: form.yearEstablished || null,
     };
     const revalidatePaths = [`/${locale}/admin/hotels`, `/${locale}/hotels`, `/${locale}`];
     const redirectTo = `/${locale}/admin/hotels`;
@@ -341,6 +354,51 @@ export function HotelForm({
           </Field>
         </div>
 
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Hotel type">
+            <select value={form.hotelType} onChange={(e) => update("hotelType", e.target.value as HotelType | "")} className={inputClass}>
+              <option value="">—</option>
+              {HOTEL_TYPE_ORDER.map((type) => (
+                <option key={type} value={type}>{hotelTypeLabel(type, locale)}</option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Star rating">
+            <select
+              value={form.starRating}
+              onChange={(e) => update("starRating", e.target.value ? Number(e.target.value) : "")}
+              className={inputClass}
+            >
+              <option value="">—</option>
+              {STAR_RATING_OPTIONS.map((n) => (
+                <option key={n} value={n}>{starRatingLabel(n, locale)}</option>
+              ))}
+            </select>
+          </Field>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Number of floors">
+            <input
+              type="number"
+              min={1}
+              value={form.numberOfFloors}
+              onChange={(e) => update("numberOfFloors", e.target.value ? Number(e.target.value) : "")}
+              className={inputClass}
+            />
+          </Field>
+          <Field label="Year established">
+            <input
+              type="number"
+              min={1900}
+              max={new Date().getFullYear()}
+              value={form.yearEstablished}
+              onChange={(e) => update("yearEstablished", e.target.value ? Number(e.target.value) : "")}
+              className={inputClass}
+            />
+          </Field>
+        </div>
+
         <div className="space-y-4 rounded-2xl border border-ink/8 p-4 dark:border-white/10">
           <div>
             <p className="font-semibold">{t("bookingSettingsLabel")}</p>
@@ -471,6 +529,7 @@ export function HotelForm({
       {mode === "edit" && hotelId && (
         <HotelRoomsManager
           hotelId={hotelId}
+          locale={locale}
           initialRooms={initialRooms}
           revalidatePaths={[`/${locale}/hotels/${form.slug}`, `/${locale}/admin/hotels/${hotelId}/edit`]}
         />

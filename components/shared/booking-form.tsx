@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { submitBookingRequest } from "@/lib/actions/bookings";
 import { amenityIcon } from "@/lib/utils/amenity-icon";
-import { ROOM_TYPE_LABELS } from "@/lib/utils/room-type";
+import { roomTypeLabel } from "@/lib/utils/room-type";
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
 import { buildWhatsAppBookingMessage } from "@/lib/utils/whatsapp-booking-message";
 import type { Locale } from "@/lib/i18n/config";
@@ -97,7 +97,7 @@ function Stepper({ label, value, min, onChange }: { label: string; value: number
   );
 }
 
-function RoomOptionCard({ room, selected, onSelect }: { room: HotelRoom; selected: boolean; onSelect: () => void }) {
+function RoomOptionCard({ room, locale, selected, onSelect }: { room: HotelRoom; locale: Locale; selected: boolean; onSelect: () => void }) {
   const t = useTranslations("bookingRequest");
   const visibleFeatures = room.features.slice(0, 3);
   const extraCount = room.features.length - visibleFeatures.length;
@@ -130,7 +130,7 @@ function RoomOptionCard({ room, selected, onSelect }: { room: HotelRoom; selecte
         <div className="flex flex-wrap items-center gap-1.5">
           <p className="truncate text-sm font-bold">{room.name}</p>
           <span className="inline-flex items-center rounded-full bg-ink/8 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-ink/60 dark:bg-white/10 dark:text-sand/60">
-            {ROOM_TYPE_LABELS[room.roomType]}
+            {roomTypeLabel(room.roomType, locale)}
           </span>
         </div>
 
@@ -390,7 +390,7 @@ export function BookingForm({
             <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink/50 dark:text-sand/50">{t("roomSectionTitle")}</h3>
             <div className="space-y-2.5">
               {rooms.map((room) => (
-                <RoomOptionCard key={room.id} room={room} selected={roomId === room.id} onSelect={() => setRoomId(room.id === roomId ? "" : room.id)} />
+                <RoomOptionCard key={room.id} room={room} locale={locale} selected={roomId === room.id} onSelect={() => setRoomId(room.id === roomId ? "" : room.id)} />
               ))}
             </div>
           </section>
