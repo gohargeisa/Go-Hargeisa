@@ -136,13 +136,51 @@ export interface JoinRequestInput {
   driversLicenseRequired?: boolean;
   depositRequired?: boolean;
   fleetSize?: number;
-  /** Dental Clinic-only intake fields (clinic-level; the per-doctor
-   * Medical Appointment Engine is untouched). */
+  /** Clinics / Medical Clinics-only intake fields (clinic-level; the
+   * per-doctor Medical Appointment Engine is untouched). Dental Clinic is
+   * now one clinicType value within this category, not a separate one. */
   clinicType?: string;
   numberOfTreatmentRooms?: number;
   insuranceAccepted?: string[];
   /** Auto Repair-only intake field. */
   garageType?: string;
+  /** Gym / Fitness Center-only intake fields. */
+  gymType?: string;
+  classesOffered?: string[];
+  membershipOptions?: string[];
+  personalTrainingAvailable?: boolean;
+  groupClassesAvailable?: boolean;
+  gymFacilities?: string[];
+  trainersAvailable?: boolean;
+  femaleTrainersAvailable?: boolean;
+  maleTrainersAvailable?: boolean;
+  trialMembershipAvailable?: boolean;
+  /** Travel Agency / Travel Office-only intake fields (target_table
+   * 'services', not 'city_services'). */
+  travelAgencyType?: string;
+  flightTicketing?: boolean;
+  hotelBooking?: boolean;
+  visaAssistance?: boolean;
+  tourPackages?: boolean;
+  airportTransfers?: boolean;
+  carRentalAssistance?: boolean;
+  hajjUmrahServices?: boolean;
+  localTours?: boolean;
+  internationalTours?: boolean;
+  groupTours?: boolean;
+  travelInsuranceAssistance?: boolean;
+  /** Flower Shop-only intake fields (target_table 'services'). */
+  flowerShopType?: string;
+  flowerDeliveryAvailable?: boolean;
+  sameDayDelivery?: boolean;
+  customBouquets?: boolean;
+  weddingArrangements?: boolean;
+  eventDecorationService?: boolean;
+  giftWrapping?: boolean;
+  indoorPlants?: boolean;
+  outdoorPlants?: boolean;
+  onlineOrderingAvailable?: boolean;
+  deliveryAreas?: string[];
 }
 
 /**
@@ -220,8 +258,15 @@ export async function submitJoinRequest(input: JoinRequestInput): Promise<{ ok: 
   const isCosmetics = resolvedOtherSlug === "cosmetics-beauty";
   const isPerfume = resolvedOtherSlug === "perfume-shop";
   const isCarRental = resolvedOtherSlug === "car-rental";
-  const isDentalClinic = resolvedOtherSlug === "dental-clinic";
+  // Clinics / Medical Clinics — Dental Clinic is now one clinicType value
+  // within this category (slug "clinic"), not a separate category. The
+  // dental-clinic slug itself is deactivated (categories.is_active=false)
+  // and can no longer be resolved here at all.
+  const isClinic = resolvedOtherSlug === "clinic";
   const isAutoRepair = resolvedOtherSlug === "auto-repair";
+  const isGym = resolvedOtherSlug === "gym";
+  const isTravelAgency = resolvedOtherSlug === "tour-companies";
+  const isFlowerShop = resolvedOtherSlug === "flower-shops";
 
   const { data: existing } = await supabase
     .from("business_join_requests")
@@ -271,7 +316,7 @@ export async function submitJoinRequest(input: JoinRequestInput): Promise<{ ok: 
     room_types_offered: input.category === "hotel" ? input.roomTypesOffered ?? [] : [],
     number_of_floors: input.category === "hotel" || isSchool || isUniversity ? input.numberOfFloors ?? null : null,
     year_established: input.category === "hotel" || isSchool || isUniversity ? input.yearEstablished ?? null : null,
-    languages: input.category === "hotel" || input.category === "restaurant" || isSchool || isUniversity || isDentalClinic ? input.languagesSpoken ?? [] : [],
+    languages: input.category === "hotel" || input.category === "restaurant" || isSchool || isUniversity || isClinic || isTravelAgency ? input.languagesSpoken ?? [] : [],
     opening_hours: input.openingHours ?? [],
     amenities: input.amenities ?? [],
     price_range: input.priceRange ?? null,
@@ -323,12 +368,48 @@ export async function submitJoinRequest(input: JoinRequestInput): Promise<{ ok: 
     drivers_license_required: isCarRental ? input.driversLicenseRequired ?? null : null,
     deposit_required: isCarRental ? input.depositRequired ?? null : null,
     fleet_size: isCarRental ? input.fleetSize ?? null : null,
-    // Dental Clinics
-    clinic_type: isDentalClinic ? input.clinicType || null : null,
-    number_of_treatment_rooms: isDentalClinic ? input.numberOfTreatmentRooms ?? null : null,
-    insurance_accepted: isDentalClinic ? input.insuranceAccepted ?? [] : [],
+    // Clinics / Medical Clinics (Dental Clinic is now one clinicType value)
+    clinic_type: isClinic ? input.clinicType || null : null,
+    number_of_treatment_rooms: isClinic ? input.numberOfTreatmentRooms ?? null : null,
+    insurance_accepted: isClinic ? input.insuranceAccepted ?? [] : [],
     // Auto Repair
     garage_type: isAutoRepair ? input.garageType || null : null,
+    // Gym / Fitness Center
+    gym_type: isGym ? input.gymType || null : null,
+    classes_offered: isGym ? input.classesOffered ?? [] : [],
+    membership_options: isGym ? input.membershipOptions ?? [] : [],
+    personal_training_available: isGym ? input.personalTrainingAvailable ?? null : null,
+    group_classes_available: isGym ? input.groupClassesAvailable ?? null : null,
+    gym_facilities: isGym ? input.gymFacilities ?? [] : [],
+    trainers_available: isGym ? input.trainersAvailable ?? null : null,
+    female_trainers_available: isGym ? input.femaleTrainersAvailable ?? null : null,
+    male_trainers_available: isGym ? input.maleTrainersAvailable ?? null : null,
+    trial_membership_available: isGym ? input.trialMembershipAvailable ?? null : null,
+    // Travel Agency / Travel Office
+    travel_agency_type: isTravelAgency ? input.travelAgencyType || null : null,
+    flight_ticketing: isTravelAgency ? input.flightTicketing ?? null : null,
+    hotel_booking: isTravelAgency ? input.hotelBooking ?? null : null,
+    visa_assistance: isTravelAgency ? input.visaAssistance ?? null : null,
+    tour_packages: isTravelAgency ? input.tourPackages ?? null : null,
+    airport_transfers: isTravelAgency ? input.airportTransfers ?? null : null,
+    car_rental_assistance: isTravelAgency ? input.carRentalAssistance ?? null : null,
+    hajj_umrah_services: isTravelAgency ? input.hajjUmrahServices ?? null : null,
+    local_tours: isTravelAgency ? input.localTours ?? null : null,
+    international_tours: isTravelAgency ? input.internationalTours ?? null : null,
+    group_tours: isTravelAgency ? input.groupTours ?? null : null,
+    travel_insurance_assistance: isTravelAgency ? input.travelInsuranceAssistance ?? null : null,
+    // Flower Shop
+    flower_shop_type: isFlowerShop ? input.flowerShopType || null : null,
+    flower_delivery_available: isFlowerShop ? input.flowerDeliveryAvailable ?? null : null,
+    same_day_delivery: isFlowerShop ? input.sameDayDelivery ?? null : null,
+    custom_bouquets: isFlowerShop ? input.customBouquets ?? null : null,
+    wedding_arrangements: isFlowerShop ? input.weddingArrangements ?? null : null,
+    event_decoration_service: isFlowerShop ? input.eventDecorationService ?? null : null,
+    gift_wrapping: isFlowerShop ? input.giftWrapping ?? null : null,
+    indoor_plants: isFlowerShop ? input.indoorPlants ?? null : null,
+    outdoor_plants: isFlowerShop ? input.outdoorPlants ?? null : null,
+    online_ordering_available: isFlowerShop ? input.onlineOrderingAvailable ?? null : null,
+    delivery_areas: isFlowerShop ? input.deliveryAreas ?? [] : [],
   } as never);
 
   if (error) return { ok: false, error: error.message };
@@ -641,9 +722,11 @@ export async function convertJoinRequest(
         if (request.fleet_size) cityServicePayload.fleet_size = request.fleet_size;
       }
 
-      // Dental Clinics — clinic-level fields only; doctors/departments/
-      // appointments are managed separately and untouched by conversion.
-      if (resolvedCategory.slug === "dental-clinic") {
+      // Clinics / Medical Clinics — clinic-level fields only; doctors/
+      // departments/appointments are managed separately and untouched by
+      // conversion. Dental Clinic is now one clinic_type value ("dental")
+      // within this category (slug "clinic") rather than a separate one.
+      if (resolvedCategory.slug === "clinic") {
         if (request.clinic_type) cityServicePayload.clinic_type = request.clinic_type;
         if (request.number_of_treatment_rooms) cityServicePayload.number_of_treatment_rooms = request.number_of_treatment_rooms;
         if (request.insurance_accepted && request.insurance_accepted.length > 0) {
@@ -655,6 +738,20 @@ export async function convertJoinRequest(
       // Auto Repair & Car Services
       if (resolvedCategory.slug === "auto-repair" && request.garage_type) {
         cityServicePayload.garage_type = request.garage_type;
+      }
+
+      // Gym / Fitness Center
+      if (resolvedCategory.slug === "gym") {
+        if (request.gym_type) cityServicePayload.gym_type = request.gym_type;
+        if (request.classes_offered && request.classes_offered.length > 0) cityServicePayload.classes_offered = request.classes_offered;
+        if (request.membership_options && request.membership_options.length > 0) cityServicePayload.membership_options = request.membership_options;
+        if (request.personal_training_available !== null) cityServicePayload.personal_training_available = request.personal_training_available;
+        if (request.group_classes_available !== null) cityServicePayload.group_classes_available = request.group_classes_available;
+        if (request.gym_facilities && request.gym_facilities.length > 0) cityServicePayload.gym_facilities = request.gym_facilities;
+        if (request.trainers_available !== null) cityServicePayload.trainers_available = request.trainers_available;
+        if (request.female_trainers_available !== null) cityServicePayload.female_trainers_available = request.female_trainers_available;
+        if (request.male_trainers_available !== null) cityServicePayload.male_trainers_available = request.male_trainers_available;
+        if (request.trial_membership_available !== null) cityServicePayload.trial_membership_available = request.trial_membership_available;
       }
 
       const { data: created, error: insertError } = await supabase
@@ -762,6 +859,42 @@ export async function convertJoinRequest(
       custom_fields: request.custom_fields ?? {},
       services: categoryName ? [categoryName] : [],
     };
+
+    // Travel Agency / Travel Office (slug "tour-companies") — its existing
+    // custom_fields_schema (destinations/specialties/license_number) is
+    // untouched above; these are additional, more structured fields.
+    if (resolvedCategory.slug === "tour-companies") {
+      if (request.travel_agency_type) servicePayload.travel_agency_type = request.travel_agency_type;
+      if (request.flight_ticketing !== null) servicePayload.flight_ticketing = request.flight_ticketing;
+      if (request.hotel_booking !== null) servicePayload.hotel_booking = request.hotel_booking;
+      if (request.visa_assistance !== null) servicePayload.visa_assistance = request.visa_assistance;
+      if (request.tour_packages !== null) servicePayload.tour_packages = request.tour_packages;
+      if (request.airport_transfers !== null) servicePayload.airport_transfers = request.airport_transfers;
+      if (request.car_rental_assistance !== null) servicePayload.car_rental_assistance = request.car_rental_assistance;
+      if (request.hajj_umrah_services !== null) servicePayload.hajj_umrah_services = request.hajj_umrah_services;
+      if (request.local_tours !== null) servicePayload.local_tours = request.local_tours;
+      if (request.international_tours !== null) servicePayload.international_tours = request.international_tours;
+      if (request.group_tours !== null) servicePayload.group_tours = request.group_tours;
+      if (request.travel_insurance_assistance !== null) servicePayload.travel_insurance_assistance = request.travel_insurance_assistance;
+      if (request.languages && request.languages.length > 0) servicePayload.languages = request.languages;
+    }
+
+    // Flower Shop (slug "flower-shops") — its existing custom_fields_schema
+    // (delivery_available/specialties/custom_arrangements) is untouched
+    // above; these are additional fields.
+    if (resolvedCategory.slug === "flower-shops") {
+      if (request.flower_shop_type) servicePayload.flower_shop_type = request.flower_shop_type;
+      if (request.flower_delivery_available !== null) servicePayload.flower_delivery_available = request.flower_delivery_available;
+      if (request.same_day_delivery !== null) servicePayload.same_day_delivery = request.same_day_delivery;
+      if (request.custom_bouquets !== null) servicePayload.custom_bouquets = request.custom_bouquets;
+      if (request.wedding_arrangements !== null) servicePayload.wedding_arrangements = request.wedding_arrangements;
+      if (request.event_decoration_service !== null) servicePayload.event_decoration_service = request.event_decoration_service;
+      if (request.gift_wrapping !== null) servicePayload.gift_wrapping = request.gift_wrapping;
+      if (request.indoor_plants !== null) servicePayload.indoor_plants = request.indoor_plants;
+      if (request.outdoor_plants !== null) servicePayload.outdoor_plants = request.outdoor_plants;
+      if (request.online_ordering_available !== null) servicePayload.online_ordering_available = request.online_ordering_available;
+      if (request.delivery_areas && request.delivery_areas.length > 0) servicePayload.delivery_areas = request.delivery_areas;
+    }
 
     const { data: created, error: insertError } = await supabase
       .from("services")

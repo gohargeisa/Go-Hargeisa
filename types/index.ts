@@ -765,6 +765,41 @@ export interface Service {
   customFields: Record<string, string | number | boolean>;
   featured?: boolean;
   logo?: string;
+  // Travel Agency / Travel Office (extends the existing "tour-companies"
+  // category, displayed as "Travel Agencies"). Its existing
+  // customFieldsSchema fields — destinations/specialties/license_number —
+  // are untouched; these are additional, more structured fields.
+  travelAgencyType?:
+    | "travel_agency" | "tour_operator" | "ticketing_office" | "visa_services"
+    | "hajj_umrah_services" | "local_tours" | "international_tours" | "other";
+  flightTicketing?: boolean;
+  hotelBooking?: boolean;
+  visaAssistance?: boolean;
+  tourPackages?: boolean;
+  airportTransfers?: boolean;
+  carRentalAssistance?: boolean;
+  hajjUmrahServices?: boolean;
+  localTours?: boolean;
+  internationalTours?: boolean;
+  groupTours?: boolean;
+  travelInsuranceAssistance?: boolean;
+  languages?: string[];
+  // Flower Shop (extends the existing "flower-shops" category). Its
+  // existing customFieldsSchema fields — delivery_available/specialties/
+  // custom_arrangements — are untouched; these are additional fields.
+  flowerShopType?:
+    | "fresh_flowers" | "artificial_flowers" | "wedding_flowers" | "event_decoration"
+    | "gift_and_flower_shop" | "floral_design" | "other";
+  flowerDeliveryAvailable?: boolean;
+  sameDayDelivery?: boolean;
+  customBouquets?: boolean;
+  weddingArrangements?: boolean;
+  eventDecorationService?: boolean;
+  giftWrapping?: boolean;
+  indoorPlants?: boolean;
+  outdoorPlants?: boolean;
+  onlineOrderingAvailable?: boolean;
+  deliveryAreas?: string[];
 }
 
 /** Phase 2 — the minimal City Services directory (Hospitals/Banks/
@@ -862,12 +897,26 @@ export interface CityService {
   driversLicenseRequired?: boolean;
   depositRequired?: boolean;
   fleetSize?: number;
-  // Dental Clinics (clinic-level fields only)
-  clinicType?: "general_dentistry" | "orthodontics" | "pediatric_dentistry" | "multi_specialty" | "other";
+  // Clinics / Medical Clinics (clinic-level fields only; Dental Clinic is now
+  // one clinicType value within this unified category, not a separate one)
+  clinicType?:
+    | "general" | "dental" | "hijama" | "veterinary" | "eye" | "dermatology" | "pediatric"
+    | "womens_health" | "mens_health" | "physiotherapy" | "ent" | "laboratory_diagnostic" | "other";
   numberOfTreatmentRooms?: number;
   insuranceAccepted?: string[];
   // Auto Repair & Car Services
   garageType?: "general_repair" | "specialized" | "dealership_affiliated" | "mobile_repair" | "other";
+  // Gym / Fitness Center
+  gymType?: "mens_gym" | "womens_gym" | "mixed_gym" | "fitness_center" | "crossfit" | "personal_training" | "other";
+  classesOffered?: string[];
+  membershipOptions?: string[];
+  personalTrainingAvailable?: boolean;
+  groupClassesAvailable?: boolean;
+  gymFacilities?: string[];
+  trainersAvailable?: boolean;
+  femaleTrainersAvailable?: boolean;
+  maleTrainersAvailable?: boolean;
+  trialMembershipAvailable?: boolean;
 }
 
 export interface Attraction {

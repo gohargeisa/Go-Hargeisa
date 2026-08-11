@@ -171,6 +171,17 @@ export interface CityServiceInput {
   insuranceAccepted?: string[];
   // Auto Repair & Car Services — ignored for every other category.
   garageType?: string;
+  // Gym / Fitness Center — ignored for every other category.
+  gymType?: string;
+  classesOffered?: string[];
+  membershipOptions?: string[];
+  personalTrainingAvailable?: boolean;
+  groupClassesAvailable?: boolean;
+  gymFacilities?: string[];
+  trainersAvailable?: boolean;
+  femaleTrainersAvailable?: boolean;
+  maleTrainersAvailable?: boolean;
+  trialMembershipAvailable?: boolean;
 }
 
 export async function createCityService(
@@ -255,6 +266,16 @@ export async function createCityService(
     number_of_treatment_rooms: input.numberOfTreatmentRooms ?? null,
     insurance_accepted: input.insuranceAccepted ?? [],
     garage_type: input.garageType || null,
+    gym_type: input.gymType || null,
+    classes_offered: input.classesOffered ?? [],
+    membership_options: input.membershipOptions ?? [],
+    personal_training_available: input.personalTrainingAvailable ?? null,
+    group_classes_available: input.groupClassesAvailable ?? null,
+    gym_facilities: input.gymFacilities ?? [],
+    trainers_available: input.trainersAvailable ?? null,
+    female_trainers_available: input.femaleTrainersAvailable ?? null,
+    male_trainers_available: input.maleTrainersAvailable ?? null,
+    trial_membership_available: input.trialMembershipAvailable ?? null,
   } as never);
 
   if (error) return { ok: false, error: error.message };
@@ -356,6 +377,16 @@ export async function updateCityService(
       number_of_treatment_rooms: input.numberOfTreatmentRooms ?? null,
       insurance_accepted: input.insuranceAccepted ?? [],
       garage_type: input.garageType || null,
+      gym_type: input.gymType || null,
+      classes_offered: input.classesOffered ?? [],
+      membership_options: input.membershipOptions ?? [],
+      personal_training_available: input.personalTrainingAvailable ?? null,
+      group_classes_available: input.groupClassesAvailable ?? null,
+      gym_facilities: input.gymFacilities ?? [],
+      trainers_available: input.trainersAvailable ?? null,
+      female_trainers_available: input.femaleTrainersAvailable ?? null,
+      male_trainers_available: input.maleTrainersAvailable ?? null,
+      trial_membership_available: input.trialMembershipAvailable ?? null,
       updated_at: new Date().toISOString(),
     } as never)
     .eq("id", id);

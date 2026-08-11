@@ -34,8 +34,17 @@ import { SALON_TYPE_ORDER, salonTypeLabel, SHOP_TYPE_ORDER, shopTypeLabel } from
 import { LANGUAGE_SPOKEN_OPTIONS, languageSpokenLabel } from "@/lib/config/hotel-attributes";
 import { STORE_TYPE_ORDER, storeTypeLabel } from "@/lib/config/retail-store-attributes";
 import { RENTAL_TYPE_ORDER, rentalTypeLabel, VEHICLE_TYPE_ORDER, vehicleTypeLabel } from "@/lib/config/car-rental-attributes";
-import { CLINIC_TYPE_ORDER, clinicTypeLabel } from "@/lib/config/dental-attributes";
+import { CLINIC_TYPE_ORDER, clinicTypeLabel } from "@/lib/config/clinic-attributes";
 import { GARAGE_TYPE_ORDER, garageTypeLabel } from "@/lib/config/auto-repair-attributes";
+import {
+  GYM_TYPE_ORDER,
+  gymTypeLabel,
+  CLASS_OFFERED_ORDER,
+  classOfferedLabel,
+  GYM_FACILITY_ORDER,
+  GYM_FACILITY_ICON,
+  gymFacilityLabel,
+} from "@/lib/config/gym-attributes";
 import { AssignedOwnerField, type AssignedOwner } from "@/components/admin/assigned-owner-field";
 import { createCityService, updateCityService } from "@/lib/actions/city-services";
 import { useUnsavedChangesWarning } from "@/lib/hooks/use-unsaved-changes-warning";
@@ -115,12 +124,23 @@ export interface CityServiceFormInput {
   driversLicenseRequired: boolean;
   depositRequired: boolean;
   fleetSize?: number;
-  // Dental Clinics
+  // Clinics / Medical Clinics (Dental Clinic is now one clinicType value)
   clinicType: string;
   numberOfTreatmentRooms?: number;
   insuranceAccepted: string[];
   // Auto Repair & Car Services
   garageType: string;
+  // Gym / Fitness Center
+  gymType: string;
+  classesOffered: string[];
+  membershipOptions: string[];
+  personalTrainingAvailable: boolean;
+  groupClassesAvailable: boolean;
+  gymFacilities: string[];
+  trainersAvailable: boolean;
+  femaleTrainersAvailable: boolean;
+  maleTrainersAvailable: boolean;
+  trialMembershipAvailable: boolean;
 }
 
 export function CityServiceForm({
@@ -222,6 +242,16 @@ export function CityServiceForm({
     numberOfTreatmentRooms: initial?.numberOfTreatmentRooms,
     insuranceAccepted: initial?.insuranceAccepted ?? [],
     garageType: initial?.garageType ?? "",
+    gymType: initial?.gymType ?? "",
+    classesOffered: initial?.classesOffered ?? [],
+    membershipOptions: initial?.membershipOptions ?? [],
+    personalTrainingAvailable: initial?.personalTrainingAvailable ?? false,
+    groupClassesAvailable: initial?.groupClassesAvailable ?? false,
+    gymFacilities: initial?.gymFacilities ?? [],
+    trainersAvailable: initial?.trainersAvailable ?? false,
+    femaleTrainersAvailable: initial?.femaleTrainersAvailable ?? false,
+    maleTrainersAvailable: initial?.maleTrainersAvailable ?? false,
+    trialMembershipAvailable: initial?.trialMembershipAvailable ?? false,
   });
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -239,8 +269,13 @@ export function CityServiceForm({
   const isCosmetics = selectedCategory?.slug === "cosmetics-beauty";
   const isPerfume = selectedCategory?.slug === "perfume-shop";
   const isCarRental = selectedCategory?.slug === "car-rental";
-  const isDentalClinic = selectedCategory?.slug === "dental-clinic";
+  // Dental Clinic is now one clinicType value ("dental") within the unified
+  // Clinics category (slug "clinic"), not a separate top-level category —
+  // the dental-clinic slug itself is deactivated and can no longer be
+  // selected here.
+  const isClinic = selectedCategory?.slug === "clinic";
   const isAutoRepair = selectedCategory?.slug === "auto-repair";
+  const isGym = selectedCategory?.slug === "gym";
 
   function update<K extends keyof CityServiceFormInput>(key: K, value: CityServiceFormInput[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -323,11 +358,21 @@ export function CityServiceForm({
       driversLicenseRequired: isCarRental ? form.driversLicenseRequired : undefined,
       depositRequired: isCarRental ? form.depositRequired : undefined,
       fleetSize: isCarRental ? form.fleetSize : undefined,
-      clinicType: isDentalClinic ? form.clinicType || undefined : undefined,
-      numberOfTreatmentRooms: isDentalClinic ? form.numberOfTreatmentRooms : undefined,
-      insuranceAccepted: isDentalClinic ? form.insuranceAccepted : undefined,
-      languages: isSchool || isUniversity || isDentalClinic ? form.languages : undefined,
+      clinicType: isClinic ? form.clinicType || undefined : undefined,
+      numberOfTreatmentRooms: isClinic ? form.numberOfTreatmentRooms : undefined,
+      insuranceAccepted: isClinic ? form.insuranceAccepted : undefined,
+      languages: isSchool || isUniversity || isClinic ? form.languages : undefined,
       garageType: isAutoRepair ? form.garageType || undefined : undefined,
+      gymType: isGym ? form.gymType || undefined : undefined,
+      classesOffered: isGym ? form.classesOffered : undefined,
+      membershipOptions: isGym ? form.membershipOptions : undefined,
+      personalTrainingAvailable: isGym ? form.personalTrainingAvailable : undefined,
+      groupClassesAvailable: isGym ? form.groupClassesAvailable : undefined,
+      gymFacilities: isGym ? form.gymFacilities : undefined,
+      trainersAvailable: isGym ? form.trainersAvailable : undefined,
+      femaleTrainersAvailable: isGym ? form.femaleTrainersAvailable : undefined,
+      maleTrainersAvailable: isGym ? form.maleTrainersAvailable : undefined,
+      trialMembershipAvailable: isGym ? form.trialMembershipAvailable : undefined,
     };
 
     startTransition(async () => {
@@ -891,7 +936,7 @@ export function CityServiceForm({
         </div>
       )}
 
-      {isDentalClinic && (
+      {isClinic && (
         <div className="space-y-4 rounded-2xl border border-ink/10 p-4 dark:border-white/15">
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Clinic type">
@@ -906,6 +951,16 @@ export function CityServiceForm({
               <input type="number" min={0} value={form.numberOfTreatmentRooms ?? ""} onChange={(e) => update("numberOfTreatmentRooms", e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
             </Field>
           </div>
+
+          {form.clinicType === "dental" && (
+            <ServiceTagsPicker
+              categorySlug="dental-clinic"
+              locale={locale}
+              values={form.serviceTags}
+              onChange={(v) => update("serviceTags", v)}
+              label="Dental services offered"
+            />
+          )}
 
           <TagInput label="Accepted insurance providers" values={form.insuranceAccepted} onChange={(v) => update("insuranceAccepted", v)} placeholder="Type an insurance provider and press Enter" />
 
@@ -953,6 +1008,84 @@ export function CityServiceForm({
             <label className="flex items-center gap-2 text-sm font-medium">
               <input type="checkbox" checked={form.homeServiceAvailable} onChange={(e) => update("homeServiceAvailable", e.target.checked)} />
               Mobile / home service available
+            </label>
+          </div>
+        </div>
+      )}
+
+      {isGym && (
+        <div className="space-y-4 rounded-2xl border border-ink/10 p-4 dark:border-white/15">
+          <Field label="Gym type">
+            <select value={form.gymType} onChange={(e) => update("gymType", e.target.value)} className={inputClass}>
+              <option value="">—</option>
+              {GYM_TYPE_ORDER.map((type) => (
+                <option key={type} value={type}>{gymTypeLabel(type, locale)}</option>
+              ))}
+            </select>
+          </Field>
+
+          <TagInput label="Membership options" values={form.membershipOptions} onChange={(v) => update("membershipOptions", v)} placeholder="e.g. Monthly, Annual, Day Pass — press Enter" />
+
+          <div>
+            <label className="mb-2 block text-sm font-semibold">Classes offered</label>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {CLASS_OFFERED_ORDER.map((code) => (
+                <label key={code} className="flex items-center gap-2 text-sm font-medium">
+                  <input
+                    type="checkbox"
+                    checked={form.classesOffered.includes(code)}
+                    onChange={() => update("classesOffered", form.classesOffered.includes(code) ? form.classesOffered.filter((c) => c !== code) : [...form.classesOffered, code])}
+                  />
+                  {classOfferedLabel(code, locale)}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-semibold">Gym facilities</label>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {GYM_FACILITY_ORDER.map((code) => {
+                const Icon = GYM_FACILITY_ICON[code];
+                return (
+                  <label key={code} className="flex items-center gap-2 text-sm font-medium">
+                    <input
+                      type="checkbox"
+                      checked={form.gymFacilities.includes(code)}
+                      onChange={() => update("gymFacilities", form.gymFacilities.includes(code) ? form.gymFacilities.filter((c) => c !== code) : [...form.gymFacilities, code])}
+                    />
+                    <Icon size={14} className="shrink-0 text-ink/50 dark:text-sand/50" aria-hidden="true" />
+                    {gymFacilityLabel(code, locale)}
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            <label className="flex items-center gap-2 text-sm font-medium">
+              <input type="checkbox" checked={form.personalTrainingAvailable} onChange={(e) => update("personalTrainingAvailable", e.target.checked)} />
+              Personal training available
+            </label>
+            <label className="flex items-center gap-2 text-sm font-medium">
+              <input type="checkbox" checked={form.groupClassesAvailable} onChange={(e) => update("groupClassesAvailable", e.target.checked)} />
+              Group classes available
+            </label>
+            <label className="flex items-center gap-2 text-sm font-medium">
+              <input type="checkbox" checked={form.trainersAvailable} onChange={(e) => update("trainersAvailable", e.target.checked)} />
+              Trainers available
+            </label>
+            <label className="flex items-center gap-2 text-sm font-medium">
+              <input type="checkbox" checked={form.femaleTrainersAvailable} onChange={(e) => update("femaleTrainersAvailable", e.target.checked)} />
+              Female trainers available
+            </label>
+            <label className="flex items-center gap-2 text-sm font-medium">
+              <input type="checkbox" checked={form.maleTrainersAvailable} onChange={(e) => update("maleTrainersAvailable", e.target.checked)} />
+              Male trainers available
+            </label>
+            <label className="flex items-center gap-2 text-sm font-medium">
+              <input type="checkbox" checked={form.trialMembershipAvailable} onChange={(e) => update("trialMembershipAvailable", e.target.checked)} />
+              Trial membership available
             </label>
           </div>
         </div>

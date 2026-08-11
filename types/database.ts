@@ -149,6 +149,12 @@ type CityServiceRow = {
   clinic_type: string | null; number_of_treatment_rooms: number | null; insurance_accepted: string[];
   // Auto Repair & Car Services
   garage_type: string | null;
+  // Gym / Fitness Center
+  gym_type: string | null; classes_offered: string[]; membership_options: string[];
+  personal_training_available: boolean | null; group_classes_available: boolean | null;
+  gym_facilities: string[]; trainers_available: boolean | null;
+  female_trainers_available: boolean | null; male_trainers_available: boolean | null;
+  trial_membership_available: boolean | null;
 };
 type AttractionRow = ListingBase & SocialExtra & {
   history: string | null; best_time_to_visit: string | null; entry_fee: string; visitor_tips: string[];
@@ -169,6 +175,17 @@ type ServiceRow = ListingBase & {
   custom_fields: Json;
   logo_url: string | null; videos: Json; whatsapp: string | null; email: string | null;
   social_instagram: string | null; social_facebook: string | null; opening_hours_structured: Json;
+  // Travel Agency / Travel Office (slug 'tour-companies')
+  travel_agency_type: string | null; flight_ticketing: boolean | null; hotel_booking: boolean | null;
+  visa_assistance: boolean | null; tour_packages: boolean | null; airport_transfers: boolean | null;
+  car_rental_assistance: boolean | null; hajj_umrah_services: boolean | null; local_tours: boolean | null;
+  international_tours: boolean | null; group_tours: boolean | null; travel_insurance_assistance: boolean | null;
+  languages: string[];
+  // Flower Shop (slug 'flower-shops')
+  flower_shop_type: string | null; flower_delivery_available: boolean | null; same_day_delivery: boolean | null;
+  custom_bouquets: boolean | null; wedding_arrangements: boolean | null; event_decoration_service: boolean | null;
+  gift_wrapping: boolean | null; indoor_plants: boolean | null; outdoor_plants: boolean | null;
+  online_ordering_available: boolean | null; delivery_areas: string[];
 };
 
 /** The `categories` table — single source of truth for every business
@@ -313,10 +330,26 @@ type BusinessJoinRequestRow = {
   // Car Rental
   rental_type: string | null; vehicle_types: string[]; minimum_rental_period: string | null;
   drivers_license_required: boolean | null; deposit_required: boolean | null; fleet_size: number | null;
-  // Dental Clinics
+  // Clinics / Medical Clinics (Dental Clinic is now one clinic_type value)
   clinic_type: string | null; number_of_treatment_rooms: number | null; insurance_accepted: string[];
   // Auto Repair & Car Services
   garage_type: string | null;
+  // Gym / Fitness Center
+  gym_type: string | null; classes_offered: string[]; membership_options: string[];
+  personal_training_available: boolean | null; group_classes_available: boolean | null;
+  gym_facilities: string[]; trainers_available: boolean | null;
+  female_trainers_available: boolean | null; male_trainers_available: boolean | null;
+  trial_membership_available: boolean | null;
+  // Travel Agency / Travel Office
+  travel_agency_type: string | null; flight_ticketing: boolean | null; hotel_booking: boolean | null;
+  visa_assistance: boolean | null; tour_packages: boolean | null; airport_transfers: boolean | null;
+  car_rental_assistance: boolean | null; hajj_umrah_services: boolean | null; local_tours: boolean | null;
+  international_tours: boolean | null; group_tours: boolean | null; travel_insurance_assistance: boolean | null;
+  // Flower Shop
+  flower_shop_type: string | null; flower_delivery_available: boolean | null; same_day_delivery: boolean | null;
+  custom_bouquets: boolean | null; wedding_arrangements: boolean | null; event_decoration_service: boolean | null;
+  gift_wrapping: boolean | null; indoor_plants: boolean | null; outdoor_plants: boolean | null;
+  online_ordering_available: boolean | null; delivery_areas: string[];
   created_at: string; updated_at: string;
 };
 

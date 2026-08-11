@@ -78,8 +78,37 @@ import {
   type RentalType,
   type VehicleType,
 } from "@/lib/config/car-rental-attributes";
-import { CLINIC_TYPE_ORDER, clinicTypeLabel, type ClinicType } from "@/lib/config/dental-attributes";
+import { CLINIC_TYPE_ORDER, clinicTypeLabel, type ClinicType } from "@/lib/config/clinic-attributes";
 import { GARAGE_TYPE_ORDER, garageTypeLabel, type GarageType } from "@/lib/config/auto-repair-attributes";
+import {
+  GYM_TYPE_ORDER,
+  gymTypeLabel,
+  CLASS_OFFERED_ORDER,
+  classOfferedLabel,
+  GYM_FACILITY_ORDER,
+  GYM_FACILITY_ICON,
+  gymFacilityLabel,
+  type GymType,
+  type ClassOffered,
+} from "@/lib/config/gym-attributes";
+import {
+  TRAVEL_AGENCY_TYPE_ORDER,
+  travelAgencyTypeLabel,
+  TRAVEL_SERVICE_ORDER,
+  TRAVEL_SERVICE_ICON,
+  travelServiceLabel,
+  type TravelAgencyType,
+  type TravelServiceCode,
+} from "@/lib/config/travel-agency-attributes";
+import {
+  FLOWER_SHOP_TYPE_ORDER,
+  flowerShopTypeLabel,
+  FLOWER_SERVICE_ORDER,
+  FLOWER_SERVICE_ICON,
+  flowerServiceLabel,
+  type FlowerShopType,
+  type FlowerServiceCode,
+} from "@/lib/config/flower-shop-attributes";
 import { AMENITIES_BY_LISTING_TYPE, AMENITY_ICON } from "@/lib/config/amenities";
 import type { Locale } from "@/lib/i18n/config";
 import type { JoinRequestCategory, GalleryImage, MediaVideo, BusinessDocument, Coordinates, WeeklyHoursDay, Category, RoomType } from "@/types";
@@ -198,12 +227,31 @@ export function JoinRequestForm({
   const [driversLicenseRequired, setDriversLicenseRequired] = useState(false);
   const [depositRequired, setDepositRequired] = useState(false);
   const [fleetSize, setFleetSize] = useState<number | undefined>(undefined);
-  // Dental Clinics (clinic-level fields only)
+  // Clinics / Medical Clinics (clinic-level fields only; Dental Clinic is
+  // now one clinicType value within this category, not a separate one)
   const [clinicType, setClinicType] = useState<ClinicType | "">("");
   const [numberOfTreatmentRooms, setNumberOfTreatmentRooms] = useState<number | undefined>(undefined);
   const [insuranceAccepted, setInsuranceAccepted] = useState<string[]>([]);
   // Auto Repair & Car Services
   const [garageType, setGarageType] = useState<GarageType | "">("");
+  // Gym / Fitness Center
+  const [gymType, setGymType] = useState<GymType | "">("");
+  const [classesOffered, setClassesOffered] = useState<ClassOffered[]>([]);
+  const [membershipOptions, setMembershipOptions] = useState<string[]>([]);
+  const [personalTrainingAvailable, setPersonalTrainingAvailable] = useState(false);
+  const [groupClassesAvailable, setGroupClassesAvailable] = useState(false);
+  const [gymFacilities, setGymFacilities] = useState<string[]>([]);
+  const [trainersAvailable, setTrainersAvailable] = useState(false);
+  const [femaleTrainersAvailable, setFemaleTrainersAvailable] = useState(false);
+  const [maleTrainersAvailable, setMaleTrainersAvailable] = useState(false);
+  const [trialMembershipAvailable, setTrialMembershipAvailable] = useState(false);
+  // Travel Agency / Travel Office
+  const [travelAgencyType, setTravelAgencyType] = useState<TravelAgencyType | "">("");
+  const [travelServices, setTravelServices] = useState<TravelServiceCode[]>([]);
+  // Flower Shop
+  const [flowerShopType, setFlowerShopType] = useState<FlowerShopType | "">("");
+  const [flowerServices, setFlowerServices] = useState<FlowerServiceCode[]>([]);
+  const [deliveryAreas, setDeliveryAreas] = useState<string[]>([]);
   const [openingHours, setOpeningHours] = useState<WeeklyHoursDay[]>(defaultWeeklyHours());
   const [amenities, setAmenities] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<PriceRange | undefined>(undefined);
@@ -228,8 +276,15 @@ export function JoinRequestForm({
   const isCosmetics = category === "other" && selectedServiceCategory?.slug === "cosmetics-beauty";
   const isPerfume = category === "other" && selectedServiceCategory?.slug === "perfume-shop";
   const isCarRental = category === "other" && selectedServiceCategory?.slug === "car-rental";
-  const isDentalClinic = category === "other" && selectedServiceCategory?.slug === "dental-clinic";
+  // Dental Clinic is now one clinicType value ("dental") within the
+  // unified Clinics category (slug "clinic"), not a separate category —
+  // the dental-clinic slug itself is deactivated and can no longer be
+  // resolved via selection here.
+  const isClinic = category === "other" && selectedServiceCategory?.slug === "clinic";
   const isAutoRepair = category === "other" && selectedServiceCategory?.slug === "auto-repair";
+  const isGym = category === "other" && selectedServiceCategory?.slug === "gym";
+  const isTravelAgency = category === "other" && selectedServiceCategory?.slug === "tour-companies";
+  const isFlowerShop = category === "other" && selectedServiceCategory?.slug === "flower-shops";
 
   /** Clears every field specific to Restaurant/Cafe/School/University/Salon/
    * Barbershop — called on any category or "other"-subcategory change so
@@ -278,6 +333,21 @@ export function JoinRequestForm({
     setNumberOfTreatmentRooms(undefined);
     setInsuranceAccepted([]);
     setGarageType("");
+    setGymType("");
+    setClassesOffered([]);
+    setMembershipOptions([]);
+    setPersonalTrainingAvailable(false);
+    setGroupClassesAvailable(false);
+    setGymFacilities([]);
+    setTrainersAvailable(false);
+    setFemaleTrainersAvailable(false);
+    setMaleTrainersAvailable(false);
+    setTrialMembershipAvailable(false);
+    setTravelAgencyType("");
+    setTravelServices([]);
+    setFlowerShopType("");
+    setFlowerServices([]);
+    setDeliveryAreas([]);
   }
 
   function selectCategory(next: JoinRequestCategory) {
@@ -345,6 +415,22 @@ export function JoinRequestForm({
     setVehicleTypes((types) => (types.includes(type) ? types.filter((t) => t !== type) : [...types, type]));
   }
 
+  function toggleClassOffered(code: ClassOffered) {
+    setClassesOffered((codes) => (codes.includes(code) ? codes.filter((c) => c !== code) : [...codes, code]));
+  }
+
+  function toggleGymFacility(code: string) {
+    setGymFacilities((codes) => (codes.includes(code) ? codes.filter((c) => c !== code) : [...codes, code]));
+  }
+
+  function toggleTravelService(code: TravelServiceCode) {
+    setTravelServices((codes) => (codes.includes(code) ? codes.filter((c) => c !== code) : [...codes, code]));
+  }
+
+  function toggleFlowerService(code: FlowerServiceCode) {
+    setFlowerServices((codes) => (codes.includes(code) ? codes.filter((c) => c !== code) : [...codes, code]));
+  }
+
   function updateHoursDay(day: WeeklyHoursDay["day"], patch: Partial<WeeklyHoursDay>) {
     setOpeningHours((hours) => hours.map((h) => (h.day === day ? { ...h, ...patch } : h)));
   }
@@ -397,7 +483,7 @@ export function JoinRequestForm({
         roomTypesOffered: isHotel ? roomTypesOffered : undefined,
         numberOfFloors: isHotel || isSchool || isUniversity ? numberOfFloors : undefined,
         yearEstablished: isHotel || isSchool || isUniversity ? yearEstablished : undefined,
-        languagesSpoken: isHotel || isRestaurant || isSchool || isUniversity || isDentalClinic ? languagesSpoken : undefined,
+        languagesSpoken: isHotel || isRestaurant || isSchool || isUniversity || isClinic || isTravelAgency ? languagesSpoken : undefined,
         openingHours,
         amenities,
         priceRange,
@@ -449,12 +535,48 @@ export function JoinRequestForm({
         driversLicenseRequired: isCarRental ? driversLicenseRequired : undefined,
         depositRequired: isCarRental ? depositRequired : undefined,
         fleetSize: isCarRental ? fleetSize : undefined,
-        // Dental Clinics
-        clinicType: isDentalClinic ? clinicType || undefined : undefined,
-        numberOfTreatmentRooms: isDentalClinic ? numberOfTreatmentRooms : undefined,
-        insuranceAccepted: isDentalClinic ? insuranceAccepted : undefined,
+        // Clinics / Medical Clinics (Dental Clinic is now one clinicType value)
+        clinicType: isClinic ? clinicType || undefined : undefined,
+        numberOfTreatmentRooms: isClinic ? numberOfTreatmentRooms : undefined,
+        insuranceAccepted: isClinic ? insuranceAccepted : undefined,
         // Auto Repair
         garageType: isAutoRepair ? garageType || undefined : undefined,
+        // Gym / Fitness Center
+        gymType: isGym ? gymType || undefined : undefined,
+        classesOffered: isGym ? classesOffered : undefined,
+        membershipOptions: isGym ? membershipOptions : undefined,
+        personalTrainingAvailable: isGym ? personalTrainingAvailable : undefined,
+        groupClassesAvailable: isGym ? groupClassesAvailable : undefined,
+        gymFacilities: isGym ? gymFacilities : undefined,
+        trainersAvailable: isGym ? trainersAvailable : undefined,
+        femaleTrainersAvailable: isGym ? femaleTrainersAvailable : undefined,
+        maleTrainersAvailable: isGym ? maleTrainersAvailable : undefined,
+        trialMembershipAvailable: isGym ? trialMembershipAvailable : undefined,
+        // Travel Agency / Travel Office
+        travelAgencyType: isTravelAgency ? travelAgencyType || undefined : undefined,
+        flightTicketing: isTravelAgency ? travelServices.includes("flight_ticketing") : undefined,
+        hotelBooking: isTravelAgency ? travelServices.includes("hotel_booking") : undefined,
+        visaAssistance: isTravelAgency ? travelServices.includes("visa_assistance") : undefined,
+        tourPackages: isTravelAgency ? travelServices.includes("tour_packages") : undefined,
+        airportTransfers: isTravelAgency ? travelServices.includes("airport_transfers") : undefined,
+        carRentalAssistance: isTravelAgency ? travelServices.includes("car_rental_assistance") : undefined,
+        hajjUmrahServices: isTravelAgency ? travelServices.includes("hajj_umrah_services") : undefined,
+        localTours: isTravelAgency ? travelServices.includes("local_tours") : undefined,
+        internationalTours: isTravelAgency ? travelServices.includes("international_tours") : undefined,
+        groupTours: isTravelAgency ? travelServices.includes("group_tours") : undefined,
+        travelInsuranceAssistance: isTravelAgency ? travelServices.includes("travel_insurance_assistance") : undefined,
+        // Flower Shop
+        flowerShopType: isFlowerShop ? flowerShopType || undefined : undefined,
+        flowerDeliveryAvailable: isFlowerShop ? flowerServices.includes("flower_delivery_available") : undefined,
+        sameDayDelivery: isFlowerShop ? flowerServices.includes("same_day_delivery") : undefined,
+        customBouquets: isFlowerShop ? flowerServices.includes("custom_bouquets") : undefined,
+        weddingArrangements: isFlowerShop ? flowerServices.includes("wedding_arrangements") : undefined,
+        eventDecorationService: isFlowerShop ? flowerServices.includes("event_decoration_service") : undefined,
+        giftWrapping: isFlowerShop ? flowerServices.includes("gift_wrapping") : undefined,
+        indoorPlants: isFlowerShop ? flowerServices.includes("indoor_plants") : undefined,
+        outdoorPlants: isFlowerShop ? flowerServices.includes("outdoor_plants") : undefined,
+        onlineOrderingAvailable: isFlowerShop ? flowerServices.includes("online_ordering_available") : undefined,
+        deliveryAreas: isFlowerShop ? deliveryAreas : undefined,
       });
 
       if (result.ok) {
@@ -1255,7 +1377,7 @@ export function JoinRequestForm({
             </div>
           )}
 
-          {isDentalClinic && (
+          {isClinic && (
             <div className="space-y-5">
               <div className="grid gap-5 sm:grid-cols-2">
                 <div>
@@ -1272,6 +1394,16 @@ export function JoinRequestForm({
                   <input id="jr-treatmentRooms" type="number" min={0} value={numberOfTreatmentRooms ?? ""} onChange={(e) => setNumberOfTreatmentRooms(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
                 </div>
               </div>
+
+              {clinicType === "dental" && (
+                <ServiceTagsPicker
+                  categorySlug="dental-clinic"
+                  locale={locale}
+                  values={serviceTags}
+                  onChange={setServiceTags}
+                  label={tAdmin("serviceTagsLabel")}
+                />
+              )}
 
               <TagInput
                 label={t("insuranceAcceptedLabel")}
@@ -1329,6 +1461,181 @@ export function JoinRequestForm({
                   {t("mobileServiceAvailableLabel")}
                 </label>
               </div>
+            </div>
+          )}
+
+          {isGym && (
+            <div className="space-y-5">
+              <div>
+                <label htmlFor="jr-gymType" className={labelClass}>{t("gymTypeLabel")}</label>
+                <select id="jr-gymType" value={gymType} onChange={(e) => setGymType(e.target.value as GymType | "")} className={inputClass}>
+                  <option value="" disabled>{t("selectGymTypePlaceholder")}</option>
+                  {GYM_TYPE_ORDER.map((type) => (
+                    <option key={type} value={type}>{gymTypeLabel(type, locale)}</option>
+                  ))}
+                </select>
+              </div>
+
+              <TagInput
+                label={t("membershipOptionsLabel")}
+                values={membershipOptions}
+                onChange={setMembershipOptions}
+                placeholder={tAdmin("tagInputPlaceholder")}
+              />
+
+              <div>
+                <label className={labelClass}>{t("classesOfferedLabel")}</label>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {CLASS_OFFERED_ORDER.map((code) => (
+                    <label key={code} className="flex items-center gap-2 text-sm font-medium">
+                      <input type="checkbox" checked={classesOffered.includes(code)} onChange={() => toggleClassOffered(code)} />
+                      {classOfferedLabel(code, locale)}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClass}>{t("gymFacilitiesLabel")}</label>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {GYM_FACILITY_ORDER.map((code) => {
+                    const Icon = GYM_FACILITY_ICON[code];
+                    return (
+                      <label key={code} className="flex items-center gap-2 text-sm font-medium">
+                        <input type="checkbox" checked={gymFacilities.includes(code)} onChange={() => toggleGymFacility(code)} />
+                        <Icon size={14} className="shrink-0 text-ink/50 dark:text-sand/50" aria-hidden="true" />
+                        {gymFacilityLabel(code, locale)}
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                <label className="flex items-center gap-2 text-sm font-medium">
+                  <input type="checkbox" checked={personalTrainingAvailable} onChange={(e) => setPersonalTrainingAvailable(e.target.checked)} />
+                  {t("personalTrainingAvailableLabel")}
+                </label>
+                <label className="flex items-center gap-2 text-sm font-medium">
+                  <input type="checkbox" checked={groupClassesAvailable} onChange={(e) => setGroupClassesAvailable(e.target.checked)} />
+                  {t("groupClassesAvailableLabel")}
+                </label>
+                <label className="flex items-center gap-2 text-sm font-medium">
+                  <input type="checkbox" checked={trainersAvailable} onChange={(e) => setTrainersAvailable(e.target.checked)} />
+                  {t("trainersAvailableLabel")}
+                </label>
+                <label className="flex items-center gap-2 text-sm font-medium">
+                  <input type="checkbox" checked={femaleTrainersAvailable} onChange={(e) => setFemaleTrainersAvailable(e.target.checked)} />
+                  {t("femaleTrainersAvailableLabel")}
+                </label>
+                <label className="flex items-center gap-2 text-sm font-medium">
+                  <input type="checkbox" checked={maleTrainersAvailable} onChange={(e) => setMaleTrainersAvailable(e.target.checked)} />
+                  {t("maleTrainersAvailableLabel")}
+                </label>
+                <label className="flex items-center gap-2 text-sm font-medium">
+                  <input type="checkbox" checked={trialMembershipAvailable} onChange={(e) => setTrialMembershipAvailable(e.target.checked)} />
+                  {t("trialMembershipAvailableLabel")}
+                </label>
+              </div>
+            </div>
+          )}
+
+          {isTravelAgency && (
+            <div className="space-y-5">
+              <div>
+                <label htmlFor="jr-travelAgencyType" className={labelClass}>{t("travelAgencyTypeLabel")}</label>
+                <select id="jr-travelAgencyType" value={travelAgencyType} onChange={(e) => setTravelAgencyType(e.target.value as TravelAgencyType | "")} className={inputClass}>
+                  <option value="" disabled>{t("selectTravelAgencyTypePlaceholder")}</option>
+                  {TRAVEL_AGENCY_TYPE_ORDER.map((type) => (
+                    <option key={type} value={type}>{travelAgencyTypeLabel(type, locale)}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className={labelClass}>{t("travelServicesLabel")}</label>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  {TRAVEL_SERVICE_ORDER.map((code) => {
+                    const Icon = TRAVEL_SERVICE_ICON[code];
+                    const active = travelServices.includes(code);
+                    return (
+                      <button
+                        key={code}
+                        type="button"
+                        onClick={() => toggleTravelService(code)}
+                        aria-pressed={active}
+                        className={`flex items-center gap-2.5 rounded-2xl border p-3.5 text-start text-sm font-medium transition-colors ${
+                          active
+                            ? "border-primary bg-primary/8 text-primary-800"
+                            : "border-ink/10 text-ink/70 hover:border-primary/40 dark:border-white/15 dark:text-sand/70"
+                        }`}
+                      >
+                        <Icon size={17} className="shrink-0" aria-hidden="true" />
+                        {travelServiceLabel(code, locale)}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClass}>{t("languagesSpokenLabel")}</label>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {LANGUAGE_SPOKEN_OPTIONS.map((value) => (
+                    <label key={value} className="flex items-center gap-2 text-sm font-medium">
+                      <input type="checkbox" checked={languagesSpoken.includes(value)} onChange={() => toggleLanguageSpoken(value)} />
+                      {languageSpokenLabel(value, locale)}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {isFlowerShop && (
+            <div className="space-y-5">
+              <div>
+                <label htmlFor="jr-flowerShopType" className={labelClass}>{t("flowerShopTypeLabel")}</label>
+                <select id="jr-flowerShopType" value={flowerShopType} onChange={(e) => setFlowerShopType(e.target.value as FlowerShopType | "")} className={inputClass}>
+                  <option value="" disabled>{t("selectFlowerShopTypePlaceholder")}</option>
+                  {FLOWER_SHOP_TYPE_ORDER.map((type) => (
+                    <option key={type} value={type}>{flowerShopTypeLabel(type, locale)}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className={labelClass}>{t("flowerServicesLabel")}</label>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  {FLOWER_SERVICE_ORDER.map((code) => {
+                    const Icon = FLOWER_SERVICE_ICON[code];
+                    const active = flowerServices.includes(code);
+                    return (
+                      <button
+                        key={code}
+                        type="button"
+                        onClick={() => toggleFlowerService(code)}
+                        aria-pressed={active}
+                        className={`flex items-center gap-2.5 rounded-2xl border p-3.5 text-start text-sm font-medium transition-colors ${
+                          active
+                            ? "border-primary bg-primary/8 text-primary-800"
+                            : "border-ink/10 text-ink/70 hover:border-primary/40 dark:border-white/15 dark:text-sand/70"
+                        }`}
+                      >
+                        <Icon size={17} className="shrink-0" aria-hidden="true" />
+                        {flowerServiceLabel(code, locale)}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <TagInput
+                label={t("deliveryAreasLabel")}
+                values={deliveryAreas}
+                onChange={setDeliveryAreas}
+                placeholder={tAdmin("tagInputPlaceholder")}
+              />
             </div>
           )}
         </div>
