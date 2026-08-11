@@ -14,6 +14,8 @@ import { useUnsavedChangesWarning } from "@/lib/hooks/use-unsaved-changes-warnin
 import { RESTAURANT_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import { OpeningHoursEditor } from "@/components/shared/opening-hours-editor";
 import { AmenitiesPicker } from "@/components/admin/amenities-picker";
+import { RESTAURANT_TYPE_ORDER, restaurantTypeLabel } from "@/lib/config/restaurant-attributes";
+import { LANGUAGE_SPOKEN_OPTIONS, languageSpokenLabel } from "@/lib/config/hotel-attributes";
 import type { Locale } from "@/lib/i18n/config";
 import type { GalleryImage, MediaVideo, OpeningHoursGroup } from "@/types";
 
@@ -53,6 +55,11 @@ export interface RestaurantFormInput {
   reservable: boolean;
   featured: boolean;
   amenitiesV2: string[];
+  restaurantType: string;
+  seatingCapacity?: number;
+  numberOfTables?: number;
+  onlineOrderUrl: string;
+  languages: string[];
 }
 
 const CUISINE_SUGGESTIONS = ["Somali", "Grill", "International", "Seafood", "Fast Food", "Ethiopian"];
@@ -111,6 +118,11 @@ export function RestaurantForm({
     reservable: initial?.reservable ?? false,
     featured: initial?.featured ?? false,
     amenitiesV2: initial?.amenitiesV2 ?? [],
+    restaurantType: initial?.restaurantType ?? "",
+    seatingCapacity: initial?.seatingCapacity,
+    numberOfTables: initial?.numberOfTables,
+    onlineOrderUrl: initial?.onlineOrderUrl ?? "",
+    languages: initial?.languages ?? [],
   });
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -180,6 +192,11 @@ export function RestaurantForm({
       reservable: form.reservable,
       featured: form.featured,
       amenities_v2: form.amenitiesV2,
+      restaurant_type: form.restaurantType || null,
+      seating_capacity: form.seatingCapacity ?? null,
+      number_of_tables: form.numberOfTables ?? null,
+      online_order_url: form.onlineOrderUrl || null,
+      languages: form.languages,
     };
     const revalidatePaths = [`/${locale}/admin/restaurants`, `/${locale}/restaurants`, `/${locale}`];
     const redirectTo = `/${locale}/admin/restaurants`;
@@ -315,6 +332,47 @@ export function RestaurantForm({
       <Field label={t("socialTelegramLabel")}>
         <input type="url" value={form.socialTelegram} onChange={(e) => update("socialTelegram", e.target.value)} className={inputClass} placeholder="https://t.me/…" />
       </Field>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Restaurant type">
+          <select value={form.restaurantType} onChange={(e) => update("restaurantType", e.target.value)} className={inputClass}>
+            <option value="">—</option>
+            {RESTAURANT_TYPE_ORDER.map((type) => (
+              <option key={type} value={type}>{restaurantTypeLabel(type, locale)}</option>
+            ))}
+          </select>
+        </Field>
+        <Field label="Online ordering URL">
+          <input type="url" value={form.onlineOrderUrl} onChange={(e) => update("onlineOrderUrl", e.target.value)} className={inputClass} placeholder="https://…" />
+        </Field>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Seating capacity">
+          <input type="number" min={1} value={form.seatingCapacity ?? ""} onChange={(e) => update("seatingCapacity", e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+        </Field>
+        <Field label="Number of tables">
+          <input type="number" min={1} value={form.numberOfTables ?? ""} onChange={(e) => update("numberOfTables", e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+        </Field>
+      </div>
+
+      <div>
+        <label className="mb-2 block text-sm font-semibold">Languages spoken</label>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {LANGUAGE_SPOKEN_OPTIONS.map((value) => (
+            <label key={value} className="flex items-center gap-2 text-sm font-medium">
+              <input
+                type="checkbox"
+                checked={form.languages.includes(value)}
+                onChange={() =>
+                  update("languages", form.languages.includes(value) ? form.languages.filter((v) => v !== value) : [...form.languages, value])
+                }
+              />
+              {languageSpokenLabel(value, locale)}
+            </label>
+          ))}
+        </div>
+      </div>
 
       <AmenitiesPicker listingType="restaurant" values={form.amenitiesV2} onChange={(v) => update("amenitiesV2", v)} label={t("amenitiesLabel")} />
 

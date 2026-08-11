@@ -13,6 +13,7 @@ import { createRecord, updateRecord } from "@/lib/actions/admin";
 import { useUnsavedChangesWarning } from "@/lib/hooks/use-unsaved-changes-warning";
 import { CAFE_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import { AmenitiesPicker } from "@/components/admin/amenities-picker";
+import { CAFE_TYPE_ORDER, cafeTypeLabel } from "@/lib/config/cafe-attributes";
 import { OpeningHoursEditor } from "@/components/shared/opening-hours-editor";
 import type { Locale } from "@/lib/i18n/config";
 import type { GalleryImage, MediaVideo, OpeningHoursGroup } from "@/types";
@@ -38,6 +39,8 @@ export interface CafeFormInput {
   specialDrinks: string[];
   wifi: boolean;
   workingSpace: boolean;
+  cafeType: string;
+  seatingCapacity?: number;
   openingHours: string;
   openingHoursStructured: OpeningHoursGroup[];
   is24Hours: boolean;
@@ -97,6 +100,8 @@ export function CafeForm({
     whatsapp: initial?.whatsapp ?? "",
     email: initial?.email ?? "",
     specialDrinks: initial?.specialDrinks ?? [],
+    cafeType: initial?.cafeType ?? "",
+    seatingCapacity: initial?.seatingCapacity,
     wifi: initial?.wifi ?? true,
     workingSpace: initial?.workingSpace ?? false,
     openingHours: initial?.openingHours ?? "",
@@ -169,6 +174,8 @@ export function CafeForm({
       whatsapp: form.whatsapp || null,
       email: form.email || null,
       special_drinks: form.specialDrinks,
+      cafe_type: form.cafeType || null,
+      seating_capacity: form.seatingCapacity ?? null,
       wifi: form.wifi,
       working_space: form.workingSpace,
       opening_hours: form.openingHours,
@@ -356,6 +363,20 @@ export function CafeForm({
       />
 
       <TagInput label={t("specialDrinksLabel")} values={form.specialDrinks} onChange={(v) => update("specialDrinks", v)} placeholder={t("tagInputPlaceholder")} suggestions={DRINK_SUGGESTIONS} />
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Café type">
+          <select value={form.cafeType} onChange={(e) => update("cafeType", e.target.value)} className={inputClass}>
+            <option value="">—</option>
+            {CAFE_TYPE_ORDER.map((type) => (
+              <option key={type} value={type}>{cafeTypeLabel(type, locale)}</option>
+            ))}
+          </select>
+        </Field>
+        <Field label="Seating capacity">
+          <input type="number" min={1} value={form.seatingCapacity ?? ""} onChange={(e) => update("seatingCapacity", e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+        </Field>
+      </div>
 
       <AmenitiesPicker listingType="cafe" values={form.amenitiesV2} onChange={(v) => update("amenitiesV2", v)} label={t("amenitiesLabel")} />
 

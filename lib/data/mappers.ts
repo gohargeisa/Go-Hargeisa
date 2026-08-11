@@ -185,6 +185,11 @@ export function mapRestaurant(row: RestaurantRow, reviews: Review[] = []): Resta
     partnerStatus: row.partner_status,
     amenitiesV2: row.amenities_v2 ?? [],
     favoriteCount: row.favorite_count ?? 0,
+    restaurantType: (row.restaurant_type as Restaurant["restaurantType"]) ?? undefined,
+    seatingCapacity: row.seating_capacity ?? undefined,
+    numberOfTables: row.number_of_tables ?? undefined,
+    onlineOrderUrl: row.online_order_url ?? undefined,
+    languages: row.languages ?? [],
   };
 }
 
@@ -240,6 +245,8 @@ export function mapCafe(row: CafeRow, reviews: Review[] = [], locale?: string): 
     menuHighlights: menu,
     menuPdfUrl: row.menu_pdf_url ?? undefined,
     partnerStatus: row.partner_status,
+    cafeType: (row.cafe_type as Cafe["cafeType"]) ?? undefined,
+    seatingCapacity: row.seating_capacity ?? undefined,
   };
 }
 
@@ -448,6 +455,31 @@ export function mapCityService(row: CityServiceRow, reviews: Review[] = [], loca
     socialX: row.social_x ?? undefined,
     socialYoutube: row.social_youtube ?? undefined,
     socialTelegram: row.social_telegram ?? undefined,
+    schoolType: (row.school_type as CityService["schoolType"]) ?? undefined,
+    curriculum: (row.curriculum as CityService["curriculum"]) ?? undefined,
+    educationLevels: row.education_levels ?? [],
+    ageRangeGrades: row.age_range_grades ?? undefined,
+    numberOfClassrooms: row.number_of_classrooms ?? undefined,
+    universityType: (row.university_type as CityService["universityType"]) ?? undefined,
+    degreeLevels: row.degree_levels ?? [],
+    facultiesOffered: row.faculties_offered ?? [],
+    numberOfBuildings: row.number_of_buildings ?? undefined,
+    educationFacilities: row.education_facilities ?? [],
+    numberOfStudents: row.number_of_students ?? undefined,
+    numberOfTeachers: row.number_of_teachers ?? undefined,
+    admissionsOpen: row.admissions_open,
+    admissionPhone: row.admission_phone ?? undefined,
+    admissionWhatsapp: row.admission_whatsapp ?? undefined,
+    admissionUrl: row.admission_url ?? undefined,
+    applicationUrl: row.application_url ?? undefined,
+    numberOfFloors: row.number_of_floors ?? undefined,
+    yearEstablished: row.year_established ?? undefined,
+    languages: row.languages ?? [],
+    salonType: (row.salon_type as CityService["salonType"]) ?? undefined,
+    shopType: (row.shop_type as CityService["shopType"]) ?? undefined,
+    staffCount: row.staff_count ?? undefined,
+    walkInsAccepted: row.walk_ins_accepted ?? undefined,
+    homeServiceAvailable: row.home_service_available ?? undefined,
   };
 }
 
@@ -475,6 +507,7 @@ export function mapProduct(row: ProductRow): Product {
     sortOrder: row.sort_order,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    size: row.size ?? undefined,
   };
 }
 

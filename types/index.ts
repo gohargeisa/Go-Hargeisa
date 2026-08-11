@@ -99,6 +99,8 @@ export interface Product {
   sortOrder: number;
   createdAt: string;
   updatedAt: string;
+  /** Free-text size/variant descriptor (e.g. "50ml", "Large", "Set of 3") — optional, most products won't need it. */
+  size?: string;
 }
 
 /** Phase 4 Medical Appointment Engine — one shared engine for Hospitals,
@@ -638,6 +640,11 @@ export interface Restaurant {
   /** Fixed-vocabulary amenities for the detail-page Amenities section (lib/config/amenities.ts). */
   amenitiesV2?: string[];
   favoriteCount?: number;
+  restaurantType?: "somali" | "international" | "fast_food" | "cafe_restaurant" | "family" | "fine_dining" | "buffet" | "bakery_restaurant" | "other";
+  seatingCapacity?: number;
+  numberOfTables?: number;
+  onlineOrderUrl?: string;
+  languages?: string[];
 }
 
 /** One opening-hours row spanning one or more days, e.g. Sat–Wed vs. a
@@ -697,6 +704,8 @@ export interface Cafe {
   menuPdfUrl?: string;
   partnerStatus: PartnerStatus;
   favoriteCount?: number;
+  cafeType?: "coffee_shop" | "dessert_cafe" | "study_cafe" | "rooftop_cafe" | "tea_house" | "other";
+  seatingCapacity?: number;
 }
 
 /** Phase 2 — Essential City Services. One shared shape across all 8
@@ -814,6 +823,35 @@ export interface CityService {
   socialX?: string;
   socialYoutube?: string;
   socialTelegram?: string;
+  // Schools + Universities — every count below is optional and off by
+  // default; none are gender-split, none are required.
+  schoolType?: "primary" | "secondary" | "primary_secondary" | "international" | "private" | "public" | "vocational" | "other";
+  curriculum?: "somaliland" | "cambridge" | "international" | "arabic" | "islamic" | "other";
+  educationLevels?: string[];
+  ageRangeGrades?: string;
+  numberOfClassrooms?: number;
+  universityType?: "public" | "private" | "community_college" | "vocational_institute" | "other";
+  degreeLevels?: string[];
+  facultiesOffered?: string[];
+  numberOfBuildings?: number;
+  educationFacilities?: string[];
+  numberOfStudents?: number;
+  numberOfTeachers?: number;
+  admissionsOpen?: boolean;
+  admissionPhone?: string;
+  admissionWhatsapp?: string;
+  admissionUrl?: string;
+  applicationUrl?: string;
+  numberOfFloors?: number;
+  yearEstablished?: number;
+  languages?: string[];
+  // Women's Beauty Salons (women-only) + Men's Barbershops (men-only) —
+  // no unisex value exists in either vocabulary.
+  salonType?: "hair_salon" | "nail_salon" | "full_service" | "spa_wellness" | "bridal_studio" | "mobile" | "other";
+  shopType?: "traditional_barbershop" | "modern_grooming" | "barbershop_spa" | "mobile" | "other";
+  staffCount?: number;
+  walkInsAccepted?: boolean;
+  homeServiceAvailable?: boolean;
 }
 
 export interface Attraction {

@@ -7,6 +7,8 @@ import { placeholderImage } from "@/lib/placeholder-image";
 import { logActivity } from "./activity";
 import { isConvertibleCategory } from "@/lib/utils/partner-categories";
 import { getCategoryById } from "@/lib/data/categories";
+import { weeklyHoursToGroups } from "@/lib/utils/weekly-hours";
+import { CUISINE_LABELS, type CuisineCode } from "@/lib/config/restaurant-attributes";
 import type { JoinRequestCategory, BusinessRequestStatus, GalleryImage, MediaVideo, BusinessDocument, WeeklyHoursDay } from "@/types";
 
 async function assertOwner() {
@@ -83,6 +85,47 @@ export interface JoinRequestInput {
   openingHours?: WeeklyHoursDay[];
   amenities?: string[];
   priceRange?: "$" | "$$" | "$$$" | "$$$$";
+  /** Restaurant-only intake fields — ignored for every other category. */
+  restaurantType?: string;
+  cuisine?: string[];
+  numberOfTables?: number;
+  onlineOrderUrl?: string;
+  is24Hours?: boolean;
+  /** Shared by Restaurant + Cafe (both map to a single `seating_capacity`
+   * column, gated by whichever of the two is actually selected). */
+  seatingCapacity?: number;
+  /** Cafe-only intake field. */
+  cafeType?: string;
+  /** School-only intake fields — set only when category === "other" and the
+   * resolved category slug is "school". */
+  schoolType?: string;
+  curriculum?: string;
+  educationLevels?: string[];
+  ageRangeGrades?: string;
+  numberOfClassrooms?: number;
+  /** University-only intake fields — set only when the resolved category
+   * slug is "university". */
+  universityType?: string;
+  degreeLevels?: string[];
+  facultiesOffered?: string[];
+  numberOfBuildings?: number;
+  /** Shared by School + University. */
+  educationFacilities?: string[];
+  numberOfStudents?: number;
+  numberOfTeachers?: number;
+  admissionsOpen?: boolean;
+  admissionPhone?: string;
+  admissionWhatsapp?: string;
+  admissionUrl?: string;
+  applicationUrl?: string;
+  /** Women's Beauty Salon-only intake field (women-only category). */
+  salonType?: string;
+  /** Men's Barbershop-only intake field (men-only category). */
+  shopType?: string;
+  /** Shared by Salon + Barbershop. */
+  staffCount?: number;
+  walkInsAccepted?: boolean;
+  homeServiceAvailable?: boolean;
 }
 
 /**
@@ -128,10 +171,16 @@ export async function submitJoinRequest(input: JoinRequestInput): Promise<{ ok: 
   // session exists.
   const supabase = createPublicClient();
 
+  // Resolved once here and reused below to gate School/University/Salon/
+  // Barbershop-specific columns server-side — mirrors how category==="hotel"
+  // already gates hotel-only columns, so these new fields get the same
+  // real (not just client-side) validation.
+  let resolvedOtherSlug: string | null = null;
+
   if (input.category === "other" && input.categoryId) {
     const { data: cat } = await supabase
       .from("categories")
-      .select("id, target_table, is_active")
+      .select("id, slug, target_table, is_active")
       .eq("id", input.categoryId)
       .maybeSingle();
     // Long-tail `services` categories (Flower Shops, Real Estate, ...) and
@@ -144,7 +193,13 @@ export async function submitJoinRequest(input: JoinRequestInput): Promise<{ ok: 
     if (!cat || !cat.is_active || (cat.target_table !== "services" && cat.target_table !== "city_services")) {
       return { ok: false, error: "Invalid category." };
     }
+    resolvedOtherSlug = cat.slug;
   }
+
+  const isSchool = resolvedOtherSlug === "school";
+  const isUniversity = resolvedOtherSlug === "university";
+  const isSalon = resolvedOtherSlug === "beauty-salon";
+  const isBarbershop = resolvedOtherSlug === "men-barbershop";
 
   const { data: existing } = await supabase
     .from("business_join_requests")
@@ -192,12 +247,50 @@ export async function submitJoinRequest(input: JoinRequestInput): Promise<{ ok: 
     star_rating: input.category === "hotel" ? input.starRating ?? null : null,
     estimated_room_count: input.category === "hotel" ? input.estimatedRoomCount ?? null : null,
     room_types_offered: input.category === "hotel" ? input.roomTypesOffered ?? [] : [],
-    number_of_floors: input.category === "hotel" ? input.numberOfFloors ?? null : null,
-    year_established: input.category === "hotel" ? input.yearEstablished ?? null : null,
-    languages: input.category === "hotel" ? input.languagesSpoken ?? [] : [],
+    number_of_floors: input.category === "hotel" || isSchool || isUniversity ? input.numberOfFloors ?? null : null,
+    year_established: input.category === "hotel" || isSchool || isUniversity ? input.yearEstablished ?? null : null,
+    languages: input.category === "hotel" || input.category === "restaurant" || isSchool || isUniversity ? input.languagesSpoken ?? [] : [],
     opening_hours: input.openingHours ?? [],
     amenities: input.amenities ?? [],
     price_range: input.priceRange ?? null,
+    // Restaurant
+    restaurant_type: input.category === "restaurant" ? input.restaurantType || null : null,
+    cuisine: input.category === "restaurant" ? input.cuisine ?? [] : [],
+    number_of_tables: input.category === "restaurant" ? input.numberOfTables ?? null : null,
+    online_order_url: input.category === "restaurant" ? input.onlineOrderUrl?.trim() || null : null,
+    is_24_hours: input.category === "restaurant" ? input.is24Hours ?? false : false,
+    // Restaurant + Cafe
+    seating_capacity: input.category === "restaurant" || input.category === "cafe" ? input.seatingCapacity ?? null : null,
+    // Cafe
+    cafe_type: input.category === "cafe" ? input.cafeType || null : null,
+    // School
+    school_type: isSchool ? input.schoolType || null : null,
+    curriculum: isSchool ? input.curriculum || null : null,
+    education_levels: isSchool ? input.educationLevels ?? [] : [],
+    age_range_grades: isSchool ? input.ageRangeGrades?.trim() || null : null,
+    number_of_classrooms: isSchool ? input.numberOfClassrooms ?? null : null,
+    // University
+    university_type: isUniversity ? input.universityType || null : null,
+    degree_levels: isUniversity ? input.degreeLevels ?? [] : [],
+    faculties_offered: isUniversity ? input.facultiesOffered ?? [] : [],
+    number_of_buildings: isUniversity ? input.numberOfBuildings ?? null : null,
+    // School + University
+    education_facilities: isSchool || isUniversity ? input.educationFacilities ?? [] : [],
+    number_of_students: isSchool || isUniversity ? input.numberOfStudents ?? null : null,
+    number_of_teachers: isSchool || isUniversity ? input.numberOfTeachers ?? null : null,
+    admissions_open: isSchool || isUniversity ? input.admissionsOpen ?? true : true,
+    admission_phone: isSchool || isUniversity ? input.admissionPhone?.trim() || null : null,
+    admission_whatsapp: isSchool || isUniversity ? input.admissionWhatsapp?.trim() || null : null,
+    admission_url: isSchool || isUniversity ? input.admissionUrl?.trim() || null : null,
+    application_url: isSchool || isUniversity ? input.applicationUrl?.trim() || null : null,
+    // Women's Beauty Salon (women-only)
+    salon_type: isSalon ? input.salonType || null : null,
+    // Men's Barbershop (men-only)
+    shop_type: isBarbershop ? input.shopType || null : null,
+    // Salon + Barbershop
+    staff_count: isSalon || isBarbershop ? input.staffCount ?? null : null,
+    walk_ins_accepted: isSalon || isBarbershop ? input.walkInsAccepted ?? null : null,
+    home_service_available: isSalon || isBarbershop ? input.homeServiceAvailable ?? null : null,
   } as never);
 
   if (error) return { ok: false, error: error.message };
@@ -419,6 +512,8 @@ export async function convertJoinRequest(
 
       const legacyCategoryEnum = resolvedCategory.slug.replace(/-/g, "_");
 
+      const requestWeeklyHours = (request.opening_hours as WeeklyHoursDay[] | null) ?? [];
+
       const cityServicePayload: Record<string, unknown> = {
         slug,
         name: request.business_name,
@@ -432,7 +527,57 @@ export async function convertJoinRequest(
         image: coverImage,
         gallery,
         service_tags: request.service_tags ?? [],
+        opening_hours_structured: weeklyHoursToGroups(requestWeeklyHours),
       };
+
+      // School + University — shared column shape, one mapping block.
+      if (resolvedCategory.slug === "school" || resolvedCategory.slug === "university") {
+        if (request.number_of_floors) cityServicePayload.number_of_floors = request.number_of_floors;
+        if (request.year_established) cityServicePayload.year_established = request.year_established;
+        if (request.languages && request.languages.length > 0) cityServicePayload.languages = request.languages;
+        if (request.education_facilities && request.education_facilities.length > 0) {
+          cityServicePayload.education_facilities = request.education_facilities;
+        }
+        if (request.number_of_students) cityServicePayload.number_of_students = request.number_of_students;
+        if (request.number_of_teachers) cityServicePayload.number_of_teachers = request.number_of_teachers;
+        cityServicePayload.admissions_open = request.admissions_open ?? true;
+        if (request.admission_phone) cityServicePayload.admission_phone = request.admission_phone;
+        if (request.admission_whatsapp) cityServicePayload.admission_whatsapp = request.admission_whatsapp;
+        if (request.admission_url) cityServicePayload.admission_url = request.admission_url;
+        if (request.application_url) cityServicePayload.application_url = request.application_url;
+      }
+      if (resolvedCategory.slug === "school") {
+        if (request.school_type) cityServicePayload.school_type = request.school_type;
+        if (request.curriculum) cityServicePayload.curriculum = request.curriculum;
+        if (request.education_levels && request.education_levels.length > 0) {
+          cityServicePayload.education_levels = request.education_levels;
+        }
+        if (request.age_range_grades) cityServicePayload.age_range_grades = request.age_range_grades;
+        if (request.number_of_classrooms) cityServicePayload.number_of_classrooms = request.number_of_classrooms;
+      }
+      if (resolvedCategory.slug === "university") {
+        if (request.university_type) cityServicePayload.university_type = request.university_type;
+        if (request.degree_levels && request.degree_levels.length > 0) cityServicePayload.degree_levels = request.degree_levels;
+        if (request.faculties_offered && request.faculties_offered.length > 0) {
+          cityServicePayload.faculties_offered = request.faculties_offered;
+        }
+        if (request.number_of_buildings) cityServicePayload.number_of_buildings = request.number_of_buildings;
+      }
+
+      // Women's Beauty Salon (women-only) + Men's Barbershop (men-only) —
+      // shared columns, one mapping block; salon_type/shop_type stay
+      // category-specific since their vocabularies never overlap.
+      if (resolvedCategory.slug === "beauty-salon" || resolvedCategory.slug === "men-barbershop") {
+        if (request.staff_count) cityServicePayload.staff_count = request.staff_count;
+        if (request.walk_ins_accepted !== null) cityServicePayload.walk_ins_accepted = request.walk_ins_accepted;
+        if (request.home_service_available !== null) cityServicePayload.home_service_available = request.home_service_available;
+      }
+      if (resolvedCategory.slug === "beauty-salon" && request.salon_type) {
+        cityServicePayload.salon_type = request.salon_type;
+      }
+      if (resolvedCategory.slug === "men-barbershop" && request.shop_type) {
+        cityServicePayload.shop_type = request.shop_type;
+      }
 
       const { data: created, error: insertError } = await supabase
         .from("city_services")
@@ -629,6 +774,11 @@ export async function convertJoinRequest(
     phone: request.phone,
     logo_url: request.logo,
     partner_status: targetPartnerStatus,
+    // Previously collected at intake and then silently discarded on
+    // conversion — the created listing started with empty hours and the
+    // admin had to retype the whole week by hand. Now carried through for
+    // all 3 of these core tables (approved fix).
+    opening_hours_structured: weeklyHoursToGroups((request.opening_hours as WeeklyHoursDay[] | null) ?? []),
   };
 
   if (request.price_range) {
@@ -681,8 +831,32 @@ export async function convertJoinRequest(
   } else if (table === "restaurants") {
     basePayload.website = request.website;
     basePayload.menu_pdf_url = request.menu_pdf_url;
+
+    if (request.restaurant_type) basePayload.restaurant_type = request.restaurant_type;
+    if (request.seating_capacity) basePayload.seating_capacity = request.seating_capacity;
+    if (request.number_of_tables) basePayload.number_of_tables = request.number_of_tables;
+    if (request.online_order_url) basePayload.online_order_url = request.online_order_url;
+    if (request.is_24_hours) basePayload.is_24_hours = request.is_24_hours;
+    if (request.languages && request.languages.length > 0) basePayload.languages = request.languages;
+    // Restaurant facilities use the rich amenities_v2 vocabulary directly
+    // (unlike Hotel, which still uses the small legacy `amenities` column —
+    // restaurants has no such legacy column to preserve).
+    if (request.amenities && request.amenities.length > 0) basePayload.amenities_v2 = request.amenities;
+    // Cuisine codes are converted to their English label text so this
+    // column stays consistent with its existing free-text display
+    // convention (the admin form's cuisine field is a plain tag input,
+    // e.g. "Somali", "Grill" — not lowercase codes).
+    if (request.cuisine && request.cuisine.length > 0) {
+      basePayload.cuisine = request.cuisine.map(
+        (code: string) => CUISINE_LABELS[code as CuisineCode]?.en ?? code
+      );
+    }
   } else {
     basePayload.menu_pdf_url = request.menu_pdf_url;
+
+    if (request.seating_capacity) basePayload.seating_capacity = request.seating_capacity;
+    if (request.cafe_type) basePayload.cafe_type = request.cafe_type;
+    if (request.amenities && request.amenities.length > 0) basePayload.amenities_v2 = request.amenities;
   }
 
   const { data: created, error: insertError } = await supabase

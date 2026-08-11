@@ -125,6 +125,36 @@ export interface CityServiceInput {
   socialTelegram?: string;
   status?: "draft" | "published";
   featured?: boolean;
+  // Schools + Universities — every count below is optional and off by
+  // default; none are gender-split. Ignored for every other category.
+  schoolType?: string;
+  curriculum?: string;
+  educationLevels?: string[];
+  ageRangeGrades?: string;
+  numberOfClassrooms?: number;
+  universityType?: string;
+  degreeLevels?: string[];
+  facultiesOffered?: string[];
+  numberOfBuildings?: number;
+  educationFacilities?: string[];
+  numberOfStudents?: number;
+  numberOfTeachers?: number;
+  admissionsOpen?: boolean;
+  admissionPhone?: string;
+  admissionWhatsapp?: string;
+  admissionUrl?: string;
+  applicationUrl?: string;
+  numberOfFloors?: number;
+  yearEstablished?: number;
+  languages?: string[];
+  // Women's Beauty Salons (women-only) + Men's Barbershops (men-only) —
+  // no unisex value exists in either vocabulary. Ignored for every other
+  // category.
+  salonType?: string;
+  shopType?: string;
+  staffCount?: number;
+  walkInsAccepted?: boolean;
+  homeServiceAvailable?: boolean;
 }
 
 export async function createCityService(
@@ -172,6 +202,31 @@ export async function createCityService(
     social_telegram: input.socialTelegram?.trim() || null,
     status: input.status ?? "draft",
     featured: input.featured ?? false,
+    school_type: input.schoolType || null,
+    curriculum: input.curriculum || null,
+    education_levels: input.educationLevels ?? [],
+    age_range_grades: input.ageRangeGrades?.trim() || null,
+    number_of_classrooms: input.numberOfClassrooms ?? null,
+    university_type: input.universityType || null,
+    degree_levels: input.degreeLevels ?? [],
+    faculties_offered: input.facultiesOffered ?? [],
+    number_of_buildings: input.numberOfBuildings ?? null,
+    education_facilities: input.educationFacilities ?? [],
+    number_of_students: input.numberOfStudents ?? null,
+    number_of_teachers: input.numberOfTeachers ?? null,
+    admissions_open: input.admissionsOpen ?? true,
+    admission_phone: input.admissionPhone?.trim() || null,
+    admission_whatsapp: input.admissionWhatsapp?.trim() || null,
+    admission_url: input.admissionUrl?.trim() || null,
+    application_url: input.applicationUrl?.trim() || null,
+    number_of_floors: input.numberOfFloors ?? null,
+    year_established: input.yearEstablished ?? null,
+    languages: input.languages ?? [],
+    salon_type: input.salonType || null,
+    shop_type: input.shopType || null,
+    staff_count: input.staffCount ?? null,
+    walk_ins_accepted: input.walkInsAccepted ?? null,
+    home_service_available: input.homeServiceAvailable ?? null,
   } as never);
 
   if (error) return { ok: false, error: error.message };
@@ -236,6 +291,31 @@ export async function updateCityService(
       social_telegram: input.socialTelegram?.trim() || null,
       status: input.status,
       featured: input.featured ?? false,
+      school_type: input.schoolType || null,
+      curriculum: input.curriculum || null,
+      education_levels: input.educationLevels ?? [],
+      age_range_grades: input.ageRangeGrades?.trim() || null,
+      number_of_classrooms: input.numberOfClassrooms ?? null,
+      university_type: input.universityType || null,
+      degree_levels: input.degreeLevels ?? [],
+      faculties_offered: input.facultiesOffered ?? [],
+      number_of_buildings: input.numberOfBuildings ?? null,
+      education_facilities: input.educationFacilities ?? [],
+      number_of_students: input.numberOfStudents ?? null,
+      number_of_teachers: input.numberOfTeachers ?? null,
+      admissions_open: input.admissionsOpen ?? true,
+      admission_phone: input.admissionPhone?.trim() || null,
+      admission_whatsapp: input.admissionWhatsapp?.trim() || null,
+      admission_url: input.admissionUrl?.trim() || null,
+      application_url: input.applicationUrl?.trim() || null,
+      number_of_floors: input.numberOfFloors ?? null,
+      year_established: input.yearEstablished ?? null,
+      languages: input.languages ?? [],
+      salon_type: input.salonType || null,
+      shop_type: input.shopType || null,
+      staff_count: input.staffCount ?? null,
+      walk_ins_accepted: input.walkInsAccepted ?? null,
+      home_service_available: input.homeServiceAvailable ?? null,
       updated_at: new Date().toISOString(),
     } as never)
     .eq("id", id);

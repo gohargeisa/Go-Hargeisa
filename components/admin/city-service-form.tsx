@@ -12,6 +12,26 @@ import { OpeningHoursEditor } from "@/components/shared/opening-hours-editor";
 import { AmenitiesPicker } from "@/components/admin/amenities-picker";
 import { ServiceTagsPicker } from "@/components/admin/service-tags-picker";
 import { Field, inputClass } from "@/components/admin/form-shared";
+import {
+  SCHOOL_TYPE_ORDER,
+  schoolTypeLabel,
+  CURRICULUM_ORDER,
+  curriculumLabel,
+  EDUCATION_LEVEL_ORDER,
+  educationLevelLabel,
+  UNIVERSITY_TYPE_ORDER,
+  universityTypeLabel,
+  DEGREE_LEVEL_ORDER,
+  degreeLevelLabel,
+  FACULTY_ORDER,
+  facultyLabel,
+  SCHOOL_FACILITY_CODES,
+  UNIVERSITY_FACILITY_CODES,
+  EDUCATION_FACILITY_ICON,
+  educationFacilityLabel,
+} from "@/lib/config/education-attributes";
+import { SALON_TYPE_ORDER, salonTypeLabel, SHOP_TYPE_ORDER, shopTypeLabel } from "@/lib/config/salon-attributes";
+import { LANGUAGE_SPOKEN_OPTIONS, languageSpokenLabel } from "@/lib/config/hotel-attributes";
 import { AssignedOwnerField, type AssignedOwner } from "@/components/admin/assigned-owner-field";
 import { createCityService, updateCityService } from "@/lib/actions/city-services";
 import { useUnsavedChangesWarning } from "@/lib/hooks/use-unsaved-changes-warning";
@@ -54,6 +74,33 @@ export interface CityServiceFormInput {
   socialTelegram: string;
   status: "draft" | "published";
   featured: boolean;
+  // Schools + Universities
+  schoolType: string;
+  curriculum: string;
+  educationLevels: string[];
+  ageRangeGrades: string;
+  numberOfClassrooms?: number;
+  universityType: string;
+  degreeLevels: string[];
+  facultiesOffered: string[];
+  numberOfBuildings?: number;
+  educationFacilities: string[];
+  numberOfStudents?: number;
+  numberOfTeachers?: number;
+  admissionsOpen: boolean;
+  admissionPhone: string;
+  admissionWhatsapp: string;
+  admissionUrl: string;
+  applicationUrl: string;
+  numberOfFloors?: number;
+  yearEstablished?: number;
+  languages: string[];
+  // Women's Beauty Salons + Men's Barbershops
+  salonType: string;
+  shopType: string;
+  staffCount?: number;
+  walkInsAccepted: boolean;
+  homeServiceAvailable: boolean;
 }
 
 export function CityServiceForm({
@@ -118,6 +165,31 @@ export function CityServiceForm({
     socialTelegram: initial?.socialTelegram ?? "",
     status: initial?.status ?? "draft",
     featured: initial?.featured ?? false,
+    schoolType: initial?.schoolType ?? "",
+    curriculum: initial?.curriculum ?? "",
+    educationLevels: initial?.educationLevels ?? [],
+    ageRangeGrades: initial?.ageRangeGrades ?? "",
+    numberOfClassrooms: initial?.numberOfClassrooms,
+    universityType: initial?.universityType ?? "",
+    degreeLevels: initial?.degreeLevels ?? [],
+    facultiesOffered: initial?.facultiesOffered ?? [],
+    numberOfBuildings: initial?.numberOfBuildings,
+    educationFacilities: initial?.educationFacilities ?? [],
+    numberOfStudents: initial?.numberOfStudents,
+    numberOfTeachers: initial?.numberOfTeachers,
+    admissionsOpen: initial?.admissionsOpen ?? true,
+    admissionPhone: initial?.admissionPhone ?? "",
+    admissionWhatsapp: initial?.admissionWhatsapp ?? "",
+    admissionUrl: initial?.admissionUrl ?? "",
+    applicationUrl: initial?.applicationUrl ?? "",
+    numberOfFloors: initial?.numberOfFloors,
+    yearEstablished: initial?.yearEstablished,
+    languages: initial?.languages ?? [],
+    salonType: initial?.salonType ?? "",
+    shopType: initial?.shopType ?? "",
+    staffCount: initial?.staffCount,
+    walkInsAccepted: initial?.walkInsAccepted ?? false,
+    homeServiceAvailable: initial?.homeServiceAvailable ?? false,
   });
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -128,6 +200,10 @@ export function CityServiceForm({
   const selectedCategory = categories.find((c) => c.id === form.categoryId);
   const featureEligible = selectedCategory?.supportsNewFeatures ?? true;
   const gallerySupported = selectedCategory?.supportsGallery ?? false;
+  const isSchool = selectedCategory?.slug === "school";
+  const isUniversity = selectedCategory?.slug === "university";
+  const isSalon = selectedCategory?.slug === "beauty-salon";
+  const isBarbershop = selectedCategory?.slug === "men-barbershop";
 
   function update<K extends keyof CityServiceFormInput>(key: K, value: CityServiceFormInput[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -178,6 +254,31 @@ export function CityServiceForm({
       socialTelegram: featureEligible ? form.socialTelegram || undefined : undefined,
       status: form.status,
       featured: form.featured,
+      schoolType: isSchool ? form.schoolType || undefined : undefined,
+      curriculum: isSchool ? form.curriculum || undefined : undefined,
+      educationLevels: isSchool ? form.educationLevels : undefined,
+      ageRangeGrades: isSchool ? form.ageRangeGrades || undefined : undefined,
+      numberOfClassrooms: isSchool ? form.numberOfClassrooms : undefined,
+      universityType: isUniversity ? form.universityType || undefined : undefined,
+      degreeLevels: isUniversity ? form.degreeLevels : undefined,
+      facultiesOffered: isUniversity ? form.facultiesOffered : undefined,
+      numberOfBuildings: isUniversity ? form.numberOfBuildings : undefined,
+      educationFacilities: isSchool || isUniversity ? form.educationFacilities : undefined,
+      numberOfStudents: isSchool || isUniversity ? form.numberOfStudents : undefined,
+      numberOfTeachers: isSchool || isUniversity ? form.numberOfTeachers : undefined,
+      admissionsOpen: isSchool || isUniversity ? form.admissionsOpen : undefined,
+      admissionPhone: isSchool || isUniversity ? form.admissionPhone || undefined : undefined,
+      admissionWhatsapp: isSchool || isUniversity ? form.admissionWhatsapp || undefined : undefined,
+      admissionUrl: isSchool || isUniversity ? form.admissionUrl || undefined : undefined,
+      applicationUrl: isSchool || isUniversity ? form.applicationUrl || undefined : undefined,
+      numberOfFloors: isSchool || isUniversity ? form.numberOfFloors : undefined,
+      yearEstablished: isSchool || isUniversity ? form.yearEstablished : undefined,
+      languages: isSchool || isUniversity ? form.languages : undefined,
+      salonType: isSalon ? form.salonType || undefined : undefined,
+      shopType: isBarbershop ? form.shopType || undefined : undefined,
+      staffCount: isSalon || isBarbershop ? form.staffCount : undefined,
+      walkInsAccepted: isSalon || isBarbershop ? form.walkInsAccepted : undefined,
+      homeServiceAvailable: isSalon || isBarbershop ? form.homeServiceAvailable : undefined,
     };
 
     startTransition(async () => {
@@ -385,6 +486,298 @@ export function CityServiceForm({
         onChange={(v) => update("serviceTags", v)}
         label={selectedCategory?.slug === "cosmetics-beauty" ? t("businessSpecialtiesLabel") : t("serviceTagsLabel")}
       />
+
+      {isSchool && (
+        <div className="space-y-4 rounded-2xl border border-ink/10 p-4 dark:border-white/15">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="School type">
+              <select value={form.schoolType} onChange={(e) => update("schoolType", e.target.value)} className={inputClass}>
+                <option value="">—</option>
+                {SCHOOL_TYPE_ORDER.map((type) => (
+                  <option key={type} value={type}>{schoolTypeLabel(type, locale)}</option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Curriculum">
+              <select value={form.curriculum} onChange={(e) => update("curriculum", e.target.value)} className={inputClass}>
+                <option value="">—</option>
+                {CURRICULUM_ORDER.map((value) => (
+                  <option key={value} value={value}>{curriculumLabel(value, locale)}</option>
+                ))}
+              </select>
+            </Field>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-semibold">Education levels</label>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {EDUCATION_LEVEL_ORDER.map((value) => (
+                <label key={value} className="flex items-center gap-2 text-sm font-medium">
+                  <input
+                    type="checkbox"
+                    checked={form.educationLevels.includes(value)}
+                    onChange={() => update("educationLevels", form.educationLevels.includes(value) ? form.educationLevels.filter((v) => v !== value) : [...form.educationLevels, value])}
+                  />
+                  {educationLevelLabel(value, locale)}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <Field label="Age range / grades served">
+            <input value={form.ageRangeGrades} onChange={(e) => update("ageRangeGrades", e.target.value)} className={inputClass} />
+          </Field>
+
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Field label="Number of classrooms">
+              <input type="number" min={0} value={form.numberOfClassrooms ?? ""} onChange={(e) => update("numberOfClassrooms", e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+            </Field>
+            <Field label="Number of floors">
+              <input type="number" min={0} value={form.numberOfFloors ?? ""} onChange={(e) => update("numberOfFloors", e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+            </Field>
+            <Field label="Year established">
+              <input type="number" min={1900} max={new Date().getFullYear()} value={form.yearEstablished ?? ""} onChange={(e) => update("yearEstablished", e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+            </Field>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Number of students (optional)">
+              <input type="number" min={0} value={form.numberOfStudents ?? ""} onChange={(e) => update("numberOfStudents", e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+            </Field>
+            <Field label="Number of teachers (optional)">
+              <input type="number" min={0} value={form.numberOfTeachers ?? ""} onChange={(e) => update("numberOfTeachers", e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+            </Field>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-semibold">Languages of instruction</label>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {LANGUAGE_SPOKEN_OPTIONS.map((value) => (
+                <label key={value} className="flex items-center gap-2 text-sm font-medium">
+                  <input
+                    type="checkbox"
+                    checked={form.languages.includes(value)}
+                    onChange={() => update("languages", form.languages.includes(value) ? form.languages.filter((v) => v !== value) : [...form.languages, value])}
+                  />
+                  {languageSpokenLabel(value, locale)}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-semibold">School facilities</label>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {SCHOOL_FACILITY_CODES.map((code) => {
+                const Icon = EDUCATION_FACILITY_ICON[code];
+                return (
+                  <label key={code} className="flex items-center gap-2 text-sm font-medium">
+                    <input
+                      type="checkbox"
+                      checked={form.educationFacilities.includes(code)}
+                      onChange={() => update("educationFacilities", form.educationFacilities.includes(code) ? form.educationFacilities.filter((c) => c !== code) : [...form.educationFacilities, code])}
+                    />
+                    <Icon size={14} className="shrink-0 text-ink/50 dark:text-sand/50" aria-hidden="true" />
+                    {educationFacilityLabel(code, locale)}
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+
+          <label className="flex items-center gap-2 text-sm font-semibold">
+            <input type="checkbox" checked={form.admissionsOpen} onChange={(e) => update("admissionsOpen", e.target.checked)} />
+            Admissions open
+          </label>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Admission phone">
+              <input value={form.admissionPhone} onChange={(e) => update("admissionPhone", e.target.value)} className={inputClass} placeholder="+252 63 000 0000" />
+            </Field>
+            <Field label="Admission WhatsApp">
+              <input value={form.admissionWhatsapp} onChange={(e) => update("admissionWhatsapp", e.target.value)} className={inputClass} placeholder="+252 63 000 0000" />
+            </Field>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Admission info URL">
+              <input type="url" value={form.admissionUrl} onChange={(e) => update("admissionUrl", e.target.value)} className={inputClass} placeholder="https://…" />
+            </Field>
+            <Field label="Application URL">
+              <input type="url" value={form.applicationUrl} onChange={(e) => update("applicationUrl", e.target.value)} className={inputClass} placeholder="https://…" />
+            </Field>
+          </div>
+        </div>
+      )}
+
+      {isUniversity && (
+        <div className="space-y-4 rounded-2xl border border-ink/10 p-4 dark:border-white/15">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="University type">
+              <select value={form.universityType} onChange={(e) => update("universityType", e.target.value)} className={inputClass}>
+                <option value="">—</option>
+                {UNIVERSITY_TYPE_ORDER.map((type) => (
+                  <option key={type} value={type}>{universityTypeLabel(type, locale)}</option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Number of buildings (optional)">
+              <input type="number" min={0} value={form.numberOfBuildings ?? ""} onChange={(e) => update("numberOfBuildings", e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+            </Field>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-semibold">Degree levels offered</label>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {DEGREE_LEVEL_ORDER.map((value) => (
+                <label key={value} className="flex items-center gap-2 text-sm font-medium">
+                  <input
+                    type="checkbox"
+                    checked={form.degreeLevels.includes(value)}
+                    onChange={() => update("degreeLevels", form.degreeLevels.includes(value) ? form.degreeLevels.filter((v) => v !== value) : [...form.degreeLevels, value])}
+                  />
+                  {degreeLevelLabel(value, locale)}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-semibold">Faculties / programs offered</label>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {FACULTY_ORDER.map((value) => (
+                <label key={value} className="flex items-center gap-2 text-sm font-medium">
+                  <input
+                    type="checkbox"
+                    checked={form.facultiesOffered.includes(value)}
+                    onChange={() => update("facultiesOffered", form.facultiesOffered.includes(value) ? form.facultiesOffered.filter((v) => v !== value) : [...form.facultiesOffered, value])}
+                  />
+                  {facultyLabel(value, locale)}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Field label="Year established">
+              <input type="number" min={1900} max={new Date().getFullYear()} value={form.yearEstablished ?? ""} onChange={(e) => update("yearEstablished", e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+            </Field>
+            <Field label="Number of students (optional)">
+              <input type="number" min={0} value={form.numberOfStudents ?? ""} onChange={(e) => update("numberOfStudents", e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+            </Field>
+            <Field label="Number of faculty (optional)">
+              <input type="number" min={0} value={form.numberOfTeachers ?? ""} onChange={(e) => update("numberOfTeachers", e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+            </Field>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-semibold">Languages of instruction</label>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {LANGUAGE_SPOKEN_OPTIONS.map((value) => (
+                <label key={value} className="flex items-center gap-2 text-sm font-medium">
+                  <input
+                    type="checkbox"
+                    checked={form.languages.includes(value)}
+                    onChange={() => update("languages", form.languages.includes(value) ? form.languages.filter((v) => v !== value) : [...form.languages, value])}
+                  />
+                  {languageSpokenLabel(value, locale)}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-semibold">Campus facilities</label>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {UNIVERSITY_FACILITY_CODES.map((code) => {
+                const Icon = EDUCATION_FACILITY_ICON[code];
+                return (
+                  <label key={code} className="flex items-center gap-2 text-sm font-medium">
+                    <input
+                      type="checkbox"
+                      checked={form.educationFacilities.includes(code)}
+                      onChange={() => update("educationFacilities", form.educationFacilities.includes(code) ? form.educationFacilities.filter((c) => c !== code) : [...form.educationFacilities, code])}
+                    />
+                    <Icon size={14} className="shrink-0 text-ink/50 dark:text-sand/50" aria-hidden="true" />
+                    {educationFacilityLabel(code, locale)}
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+
+          <label className="flex items-center gap-2 text-sm font-semibold">
+            <input type="checkbox" checked={form.admissionsOpen} onChange={(e) => update("admissionsOpen", e.target.checked)} />
+            Admissions open
+          </label>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Admission phone">
+              <input value={form.admissionPhone} onChange={(e) => update("admissionPhone", e.target.value)} className={inputClass} placeholder="+252 63 000 0000" />
+            </Field>
+            <Field label="Admission WhatsApp">
+              <input value={form.admissionWhatsapp} onChange={(e) => update("admissionWhatsapp", e.target.value)} className={inputClass} placeholder="+252 63 000 0000" />
+            </Field>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Admission info URL">
+              <input type="url" value={form.admissionUrl} onChange={(e) => update("admissionUrl", e.target.value)} className={inputClass} placeholder="https://…" />
+            </Field>
+            <Field label="Application URL">
+              <input type="url" value={form.applicationUrl} onChange={(e) => update("applicationUrl", e.target.value)} className={inputClass} placeholder="https://…" />
+            </Field>
+          </div>
+        </div>
+      )}
+
+      {isSalon && (
+        <div className="space-y-4 rounded-2xl border border-ink/10 p-4 dark:border-white/15">
+          <Field label="Salon type">
+            <select value={form.salonType} onChange={(e) => update("salonType", e.target.value)} className={inputClass}>
+              <option value="">—</option>
+              {SALON_TYPE_ORDER.map((type) => (
+                <option key={type} value={type}>{salonTypeLabel(type, locale)}</option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Number of stylists (optional)">
+            <input type="number" min={0} value={form.staffCount ?? ""} onChange={(e) => update("staffCount", e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+          </Field>
+          <div className="flex flex-col gap-2">
+            <label className="flex items-center gap-2 text-sm font-medium">
+              <input type="checkbox" checked={form.walkInsAccepted} onChange={(e) => update("walkInsAccepted", e.target.checked)} />
+              Walk-ins accepted
+            </label>
+            <label className="flex items-center gap-2 text-sm font-medium">
+              <input type="checkbox" checked={form.homeServiceAvailable} onChange={(e) => update("homeServiceAvailable", e.target.checked)} />
+              Home service available
+            </label>
+          </div>
+        </div>
+      )}
+
+      {isBarbershop && (
+        <div className="space-y-4 rounded-2xl border border-ink/10 p-4 dark:border-white/15">
+          <Field label="Shop type">
+            <select value={form.shopType} onChange={(e) => update("shopType", e.target.value)} className={inputClass}>
+              <option value="">—</option>
+              {SHOP_TYPE_ORDER.map((type) => (
+                <option key={type} value={type}>{shopTypeLabel(type, locale)}</option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Number of barbers (optional)">
+            <input type="number" min={0} value={form.staffCount ?? ""} onChange={(e) => update("staffCount", e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+          </Field>
+          <div className="flex flex-col gap-2">
+            <label className="flex items-center gap-2 text-sm font-medium">
+              <input type="checkbox" checked={form.walkInsAccepted} onChange={(e) => update("walkInsAccepted", e.target.checked)} />
+              Walk-ins accepted
+            </label>
+            <label className="flex items-center gap-2 text-sm font-medium">
+              <input type="checkbox" checked={form.homeServiceAvailable} onChange={(e) => update("homeServiceAvailable", e.target.checked)} />
+              Home service available
+            </label>
+          </div>
+        </div>
+      )}
 
       <Field label={t("statusLabel")}>
         <select value={form.status} onChange={(e) => update("status", e.target.value as "draft" | "published")} className={inputClass}>

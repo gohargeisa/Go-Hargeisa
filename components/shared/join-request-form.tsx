@@ -26,6 +26,49 @@ import {
   type HotelType,
 } from "@/lib/config/hotel-attributes";
 import { ROOM_TYPE_ORDER, roomTypeLabel } from "@/lib/utils/room-type";
+import {
+  RESTAURANT_TYPE_ORDER,
+  restaurantTypeLabel,
+  CUISINE_ORDER,
+  cuisineLabel,
+  type RestaurantType,
+  type CuisineCode,
+} from "@/lib/config/restaurant-attributes";
+import { CAFE_TYPE_ORDER, cafeTypeLabel, type CafeType } from "@/lib/config/cafe-attributes";
+import {
+  SCHOOL_TYPE_ORDER,
+  schoolTypeLabel,
+  CURRICULUM_ORDER,
+  curriculumLabel,
+  EDUCATION_LEVEL_ORDER,
+  educationLevelLabel,
+  UNIVERSITY_TYPE_ORDER,
+  universityTypeLabel,
+  DEGREE_LEVEL_ORDER,
+  degreeLevelLabel,
+  FACULTY_ORDER,
+  facultyLabel,
+  SCHOOL_FACILITY_CODES,
+  UNIVERSITY_FACILITY_CODES,
+  EDUCATION_FACILITY_ICON,
+  educationFacilityLabel,
+  type SchoolType,
+  type Curriculum,
+  type EducationLevel,
+  type UniversityType,
+  type DegreeLevel,
+  type Faculty,
+  type EducationFacility,
+} from "@/lib/config/education-attributes";
+import {
+  SALON_TYPE_ORDER,
+  salonTypeLabel,
+  SHOP_TYPE_ORDER,
+  shopTypeLabel,
+  type SalonType,
+  type ShopType,
+} from "@/lib/config/salon-attributes";
+import { AMENITIES_BY_LISTING_TYPE, AMENITY_ICON } from "@/lib/config/amenities";
 import type { Locale } from "@/lib/i18n/config";
 import type { JoinRequestCategory, GalleryImage, MediaVideo, BusinessDocument, Coordinates, WeeklyHoursDay, Category, RoomType } from "@/types";
 
@@ -56,6 +99,7 @@ export function JoinRequestForm({
 }) {
   const t = useTranslations("joinRequest");
   const ta = useTranslations("partnerAmenities");
+  const tAmenity = useTranslations("amenities");
   const tw = useTranslations("weekdays");
   // Reuses the admin panel's own video-uploader strings (identical UI,
   // already translated in all 3 locales) instead of duplicating them here.
@@ -93,6 +137,45 @@ export function JoinRequestForm({
   const [numberOfFloors, setNumberOfFloors] = useState<number | undefined>(undefined);
   const [yearEstablished, setYearEstablished] = useState<number | undefined>(undefined);
   const [languagesSpoken, setLanguagesSpoken] = useState<string[]>([]);
+  // Restaurant
+  const [restaurantType, setRestaurantType] = useState<RestaurantType | "">("");
+  const [cuisine, setCuisine] = useState<CuisineCode[]>([]);
+  const [numberOfTables, setNumberOfTables] = useState<number | undefined>(undefined);
+  const [onlineOrderUrl, setOnlineOrderUrl] = useState("");
+  const [is24Hours, setIs24Hours] = useState(false);
+  // Restaurant + Cafe (shared column)
+  const [seatingCapacity, setSeatingCapacity] = useState<number | undefined>(undefined);
+  // Cafe
+  const [cafeType, setCafeType] = useState<CafeType | "">("");
+  // Schools
+  const [schoolType, setSchoolType] = useState<SchoolType | "">("");
+  const [curriculum, setCurriculum] = useState<Curriculum | "">("");
+  const [educationLevels, setEducationLevels] = useState<EducationLevel[]>([]);
+  const [ageRangeGrades, setAgeRangeGrades] = useState("");
+  const [numberOfClassrooms, setNumberOfClassrooms] = useState<number | undefined>(undefined);
+  // Universities
+  const [universityType, setUniversityType] = useState<UniversityType | "">("");
+  const [degreeLevels, setDegreeLevels] = useState<DegreeLevel[]>([]);
+  const [facultiesOffered, setFacultiesOffered] = useState<Faculty[]>([]);
+  const [numberOfBuildings, setNumberOfBuildings] = useState<number | undefined>(undefined);
+  // Schools + Universities (shared columns) — every count below is optional
+  // and off by default; none are gender-split.
+  const [educationFacilities, setEducationFacilities] = useState<EducationFacility[]>([]);
+  const [numberOfStudents, setNumberOfStudents] = useState<number | undefined>(undefined);
+  const [numberOfTeachers, setNumberOfTeachers] = useState<number | undefined>(undefined);
+  const [admissionsOpen, setAdmissionsOpen] = useState(true);
+  const [admissionPhone, setAdmissionPhone] = useState("");
+  const [admissionWhatsapp, setAdmissionWhatsapp] = useState("");
+  const [admissionUrl, setAdmissionUrl] = useState("");
+  const [applicationUrl, setApplicationUrl] = useState("");
+  // Women's Beauty Salons (women-only)
+  const [salonType, setSalonType] = useState<SalonType | "">("");
+  // Men's Barbershops (men-only)
+  const [shopType, setShopType] = useState<ShopType | "">("");
+  // Salons + Barbershops (shared columns)
+  const [staffCount, setStaffCount] = useState<number | undefined>(undefined);
+  const [walkInsAccepted, setWalkInsAccepted] = useState(false);
+  const [homeServiceAvailable, setHomeServiceAvailable] = useState(false);
   const [openingHours, setOpeningHours] = useState<WeeklyHoursDay[]>(defaultWeeklyHours());
   const [amenities, setAmenities] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<PriceRange | undefined>(undefined);
@@ -107,11 +190,57 @@ export function JoinRequestForm({
   const categoryAmenities = PARTNER_AMENITIES[category];
   const selectedServiceCategory = serviceCategories.find((c) => c.id === serviceCategoryId);
 
+  const isHotel = category === "hotel";
+  const isRestaurant = category === "restaurant";
+  const isCafe = category === "cafe";
+  const isSchool = category === "other" && selectedServiceCategory?.slug === "school";
+  const isUniversity = category === "other" && selectedServiceCategory?.slug === "university";
+  const isSalon = category === "other" && selectedServiceCategory?.slug === "beauty-salon";
+  const isBarbershop = category === "other" && selectedServiceCategory?.slug === "men-barbershop";
+
+  /** Clears every field specific to Restaurant/Cafe/School/University/Salon/
+   * Barbershop — called on any category or "other"-subcategory change so
+   * stale values from a previously-selected category are never carried
+   * into a different one, even though submission already gates on the
+   * currently-active category and would never send them regardless. */
+  function resetSpecializedFields() {
+    setRestaurantType("");
+    setCuisine([]);
+    setNumberOfTables(undefined);
+    setOnlineOrderUrl("");
+    setIs24Hours(false);
+    setSeatingCapacity(undefined);
+    setCafeType("");
+    setSchoolType("");
+    setCurriculum("");
+    setEducationLevels([]);
+    setAgeRangeGrades("");
+    setNumberOfClassrooms(undefined);
+    setUniversityType("");
+    setDegreeLevels([]);
+    setFacultiesOffered([]);
+    setNumberOfBuildings(undefined);
+    setEducationFacilities([]);
+    setNumberOfStudents(undefined);
+    setNumberOfTeachers(undefined);
+    setAdmissionsOpen(true);
+    setAdmissionPhone("");
+    setAdmissionWhatsapp("");
+    setAdmissionUrl("");
+    setApplicationUrl("");
+    setSalonType("");
+    setShopType("");
+    setStaffCount(undefined);
+    setWalkInsAccepted(false);
+    setHomeServiceAvailable(false);
+  }
+
   function selectCategory(next: JoinRequestCategory) {
     setCategory(next);
     setAmenities([]);
     setCustomFields({});
     setServiceTags([]);
+    resetSpecializedFields();
     if (next !== "hotel") {
       setBookingWhatsapp("");
       setBookingComUrl("");
@@ -121,10 +250,18 @@ export function JoinRequestForm({
       setStarRating(undefined);
       setEstimatedRoomCount(undefined);
       setRoomTypesOffered([]);
-      setNumberOfFloors(undefined);
-      setYearEstablished(undefined);
-      setLanguagesSpoken([]);
+      // numberOfFloors/yearEstablished/languagesSpoken are deliberately NOT
+      // cleared here — Restaurant, Schools, and Universities reuse these
+      // exact same fields (see business-requests.ts), so a value entered
+      // while browsing one category legitimately carries over rather than
+      // being force-cleared; submission still only sends them for the
+      // category currently selected.
     }
+  }
+
+  function selectOtherCategory(categoryId: string) {
+    selectCategory("other");
+    setServiceCategoryId(categoryId);
   }
 
   function toggleAmenity(code: string) {
@@ -137,6 +274,26 @@ export function JoinRequestForm({
 
   function toggleLanguageSpoken(value: string) {
     setLanguagesSpoken((values) => (values.includes(value) ? values.filter((v) => v !== value) : [...values, value]));
+  }
+
+  function toggleCuisine(code: CuisineCode) {
+    setCuisine((codes) => (codes.includes(code) ? codes.filter((c) => c !== code) : [...codes, code]));
+  }
+
+  function toggleEducationLevel(value: EducationLevel) {
+    setEducationLevels((values) => (values.includes(value) ? values.filter((v) => v !== value) : [...values, value]));
+  }
+
+  function toggleDegreeLevel(value: DegreeLevel) {
+    setDegreeLevels((values) => (values.includes(value) ? values.filter((v) => v !== value) : [...values, value]));
+  }
+
+  function toggleFaculty(value: Faculty) {
+    setFacultiesOffered((values) => (values.includes(value) ? values.filter((v) => v !== value) : [...values, value]));
+  }
+
+  function toggleEducationFacility(code: EducationFacility) {
+    setEducationFacilities((codes) => (codes.includes(code) ? codes.filter((c) => c !== code) : [...codes, code]));
   }
 
   function updateHoursDay(day: WeeklyHoursDay["day"], patch: Partial<WeeklyHoursDay>) {
@@ -181,20 +338,58 @@ export function JoinRequestForm({
         documents,
         menuPdfUrl: menuPdfUrl || undefined,
         bookingUrl: bookingUrl || undefined,
-        bookingWhatsapp: category === "hotel" ? bookingWhatsapp || undefined : undefined,
-        bookingComUrl: category === "hotel" ? bookingComUrl || undefined : undefined,
-        checkInTime: category === "hotel" ? checkInTime || undefined : undefined,
-        checkOutTime: category === "hotel" ? checkOutTime || undefined : undefined,
-        hotelType: category === "hotel" ? hotelType || undefined : undefined,
-        starRating: category === "hotel" ? starRating : undefined,
-        estimatedRoomCount: category === "hotel" ? estimatedRoomCount : undefined,
-        roomTypesOffered: category === "hotel" ? roomTypesOffered : undefined,
-        numberOfFloors: category === "hotel" ? numberOfFloors : undefined,
-        yearEstablished: category === "hotel" ? yearEstablished : undefined,
-        languagesSpoken: category === "hotel" ? languagesSpoken : undefined,
+        bookingWhatsapp: isHotel ? bookingWhatsapp || undefined : undefined,
+        bookingComUrl: isHotel ? bookingComUrl || undefined : undefined,
+        checkInTime: isHotel ? checkInTime || undefined : undefined,
+        checkOutTime: isHotel ? checkOutTime || undefined : undefined,
+        hotelType: isHotel ? hotelType || undefined : undefined,
+        starRating: isHotel ? starRating : undefined,
+        estimatedRoomCount: isHotel ? estimatedRoomCount : undefined,
+        roomTypesOffered: isHotel ? roomTypesOffered : undefined,
+        numberOfFloors: isHotel || isSchool || isUniversity ? numberOfFloors : undefined,
+        yearEstablished: isHotel || isSchool || isUniversity ? yearEstablished : undefined,
+        languagesSpoken: isHotel || isRestaurant || isSchool || isUniversity ? languagesSpoken : undefined,
         openingHours,
         amenities,
         priceRange,
+        // Restaurant
+        restaurantType: isRestaurant ? restaurantType || undefined : undefined,
+        cuisine: isRestaurant ? cuisine : undefined,
+        numberOfTables: isRestaurant ? numberOfTables : undefined,
+        onlineOrderUrl: isRestaurant ? onlineOrderUrl || undefined : undefined,
+        is24Hours: isRestaurant ? is24Hours : undefined,
+        // Restaurant + Cafe
+        seatingCapacity: isRestaurant || isCafe ? seatingCapacity : undefined,
+        // Cafe
+        cafeType: isCafe ? cafeType || undefined : undefined,
+        // Schools
+        schoolType: isSchool ? schoolType || undefined : undefined,
+        curriculum: isSchool ? curriculum || undefined : undefined,
+        educationLevels: isSchool ? educationLevels : undefined,
+        ageRangeGrades: isSchool ? ageRangeGrades || undefined : undefined,
+        numberOfClassrooms: isSchool ? numberOfClassrooms : undefined,
+        // Universities
+        universityType: isUniversity ? universityType || undefined : undefined,
+        degreeLevels: isUniversity ? degreeLevels : undefined,
+        facultiesOffered: isUniversity ? facultiesOffered : undefined,
+        numberOfBuildings: isUniversity ? numberOfBuildings : undefined,
+        // Schools + Universities
+        educationFacilities: isSchool || isUniversity ? educationFacilities : undefined,
+        numberOfStudents: isSchool || isUniversity ? numberOfStudents : undefined,
+        numberOfTeachers: isSchool || isUniversity ? numberOfTeachers : undefined,
+        admissionsOpen: isSchool || isUniversity ? admissionsOpen : undefined,
+        admissionPhone: isSchool || isUniversity ? admissionPhone || undefined : undefined,
+        admissionWhatsapp: isSchool || isUniversity ? admissionWhatsapp || undefined : undefined,
+        admissionUrl: isSchool || isUniversity ? admissionUrl || undefined : undefined,
+        applicationUrl: isSchool || isUniversity ? applicationUrl || undefined : undefined,
+        // Women's Beauty Salons
+        salonType: isSalon ? salonType || undefined : undefined,
+        // Men's Barbershops
+        shopType: isBarbershop ? shopType || undefined : undefined,
+        // Salons + Barbershops
+        staffCount: isSalon || isBarbershop ? staffCount : undefined,
+        walkInsAccepted: isSalon || isBarbershop ? walkInsAccepted : undefined,
+        homeServiceAvailable: isSalon || isBarbershop ? homeServiceAvailable : undefined,
       });
 
       if (result.ok) {
@@ -259,10 +454,7 @@ export function JoinRequestForm({
             <select
               id="jr-other-category"
               value={category === "other" ? serviceCategoryId : ""}
-              onChange={(e) => {
-                selectCategory("other");
-                setServiceCategoryId(e.target.value);
-              }}
+              onChange={(e) => selectOtherCategory(e.target.value)}
               className={inputClass}
             >
               <option value="" disabled>{t("selectCategoryPlaceholder")}</option>
@@ -453,6 +645,168 @@ export function JoinRequestForm({
             </div>
           )}
 
+          {isRestaurant && (
+            <div className="space-y-5">
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="jr-restaurantType" className={labelClass}>{t("restaurantTypeLabel")}</label>
+                  <select
+                    id="jr-restaurantType"
+                    value={restaurantType}
+                    onChange={(e) => setRestaurantType(e.target.value as RestaurantType | "")}
+                    className={inputClass}
+                  >
+                    <option value="" disabled>{t("selectRestaurantTypePlaceholder")}</option>
+                    {RESTAURANT_TYPE_ORDER.map((type) => (
+                      <option key={type} value={type}>{restaurantTypeLabel(type, locale)}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="jr-onlineOrderUrl" className={labelClass}>{t("onlineOrderUrlLabel")}</label>
+                  <input id="jr-onlineOrderUrl" type="url" value={onlineOrderUrl} onChange={(e) => setOnlineOrderUrl(e.target.value)} className={inputClass} placeholder="https://…" />
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClass}>{t("cuisineLabel")}</label>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {CUISINE_ORDER.map((code) => (
+                    <label key={code} className="flex items-center gap-2 text-sm font-medium">
+                      <input type="checkbox" checked={cuisine.includes(code)} onChange={() => toggleCuisine(code)} />
+                      {cuisineLabel(code, locale)}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="jr-seatingCapacity" className={labelClass}>{t("seatingCapacityLabel")}</label>
+                  <input
+                    id="jr-seatingCapacity"
+                    type="number"
+                    min={1}
+                    value={seatingCapacity ?? ""}
+                    onChange={(e) => setSeatingCapacity(e.target.value ? Number(e.target.value) : undefined)}
+                    className={inputClass}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="jr-numberOfTables" className={labelClass}>{t("numberOfTablesLabel")}</label>
+                  <input
+                    id="jr-numberOfTables"
+                    type="number"
+                    min={1}
+                    value={numberOfTables ?? ""}
+                    onChange={(e) => setNumberOfTables(e.target.value ? Number(e.target.value) : undefined)}
+                    className={inputClass}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClass}>{t("languagesSpokenLabel")}</label>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {LANGUAGE_SPOKEN_OPTIONS.map((value) => (
+                    <label key={value} className="flex items-center gap-2 text-sm font-medium">
+                      <input type="checkbox" checked={languagesSpoken.includes(value)} onChange={() => toggleLanguageSpoken(value)} />
+                      {languageSpokenLabel(value, locale)}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClass}>{t("amenitiesTitle")}</label>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  {AMENITIES_BY_LISTING_TYPE.restaurant.map((code) => {
+                    const Icon = AMENITY_ICON[code];
+                    const active = amenities.includes(code);
+                    return (
+                      <button
+                        key={code}
+                        type="button"
+                        onClick={() => toggleAmenity(code)}
+                        aria-pressed={active}
+                        className={`flex items-center gap-2.5 rounded-2xl border p-3.5 text-start text-sm font-medium transition-colors ${
+                          active
+                            ? "border-primary bg-primary/8 text-primary-800"
+                            : "border-ink/10 text-ink/70 hover:border-primary/40 dark:border-white/15 dark:text-sand/70"
+                        }`}
+                      >
+                        <Icon size={17} className="shrink-0" aria-hidden="true" />
+                        {tAmenity(code)}
+                      </button>
+                    );
+                  })}
+                </div>
+                <label className="mt-3 flex items-center gap-2 text-sm font-medium">
+                  <input type="checkbox" checked={is24Hours} onChange={(e) => setIs24Hours(e.target.checked)} />
+                  {t("is24HoursLabel")}
+                </label>
+              </div>
+            </div>
+          )}
+
+          {isCafe && (
+            <div className="space-y-5">
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="jr-cafeType" className={labelClass}>{t("cafeTypeLabel")}</label>
+                  <select
+                    id="jr-cafeType"
+                    value={cafeType}
+                    onChange={(e) => setCafeType(e.target.value as CafeType | "")}
+                    className={inputClass}
+                  >
+                    <option value="" disabled>{t("selectCafeTypePlaceholder")}</option>
+                    {CAFE_TYPE_ORDER.map((type) => (
+                      <option key={type} value={type}>{cafeTypeLabel(type, locale)}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="jr-cafeSeatingCapacity" className={labelClass}>{t("seatingCapacityLabel")}</label>
+                  <input
+                    id="jr-cafeSeatingCapacity"
+                    type="number"
+                    min={1}
+                    value={seatingCapacity ?? ""}
+                    onChange={(e) => setSeatingCapacity(e.target.value ? Number(e.target.value) : undefined)}
+                    className={inputClass}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClass}>{t("amenitiesTitle")}</label>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  {AMENITIES_BY_LISTING_TYPE.cafe.map((code) => {
+                    const Icon = AMENITY_ICON[code];
+                    const active = amenities.includes(code);
+                    return (
+                      <button
+                        key={code}
+                        type="button"
+                        onClick={() => toggleAmenity(code)}
+                        aria-pressed={active}
+                        className={`flex items-center gap-2.5 rounded-2xl border p-3.5 text-start text-sm font-medium transition-colors ${
+                          active
+                            ? "border-primary bg-primary/8 text-primary-800"
+                            : "border-ink/10 text-ink/70 hover:border-primary/40 dark:border-white/15 dark:text-sand/70"
+                        }`}
+                      >
+                        <Icon size={17} className="shrink-0" aria-hidden="true" />
+                        {tAmenity(code)}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+
           {category === "other" && selectedServiceCategory && selectedServiceCategory.customFieldsSchema.length > 0 && (
             <CustomFieldsEditor
               schema={selectedServiceCategory.customFieldsSchema}
@@ -470,6 +824,302 @@ export function JoinRequestForm({
               onChange={setServiceTags}
               label={selectedServiceCategory.slug === "cosmetics-beauty" ? tAdmin("businessSpecialtiesLabel") : tAdmin("serviceTagsLabel")}
             />
+          )}
+
+          {isSchool && (
+            <div className="space-y-5">
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="jr-schoolType" className={labelClass}>{t("schoolTypeLabel")}</label>
+                  <select id="jr-schoolType" value={schoolType} onChange={(e) => setSchoolType(e.target.value as SchoolType | "")} className={inputClass}>
+                    <option value="" disabled>{t("selectSchoolTypePlaceholder")}</option>
+                    {SCHOOL_TYPE_ORDER.map((type) => (
+                      <option key={type} value={type}>{schoolTypeLabel(type, locale)}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="jr-curriculum" className={labelClass}>{t("curriculumLabel")}</label>
+                  <select id="jr-curriculum" value={curriculum} onChange={(e) => setCurriculum(e.target.value as Curriculum | "")} className={inputClass}>
+                    <option value="" disabled>{t("selectCurriculumPlaceholder")}</option>
+                    {CURRICULUM_ORDER.map((value) => (
+                      <option key={value} value={value}>{curriculumLabel(value, locale)}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClass}>{t("educationLevelsLabel")}</label>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {EDUCATION_LEVEL_ORDER.map((value) => (
+                    <label key={value} className="flex items-center gap-2 text-sm font-medium">
+                      <input type="checkbox" checked={educationLevels.includes(value)} onChange={() => toggleEducationLevel(value)} />
+                      {educationLevelLabel(value, locale)}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="jr-ageRangeGrades" className={labelClass}>{t("ageRangeGradesLabel")}</label>
+                <input id="jr-ageRangeGrades" value={ageRangeGrades} onChange={(e) => setAgeRangeGrades(e.target.value)} className={inputClass} />
+              </div>
+
+              <div className="grid gap-5 sm:grid-cols-3">
+                <div>
+                  <label htmlFor="jr-numberOfClassrooms" className={labelClass}>{t("numberOfClassroomsLabel")}</label>
+                  <input id="jr-numberOfClassrooms" type="number" min={0} value={numberOfClassrooms ?? ""} onChange={(e) => setNumberOfClassrooms(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+                <div>
+                  <label htmlFor="jr-schoolFloors" className={labelClass}>{t("numberOfFloorsLabel")}</label>
+                  <input id="jr-schoolFloors" type="number" min={0} value={numberOfFloors ?? ""} onChange={(e) => setNumberOfFloors(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+                <div>
+                  <label htmlFor="jr-yearEstablishedSchool" className={labelClass}>{t("yearEstablishedLabel")}</label>
+                  <input id="jr-yearEstablishedSchool" type="number" min={1900} max={new Date().getFullYear()} value={yearEstablished ?? ""} onChange={(e) => setYearEstablished(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+              </div>
+
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="jr-numberOfStudentsSchool" className={labelClass}>{t("numberOfStudentsLabel")}</label>
+                  <input id="jr-numberOfStudentsSchool" type="number" min={0} value={numberOfStudents ?? ""} onChange={(e) => setNumberOfStudents(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+                <div>
+                  <label htmlFor="jr-numberOfTeachersSchool" className={labelClass}>{t("numberOfTeachersLabel")}</label>
+                  <input id="jr-numberOfTeachersSchool" type="number" min={0} value={numberOfTeachers ?? ""} onChange={(e) => setNumberOfTeachers(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClass}>{t("languagesOfInstructionLabel")}</label>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {LANGUAGE_SPOKEN_OPTIONS.map((value) => (
+                    <label key={value} className="flex items-center gap-2 text-sm font-medium">
+                      <input type="checkbox" checked={languagesSpoken.includes(value)} onChange={() => toggleLanguageSpoken(value)} />
+                      {languageSpokenLabel(value, locale)}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClass}>{t("schoolFacilitiesLabel")}</label>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {SCHOOL_FACILITY_CODES.map((code) => {
+                    const Icon = EDUCATION_FACILITY_ICON[code];
+                    return (
+                      <label key={code} className="flex items-center gap-2 text-sm font-medium">
+                        <input type="checkbox" checked={educationFacilities.includes(code)} onChange={() => toggleEducationFacility(code)} />
+                        <Icon size={14} className="shrink-0 text-ink/50 dark:text-sand/50" aria-hidden="true" />
+                        {educationFacilityLabel(code, locale)}
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="space-y-3 rounded-2xl border border-ink/10 p-4 dark:border-white/15">
+                <label className="flex items-center gap-2 text-sm font-semibold">
+                  <input type="checkbox" checked={admissionsOpen} onChange={(e) => setAdmissionsOpen(e.target.checked)} />
+                  {t("admissionsOpenLabel")}
+                </label>
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <div>
+                    <label htmlFor="jr-admissionPhoneSchool" className={labelClass}>{t("admissionPhoneLabel")}</label>
+                    <input id="jr-admissionPhoneSchool" type="tel" value={admissionPhone} onChange={(e) => setAdmissionPhone(e.target.value)} className={inputClass} placeholder="+252 63 000 0000" />
+                  </div>
+                  <div>
+                    <label htmlFor="jr-admissionWhatsappSchool" className={labelClass}>{t("admissionWhatsappLabel")}</label>
+                    <input id="jr-admissionWhatsappSchool" type="tel" value={admissionWhatsapp} onChange={(e) => setAdmissionWhatsapp(e.target.value)} className={inputClass} placeholder="+252 63 000 0000" />
+                  </div>
+                </div>
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <div>
+                    <label htmlFor="jr-admissionUrlSchool" className={labelClass}>{t("admissionUrlLabel")}</label>
+                    <input id="jr-admissionUrlSchool" type="url" value={admissionUrl} onChange={(e) => setAdmissionUrl(e.target.value)} className={inputClass} placeholder="https://…" />
+                  </div>
+                  <div>
+                    <label htmlFor="jr-applicationUrlSchool" className={labelClass}>{t("applicationUrlLabel")}</label>
+                    <input id="jr-applicationUrlSchool" type="url" value={applicationUrl} onChange={(e) => setApplicationUrl(e.target.value)} className={inputClass} placeholder="https://…" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {isUniversity && (
+            <div className="space-y-5">
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="jr-universityType" className={labelClass}>{t("universityTypeLabel")}</label>
+                  <select id="jr-universityType" value={universityType} onChange={(e) => setUniversityType(e.target.value as UniversityType | "")} className={inputClass}>
+                    <option value="" disabled>{t("selectUniversityTypePlaceholder")}</option>
+                    {UNIVERSITY_TYPE_ORDER.map((type) => (
+                      <option key={type} value={type}>{universityTypeLabel(type, locale)}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="jr-numberOfBuildings" className={labelClass}>{t("numberOfBuildingsLabel")}</label>
+                  <input id="jr-numberOfBuildings" type="number" min={0} value={numberOfBuildings ?? ""} onChange={(e) => setNumberOfBuildings(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClass}>{t("degreeLevelsLabel")}</label>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {DEGREE_LEVEL_ORDER.map((value) => (
+                    <label key={value} className="flex items-center gap-2 text-sm font-medium">
+                      <input type="checkbox" checked={degreeLevels.includes(value)} onChange={() => toggleDegreeLevel(value)} />
+                      {degreeLevelLabel(value, locale)}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClass}>{t("facultiesOfferedLabel")}</label>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {FACULTY_ORDER.map((value) => (
+                    <label key={value} className="flex items-center gap-2 text-sm font-medium">
+                      <input type="checkbox" checked={facultiesOffered.includes(value)} onChange={() => toggleFaculty(value)} />
+                      {facultyLabel(value, locale)}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="jr-yearEstablishedUni" className={labelClass}>{t("yearEstablishedLabel")}</label>
+                  <input id="jr-yearEstablishedUni" type="number" min={1900} max={new Date().getFullYear()} value={yearEstablished ?? ""} onChange={(e) => setYearEstablished(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+              </div>
+
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="jr-numberOfStudentsUni" className={labelClass}>{t("numberOfStudentsLabel")}</label>
+                  <input id="jr-numberOfStudentsUni" type="number" min={0} value={numberOfStudents ?? ""} onChange={(e) => setNumberOfStudents(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+                <div>
+                  <label htmlFor="jr-numberOfTeachersUni" className={labelClass}>{t("numberOfFacultyLabel")}</label>
+                  <input id="jr-numberOfTeachersUni" type="number" min={0} value={numberOfTeachers ?? ""} onChange={(e) => setNumberOfTeachers(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClass}>{t("languagesOfInstructionLabel")}</label>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {LANGUAGE_SPOKEN_OPTIONS.map((value) => (
+                    <label key={value} className="flex items-center gap-2 text-sm font-medium">
+                      <input type="checkbox" checked={languagesSpoken.includes(value)} onChange={() => toggleLanguageSpoken(value)} />
+                      {languageSpokenLabel(value, locale)}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClass}>{t("campusFacilitiesLabel")}</label>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {UNIVERSITY_FACILITY_CODES.map((code) => {
+                    const Icon = EDUCATION_FACILITY_ICON[code];
+                    return (
+                      <label key={code} className="flex items-center gap-2 text-sm font-medium">
+                        <input type="checkbox" checked={educationFacilities.includes(code)} onChange={() => toggleEducationFacility(code)} />
+                        <Icon size={14} className="shrink-0 text-ink/50 dark:text-sand/50" aria-hidden="true" />
+                        {educationFacilityLabel(code, locale)}
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="space-y-3 rounded-2xl border border-ink/10 p-4 dark:border-white/15">
+                <label className="flex items-center gap-2 text-sm font-semibold">
+                  <input type="checkbox" checked={admissionsOpen} onChange={(e) => setAdmissionsOpen(e.target.checked)} />
+                  {t("admissionsOpenLabel")}
+                </label>
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <div>
+                    <label htmlFor="jr-admissionPhoneUni" className={labelClass}>{t("admissionPhoneLabel")}</label>
+                    <input id="jr-admissionPhoneUni" type="tel" value={admissionPhone} onChange={(e) => setAdmissionPhone(e.target.value)} className={inputClass} placeholder="+252 63 000 0000" />
+                  </div>
+                  <div>
+                    <label htmlFor="jr-admissionWhatsappUni" className={labelClass}>{t("admissionWhatsappLabel")}</label>
+                    <input id="jr-admissionWhatsappUni" type="tel" value={admissionWhatsapp} onChange={(e) => setAdmissionWhatsapp(e.target.value)} className={inputClass} placeholder="+252 63 000 0000" />
+                  </div>
+                </div>
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <div>
+                    <label htmlFor="jr-admissionUrlUni" className={labelClass}>{t("admissionUrlLabel")}</label>
+                    <input id="jr-admissionUrlUni" type="url" value={admissionUrl} onChange={(e) => setAdmissionUrl(e.target.value)} className={inputClass} placeholder="https://…" />
+                  </div>
+                  <div>
+                    <label htmlFor="jr-applicationUrlUni" className={labelClass}>{t("applicationUrlLabel")}</label>
+                    <input id="jr-applicationUrlUni" type="url" value={applicationUrl} onChange={(e) => setApplicationUrl(e.target.value)} className={inputClass} placeholder="https://…" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {isSalon && (
+            <div className="space-y-5">
+              <div>
+                <label htmlFor="jr-salonType" className={labelClass}>{t("salonTypeLabel")}</label>
+                <select id="jr-salonType" value={salonType} onChange={(e) => setSalonType(e.target.value as SalonType | "")} className={inputClass}>
+                  <option value="" disabled>{t("selectSalonTypePlaceholder")}</option>
+                  {SALON_TYPE_ORDER.map((type) => (
+                    <option key={type} value={type}>{salonTypeLabel(type, locale)}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="jr-staffCountSalon" className={labelClass}>{t("numberOfStylistsLabel")}</label>
+                <input id="jr-staffCountSalon" type="number" min={0} value={staffCount ?? ""} onChange={(e) => setStaffCount(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="flex items-center gap-2 text-sm font-medium">
+                  <input type="checkbox" checked={walkInsAccepted} onChange={(e) => setWalkInsAccepted(e.target.checked)} />
+                  {t("walkInsAcceptedLabel")}
+                </label>
+                <label className="flex items-center gap-2 text-sm font-medium">
+                  <input type="checkbox" checked={homeServiceAvailable} onChange={(e) => setHomeServiceAvailable(e.target.checked)} />
+                  {t("homeServiceAvailableLabel")}
+                </label>
+              </div>
+            </div>
+          )}
+
+          {isBarbershop && (
+            <div className="space-y-5">
+              <div>
+                <label htmlFor="jr-shopType" className={labelClass}>{t("shopTypeLabel")}</label>
+                <select id="jr-shopType" value={shopType} onChange={(e) => setShopType(e.target.value as ShopType | "")} className={inputClass}>
+                  <option value="" disabled>{t("selectShopTypePlaceholder")}</option>
+                  {SHOP_TYPE_ORDER.map((type) => (
+                    <option key={type} value={type}>{shopTypeLabel(type, locale)}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="jr-staffCountBarber" className={labelClass}>{t("numberOfBarbersLabel")}</label>
+                <input id="jr-staffCountBarber" type="number" min={0} value={staffCount ?? ""} onChange={(e) => setStaffCount(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="flex items-center gap-2 text-sm font-medium">
+                  <input type="checkbox" checked={walkInsAccepted} onChange={(e) => setWalkInsAccepted(e.target.checked)} />
+                  {t("walkInsAcceptedLabel")}
+                </label>
+                <label className="flex items-center gap-2 text-sm font-medium">
+                  <input type="checkbox" checked={homeServiceAvailable} onChange={(e) => setHomeServiceAvailable(e.target.checked)} />
+                  {t("homeServiceAvailableLabel")}
+                </label>
+              </div>
+            </div>
           )}
         </div>
       </div>

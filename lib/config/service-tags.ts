@@ -13,6 +13,7 @@ import {
   Droplets,
   Sparkle,
   Sparkles,
+  Flower2,
   Baby,
   Gift,
   Wrench,
@@ -54,6 +55,7 @@ export const SERVICE_TAG_CODES = [
   "bridal_beauty",
   "eyelashes_eyebrows",
   "spa_body_care",
+  "henna_services",
   // Men's Barbershops
   "haircuts",
   "beard_shaving",
@@ -92,6 +94,7 @@ export const SERVICE_TAG_ICON: Record<ServiceTagCode, LucideIcon> = {
   bridal_beauty: Gem,
   eyelashes_eyebrows: Eye,
   spa_body_care: Waves,
+  henna_services: Flower2,
 
   haircuts: Scissors,
   beard_shaving: Brush,
@@ -126,7 +129,7 @@ export const SERVICE_TAG_ICON: Record<ServiceTagCode, LucideIcon> = {
  * picker/filter/display — same "renders nothing when not applicable" rule
  * as amenities. */
 export const SERVICE_TAGS_BY_CATEGORY_SLUG: Record<string, ServiceTagCode[]> = {
-  "beauty-salon": ["hair_services", "makeup", "nail_services", "skincare_facials", "hair_removal", "bridal_beauty", "eyelashes_eyebrows", "spa_body_care"],
+  "beauty-salon": ["hair_services", "makeup", "nail_services", "skincare_facials", "hair_removal", "bridal_beauty", "eyelashes_eyebrows", "spa_body_care", "henna_services"],
   "men-barbershop": [
     "haircuts", "beard_shaving", "hair_styling", "hair_coloring", "hair_treatments",
     "facials_skincare", "head_massage", "beard_styling", "kids_haircuts", "grooming_packages",

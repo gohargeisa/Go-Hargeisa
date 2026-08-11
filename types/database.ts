@@ -83,6 +83,8 @@ type RestaurantRow = ListingBase & SocialExtra & {
   social_instagram: string | null; social_facebook: string | null; whatsapp: string | null; email: string | null;
   partner_status: PartnerStatusDb; trial_expires_at: string | null;
   is_24_hours: boolean; temporarily_closed: boolean; permanently_closed: boolean;
+  restaurant_type: string | null; seating_capacity: number | null; number_of_tables: number | null;
+  online_order_url: string | null; languages: string[];
 };
 type CafeRow = ListingBase & SocialExtra & {
   description_ar: string | null; description_so: string | null;
@@ -93,6 +95,7 @@ type CafeRow = ListingBase & SocialExtra & {
   logo_url: string | null; menu: Json; menu_pdf_url: string | null;
   partner_status: PartnerStatusDb; trial_expires_at: string | null;
   is_24_hours: boolean; temporarily_closed: boolean; permanently_closed: boolean;
+  cafe_type: string | null; seating_capacity: number | null;
 };
 
 type BusinessOfferRow = {
@@ -125,6 +128,18 @@ type CityServiceRow = {
   service_tags: string[];
   status: "draft" | "published" | "archived"; featured: boolean; sort_order: number;
   created_at: string; updated_at: string;
+  // Schools + Universities
+  school_type: string | null; curriculum: string | null; education_levels: string[];
+  age_range_grades: string | null; number_of_classrooms: number | null;
+  university_type: string | null; degree_levels: string[]; faculties_offered: string[];
+  number_of_buildings: number | null;
+  education_facilities: string[]; number_of_students: number | null; number_of_teachers: number | null;
+  admissions_open: boolean; admission_phone: string | null; admission_whatsapp: string | null;
+  admission_url: string | null; application_url: string | null;
+  number_of_floors: number | null; year_established: number | null; languages: string[];
+  // Women's Beauty Salons + Men's Barbershops
+  salon_type: string | null; shop_type: string | null;
+  staff_count: number | null; walk_ins_accepted: boolean | null; home_service_available: boolean | null;
 };
 type AttractionRow = ListingBase & SocialExtra & {
   history: string | null; best_time_to_visit: string | null; entry_fee: string; visitor_tips: string[];
@@ -193,6 +208,7 @@ type ProductRow = {
   image: string | null; gallery: Json;
   is_available: boolean; is_featured: boolean; is_hidden: boolean;
   sort_order: number; created_at: string; updated_at: string;
+  size: string | null;
 };
 
 type DepartmentRow = {
@@ -265,6 +281,24 @@ type BusinessJoinRequestRow = {
   hotel_type: string | null; star_rating: number | null;
   estimated_room_count: number | null; room_types_offered: string[];
   number_of_floors: number | null; year_established: number | null; languages: string[];
+  // Restaurants
+  restaurant_type: string | null; cuisine: string[]; number_of_tables: number | null;
+  online_order_url: string | null; is_24_hours: boolean;
+  // Restaurants + Cafes
+  seating_capacity: number | null;
+  // Cafes
+  cafe_type: string | null;
+  // Schools + Universities
+  school_type: string | null; curriculum: string | null; education_levels: string[];
+  age_range_grades: string | null; number_of_classrooms: number | null;
+  university_type: string | null; degree_levels: string[]; faculties_offered: string[];
+  number_of_buildings: number | null;
+  education_facilities: string[]; number_of_students: number | null; number_of_teachers: number | null;
+  admissions_open: boolean; admission_phone: string | null; admission_whatsapp: string | null;
+  admission_url: string | null; application_url: string | null;
+  // Women's Beauty Salons + Men's Barbershops
+  salon_type: string | null; shop_type: string | null;
+  staff_count: number | null; walk_ins_accepted: boolean | null; home_service_available: boolean | null;
   created_at: string; updated_at: string;
 };
 

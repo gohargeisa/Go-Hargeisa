@@ -74,10 +74,14 @@ export function isConvertibleCategory(
  * 3 categories the spec gave an explicit list for. Every other category has
  * no Amenities section on the form rather than an invented one.
  */
+/** Restaurant and Café deliberately have no entry here — both now use the
+ * richer, already-trilingual AMENITIES_BY_LISTING_TYPE vocabulary
+ * (lib/config/amenities.ts) directly in their own join-request-form.tsx
+ * block instead of this small intake-only list, so their real amenities_v2
+ * codes match what the created listing already knows how to render. Hotel
+ * keeps this original small list untouched. */
 export const PARTNER_AMENITIES: Partial<Record<JoinRequestCategory, string[]>> = {
   hotel: ["wifi", "parking", "restaurant", "pool", "gym", "breakfast", "airport_shuttle", "meeting_rooms", "room_service", "card_payment", "cash_accepted"],
-  cafe: ["wifi", "workspace", "outdoor_seating", "coffee", "tea", "desserts", "meeting_space"],
-  restaurant: ["family", "delivery", "takeaway", "outdoor_seating", "private_dining", "parking"],
 };
 
 export const PARTNER_AMENITY_ICON: Record<string, LucideIcon> = {

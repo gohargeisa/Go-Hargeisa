@@ -33,6 +33,7 @@ const BLANK: ProductInput = {
   isAvailable: true,
   isFeatured: false,
   isHidden: false,
+  size: "",
 };
 
 /**
@@ -163,6 +164,7 @@ export function ProductsManager({
                 <p className="text-xs text-ink/50 dark:text-sand/50">
                   {product.category ? PRODUCT_CATEGORY_LABELS[product.category][locale as "en" | "ar" | "so"] ?? PRODUCT_CATEGORY_LABELS[product.category].en : ""}
                   {product.brand ? ` • ${product.brand}` : ""}
+                  {product.size ? ` • ${product.size}` : ""}
                   {product.price != null ? ` • ${product.price} ${product.currency}` : ` • ${t("priceOnRequest")}`}
                 </p>
               </div>
@@ -310,6 +312,9 @@ function ProductForm({
         </Field>
         <Field label={t("currencyLabel")}>
           <input value={draft.currency} onChange={(e) => update("currency", e.target.value || "USD")} className={inputClass} />
+        </Field>
+        <Field label={t("sizeLabel")} hint={t("sizeOptionalHint")}>
+          <input value={draft.size ?? ""} onChange={(e) => update("size", e.target.value)} className={inputClass} placeholder="50ml" />
         </Field>
         <Field label={t("availabilityLabel")}>
           <select

@@ -22,6 +22,8 @@ export interface ProductInput {
   isFeatured: boolean;
   isHidden: boolean;
   sortOrder?: number;
+  /** Free-text size/variant descriptor (e.g. "50ml", "Large", "Set of 3") — optional, most products won't need it. */
+  size?: string;
 }
 
 /**
@@ -72,6 +74,7 @@ function toPayload(input: ProductInput, listingId: string) {
     is_featured: input.isFeatured,
     is_hidden: input.isHidden,
     sort_order: input.sortOrder ?? 0,
+    size: input.size?.trim() || null,
   };
 }
 
