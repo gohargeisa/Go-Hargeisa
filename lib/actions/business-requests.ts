@@ -181,6 +181,100 @@ export interface JoinRequestInput {
   outdoorPlants?: boolean;
   onlineOrderingAvailable?: boolean;
   deliveryAreas?: string[];
+  /** "Services offered" chips picked at intake for Apartments/Real Estate/
+   * Electronics/Transportation — carried onto `services.services` at
+   * conversion (previously that column was only ever set to [categoryName]). */
+  servicesOffered?: string[];
+  /** Apartments-only intake fields (target_table 'services'). */
+  apartmentType?: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  unitsCount?: number;
+  floorNumber?: number;
+  buildingFloors?: number;
+  furnished?: boolean;
+  monthlyRent?: number;
+  dailyRent?: number;
+  securityDeposit?: number;
+  minStayNights?: number;
+  maxStayNights?: number;
+  parkingAvailable?: boolean;
+  wifiAvailable?: boolean;
+  airConditioning?: boolean;
+  kitchenAvailable?: boolean;
+  electricityIncluded?: boolean;
+  waterIncluded?: boolean;
+  generatorAvailable?: boolean;
+  securityAvailable?: boolean;
+  elevatorAvailable?: boolean;
+  swimmingPool?: boolean;
+  laundryAvailable?: boolean;
+  familyFriendly?: boolean;
+  petPolicy?: string;
+  /** Real Estate-only intake fields (target_table 'services'). */
+  propertyType?: string;
+  listingPurpose?: string;
+  price?: number;
+  priceCurrency?: string;
+  realEstateBedrooms?: number;
+  realEstateBathrooms?: number;
+  floorsCount?: number;
+  yearBuilt?: number;
+  areaSqm?: number;
+  landAreaSqm?: number;
+  buildingAreaSqm?: number;
+  realEstateParkingAvailable?: boolean;
+  realEstateFurnished?: boolean;
+  documentsAvailable?: boolean;
+  viewingAvailable?: boolean;
+  propertyCondition?: string;
+  ownershipStatus?: string;
+  /** Electronics-only intake fields (target_table 'services'). */
+  electronicsBusinessType?: string;
+  brandsAvailable?: string[];
+  sellsNew?: boolean;
+  sellsUsed?: boolean;
+  warrantyAvailable?: boolean;
+  electronicsDeliveryAvailable?: boolean;
+  electronicsRepairAvailable?: boolean;
+  installationAvailable?: boolean;
+  paymentOptions?: string[];
+  /** Transportation-only intake fields (target_table 'services'). */
+  transportationType?: string;
+  vehicleCount?: number;
+  passengerCapacity?: number;
+  driverAvailable?: boolean;
+  airportTransferAvailable?: boolean;
+  cityTransfersAvailable?: boolean;
+  intercityTransportAvailable?: boolean;
+  rentalAvailable?: boolean;
+  dailyRentalAvailable?: boolean;
+  weeklyRentalAvailable?: boolean;
+  monthlyRentalAvailable?: boolean;
+  deliveryServiceAvailable?: boolean;
+  cargoServiceAvailable?: boolean;
+  /** Hospital-only intake fields (target_table 'city_services'). */
+  hospitalType?: string;
+  bedsCount?: number;
+  doctorsCount?: number;
+  nursesCount?: number;
+  departmentsCount?: number;
+  operatingRoomsCount?: number;
+  emergencyDepartment?: boolean;
+  icuAvailable?: boolean;
+  pharmacyOnsite?: boolean;
+  laboratoryOnsite?: boolean;
+  radiologyOnsite?: boolean;
+  ambulanceAvailable?: boolean;
+  maternityDepartment?: boolean;
+  pediatricDepartment?: boolean;
+  visitingHours?: string;
+  /** Pharmacy-only intake fields (target_table 'city_services'). */
+  pharmacyType?: string;
+  pharmacyDeliveryAvailable?: boolean;
+  prescriptionRequired?: boolean;
+  homeDelivery?: boolean;
+  pharmacyEmergencyContact?: string;
 }
 
 /**
@@ -267,6 +361,12 @@ export async function submitJoinRequest(input: JoinRequestInput): Promise<{ ok: 
   const isGym = resolvedOtherSlug === "gym";
   const isTravelAgency = resolvedOtherSlug === "tour-companies";
   const isFlowerShop = resolvedOtherSlug === "flower-shops";
+  const isApartments = resolvedOtherSlug === "apartments";
+  const isRealEstate = resolvedOtherSlug === "real-estate";
+  const isElectronics = resolvedOtherSlug === "electronics";
+  const isTransportation = resolvedOtherSlug === "transportation";
+  const isHospital = resolvedOtherSlug === "hospital";
+  const isPharmacy = resolvedOtherSlug === "pharmacy";
 
   const { data: existing } = await supabase
     .from("business_join_requests")
@@ -316,7 +416,7 @@ export async function submitJoinRequest(input: JoinRequestInput): Promise<{ ok: 
     room_types_offered: input.category === "hotel" ? input.roomTypesOffered ?? [] : [],
     number_of_floors: input.category === "hotel" || isSchool || isUniversity ? input.numberOfFloors ?? null : null,
     year_established: input.category === "hotel" || isSchool || isUniversity ? input.yearEstablished ?? null : null,
-    languages: input.category === "hotel" || input.category === "restaurant" || isSchool || isUniversity || isClinic || isTravelAgency ? input.languagesSpoken ?? [] : [],
+    languages: input.category === "hotel" || input.category === "restaurant" || isSchool || isUniversity || isClinic || isTravelAgency || isHospital ? input.languagesSpoken ?? [] : [],
     opening_hours: input.openingHours ?? [],
     amenities: input.amenities ?? [],
     price_range: input.priceRange ?? null,
@@ -325,7 +425,7 @@ export async function submitJoinRequest(input: JoinRequestInput): Promise<{ ok: 
     cuisine: input.category === "restaurant" ? input.cuisine ?? [] : [],
     number_of_tables: input.category === "restaurant" ? input.numberOfTables ?? null : null,
     online_order_url: input.category === "restaurant" ? input.onlineOrderUrl?.trim() || null : null,
-    is_24_hours: input.category === "restaurant" ? input.is24Hours ?? false : false,
+    is_24_hours: input.category === "restaurant" || isPharmacy ? input.is24Hours ?? false : false,
     // Restaurant + Cafe
     seating_capacity: input.category === "restaurant" || input.category === "cafe" ? input.seatingCapacity ?? null : null,
     // Cafe
@@ -371,7 +471,7 @@ export async function submitJoinRequest(input: JoinRequestInput): Promise<{ ok: 
     // Clinics / Medical Clinics (Dental Clinic is now one clinicType value)
     clinic_type: isClinic ? input.clinicType || null : null,
     number_of_treatment_rooms: isClinic ? input.numberOfTreatmentRooms ?? null : null,
-    insurance_accepted: isClinic ? input.insuranceAccepted ?? [] : [],
+    insurance_accepted: isClinic || isHospital || isPharmacy ? input.insuranceAccepted ?? [] : [],
     // Auto Repair
     garage_type: isAutoRepair ? input.garageType || null : null,
     // Gym / Fitness Center
@@ -410,6 +510,97 @@ export async function submitJoinRequest(input: JoinRequestInput): Promise<{ ok: 
     outdoor_plants: isFlowerShop ? input.outdoorPlants ?? null : null,
     online_ordering_available: isFlowerShop ? input.onlineOrderingAvailable ?? null : null,
     delivery_areas: isFlowerShop ? input.deliveryAreas ?? [] : [],
+    // Apartments
+    apartment_type: isApartments ? input.apartmentType || null : null,
+    bedrooms: isApartments ? input.bedrooms ?? null : null,
+    bathrooms: isApartments ? input.bathrooms ?? null : null,
+    units_count: isApartments ? input.unitsCount ?? null : null,
+    floor_number: isApartments ? input.floorNumber ?? null : null,
+    building_floors: isApartments ? input.buildingFloors ?? null : null,
+    furnished: isApartments ? input.furnished ?? null : null,
+    monthly_rent: isApartments ? input.monthlyRent ?? null : null,
+    daily_rent: isApartments ? input.dailyRent ?? null : null,
+    security_deposit: isApartments ? input.securityDeposit ?? null : null,
+    min_stay_nights: isApartments ? input.minStayNights ?? null : null,
+    max_stay_nights: isApartments ? input.maxStayNights ?? null : null,
+    parking_available: isApartments ? input.parkingAvailable ?? null : null,
+    wifi_available: isApartments ? input.wifiAvailable ?? null : null,
+    air_conditioning: isApartments ? input.airConditioning ?? null : null,
+    kitchen_available: isApartments ? input.kitchenAvailable ?? null : null,
+    electricity_included: isApartments ? input.electricityIncluded ?? null : null,
+    water_included: isApartments ? input.waterIncluded ?? null : null,
+    generator_available: isApartments ? input.generatorAvailable ?? null : null,
+    security_available: isApartments ? input.securityAvailable ?? null : null,
+    elevator_available: isApartments ? input.elevatorAvailable ?? null : null,
+    swimming_pool: isApartments ? input.swimmingPool ?? null : null,
+    laundry_available: isApartments ? input.laundryAvailable ?? null : null,
+    family_friendly: isApartments ? input.familyFriendly ?? null : null,
+    pet_policy: isApartments ? input.petPolicy || null : null,
+    // Real Estate
+    property_type: isRealEstate ? input.propertyType || null : null,
+    listing_purpose: isRealEstate ? input.listingPurpose || null : null,
+    price: isRealEstate ? input.price ?? null : null,
+    price_currency: isRealEstate ? input.priceCurrency || null : null,
+    real_estate_bedrooms: isRealEstate ? input.realEstateBedrooms ?? null : null,
+    real_estate_bathrooms: isRealEstate ? input.realEstateBathrooms ?? null : null,
+    floors_count: isRealEstate ? input.floorsCount ?? null : null,
+    year_built: isRealEstate ? input.yearBuilt ?? null : null,
+    area_sqm: isRealEstate ? input.areaSqm ?? null : null,
+    land_area_sqm: isRealEstate ? input.landAreaSqm ?? null : null,
+    building_area_sqm: isRealEstate ? input.buildingAreaSqm ?? null : null,
+    real_estate_parking_available: isRealEstate ? input.realEstateParkingAvailable ?? null : null,
+    real_estate_furnished: isRealEstate ? input.realEstateFurnished ?? null : null,
+    documents_available: isRealEstate ? input.documentsAvailable ?? null : null,
+    viewing_available: isRealEstate ? input.viewingAvailable ?? null : null,
+    property_condition: isRealEstate ? input.propertyCondition || null : null,
+    ownership_status: isRealEstate ? input.ownershipStatus || null : null,
+    // Electronics
+    electronics_business_type: isElectronics ? input.electronicsBusinessType || null : null,
+    brands_available: isElectronics ? input.brandsAvailable ?? [] : [],
+    sells_new: isElectronics ? input.sellsNew ?? null : null,
+    sells_used: isElectronics ? input.sellsUsed ?? null : null,
+    warranty_available: isElectronics ? input.warrantyAvailable ?? null : null,
+    electronics_delivery_available: isElectronics ? input.electronicsDeliveryAvailable ?? null : null,
+    electronics_repair_available: isElectronics ? input.electronicsRepairAvailable ?? null : null,
+    installation_available: isElectronics ? input.installationAvailable ?? null : null,
+    payment_options: isElectronics ? input.paymentOptions ?? [] : [],
+    // Transportation
+    transportation_type: isTransportation ? input.transportationType || null : null,
+    vehicle_count: isTransportation ? input.vehicleCount ?? null : null,
+    passenger_capacity: isTransportation ? input.passengerCapacity ?? null : null,
+    driver_available: isTransportation ? input.driverAvailable ?? null : null,
+    airport_transfer_available: isTransportation ? input.airportTransferAvailable ?? null : null,
+    city_transfers_available: isTransportation ? input.cityTransfersAvailable ?? null : null,
+    intercity_transport_available: isTransportation ? input.intercityTransportAvailable ?? null : null,
+    rental_available: isTransportation ? input.rentalAvailable ?? null : null,
+    daily_rental_available: isTransportation ? input.dailyRentalAvailable ?? null : null,
+    weekly_rental_available: isTransportation ? input.weeklyRentalAvailable ?? null : null,
+    monthly_rental_available: isTransportation ? input.monthlyRentalAvailable ?? null : null,
+    delivery_service_available: isTransportation ? input.deliveryServiceAvailable ?? null : null,
+    cargo_service_available: isTransportation ? input.cargoServiceAvailable ?? null : null,
+    // Hospital
+    hospital_type: isHospital ? input.hospitalType || null : null,
+    beds_count: isHospital ? input.bedsCount ?? null : null,
+    doctors_count: isHospital ? input.doctorsCount ?? null : null,
+    nurses_count: isHospital ? input.nursesCount ?? null : null,
+    departments_count: isHospital ? input.departmentsCount ?? null : null,
+    operating_rooms_count: isHospital ? input.operatingRoomsCount ?? null : null,
+    emergency_department: isHospital ? input.emergencyDepartment ?? null : null,
+    icu_available: isHospital ? input.icuAvailable ?? null : null,
+    pharmacy_onsite: isHospital ? input.pharmacyOnsite ?? null : null,
+    laboratory_onsite: isHospital ? input.laboratoryOnsite ?? null : null,
+    radiology_onsite: isHospital ? input.radiologyOnsite ?? null : null,
+    ambulance_available: isHospital ? input.ambulanceAvailable ?? null : null,
+    maternity_department: isHospital ? input.maternityDepartment ?? null : null,
+    pediatric_department: isHospital ? input.pediatricDepartment ?? null : null,
+    visiting_hours: isHospital ? input.visitingHours?.trim() || null : null,
+    // Pharmacy
+    pharmacy_type: isPharmacy ? input.pharmacyType || null : null,
+    pharmacy_delivery_available: isPharmacy ? input.pharmacyDeliveryAvailable ?? null : null,
+    prescription_required: isPharmacy ? input.prescriptionRequired ?? null : null,
+    home_delivery: isPharmacy ? input.homeDelivery ?? null : null,
+    pharmacy_emergency_contact: isPharmacy ? input.pharmacyEmergencyContact?.trim() || null : null,
+    services_offered: isApartments || isRealEstate || isElectronics || isTransportation ? input.servicesOffered ?? [] : [],
   } as never);
 
   if (error) return { ok: false, error: error.message };
@@ -754,6 +945,43 @@ export async function convertJoinRequest(
         if (request.trial_membership_available !== null) cityServicePayload.trial_membership_available = request.trial_membership_available;
       }
 
+      // Hospital (doctors/departments/appointments are managed separately
+      // and untouched by conversion, same as Clinics above)
+      if (resolvedCategory.slug === "hospital") {
+        if (request.hospital_type) cityServicePayload.hospital_type = request.hospital_type;
+        if (request.beds_count) cityServicePayload.beds_count = request.beds_count;
+        if (request.doctors_count) cityServicePayload.doctors_count = request.doctors_count;
+        if (request.nurses_count) cityServicePayload.nurses_count = request.nurses_count;
+        if (request.departments_count) cityServicePayload.departments_count = request.departments_count;
+        if (request.operating_rooms_count) cityServicePayload.operating_rooms_count = request.operating_rooms_count;
+        if (request.emergency_department !== null) cityServicePayload.emergency_department = request.emergency_department;
+        if (request.icu_available !== null) cityServicePayload.icu_available = request.icu_available;
+        if (request.pharmacy_onsite !== null) cityServicePayload.pharmacy_onsite = request.pharmacy_onsite;
+        if (request.laboratory_onsite !== null) cityServicePayload.laboratory_onsite = request.laboratory_onsite;
+        if (request.radiology_onsite !== null) cityServicePayload.radiology_onsite = request.radiology_onsite;
+        if (request.ambulance_available !== null) cityServicePayload.ambulance_available = request.ambulance_available;
+        if (request.maternity_department !== null) cityServicePayload.maternity_department = request.maternity_department;
+        if (request.pediatric_department !== null) cityServicePayload.pediatric_department = request.pediatric_department;
+        if (request.visiting_hours) cityServicePayload.visiting_hours = request.visiting_hours;
+        if (request.languages && request.languages.length > 0) cityServicePayload.languages = request.languages;
+        if (request.insurance_accepted && request.insurance_accepted.length > 0) {
+          cityServicePayload.insurance_accepted = request.insurance_accepted;
+        }
+      }
+
+      // Pharmacy
+      if (resolvedCategory.slug === "pharmacy") {
+        if (request.pharmacy_type) cityServicePayload.pharmacy_type = request.pharmacy_type;
+        if (request.pharmacy_delivery_available !== null) cityServicePayload.pharmacy_delivery_available = request.pharmacy_delivery_available;
+        if (request.prescription_required !== null) cityServicePayload.prescription_required = request.prescription_required;
+        if (request.home_delivery !== null) cityServicePayload.home_delivery = request.home_delivery;
+        if (request.pharmacy_emergency_contact) cityServicePayload.pharmacy_emergency_contact = request.pharmacy_emergency_contact;
+        if (request.is_24_hours) cityServicePayload.is_24_hours = request.is_24_hours;
+        if (request.insurance_accepted && request.insurance_accepted.length > 0) {
+          cityServicePayload.insurance_accepted = request.insurance_accepted;
+        }
+      }
+
       const { data: created, error: insertError } = await supabase
         .from("city_services")
         .insert(cityServicePayload as never)
@@ -857,7 +1085,7 @@ export async function convertJoinRequest(
       owner_id: user?.id ?? null,
       category_id: request.category_id,
       custom_fields: request.custom_fields ?? {},
-      services: categoryName ? [categoryName] : [],
+      services: request.services_offered && request.services_offered.length > 0 ? request.services_offered : categoryName ? [categoryName] : [],
     };
 
     // Travel Agency / Travel Office (slug "tour-companies") — its existing
@@ -894,6 +1122,88 @@ export async function convertJoinRequest(
       if (request.outdoor_plants !== null) servicePayload.outdoor_plants = request.outdoor_plants;
       if (request.online_ordering_available !== null) servicePayload.online_ordering_available = request.online_ordering_available;
       if (request.delivery_areas && request.delivery_areas.length > 0) servicePayload.delivery_areas = request.delivery_areas;
+    }
+
+    // Apartments (slug "apartments")
+    if (resolvedCategory.slug === "apartments") {
+      if (request.apartment_type) servicePayload.apartment_type = request.apartment_type;
+      if (request.bedrooms) servicePayload.bedrooms = request.bedrooms;
+      if (request.bathrooms) servicePayload.bathrooms = request.bathrooms;
+      if (request.units_count) servicePayload.units_count = request.units_count;
+      if (request.floor_number) servicePayload.floor_number = request.floor_number;
+      if (request.building_floors) servicePayload.building_floors = request.building_floors;
+      if (request.furnished !== null) servicePayload.furnished = request.furnished;
+      if (request.monthly_rent) servicePayload.monthly_rent = request.monthly_rent;
+      if (request.daily_rent) servicePayload.daily_rent = request.daily_rent;
+      if (request.security_deposit) servicePayload.security_deposit = request.security_deposit;
+      if (request.min_stay_nights) servicePayload.min_stay_nights = request.min_stay_nights;
+      if (request.max_stay_nights) servicePayload.max_stay_nights = request.max_stay_nights;
+      if (request.parking_available !== null) servicePayload.parking_available = request.parking_available;
+      if (request.wifi_available !== null) servicePayload.wifi_available = request.wifi_available;
+      if (request.air_conditioning !== null) servicePayload.air_conditioning = request.air_conditioning;
+      if (request.kitchen_available !== null) servicePayload.kitchen_available = request.kitchen_available;
+      if (request.electricity_included !== null) servicePayload.electricity_included = request.electricity_included;
+      if (request.water_included !== null) servicePayload.water_included = request.water_included;
+      if (request.generator_available !== null) servicePayload.generator_available = request.generator_available;
+      if (request.security_available !== null) servicePayload.security_available = request.security_available;
+      if (request.elevator_available !== null) servicePayload.elevator_available = request.elevator_available;
+      if (request.swimming_pool !== null) servicePayload.swimming_pool = request.swimming_pool;
+      if (request.laundry_available !== null) servicePayload.laundry_available = request.laundry_available;
+      if (request.family_friendly !== null) servicePayload.family_friendly = request.family_friendly;
+      if (request.pet_policy) servicePayload.pet_policy = request.pet_policy;
+    }
+
+    // Real Estate (slug "real-estate") — its retired custom_fields_schema
+    // (see 20260812000001) means custom_fields above is now always empty
+    // for new submissions; these typed columns are the real data going forward.
+    if (resolvedCategory.slug === "real-estate") {
+      if (request.property_type) servicePayload.property_type = request.property_type;
+      if (request.listing_purpose) servicePayload.listing_purpose = request.listing_purpose;
+      if (request.price) servicePayload.price = request.price;
+      if (request.price_currency) servicePayload.price_currency = request.price_currency;
+      if (request.real_estate_bedrooms) servicePayload.real_estate_bedrooms = request.real_estate_bedrooms;
+      if (request.real_estate_bathrooms) servicePayload.real_estate_bathrooms = request.real_estate_bathrooms;
+      if (request.floors_count) servicePayload.floors_count = request.floors_count;
+      if (request.year_built) servicePayload.year_built = request.year_built;
+      if (request.area_sqm) servicePayload.area_sqm = request.area_sqm;
+      if (request.land_area_sqm) servicePayload.land_area_sqm = request.land_area_sqm;
+      if (request.building_area_sqm) servicePayload.building_area_sqm = request.building_area_sqm;
+      if (request.real_estate_parking_available !== null) servicePayload.real_estate_parking_available = request.real_estate_parking_available;
+      if (request.real_estate_furnished !== null) servicePayload.real_estate_furnished = request.real_estate_furnished;
+      if (request.documents_available !== null) servicePayload.documents_available = request.documents_available;
+      if (request.viewing_available !== null) servicePayload.viewing_available = request.viewing_available;
+      if (request.property_condition) servicePayload.property_condition = request.property_condition;
+      if (request.ownership_status) servicePayload.ownership_status = request.ownership_status;
+    }
+
+    // Electronics (slug "electronics")
+    if (resolvedCategory.slug === "electronics") {
+      if (request.electronics_business_type) servicePayload.electronics_business_type = request.electronics_business_type;
+      if (request.brands_available && request.brands_available.length > 0) servicePayload.brands_available = request.brands_available;
+      if (request.sells_new !== null) servicePayload.sells_new = request.sells_new;
+      if (request.sells_used !== null) servicePayload.sells_used = request.sells_used;
+      if (request.warranty_available !== null) servicePayload.warranty_available = request.warranty_available;
+      if (request.electronics_delivery_available !== null) servicePayload.electronics_delivery_available = request.electronics_delivery_available;
+      if (request.electronics_repair_available !== null) servicePayload.electronics_repair_available = request.electronics_repair_available;
+      if (request.installation_available !== null) servicePayload.installation_available = request.installation_available;
+      if (request.payment_options && request.payment_options.length > 0) servicePayload.payment_options = request.payment_options;
+    }
+
+    // Transportation (slug "transportation")
+    if (resolvedCategory.slug === "transportation") {
+      if (request.transportation_type) servicePayload.transportation_type = request.transportation_type;
+      if (request.vehicle_count) servicePayload.vehicle_count = request.vehicle_count;
+      if (request.passenger_capacity) servicePayload.passenger_capacity = request.passenger_capacity;
+      if (request.driver_available !== null) servicePayload.driver_available = request.driver_available;
+      if (request.airport_transfer_available !== null) servicePayload.airport_transfer_available = request.airport_transfer_available;
+      if (request.city_transfers_available !== null) servicePayload.city_transfers_available = request.city_transfers_available;
+      if (request.intercity_transport_available !== null) servicePayload.intercity_transport_available = request.intercity_transport_available;
+      if (request.rental_available !== null) servicePayload.rental_available = request.rental_available;
+      if (request.daily_rental_available !== null) servicePayload.daily_rental_available = request.daily_rental_available;
+      if (request.weekly_rental_available !== null) servicePayload.weekly_rental_available = request.weekly_rental_available;
+      if (request.monthly_rental_available !== null) servicePayload.monthly_rental_available = request.monthly_rental_available;
+      if (request.delivery_service_available !== null) servicePayload.delivery_service_available = request.delivery_service_available;
+      if (request.cargo_service_available !== null) servicePayload.cargo_service_available = request.cargo_service_available;
     }
 
     const { data: created, error: insertError } = await supabase

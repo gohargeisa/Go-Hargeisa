@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { AnimatePresence, m } from "framer-motion";
 import {
   Bell, BedDouble, Building2, Compass, Heart, LayoutDashboard, MapIcon,
-  MessageSquare, Settings as SettingsIcon, ShieldCheck, LifeBuoy, Star, User,
+  MessageSquare, Settings as SettingsIcon, ShieldCheck, LifeBuoy, Star, Stethoscope, User,
 } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { syncFavorites } from "@/lib/offline/favorites-store";
@@ -20,13 +20,14 @@ import { MessagesPanel } from "@/components/dashboard/messages-panel";
 import { SavedTripsPanel } from "@/components/dashboard/saved-trips-panel";
 import { ReviewsPanel } from "@/components/dashboard/reviews-panel";
 import { BookingsPanel } from "@/components/dashboard/bookings-panel";
+import { AppointmentsPanel } from "@/components/dashboard/appointments-panel";
 import { ProfilePanel } from "@/components/dashboard/profile-panel";
 import { SettingsPanel } from "@/components/dashboard/settings-panel";
 import { SecurityPanel } from "@/components/dashboard/security-panel";
 import { NotificationList } from "@/components/shared/notification-list";
 import type { SavedTrip } from "@/lib/data/saved-trips";
 import type { MyReview } from "@/lib/data/reviews";
-import type { OwnedListing, OwnedListingMessage } from "@/lib/data/business";
+import type { OwnedListing, OwnedListingMessage, MyAppointment } from "@/lib/data/business";
 import { serviceHref } from "@/lib/utils/service-categories";
 import type { Booking, Notification } from "@/types";
 
@@ -47,6 +48,7 @@ const tabs = [
   { key: "favorites", icon: Heart },
   { key: "trips", icon: MapIcon },
   { key: "bookings", icon: BedDouble },
+  { key: "appointments", icon: Stethoscope },
   { key: "reviews", icon: Star },
   { key: "messages", icon: MessageSquare },
   { key: "notifications", icon: Bell },
@@ -62,12 +64,12 @@ function isTabKey(value: string | null): value is TabKey {
 }
 
 export function DashboardTabs({
-  locale, userId, email, favorites, trips, bookings, reviews, notifications, unreadNotifications, userName, avatarUrl,
+  locale, userId, email, favorites, trips, bookings, appointments, reviews, notifications, unreadNotifications, userName, avatarUrl,
   phone, bio, hasPassword, memberSince, notifyActivity, notifyMarketing, notifyInApp, notifyCategories,
   ownedListings, messages, unreadMessages, supportSlot,
 }: {
   locale: Locale; userId: string; email: string; favorites: FavoriteEntry[]; trips: SavedTrip[];
-  bookings: Booking[]; reviews: MyReview[]; notifications: Notification[]; unreadNotifications: number;
+  bookings: Booking[]; appointments: MyAppointment[]; reviews: MyReview[]; notifications: Notification[]; unreadNotifications: number;
   userName: string; avatarUrl: string;
   phone: string; bio: string; hasPassword: boolean; memberSince: string;
   notifyActivity: boolean; notifyMarketing: boolean; notifyInApp: boolean; notifyCategories: Record<string, boolean>;
@@ -108,6 +110,7 @@ export function DashboardTabs({
     favorites: t("tabFavorites"),
     trips: t("tabTrips"),
     bookings: t("tabBookings"),
+    appointments: t("tabAppointments"),
     reviews: t("tabReviews"),
     messages: t("navMessages"),
     profile: t("tabProfile"),
@@ -150,6 +153,7 @@ export function DashboardTabs({
           </div>}
           {active === "trips" && <SavedTripsPanel locale={locale} trips={trips} />}
           {active === "bookings" && <BookingsPanel locale={locale} bookings={bookings} />}
+          {active === "appointments" && <AppointmentsPanel locale={locale} appointments={appointments} />}
           {active === "reviews" && <ReviewsPanel locale={locale} reviews={reviews} />}
           {active === "messages" && <MessagesPanel locale={locale} messages={messages} hasBusinesses={ownedListings.length > 0} />}
           {active === "profile" && (

@@ -25,7 +25,28 @@ import { resolveMapsUrl, resolveDirectionsUrl } from "@/lib/utils/google-maps";
 import { Reveal } from "@/components/home/reveal";
 import { serviceHref, singularize } from "@/lib/utils/service-categories";
 import { CustomFieldsDisplay } from "@/components/shared/custom-fields-display";
+import { ServiceTypedFieldsDisplay } from "@/components/shared/service-typed-fields-display";
 import { SERVICES_PUBLIC_ENABLED } from "@/lib/config/features";
+
+const TYPED_FIELD_CATEGORIES = new Set(["apartments", "real-estate", "electronics", "transportation"]);
+
+/** Whether this service's category is one of the typed-column categories
+ * AND at least one of its fields actually has a value — mirrors the
+ * customFieldsSchema-driven `hasDetails` check above but for the newer
+ * typed-column categories (see 20260812000001_..._fields.sql), which don't
+ * use customFieldsSchema at all. */
+function hasTypedDetails(service: import("@/types").Service, categorySlug: string): boolean {
+  if (!TYPED_FIELD_CATEGORIES.has(categorySlug)) return false;
+  const candidates: unknown[] =
+    categorySlug === "apartments"
+      ? [service.apartmentType, service.bedrooms, service.monthlyRent, service.dailyRent, service.parkingAvailable, service.petPolicy]
+      : categorySlug === "real-estate"
+        ? [service.propertyType, service.listingPurpose, service.price, service.realEstateBedrooms, service.areaSqm]
+        : categorySlug === "electronics"
+          ? [service.electronicsBusinessType, service.sellsNew, service.sellsUsed, service.warrantyAvailable, (service.brandsAvailable ?? []).length > 0]
+          : [service.transportationType, service.vehicleCount, service.driverAvailable, service.rentalAvailable];
+  return candidates.some((v) => v !== undefined && v !== false && v !== "");
+}
 
 export const revalidate = 3600;
 
@@ -92,7 +113,8 @@ export default async function ServiceDetailPage({
   const galleryImages = galleryEligible ? service.gallery : [];
 
   const hasDetails = Boolean(
-    serviceCategory && serviceCategory.customFieldsSchema.some((f) => service.customFields[f.key] !== undefined && service.customFields[f.key] !== "")
+    (serviceCategory && serviceCategory.customFieldsSchema.some((f) => service.customFields[f.key] !== undefined && service.customFields[f.key] !== "")) ||
+      hasTypedDetails(service, service.categorySlug)
   );
 
   const navTabs: HotelNavTab[] = [
@@ -174,6 +196,9 @@ export default async function ServiceDetailPage({
                   {td("details")}
                 </h2>
                 <CustomFieldsDisplay category={serviceCategory} values={service.customFields} />
+                <div className="mt-4">
+                  <ServiceTypedFieldsDisplay service={service} categorySlug={service.categorySlug} locale={locale} />
+                </div>
               </section>
             </Reveal>
           )}

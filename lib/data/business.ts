@@ -473,6 +473,84 @@ export async function getMyBookingById(bookingId: string): Promise<Booking | nul
   return data ? mapBooking(data as any) : null;
 }
 
+/** Every appointment platform-wide — admin-only (backed by the "Platform
+ * admin manages all appointments" RLS policy). Powers /admin/appointments,
+ * mirroring getAllBookingsForAdmin above. */
+export async function getAllAppointmentsForAdmin(): Promise<MyAppointment[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("appointments")
+    .select("*, doctors(name, departments(name), city_services(name, slug))")
+    .order("appointment_date", { ascending: false });
+
+  return ((data ?? []) as any[]).map((row) => ({
+    id: row.id,
+    doctorId: row.doctor_id,
+    doctorName: row.doctors?.name ?? "",
+    hospitalName: row.doctors?.city_services?.name ?? "",
+    hospitalSlug: row.doctors?.city_services?.slug ?? "",
+    departmentName: row.doctors?.departments?.name ?? undefined,
+    patientName: row.patient_name,
+    patientPhone: row.patient_phone,
+    appointmentDate: row.appointment_date,
+    appointmentTime: row.appointment_time,
+    status: row.status,
+    notes: row.notes ?? undefined,
+    createdAt: row.created_at,
+  }));
+}
+
+export interface MyAppointment {
+  id: string;
+  doctorId: string;
+  doctorName: string;
+  hospitalName: string;
+  hospitalSlug: string;
+  departmentName?: string;
+  patientName: string;
+  patientPhone: string;
+  appointmentDate: string;
+  appointmentTime: string;
+  status: import("@/types").AppointmentStatus;
+  notes?: string;
+  createdAt: string;
+}
+
+/** The signed-in patient's own appointments, across every hospital/clinic —
+ * powers the user dashboard's "Appointments" tab. Requires the "Patients
+ * read their own appointments" RLS policy (user_id = auth.uid()); only
+ * appointments submitted while logged in ever get a user_id, so anonymous
+ * requests won't show up here, same reasoning as getMyBookings above. */
+export async function getMyAppointments(): Promise<MyAppointment[]> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data } = await supabase
+    .from("appointments")
+    .select("*, doctors(name, departments(name), city_services(name, slug))")
+    .eq("user_id", user.id)
+    .order("appointment_date", { ascending: false });
+
+  return ((data ?? []) as any[]).map((row) => ({
+    id: row.id,
+    doctorId: row.doctor_id,
+    doctorName: row.doctors?.name ?? "",
+    hospitalName: row.doctors?.city_services?.name ?? "",
+    hospitalSlug: row.doctors?.city_services?.slug ?? "",
+    departmentName: row.doctors?.departments?.name ?? undefined,
+    patientName: row.patient_name,
+    patientPhone: row.patient_phone,
+    appointmentDate: row.appointment_date,
+    appointmentTime: row.appointment_time,
+    status: row.status,
+    notes: row.notes ?? undefined,
+    createdAt: row.created_at,
+  }));
+}
+
 export async function getReviewsForListing(listingType: BusinessListingType, listingId: string): Promise<Review[]> {
   const supabase = await createClient();
   const { data } = await supabase

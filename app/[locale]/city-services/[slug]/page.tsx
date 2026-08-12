@@ -38,8 +38,33 @@ import { toWhatsAppHref } from "@/lib/utils/whatsapp";
 import { normalizeExternalUrl } from "@/lib/utils/normalize-url";
 import { Reveal } from "@/components/home/reveal";
 import { safeJsonLd } from "@/lib/utils/json-ld";
+import { CityServiceTypedFieldsDisplay } from "@/components/shared/city-service-typed-fields-display";
+import type { CityService } from "@/types";
 
 export const revalidate = 3600;
+
+/** Whether Hospital/Pharmacy's typed columns (see
+ * 20260812000002_hospital_pharmacy_fields.sql) have at least one value set —
+ * gates the "Details" tab the same way hasDetails does on the services
+ * detail page. */
+function hasTypedDetails(service: CityService, categorySlug: string): boolean {
+  if (categorySlug === "hospital") {
+    return [
+      service.hospitalType, service.bedsCount, service.doctorsCount, service.nursesCount,
+      service.departmentsCount, service.operatingRoomsCount, service.visitingHours,
+      service.emergencyDepartment, service.icuAvailable, service.pharmacyOnsite,
+      service.laboratoryOnsite, service.radiologyOnsite, service.ambulanceAvailable,
+      service.maternityDepartment, service.pediatricDepartment,
+    ].some((v) => v !== undefined && v !== false && v !== "");
+  }
+  if (categorySlug === "pharmacy") {
+    return [
+      service.pharmacyType, service.pharmacyEmergencyContact,
+      service.pharmacyDeliveryAvailable, service.prescriptionRequired, service.homeDelivery,
+    ].some((v) => v !== undefined && v !== false && v !== "");
+  }
+  return false;
+}
 
 export async function generateStaticParams() {
   const slugs = await getAllCityServiceSlugs();
@@ -102,6 +127,7 @@ export default async function CityServiceDetailPage({
     .filter((s) => s.id !== service.id)
     .slice(0, 4);
 
+  const showTypedDetails = hasTypedDetails(service, category.slug);
   const hasStructuredHours = !!service.openingHoursStructured && service.openingHoursStructured.length > 0;
   const hasHoursInfo = featureEligible && (hasStructuredHours || service.is24Hours || service.temporarilyClosed || service.permanentlyClosed);
   const serviceWhatsappHref = service.whatsapp ? toWhatsAppHref(service.whatsapp, `Hi, I'd like to know more about ${service.name}.`) : undefined;
@@ -110,6 +136,7 @@ export default async function CityServiceDetailPage({
   const navTabs: HotelNavTab[] = [
     { id: "overview", label: td("overview") },
     ...(productsEligible && products.length > 0 ? [{ id: "products", label: tp("title") }] : []),
+    ...(showTypedDetails ? [{ id: "details", label: td("details") }] : []),
     ...(appointmentsEligible && doctors.length > 0 ? [{ id: "doctors", label: ta("doctorsTitle") }] : []),
     ...(galleryEligible && service.gallery.length > 0 ? [{ id: "gallery", label: t("gallery") }] : []),
     ...(featureEligible && service.videos && service.videos.length > 0 ? [{ id: "videos", label: td("videoGallery") }] : []),
@@ -238,6 +265,17 @@ export default async function CityServiceDetailPage({
                   {tp("title")}
                 </h2>
                 <ProductsSection products={products} storeName={service.name} locale={locale} />
+              </section>
+            </Reveal>
+          )}
+
+          {showTypedDetails && (
+            <Reveal>
+              <section id="details" aria-labelledby="details-heading" className="scroll-mt-36">
+                <h2 id="details-heading" className="mb-5 font-display text-2xl font-semibold">
+                  {td("details")}
+                </h2>
+                <CityServiceTypedFieldsDisplay service={service} categorySlug={category.slug} locale={locale} />
               </section>
             </Reveal>
           )}

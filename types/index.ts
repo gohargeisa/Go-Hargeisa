@@ -132,9 +132,10 @@ export interface Doctor {
   appointmentDurationMinutes: number;
   isActive: boolean;
   sortOrder: number;
+  consultationFee?: number;
 }
 
-export type AppointmentStatus = "pending" | "confirmed" | "cancelled" | "completed";
+export type AppointmentStatus = "pending" | "confirmed" | "completed" | "cancelled" | "rejected" | "no_show";
 
 export interface Appointment {
   id: string;
@@ -800,6 +801,84 @@ export interface Service {
   outdoorPlants?: boolean;
   onlineOrderingAvailable?: boolean;
   deliveryAreas?: string[];
+  // Apartments (extends the existing "apartments" category)
+  apartmentType?:
+    | "furnished" | "unfurnished" | "serviced" | "studio" | "family" | "luxury"
+    | "short_term_rental" | "long_term_rental" | "other";
+  bedrooms?: number;
+  bathrooms?: number;
+  unitsCount?: number;
+  floorNumber?: number;
+  buildingFloors?: number;
+  furnished?: boolean;
+  monthlyRent?: number;
+  dailyRent?: number;
+  securityDeposit?: number;
+  minStayNights?: number;
+  maxStayNights?: number;
+  parkingAvailable?: boolean;
+  wifiAvailable?: boolean;
+  airConditioning?: boolean;
+  kitchenAvailable?: boolean;
+  electricityIncluded?: boolean;
+  waterIncluded?: boolean;
+  generatorAvailable?: boolean;
+  securityAvailable?: boolean;
+  elevatorAvailable?: boolean;
+  swimmingPool?: boolean;
+  laundryAvailable?: boolean;
+  familyFriendly?: boolean;
+  petPolicy?: "allowed" | "not_allowed" | "case_by_case" | "other";
+  // Real Estate (extends the existing "real-estate" category)
+  propertyType?:
+    | "residential" | "commercial" | "land" | "villa" | "house" | "apartment"
+    | "office" | "shop" | "warehouse" | "building" | "agricultural_land" | "other";
+  listingPurpose?: "for_sale" | "for_rent" | "for_lease";
+  price?: number;
+  priceCurrency?: "usd" | "sos" | "other";
+  realEstateBedrooms?: number;
+  realEstateBathrooms?: number;
+  floorsCount?: number;
+  yearBuilt?: number;
+  areaSqm?: number;
+  landAreaSqm?: number;
+  buildingAreaSqm?: number;
+  realEstateParkingAvailable?: boolean;
+  realEstateFurnished?: boolean;
+  documentsAvailable?: boolean;
+  viewingAvailable?: boolean;
+  propertyCondition?: "new" | "excellent" | "good" | "needs_renovation" | "under_construction" | "other";
+  ownershipStatus?: "freehold" | "leasehold" | "disputed" | "other";
+  // Electronics (extends the existing "electronics" category)
+  electronicsBusinessType?:
+    | "electronics_store" | "mobile_phone_store" | "computer_store" | "appliance_store"
+    | "accessories_store" | "repair_center" | "camera_store" | "gaming_store"
+    | "home_electronics" | "other";
+  brandsAvailable?: string[];
+  sellsNew?: boolean;
+  sellsUsed?: boolean;
+  warrantyAvailable?: boolean;
+  electronicsDeliveryAvailable?: boolean;
+  electronicsRepairAvailable?: boolean;
+  installationAvailable?: boolean;
+  paymentOptions?: string[];
+  // Transportation (extends the existing "transportation" category)
+  transportationType?:
+    | "taxi" | "car_rental" | "bus_service" | "minibus" | "private_driver"
+    | "airport_transfer" | "transport_company" | "truck_cargo"
+    | "motorcycle_transport" | "delivery_transport" | "other";
+  vehicleCount?: number;
+  passengerCapacity?: number;
+  driverAvailable?: boolean;
+  airportTransferAvailable?: boolean;
+  cityTransfersAvailable?: boolean;
+  intercityTransportAvailable?: boolean;
+  rentalAvailable?: boolean;
+  dailyRentalAvailable?: boolean;
+  weeklyRentalAvailable?: boolean;
+  monthlyRentalAvailable?: boolean;
+  deliveryServiceAvailable?: boolean;
+  cargoServiceAvailable?: boolean;
 }
 
 /** Phase 2 — the minimal City Services directory (Hospitals/Banks/
@@ -917,6 +996,30 @@ export interface CityService {
   femaleTrainersAvailable?: boolean;
   maleTrainersAvailable?: boolean;
   trialMembershipAvailable?: boolean;
+  // Hospital
+  hospitalType?:
+    | "general" | "private" | "public" | "specialist" | "maternity" | "childrens"
+    | "surgical" | "emergency" | "medical_center" | "other";
+  bedsCount?: number;
+  doctorsCount?: number;
+  nursesCount?: number;
+  departmentsCount?: number;
+  operatingRoomsCount?: number;
+  emergencyDepartment?: boolean;
+  icuAvailable?: boolean;
+  pharmacyOnsite?: boolean;
+  laboratoryOnsite?: boolean;
+  radiologyOnsite?: boolean;
+  ambulanceAvailable?: boolean;
+  maternityDepartment?: boolean;
+  pediatricDepartment?: boolean;
+  visitingHours?: string;
+  // Pharmacy
+  pharmacyType?: "community" | "hospital_pharmacy" | "twenty_four_hour" | "online" | "specialty" | "other";
+  pharmacyDeliveryAvailable?: boolean;
+  prescriptionRequired?: boolean;
+  homeDelivery?: boolean;
+  pharmacyEmergencyContact?: string;
 }
 
 export interface Attraction {

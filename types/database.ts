@@ -155,6 +155,15 @@ type CityServiceRow = {
   gym_facilities: string[]; trainers_available: boolean | null;
   female_trainers_available: boolean | null; male_trainers_available: boolean | null;
   trial_membership_available: boolean | null;
+  // Hospital
+  hospital_type: string | null; beds_count: number | null; doctors_count: number | null;
+  nurses_count: number | null; departments_count: number | null; operating_rooms_count: number | null;
+  emergency_department: boolean | null; icu_available: boolean | null; pharmacy_onsite: boolean | null;
+  laboratory_onsite: boolean | null; radiology_onsite: boolean | null; ambulance_available: boolean | null;
+  maternity_department: boolean | null; pediatric_department: boolean | null; visiting_hours: string | null;
+  // Pharmacy
+  pharmacy_type: string | null; pharmacy_delivery_available: boolean | null; prescription_required: boolean | null;
+  home_delivery: boolean | null; pharmacy_emergency_contact: string | null;
 };
 type AttractionRow = ListingBase & SocialExtra & {
   history: string | null; best_time_to_visit: string | null; entry_fee: string; visitor_tips: string[];
@@ -186,6 +195,33 @@ type ServiceRow = ListingBase & {
   custom_bouquets: boolean | null; wedding_arrangements: boolean | null; event_decoration_service: boolean | null;
   gift_wrapping: boolean | null; indoor_plants: boolean | null; outdoor_plants: boolean | null;
   online_ordering_available: boolean | null; delivery_areas: string[];
+  // Apartments (slug 'apartments')
+  apartment_type: string | null; bedrooms: number | null; bathrooms: number | null;
+  units_count: number | null; floor_number: number | null; building_floors: number | null;
+  furnished: boolean | null; monthly_rent: number | null; daily_rent: number | null;
+  security_deposit: number | null; min_stay_nights: number | null; max_stay_nights: number | null;
+  parking_available: boolean | null; wifi_available: boolean | null; air_conditioning: boolean | null;
+  kitchen_available: boolean | null; electricity_included: boolean | null; water_included: boolean | null;
+  generator_available: boolean | null; security_available: boolean | null; elevator_available: boolean | null;
+  swimming_pool: boolean | null; laundry_available: boolean | null; family_friendly: boolean | null;
+  pet_policy: string | null;
+  // Real Estate (slug 'real-estate')
+  property_type: string | null; listing_purpose: string | null; price: number | null;
+  price_currency: string | null; real_estate_bedrooms: number | null; real_estate_bathrooms: number | null;
+  floors_count: number | null; year_built: number | null; area_sqm: number | null;
+  land_area_sqm: number | null; building_area_sqm: number | null; real_estate_parking_available: boolean | null;
+  real_estate_furnished: boolean | null; documents_available: boolean | null; viewing_available: boolean | null;
+  property_condition: string | null; ownership_status: string | null;
+  // Electronics (slug 'electronics')
+  electronics_business_type: string | null; brands_available: string[]; sells_new: boolean | null;
+  sells_used: boolean | null; warranty_available: boolean | null; electronics_delivery_available: boolean | null;
+  electronics_repair_available: boolean | null; installation_available: boolean | null; payment_options: string[];
+  // Transportation (slug 'transportation')
+  transportation_type: string | null; vehicle_count: number | null; passenger_capacity: number | null;
+  driver_available: boolean | null; airport_transfer_available: boolean | null; city_transfers_available: boolean | null;
+  intercity_transport_available: boolean | null; rental_available: boolean | null; daily_rental_available: boolean | null;
+  weekly_rental_available: boolean | null; monthly_rental_available: boolean | null;
+  delivery_service_available: boolean | null; cargo_service_available: boolean | null;
 };
 
 /** The `categories` table — single source of truth for every business
@@ -250,22 +286,25 @@ type DoctorRow = {
   bio: string | null; bio_ar: string | null; bio_so: string | null;
   languages: string[]; working_hours: Json;
   appointment_duration_minutes: number; is_active: boolean; sort_order: number;
+  consultation_fee: number | null;
   created_at: string; updated_at: string;
 };
+
+type AppointmentStatusDb = "pending" | "confirmed" | "completed" | "cancelled" | "rejected" | "no_show";
 
 type AppointmentRow = {
   id: string; doctor_id: string;
   patient_name: string; patient_phone: string; patient_email: string | null;
   user_id: string | null;
   appointment_date: string; appointment_time: string;
-  status: "pending" | "confirmed" | "cancelled" | "completed";
+  status: AppointmentStatusDb;
   notes: string | null; created_at: string; updated_at: string;
 };
 
 type AppointmentStatusHistoryRow = {
   id: string; appointment_id: string;
-  old_status: "pending" | "confirmed" | "cancelled" | "completed" | null;
-  new_status: "pending" | "confirmed" | "cancelled" | "completed";
+  old_status: AppointmentStatusDb | null;
+  new_status: AppointmentStatusDb;
   changed_by: string | null; created_at: string;
 };
 
@@ -350,6 +389,43 @@ type BusinessJoinRequestRow = {
   custom_bouquets: boolean | null; wedding_arrangements: boolean | null; event_decoration_service: boolean | null;
   gift_wrapping: boolean | null; indoor_plants: boolean | null; outdoor_plants: boolean | null;
   online_ordering_available: boolean | null; delivery_areas: string[];
+  services_offered: string[];
+  // Apartments
+  apartment_type: string | null; bedrooms: number | null; bathrooms: number | null;
+  units_count: number | null; floor_number: number | null; building_floors: number | null;
+  furnished: boolean | null; monthly_rent: number | null; daily_rent: number | null;
+  security_deposit: number | null; min_stay_nights: number | null; max_stay_nights: number | null;
+  parking_available: boolean | null; wifi_available: boolean | null; air_conditioning: boolean | null;
+  kitchen_available: boolean | null; electricity_included: boolean | null; water_included: boolean | null;
+  generator_available: boolean | null; security_available: boolean | null; elevator_available: boolean | null;
+  swimming_pool: boolean | null; laundry_available: boolean | null; family_friendly: boolean | null;
+  pet_policy: string | null;
+  // Real Estate
+  property_type: string | null; listing_purpose: string | null; price: number | null;
+  price_currency: string | null; real_estate_bedrooms: number | null; real_estate_bathrooms: number | null;
+  floors_count: number | null; year_built: number | null; area_sqm: number | null;
+  land_area_sqm: number | null; building_area_sqm: number | null; real_estate_parking_available: boolean | null;
+  real_estate_furnished: boolean | null; documents_available: boolean | null; viewing_available: boolean | null;
+  property_condition: string | null; ownership_status: string | null;
+  // Electronics
+  electronics_business_type: string | null; brands_available: string[]; sells_new: boolean | null;
+  sells_used: boolean | null; warranty_available: boolean | null; electronics_delivery_available: boolean | null;
+  electronics_repair_available: boolean | null; installation_available: boolean | null; payment_options: string[];
+  // Transportation
+  transportation_type: string | null; vehicle_count: number | null; passenger_capacity: number | null;
+  driver_available: boolean | null; airport_transfer_available: boolean | null; city_transfers_available: boolean | null;
+  intercity_transport_available: boolean | null; rental_available: boolean | null; daily_rental_available: boolean | null;
+  weekly_rental_available: boolean | null; monthly_rental_available: boolean | null;
+  delivery_service_available: boolean | null; cargo_service_available: boolean | null;
+  // Hospital
+  hospital_type: string | null; beds_count: number | null; doctors_count: number | null;
+  nurses_count: number | null; departments_count: number | null; operating_rooms_count: number | null;
+  emergency_department: boolean | null; icu_available: boolean | null; pharmacy_onsite: boolean | null;
+  laboratory_onsite: boolean | null; radiology_onsite: boolean | null; ambulance_available: boolean | null;
+  maternity_department: boolean | null; pediatric_department: boolean | null; visiting_hours: string | null;
+  // Pharmacy
+  pharmacy_type: string | null; pharmacy_delivery_available: boolean | null; prescription_required: boolean | null;
+  home_delivery: boolean | null; pharmacy_emergency_contact: string | null;
   created_at: string; updated_at: string;
 };
 
@@ -455,6 +531,18 @@ export type Database = {
           p_exclude_booking_id?: string | null;
         };
         Returns: boolean;
+      };
+      submit_appointment_request: {
+        Args: {
+          p_doctor_id: string;
+          p_patient_name: string;
+          p_patient_phone: string;
+          p_patient_email: string | null;
+          p_appointment_date: string;
+          p_appointment_time: string;
+          p_notes: string | null;
+        };
+        Returns: string;
       };
     };
     Enums: { user_role: "user" | "business_owner" | "owner"; price_range: "$" | "$$" | "$$$" | "$$$$"; attraction_category: "landmark" | "museum" | "market" | "nature" | "religious"; event_category: "cultural" | "national" | "business" | "sports" | "concert"; content_status: "draft" | "published" | "archived"; listing_type: "hotel" | "restaurant" | "cafe" | "attraction" | "service"; service_category: ServiceCategoryDb; subscription_tier: "basic" | "silver" | "gold"; subscription_status: "active" | "paused" | "cancelled"; partner_status: PartnerStatusDb; business_request_status: BusinessRequestStatusDb; city_service_category: CityServiceCategoryDb; };

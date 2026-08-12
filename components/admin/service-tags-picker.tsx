@@ -67,10 +67,10 @@ export function ServiceTagsPicker({
           const Icon = isProductSpecialty ? Sparkles : SERVICE_TAG_ICON[code as keyof typeof SERVICE_TAG_ICON];
           const codeLabel = isProductSpecialty ? productCategoryLabel(code as ProductCategory, locale) ?? code : t(code);
           return (
-            <label key={code} className="flex items-center gap-2 text-sm font-medium">
-              <input type="checkbox" checked={values.includes(code)} onChange={() => toggle(code)} />
+            <label key={code} className="flex min-w-0 items-center gap-2 text-sm font-medium">
+              <input type="checkbox" checked={values.includes(code)} onChange={() => toggle(code)} className="shrink-0" />
               <Icon size={14} className="shrink-0 text-ink/50 dark:text-sand/50" aria-hidden="true" />
-              {codeLabel}
+              <span className="min-w-0 break-words">{codeLabel}</span>
             </label>
           );
         })}

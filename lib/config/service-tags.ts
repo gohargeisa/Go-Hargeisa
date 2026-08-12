@@ -32,6 +32,12 @@ import {
   Smile,
   SmilePlus,
   AlertCircle,
+  Pill,
+  PillBottle,
+  Package,
+  Truck,
+  PackageCheck,
+  HeartPulse,
   type LucideIcon,
 } from "lucide-react";
 
@@ -97,6 +103,18 @@ export const SERVICE_TAG_CODES = [
   "tooth_extraction",
   "pediatric_dentistry",
   "emergency_dental_care",
+  // Pharmacies
+  "prescription_medicines",
+  "otc_medicines",
+  "vitamins_supplements",
+  "medical_supplies",
+  "baby_products",
+  "personal_care",
+  "cosmetics",
+  "home_delivery",
+  "prescription_delivery",
+  "blood_pressure_check",
+  "blood_sugar_check",
 ] as const;
 
 export type ServiceTagCode = (typeof SERVICE_TAG_CODES)[number];
@@ -147,6 +165,18 @@ export const SERVICE_TAG_ICON: Record<ServiceTagCode, LucideIcon> = {
   tooth_extraction: Scissors,
   pediatric_dentistry: Baby,
   emergency_dental_care: AlertCircle,
+
+  prescription_medicines: Pill,
+  otc_medicines: PillBottle,
+  vitamins_supplements: Sparkle,
+  medical_supplies: Package,
+  baby_products: Baby,
+  personal_care: Droplet,
+  cosmetics: SprayCan,
+  home_delivery: Truck,
+  prescription_delivery: PackageCheck,
+  blood_pressure_check: HeartPulse,
+  blood_sugar_check: Droplets,
 };
 
 /** Which codes are offered as choices for a given City Services category —
@@ -169,6 +199,11 @@ export const SERVICE_TAGS_BY_CATEGORY_SLUG: Record<string, ServiceTagCode[]> = {
   "dental-clinic": [
     "general_checkups", "teeth_cleaning", "fillings", "root_canal", "teeth_whitening",
     "orthodontics_braces", "dental_implants", "tooth_extraction", "pediatric_dentistry", "emergency_dental_care",
+  ],
+  pharmacy: [
+    "prescription_medicines", "otc_medicines", "vitamins_supplements", "medical_supplies",
+    "baby_products", "personal_care", "cosmetics", "home_delivery", "prescription_delivery",
+    "blood_pressure_check", "blood_sugar_check",
   ],
 };
 

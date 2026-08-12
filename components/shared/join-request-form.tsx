@@ -110,6 +110,82 @@ import {
   type FlowerServiceCode,
 } from "@/lib/config/flower-shop-attributes";
 import { AMENITIES_BY_LISTING_TYPE, AMENITY_ICON } from "@/lib/config/amenities";
+import {
+  APARTMENT_TYPE_ORDER,
+  apartmentTypeLabel,
+  PET_POLICY_ORDER,
+  petPolicyLabel,
+  APARTMENT_FEATURE_ORDER,
+  APARTMENT_FEATURE_ICON,
+  apartmentFeatureLabel,
+  APARTMENT_SERVICE_SUGGESTIONS,
+  type ApartmentType,
+  type PetPolicy,
+  type ApartmentFeatureCode,
+} from "@/lib/config/apartment-attributes";
+import {
+  PROPERTY_TYPE_ORDER,
+  propertyTypeLabel,
+  LISTING_PURPOSE_ORDER,
+  listingPurposeLabel,
+  PROPERTY_CONDITION_ORDER,
+  propertyConditionLabel,
+  OWNERSHIP_STATUS_ORDER,
+  ownershipStatusLabel,
+  PRICE_CURRENCY_ORDER,
+  priceCurrencyLabel,
+  REAL_ESTATE_FEATURE_ORDER,
+  REAL_ESTATE_FEATURE_ICON,
+  realEstateFeatureLabel,
+  REAL_ESTATE_SERVICE_SUGGESTIONS,
+  type PropertyType,
+  type ListingPurpose,
+  type PropertyCondition,
+  type OwnershipStatus,
+  type PriceCurrency,
+  type RealEstateFeatureCode,
+} from "@/lib/config/real-estate-attributes";
+import {
+  ELECTRONICS_BUSINESS_TYPE_ORDER,
+  electronicsBusinessTypeLabel,
+  ELECTRONICS_FEATURE_ORDER,
+  ELECTRONICS_FEATURE_ICON,
+  electronicsFeatureLabel,
+  ELECTRONICS_SERVICE_SUGGESTIONS,
+  PAYMENT_OPTION_ORDER,
+  paymentOptionLabel,
+  type ElectronicsBusinessType,
+  type ElectronicsFeatureCode,
+  type PaymentOption,
+} from "@/lib/config/electronics-attributes";
+import {
+  TRANSPORTATION_TYPE_ORDER,
+  transportationTypeLabel,
+  TRANSPORTATION_FEATURE_ORDER,
+  TRANSPORTATION_FEATURE_ICON,
+  transportationFeatureLabel,
+  TRANSPORTATION_SERVICE_SUGGESTIONS,
+  type TransportationType,
+  type TransportationFeatureCode,
+} from "@/lib/config/transportation-attributes";
+import {
+  HOSPITAL_TYPE_ORDER,
+  hospitalTypeLabel,
+  HOSPITAL_FACILITY_ORDER,
+  HOSPITAL_FACILITY_ICON,
+  hospitalFacilityLabel,
+  type HospitalType,
+  type HospitalFacilityCode,
+} from "@/lib/config/hospital-attributes";
+import {
+  PHARMACY_TYPE_ORDER,
+  pharmacyTypeLabel,
+  PHARMACY_FEATURE_ORDER,
+  PHARMACY_FEATURE_ICON,
+  pharmacyFeatureLabel,
+  type PharmacyType,
+  type PharmacyFeatureCode,
+} from "@/lib/config/pharmacy-attributes";
 import type { Locale } from "@/lib/i18n/config";
 import type { JoinRequestCategory, GalleryImage, MediaVideo, BusinessDocument, Coordinates, WeeklyHoursDay, Category, RoomType } from "@/types";
 
@@ -252,6 +328,63 @@ export function JoinRequestForm({
   const [flowerShopType, setFlowerShopType] = useState<FlowerShopType | "">("");
   const [flowerServices, setFlowerServices] = useState<FlowerServiceCode[]>([]);
   const [deliveryAreas, setDeliveryAreas] = useState<string[]>([]);
+  // Apartments
+  const [apartmentType, setApartmentType] = useState<ApartmentType | "">("");
+  const [aptBedrooms, setAptBedrooms] = useState<number | undefined>(undefined);
+  const [aptBathrooms, setAptBathrooms] = useState<number | undefined>(undefined);
+  const [unitsCount, setUnitsCount] = useState<number | undefined>(undefined);
+  const [floorNumber, setFloorNumber] = useState<number | undefined>(undefined);
+  const [buildingFloors, setBuildingFloors] = useState<number | undefined>(undefined);
+  const [aptFurnished, setAptFurnished] = useState(false);
+  const [monthlyRent, setMonthlyRent] = useState<number | undefined>(undefined);
+  const [dailyRent, setDailyRent] = useState<number | undefined>(undefined);
+  const [securityDeposit, setSecurityDeposit] = useState<number | undefined>(undefined);
+  const [minStayNights, setMinStayNights] = useState<number | undefined>(undefined);
+  const [maxStayNights, setMaxStayNights] = useState<number | undefined>(undefined);
+  const [apartmentFeatures, setApartmentFeatures] = useState<ApartmentFeatureCode[]>([]);
+  const [petPolicy, setPetPolicy] = useState<PetPolicy | "">("");
+  const [apartmentServices, setApartmentServices] = useState<string[]>([]);
+  // Real Estate
+  const [propertyType, setPropertyType] = useState<PropertyType | "">("");
+  const [listingPurpose, setListingPurpose] = useState<ListingPurpose | "">("");
+  const [price, setPrice] = useState<number | undefined>(undefined);
+  const [priceCurrency, setPriceCurrency] = useState<PriceCurrency | "">("usd");
+  const [reBedrooms, setReBedrooms] = useState<number | undefined>(undefined);
+  const [reBathrooms, setReBathrooms] = useState<number | undefined>(undefined);
+  const [floorsCount, setFloorsCount] = useState<number | undefined>(undefined);
+  const [yearBuilt, setYearBuilt] = useState<number | undefined>(undefined);
+  const [areaSqm, setAreaSqm] = useState<number | undefined>(undefined);
+  const [landAreaSqm, setLandAreaSqm] = useState<number | undefined>(undefined);
+  const [buildingAreaSqm, setBuildingAreaSqm] = useState<number | undefined>(undefined);
+  const [propertyCondition, setPropertyCondition] = useState<PropertyCondition | "">("");
+  const [ownershipStatus, setOwnershipStatus] = useState<OwnershipStatus | "">("");
+  const [realEstateFeatures, setRealEstateFeatures] = useState<RealEstateFeatureCode[]>([]);
+  const [realEstateServices, setRealEstateServices] = useState<string[]>([]);
+  // Electronics
+  const [electronicsBusinessType, setElectronicsBusinessType] = useState<ElectronicsBusinessType | "">("");
+  const [brandsAvailable, setBrandsAvailable] = useState<string[]>([]);
+  const [electronicsFeatures, setElectronicsFeatures] = useState<ElectronicsFeatureCode[]>([]);
+  const [paymentOptions, setPaymentOptions] = useState<PaymentOption[]>([]);
+  const [electronicsServices, setElectronicsServices] = useState<string[]>([]);
+  // Transportation
+  const [transportationType, setTransportationType] = useState<TransportationType | "">("");
+  const [vehicleCount, setVehicleCount] = useState<number | undefined>(undefined);
+  const [passengerCapacity, setPassengerCapacity] = useState<number | undefined>(undefined);
+  const [transportationFeatures, setTransportationFeatures] = useState<TransportationFeatureCode[]>([]);
+  const [transportationServices, setTransportationServices] = useState<string[]>([]);
+  // Hospital
+  const [hospitalType, setHospitalType] = useState<HospitalType | "">("");
+  const [bedsCount, setBedsCount] = useState<number | undefined>(undefined);
+  const [doctorsCount, setDoctorsCount] = useState<number | undefined>(undefined);
+  const [nursesCount, setNursesCount] = useState<number | undefined>(undefined);
+  const [departmentsCount, setDepartmentsCount] = useState<number | undefined>(undefined);
+  const [operatingRoomsCount, setOperatingRoomsCount] = useState<number | undefined>(undefined);
+  const [hospitalFacilities, setHospitalFacilities] = useState<HospitalFacilityCode[]>([]);
+  const [visitingHours, setVisitingHours] = useState("");
+  // Pharmacy
+  const [pharmacyType, setPharmacyType] = useState<PharmacyType | "">("");
+  const [pharmacyFeatures, setPharmacyFeatures] = useState<PharmacyFeatureCode[]>([]);
+  const [pharmacyEmergencyContact, setPharmacyEmergencyContact] = useState("");
   const [openingHours, setOpeningHours] = useState<WeeklyHoursDay[]>(defaultWeeklyHours());
   const [amenities, setAmenities] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<PriceRange | undefined>(undefined);
@@ -285,6 +418,12 @@ export function JoinRequestForm({
   const isGym = category === "other" && selectedServiceCategory?.slug === "gym";
   const isTravelAgency = category === "other" && selectedServiceCategory?.slug === "tour-companies";
   const isFlowerShop = category === "other" && selectedServiceCategory?.slug === "flower-shops";
+  const isApartments = category === "other" && selectedServiceCategory?.slug === "apartments";
+  const isRealEstate = category === "other" && selectedServiceCategory?.slug === "real-estate";
+  const isElectronics = category === "other" && selectedServiceCategory?.slug === "electronics";
+  const isTransportation = category === "other" && selectedServiceCategory?.slug === "transportation";
+  const isHospital = category === "other" && selectedServiceCategory?.slug === "hospital";
+  const isPharmacy = category === "other" && selectedServiceCategory?.slug === "pharmacy";
 
   /** Clears every field specific to Restaurant/Cafe/School/University/Salon/
    * Barbershop — called on any category or "other"-subcategory change so
@@ -348,6 +487,57 @@ export function JoinRequestForm({
     setFlowerShopType("");
     setFlowerServices([]);
     setDeliveryAreas([]);
+    setApartmentType("");
+    setAptBedrooms(undefined);
+    setAptBathrooms(undefined);
+    setUnitsCount(undefined);
+    setFloorNumber(undefined);
+    setBuildingFloors(undefined);
+    setAptFurnished(false);
+    setMonthlyRent(undefined);
+    setDailyRent(undefined);
+    setSecurityDeposit(undefined);
+    setMinStayNights(undefined);
+    setMaxStayNights(undefined);
+    setApartmentFeatures([]);
+    setPetPolicy("");
+    setApartmentServices([]);
+    setPropertyType("");
+    setListingPurpose("");
+    setPrice(undefined);
+    setPriceCurrency("usd");
+    setReBedrooms(undefined);
+    setReBathrooms(undefined);
+    setFloorsCount(undefined);
+    setYearBuilt(undefined);
+    setAreaSqm(undefined);
+    setLandAreaSqm(undefined);
+    setBuildingAreaSqm(undefined);
+    setPropertyCondition("");
+    setOwnershipStatus("");
+    setRealEstateFeatures([]);
+    setRealEstateServices([]);
+    setElectronicsBusinessType("");
+    setBrandsAvailable([]);
+    setElectronicsFeatures([]);
+    setPaymentOptions([]);
+    setElectronicsServices([]);
+    setTransportationType("");
+    setVehicleCount(undefined);
+    setPassengerCapacity(undefined);
+    setTransportationFeatures([]);
+    setTransportationServices([]);
+    setHospitalType("");
+    setBedsCount(undefined);
+    setDoctorsCount(undefined);
+    setNursesCount(undefined);
+    setDepartmentsCount(undefined);
+    setOperatingRoomsCount(undefined);
+    setHospitalFacilities([]);
+    setVisitingHours("");
+    setPharmacyType("");
+    setPharmacyFeatures([]);
+    setPharmacyEmergencyContact("");
   }
 
   function selectCategory(next: JoinRequestCategory) {
@@ -431,6 +621,50 @@ export function JoinRequestForm({
     setFlowerServices((codes) => (codes.includes(code) ? codes.filter((c) => c !== code) : [...codes, code]));
   }
 
+  function toggleApartmentFeature(code: ApartmentFeatureCode) {
+    setApartmentFeatures((codes) => (codes.includes(code) ? codes.filter((c) => c !== code) : [...codes, code]));
+  }
+
+  function toggleApartmentService(value: string) {
+    setApartmentServices((v) => (v.includes(value) ? v.filter((x) => x !== value) : [...v, value]));
+  }
+
+  function toggleRealEstateFeature(code: RealEstateFeatureCode) {
+    setRealEstateFeatures((codes) => (codes.includes(code) ? codes.filter((c) => c !== code) : [...codes, code]));
+  }
+
+  function toggleRealEstateService(value: string) {
+    setRealEstateServices((v) => (v.includes(value) ? v.filter((x) => x !== value) : [...v, value]));
+  }
+
+  function toggleElectronicsFeature(code: ElectronicsFeatureCode) {
+    setElectronicsFeatures((codes) => (codes.includes(code) ? codes.filter((c) => c !== code) : [...codes, code]));
+  }
+
+  function togglePaymentOption(code: PaymentOption) {
+    setPaymentOptions((codes) => (codes.includes(code) ? codes.filter((c) => c !== code) : [...codes, code]));
+  }
+
+  function toggleElectronicsService(value: string) {
+    setElectronicsServices((v) => (v.includes(value) ? v.filter((x) => x !== value) : [...v, value]));
+  }
+
+  function toggleTransportationFeature(code: TransportationFeatureCode) {
+    setTransportationFeatures((codes) => (codes.includes(code) ? codes.filter((c) => c !== code) : [...codes, code]));
+  }
+
+  function toggleTransportationService(value: string) {
+    setTransportationServices((v) => (v.includes(value) ? v.filter((x) => x !== value) : [...v, value]));
+  }
+
+  function toggleHospitalFacility(code: HospitalFacilityCode) {
+    setHospitalFacilities((codes) => (codes.includes(code) ? codes.filter((c) => c !== code) : [...codes, code]));
+  }
+
+  function togglePharmacyFeature(code: PharmacyFeatureCode) {
+    setPharmacyFeatures((codes) => (codes.includes(code) ? codes.filter((c) => c !== code) : [...codes, code]));
+  }
+
   function updateHoursDay(day: WeeklyHoursDay["day"], patch: Partial<WeeklyHoursDay>) {
     setOpeningHours((hours) => hours.map((h) => (h.day === day ? { ...h, ...patch } : h)));
   }
@@ -483,7 +717,7 @@ export function JoinRequestForm({
         roomTypesOffered: isHotel ? roomTypesOffered : undefined,
         numberOfFloors: isHotel || isSchool || isUniversity ? numberOfFloors : undefined,
         yearEstablished: isHotel || isSchool || isUniversity ? yearEstablished : undefined,
-        languagesSpoken: isHotel || isRestaurant || isSchool || isUniversity || isClinic || isTravelAgency ? languagesSpoken : undefined,
+        languagesSpoken: isHotel || isRestaurant || isSchool || isUniversity || isClinic || isTravelAgency || isHospital ? languagesSpoken : undefined,
         openingHours,
         amenities,
         priceRange,
@@ -492,7 +726,7 @@ export function JoinRequestForm({
         cuisine: isRestaurant ? cuisine : undefined,
         numberOfTables: isRestaurant ? numberOfTables : undefined,
         onlineOrderUrl: isRestaurant ? onlineOrderUrl || undefined : undefined,
-        is24Hours: isRestaurant ? is24Hours : undefined,
+        is24Hours: isRestaurant || isPharmacy ? is24Hours : undefined,
         // Restaurant + Cafe
         seatingCapacity: isRestaurant || isCafe ? seatingCapacity : undefined,
         // Cafe
@@ -538,7 +772,7 @@ export function JoinRequestForm({
         // Clinics / Medical Clinics (Dental Clinic is now one clinicType value)
         clinicType: isClinic ? clinicType || undefined : undefined,
         numberOfTreatmentRooms: isClinic ? numberOfTreatmentRooms : undefined,
-        insuranceAccepted: isClinic ? insuranceAccepted : undefined,
+        insuranceAccepted: isClinic || isHospital || isPharmacy ? insuranceAccepted : undefined,
         // Auto Repair
         garageType: isAutoRepair ? garageType || undefined : undefined,
         // Gym / Fitness Center
@@ -577,6 +811,105 @@ export function JoinRequestForm({
         outdoorPlants: isFlowerShop ? flowerServices.includes("outdoor_plants") : undefined,
         onlineOrderingAvailable: isFlowerShop ? flowerServices.includes("online_ordering_available") : undefined,
         deliveryAreas: isFlowerShop ? deliveryAreas : undefined,
+        // Apartments
+        apartmentType: isApartments ? apartmentType || undefined : undefined,
+        bedrooms: isApartments ? aptBedrooms : undefined,
+        bathrooms: isApartments ? aptBathrooms : undefined,
+        unitsCount: isApartments ? unitsCount : undefined,
+        floorNumber: isApartments ? floorNumber : undefined,
+        buildingFloors: isApartments ? buildingFloors : undefined,
+        furnished: isApartments ? aptFurnished : undefined,
+        monthlyRent: isApartments ? monthlyRent : undefined,
+        dailyRent: isApartments ? dailyRent : undefined,
+        securityDeposit: isApartments ? securityDeposit : undefined,
+        minStayNights: isApartments ? minStayNights : undefined,
+        maxStayNights: isApartments ? maxStayNights : undefined,
+        parkingAvailable: isApartments ? apartmentFeatures.includes("parking_available") : undefined,
+        wifiAvailable: isApartments ? apartmentFeatures.includes("wifi_available") : undefined,
+        airConditioning: isApartments ? apartmentFeatures.includes("air_conditioning") : undefined,
+        kitchenAvailable: isApartments ? apartmentFeatures.includes("kitchen_available") : undefined,
+        electricityIncluded: isApartments ? apartmentFeatures.includes("electricity_included") : undefined,
+        waterIncluded: isApartments ? apartmentFeatures.includes("water_included") : undefined,
+        generatorAvailable: isApartments ? apartmentFeatures.includes("generator_available") : undefined,
+        securityAvailable: isApartments ? apartmentFeatures.includes("security_available") : undefined,
+        elevatorAvailable: isApartments ? apartmentFeatures.includes("elevator_available") : undefined,
+        swimmingPool: isApartments ? apartmentFeatures.includes("swimming_pool") : undefined,
+        laundryAvailable: isApartments ? apartmentFeatures.includes("laundry_available") : undefined,
+        familyFriendly: isApartments ? apartmentFeatures.includes("family_friendly") : undefined,
+        petPolicy: isApartments ? petPolicy || undefined : undefined,
+        // Real Estate
+        propertyType: isRealEstate ? propertyType || undefined : undefined,
+        listingPurpose: isRealEstate ? listingPurpose || undefined : undefined,
+        price: isRealEstate ? price : undefined,
+        priceCurrency: isRealEstate ? priceCurrency || undefined : undefined,
+        realEstateBedrooms: isRealEstate ? reBedrooms : undefined,
+        realEstateBathrooms: isRealEstate ? reBathrooms : undefined,
+        floorsCount: isRealEstate ? floorsCount : undefined,
+        yearBuilt: isRealEstate ? yearBuilt : undefined,
+        areaSqm: isRealEstate ? areaSqm : undefined,
+        landAreaSqm: isRealEstate ? landAreaSqm : undefined,
+        buildingAreaSqm: isRealEstate ? buildingAreaSqm : undefined,
+        realEstateParkingAvailable: isRealEstate ? realEstateFeatures.includes("parking_available") : undefined,
+        realEstateFurnished: isRealEstate ? realEstateFeatures.includes("furnished") : undefined,
+        documentsAvailable: isRealEstate ? realEstateFeatures.includes("documents_available") : undefined,
+        viewingAvailable: isRealEstate ? realEstateFeatures.includes("viewing_available") : undefined,
+        propertyCondition: isRealEstate ? propertyCondition || undefined : undefined,
+        ownershipStatus: isRealEstate ? ownershipStatus || undefined : undefined,
+        // Electronics
+        electronicsBusinessType: isElectronics ? electronicsBusinessType || undefined : undefined,
+        brandsAvailable: isElectronics ? brandsAvailable : undefined,
+        sellsNew: isElectronics ? electronicsFeatures.includes("sells_new") : undefined,
+        sellsUsed: isElectronics ? electronicsFeatures.includes("sells_used") : undefined,
+        warrantyAvailable: isElectronics ? electronicsFeatures.includes("warranty_available") : undefined,
+        electronicsDeliveryAvailable: isElectronics ? electronicsFeatures.includes("electronics_delivery_available") : undefined,
+        electronicsRepairAvailable: isElectronics ? electronicsFeatures.includes("electronics_repair_available") : undefined,
+        installationAvailable: isElectronics ? electronicsFeatures.includes("installation_available") : undefined,
+        paymentOptions: isElectronics ? paymentOptions : undefined,
+        // Transportation
+        transportationType: isTransportation ? transportationType || undefined : undefined,
+        vehicleCount: isTransportation ? vehicleCount : undefined,
+        passengerCapacity: isTransportation ? passengerCapacity : undefined,
+        driverAvailable: isTransportation ? transportationFeatures.includes("driver_available") : undefined,
+        airportTransferAvailable: isTransportation ? transportationFeatures.includes("airport_transfer_available") : undefined,
+        cityTransfersAvailable: isTransportation ? transportationFeatures.includes("city_transfers_available") : undefined,
+        intercityTransportAvailable: isTransportation ? transportationFeatures.includes("intercity_transport_available") : undefined,
+        rentalAvailable: isTransportation ? transportationFeatures.includes("rental_available") : undefined,
+        dailyRentalAvailable: isTransportation ? transportationFeatures.includes("daily_rental_available") : undefined,
+        weeklyRentalAvailable: isTransportation ? transportationFeatures.includes("weekly_rental_available") : undefined,
+        monthlyRentalAvailable: isTransportation ? transportationFeatures.includes("monthly_rental_available") : undefined,
+        deliveryServiceAvailable: isTransportation ? transportationFeatures.includes("delivery_service_available") : undefined,
+        cargoServiceAvailable: isTransportation ? transportationFeatures.includes("cargo_service_available") : undefined,
+        // Hospital
+        hospitalType: isHospital ? hospitalType || undefined : undefined,
+        bedsCount: isHospital ? bedsCount : undefined,
+        doctorsCount: isHospital ? doctorsCount : undefined,
+        nursesCount: isHospital ? nursesCount : undefined,
+        departmentsCount: isHospital ? departmentsCount : undefined,
+        operatingRoomsCount: isHospital ? operatingRoomsCount : undefined,
+        emergencyDepartment: isHospital ? hospitalFacilities.includes("emergency_department") : undefined,
+        icuAvailable: isHospital ? hospitalFacilities.includes("icu_available") : undefined,
+        pharmacyOnsite: isHospital ? hospitalFacilities.includes("pharmacy_onsite") : undefined,
+        laboratoryOnsite: isHospital ? hospitalFacilities.includes("laboratory_onsite") : undefined,
+        radiologyOnsite: isHospital ? hospitalFacilities.includes("radiology_onsite") : undefined,
+        ambulanceAvailable: isHospital ? hospitalFacilities.includes("ambulance_available") : undefined,
+        maternityDepartment: isHospital ? hospitalFacilities.includes("maternity_department") : undefined,
+        pediatricDepartment: isHospital ? hospitalFacilities.includes("pediatric_department") : undefined,
+        visitingHours: isHospital ? visitingHours || undefined : undefined,
+        // Pharmacy
+        pharmacyType: isPharmacy ? pharmacyType || undefined : undefined,
+        pharmacyDeliveryAvailable: isPharmacy ? pharmacyFeatures.includes("pharmacy_delivery_available") : undefined,
+        prescriptionRequired: isPharmacy ? pharmacyFeatures.includes("prescription_required") : undefined,
+        homeDelivery: isPharmacy ? pharmacyFeatures.includes("home_delivery") : undefined,
+        pharmacyEmergencyContact: isPharmacy ? pharmacyEmergencyContact || undefined : undefined,
+        servicesOffered: isApartments
+          ? apartmentServices
+          : isRealEstate
+            ? realEstateServices
+            : isElectronics
+              ? electronicsServices
+              : isTransportation
+                ? transportationServices
+                : undefined,
       });
 
       if (result.ok) {
@@ -1636,6 +1969,507 @@ export function JoinRequestForm({
                 onChange={setDeliveryAreas}
                 placeholder={tAdmin("tagInputPlaceholder")}
               />
+            </div>
+          )}
+
+          {isApartments && (
+            <div className="space-y-5">
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="jr-apartmentType" className={labelClass}>{t("apartmentTypeLabel")}</label>
+                  <select id="jr-apartmentType" value={apartmentType} onChange={(e) => setApartmentType(e.target.value as ApartmentType | "")} className={inputClass}>
+                    <option value="" disabled>{t("selectApartmentTypePlaceholder")}</option>
+                    {APARTMENT_TYPE_ORDER.map((type) => (
+                      <option key={type} value={type}>{apartmentTypeLabel(type, locale)}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="jr-petPolicy" className={labelClass}>{t("petPolicyLabel")}</label>
+                  <select id="jr-petPolicy" value={petPolicy} onChange={(e) => setPetPolicy(e.target.value as PetPolicy | "")} className={inputClass}>
+                    <option value="" disabled>{t("selectPetPolicyPlaceholder")}</option>
+                    {PET_POLICY_ORDER.map((type) => (
+                      <option key={type} value={type}>{petPolicyLabel(type, locale)}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid gap-5 sm:grid-cols-3">
+                <div>
+                  <label htmlFor="jr-aptBedrooms" className={labelClass}>{t("bedroomsLabel")}</label>
+                  <input id="jr-aptBedrooms" type="number" min={0} value={aptBedrooms ?? ""} onChange={(e) => setAptBedrooms(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+                <div>
+                  <label htmlFor="jr-aptBathrooms" className={labelClass}>{t("bathroomsLabel")}</label>
+                  <input id="jr-aptBathrooms" type="number" min={0} value={aptBathrooms ?? ""} onChange={(e) => setAptBathrooms(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+                <div>
+                  <label htmlFor="jr-unitsCount" className={labelClass}>{t("unitsCountLabel")}</label>
+                  <input id="jr-unitsCount" type="number" min={0} value={unitsCount ?? ""} onChange={(e) => setUnitsCount(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+                <div>
+                  <label htmlFor="jr-floorNumber" className={labelClass}>{t("floorNumberLabel")}</label>
+                  <input id="jr-floorNumber" type="number" value={floorNumber ?? ""} onChange={(e) => setFloorNumber(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+                <div>
+                  <label htmlFor="jr-buildingFloors" className={labelClass}>{t("buildingFloorsLabel")}</label>
+                  <input id="jr-buildingFloors" type="number" min={0} value={buildingFloors ?? ""} onChange={(e) => setBuildingFloors(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+                <label className="flex items-center gap-2 self-end pb-3 text-sm font-medium">
+                  <input type="checkbox" checked={aptFurnished} onChange={(e) => setAptFurnished(e.target.checked)} />
+                  {t("furnishedLabel")}
+                </label>
+              </div>
+
+              <div className="grid gap-5 sm:grid-cols-3">
+                <div>
+                  <label htmlFor="jr-monthlyRent" className={labelClass}>{t("monthlyRentLabel")}</label>
+                  <input id="jr-monthlyRent" type="number" min={0} value={monthlyRent ?? ""} onChange={(e) => setMonthlyRent(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+                <div>
+                  <label htmlFor="jr-dailyRent" className={labelClass}>{t("dailyRentLabel")}</label>
+                  <input id="jr-dailyRent" type="number" min={0} value={dailyRent ?? ""} onChange={(e) => setDailyRent(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+                <div>
+                  <label htmlFor="jr-securityDeposit" className={labelClass}>{t("securityDepositLabel")}</label>
+                  <input id="jr-securityDeposit" type="number" min={0} value={securityDeposit ?? ""} onChange={(e) => setSecurityDeposit(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+                <div>
+                  <label htmlFor="jr-minStayNights" className={labelClass}>{t("minStayNightsLabel")}</label>
+                  <input id="jr-minStayNights" type="number" min={0} value={minStayNights ?? ""} onChange={(e) => setMinStayNights(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+                <div>
+                  <label htmlFor="jr-maxStayNights" className={labelClass}>{t("maxStayNightsLabel")}</label>
+                  <input id="jr-maxStayNights" type="number" min={0} value={maxStayNights ?? ""} onChange={(e) => setMaxStayNights(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClass}>{t("apartmentFeaturesLabel")}</label>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {APARTMENT_FEATURE_ORDER.map((code) => {
+                    const Icon = APARTMENT_FEATURE_ICON[code];
+                    return (
+                      <label key={code} className="flex items-center gap-2 text-sm font-medium">
+                        <input type="checkbox" checked={apartmentFeatures.includes(code)} onChange={() => toggleApartmentFeature(code)} />
+                        <Icon size={14} className="shrink-0 text-ink/50 dark:text-sand/50" aria-hidden="true" />
+                        {apartmentFeatureLabel(code, locale)}
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <TagInput
+                label={t("servicesOfferedLabel")}
+                values={apartmentServices}
+                onChange={setApartmentServices}
+                placeholder={APARTMENT_SERVICE_SUGGESTIONS.map((s) => (locale === "ar" && s.ar) || (locale === "so" && s.so) || s.en).slice(0, 3).join(", ")}
+              />
+              <div className="flex flex-wrap gap-2">
+                {APARTMENT_SERVICE_SUGGESTIONS.map((s) => {
+                  const label = (locale === "ar" && s.ar) || (locale === "so" && s.so) || s.en;
+                  return (
+                    <button
+                      key={s.en}
+                      type="button"
+                      onClick={() => toggleApartmentService(label)}
+                      className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                        apartmentServices.includes(label)
+                          ? "border-primary bg-primary/8 text-primary-800"
+                          : "border-ink/10 text-ink/70 hover:border-primary/40 dark:border-white/15 dark:text-sand/70"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {isRealEstate && (
+            <div className="space-y-5">
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="jr-propertyType" className={labelClass}>{t("propertyTypeLabel")}</label>
+                  <select id="jr-propertyType" value={propertyType} onChange={(e) => setPropertyType(e.target.value as PropertyType | "")} className={inputClass}>
+                    <option value="" disabled>{t("selectPropertyTypePlaceholder")}</option>
+                    {PROPERTY_TYPE_ORDER.map((type) => (
+                      <option key={type} value={type}>{propertyTypeLabel(type, locale)}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="jr-listingPurpose" className={labelClass}>{t("listingPurposeLabel")}</label>
+                  <select id="jr-listingPurpose" value={listingPurpose} onChange={(e) => setListingPurpose(e.target.value as ListingPurpose | "")} className={inputClass}>
+                    <option value="" disabled>{t("selectListingPurposePlaceholder")}</option>
+                    {LISTING_PURPOSE_ORDER.map((type) => (
+                      <option key={type} value={type}>{listingPurposeLabel(type, locale)}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="jr-price" className={labelClass}>{t("priceLabel")}</label>
+                  <input id="jr-price" type="number" min={0} value={price ?? ""} onChange={(e) => setPrice(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+                <div>
+                  <label htmlFor="jr-priceCurrency" className={labelClass}>{t("priceCurrencyLabel")}</label>
+                  <select id="jr-priceCurrency" value={priceCurrency} onChange={(e) => setPriceCurrency(e.target.value as PriceCurrency | "")} className={inputClass}>
+                    {PRICE_CURRENCY_ORDER.map((type) => (
+                      <option key={type} value={type}>{priceCurrencyLabel(type, locale)}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid gap-5 sm:grid-cols-3">
+                <div>
+                  <label htmlFor="jr-reBedrooms" className={labelClass}>{t("bedroomsLabel")}</label>
+                  <input id="jr-reBedrooms" type="number" min={0} value={reBedrooms ?? ""} onChange={(e) => setReBedrooms(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+                <div>
+                  <label htmlFor="jr-reBathrooms" className={labelClass}>{t("bathroomsLabel")}</label>
+                  <input id="jr-reBathrooms" type="number" min={0} value={reBathrooms ?? ""} onChange={(e) => setReBathrooms(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+                <div>
+                  <label htmlFor="jr-floorsCount" className={labelClass}>{t("floorsCountLabel")}</label>
+                  <input id="jr-floorsCount" type="number" min={0} value={floorsCount ?? ""} onChange={(e) => setFloorsCount(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+                <div>
+                  <label htmlFor="jr-yearBuilt" className={labelClass}>{t("yearBuiltLabel")}</label>
+                  <input id="jr-yearBuilt" type="number" value={yearBuilt ?? ""} onChange={(e) => setYearBuilt(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+                <div>
+                  <label htmlFor="jr-areaSqm" className={labelClass}>{t("areaSqmLabel")}</label>
+                  <input id="jr-areaSqm" type="number" min={0} value={areaSqm ?? ""} onChange={(e) => setAreaSqm(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+                <div>
+                  <label htmlFor="jr-landAreaSqm" className={labelClass}>{t("landAreaSqmLabel")}</label>
+                  <input id="jr-landAreaSqm" type="number" min={0} value={landAreaSqm ?? ""} onChange={(e) => setLandAreaSqm(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+                <div>
+                  <label htmlFor="jr-buildingAreaSqm" className={labelClass}>{t("buildingAreaSqmLabel")}</label>
+                  <input id="jr-buildingAreaSqm" type="number" min={0} value={buildingAreaSqm ?? ""} onChange={(e) => setBuildingAreaSqm(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+              </div>
+
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="jr-propertyCondition" className={labelClass}>{t("propertyConditionLabel")}</label>
+                  <select id="jr-propertyCondition" value={propertyCondition} onChange={(e) => setPropertyCondition(e.target.value as PropertyCondition | "")} className={inputClass}>
+                    <option value="" disabled>{t("selectPropertyConditionPlaceholder")}</option>
+                    {PROPERTY_CONDITION_ORDER.map((type) => (
+                      <option key={type} value={type}>{propertyConditionLabel(type, locale)}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="jr-ownershipStatus" className={labelClass}>{t("ownershipStatusLabel")}</label>
+                  <select id="jr-ownershipStatus" value={ownershipStatus} onChange={(e) => setOwnershipStatus(e.target.value as OwnershipStatus | "")} className={inputClass}>
+                    <option value="" disabled>{t("selectOwnershipStatusPlaceholder")}</option>
+                    {OWNERSHIP_STATUS_ORDER.map((type) => (
+                      <option key={type} value={type}>{ownershipStatusLabel(type, locale)}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClass}>{t("propertyFeaturesLabel")}</label>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  {REAL_ESTATE_FEATURE_ORDER.map((code) => {
+                    const Icon = REAL_ESTATE_FEATURE_ICON[code];
+                    return (
+                      <label key={code} className="flex items-center gap-2 text-sm font-medium">
+                        <input type="checkbox" checked={realEstateFeatures.includes(code)} onChange={() => toggleRealEstateFeature(code)} />
+                        <Icon size={14} className="shrink-0 text-ink/50 dark:text-sand/50" aria-hidden="true" />
+                        {realEstateFeatureLabel(code, locale)}
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {REAL_ESTATE_SERVICE_SUGGESTIONS.map((s) => {
+                  const label = (locale === "ar" && s.ar) || (locale === "so" && s.so) || s.en;
+                  return (
+                    <button
+                      key={s.en}
+                      type="button"
+                      onClick={() => toggleRealEstateService(label)}
+                      className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                        realEstateServices.includes(label)
+                          ? "border-primary bg-primary/8 text-primary-800"
+                          : "border-ink/10 text-ink/70 hover:border-primary/40 dark:border-white/15 dark:text-sand/70"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {isElectronics && (
+            <div className="space-y-5">
+              <div>
+                <label htmlFor="jr-electronicsBusinessType" className={labelClass}>{t("electronicsBusinessTypeLabel")}</label>
+                <select id="jr-electronicsBusinessType" value={electronicsBusinessType} onChange={(e) => setElectronicsBusinessType(e.target.value as ElectronicsBusinessType | "")} className={inputClass}>
+                  <option value="" disabled>{t("selectElectronicsBusinessTypePlaceholder")}</option>
+                  {ELECTRONICS_BUSINESS_TYPE_ORDER.map((type) => (
+                    <option key={type} value={type}>{electronicsBusinessTypeLabel(type, locale)}</option>
+                  ))}
+                </select>
+              </div>
+
+              <TagInput
+                label={t("brandsAvailableLabel")}
+                values={brandsAvailable}
+                onChange={setBrandsAvailable}
+                placeholder={tAdmin("tagInputPlaceholder")}
+              />
+
+              <div>
+                <label className={labelClass}>{t("electronicsFeaturesLabel")}</label>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {ELECTRONICS_FEATURE_ORDER.map((code) => {
+                    const Icon = ELECTRONICS_FEATURE_ICON[code];
+                    return (
+                      <label key={code} className="flex items-center gap-2 text-sm font-medium">
+                        <input type="checkbox" checked={electronicsFeatures.includes(code)} onChange={() => toggleElectronicsFeature(code)} />
+                        <Icon size={14} className="shrink-0 text-ink/50 dark:text-sand/50" aria-hidden="true" />
+                        {electronicsFeatureLabel(code, locale)}
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClass}>{t("paymentOptionsLabel")}</label>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {PAYMENT_OPTION_ORDER.map((code) => (
+                    <label key={code} className="flex items-center gap-2 text-sm font-medium">
+                      <input type="checkbox" checked={paymentOptions.includes(code)} onChange={() => togglePaymentOption(code)} />
+                      {paymentOptionLabel(code, locale)}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {ELECTRONICS_SERVICE_SUGGESTIONS.map((s) => {
+                  const label = (locale === "ar" && s.ar) || (locale === "so" && s.so) || s.en;
+                  return (
+                    <button
+                      key={s.en}
+                      type="button"
+                      onClick={() => toggleElectronicsService(label)}
+                      className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                        electronicsServices.includes(label)
+                          ? "border-primary bg-primary/8 text-primary-800"
+                          : "border-ink/10 text-ink/70 hover:border-primary/40 dark:border-white/15 dark:text-sand/70"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {isTransportation && (
+            <div className="space-y-5">
+              <div>
+                <label htmlFor="jr-transportationType" className={labelClass}>{t("transportationTypeLabel")}</label>
+                <select id="jr-transportationType" value={transportationType} onChange={(e) => setTransportationType(e.target.value as TransportationType | "")} className={inputClass}>
+                  <option value="" disabled>{t("selectTransportationTypePlaceholder")}</option>
+                  {TRANSPORTATION_TYPE_ORDER.map((type) => (
+                    <option key={type} value={type}>{transportationTypeLabel(type, locale)}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="jr-vehicleCount" className={labelClass}>{t("vehicleCountLabel")}</label>
+                  <input id="jr-vehicleCount" type="number" min={0} value={vehicleCount ?? ""} onChange={(e) => setVehicleCount(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+                <div>
+                  <label htmlFor="jr-passengerCapacity" className={labelClass}>{t("passengerCapacityLabel")}</label>
+                  <input id="jr-passengerCapacity" type="number" min={0} value={passengerCapacity ?? ""} onChange={(e) => setPassengerCapacity(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClass}>{t("transportationFeaturesLabel")}</label>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {TRANSPORTATION_FEATURE_ORDER.map((code) => {
+                    const Icon = TRANSPORTATION_FEATURE_ICON[code];
+                    return (
+                      <label key={code} className="flex items-center gap-2 text-sm font-medium">
+                        <input type="checkbox" checked={transportationFeatures.includes(code)} onChange={() => toggleTransportationFeature(code)} />
+                        <Icon size={14} className="shrink-0 text-ink/50 dark:text-sand/50" aria-hidden="true" />
+                        {transportationFeatureLabel(code, locale)}
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {TRANSPORTATION_SERVICE_SUGGESTIONS.map((s) => {
+                  const label = (locale === "ar" && s.ar) || (locale === "so" && s.so) || s.en;
+                  return (
+                    <button
+                      key={s.en}
+                      type="button"
+                      onClick={() => toggleTransportationService(label)}
+                      className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                        transportationServices.includes(label)
+                          ? "border-primary bg-primary/8 text-primary-800"
+                          : "border-ink/10 text-ink/70 hover:border-primary/40 dark:border-white/15 dark:text-sand/70"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {isHospital && (
+            <div className="space-y-5">
+              <div>
+                <label htmlFor="jr-hospitalType" className={labelClass}>{t("hospitalTypeLabel")}</label>
+                <select id="jr-hospitalType" value={hospitalType} onChange={(e) => setHospitalType(e.target.value as HospitalType | "")} className={inputClass}>
+                  <option value="" disabled>{t("selectHospitalTypePlaceholder")}</option>
+                  {HOSPITAL_TYPE_ORDER.map((type) => (
+                    <option key={type} value={type}>{hospitalTypeLabel(type, locale)}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid gap-5 sm:grid-cols-3">
+                <div>
+                  <label htmlFor="jr-bedsCount" className={labelClass}>{t("bedsCountLabel")}</label>
+                  <input id="jr-bedsCount" type="number" min={0} value={bedsCount ?? ""} onChange={(e) => setBedsCount(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+                <div>
+                  <label htmlFor="jr-doctorsCount" className={labelClass}>{t("doctorsCountLabel")}</label>
+                  <input id="jr-doctorsCount" type="number" min={0} value={doctorsCount ?? ""} onChange={(e) => setDoctorsCount(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+                <div>
+                  <label htmlFor="jr-nursesCount" className={labelClass}>{t("nursesCountLabel")}</label>
+                  <input id="jr-nursesCount" type="number" min={0} value={nursesCount ?? ""} onChange={(e) => setNursesCount(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+                <div>
+                  <label htmlFor="jr-departmentsCount" className={labelClass}>{t("departmentsCountLabel")}</label>
+                  <input id="jr-departmentsCount" type="number" min={0} value={departmentsCount ?? ""} onChange={(e) => setDepartmentsCount(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+                <div>
+                  <label htmlFor="jr-operatingRoomsCount" className={labelClass}>{t("operatingRoomsCountLabel")}</label>
+                  <input id="jr-operatingRoomsCount" type="number" min={0} value={operatingRoomsCount ?? ""} onChange={(e) => setOperatingRoomsCount(e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
+                </div>
+                <div>
+                  <label htmlFor="jr-visitingHours" className={labelClass}>{t("visitingHoursLabel")}</label>
+                  <input id="jr-visitingHours" value={visitingHours} onChange={(e) => setVisitingHours(e.target.value)} className={inputClass} placeholder={t("visitingHoursPlaceholder")} />
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClass}>{t("hospitalFacilitiesLabel")}</label>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {HOSPITAL_FACILITY_ORDER.map((code) => {
+                    const Icon = HOSPITAL_FACILITY_ICON[code];
+                    return (
+                      <label key={code} className="flex items-center gap-2 text-sm font-medium">
+                        <input type="checkbox" checked={hospitalFacilities.includes(code)} onChange={() => toggleHospitalFacility(code)} />
+                        <Icon size={14} className="shrink-0 text-ink/50 dark:text-sand/50" aria-hidden="true" />
+                        {hospitalFacilityLabel(code, locale)}
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <TagInput
+                label={t("insuranceAcceptedLabel")}
+                values={insuranceAccepted}
+                onChange={setInsuranceAccepted}
+                placeholder={tAdmin("tagInputPlaceholder")}
+              />
+
+              <div>
+                <label className={labelClass}>{t("languagesSpokenLabel")}</label>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {LANGUAGE_SPOKEN_OPTIONS.map((value) => (
+                    <label key={value} className="flex items-center gap-2 text-sm font-medium">
+                      <input type="checkbox" checked={languagesSpoken.includes(value)} onChange={() => toggleLanguageSpoken(value)} />
+                      {languageSpokenLabel(value, locale)}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {isPharmacy && (
+            <div className="space-y-5">
+              <div>
+                <label htmlFor="jr-pharmacyType" className={labelClass}>{t("pharmacyTypeLabel")}</label>
+                <select id="jr-pharmacyType" value={pharmacyType} onChange={(e) => setPharmacyType(e.target.value as PharmacyType | "")} className={inputClass}>
+                  <option value="" disabled>{t("selectPharmacyTypePlaceholder")}</option>
+                  {PHARMACY_TYPE_ORDER.map((type) => (
+                    <option key={type} value={type}>{pharmacyTypeLabel(type, locale)}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="jr-pharmacyEmergencyContact" className={labelClass}>{t("emergencyContactLabel")}</label>
+                  <input id="jr-pharmacyEmergencyContact" value={pharmacyEmergencyContact} onChange={(e) => setPharmacyEmergencyContact(e.target.value)} className={inputClass} />
+                </div>
+                <label className="flex items-center gap-2 self-end pb-3 text-sm font-medium">
+                  <input type="checkbox" checked={is24Hours} onChange={(e) => setIs24Hours(e.target.checked)} />
+                  {t("is24HoursLabel")}
+                </label>
+              </div>
+
+              <div>
+                <label className={labelClass}>{t("pharmacyFeaturesLabel")}</label>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {PHARMACY_FEATURE_ORDER.map((code) => {
+                    const Icon = PHARMACY_FEATURE_ICON[code];
+                    return (
+                      <label key={code} className="flex items-center gap-2 text-sm font-medium">
+                        <input type="checkbox" checked={pharmacyFeatures.includes(code)} onChange={() => togglePharmacyFeature(code)} />
+                        <Icon size={14} className="shrink-0 text-ink/50 dark:text-sand/50" aria-hidden="true" />
+                        {pharmacyFeatureLabel(code, locale)}
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <TagInput
+                label={t("insuranceAcceptedLabel")}
+                values={insuranceAccepted}
+                onChange={setInsuranceAccepted}
+                placeholder={tAdmin("tagInputPlaceholder")}
+              />
+
+              <ServiceTagsPicker categorySlug="pharmacy" values={serviceTags} onChange={setServiceTags} locale={locale} label={t("servicesOfferedLabel")} />
             </div>
           )}
         </div>

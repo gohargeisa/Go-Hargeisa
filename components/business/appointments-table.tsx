@@ -13,13 +13,15 @@ export interface AppointmentManagerRow extends Appointment {
   doctorName: string;
 }
 
-const STATUS_OPTIONS: AppointmentStatus[] = ["pending", "confirmed", "cancelled", "completed"];
+const STATUS_OPTIONS: AppointmentStatus[] = ["pending", "confirmed", "completed", "cancelled", "rejected", "no_show"];
 
 const STATUS_STYLES: Record<AppointmentStatus, string> = {
   pending: "bg-amber-100 text-amber-700 dark:bg-amber-400/15 dark:text-amber-300",
   confirmed: "bg-accent/10 text-accent-700 dark:bg-accent/15 dark:text-accent-400",
   cancelled: "bg-red-100 text-red-700 dark:bg-red-400/15 dark:text-red-300",
   completed: "bg-secondary/15 text-secondary-700 dark:bg-white/10 dark:text-sand/70",
+  rejected: "bg-red-100 text-red-700 dark:bg-red-400/15 dark:text-red-300",
+  no_show: "bg-ink/10 text-ink/60 dark:bg-white/10 dark:text-sand/60",
 };
 
 function formatDate(iso: string): string {
