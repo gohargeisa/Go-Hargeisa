@@ -595,8 +595,21 @@ export interface Hotel {
 
 export interface RestaurantMenuItem {
   name: string;
-  price: string;
+  /** Optional — some verified official menus (e.g. a brand's public menu
+   * page) list real items without publishing prices. Omitted rather than
+   * fabricated in that case; the menu UI hides the price line entirely. */
+  price?: string;
   description?: string;
+  /** Optional grouping label (e.g. "Starters", "Grills", "Drinks") — items
+   * without one render in the original flat list (backward compatible with
+   * every listing's existing menu data); once any item on a listing has a
+   * category, the menu switches to grouped cards with tab/chip navigation. */
+  category?: string;
+  /** Per-item photo — same GalleryImage-less plain URL shape as the rest of
+   * this jsonb column (no schema change: `menu` is jsonb, this is just a
+   * richer shape within it). */
+  image?: string;
+  featured?: boolean;
 }
 
 export interface Restaurant {

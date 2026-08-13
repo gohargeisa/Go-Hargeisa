@@ -31,7 +31,7 @@ export function CityServiceCard({ service, category, locale }: { service: CitySe
 
   return (
     <AnimatedCard className="flex h-full flex-col overflow-hidden rounded-xl2 border border-ink/8 bg-white shadow-soft transition-shadow duration-300 ease-premium hover:border-primary/25 hover:shadow-card dark:border-white/10 dark:bg-white/[0.04]">
-      <div className="relative h-36 w-full shrink-0 bg-ink/5 dark:bg-white/10">
+      <div className="relative aspect-[16/10] w-full shrink-0 bg-ink/5 dark:bg-white/10">
         {service.image ? (
           hasGallery ? (
             <button
@@ -85,7 +85,7 @@ export function CityServiceCard({ service, category, locale }: { service: CitySe
           <h3 className="font-display text-lg font-bold text-ink transition-colors hover:text-primary dark:text-white">{service.name}</h3>
         </Link>
         {service.description && (
-          <p className="mt-1.5 text-sm text-ink/60 dark:text-sand/60">{service.description}</p>
+          <p className="mt-1.5 line-clamp-3 text-sm text-ink/60 dark:text-sand/60">{service.description}</p>
         )}
 
         <div className="mt-3 flex flex-col gap-2 text-sm text-ink/65 dark:text-sand/65">
@@ -126,7 +126,7 @@ export function CityServiceCard({ service, category, locale }: { service: CitySe
           )}
         </div>
 
-        <div className="mt-4 flex gap-2.5">
+        <div className="mt-auto flex gap-2.5 pt-4">
           <SecondaryButton href={href} fullWidth>
             {t("viewDetails")}
           </SecondaryButton>

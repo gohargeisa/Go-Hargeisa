@@ -32,7 +32,7 @@ export default async function CityServicesPage({
   searchParams,
 }: {
   params: { locale: string };
-  searchParams: { q?: string };
+  searchParams: { q?: string; category?: string };
 }) {
   const t = await getTranslations({ locale, namespace: "cityServices" });
   const groups = await getCityServicesGroupedByCategory(locale);
@@ -75,7 +75,7 @@ export default async function CityServicesPage({
         ) : (
           <>
             <PremiumSectionHeading title={t("sectionsTitle")} subtitle={t("sectionsSubtitle")} className="mb-10 md:mb-14" />
-            <CityServicesPageClient groups={groups} locale={locale} initialQuery={searchParams.q} />
+            <CityServicesPageClient groups={groups} locale={locale} initialQuery={searchParams.q} initialCategorySlug={searchParams.category} />
           </>
         )}
       </section>

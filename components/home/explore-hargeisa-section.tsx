@@ -1,26 +1,27 @@
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { Reveal } from "@/components/home/reveal";
+import { ViewAllButton } from "@/components/home/view-all-button";
 import { EmptyState } from "@/components/shared/empty-state";
-import { DynamicIcon } from "@/lib/utils/dynamic-icon";
-import { categoryDisplayName } from "@/lib/utils/category-href";
+import { PremiumCategoryCard } from "@/components/home/premium-category-card";
 import type { Locale } from "@/lib/i18n/config";
 import type { Category } from "@/types";
 
 /**
- * Fully dynamic — `categoryCounts` is already computed from real published
- * listings (getCityServiceCategoryCounts) and only ever contains categories
- * with at least one, sorted by count descending. No category is ever
- * hardcoded here; a brand-new category appears automatically the moment its
- * first listing is published, and disappears the moment its last one isn't.
+ * Every non-hotel/restaurant/cafe category (Hospitals, Pharmacies, Schools,
+ * Real Estate, Electronics, ...) gets its own premium card here, each
+ * linking straight to its own listing page via categoryHref() — replacing
+ * the old design where every City Services category was a small icon tile
+ * that all pointed at the same flat /city-services URL. `categories` is
+ * fully dynamic (already-counted, already filtered to >0 by the caller);
+ * nothing here is a fixed list.
  */
 export async function ExploreHargeisaSection({
   locale,
-  categoryCounts,
+  categories,
 }: {
-  locale: string;
-  categoryCounts: { category: Category; count: number }[];
+  locale: Locale;
+  categories: Category[];
 }) {
   const t = await getTranslations("home");
 
@@ -39,39 +40,29 @@ export async function ExploreHargeisaSection({
           </div>
         </Reveal>
 
-        <Reveal delay={0.1}>
-          {categoryCounts.length === 0 ? (
-            <div className="mt-10 md:mt-14">
-              <EmptyState
-                icon={Sparkles}
-                title={t("exploreHargeisaEmptyTitle")}
-                description={t("exploreHargeisaEmptyDescription")}
-              />
-            </div>
-          ) : (
-            <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 md:mt-14 lg:grid-cols-3">
-              {categoryCounts.map(({ category, count }) => (
-                <Link
-                  key={category.id}
-                  href={`/${locale}/city-services`}
-                  className="group flex h-full flex-col rounded-2xl border border-ink/8 bg-white p-6 shadow-soft transition-all duration-300 ease-premium hover:-translate-y-1 hover:shadow-card dark:border-white/10 dark:bg-white/[0.03] sm:p-7"
-                >
-                  <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-transform duration-300 ease-premium group-hover:scale-105">
-                    <DynamicIcon name={category.icon} size={26} aria-hidden="true" />
-                  </span>
-                  <h3 className="mt-5 font-display text-lg font-bold text-ink dark:text-white">{categoryDisplayName(category, locale as Locale)}</h3>
-                  <p className="mt-1.5 flex-1 text-sm leading-relaxed text-ink/60 dark:text-sand/60">
-                    {t("placesCount", { count })}
-                  </p>
-                  <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary-700">
-                    {t("exploreCta")}
-                    <ArrowRight size={14} className="transition-transform duration-300 ease-premium group-hover:translate-x-1" aria-hidden="true" />
-                  </span>
-                </Link>
-              ))}
-            </div>
-          )}
-        </Reveal>
+        {categories.length === 0 ? (
+          <div className="mt-10 md:mt-14">
+            <EmptyState
+              icon={Sparkles}
+              title={t("exploreHargeisaEmptyTitle")}
+              description={t("exploreHargeisaEmptyDescription")}
+            />
+          </div>
+        ) : (
+          <>
+            <Reveal delay={0.1}>
+              <div className="mt-10 grid gap-6 sm:grid-cols-2 md:mt-14 lg:grid-cols-3">
+                {categories.map((category) => (
+                  <PremiumCategoryCard key={category.id} category={category} locale={locale} />
+                ))}
+              </div>
+            </Reveal>
+
+            <Reveal delay={0.15}>
+              <ViewAllButton href={`/${locale}/city-services`} label={t("viewAllServicesButton")} />
+            </Reveal>
+          </>
+        )}
       </div>
     </section>
   );

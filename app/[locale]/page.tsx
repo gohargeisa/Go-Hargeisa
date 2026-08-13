@@ -26,7 +26,6 @@ import { OfferCard } from "@/components/home/offer-card";
 import { AnnouncementBanner } from "@/components/home/announcement-banner";
 import { BusinessJoinBanner } from "@/components/home/business-join-banner";
 import { ExploreHargeisaSection } from "@/components/home/explore-hargeisa-section";
-import { CategoriesGridSection } from "@/components/home/categories-grid-section";
 import { NewsletterSection } from "@/components/home/newsletter-section";
 import { Reveal } from "@/components/home/reveal";
 import { ScrollRow } from "@/components/shared/scroll-row";
@@ -72,6 +71,18 @@ export default async function HomePage({
       getVisibleCategoriesWithCounts(),
     ]);
   const hotels = filterHotelsForPresentation(hotelsRaw);
+
+  // The homepage's "City Services" section shows every non-hotel/restaurant/
+  // cafe category as its own premium card — both the literal city_services
+  // sub-categories (Hospitals, Pharmacies, ...) and the separate
+  // services-vertical categories (Real Estate, Apartments, ...). Both lists
+  // are already fetched above with counts populated — no new query needed.
+  const serviceVerticalCategories = categories.filter((c) => c.targetTable === "services");
+  const cityServicesShowcaseCategories = [
+    ...serviceVerticalCategories,
+    ...cityServiceCategoryCounts.map(({ category, count }) => ({ ...category, businessCount: count })),
+  ].sort((a, b) => a.sortOrder - b.sortOrder);
+
   const now = Date.now();
   // getEvents() already sorts by start_date ascending — only the "still
   // relevant" filter (hasn't ended yet) and the homepage's own preview cap
@@ -103,8 +114,6 @@ export default async function HomePage({
       <Hero locale={locale} />
 
       <BusinessJoinBanner locale={locale} />
-
-      <CategoriesGridSection locale={locale} categories={categories} />
 
       {/* About Go Hargeisa */}
       <section className="mx-auto max-w-7xl px-5 pb-20 pt-2 md:px-8 md:pb-28 md:pt-12 lg:px-12">
@@ -386,7 +395,7 @@ export default async function HomePage({
         </section>
       )}
 
-      <ExploreHargeisaSection locale={locale} categoryCounts={cityServiceCategoryCounts} />
+      <ExploreHargeisaSection locale={locale} categories={cityServicesShowcaseCategories} />
 
       {upcomingEvents.length > 0 && (
         <section className="bg-white py-16 dark:bg-white/[0.03] md:py-24">

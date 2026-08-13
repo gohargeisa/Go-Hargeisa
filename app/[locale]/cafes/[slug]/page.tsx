@@ -18,6 +18,7 @@ import { CafeQuickInfoCards } from "@/components/shared/cafe-quick-info-cards";
 import { HotelGallerySlider } from "@/components/shared/hotel-gallery-slider";
 import { HotelNavTabs, type HotelNavTab } from "@/components/shared/hotel-nav-tabs";
 import { BusinessPhotoGallery } from "@/components/shared/business-photo-gallery";
+import { RestaurantMenuSection } from "@/components/shared/restaurant-menu-section";
 import { CAFE_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import { AmenitiesSection, hasAmenities } from "@/components/shared/amenities-section";
 import { SocialLinks } from "@/components/shared/social-links";
@@ -286,23 +287,11 @@ export default async function CafeDetailPage({
                   )}
                 </div>
                 {cafe.menuHighlights.length > 0 && (
-                  <div className="divide-y divide-ink/8 overflow-hidden rounded-xl2 border border-ink/8 dark:divide-white/10 dark:border-white/10">
-                    {cafe.menuHighlights.map((item) => (
-                      <div key={item.name} className="flex items-center justify-between gap-4 p-4 sm:p-5">
-                        <div className="min-w-0">
-                          <p className="text-sm font-semibold sm:text-base">{item.name}</p>
-                          {item.description && (
-                            <p className="mt-1 text-xs text-ink/55 dark:text-sand/55 sm:text-sm">
-                              {item.description}
-                            </p>
-                          )}
-                        </div>
-                        <span className="shrink-0 font-display text-sm font-bold text-primary sm:text-base">
-                          {item.price}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
+                  <RestaurantMenuSection
+                    items={cafe.menuHighlights}
+                    allCategoriesLabel={td("menuAllCategoriesLabel")}
+                    featuredLabel={td("menuFeaturedLabel")}
+                  />
                 )}
               </section>
             </Reveal>

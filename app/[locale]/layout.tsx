@@ -223,6 +223,14 @@ export default async function LocaleLayout({
                     socialYoutube={siteSettings?.social_youtube ?? undefined}
                     socialTiktok={siteSettings?.social_tiktok ?? undefined}
                   />
+                  {/* Reserves clearance below the page's real (in-flow) end
+                      so the fixed BottomNav — which floats above everything
+                      and takes no flow space of its own — never permanently
+                      strands the last footer links/buttons underneath it.
+                      Same lg:hidden breakpoint and safe-area handling as
+                      BottomNav itself; global here so every route gets it
+                      automatically without per-page changes. */}
+                  <div aria-hidden="true" className="h-[calc(5.5rem+env(safe-area-inset-bottom))] lg:hidden" />
                   <ServiceWorkerRegister />
                   <CapacitorBootstrap />
                   <OfflineBanner />

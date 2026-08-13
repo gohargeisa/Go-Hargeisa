@@ -1,5 +1,5 @@
 import type { Database } from "@/types/database";
-import type { Hotel, HotelRoom, Restaurant, Cafe, Service, Attraction, EventItem, CityService, Article, GalleryImage, Review, BusinessOffer, MediaVideo, Notification, NotificationCategory, NotificationSeverity, Category, Product, Department, Doctor, Appointment, OpeningHoursGroup } from "@/types";
+import type { Hotel, HotelRoom, Restaurant, Cafe, Service, Attraction, EventItem, CityService, Article, GalleryImage, Review, BusinessOffer, MediaVideo, Notification, NotificationCategory, NotificationSeverity, Category, Product, Department, Doctor, Appointment, OpeningHoursGroup, RestaurantMenuItem } from "@/types";
 
 type HotelRow = Database["public"]["Tables"]["hotels"]["Row"];
 type HotelRoomRow = Database["public"]["Tables"]["hotel_rooms"]["Row"];
@@ -140,7 +140,7 @@ export function mapHotel(
 }
 
 export function mapRestaurant(row: RestaurantRow, reviews: Review[] = []): Restaurant {
-  const menu = Array.isArray(row.menu) ? (row.menu as { name: string; price: string; description?: string }[]) : [];
+  const menu = Array.isArray(row.menu) ? (row.menu as unknown as RestaurantMenuItem[]) : [];
   const openingHoursStructured = Array.isArray(row.opening_hours_structured)
     ? (row.opening_hours_structured as unknown as Restaurant["openingHoursStructured"])
     : [];
@@ -194,7 +194,7 @@ export function mapRestaurant(row: RestaurantRow, reviews: Review[] = []): Resta
 }
 
 export function mapCafe(row: CafeRow, reviews: Review[] = [], locale?: string): Cafe {
-  const menu = Array.isArray(row.menu) ? (row.menu as { name: string; price: string; description?: string }[]) : [];
+  const menu = Array.isArray(row.menu) ? (row.menu as unknown as RestaurantMenuItem[]) : [];
   const openingHoursStructured = Array.isArray(row.opening_hours_structured)
     ? (row.opening_hours_structured as unknown as Cafe["openingHoursStructured"])
     : [];

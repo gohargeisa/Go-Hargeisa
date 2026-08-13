@@ -6,6 +6,12 @@ import type { Locale } from "@/lib/i18n/config";
  * core verticals + City Services each have their own dedicated route;
  * every `services`-vertical (long-tail) category nests under /services/[slug]
  * — see lib/utils/service-categories.ts serviceHref for why.
+ *
+ * A real city_services sub-category (Hospitals, Pharmacies, ...) deep-links
+ * straight to its own tab on /city-services via ?category=<slug> — see
+ * CityServicesPageClient's initialCategorySlug prop. The single pinned
+ * umbrella row (the "City Services" nav entry itself) keeps the plain,
+ * unfiltered URL since it isn't a sub-category to filter by.
  */
 export function categoryHref(locale: string, category: Category): string {
   switch (category.targetTable) {
@@ -20,7 +26,7 @@ export function categoryHref(locale: string, category: Category): string {
     case "events":
       return `/${locale}/events`;
     case "city_services":
-      return `/${locale}/city-services`;
+      return category.isPinned ? `/${locale}/city-services` : `/${locale}/city-services?category=${category.slug}`;
     case "services":
       return `/${locale}/services/${category.slug}`;
   }
