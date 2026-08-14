@@ -3,7 +3,8 @@ import type { Locale } from "@/lib/i18n/config";
 import { AddToTripButton } from "@/components/shared/add-to-trip-button";
 import { ShareButton } from "@/components/shared/share-button";
 import { FavoriteButton } from "@/components/shared/favorite-button";
-import { PrimaryButton } from "@/components/shared/buttons";
+import { PrimaryButton, SecondaryButton } from "@/components/shared/buttons";
+import { TableReservationButton } from "@/components/shared/table-reservation-button";
 import { OpenStatusBadge } from "@/components/shared/open-status-badge";
 import type { OpeningHoursGroup } from "@/types";
 
@@ -19,6 +20,8 @@ export function CafeActionCard({
   phone,
   locale,
   callLabel,
+  reservable,
+  reserveLabel,
   initiallyFavorited = false,
   favoriteCount,
   addFavoriteLabel,
@@ -35,6 +38,10 @@ export function CafeActionCard({
   phone?: string;
   locale: Locale;
   callLabel: string;
+  /** Off for every cafe by default — see cafes.reservable. Only true once a
+   * specific cafe is confirmed to actually take table reservations. */
+  reservable?: boolean;
+  reserveLabel?: string;
   initiallyFavorited?: boolean;
   favoriteCount?: number;
   addFavoriteLabel: string;
@@ -66,12 +73,29 @@ export function CafeActionCard({
         </div>
       )}
 
-      {phone && (
-        <PrimaryButton href={`tel:${phone}`} size="lg" fullWidth>
-          <Phone size={15} aria-hidden="true" />
-          {callLabel}
-        </PrimaryButton>
+      {reservable && reserveLabel && (
+        <TableReservationButton
+          listingType="cafe"
+          listingId={cafeId}
+          businessName={name}
+          locale={locale}
+          label={reserveLabel}
+          className="group inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-primary-700 text-[15px] font-semibold text-white shadow-soft transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-primary-800 hover:shadow-card active:scale-95"
+        />
       )}
+
+      {phone &&
+        (reservable ? (
+          <SecondaryButton href={`tel:${phone}`} size="lg" fullWidth>
+            <Phone size={15} aria-hidden="true" />
+            {callLabel}
+          </SecondaryButton>
+        ) : (
+          <PrimaryButton href={`tel:${phone}`} size="lg" fullWidth>
+            <Phone size={15} aria-hidden="true" />
+            {callLabel}
+          </PrimaryButton>
+        ))}
 
       <AddToTripButton locale={locale} listingType="cafe" listingId={cafeId} />
       <ShareButton title={name} />

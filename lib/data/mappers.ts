@@ -1,5 +1,5 @@
 import type { Database } from "@/types/database";
-import type { Hotel, HotelRoom, Restaurant, Cafe, Service, Attraction, EventItem, CityService, Article, GalleryImage, Review, BusinessOffer, MediaVideo, Notification, NotificationCategory, NotificationSeverity, Category, Product, Department, Doctor, Appointment, OpeningHoursGroup, RestaurantMenuItem } from "@/types";
+import type { Hotel, HotelRoom, Restaurant, Cafe, Service, Attraction, EventItem, CityService, Article, GalleryImage, Review, BusinessOffer, MediaVideo, Notification, NotificationCategory, NotificationSeverity, Category, Product, Department, Doctor, Appointment, OpeningHoursGroup, RestaurantMenuItem, TableReservation } from "@/types";
 
 type HotelRow = Database["public"]["Tables"]["hotels"]["Row"];
 type HotelRoomRow = Database["public"]["Tables"]["hotel_rooms"]["Row"];
@@ -16,6 +16,7 @@ type ProductRow = Database["public"]["Tables"]["products"]["Row"];
 type DepartmentRow = Database["public"]["Tables"]["departments"]["Row"];
 type DoctorRow = Database["public"]["Tables"]["doctors"]["Row"];
 type AppointmentRow = Database["public"]["Tables"]["appointments"]["Row"];
+type TableReservationRow = Database["public"]["Tables"]["table_reservations"]["Row"];
 
 function toGallery(json: unknown): GalleryImage[] {
   if (!Array.isArray(json)) return [];
@@ -247,6 +248,25 @@ export function mapCafe(row: CafeRow, reviews: Review[] = [], locale?: string): 
     partnerStatus: row.partner_status,
     cafeType: (row.cafe_type as Cafe["cafeType"]) ?? undefined,
     seatingCapacity: row.seating_capacity ?? undefined,
+    reservable: row.reservable,
+  };
+}
+
+export function mapTableReservation(row: TableReservationRow): TableReservation {
+  return {
+    id: row.id,
+    listingType: row.listing_type as TableReservation["listingType"],
+    listingId: row.listing_id,
+    customerName: row.customer_name,
+    customerPhone: row.customer_phone,
+    reservationDate: row.reservation_date,
+    reservationTime: row.reservation_time,
+    guestsCount: row.guests_count,
+    notes: row.notes ?? undefined,
+    status: row.status,
+    reservationReference: row.reservation_reference,
+    userId: row.user_id ?? undefined,
+    createdAt: row.created_at,
   };
 }
 

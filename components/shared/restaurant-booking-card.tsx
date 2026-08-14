@@ -1,9 +1,9 @@
-import { ArrowUpRight, Clock, Globe, Phone } from "lucide-react";
+import { Clock, Globe, Phone } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { AddToTripButton } from "@/components/shared/add-to-trip-button";
 import { ShareButton } from "@/components/shared/share-button";
 import { FavoriteButton } from "@/components/shared/favorite-button";
-import { PrimaryButton } from "@/components/shared/buttons";
+import { TableReservationButton } from "@/components/shared/table-reservation-button";
 import { normalizeExternalUrl } from "@/lib/utils/normalize-url";
 import { hasMeaningfulPrice } from "@/lib/utils/price-range";
 
@@ -69,22 +69,16 @@ export function RestaurantBookingCard({
         </div>
       )}
 
-      {reservable &&
-        (websiteHref ? (
-          <PrimaryButton href={websiteHref} external size="lg" fullWidth>
-            {reserveLabel}
-            <ArrowUpRight size={15} aria-hidden="true" />
-            <span className="sr-only">(opens in a new tab)</span>
-          </PrimaryButton>
-        ) : phone ? (
-          <PrimaryButton href={`tel:${phone}`} size="lg" fullWidth>
-            {reserveLabel}
-          </PrimaryButton>
-        ) : (
-          <PrimaryButton disabled size="lg" fullWidth>
-            {reserveLabel}
-          </PrimaryButton>
-        ))}
+      {reservable && (
+        <TableReservationButton
+          listingType="restaurant"
+          listingId={restaurantId}
+          businessName={name}
+          locale={locale}
+          label={reserveLabel}
+          className="group inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-primary-700 text-[15px] font-semibold text-white shadow-soft transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-primary-800 hover:shadow-card active:scale-95"
+        />
+      )}
 
       {(phone || website) && (
         <div className="space-y-2.5 rounded-2xl border border-ink/8 p-4 dark:border-white/10">

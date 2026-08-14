@@ -26,6 +26,7 @@ import { VideoGallery } from "@/components/shared/video-gallery";
 import { formatDayRange, formatTime12h } from "@/lib/utils/opening-hours";
 import { OpenStatusBadge } from "@/components/shared/open-status-badge";
 import { CafeActionCard } from "@/components/shared/cafe-action-card";
+import { TableReservationButton } from "@/components/shared/table-reservation-button";
 import { MobileBookingBar } from "@/components/shared/mobile-booking-bar";
 import { ListingCard } from "@/components/shared/listing-card";
 import { ReviewsSection } from "@/components/shared/reviews-section";
@@ -100,6 +101,7 @@ export default async function CafeDetailPage({
     ...(hasHoursInfo ? [{ id: "hours", label: td("openingHoursByDay") }] : []),
     ...(cafe.specialDrinks.length > 0 ? [{ id: "specialties", label: td("coffeeSpecialties") }] : []),
     ...(cafe.menuHighlights.length > 0 || cafe.menuPdfUrl ? [{ id: "menu", label: td("menuHighlights") }] : []),
+    ...(cafe.reservable ? [{ id: "reservation", label: t("reserveTable") }] : []),
     ...(cafe.gallery.length > 0 ? [{ id: "gallery", label: t("gallery") }] : []),
     ...(cafe.videos && cafe.videos.length > 0 ? [{ id: "videos", label: td("videoGallery") }] : []),
     ...(showAmenities ? [{ id: "amenities", label: t("amenities") }] : []),
@@ -158,7 +160,9 @@ export default async function CafeDetailPage({
         website={cafe.website}
         email={cafe.email}
         whatsappFallback={whatsappFallback}
-        showPrimary={false}
+        showPrimary={cafe.reservable}
+        primaryLabel={t("reserveTable")}
+        reservable={cafe.reservable}
       />
 
       <SocialLinks
@@ -297,6 +301,29 @@ export default async function CafeDetailPage({
             </Reveal>
           )}
 
+          {cafe.reservable && (
+            <Reveal>
+              <section id="reservation" aria-labelledby="reservation-heading" className="scroll-mt-36">
+                <h2 id="reservation-heading" className="mb-5 font-display text-2xl font-semibold">
+                  {t("reserveTable")}
+                </h2>
+                <div className="rounded-xl3 border border-ink/8 bg-white p-6 dark:border-white/10 dark:bg-white/[0.03] sm:p-8">
+                  <p className="mb-5 max-w-lg text-sm leading-relaxed text-ink/65 dark:text-sand/65">
+                    {td("reservationSectionBody")}
+                  </p>
+                  <TableReservationButton
+                    listingType="cafe"
+                    listingId={cafe.id}
+                    businessName={cafe.name}
+                    locale={locale}
+                    label={t("reserveTable")}
+                    className="group inline-flex h-12 items-center justify-center gap-2 rounded-full bg-primary-700 px-8 text-[15px] font-semibold text-white shadow-soft transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-primary-800 hover:shadow-card active:scale-95"
+                  />
+                </div>
+              </section>
+            </Reveal>
+          )}
+
           {cafe.gallery.length > 0 && (
             <Reveal>
               <section id="gallery" aria-labelledby="photo-gallery-heading" className="scroll-mt-36">
@@ -398,6 +425,8 @@ export default async function CafeDetailPage({
             phone={cafe.phone}
             locale={locale}
             callLabel={th("call")}
+            reservable={cafe.reservable}
+            reserveLabel={t("reserveTable")}
             initiallyFavorited={isFavorited}
             favoriteCount={cafe.favoriteCount}
             addFavoriteLabel={tl("addToFavorites", { name: cafe.name })}
@@ -457,7 +486,9 @@ export default async function CafeDetailPage({
         whatsappFallback={whatsappFallback}
         directionsHref={directionsHref}
         locale={locale}
-        showPrimary={false}
+        showPrimary={cafe.reservable}
+        primaryLabel={t("reserveTable")}
+        reservable={cafe.reservable}
       />
     </>
   );

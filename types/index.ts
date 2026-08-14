@@ -720,6 +720,31 @@ export interface Cafe {
   favoriteCount?: number;
   cafeType?: "coffee_shop" | "dessert_cafe" | "study_cafe" | "rooftop_cafe" | "tea_house" | "other";
   seatingCapacity?: number;
+  /** Off by default for every cafe — only set true for a cafe that's
+   * actually confirmed to take table reservations (see restaurants.reservable,
+   * the same flag Restaurant already has). */
+  reservable?: boolean;
+}
+
+/** One reservation request for a restaurant or cafe table — same
+ * `listing_type`/`listing_id` polymorphic shape reviews/favorites already
+ * use, so this works for any restaurant or cafe without per-business code.
+ * Never real-time table availability — see submit_table_reservation() —
+ * this is always a request the business owner reviews and confirms. */
+export interface TableReservation {
+  id: string;
+  listingType: "restaurant" | "cafe";
+  listingId: string;
+  customerName: string;
+  customerPhone: string;
+  reservationDate: string;
+  reservationTime: string;
+  guestsCount: number;
+  notes?: string;
+  status: "pending" | "confirmed" | "cancelled" | "completed";
+  reservationReference: string;
+  userId?: string;
+  createdAt: string;
 }
 
 /** Phase 2 — Essential City Services. One shared shape across all 8

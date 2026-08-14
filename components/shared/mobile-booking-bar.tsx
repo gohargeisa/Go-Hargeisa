@@ -8,6 +8,7 @@ import { getBookingHref } from "@/lib/utils/booking-href";
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
 import { FavoriteButton } from "@/components/shared/favorite-button";
 import { HotelBookNowButton } from "@/components/shared/hotel-book-now-button";
+import { TableReservationButton } from "@/components/shared/table-reservation-button";
 import type { HotelBookingCta } from "@/lib/utils/booking-cta";
 import type { BusinessListingType, HotelRoom } from "@/types";
 
@@ -40,6 +41,7 @@ export function MobileBookingBar({
   primaryLabel,
   bookingCta,
   rooms,
+  reservable,
 }: {
   listingType: BusinessListingType;
   listingId: string;
@@ -57,6 +59,8 @@ export function MobileBookingBar({
   /** Hotel-only: see components/shared/hotel-action-bar.tsx for the same prop. */
   bookingCta?: HotelBookingCta;
   rooms?: HotelRoom[];
+  /** Restaurant/cafe only: see components/shared/hotel-action-bar.tsx for the same prop. */
+  reservable?: boolean;
 }) {
   const t = useTranslations("hotelDetail");
   const [copied, setCopied] = useState(false);
@@ -148,8 +152,20 @@ export function MobileBookingBar({
         />
       )}
 
+      {showPrimary && !bookingCta && reservable && (
+        <TableReservationButton
+          listingType={listingType as "restaurant" | "cafe"}
+          listingId={listingId}
+          businessName={name}
+          locale={locale}
+          label={primaryLabel ?? t("bookNow")}
+          className="inline-flex h-12 shrink-0 items-center justify-center gap-1.5 rounded-full bg-primary px-7 text-sm font-bold text-white shadow-soft transition-all duration-150 hover:bg-primary-700 active:scale-95"
+        />
+      )}
+
       {showPrimary &&
         !bookingCta &&
+        !reservable &&
         (booking ? (
           <a
             href={booking.href}

@@ -2,7 +2,7 @@ import { safeJsonLd } from "@/lib/utils/json-ld";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { ExternalLink, FileText, MapPin, Navigation } from "lucide-react";
+import { ExternalLink, FileText, MapPin, Navigation, UtensilsCrossed } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
 import { getRestaurantBySlug, getAllRestaurantSlugs } from "@/lib/data/restaurants";
@@ -21,6 +21,8 @@ import { BusinessPhotoGallery } from "@/components/shared/business-photo-gallery
 import { RestaurantMenuSection } from "@/components/shared/restaurant-menu-section";
 import { RESTAURANT_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import { RestaurantBookingCard } from "@/components/shared/restaurant-booking-card";
+import { TableReservationButton } from "@/components/shared/table-reservation-button";
+import { EmptyState } from "@/components/shared/empty-state";
 import { MobileBookingBar } from "@/components/shared/mobile-booking-bar";
 import { ListingCard } from "@/components/shared/listing-card";
 import { ReviewsSection } from "@/components/shared/reviews-section";
@@ -95,6 +97,7 @@ export default async function RestaurantDetailPage({
     ...(offers.length > 0 ? [{ id: "offers", label: td("offersTabLabel") }] : []),
     ...(hasHoursInfo ? [{ id: "hours", label: td("openingHoursByDay") }] : []),
     ...(restaurant.menuHighlights.length > 0 || restaurant.menuPdfUrl ? [{ id: "menu", label: td("menuHighlights") }] : []),
+    ...(restaurant.reservable ? [{ id: "reservation", label: t("reserveTable") }] : []),
     ...(restaurant.gallery.length > 0 ? [{ id: "gallery", label: t("gallery") }] : []),
     ...(restaurant.videos && restaurant.videos.length > 0 ? [{ id: "videos", label: td("videoGallery") }] : []),
     ...(hasAmenities(restaurant.amenitiesV2) ? [{ id: "amenities", label: t("amenities") }] : []),
@@ -152,6 +155,7 @@ export default async function RestaurantDetailPage({
         whatsappFallback={whatsappFallback}
         showPrimary={restaurant.reservable}
         primaryLabel={t("reserveTable")}
+        reservable={restaurant.reservable}
       />
 
       <SocialLinks
@@ -246,27 +250,50 @@ export default async function RestaurantDetailPage({
             </Reveal>
           )}
 
-          {(restaurant.menuHighlights.length > 0 || restaurant.menuPdfUrl) && (
-            <Reveal>
-              <section id="menu" aria-labelledby="menu-heading" className="scroll-mt-36">
-                <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-                  <h2 id="menu-heading" className="font-display text-2xl font-semibold">
-                    {td("menuHighlights")}
-                  </h2>
-                  {restaurant.menuPdfUrl && (
-                    <SecondaryButton href={restaurant.menuPdfUrl} external size="sm">
-                      <FileText size={14} aria-hidden="true" />
-                      {td("downloadMenuPdf")}
-                    </SecondaryButton>
-                  )}
-                </div>
-                {restaurant.menuHighlights.length > 0 && (
-                  <RestaurantMenuSection
-                    items={restaurant.menuHighlights}
-                    allCategoriesLabel={td("menuAllCategoriesLabel")}
-                    featuredLabel={td("menuFeaturedLabel")}
-                  />
+          <Reveal>
+            <section id="menu" aria-labelledby="menu-heading" className="scroll-mt-36">
+              <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+                <h2 id="menu-heading" className="font-display text-2xl font-semibold">
+                  {td("menuHighlights")}
+                </h2>
+                {restaurant.menuPdfUrl && (
+                  <SecondaryButton href={restaurant.menuPdfUrl} external size="sm">
+                    <FileText size={14} aria-hidden="true" />
+                    {td("downloadMenuPdf")}
+                  </SecondaryButton>
                 )}
+              </div>
+              {restaurant.menuHighlights.length > 0 ? (
+                <RestaurantMenuSection
+                  items={restaurant.menuHighlights}
+                  allCategoriesLabel={td("menuAllCategoriesLabel")}
+                  featuredLabel={td("menuFeaturedLabel")}
+                />
+              ) : !restaurant.menuPdfUrl ? (
+                <EmptyState icon={UtensilsCrossed} title={td("menuComingSoonTitle")} description={td("menuComingSoonBody")} />
+              ) : null}
+            </section>
+          </Reveal>
+
+          {restaurant.reservable && (
+            <Reveal>
+              <section id="reservation" aria-labelledby="reservation-heading" className="scroll-mt-36">
+                <h2 id="reservation-heading" className="mb-5 font-display text-2xl font-semibold">
+                  {t("reserveTable")}
+                </h2>
+                <div className="rounded-xl3 border border-ink/8 bg-white p-6 dark:border-white/10 dark:bg-white/[0.03] sm:p-8">
+                  <p className="mb-5 max-w-lg text-sm leading-relaxed text-ink/65 dark:text-sand/65">
+                    {td("reservationSectionBody")}
+                  </p>
+                  <TableReservationButton
+                    listingType="restaurant"
+                    listingId={restaurant.id}
+                    businessName={restaurant.name}
+                    locale={locale}
+                    label={t("reserveTable")}
+                    className="group inline-flex h-12 items-center justify-center gap-2 rounded-full bg-primary-700 px-8 text-[15px] font-semibold text-white shadow-soft transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-primary-800 hover:shadow-card active:scale-95"
+                  />
+                </div>
               </section>
             </Reveal>
           )}
@@ -440,6 +467,7 @@ export default async function RestaurantDetailPage({
         locale={locale}
         showPrimary={restaurant.reservable}
         primaryLabel={t("reserveTable")}
+        reservable={restaurant.reservable}
       />
     </>
   );

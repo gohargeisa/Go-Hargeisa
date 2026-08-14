@@ -4,6 +4,7 @@ import { Reveal } from "@/components/home/reveal";
 import { TrackedCtaLink } from "@/components/shared/tracked-cta-link";
 import { ClaimBusinessButton } from "@/components/shared/claim-business-button";
 import { HotelBookNowButton } from "@/components/shared/hotel-book-now-button";
+import { TableReservationButton } from "@/components/shared/table-reservation-button";
 import { getBookingHref } from "@/lib/utils/booking-href";
 import { normalizeExternalUrl } from "@/lib/utils/normalize-url";
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
@@ -47,6 +48,7 @@ export async function HotelActionBar({
   primaryLabel,
   bookingCta,
   rooms,
+  reservable,
 }: {
   locale: Locale;
   listingType: BusinessListingType;
@@ -67,6 +69,11 @@ export async function HotelActionBar({
    * of the generic website/phone fallback below. */
   bookingCta?: HotelBookingCta;
   rooms?: HotelRoom[];
+  /** Restaurant/cafe only: when true, the primary button opens the real
+   * table-reservation request flow (TableReservationButton) instead of the
+   * generic website/phone fallback link below — same component regardless
+   * of which restaurant or cafe this is. */
+  reservable?: boolean;
 }) {
   const t = await getTranslations("hotelDetail");
   const tc = await getTranslations("common");
@@ -95,7 +102,18 @@ export async function HotelActionBar({
           />
         )}
 
-        {showPrimary && !bookingCta && booking && (
+        {showPrimary && !bookingCta && reservable && (
+          <TableReservationButton
+            listingType={listingType as "restaurant" | "cafe"}
+            listingId={listingId}
+            businessName={name}
+            locale={locale}
+            label={primaryLabel ?? tc("bookNow")}
+            className={PRIMARY_CLASS}
+          />
+        )}
+
+        {showPrimary && !bookingCta && !reservable && booking && (
           <a
             href={booking.href}
             target={booking.external ? "_blank" : undefined}

@@ -12,6 +12,7 @@ import {
   Home,
   Building2,
   CalendarDays,
+  CalendarClock,
   Images,
   Star,
   BarChart3,
@@ -38,6 +39,7 @@ const BASE_NAV_ITEMS = [
   { href: "/listing", icon: Building2, key: "navMyBusiness" },
   { href: "/offers", icon: Tag, key: "navOffers" },
   { href: "/bookings", icon: CalendarDays, key: "navBookings" },
+  { href: "/reservations", icon: CalendarClock, key: "navReservations" },
   { href: "/gallery", icon: Images, key: "navGallery" },
   { href: "/reviews", icon: Star, key: "navReviews" },
   { href: "/analytics", icon: BarChart3, key: "navAnalytics" },
@@ -167,7 +169,12 @@ export function BusinessSidebar({ locale, listing }: { locale: Locale; listing: 
 
   return (
     <>
-      <div className="flex items-center justify-between border-b border-ink/8 bg-white p-4 dark:border-white/10 dark:bg-ink lg:hidden">
+      {/* mt- offsets this bar below the global fixed SiteHeader (h-20 +
+          safe-area-inset-top, see components/layout/site-header.tsx) —
+          without it this row renders at the very top of the page flow and
+          the hamburger button sits underneath the header's hit-testing
+          area, making it unclickable. */}
+      <div className="mt-[calc(env(safe-area-inset-top)+5rem)] flex items-center justify-between border-b border-ink/8 bg-white p-4 dark:border-white/10 dark:bg-ink lg:hidden">
         <button
           type="button"
           onClick={() => setMobileOpen(true)}
@@ -176,7 +183,7 @@ export function BusinessSidebar({ locale, listing }: { locale: Locale; listing: 
         >
           <Menu size={19} aria-hidden="true" />
         </button>
-        <p className="truncate text-sm font-bold">{listing.name}</p>
+        <p className="min-w-0 flex-1 truncate px-2 text-center text-sm font-bold">{listing.name}</p>
         <div className="h-10 w-10" aria-hidden="true" />
       </div>
 

@@ -92,7 +92,7 @@ type CafeRow = ListingBase & SocialExtra & {
   opening_hours: string | null; opening_hours_structured: Json; owner_id: string | null;
   price_range: "$" | "$$" | "$$$" | "$$$$"; amenities: string[]; videos: Json; website: string | null;
   social_instagram: string | null; social_facebook: string | null; whatsapp: string | null; email: string | null;
-  logo_url: string | null; menu: Json; menu_pdf_url: string | null;
+  logo_url: string | null; menu: Json; menu_pdf_url: string | null; reservable: boolean;
   partner_status: PartnerStatusDb; trial_expires_at: string | null;
   is_24_hours: boolean; temporarily_closed: boolean; permanently_closed: boolean;
   cafe_type: string | null; seating_capacity: number | null;
@@ -255,6 +255,15 @@ type BookingStatusHistoryRow = {
   old_status: "pending" | "confirmed" | "cancelled" | "completed" | null;
   new_status: "pending" | "confirmed" | "cancelled" | "completed";
   changed_by: string | null; created_at: string;
+};
+
+type TableReservationRow = {
+  id: string; listing_type: "hotel" | "restaurant" | "cafe"; listing_id: string;
+  customer_name: string; customer_phone: string;
+  reservation_date: string; reservation_time: string; guests_count: number;
+  notes: string | null; status: "pending" | "confirmed" | "cancelled" | "completed";
+  reservation_reference: string; user_id: string | null;
+  created_at: string; updated_at: string;
 };
 
 type ProductRow = {
@@ -476,6 +485,7 @@ export type Database = {
       room_availability: Table<RoomAvailabilityRow>;
       bookings: Table<BookingRow>;
       booking_status_history: Table<BookingStatusHistoryRow>;
+      table_reservations: Table<TableReservationRow>;
       business_metric_events: Table<BusinessMetricEventRow>;
       business_subscriptions: Table<BusinessSubscriptionRow>;
       business_subscription_notes: Table<BusinessSubscriptionNoteRow>;
