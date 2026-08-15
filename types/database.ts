@@ -183,7 +183,7 @@ type ServiceRow = ListingBase & {
   category: ServiceCategoryDb | null; category_id: string | null; owner_id: string | null;
   custom_fields: Json;
   logo_url: string | null; videos: Json; whatsapp: string | null; email: string | null;
-  social_instagram: string | null; social_facebook: string | null; opening_hours_structured: Json;
+  social_instagram: string | null; social_facebook: string | null; social_tiktok: string | null; opening_hours_structured: Json;
   // Travel Agency / Travel Office (slug 'tour-companies')
   travel_agency_type: string | null; flight_ticketing: boolean | null; hotel_booking: boolean | null;
   visa_assistance: boolean | null; tour_packages: boolean | null; airport_transfers: boolean | null;
@@ -325,7 +325,7 @@ type BusinessMetricEventRow = {
 type BusinessSubscriptionRow = {
   id: string; listing_type: BusinessListingType; listing_id: string;
   plan_tier: "basic" | "silver" | "gold"; status: "active" | "paused" | "cancelled";
-  renews_at: string | null; created_at: string; updated_at: string;
+  renews_at: string | null; custom_price_usd: number | null; created_at: string; updated_at: string;
 };
 
 type BusinessSubscriptionNoteRow = {

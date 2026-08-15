@@ -78,7 +78,13 @@ export function Hero({ locale }: { locale: Locale }) {
     <section className="relative flex min-h-[720px] h-auto items-start overflow-hidden pb-12 md:h-screen md:max-h-[980px] md:pb-0 md:items-center lg:h-auto lg:min-h-screen lg:max-h-none">
       <HeroBackground reduceMotion={!!reduceMotion} priority />
 
-      <div className="container-px relative z-10 mx-auto flex w-full flex-col items-center pt-24 text-center text-white sm:pt-28 md:pt-16 lg:min-w-0 lg:pt-24 lg:pb-8">
+      {/* pt- on mobile/sm accounts for env(safe-area-inset-top) explicitly —
+          the fixed SiteHeader is h-20 (80px) PLUS that same safe-area inset
+          (components/layout/site-header.tsx), so a flat rem value alone
+          under-reserves space on notched phones and the header ends up
+          overlapping the badge/heading. md/lg switch to items-center within
+          a tall section, so a flat value is fine there. */}
+      <div className="container-px relative z-10 mx-auto flex w-full flex-col items-center pt-[calc(env(safe-area-inset-top)+6rem)] text-center text-white sm:pt-[calc(env(safe-area-inset-top)+7rem)] md:pt-16 lg:min-w-0 lg:pt-24 lg:pb-8">
         <m.span
           custom={0}
           initial={initial}

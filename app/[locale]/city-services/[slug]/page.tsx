@@ -21,6 +21,10 @@ import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { BusinessPhotoGallery } from "@/components/shared/business-photo-gallery";
 import { SERVICE_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import { VideoGallery } from "@/components/shared/video-gallery";
+import { AddToTripButton } from "@/components/shared/add-to-trip-button";
+import { PartnerAcquisitionCta } from "@/components/shared/partner-acquisition-cta";
+import { isMedicalAppointmentCategory } from "@/lib/utils/appointment-domain";
+import { ClaimBusinessButton } from "@/components/shared/claim-business-button";
 import { AmenitiesSection, hasAmenities } from "@/components/shared/amenities-section";
 import { ServiceTagsSection, hasServiceTags } from "@/components/shared/service-tags-section";
 import { SocialLinks } from "@/components/shared/social-links";
@@ -62,6 +66,41 @@ function hasTypedDetails(service: CityService, categorySlug: string): boolean {
       service.pharmacyType, service.pharmacyEmergencyContact,
       service.pharmacyDeliveryAvailable, service.prescriptionRequired, service.homeDelivery,
     ].some((v) => v !== undefined && v !== false && v !== "");
+  }
+  if (categorySlug === "clinic") {
+    const values: (string | number | boolean | undefined)[] = [
+      service.clinicType, service.numberOfTreatmentRooms,
+      service.insuranceAccepted?.length, service.languages?.length,
+    ];
+    return values.some((v) => v !== undefined && v !== false && v !== 0 && v !== "");
+  }
+  if (categorySlug === "school") {
+    const values: (string | number | boolean | undefined)[] = [
+      service.schoolType, service.curriculum, service.educationLevels?.length, service.ageRangeGrades,
+      service.numberOfClassrooms, service.numberOfStudents, service.numberOfTeachers,
+      service.languages?.length, service.admissionsOpen, service.educationFacilities?.length,
+    ];
+    return values.some((v) => v !== undefined && v !== false && v !== 0 && v !== "");
+  }
+  if (categorySlug === "university") {
+    const values: (string | number | boolean | undefined)[] = [
+      service.universityType, service.degreeLevels?.length, service.facultiesOffered?.length,
+      service.numberOfBuildings, service.numberOfStudents, service.numberOfTeachers,
+      service.languages?.length, service.admissionsOpen, service.educationFacilities?.length,
+    ];
+    return values.some((v) => v !== undefined && v !== false && v !== 0 && v !== "");
+  }
+  if (categorySlug === "beauty-salon") {
+    const values: (string | number | boolean | undefined)[] = [service.salonType, service.staffCount, service.walkInsAccepted, service.homeServiceAvailable];
+    return values.some((v) => v !== undefined && v !== false && v !== 0 && v !== "");
+  }
+  if (categorySlug === "men-barbershop") {
+    const values: (string | number | boolean | undefined)[] = [service.shopType, service.staffCount, service.walkInsAccepted, service.homeServiceAvailable];
+    return values.some((v) => v !== undefined && v !== false && v !== 0 && v !== "");
+  }
+  if (categorySlug === "perfume-shop" || categorySlug === "cosmetics-beauty") {
+    const values: (string | number | boolean | undefined)[] = [service.storeType, service.brands?.length];
+    return values.some((v) => v !== undefined && v !== false && v !== 0 && v !== "");
   }
   return false;
 }
@@ -112,7 +151,11 @@ export default async function CityServiceDetailPage({
   const categoryLabel = categoryDisplayName(category, locale);
   const productsEligible = category.supportsProducts;
   const appointmentsEligible = category.supportsAppointments;
-  const isDental = category.slug === "dental-clinic";
+  // "dental-clinic" was the old standalone category slug before Dental was
+  // folded into Clinics as one clinicType value — real dental listings today
+  // are category.slug === "clinic" with clinicType === "dental".
+  const isDental = category.slug === "dental-clinic" || (category.slug === "clinic" && service.clinicType === "dental");
+  const isMedical = isMedicalAppointmentCategory(category.slug);
 
   const [myReview, isFavorited, nearbyPlaces, allGroups, products, doctors, departments] = await Promise.all([
     featureEligible ? getMyReviewForListing("city_service", service.id) : Promise.resolve(null),
@@ -137,7 +180,7 @@ export default async function CityServiceDetailPage({
     { id: "overview", label: td("overview") },
     ...(productsEligible && products.length > 0 ? [{ id: "products", label: tp("title") }] : []),
     ...(showTypedDetails ? [{ id: "details", label: td("details") }] : []),
-    ...(appointmentsEligible && doctors.length > 0 ? [{ id: "doctors", label: ta("doctorsTitle") }] : []),
+    ...(appointmentsEligible && doctors.length > 0 ? [{ id: "doctors", label: ta(isMedical ? "doctorsTitle" : "staffLabel") }] : []),
     ...(galleryEligible && service.gallery.length > 0 ? [{ id: "gallery", label: t("gallery") }] : []),
     ...(featureEligible && service.videos && service.videos.length > 0 ? [{ id: "videos", label: td("videoGallery") }] : []),
     ...(hasHoursInfo ? [{ id: "hours", label: td("openingHoursByDay") }] : []),
@@ -179,6 +222,8 @@ export default async function CityServiceDetailPage({
         reviewCount={service.reviewCount}
         categoryLabel={categoryLabel}
         showRating={featureEligible}
+        locale={locale}
+        isPartner={service.status === "published"}
       />
 
       {(appointmentsEligible && doctors.length > 0) || service.phone || serviceWhatsappHref || service.email || serviceWebsiteHref ? (
@@ -186,7 +231,7 @@ export default async function CityServiceDetailPage({
           <div className="container-px mx-auto mt-6 flex flex-wrap items-center justify-center gap-3">
             {appointmentsEligible && doctors.length > 0 && (
               <PrimaryButton href={`/${locale}/city-services/${service.slug}/book`} size="sm">
-                {isDental ? ta("bookADentist") : ta("bookADoctor")}
+                {isMedical ? (isDental ? ta("bookADentist") : ta("bookADoctor")) : ta("bookAppointmentButton")}
               </PrimaryButton>
             )}
             {service.phone && (
@@ -284,7 +329,7 @@ export default async function CityServiceDetailPage({
             <Reveal>
               <section id="doctors" aria-labelledby="doctors-heading" className="scroll-mt-36">
                 <h2 id="doctors-heading" className="mb-5 font-display text-2xl font-semibold">
-                  {ta("doctorsTitle")}
+                  {ta(isMedical ? "doctorsTitle" : "staffLabel")}
                 </h2>
                 <DoctorsSection
                   doctors={doctors}
@@ -292,6 +337,7 @@ export default async function CityServiceDetailPage({
                   locale={locale}
                   bookHref={(doctorId) => `/${locale}/city-services/${service.slug}/book?doctor=${doctorId}`}
                   bookLabel={ta("bookAppointment")}
+                  isMedical={isMedical}
                 />
               </section>
             </Reveal>
@@ -431,6 +477,7 @@ export default async function CityServiceDetailPage({
         </div>
 
         <aside className="h-fit space-y-3 rounded-xl3 border border-ink/8 p-6 shadow-card dark:border-white/10 lg:sticky lg:top-24">
+          <AddToTripButton locale={locale} listingType="city_service" listingId={service.id} />
           <ShareButton title={service.name} />
           {featureEligible && (
             <FavoriteButton
@@ -446,6 +493,11 @@ export default async function CityServiceDetailPage({
               removeLabel={tl("removeFromFavorites", { name: service.name })}
             />
           )}
+          <ClaimBusinessButton
+            listingType="city_service"
+            listingId={service.id}
+            className="inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-ink/15 py-3 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
+          />
         </aside>
       </div>
 
@@ -478,6 +530,8 @@ export default async function CityServiceDetailPage({
           </div>
         </section>
       )}
+
+      <PartnerAcquisitionCta locale={locale} />
     </>
   );
 }

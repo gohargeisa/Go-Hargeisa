@@ -14,6 +14,7 @@ import {
 } from "@/lib/config/real-estate-attributes";
 import { electronicsBusinessTypeLabel, ELECTRONICS_FEATURE_ORDER, electronicsFeatureLabel } from "@/lib/config/electronics-attributes";
 import { transportationTypeLabel, TRANSPORTATION_FEATURE_ORDER, transportationFeatureLabel } from "@/lib/config/transportation-attributes";
+import { flowerShopTypeLabel, FLOWER_SERVICE_ORDER, flowerServiceLabel } from "@/lib/config/flower-shop-attributes";
 
 type Row = { label: string; value: React.ReactNode };
 
@@ -38,11 +39,11 @@ function featureRows<Code extends string>(
 
 /**
  * Read-only "Details" grid for Apartments/Real Estate/Electronics/
- * Transportation's typed columns (see 20260812000001) — these categories
- * don't use `customFieldsSchema`/`CustomFieldsDisplay` (Real Estate's old
- * schema was retired in that same migration), so this is their equivalent
- * display, gated by `categorySlug`. Renders nothing for any other category
- * or when the listing has no values set.
+ * Transportation/Flower Shops's typed columns, gated by `categorySlug`.
+ * Flower Shops also has 3 older `customFieldsSchema` fields rendered
+ * separately by `CustomFieldsDisplay` — this covers only its newer typed
+ * columns, the same split as every other category here. Renders nothing
+ * for any other category or when the listing has no values set.
  */
 export async function ServiceTypedFieldsDisplay({
   service,
@@ -158,6 +159,28 @@ export async function ServiceTypedFieldsDisplay({
             monthly_rental_available: service.monthlyRentalAvailable,
             delivery_service_available: service.deliveryServiceAvailable,
             cargo_service_available: service.cargoServiceAvailable,
+          })[code],
+        locale
+      ),
+    ];
+  } else if (categorySlug === "flower-shops") {
+    rows = [
+      { label: t("flowerShopTypeLabel"), value: flowerShopTypeLabel(service.flowerShopType, locale) },
+      { label: t("deliveryAreasLabel"), value: service.deliveryAreas && service.deliveryAreas.length > 0 ? service.deliveryAreas.join(", ") : undefined },
+      ...featureRows(
+        FLOWER_SERVICE_ORDER,
+        flowerServiceLabel,
+        (code) =>
+          ({
+            flower_delivery_available: service.flowerDeliveryAvailable,
+            same_day_delivery: service.sameDayDelivery,
+            custom_bouquets: service.customBouquets,
+            wedding_arrangements: service.weddingArrangements,
+            event_decoration_service: service.eventDecorationService,
+            gift_wrapping: service.giftWrapping,
+            indoor_plants: service.indoorPlants,
+            outdoor_plants: service.outdoorPlants,
+            online_ordering_available: service.onlineOrderingAvailable,
           })[code],
         locale
       ),

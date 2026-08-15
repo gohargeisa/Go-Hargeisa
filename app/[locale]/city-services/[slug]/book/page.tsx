@@ -7,6 +7,7 @@ import { getCategoryById } from "@/lib/data/categories";
 import { getDoctorsForListing, getDepartmentsForListing } from "@/lib/data/doctors";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { AppointmentBookingForm } from "@/components/shared/appointment-booking-form";
+import { isMedicalAppointmentCategory } from "@/lib/utils/appointment-domain";
 
 export async function generateMetadata({
   params: { locale, slug },
@@ -50,7 +51,12 @@ export default async function CityServiceBookingPage({
     getDepartmentsForListing(service.id),
   ]);
 
-  const isDental = category.slug === "dental-clinic";
+  // "dental-clinic" was the old standalone category slug before Dental was
+  // folded into Clinics as one clinicType value — real dental listings today
+  // are category.slug === "clinic" with clinicType === "dental".
+  const isDental = category.slug === "dental-clinic" || (category.slug === "clinic" && service.clinicType === "dental");
+  const isMedical = isMedicalAppointmentCategory(category.slug);
+  const bookLabel = isMedical ? (isDental ? t("bookADentist") : t("bookADoctor")) : t("bookAppointmentButton");
 
   return (
     <>
@@ -58,14 +64,14 @@ export default async function CityServiceBookingPage({
         items={[
           { label: tNav("cityServices"), href: `/${locale}/city-services` },
           { label: service.name, href: `/${locale}/city-services/${service.slug}` },
-          { label: isDental ? t("bookADentist") : t("bookADoctor"), href: `/${locale}/city-services/${service.slug}/book` },
+          { label: bookLabel, href: `/${locale}/city-services/${service.slug}/book` },
         ]}
       />
 
       <section className="container-px mx-auto pb-16 pt-4 sm:pt-6">
         <div className="mx-auto max-w-2xl overflow-hidden rounded-3xl border border-ink/8 bg-white shadow-premium dark:border-white/10 dark:bg-ink">
           {doctors.length === 0 ? (
-            <p className="p-10 text-center text-sm text-ink/50 dark:text-sand/50">{t("noDoctorsYet")}</p>
+            <p className="p-10 text-center text-sm text-ink/50 dark:text-sand/50">{t(isMedical ? "noDoctorsYet" : "noStaffYetPublic")}</p>
           ) : (
             <AppointmentBookingForm
               cityServiceName={service.name}
@@ -74,6 +80,7 @@ export default async function CityServiceBookingPage({
               preselectedDoctorId={searchParams.doctor}
               locale={locale}
               isDental={isDental}
+              isMedical={isMedical}
             />
           )}
         </div>

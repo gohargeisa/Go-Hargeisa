@@ -26,14 +26,18 @@ export interface ProductInput {
   size?: string;
 }
 
+export type ProductListingType = "city_service" | "service";
+
 /**
- * Products authorize via their PARENT city_services listing's owner_id, not a
- * column of their own — same shape as lib/actions/hotel-rooms.ts's
+ * Products authorize via their PARENT listing's owner_id, not a column of
+ * their own — same shape as lib/actions/hotel-rooms.ts's
  * assertCanManageRoom (hotels.owner_id) and lib/actions/city-services.ts's
  * assertCanEditCityService. RLS on `products` mirrors this same check
- * server-side as the authoritative gate.
+ * server-side as the authoritative gate. `listingType` picks which parent
+ * table owns the listing — city_services (Perfume/Cosmetics) or services
+ * (Flowers & Gifts) — everything else about the check is identical.
  */
-async function assertCanManageProduct(listingId: string) {
+async function assertCanManageProduct(listingId: string, listingType: ProductListingType) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -46,16 +50,17 @@ async function assertCanManageProduct(listingId: string) {
   if (role === "owner") return supabase;
 
   if (role === "business_owner") {
-    const { data: listing } = await supabase.from("city_services").select("owner_id").eq("id", listingId).single();
+    const table = listingType === "city_service" ? "city_services" : "services";
+    const { data: listing } = await supabase.from(table).select("owner_id").eq("id", listingId).single();
     if ((listing as { owner_id: string | null } | null)?.owner_id === user.id) return supabase;
   }
 
   throw new Error("Not authorized.");
 }
 
-function toPayload(input: ProductInput, listingId: string) {
+function toPayload(input: ProductInput, listingId: string, listingType: ProductListingType) {
   return {
-    listing_type: "city_service",
+    listing_type: listingType,
     listing_id: listingId,
     name: input.name.trim(),
     name_ar: input.nameAr?.trim() || null,
@@ -81,11 +86,12 @@ function toPayload(input: ProductInput, listingId: string) {
 export async function createProduct(
   listingId: string,
   input: ProductInput,
-  revalidatePaths: string[]
+  revalidatePaths: string[],
+  listingType: ProductListingType = "city_service"
 ): Promise<{ ok: boolean; error?: string }> {
-  const supabase = await assertCanManageProduct(listingId);
+  const supabase = await assertCanManageProduct(listingId, listingType);
 
-  const { error } = await supabase.from("products").insert(toPayload(input, listingId) as never);
+  const { error } = await supabase.from("products").insert(toPayload(input, listingId, listingType) as never);
   if (error) return { ok: false, error: error.message };
 
   for (const path of revalidatePaths) revalidatePath(path);
@@ -96,13 +102,14 @@ export async function updateProduct(
   productId: string,
   listingId: string,
   input: ProductInput,
-  revalidatePaths: string[]
+  revalidatePaths: string[],
+  listingType: ProductListingType = "city_service"
 ): Promise<{ ok: boolean; error?: string }> {
-  const supabase = await assertCanManageProduct(listingId);
+  const supabase = await assertCanManageProduct(listingId, listingType);
 
   const { error } = await supabase
     .from("products")
-    .update({ ...toPayload(input, listingId), updated_at: new Date().toISOString() } as never)
+    .update({ ...toPayload(input, listingId, listingType), updated_at: new Date().toISOString() } as never)
     .eq("id", productId);
   if (error) return { ok: false, error: error.message };
 
@@ -113,9 +120,10 @@ export async function updateProduct(
 export async function deleteProduct(
   productId: string,
   listingId: string,
-  revalidatePaths: string[]
+  revalidatePaths: string[],
+  listingType: ProductListingType = "city_service"
 ): Promise<{ ok: boolean; error?: string }> {
-  const supabase = await assertCanManageProduct(listingId);
+  const supabase = await assertCanManageProduct(listingId, listingType);
 
   const { error } = await supabase.from("products").delete().eq("id", productId);
   if (error) return { ok: false, error: error.message };

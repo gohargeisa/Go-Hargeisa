@@ -12,6 +12,7 @@ import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { ViewTracker } from "@/components/shared/view-tracker";
 import { HotelHeaderTop } from "@/components/shared/hotel-header-top";
 import { HotelActionBar } from "@/components/shared/hotel-action-bar";
+import { SocialLinks } from "@/components/shared/social-links";
 import { HotelGallerySlider } from "@/components/shared/hotel-gallery-slider";
 import { HotelNavTabs, type HotelNavTab } from "@/components/shared/hotel-nav-tabs";
 import { BusinessPhotoGallery } from "@/components/shared/business-photo-gallery";
@@ -25,10 +26,13 @@ import { resolveMapsUrl, resolveDirectionsUrl } from "@/lib/utils/google-maps";
 import { Reveal } from "@/components/home/reveal";
 import { serviceHref, singularize } from "@/lib/utils/service-categories";
 import { CustomFieldsDisplay } from "@/components/shared/custom-fields-display";
+import { PartnerAcquisitionCta } from "@/components/shared/partner-acquisition-cta";
 import { ServiceTypedFieldsDisplay } from "@/components/shared/service-typed-fields-display";
 import { SERVICES_PUBLIC_ENABLED } from "@/lib/config/features";
+import { getProductsForListing } from "@/lib/data/products";
+import { ProductsSection } from "@/components/shared/products-section";
 
-const TYPED_FIELD_CATEGORIES = new Set(["apartments", "real-estate", "electronics", "transportation"]);
+const TYPED_FIELD_CATEGORIES = new Set(["apartments", "real-estate", "electronics", "transportation", "flower-shops"]);
 
 /** Whether this service's category is one of the typed-column categories
  * AND at least one of its fields actually has a value — mirrors the
@@ -44,7 +48,13 @@ function hasTypedDetails(service: import("@/types").Service, categorySlug: strin
         ? [service.propertyType, service.listingPurpose, service.price, service.realEstateBedrooms, service.areaSqm]
         : categorySlug === "electronics"
           ? [service.electronicsBusinessType, service.sellsNew, service.sellsUsed, service.warrantyAvailable, (service.brandsAvailable ?? []).length > 0]
-          : [service.transportationType, service.vehicleCount, service.driverAvailable, service.rentalAvailable];
+          : categorySlug === "flower-shops"
+            ? [
+                service.flowerShopType, service.flowerDeliveryAvailable, service.sameDayDelivery, service.customBouquets,
+                service.weddingArrangements, service.eventDecorationService, service.giftWrapping, service.indoorPlants,
+                service.outdoorPlants, service.onlineOrderingAvailable, (service.deliveryAreas ?? []).length > 0,
+              ]
+            : [service.transportationType, service.vehicleCount, service.driverAvailable, service.rentalAvailable];
   return candidates.some((v) => v !== undefined && v !== false && v !== "");
 }
 
@@ -94,11 +104,14 @@ export default async function ServiceDetailPage({
   const tNav = await getTranslations("nav");
   const td = await getTranslations("detail");
   const th = await getTranslations("hotelDetail");
+  const tp = await getTranslations("products");
   const serviceCategory = await getCategoryBySlug(service.categorySlug);
-  const [allServices, siteSettings, myReview] = await Promise.all([
+  const productsEligible = serviceCategory?.supportsProducts ?? false;
+  const [allServices, siteSettings, myReview, products] = await Promise.all([
     serviceCategory ? getServices({ categoryId: serviceCategory.id }) : Promise.resolve([]),
     getSiteSettings(),
     getMyReviewForListing("service", service.id),
+    productsEligible ? getProductsForListing(service.id, "service") : Promise.resolve([]),
   ]);
   const similarServices = allServices.filter((s) => s.id !== service.id).slice(0, 4);
   const whatsappFallback = (siteSettings as { whatsapp_number?: string } | null)?.whatsapp_number ?? undefined;
@@ -119,6 +132,7 @@ export default async function ServiceDetailPage({
 
   const navTabs: HotelNavTab[] = [
     { id: "overview", label: td("overview") },
+    ...(productsEligible && products.length > 0 ? [{ id: "products", label: tp("title") }] : []),
     ...(hasDetails ? [{ id: "details", label: td("details") }] : []),
     ...(service.services.length > 0 ? [{ id: "services", label: "Services" }] : []),
     ...(galleryImages.length > 0 ? [{ id: "gallery", label: t("gallery") }] : []),
@@ -159,6 +173,8 @@ export default async function ServiceDetailPage({
         rating={service.rating}
         reviewCount={service.reviewCount}
         categoryLabel={singularize(service.categoryLabel)}
+        locale={locale}
+        isPartner
       />
 
       <HotelActionBar
@@ -171,6 +187,20 @@ export default async function ServiceDetailPage({
         whatsappFallback={whatsappFallback}
         showPrimary={false}
       />
+
+      {(service.socialInstagram || service.socialFacebook || service.socialTiktok) && (
+        <SocialLinks
+          instagram={service.socialInstagram}
+          facebook={service.socialFacebook}
+          tiktok={service.socialTiktok}
+          labels={{
+            instagram: td("followInstagram"),
+            facebook: td("followFacebook"),
+            tiktok: td("followTiktok"),
+          }}
+          className="container-px mx-auto mt-3 justify-center"
+        />
+      )}
 
       <HotelGallerySlider cover={service.coverImage} images={galleryImages} alt={service.name} />
 
@@ -188,6 +218,17 @@ export default async function ServiceDetailPage({
               <p className="leading-relaxed text-ink/75 dark:text-sand/75">{service.description}</p>
             </section>
           </Reveal>
+
+          {productsEligible && products.length > 0 && (
+            <Reveal>
+              <section id="products" aria-labelledby="products-heading" className="scroll-mt-36">
+                <h2 id="products-heading" className="mb-5 font-display text-2xl font-semibold">
+                  {tp("title")}
+                </h2>
+                <ProductsSection products={products} storeName={service.name} locale={locale} />
+              </section>
+            </Reveal>
+          )}
 
           {hasDetails && serviceCategory && (
             <Reveal>
@@ -343,6 +384,8 @@ export default async function ServiceDetailPage({
           </div>
         </section>
       )}
+
+      <PartnerAcquisitionCta locale={locale} />
     </>
   );
 }

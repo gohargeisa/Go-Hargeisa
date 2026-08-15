@@ -28,11 +28,13 @@ import {
   Package,
   Users,
   Stethoscope,
+  UserCog,
   CalendarCheck,
 } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { SignOutButton } from "@/components/shared/sign-out-button";
 import type { OwnedListing } from "@/lib/data/business";
+import { isMedicalAppointmentCategory } from "@/lib/utils/appointment-domain";
 
 const BASE_NAV_ITEMS = [
   { href: "", icon: Home, key: "navDashboard" },
@@ -55,18 +57,23 @@ const BASE_NAV_ITEMS = [
  * supports_appointments), so every hotel/restaurant/cafe/service owner's
  * sidebar is completely unaffected. */
 const PRODUCTS_NAV_ITEM = { href: "/products", icon: Package, key: "navProducts" } as const;
-const APPOINTMENTS_NAV_ITEMS = [
-  { href: "/departments", icon: Users, key: "navDepartments" },
-  { href: "/doctors", icon: Stethoscope, key: "navDoctors" },
-  { href: "/appointments", icon: CalendarCheck, key: "navAppointments" },
-] as const;
 
 function getNavItems(listing: OwnedListing) {
   const items: { href: string; icon: typeof Home; key: string }[] = [...BASE_NAV_ITEMS];
   const myBusinessIndex = items.findIndex((i) => i.key === "navMyBusiness");
+  // "Doctors" reads as Stethoscope/"Doctors" for Hospital/Clinic, and as a
+  // generic staff icon/label for every other appointments-enabled category
+  // (e.g. Beauty Salon) — see lib/utils/appointment-domain.ts. Same routes,
+  // same underlying doctors/appointments tables either way.
+  const isMedical = isMedicalAppointmentCategory(listing.categorySlug);
+  const appointmentsNavItems = [
+    { href: "/departments", icon: Users, key: "navDepartments" },
+    { href: "/doctors", icon: isMedical ? Stethoscope : UserCog, key: isMedical ? "navDoctors" : "staffLabel" },
+    { href: "/appointments", icon: CalendarCheck, key: "navAppointments" },
+  ];
   const inserts = [
     ...(listing.supportsProducts ? [PRODUCTS_NAV_ITEM] : []),
-    ...(listing.supportsAppointments ? APPOINTMENTS_NAV_ITEMS : []),
+    ...(listing.supportsAppointments ? appointmentsNavItems : []),
   ];
   if (inserts.length > 0) items.splice(myBusinessIndex + 1, 0, ...inserts);
   return items;

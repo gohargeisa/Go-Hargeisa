@@ -26,10 +26,15 @@ const STATUS_STYLES: Record<MyAppointment["status"], string> = {
   no_show: "bg-ink/10 text-ink/60 dark:bg-white/10 dark:text-sand/60",
 };
 
+const MONTH_ABBR = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+// Deterministic, not locale-dependent — toLocaleDateString(undefined, ...)
+// resolves the server's locale differently from the client's, producing a
+// React hydration mismatch (see components/business/reservations-table.tsx).
 function formatDate(iso: string): string {
-  const d = new Date(`${iso}T00:00:00`);
-  if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  const [y, m, d] = iso.split("-").map(Number);
+  if (!y || !m || !d) return iso;
+  return `${MONTH_ABBR[m - 1]} ${d}, ${y}`;
 }
 
 export function AppointmentsPanel({ locale, appointments }: { locale: Locale; appointments: MyAppointment[] }) {

@@ -31,6 +31,7 @@ export function AppointmentBookingForm({
   preselectedDoctorId,
   locale,
   isDental,
+  isMedical = true,
 }: {
   cityServiceName: string;
   doctors: Doctor[];
@@ -38,6 +39,7 @@ export function AppointmentBookingForm({
   preselectedDoctorId?: string;
   locale: string;
   isDental: boolean;
+  isMedical?: boolean;
 }) {
   const t = useTranslations("appointments");
 
@@ -88,7 +90,7 @@ export function AppointmentBookingForm({
     setError(null);
 
     if (!doctorId) {
-      setError(t("selectDoctorRequired"));
+      setError(t(isMedical ? "selectDoctorRequired" : "selectStaffRequired"));
       return;
     }
     if (!date || !time) {
@@ -138,9 +140,11 @@ export function AppointmentBookingForm({
     );
   }
 
+  const bookLabel = isMedical ? (isDental ? t("bookADentist") : t("bookADoctor")) : t("bookAppointmentButton");
+
   return (
     <form onSubmit={onSubmit} className="space-y-5 p-5 sm:p-8">
-      <h2 className="font-display text-xl font-bold">{isDental ? t("bookADentist") : t("bookADoctor")}</h2>
+      <h2 className="font-display text-xl font-bold">{bookLabel}</h2>
 
       {departments.length > 0 && (
         <div>
@@ -164,9 +168,9 @@ export function AppointmentBookingForm({
       )}
 
       <div>
-        <label className="mb-1.5 block text-sm font-semibold">{t("doctorLabel")}</label>
+        <label className="mb-1.5 block text-sm font-semibold">{t(isMedical ? "doctorLabel" : "staffLabel")}</label>
         <select value={doctorId} onChange={(e) => setDoctorId(e.target.value)} className={inputClass}>
-          <option value="">{t("selectDoctorPlaceholder")}</option>
+          <option value="">{t(isMedical ? "selectDoctorPlaceholder" : "selectStaffPlaceholder")}</option>
           {filteredDoctors.map((d) => (
             <option key={d.id} value={d.id}>
               {d.name}
@@ -216,7 +220,7 @@ export function AppointmentBookingForm({
       </div>
       <div>
         <label className="mb-1.5 block text-sm font-semibold">{t("notesLabel")}</label>
-        <textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} className={inputClass} placeholder={t("notesPlaceholder")} />
+        <textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} className={inputClass} placeholder={t(isMedical ? "notesPlaceholder" : "staffNotesPlaceholder")} />
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
@@ -227,7 +231,7 @@ export function AppointmentBookingForm({
         className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary py-3.5 text-sm font-bold text-white transition-colors hover:bg-primary-700 disabled:opacity-70"
       >
         {isPending && <Loader2 size={16} className="animate-spin" />}
-        {isDental ? t("bookADentist") : t("bookADoctor")}
+        {bookLabel}
       </button>
     </form>
   );

@@ -2,6 +2,8 @@ import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { Building2, MapPin, Star } from "lucide-react";
 import { Reveal } from "@/components/home/reveal";
+import { PartnerBadge } from "@/components/shared/partner-badge";
+import type { Locale } from "@/lib/i18n/config";
 
 /**
  * Centered logo / name / rating block shown above the hero gallery — this
@@ -21,6 +23,8 @@ export async function HotelHeaderTop({
   reviewCount,
   categoryLabel,
   showRating = true,
+  locale,
+  isPartner = false,
 }: {
   logo?: string;
   name: string;
@@ -31,6 +35,12 @@ export async function HotelHeaderTop({
    * (hospital/pharmacy/mosque/bank) — a "No reviews yet" star row would be
    * clutter on a page that will never collect reviews. */
   showRating?: boolean;
+  /** Only needed when isPartner is true (renders the PartnerBadge). */
+  locale?: Locale;
+  /** True when this listing's status === 'published' — see
+   * components/shared/partner-badge.tsx for why that's the gate. Callers
+   * that don't pass this (or pass false) simply render no badge. */
+  isPartner?: boolean;
 }) {
   const t = await getTranslations("common");
 
@@ -82,6 +92,11 @@ export async function HotelHeaderTop({
           <span className="text-xs font-medium uppercase tracking-wide text-ink/70 dark:text-sand/70">
             {categoryLabel}
           </span>
+          {isPartner && locale && (
+            <div className="mt-1">
+              <PartnerBadge locale={locale} />
+            </div>
+          )}
         </div>
       </div>
     </Reveal>

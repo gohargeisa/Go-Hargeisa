@@ -6,6 +6,7 @@ import { getActiveListing } from "@/lib/data/business";
 import { createClient } from "@/lib/supabase/server";
 import { mapAppointment } from "@/lib/data/mappers";
 import { AppointmentsTable, type AppointmentManagerRow } from "@/components/business/appointments-table";
+import { isMedicalAppointmentCategory } from "@/lib/utils/appointment-domain";
 
 export const metadata: Metadata = { title: "Appointments — Dashboard", robots: { index: false } };
 
@@ -46,7 +47,7 @@ export default async function AppointmentsPage({ params: { locale } }: { params:
         <p className="mt-1 text-sm text-ink/60 dark:text-sand/60">{t("appointmentsPageSubtitle")}</p>
       </div>
       <div className="pt-4">
-        <AppointmentsTable appointments={rows} revalidatePath={currentPath} />
+        <AppointmentsTable appointments={rows} revalidatePath={currentPath} isMedical={isMedicalAppointmentCategory(listing.categorySlug)} />
       </div>
     </div>
   );

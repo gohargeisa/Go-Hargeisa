@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Loader2, Pencil, Plus, Trash2, X, Star, EyeOff } from "lucide-react";
-import { createProduct, deleteProduct, updateProduct, type ProductInput } from "@/lib/actions/products";
+import { createProduct, deleteProduct, updateProduct, type ProductInput, type ProductListingType } from "@/lib/actions/products";
 import { ImageUploader } from "@/components/shared/image-uploader";
 import { GalleryManager } from "@/components/admin/gallery-manager-lazy";
 import { Field, inputClass } from "@/components/admin/form-shared";
@@ -49,11 +49,13 @@ export function ProductsManager({
   initialProducts,
   revalidatePaths,
   locale,
+  listingType = "city_service",
 }: {
   listingId: string;
   initialProducts: ProductManagerRow[];
   revalidatePaths: string[];
   locale: string;
+  listingType?: ProductListingType;
 }) {
   const t = useTranslations("products");
   const [products, setProducts] = useState(initialProducts);
@@ -85,8 +87,8 @@ export function ProductsManager({
     startTransition(async () => {
       const result =
         editingId && editingId !== "new"
-          ? await updateProduct(editingId, listingId, draft, revalidatePaths)
-          : await createProduct(listingId, draft, revalidatePaths);
+          ? await updateProduct(editingId, listingId, draft, revalidatePaths, listingType)
+          : await createProduct(listingId, draft, revalidatePaths, listingType);
       if (result.ok) {
         setEditingId(null);
         router.refresh();
@@ -99,7 +101,7 @@ export function ProductsManager({
   function remove(id: string) {
     if (!confirm(t("confirmDelete"))) return;
     startTransition(async () => {
-      const result = await deleteProduct(id, listingId, revalidatePaths);
+      const result = await deleteProduct(id, listingId, revalidatePaths, listingType);
       if (result.ok) router.refresh();
       else alert(result.error ?? t("deleteFailed"));
     });

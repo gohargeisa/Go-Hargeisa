@@ -13,18 +13,22 @@ export default async function ProductsPage({ params: { locale } }: { params: { l
   const currentPath = `/${locale}/business/products`;
   const listing = await getActiveListing(locale, currentPath);
   if (!listing) return null;
-  // Only Perfume & Cosmetics shops (categories.supports_products) get this
-  // page — every other listing type/category has no products table concept.
+  // Only categories with categories.supports_products get this page (today:
+  // Perfume & Cosmetics/city_services, Flowers & Gifts/services) — every
+  // other listing type/category has no products table concept.
   // redirect() rather than notFound() — see the identical comment in
   // app/[locale]/city-services/[slug]/book/page.tsx for why.
   if (!listing.supportsProducts) redirect(`/${locale}/business`);
+  // supportsProducts is only ever true for city_service/service listings —
+  // see lib/data/business.ts — so this narrowing is safe.
+  const listingType = listing.listingType as "city_service" | "service";
 
   const t = await getTranslations({ locale, namespace: "products" });
   const supabase = await createClient();
   const { data } = await supabase
     .from("products")
     .select("*")
-    .eq("listing_type", "city_service")
+    .eq("listing_type", listingType)
     .eq("listing_id", listing.id)
     .order("sort_order", { ascending: true });
 
@@ -60,7 +64,7 @@ export default async function ProductsPage({ params: { locale } }: { params: { l
       </div>
 
       <div className="pt-4">
-        <ProductsManager listingId={listing.id} initialProducts={rows} revalidatePaths={[currentPath]} locale={locale} />
+        <ProductsManager listingId={listing.id} initialProducts={rows} revalidatePaths={[currentPath]} locale={locale} listingType={listingType} />
       </div>
     </div>
   );

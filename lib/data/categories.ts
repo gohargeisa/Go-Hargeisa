@@ -56,7 +56,16 @@ export const getCategories = cache(getCategoriesDurable);
 export async function getVisibleCategories(): Promise<Category[]> {
   const categories = await getCategories();
   return categories.filter((c) => {
-    if (c.targetTable === "city_services" && !c.isPinned) return false;
+    // "flower-shops" (Flowers & Gifts) is a deliberate, narrow exception:
+    // it moved from the standalone `services` vertical into City Services,
+    // which would otherwise make it (and the site's "More" nav dropdown,
+    // if this was the only non-pinned category with a real listing)
+    // disappear from top-level navigation entirely — City Services is still
+    // its primary, natural home (discoverable there like every other
+    // subcategory); this only keeps it reachable as a "More" shortcut too,
+    // same as it was before the move. No other city_services subcategory
+    // gets this treatment.
+    if (c.targetTable === "city_services" && !c.isPinned && c.slug !== "flower-shops") return false;
     if (c.targetTable === "services") return SERVICES_PUBLIC_ENABLED;
     if (c.targetTable === "restaurants") return RESTAURANTS_PUBLIC_ENABLED;
     if (c.targetTable === "cafes") return CAFES_PUBLIC_ENABLED;

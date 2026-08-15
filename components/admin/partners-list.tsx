@@ -12,6 +12,7 @@ import {
   addSubscriptionNote,
   extendTrial,
   expireTrialNow,
+  setCustomPrice,
 } from "@/lib/actions/partners";
 import { ListingStatusMenu } from "@/components/shared/listing-status-menu";
 import { FeatureListingButton } from "@/components/shared/feature-listing-button";
@@ -39,6 +40,8 @@ export interface PartnerRow {
   planTier: SubscriptionPlanId | null;
   subscriptionStatus: SubscriptionStatus;
   renewsAt: string | null;
+  /** Overrides the plan tier's default price (lib/config/subscription-plans.ts) for this one partner. null = use the plan's standard price. */
+  customPriceUsd: number | null;
   notes: PartnerNote[];
 }
 
@@ -63,6 +66,8 @@ export function PartnersList({ locale, rows }: { locale: Locale; rows: PartnerRo
   const [trialExtendDate, setTrialExtendDate] = useState("");
   const [notesOpenId, setNotesOpenId] = useState<string | null>(null);
   const [noteDraft, setNoteDraft] = useState("");
+  const [priceEditingId, setPriceEditingId] = useState<string | null>(null);
+  const [priceDraft, setPriceDraft] = useState("");
 
   function run(id: string, action: () => Promise<{ ok: boolean; error?: string }>) {
     setPendingId(id);
@@ -139,6 +144,38 @@ export function PartnersList({ locale, rows }: { locale: Locale; rows: PartnerRo
     run(row.id, () => expireTrialNow(locale, row.table, row.id));
   }
 
+  function onStartPriceEdit(row: PartnerRow) {
+    const fallback = SUBSCRIPTION_PLANS[row.planTier ?? "basic"].priceUsd;
+    setPriceDraft(String(row.customPriceUsd ?? fallback));
+    setPriceEditingId(row.id);
+  }
+
+  function onSavePrice(row: PartnerRow) {
+    const parsed = priceDraft.trim() === "" ? null : Number(priceDraft);
+    if (parsed !== null && (!Number.isFinite(parsed) || parsed < 0)) return;
+    setPendingId(row.id);
+    startTransition(async () => {
+      const result = await setCustomPrice(locale, row.table, row.id, parsed);
+      if (result.ok) {
+        router.refresh();
+        setPriceEditingId(null);
+      } else {
+        alert(result.error ?? t("somethingWentWrong"));
+      }
+      setPendingId(null);
+    });
+  }
+
+  function onClearPrice(row: PartnerRow) {
+    setPendingId(row.id);
+    startTransition(async () => {
+      const result = await setCustomPrice(locale, row.table, row.id, null);
+      if (result.ok) router.refresh();
+      else alert(result.error ?? t("somethingWentWrong"));
+      setPendingId(null);
+    });
+  }
+
   function onAddNote(row: PartnerRow) {
     if (!noteDraft.trim()) return;
     setPendingId(row.id);
@@ -167,7 +204,10 @@ export function PartnersList({ locale, rows }: { locale: Locale; rows: PartnerRo
     <div className="flex flex-col gap-4">
       {rows.map((row) => {
         const busy = isPending && pendingId === row.id;
-        const plan = row.planTier ? SUBSCRIPTION_PLANS[row.planTier] : null;
+        // A partner with no business_subscriptions row yet (planTier null)
+        // still shows/uses the "basic" plan's price — matches the <select>
+        // below, which already falls back to "basic" the same way.
+        const plan = SUBSCRIPTION_PLANS[row.planTier ?? "basic"];
         const planIdx = row.planTier ? SUBSCRIPTION_PLAN_ORDER.indexOf(row.planTier) : -1;
         const notesOpen = notesOpenId === row.id;
 
@@ -309,6 +349,62 @@ export function PartnersList({ locale, rows }: { locale: Locale; rows: PartnerRo
                 >
                   {t("upgradePlan")}
                 </button>
+
+                {priceEditingId === row.id ? (
+                  <>
+                    <div className="flex h-8 items-center gap-1 rounded-lg border border-ink/10 pl-2 text-xs dark:border-white/15">
+                      <span className="text-ink/45 dark:text-sand/45">$</span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={priceDraft}
+                        onChange={(e) => setPriceDraft(e.target.value)}
+                        placeholder={t("usePlanDefaultPlaceholder")}
+                        className="h-full w-20 bg-transparent pr-2 outline-none"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => onSavePrice(row)}
+                      disabled={busy}
+                      className="h-8 rounded-lg bg-primary px-2.5 text-xs font-semibold text-white transition-colors hover:bg-primary-700 disabled:opacity-60"
+                    >
+                      {t("savePriceAction")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPriceEditingId(null)}
+                      disabled={busy}
+                      className="h-8 rounded-lg border border-ink/10 px-2.5 text-xs font-semibold dark:border-white/15"
+                    >
+                      {t("extendCancel")}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => onStartPriceEdit(row)}
+                      disabled={busy}
+                      className="flex h-8 items-center gap-1 rounded-lg border border-ink/10 px-2.5 text-xs font-semibold transition-colors hover:border-primary hover:text-primary disabled:opacity-60 dark:border-white/15"
+                    >
+                      <Pencil size={11} />
+                      ${row.customPriceUsd ?? plan.priceUsd}
+                      {row.customPriceUsd !== null && <span className="text-ink/40 dark:text-sand/40">({t("customPriceTag")})</span>}
+                    </button>
+                    {row.customPriceUsd !== null && (
+                      <button
+                        type="button"
+                        onClick={() => onClearPrice(row)}
+                        disabled={busy}
+                        className="h-8 rounded-lg border border-ink/10 px-2.5 text-xs font-semibold text-ink/55 transition-colors hover:border-primary hover:text-primary disabled:opacity-60 dark:border-white/15 dark:text-sand/55"
+                      >
+                        {t("clearCustomPriceAction")}
+                      </button>
+                    )}
+                  </>
+                )}
 
                 <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${STATUS_STYLE[row.subscriptionStatus]}`}>
                   {t(`subscriptionStatus${row.subscriptionStatus[0].toUpperCase()}${row.subscriptionStatus.slice(1)}` as

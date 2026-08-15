@@ -78,7 +78,7 @@ export type ProductGender = "men" | "women" | "unisex" | "kids";
  * listingType='city_service' (Perfume & Cosmetics shops). */
 export interface Product {
   id: string;
-  listingType: "city_service";
+  listingType: "city_service" | "service";
   listingId: string;
   name: string;
   nameAr?: string;
@@ -790,6 +790,7 @@ export interface Service {
   website?: string;
   socialInstagram?: string;
   socialFacebook?: string;
+  socialTiktok?: string;
   openingHours?: string;
   openingHoursStructured?: OpeningHoursGroup[];
   services: string[];

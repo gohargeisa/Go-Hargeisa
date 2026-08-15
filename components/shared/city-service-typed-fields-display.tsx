@@ -4,6 +4,23 @@ import type { CityService } from "@/types";
 import type { Locale } from "@/lib/i18n/config";
 import { hospitalTypeLabel, HOSPITAL_FACILITY_ORDER, hospitalFacilityLabel } from "@/lib/config/hospital-attributes";
 import { pharmacyTypeLabel, PHARMACY_FEATURE_ORDER, pharmacyFeatureLabel } from "@/lib/config/pharmacy-attributes";
+import { clinicTypeLabel } from "@/lib/config/clinic-attributes";
+import { salonTypeLabel, shopTypeLabel } from "@/lib/config/salon-attributes";
+import { storeTypeLabel } from "@/lib/config/retail-store-attributes";
+import {
+  schoolTypeLabel,
+  curriculumLabel,
+  educationLevelLabel,
+  universityTypeLabel,
+  degreeLevelLabel,
+  facultyLabel,
+  educationFacilityLabel,
+  SCHOOL_FACILITY_CODES,
+  UNIVERSITY_FACILITY_CODES,
+  type EducationLevel,
+  type DegreeLevel,
+  type Faculty,
+} from "@/lib/config/education-attributes";
 
 type Row = { label: string; value: React.ReactNode };
 
@@ -23,9 +40,20 @@ function featureRows<Code extends string>(
     .filter((row): row is Row => row.value !== null);
 }
 
+function codedList<Code extends string>(codes: string[] | undefined, labelFn: (code: Code, locale: string) => string | undefined, locale: string): string | undefined {
+  if (!codes || codes.length === 0) return undefined;
+  const labels = codes.map((c) => labelFn(c as Code, locale)).filter((l): l is string => !!l);
+  return labels.length > 0 ? labels.join(", ") : undefined;
+}
+
+function textList(values: string[] | undefined): string | undefined {
+  return values && values.length > 0 ? values.join(", ") : undefined;
+}
+
 /**
- * Read-only "Details" grid for Hospital/Pharmacy's typed columns (see
- * 20260812000002_hospital_pharmacy_fields.sql), gated by `categorySlug`.
+ * Read-only "Details" grid for a category's typed columns (Hospital,
+ * Pharmacy, Clinic, School, University, Beauty Salon, Men's Barbershop,
+ * Perfume Shop, Cosmetics & Women's Beauty), gated by `categorySlug`.
  * Renders nothing for any other category or when the listing has no values
  * set. Doctors/Departments/Appointments are shown by DoctorsSection
  * elsewhere on this page and are intentionally not duplicated here.
@@ -87,6 +115,57 @@ export async function CityServiceTypedFieldsDisplay({
           })[code],
         locale
       ),
+    ];
+  } else if (categorySlug === "clinic") {
+    rows = [
+      { label: t("clinicTypeLabel"), value: clinicTypeLabel(service.clinicType, locale) },
+      { label: t("numberOfTreatmentRoomsLabel"), value: service.numberOfTreatmentRooms },
+      { label: t("insuranceAcceptedLabel"), value: textList(service.insuranceAccepted) },
+      { label: t("languagesSpokenLabel"), value: textList(service.languages) },
+    ];
+  } else if (categorySlug === "school") {
+    rows = [
+      { label: t("schoolTypeLabel"), value: schoolTypeLabel(service.schoolType, locale) },
+      { label: t("curriculumLabel"), value: curriculumLabel(service.curriculum, locale) },
+      { label: t("educationLevelsLabel"), value: codedList<EducationLevel>(service.educationLevels, educationLevelLabel, locale) },
+      { label: t("ageRangeGradesLabel"), value: service.ageRangeGrades },
+      { label: t("numberOfClassroomsLabel"), value: service.numberOfClassrooms },
+      { label: t("numberOfStudentsLabel"), value: service.numberOfStudents },
+      { label: t("numberOfTeachersLabel"), value: service.numberOfTeachers },
+      { label: t("languagesOfInstructionLabel"), value: textList(service.languages) },
+      { label: t("admissionsOpenLabel"), value: boolCell(service.admissionsOpen) },
+      ...featureRows(SCHOOL_FACILITY_CODES, educationFacilityLabel, (code) => service.educationFacilities?.includes(code), locale),
+    ];
+  } else if (categorySlug === "university") {
+    rows = [
+      { label: t("universityTypeLabel"), value: universityTypeLabel(service.universityType, locale) },
+      { label: t("degreeLevelsLabel"), value: codedList<DegreeLevel>(service.degreeLevels, degreeLevelLabel, locale) },
+      { label: t("facultiesOfferedLabel"), value: codedList<Faculty>(service.facultiesOffered, facultyLabel, locale) },
+      { label: t("numberOfBuildingsLabel"), value: service.numberOfBuildings },
+      { label: t("numberOfStudentsLabel"), value: service.numberOfStudents },
+      { label: t("numberOfFacultyLabel"), value: service.numberOfTeachers },
+      { label: t("languagesOfInstructionLabel"), value: textList(service.languages) },
+      { label: t("admissionsOpenLabel"), value: boolCell(service.admissionsOpen) },
+      ...featureRows(UNIVERSITY_FACILITY_CODES, educationFacilityLabel, (code) => service.educationFacilities?.includes(code), locale),
+    ];
+  } else if (categorySlug === "beauty-salon") {
+    rows = [
+      { label: t("salonTypeLabel"), value: salonTypeLabel(service.salonType, locale) },
+      { label: t("numberOfStylistsLabel"), value: service.staffCount },
+      { label: t("walkInsAcceptedLabel"), value: boolCell(service.walkInsAccepted) },
+      { label: t("homeServiceAvailableLabel"), value: boolCell(service.homeServiceAvailable) },
+    ];
+  } else if (categorySlug === "men-barbershop") {
+    rows = [
+      { label: t("shopTypeLabel"), value: shopTypeLabel(service.shopType, locale) },
+      { label: t("numberOfBarbersLabel"), value: service.staffCount },
+      { label: t("walkInsAcceptedLabel"), value: boolCell(service.walkInsAccepted) },
+      { label: t("homeServiceAvailableLabel"), value: boolCell(service.homeServiceAvailable) },
+    ];
+  } else if (categorySlug === "perfume-shop" || categorySlug === "cosmetics-beauty") {
+    rows = [
+      { label: t("storeTypeLabel"), value: storeTypeLabel(service.storeType, locale) },
+      { label: t("brandsCarriedLabel"), value: textList(service.brands) },
     ];
   }
 

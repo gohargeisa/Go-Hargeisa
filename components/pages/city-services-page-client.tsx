@@ -20,23 +20,37 @@ import type { Locale } from "@/lib/i18n/config";
  * card instead of several), matching the requested "no duplicate top-level
  * cards, no new category data" structure. Add another entry here if a
  * future grouping is needed — no other code needs to change. */
-type MergedCategoryKey = "education" | "perfumes-cosmetics";
+type MergedCategoryKey = "health" | "education" | "beauty" | "perfumes-cosmetics";
 
 type MergedCategoryConfig = {
   key: MergedCategoryKey;
   memberSlugs: string[];
   icon: string;
   color: string;
-  nameKey: "educationCategoryName" | "perfumesCosmeticsCategoryName";
+  nameKey: "healthCategoryName" | "educationCategoryName" | "beautyCategoryName" | "perfumesCosmeticsCategoryName";
 };
 
 const MERGED_CATEGORIES: MergedCategoryConfig[] = [
   {
+    key: "health",
+    memberSlugs: ["hospital", "clinic", "pharmacy"],
+    icon: "HeartPulse",
+    color: "#DC2626",
+    nameKey: "healthCategoryName",
+  },
+  {
     key: "education",
-    memberSlugs: ["school", "university", "language-institute"],
+    memberSlugs: ["school", "university", "institute", "language-institute"],
     icon: "GraduationCap",
     color: "#16A34A",
     nameKey: "educationCategoryName",
+  },
+  {
+    key: "beauty",
+    memberSlugs: ["beauty-salon", "men-barbershop"],
+    icon: "Scissors",
+    color: "#9333EA",
+    nameKey: "beautyCategoryName",
   },
   {
     key: "perfumes-cosmetics",
@@ -57,7 +71,7 @@ function mergedCategoryOf(key: string) {
  * published listings is simply skipped, same as today); everything else
  * keeps its existing count-descending order after these. Purely a display
  * concern — doesn't touch `categories.sort_order` in the database. */
-const CATEGORY_CARD_PRIORITY = ["hospital", "clinic", "pharmacy", "education", "perfumes-cosmetics", "kids-family"];
+const CATEGORY_CARD_PRIORITY = ["health", "education", "beauty", "perfumes-cosmetics", "kids-family"];
 
 /** Bounded, literal Tailwind class strings (safe for the JIT scanner) so a
  * sparse section never reads as "one tiny card lost in a huge empty grid" —

@@ -149,6 +149,8 @@ export default async function CafeDetailPage({
         rating={cafe.rating}
         reviewCount={cafe.reviewCount}
         categoryLabel="Cafe"
+        locale={locale}
+        isPartner
       />
 
       <HotelActionBar
@@ -486,9 +488,6 @@ export default async function CafeDetailPage({
         whatsappFallback={whatsappFallback}
         directionsHref={directionsHref}
         locale={locale}
-        showPrimary={cafe.reservable}
-        primaryLabel={t("reserveTable")}
-        reservable={cafe.reservable}
       />
     </>
   );

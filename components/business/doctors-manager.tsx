@@ -32,19 +32,24 @@ const BLANK: DoctorInput = {
   departmentId: undefined,
 };
 
-/** Inline CRUD for a hospital/clinic's doctors — mirrors
+/** Inline CRUD for a city_service's staff/doctors — mirrors
  * components/business/products-manager.tsx's structure. Working hours reuse
- * the existing OpeningHoursEditor as-is (Phase 4 accepted design choice). */
+ * the existing OpeningHoursEditor as-is (Phase 4 accepted design choice).
+ * `isMedical` swaps the doctor/patient-specific copy for generic staff
+ * copy — see lib/utils/appointment-domain.ts — without touching the
+ * underlying doctors table or any Hospital/Clinic behavior. */
 export function DoctorsManager({
   cityServiceId,
   initialDoctors,
   departments,
   revalidatePaths,
+  isMedical = true,
 }: {
   cityServiceId: string;
   initialDoctors: DoctorManagerRow[];
   departments: DepartmentManagerRow[];
   revalidatePaths: string[];
+  isMedical?: boolean;
 }) {
   const t = useTranslations("appointments");
   const tw = useTranslations("weekdays");
@@ -70,7 +75,7 @@ export function DoctorsManager({
 
   function save() {
     if (!draft.name.trim()) {
-      setError(t("doctorNameRequired"));
+      setError(t(isMedical ? "doctorNameRequired" : "staffNameRequiredError"));
       return;
     }
     setError(null);
@@ -89,7 +94,7 @@ export function DoctorsManager({
   }
 
   function remove(id: string) {
-    if (!confirm(t("confirmDeleteDoctor"))) return;
+    if (!confirm(t(isMedical ? "confirmDeleteDoctor" : "confirmDeleteStaffMember"))) return;
     startTransition(async () => {
       const result = await deleteDoctor(id, cityServiceId, revalidatePaths);
       if (result.ok) router.refresh();
@@ -104,19 +109,21 @@ export function DoctorsManager({
   return (
     <div className="space-y-4 rounded-xl2 border border-ink/8 p-5 dark:border-white/10">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold">{t("doctorsTitle")}</h3>
+        <h3 className="text-sm font-semibold">{t(isMedical ? "doctorsTitle" : "staffLabel")}</h3>
         {editingId === null && (
           <button
             type="button"
             onClick={() => startEdit()}
             className="inline-flex items-center gap-1.5 rounded-full border border-ink/15 px-3 py-1.5 text-xs font-semibold transition-colors hover:border-primary hover:text-primary dark:border-white/20"
           >
-            <Plus size={13} /> {t("addDoctor")}
+            <Plus size={13} /> {t(isMedical ? "addDoctor" : "addStaffMember")}
           </button>
         )}
       </div>
 
-      {doctors.length === 0 && editingId === null && <p className="text-sm text-ink/50 dark:text-sand/50">{t("noDoctorsYet")}</p>}
+      {doctors.length === 0 && editingId === null && (
+        <p className="text-sm text-ink/50 dark:text-sand/50">{t(isMedical ? "noDoctorsAddedYet" : "noStaffMembersYet")}</p>
+      )}
 
       <div className="space-y-2">
         {doctors.map((doctor) =>

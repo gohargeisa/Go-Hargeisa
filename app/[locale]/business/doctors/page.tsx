@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { mapDoctor, mapDepartment } from "@/lib/data/mappers";
 import { DoctorsManager, type DoctorManagerRow } from "@/components/business/doctors-manager";
 import type { DepartmentManagerRow } from "@/components/business/departments-manager";
+import { isMedicalAppointmentCategory } from "@/lib/utils/appointment-domain";
 
 export const metadata: Metadata = { title: "Doctors — Dashboard", robots: { index: false } };
 
@@ -17,6 +18,7 @@ export default async function DoctorsPage({ params: { locale } }: { params: { lo
   // redirect() rather than notFound() — see the comment in
   // app/[locale]/city-services/[slug]/book/page.tsx for why.
   if (!listing.supportsAppointments) redirect(`/${locale}/business`);
+  const isMedical = isMedicalAppointmentCategory(listing.categorySlug);
 
   const t = await getTranslations({ locale, namespace: "appointments" });
   const supabase = await createClient();
@@ -54,11 +56,17 @@ export default async function DoctorsPage({ params: { locale } }: { params: { lo
   return (
     <div className="max-w-2xl space-y-2">
       <div>
-        <h1 className="font-display text-2xl font-bold">{t("navDoctors")}</h1>
-        <p className="mt-1 text-sm text-ink/60 dark:text-sand/60">{t("doctorsPageSubtitle")}</p>
+        <h1 className="font-display text-2xl font-bold">{t(isMedical ? "navDoctors" : "staffLabel")}</h1>
+        <p className="mt-1 text-sm text-ink/60 dark:text-sand/60">{t(isMedical ? "doctorsPageSubtitle" : "staffPageSubtitle")}</p>
       </div>
       <div className="pt-4">
-        <DoctorsManager cityServiceId={listing.id} initialDoctors={doctors} departments={departments} revalidatePaths={[currentPath]} />
+        <DoctorsManager
+          cityServiceId={listing.id}
+          initialDoctors={doctors}
+          departments={departments}
+          revalidatePaths={[currentPath]}
+          isMedical={isMedical}
+        />
       </div>
     </div>
   );

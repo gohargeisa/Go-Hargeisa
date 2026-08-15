@@ -38,6 +38,16 @@ import {
   Truck,
   PackageCheck,
   HeartPulse,
+  Activity,
+  Sun,
+  Radio,
+  Brain,
+  Apple,
+  MessageCircle,
+  Leaf,
+  BookOpen,
+  Flower,
+  Cake,
   type LucideIcon,
 } from "lucide-react";
 
@@ -115,6 +125,24 @@ export const SERVICE_TAG_CODES = [
   "prescription_delivery",
   "blood_pressure_check",
   "blood_sugar_check",
+  // Clinics (general — holistic/multi-discipline practices)
+  "medical_consultation",
+  "physiotherapy",
+  "red_light_therapy",
+  "frequency_therapy",
+  "brain_tap_therapy",
+  "nutritional_coaching",
+  "medical_massage",
+  "speech_language_therapy",
+  "herbal_therapy",
+  "supplements_minerals",
+  "quranic_spiritual_healing",
+  // Flowers & Gifts
+  "fresh_flowers",
+  "bouquets",
+  "floral_arrangements",
+  "occasion_gifts",
+  "cakes",
 ] as const;
 
 export type ServiceTagCode = (typeof SERVICE_TAG_CODES)[number];
@@ -177,6 +205,24 @@ export const SERVICE_TAG_ICON: Record<ServiceTagCode, LucideIcon> = {
   prescription_delivery: PackageCheck,
   blood_pressure_check: HeartPulse,
   blood_sugar_check: Droplets,
+
+  medical_consultation: Stethoscope,
+  physiotherapy: Activity,
+  red_light_therapy: Sun,
+  frequency_therapy: Radio,
+  brain_tap_therapy: Brain,
+  nutritional_coaching: Apple,
+  medical_massage: Hand,
+  speech_language_therapy: MessageCircle,
+  herbal_therapy: Leaf,
+  supplements_minerals: Pill,
+  quranic_spiritual_healing: BookOpen,
+
+  fresh_flowers: Flower2,
+  bouquets: Flower,
+  floral_arrangements: Sparkles,
+  occasion_gifts: Gift,
+  cakes: Cake,
 };
 
 /** Which codes are offered as choices for a given City Services category —
@@ -205,6 +251,19 @@ export const SERVICE_TAGS_BY_CATEGORY_SLUG: Record<string, ServiceTagCode[]> = {
     "baby_products", "personal_care", "cosmetics", "home_delivery", "prescription_delivery",
     "blood_pressure_check", "blood_sugar_check",
   ],
+  // General Clinics (clinicType other than "dental", which keeps its own
+  // vocabulary above via the "dental-clinic" key, reused when clinicType is
+  // "dental" — see components/shared/join-request-form.tsx). Any clinic can
+  // use this vocabulary, not just Holistic Health Center.
+  clinic: [
+    "medical_consultation", "physiotherapy", "red_light_therapy", "frequency_therapy",
+    "brain_tap_therapy", "nutritional_coaching", "medical_massage", "speech_language_therapy",
+    "herbal_therapy", "supplements_minerals", "quranic_spiritual_healing",
+  ],
+  // Flowers & Gifts (city_services — moved from the standalone `services`
+  // vertical). Any Flowers & Gifts business can use this vocabulary, not
+  // just Lavender Flowers.
+  "flower-shops": ["fresh_flowers", "bouquets", "floral_arrangements", "occasion_gifts", "cakes"],
 };
 
 /** Filters arbitrary stored strings down to known codes — same defensive

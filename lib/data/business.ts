@@ -35,6 +35,11 @@ export interface OwnedListing {
    * business-sidebar.tsx. */
   supportsProducts: boolean;
   supportsAppointments: boolean;
+  /** city_service listings only — see lib/utils/appointment-domain.ts,
+   * which uses this to decide whether the shared doctors/appointments
+   * engine's dashboard copy should read as medical (Hospital/Clinic) or
+   * generic (every other supportsAppointments category, e.g. Beauty Salon). */
+  categorySlug?: string;
 }
 
 function galleryLength(gallery: unknown): number {
@@ -55,10 +60,10 @@ async function _getOwnedListings(userId: string): Promise<OwnedListing[]> {
     supabase.from("hotels").select("*").eq("owner_id", userId),
     supabase.from("restaurants").select("*").eq("owner_id", userId),
     supabase.from("cafes").select("*").eq("owner_id", userId),
-    supabase.from("services").select("*").eq("owner_id", userId),
+    supabase.from("services").select("*, categories(supports_products, supports_appointments, slug)").eq("owner_id", userId),
     supabase
       .from("city_services")
-      .select("*, categories(supports_products, supports_appointments)")
+      .select("*, categories(supports_products, supports_appointments, slug)")
       .eq("owner_id", userId),
   ]);
 
@@ -135,6 +140,7 @@ async function _getOwnedListings(userId: string): Promise<OwnedListing[]> {
   // via a convertJoinRequest-style upgrade path), so every service owner
   // is treated as "official" and gets dashboard access immediately.
   for (const s of services ?? []) {
+    const category = (s as unknown as { categories: { supports_products: boolean; supports_appointments: boolean; slug: string } | null }).categories;
     out.push({
       listingType: "service",
       id: s.id,
@@ -152,8 +158,9 @@ async function _getOwnedListings(userId: string): Promise<OwnedListing[]> {
       hasDescription: Boolean(s.description?.trim()),
       galleryCount: galleryLength(s.gallery),
       partnerStatus: "official",
-      supportsProducts: false,
-      supportsAppointments: false,
+      supportsProducts: category?.supports_products ?? false,
+      supportsAppointments: category?.supports_appointments ?? false,
+      categorySlug: category?.slug,
     });
   }
   // city_services has no partner_status column and no trial flow, same
@@ -162,7 +169,7 @@ async function _getOwnedListings(userId: string): Promise<OwnedListing[]> {
   // either (city_services only stores lat/lng + maps_url) — "" rather than
   // undefined since OwnedListing.address is required.
   for (const cs of cityServices ?? []) {
-    const category = (cs as unknown as { categories: { supports_products: boolean; supports_appointments: boolean } | null }).categories;
+    const category = (cs as unknown as { categories: { supports_products: boolean; supports_appointments: boolean; slug: string } | null }).categories;
     out.push({
       listingType: "city_service",
       id: cs.id,
@@ -182,6 +189,7 @@ async function _getOwnedListings(userId: string): Promise<OwnedListing[]> {
       partnerStatus: "official",
       supportsProducts: category?.supports_products ?? false,
       supportsAppointments: category?.supports_appointments ?? false,
+      categorySlug: category?.slug,
     });
   }
 

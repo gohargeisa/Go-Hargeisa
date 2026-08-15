@@ -327,6 +327,7 @@ export function mapService(row: ServiceRow, reviews: Review[] = [], category?: C
     website: row.website ?? undefined,
     socialInstagram: row.social_instagram ?? undefined,
     socialFacebook: row.social_facebook ?? undefined,
+    socialTiktok: row.social_tiktok ?? undefined,
     openingHours: row.opening_hours ?? undefined,
     openingHoursStructured,
     services: row.services ?? [],
@@ -636,7 +637,7 @@ export function mapCityService(row: CityServiceRow, reviews: Review[] = [], loca
 export function mapProduct(row: ProductRow): Product {
   return {
     id: row.id,
-    listingType: "city_service",
+    listingType: (row.listing_type as Product["listingType"]) ?? "city_service",
     listingId: row.listing_id,
     name: row.name,
     nameAr: row.name_ar ?? undefined,

@@ -39,6 +39,7 @@ import { AmenitiesSection, hasAmenities } from "@/components/shared/amenities-se
 import { SocialLinks } from "@/components/shared/social-links";
 import { VideoGallery } from "@/components/shared/video-gallery";
 import { OpenStatusBadge } from "@/components/shared/open-status-badge";
+import { PartnerAcquisitionCta } from "@/components/shared/partner-acquisition-cta";
 import { formatDayRange, formatTime12h } from "@/lib/utils/opening-hours";
 
 // Public content changes infrequently; revalidate hourly instead of
@@ -142,6 +143,8 @@ export default async function RestaurantDetailPage({
         rating={restaurant.rating}
         reviewCount={restaurant.reviewCount}
         categoryLabel={listingCategoryLabel(restaurant.priceRange, "Restaurant")}
+        locale={locale}
+        isPartner
       />
 
       <HotelActionBar
@@ -456,18 +459,16 @@ export default async function RestaurantDetailPage({
         </section>
       )}
 
+      <PartnerAcquisitionCta locale={locale} />
+
       <MobileBookingBar
         listingType="restaurant"
         listingId={restaurant.id}
         name={restaurant.name}
         phone={restaurant.phone}
-        website={restaurant.website}
         whatsappFallback={whatsappFallback}
         directionsHref={directionsHref}
         locale={locale}
-        showPrimary={restaurant.reservable}
-        primaryLabel={t("reserveTable")}
-        reservable={restaurant.reservable}
       />
     </>
   );

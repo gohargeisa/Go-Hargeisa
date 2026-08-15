@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Stethoscope, Languages } from "lucide-react";
+import { Stethoscope, UserCog, Languages } from "lucide-react";
 import type { Doctor, Department } from "@/types";
 
 function doctorLocalizedField(value: string | undefined, valueAr: string | undefined, valueSo: string | undefined, locale: string): string | undefined {
@@ -20,12 +20,14 @@ export function DoctorsSection({
   locale,
   bookHref,
   bookLabel,
+  isMedical = true,
 }: {
   doctors: Doctor[];
   departments: Department[];
   locale: string;
   bookHref: (doctorId: string) => string;
   bookLabel: string;
+  isMedical?: boolean;
 }) {
   if (doctors.length === 0) return null;
 
@@ -48,7 +50,7 @@ export function DoctorsSection({
           )}
           <div className="grid gap-4 sm:grid-cols-2">
             {group.items.map((doctor) => (
-              <DoctorCard key={doctor.id} doctor={doctor} locale={locale} bookHref={bookHref(doctor.id)} bookLabel={bookLabel} />
+              <DoctorCard key={doctor.id} doctor={doctor} locale={locale} bookHref={bookHref(doctor.id)} bookLabel={bookLabel} isMedical={isMedical} />
             ))}
           </div>
         </div>
@@ -57,7 +59,7 @@ export function DoctorsSection({
       {ungrouped.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-2">
           {ungrouped.map((doctor) => (
-            <DoctorCard key={doctor.id} doctor={doctor} locale={locale} bookHref={bookHref(doctor.id)} bookLabel={bookLabel} />
+            <DoctorCard key={doctor.id} doctor={doctor} locale={locale} bookHref={bookHref(doctor.id)} bookLabel={bookLabel} isMedical={isMedical} />
           ))}
         </div>
       )}
@@ -65,9 +67,22 @@ export function DoctorsSection({
   );
 }
 
-function DoctorCard({ doctor, locale, bookHref, bookLabel }: { doctor: Doctor; locale: string; bookHref: string; bookLabel: string }) {
+function DoctorCard({
+  doctor,
+  locale,
+  bookHref,
+  bookLabel,
+  isMedical = true,
+}: {
+  doctor: Doctor;
+  locale: string;
+  bookHref: string;
+  bookLabel: string;
+  isMedical?: boolean;
+}) {
   const specialty = doctorLocalizedField(doctor.specialty, doctor.specialtyAr, doctor.specialtySo, locale);
   const bio = doctorLocalizedField(doctor.bio, doctor.bioAr, doctor.bioSo, locale);
+  const FallbackIcon = isMedical ? Stethoscope : UserCog;
 
   return (
     <div className="flex gap-4 rounded-xl2 border border-ink/8 p-4 dark:border-white/10">
@@ -76,7 +91,7 @@ function DoctorCard({ doctor, locale, bookHref, bookLabel }: { doctor: Doctor; l
           <Image src={doctor.photo} alt={doctor.name} fill sizes="64px" className="object-cover" />
         ) : (
           <div className="flex h-full w-full items-center justify-center">
-            <Stethoscope size={22} className="text-ink/25" aria-hidden="true" />
+            <FallbackIcon size={22} className="text-ink/25" aria-hidden="true" />
           </div>
         )}
       </div>

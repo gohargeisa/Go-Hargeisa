@@ -19,7 +19,7 @@ export default async function AdminPartnersPage({ params: { locale } }: { params
     supabase.from("hotels").select("id, name, partner_status, status, trial_expires_at, featured, is_pinned").not("owner_id", "is", null),
     supabase.from("restaurants").select("id, name, partner_status, status, trial_expires_at, featured, is_pinned").not("owner_id", "is", null),
     supabase.from("cafes").select("id, name, partner_status, status, trial_expires_at, featured, is_pinned").not("owner_id", "is", null),
-    supabase.from("business_subscriptions").select("id, listing_type, listing_id, plan_tier, status, renews_at"),
+    supabase.from("business_subscriptions").select("id, listing_type, listing_id, plan_tier, status, renews_at, custom_price_usd"),
   ]);
 
   const subIds = (subs ?? []).map((s) => s.id);
@@ -66,6 +66,7 @@ export default async function AdminPartnersPage({ params: { locale } }: { params
       planTier: (sub?.plan_tier as SubscriptionPlanId | undefined) ?? null,
       subscriptionStatus: (sub?.status as SubscriptionStatus | undefined) ?? "active",
       renewsAt: sub?.renews_at ?? null,
+      customPriceUsd: sub?.custom_price_usd ?? null,
       notes: notesFor(sub?.id),
     };
   };

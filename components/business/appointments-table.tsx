@@ -24,15 +24,30 @@ const STATUS_STYLES: Record<AppointmentStatus, string> = {
   no_show: "bg-ink/10 text-ink/60 dark:bg-white/10 dark:text-sand/60",
 };
 
+const MONTH_ABBR = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+// Deterministic, not locale-dependent — toLocaleDateString(undefined, ...)
+// resolves the server's locale differently from the client's, producing a
+// React hydration mismatch (see components/business/reservations-table.tsx).
 function formatDate(iso: string): string {
-  const d = new Date(`${iso}T00:00:00`);
-  if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  const [y, m, d] = iso.split("-").map(Number);
+  if (!y || !m || !d) return iso;
+  return `${MONTH_ABBR[m - 1]} ${d}, ${y}`;
 }
 
 /** Mirrors components/business/bookings-table.tsx's structure — one shared
- * shape for "list of requests, change status inline" across both engines. */
-export function AppointmentsTable({ appointments, revalidatePath }: { appointments: AppointmentManagerRow[]; revalidatePath: string }) {
+ * shape for "list of requests, change status inline" across both engines.
+ * `isMedical` swaps "Patient"/"Doctor" copy for generic "Customer"/"Staff"
+ * copy — see lib/utils/appointment-domain.ts. */
+export function AppointmentsTable({
+  appointments,
+  revalidatePath,
+  isMedical = true,
+}: {
+  appointments: AppointmentManagerRow[];
+  revalidatePath: string;
+  isMedical?: boolean;
+}) {
   const t = useTranslations("appointments");
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -65,8 +80,8 @@ export function AppointmentsTable({ appointments, revalidatePath }: { appointmen
         <table className="w-full text-sm">
           <thead className="bg-ink/[0.03] dark:bg-white/5">
             <tr>
-              <th className="px-4 py-3 text-start font-semibold">{t("patientName")}</th>
-              <th className="px-4 py-3 text-start font-semibold">{t("doctorLabel")}</th>
+              <th className="px-4 py-3 text-start font-semibold">{t(isMedical ? "patientName" : "customerLabel")}</th>
+              <th className="px-4 py-3 text-start font-semibold">{t(isMedical ? "doctorLabel" : "staffLabel")}</th>
               <th className="px-4 py-3 text-start font-semibold">{t("appointmentDate")}</th>
               <th className="px-4 py-3 text-start font-semibold">{t("appointmentTime")}</th>
               <th className="px-4 py-3 text-start font-semibold">{t("status")}</th>
@@ -102,8 +117,8 @@ export function AppointmentsTable({ appointments, revalidatePath }: { appointmen
                         href={whatsappHref}
                         target="_blank"
                         rel="noopener noreferrer"
-                        aria-label={t("contactPatient")}
-                        title={t("contactPatient")}
+                        aria-label={t(isMedical ? "contactPatient" : "contactCustomerLabel")}
+                        title={t(isMedical ? "contactPatient" : "contactCustomerLabel")}
                         className="ms-auto flex h-8 w-8 items-center justify-center rounded-full border border-ink/15 text-[#25D366] transition-colors hover:border-[#25D366] dark:border-white/20"
                       >
                         <MessageCircle size={14} aria-hidden="true" />
@@ -134,14 +149,19 @@ export function AppointmentsTable({ appointments, revalidatePath }: { appointmen
               <div className="mt-3 text-xs text-ink/60 dark:text-sand/60">
                 {formatDate(a.appointmentDate)} • {formatTime12h(a.appointmentTime)}
               </div>
-              <div className="mt-3 flex gap-2">
+              {/* grid, not flex — six fixed-width status buttons in a flex
+                  row with no wrap overflowed the card on narrow viewports
+                  (each button's text sets a minimum content width flex-1
+                  can't shrink past); a 3-column grid gives two clean, equal
+                  rows at every width instead. */}
+              <div className="mt-3 grid grid-cols-3 gap-2">
                 {STATUS_OPTIONS.map((s) => (
                   <button
                     key={s}
                     type="button"
                     onClick={() => onStatusChange(a, s)}
                     disabled={isPending || a.status === s}
-                    className={`flex-1 rounded-full border py-2 text-xs font-semibold disabled:opacity-40 ${
+                    className={`rounded-full border py-2 text-xs font-semibold disabled:opacity-40 ${
                       a.status === s ? "border-primary text-primary" : "border-ink/15 dark:border-white/20"
                     }`}
                   >
@@ -156,7 +176,7 @@ export function AppointmentsTable({ appointments, revalidatePath }: { appointmen
                   rel="noopener noreferrer"
                   className="mt-2 flex items-center justify-center gap-1 rounded-full border border-ink/15 py-2 text-xs font-semibold dark:border-white/20"
                 >
-                  <MessageCircle size={13} aria-hidden="true" /> {t("contactPatient")}
+                  <MessageCircle size={13} aria-hidden="true" /> {t(isMedical ? "contactPatient" : "contactCustomerLabel")}
                 </a>
               )}
             </div>

@@ -171,6 +171,40 @@ export async function extendSubscription(
   return { ok: true };
 }
 
+/** Owner-only. Sets a custom subscription price that overrides the plan
+ * tier's default (lib/config/subscription-plans.ts) for this one partner —
+ * e.g. a negotiated rate. Pass `null` to clear the override and fall back
+ * to the plan's standard price. Same RLS/upsert shape as extendSubscription
+ * above — only the owner role can write to business_subscriptions. */
+export async function setCustomPrice(
+  locale: string,
+  table: PartnerTable,
+  listingId: string,
+  priceUsd: number | null
+): Promise<{ ok: boolean; error?: string }> {
+  if (!PARTNER_TABLES.includes(table)) return { ok: false, error: "Invalid table." };
+  if (priceUsd !== null && (!Number.isFinite(priceUsd) || priceUsd < 0)) {
+    return { ok: false, error: "Invalid price." };
+  }
+
+  const supabase = await assertOwner();
+  const listingType = table === "hotels" ? "hotel" : table === "restaurants" ? "restaurant" : "cafe";
+
+  const { error } = await supabase
+    .from("business_subscriptions")
+    .upsert(
+      { listing_type: listingType, listing_id: listingId, custom_price_usd: priceUsd } as never,
+      { onConflict: "listing_type,listing_id" }
+    );
+
+  if (error) return { ok: false, error: error.message };
+
+  await logActivity("update", "subscription_custom_price", listingId, { table, priceUsd });
+  revalidatePath(`/${locale}/admin/partners`);
+  revalidatePath(`/${locale}/business/subscription`);
+  return { ok: true };
+}
+
 /** Owner-only internal note, never exposed to the business owner — see
  * business_subscription_notes RLS in
  * supabase/migrations/20260730000005_subscription_lifecycle.sql. */

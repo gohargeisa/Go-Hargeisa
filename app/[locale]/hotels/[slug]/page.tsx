@@ -177,6 +177,8 @@ export default async function HotelDetailPage({
         rating={hotel.rating}
         reviewCount={hotel.reviewCount}
         categoryLabel={hotelCategoryLabel(hotel.priceRange)}
+        locale={locale}
+        isPartner
       />
 
       <HotelActionBar
@@ -501,12 +503,9 @@ export default async function HotelDetailPage({
         listingId={hotel.id}
         name={hotel.name}
         phone={hotel.phone}
-        website={hotel.website}
         whatsappFallback={whatsappFallback}
         directionsHref={directionsHref}
         locale={locale}
-        bookingCta={bookingCta}
-        rooms={hotel.rooms}
       />
     </>
   );
