@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { ExternalLink, MapPin, Navigation } from "lucide-react";
+import { ExternalLink, MapPin, Navigation, FileText } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
 import { getHotelBySlug, getAllHotelSlugs, getNearbyAttractionsForHotel } from "@/lib/data/hotels";
@@ -178,7 +178,7 @@ export default async function HotelDetailPage({
         reviewCount={hotel.reviewCount}
         categoryLabel={hotelCategoryLabel(hotel.priceRange)}
         locale={locale}
-        isPartner
+        isPartner={hotel.isPartner}
       />
 
       <HotelActionBar
@@ -195,6 +195,20 @@ export default async function HotelDetailPage({
         bookingCta={bookingCta}
         rooms={hotel.rooms}
       />
+
+      {hotel.documentUrl && (
+        <div className="container-px mx-auto mt-3 flex flex-wrap items-center justify-center gap-3">
+          <a
+            href={hotel.documentUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-full border border-ink/15 px-4 text-sm font-semibold text-ink transition-all duration-200 hover:-translate-y-0.5 hover:border-primary hover:text-primary hover:shadow-soft active:scale-95 dark:border-white/20 dark:text-white"
+          >
+            <FileText size={15} aria-hidden="true" />
+            {t("document_hotel_info")}
+          </a>
+        </div>
+      )}
 
       <SocialLinks
         instagram={hotel.socialInstagram}
@@ -504,7 +518,6 @@ export default async function HotelDetailPage({
         name={hotel.name}
         phone={hotel.phone}
         whatsappFallback={whatsappFallback}
-        directionsHref={directionsHref}
         locale={locale}
       />
     </>

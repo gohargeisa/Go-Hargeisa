@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Check, MessageCircle, Navigation, Phone, Share2 } from "lucide-react";
+import { Check, MessageCircle, Phone, Share2 } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
 import { FavoriteButton } from "@/components/shared/favorite-button";
@@ -12,19 +12,24 @@ const ICON_BUTTON_CLASS =
   "flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-ink/70 transition-all duration-150 hover:bg-ink/5 hover:text-primary active:scale-90 dark:text-white/80 dark:hover:bg-white/10";
 
 /**
- * Compact mobile bottom SECONDARY-action bar (Save, Call, Directions,
- * WhatsApp, Share) shared by the hotel, restaurant, and cafe detail pages.
- * Deliberately has no primary conversion CTA of its own — every page that
- * renders this also renders components/shared/hotel-action-bar.tsx, which
- * is the single source of truth for the primary CTA (Book Now / Reserve a
- * Table) at every breakpoint, including mobile. This bar used to mount its
+ * Compact mobile bottom SECONDARY-action bar (Save, Call, WhatsApp, Share)
+ * shared by the hotel, restaurant, and cafe detail pages. Deliberately has
+ * no primary conversion CTA of its own — every page that renders this also
+ * renders components/shared/hotel-action-bar.tsx, which is the single
+ * source of truth for the primary CTA (Book Now / Reserve a Table / Order
+ * Now) at every breakpoint, including mobile. This bar used to mount its
  * own separate copy of that same button, producing two on-screen instances
  * of the same action; removing it here (rather than passing a suppression
  * prop from each page) fixes it for every current AND future category that
  * reuses this component, since there's no primary-CTA branch left to
- * accidentally re-enable. `env(safe-area-inset-bottom)` keeps the bar clear
- * of the home indicator on notched iPhones (app/[locale]/layout.tsx sets
- * viewport-fit: "cover" so that value is actually non-zero there).
+ * accidentally re-enable. Directions is the same story: the page's own
+ * "Location" section already renders it (alongside "Open in Google Maps")
+ * as the single, canonical location/map experience — a second, always-
+ * floating Directions control here read as a duplicate map experience, so
+ * it isn't repeated in this bar either. `env(safe-area-inset-bottom)` keeps
+ * the bar clear of the home indicator on notched iPhones
+ * (app/[locale]/layout.tsx sets viewport-fit: "cover" so that value is
+ * actually non-zero there).
  */
 export function MobileBookingBar({
   listingType,
@@ -32,7 +37,6 @@ export function MobileBookingBar({
   name,
   phone,
   whatsappFallback,
-  directionsHref,
   locale,
   initiallyFavorited = false,
 }: {
@@ -42,8 +46,6 @@ export function MobileBookingBar({
   phone?: string;
   /** site_settings.whatsapp_number — used only when the listing has no phone of its own. */
   whatsappFallback?: string;
-  /** Precomputed by the caller via lib/utils/google-maps.ts#resolveDirectionsUrl — every detail page already builds this for its own "Get Directions" button, so it's just passed through here rather than recomputed. */
-  directionsHref?: string;
   locale: Locale;
   initiallyFavorited?: boolean;
 }) {
@@ -92,18 +94,6 @@ export function MobileBookingBar({
       {phone && (
         <a href={`tel:${phone}`} aria-label={`${t("call")} — ${name}`} className={ICON_BUTTON_CLASS}>
           <Phone size={18} aria-hidden="true" />
-        </a>
-      )}
-
-      {directionsHref && (
-        <a
-          href={directionsHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={`${t("directions")} — ${name}`}
-          className={ICON_BUTTON_CLASS}
-        >
-          <Navigation size={17} aria-hidden="true" />
         </a>
       )}
 

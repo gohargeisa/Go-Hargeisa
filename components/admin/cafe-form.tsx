@@ -59,6 +59,7 @@ export interface CafeFormInput {
   menuHighlights: { name: string; price: string; description?: string }[];
   menuPdfUrl: string;
   featured: boolean;
+  isPartner: boolean;
 }
 
 const DRINK_SUGGESTIONS = ["Somali Spiced Coffee", "Somali Tea (Shaah)", "Iced Caramel Macchiato", "Cold Brew"];
@@ -122,6 +123,7 @@ export function CafeForm({
     menuHighlights: initial?.menuHighlights ?? [],
     menuPdfUrl: initial?.menuPdfUrl ?? "",
     featured: initial?.featured ?? false,
+    isPartner: initial?.isPartner ?? false,
   });
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -196,6 +198,7 @@ export function CafeForm({
       menu: form.menuHighlights,
       menu_pdf_url: form.menuPdfUrl || null,
       featured: form.featured,
+      is_partner: form.isPartner,
     };
     const revalidatePaths = [`/${locale}/admin/cafes`, `/${locale}/cafes`, `/${locale}`];
     const redirectTo = `/${locale}/admin/cafes`;
@@ -420,6 +423,12 @@ export function CafeForm({
           <label className="flex items-center gap-2 text-sm font-medium">
             <input type="checkbox" checked={form.featured} onChange={(e) => update("featured", e.target.checked)} />
             {t("featureOnHomepage")}
+          </label>
+        )}
+        {canFeature && (
+          <label className="flex items-center gap-2 text-sm font-medium">
+            <input type="checkbox" checked={form.isPartner} onChange={(e) => update("isPartner", e.target.checked)} />
+            {t("goHargeisaPartner")}
           </label>
         )}
       </div>

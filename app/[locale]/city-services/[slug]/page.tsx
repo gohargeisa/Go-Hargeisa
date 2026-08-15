@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { MapPin, Navigation, ExternalLink, Phone as PhoneIcon, MessageCircle, Mail, Globe } from "lucide-react";
+import { MapPin, Navigation, ExternalLink, Phone as PhoneIcon, MessageCircle, Mail, Globe, Wrench, GraduationCap, Send, ShoppingBag, FileText } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
 import { getCityServiceBySlug, getAllCityServiceSlugs, getCityServicesGroupedByCategory } from "@/lib/data/city-services";
@@ -43,6 +43,9 @@ import { normalizeExternalUrl } from "@/lib/utils/normalize-url";
 import { Reveal } from "@/components/home/reveal";
 import { safeJsonLd } from "@/lib/utils/json-ld";
 import { CityServiceTypedFieldsDisplay } from "@/components/shared/city-service-typed-fields-display";
+import { getPrimaryActionGroup } from "@/lib/utils/business-primary-action";
+import { getDocumentLabelGroup } from "@/lib/utils/business-document";
+import { ProductOrderButton } from "@/components/shared/product-order-button";
 import type { CityService } from "@/types";
 
 export const revalidate = 3600;
@@ -156,6 +159,9 @@ export default async function CityServiceDetailPage({
   // are category.slug === "clinic" with clinicType === "dental".
   const isDental = category.slug === "dental-clinic" || (category.slug === "clinic" && service.clinicType === "dental");
   const isMedical = isMedicalAppointmentCategory(category.slug);
+  const primaryActionGroup = getPrimaryActionGroup(category.slug, productsEligible);
+  const documentLabelGroup = getDocumentLabelGroup({ listingType: "city_service", categorySlug: category.slug });
+  const documentLabelKey = `document_${documentLabelGroup}` as const;
 
   const [myReview, isFavorited, nearbyPlaces, allGroups, products, doctors, departments] = await Promise.all([
     featureEligible ? getMyReviewForListing("city_service", service.id) : Promise.resolve(null),
@@ -175,6 +181,27 @@ export default async function CityServiceDetailPage({
   const hasHoursInfo = featureEligible && (hasStructuredHours || service.is24Hours || service.temporarilyClosed || service.permanentlyClosed);
   const serviceWhatsappHref = service.whatsapp ? toWhatsAppHref(service.whatsapp, `Hi, I'd like to know more about ${service.name}.`) : undefined;
   const serviceWebsiteHref = service.website ? normalizeExternalUrl(service.website) : undefined;
+
+  // Category-aware primary action, mutually exclusive with the doctor/staff
+  // appointment button above it — see lib/utils/business-primary-action.ts.
+  // "product_order" gets a real order-request flow (ProductOrderButton, see
+  // product_orders table) once the listing actually has products; otherwise
+  // (and for every other non-appointment category) it falls back to the same
+  // real contact channels already computed above, just wrapped in a
+  // category-appropriate label (Book Service / Inquire Now / Request
+  // Booking / Contact Us) instead of a second flat Call/WhatsApp row.
+  const showDoctorPrimary = appointmentsEligible && doctors.length > 0;
+  const showOrderPrimary = !showDoctorPrimary && primaryActionGroup === "product_order" && products.length > 0;
+  const showCatalogSecondary = productsEligible && products.length > 0;
+  const genericPrimaryAction = serviceWhatsappHref
+    ? { href: serviceWhatsappHref, external: true }
+    : service.phone
+      ? { href: `tel:${service.phone}`, external: false }
+      : serviceWebsiteHref
+        ? { href: serviceWebsiteHref, external: true }
+        : undefined;
+  const showGenericPrimary = !showDoctorPrimary && !showOrderPrimary && !!genericPrimaryAction;
+  const genericGroup = primaryActionGroup === "product_order" ? "contact" : primaryActionGroup;
 
   const navTabs: HotelNavTab[] = [
     { id: "overview", label: td("overview") },
@@ -217,21 +244,63 @@ export default async function CityServiceDetailPage({
       />
 
       <HotelHeaderTop
+        logo={service.logoUrl}
         name={service.name}
         rating={service.rating}
         reviewCount={service.reviewCount}
         categoryLabel={categoryLabel}
         showRating={featureEligible}
         locale={locale}
-        isPartner={service.status === "published"}
+        isPartner={service.isPartner}
+        fallbackIcon={category.icon}
+        fallbackColor={category.color}
+        logoFit="contain"
       />
 
-      {(appointmentsEligible && doctors.length > 0) || service.phone || serviceWhatsappHref || service.email || serviceWebsiteHref ? (
+      {showDoctorPrimary || showOrderPrimary || showGenericPrimary || showCatalogSecondary || service.phone || serviceWhatsappHref || service.email || serviceWebsiteHref ? (
         <Reveal delay={0.05}>
           <div className="container-px mx-auto mt-6 flex flex-wrap items-center justify-center gap-3">
-            {appointmentsEligible && doctors.length > 0 && (
+            {showDoctorPrimary && (
               <PrimaryButton href={`/${locale}/city-services/${service.slug}/book`} size="sm">
                 {isMedical ? (isDental ? ta("bookADentist") : ta("bookADoctor")) : ta("bookAppointmentButton")}
+              </PrimaryButton>
+            )}
+            {showOrderPrimary && (
+              <ProductOrderButton
+                listingType="city_service"
+                listingId={service.id}
+                businessName={service.name}
+                products={products}
+                locale={locale}
+                label={t("orderNow")}
+                className="group inline-flex h-9 items-center justify-center gap-2 rounded-full bg-primary-700 px-4 text-sm font-semibold text-white shadow-soft transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-primary-800 hover:shadow-card active:scale-95"
+                icon={<ShoppingBag size={15} aria-hidden="true" />}
+              />
+            )}
+            {showCatalogSecondary && (
+              <SecondaryButton href="#products" size="sm">
+                <ShoppingBag size={15} aria-hidden="true" />
+                {t("viewProducts")}
+              </SecondaryButton>
+            )}
+            {showGenericPrimary && genericPrimaryAction && (
+              <PrimaryButton href={genericPrimaryAction.href} external={genericPrimaryAction.external} size="sm">
+                {genericGroup === "car_service" ? (
+                  <Wrench size={15} aria-hidden="true" />
+                ) : genericGroup === "education" ? (
+                  <GraduationCap size={15} aria-hidden="true" />
+                ) : genericGroup === "travel" ? (
+                  <Send size={15} aria-hidden="true" />
+                ) : (
+                  <MessageCircle size={15} aria-hidden="true" />
+                )}
+                {genericGroup === "car_service"
+                  ? t("bookService")
+                  : genericGroup === "education"
+                    ? t("inquireNow")
+                    : genericGroup === "travel"
+                      ? t("requestBooking")
+                      : t("contactUs")}
               </PrimaryButton>
             )}
             {service.phone && (
@@ -256,6 +325,12 @@ export default async function CityServiceDetailPage({
               <SecondaryButton href={`mailto:${service.email}`} size="sm">
                 <Mail size={15} aria-hidden="true" />
                 {th("email")}
+              </SecondaryButton>
+            )}
+            {service.documentUrl && (
+              <SecondaryButton href={service.documentUrl} external size="sm">
+                <FileText size={15} aria-hidden="true" />
+                {t(documentLabelKey)}
               </SecondaryButton>
             )}
           </div>
@@ -284,7 +359,14 @@ export default async function CityServiceDetailPage({
         />
       )}
 
-      {service.image && <HotelGallerySlider cover={service.image} images={galleryEligible ? service.gallery : []} alt={service.name} />}
+      {service.image && (
+        <HotelGallerySlider
+          cover={service.image}
+          images={galleryEligible ? service.gallery : []}
+          alt={service.name}
+          productOriented={productsEligible}
+        />
+      )}
 
       <div className="mt-8">
         <HotelNavTabs tabs={navTabs} />

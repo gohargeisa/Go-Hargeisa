@@ -109,7 +109,15 @@ export default async function EditRestaurantPage({
           menuPdfUrl: restaurant.menu_pdf_url ?? "",
           reservable: restaurant.reservable,
           featured: restaurant.featured,
+          isPartner: restaurant.is_partner,
           amenitiesV2: restaurant.amenities_v2 ?? [],
+          restaurantType: restaurant.restaurant_type ?? "",
+          seatingCapacity: restaurant.seating_capacity ?? undefined,
+          numberOfTables: restaurant.number_of_tables ?? undefined,
+          onlineOrderUrl: restaurant.online_order_url ?? "",
+          onlineOrderingEnabled: restaurant.online_ordering_enabled,
+          phoneOrderingEnabled: restaurant.phone_ordering_enabled,
+          languages: restaurant.languages ?? [],
         }}
       />
     </section>

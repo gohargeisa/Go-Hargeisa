@@ -17,7 +17,7 @@ export function ImageUploader({
   value: string;
   onChange: (url: string) => void;
   label?: string;
-  bucket?: "listing-images" | "avatars";
+  bucket?: "listing-images" | "avatars" | "category-images";
   rounded?: string;
 }) {
   const [uploading, setUploading] = useState(false);

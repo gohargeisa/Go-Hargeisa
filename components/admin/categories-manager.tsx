@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, Trash2, Pencil, Eye, EyeOff, Pin, PinOff, ChevronUp, ChevronDown, Plus, X } from "lucide-react";
 import { createCategory, updateCategory, setCategoryActive, setCategoryPinned, reorderCategories, deleteCategory, type CategoryInput } from "@/lib/actions/categories";
 import { DynamicIcon } from "@/lib/utils/dynamic-icon";
+import { ImageUploader } from "@/components/shared/image-uploader";
 import type { Locale } from "@/lib/i18n/config";
 import type { Category, CategoryCustomField, CategoryTargetTable } from "@/types";
 
@@ -20,6 +21,7 @@ const EMPTY_FORM: CategoryInput = {
   description: "",
   icon: "Building2",
   color: "",
+  imageUrl: "",
   targetTable: "services",
   isActive: true,
   isPinned: false,
@@ -68,6 +70,7 @@ export function CategoriesManager({ locale, categories }: { locale: Locale; cate
       description: category.description ?? "",
       icon: category.icon,
       color: category.color ?? "",
+      imageUrl: category.imageUrl ?? "",
       targetTable: category.targetTable,
       isActive: category.isActive,
       isPinned: category.isPinned,
@@ -204,6 +207,19 @@ export function CategoriesManager({ locale, categories }: { locale: Locale; cate
           <div>
             <label className="mb-1.5 block text-sm font-semibold">Description</label>
             <textarea rows={2} value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} className={inputClass} />
+          </div>
+
+          <div>
+            <ImageUploader
+              bucket="category-images"
+              folder="categories"
+              value={form.imageUrl ?? ""}
+              onChange={(url) => setForm((f) => ({ ...f, imageUrl: url }))}
+              label="Category Image (optional)"
+            />
+            <p className="mt-1.5 text-xs text-ink/45 dark:text-sand/45">
+              Shown everywhere this category appears (City Services, homepage, category selectors). Removing it falls back to the icon shown below.
+            </p>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-3">
@@ -404,9 +420,18 @@ export function CategoriesManager({ locale, categories }: { locale: Locale; cate
                 className="flex flex-col gap-3 rounded-xl2 border border-ink/8 bg-white p-4 dark:border-white/10 dark:bg-white/[0.03] sm:flex-row sm:items-center sm:justify-between"
               >
                 <div className="flex min-w-0 items-center gap-3">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                    <DynamicIcon name={category.icon} size={18} />
-                  </span>
+                  {category.imageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={category.imageUrl}
+                      alt=""
+                      className="h-10 w-10 shrink-0 rounded-lg border border-ink/10 object-cover dark:border-white/15"
+                    />
+                  ) : (
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      <DynamicIcon name={category.icon} size={18} />
+                    </span>
+                  )}
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="truncate font-semibold">{category.name}</p>

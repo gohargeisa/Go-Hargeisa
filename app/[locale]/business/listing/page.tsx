@@ -7,6 +7,7 @@ import { MyBusinessForm } from "@/components/business/my-business-form";
 import { ServiceBadges } from "@/components/business/service-badges";
 import { HotelBookingSettingsForm } from "@/components/business/hotel-booking-settings-form";
 import { HotelRoomsManager } from "@/components/admin/hotel-rooms-manager";
+import { RestaurantOrderingSettingsForm } from "@/components/business/restaurant-ordering-settings-form";
 import type { HotelBookingMode, HotelExternalBookingOption, BusinessListingType } from "@/types";
 
 export const metadata: Metadata = { title: "My Business — Dashboard", robots: { index: false } };
@@ -45,6 +46,7 @@ export default async function MyBusinessPage({ params: { locale } }: { params: {
         listingType={listing.listingType}
         listingId={listing.id}
         currentPath={currentPath}
+        categorySlug={listing.categorySlug}
         initial={{
           name: row?.name ?? listing.name,
           shortDescription: row?.short_description ?? "",
@@ -68,6 +70,7 @@ export default async function MyBusinessPage({ params: { locale } }: { params: {
           openingHoursStructured: (row as { opening_hours_structured?: any })?.opening_hours_structured ?? [],
           menuHighlights: (row as { menu?: { name: string; price: string; description?: string }[] })?.menu ?? [],
           menuPdfUrl: (row as { menu_pdf_url?: string })?.menu_pdf_url ?? "",
+          documentUrl: (row as { document_url?: string })?.document_url ?? "",
         }}
       />
 
@@ -104,6 +107,19 @@ export default async function MyBusinessPage({ params: { locale } }: { params: {
             isAvailable: r.is_available ?? true,
           }))}
           revalidatePaths={[currentPath, `/${locale}/hotels/${listing.slug}`]}
+        />
+      )}
+
+      {listing.listingType === "restaurant" && (
+        <RestaurantOrderingSettingsForm
+          restaurantId={listing.id}
+          currentPath={currentPath}
+          initial={{
+            reservable: (row as { reservable?: boolean })?.reservable ?? false,
+            onlineOrderingEnabled: (row as { online_ordering_enabled?: boolean })?.online_ordering_enabled ?? false,
+            onlineOrderUrl: (row as { online_order_url?: string })?.online_order_url ?? "",
+            phoneOrderingEnabled: (row as { phone_ordering_enabled?: boolean })?.phone_ordering_enabled ?? false,
+          }}
         />
       )}
 

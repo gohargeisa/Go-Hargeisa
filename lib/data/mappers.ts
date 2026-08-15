@@ -1,5 +1,5 @@
 import type { Database } from "@/types/database";
-import type { Hotel, HotelRoom, Restaurant, Cafe, Service, Attraction, EventItem, CityService, Article, GalleryImage, Review, BusinessOffer, MediaVideo, Notification, NotificationCategory, NotificationSeverity, Category, Product, Department, Doctor, Appointment, OpeningHoursGroup, RestaurantMenuItem, TableReservation } from "@/types";
+import type { Hotel, HotelRoom, Restaurant, Cafe, Service, Attraction, EventItem, CityService, Article, GalleryImage, Review, BusinessOffer, MediaVideo, Notification, NotificationCategory, NotificationSeverity, Category, Product, Department, Doctor, Appointment, OpeningHoursGroup, RestaurantMenuItem, TableReservation, ProductOrder } from "@/types";
 
 type HotelRow = Database["public"]["Tables"]["hotels"]["Row"];
 type HotelRoomRow = Database["public"]["Tables"]["hotel_rooms"]["Row"];
@@ -17,6 +17,7 @@ type DepartmentRow = Database["public"]["Tables"]["departments"]["Row"];
 type DoctorRow = Database["public"]["Tables"]["doctors"]["Row"];
 type AppointmentRow = Database["public"]["Tables"]["appointments"]["Row"];
 type TableReservationRow = Database["public"]["Tables"]["table_reservations"]["Row"];
+type ProductOrderRow = Database["public"]["Tables"]["product_orders"]["Row"];
 
 function toGallery(json: unknown): GalleryImage[] {
   if (!Array.isArray(json)) return [];
@@ -93,6 +94,7 @@ export function mapHotel(
     coverImage: row.cover_image,
     gallery: toGallery(row.gallery),
     videos: toVideos(row.videos),
+    documentUrl: row.document_url ?? undefined,
     address: row.address,
     location: { lat: row.lat, lng: row.lng },
     googleMapsUrl: row.google_maps_url ?? undefined,
@@ -133,6 +135,7 @@ export function mapHotel(
     bookingWhatsapp: row.booking_whatsapp ?? undefined,
     bookingComUrl: row.booking_com_url ?? undefined,
     partnerStatus: row.partner_status,
+    isPartner: row.is_partner,
     hotelType: (row.hotel_type as Hotel["hotelType"]) ?? undefined,
     starRating: row.star_rating ?? undefined,
     numberOfFloors: row.number_of_floors ?? undefined,
@@ -184,12 +187,15 @@ export function mapRestaurant(row: RestaurantRow, reviews: Review[] = []): Resta
     logo: row.logo_url ?? undefined,
     menuPdfUrl: row.menu_pdf_url ?? undefined,
     partnerStatus: row.partner_status,
+    isPartner: row.is_partner,
     amenitiesV2: row.amenities_v2 ?? [],
     favoriteCount: row.favorite_count ?? 0,
     restaurantType: (row.restaurant_type as Restaurant["restaurantType"]) ?? undefined,
     seatingCapacity: row.seating_capacity ?? undefined,
     numberOfTables: row.number_of_tables ?? undefined,
     onlineOrderUrl: row.online_order_url ?? undefined,
+    onlineOrderingEnabled: row.online_ordering_enabled,
+    phoneOrderingEnabled: row.phone_ordering_enabled,
     languages: row.languages ?? [],
   };
 }
@@ -246,6 +252,7 @@ export function mapCafe(row: CafeRow, reviews: Review[] = [], locale?: string): 
     menuHighlights: menu,
     menuPdfUrl: row.menu_pdf_url ?? undefined,
     partnerStatus: row.partner_status,
+    isPartner: row.is_partner,
     cafeType: (row.cafe_type as Cafe["cafeType"]) ?? undefined,
     seatingCapacity: row.seating_capacity ?? undefined,
     reservable: row.reservable,
@@ -270,6 +277,29 @@ export function mapTableReservation(row: TableReservationRow): TableReservation 
   };
 }
 
+export function mapProductOrder(row: ProductOrderRow): ProductOrder {
+  return {
+    id: row.id,
+    listingType: row.listing_type,
+    listingId: row.listing_id,
+    productId: row.product_id ?? undefined,
+    customerName: row.customer_name,
+    customerPhone: row.customer_phone,
+    fulfillmentType: row.fulfillment_type,
+    deliveryAddress: row.delivery_address ?? undefined,
+    preferredDate: row.preferred_date ?? undefined,
+    recipientName: row.recipient_name ?? undefined,
+    recipientPhone: row.recipient_phone ?? undefined,
+    occasion: row.occasion ?? undefined,
+    messageNote: row.message_note ?? undefined,
+    notes: row.notes ?? undefined,
+    status: row.status,
+    orderReference: row.order_reference,
+    userId: row.user_id ?? undefined,
+    createdAt: row.created_at,
+  };
+}
+
 export function mapCategory(row: CategoryRow): Category {
   return {
     id: row.id,
@@ -282,6 +312,7 @@ export function mapCategory(row: CategoryRow): Category {
     descriptionSo: row.description_so ?? undefined,
     icon: row.icon,
     color: row.color ?? undefined,
+    imageUrl: row.image_url ?? undefined,
     targetTable: row.target_table,
     isActive: row.is_active,
     isPinned: row.is_pinned,
@@ -315,6 +346,7 @@ export function mapService(row: ServiceRow, reviews: Review[] = [], category?: C
     coverImage: row.cover_image,
     gallery: toGallery(row.gallery),
     videos: toVideos(row.videos),
+    documentUrl: row.document_url ?? undefined,
     address: row.address,
     location: { lat: row.lat, lng: row.lng },
     googleMapsUrl: row.google_maps_url ?? undefined,
@@ -339,6 +371,7 @@ export function mapService(row: ServiceRow, reviews: Review[] = [], category?: C
     customFields: (row.custom_fields as Record<string, string | number | boolean>) ?? {},
     featured: row.featured,
     logo: row.logo_url ?? undefined,
+    isPartner: row.is_partner,
     travelAgencyType: (row.travel_agency_type as Service["travelAgencyType"]) ?? undefined,
     flightTicketing: row.flight_ticketing ?? undefined,
     hotelBooking: row.hotel_booking ?? undefined,
@@ -541,12 +574,15 @@ export function mapCityService(row: CityServiceRow, reviews: Review[] = [], loca
     mapsUrl: row.maps_url,
     website: row.website,
     image: row.image,
+    logoUrl: row.logo_url ?? undefined,
     gallery: toGallery(row.gallery),
     videos: toVideos(row.videos),
+    documentUrl: row.document_url ?? undefined,
     coords: { lat: row.lat, lng: row.lng },
     status: row.status,
     featured: row.featured,
     sortOrder: row.sort_order,
+    isPartner: row.is_partner,
     rating: Number(row.rating),
     reviewCount: row.review_count,
     reviews,

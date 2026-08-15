@@ -24,8 +24,9 @@ export default async function GalleryPage({ params: { locale } }: { params: { lo
   const t = await getTranslations({ locale, namespace: "businessDashboard" });
   const supabase = await createClient();
   const table = TABLE_BY_TYPE[listing.listingType];
-  // city_services has no cover_image/logo_url columns — its cover field is `image`, no logo at all.
-  const columns = listing.listingType === "city_service" ? "image, gallery, videos" : "cover_image, logo_url, gallery, videos";
+  // city_services' cover field is `image`, not `cover_image` — logo_url is
+  // now the same column every other listing table already has.
+  const columns = listing.listingType === "city_service" ? "image, logo_url, gallery, videos" : "cover_image, logo_url, gallery, videos";
   const { data: row } = await supabase.from(table).select(columns).eq("id", listing.id).single();
   const typedRow = row as { cover_image?: string; logo_url?: string; image?: string; gallery?: unknown; videos?: unknown } | null;
 

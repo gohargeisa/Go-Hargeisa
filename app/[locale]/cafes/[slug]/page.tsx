@@ -150,7 +150,7 @@ export default async function CafeDetailPage({
         reviewCount={cafe.reviewCount}
         categoryLabel="Cafe"
         locale={locale}
-        isPartner
+        isPartner={cafe.isPartner}
       />
 
       <HotelActionBar
@@ -486,7 +486,6 @@ export default async function CafeDetailPage({
         name={cafe.name}
         phone={cafe.phone}
         whatsappFallback={whatsappFallback}
-        directionsHref={directionsHref}
         locale={locale}
       />
     </>

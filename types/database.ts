@@ -53,10 +53,11 @@ type HotelRow = ListingBase & SocialExtra & {
   booking_mode: "go_hargeisa" | "external";
   external_booking_option: "website" | "booking_com" | "whatsapp" | "custom_url" | null;
   external_booking_url: string | null; booking_whatsapp: string | null; booking_com_url: string | null;
-  partner_status: PartnerStatusDb; trial_expires_at: string | null;
+  partner_status: PartnerStatusDb; trial_expires_at: string | null; is_partner: boolean;
   opening_hours_structured: Json; is_24_hours: boolean; temporarily_closed: boolean; permanently_closed: boolean;
   hotel_type: string | null; star_rating: number | null;
   number_of_floors: number | null; year_established: number | null;
+  document_url: string | null;
 };
 
 type RoomTypeDb = "standard" | "deluxe" | "twin" | "family" | "executive_suite";
@@ -81,10 +82,11 @@ type RestaurantRow = ListingBase & SocialExtra & {
   opening_hours: string | null; opening_hours_structured: Json; menu: Json; reservable: boolean; owner_id: string | null;
   logo_url: string | null; menu_pdf_url: string | null; videos: Json;
   social_instagram: string | null; social_facebook: string | null; whatsapp: string | null; email: string | null;
-  partner_status: PartnerStatusDb; trial_expires_at: string | null;
+  partner_status: PartnerStatusDb; trial_expires_at: string | null; is_partner: boolean;
   is_24_hours: boolean; temporarily_closed: boolean; permanently_closed: boolean;
   restaurant_type: string | null; seating_capacity: number | null; number_of_tables: number | null;
   online_order_url: string | null; languages: string[];
+  online_ordering_enabled: boolean; phone_ordering_enabled: boolean;
 };
 type CafeRow = ListingBase & SocialExtra & {
   description_ar: string | null; description_so: string | null;
@@ -93,7 +95,7 @@ type CafeRow = ListingBase & SocialExtra & {
   price_range: "$" | "$$" | "$$$" | "$$$$"; amenities: string[]; videos: Json; website: string | null;
   social_instagram: string | null; social_facebook: string | null; whatsapp: string | null; email: string | null;
   logo_url: string | null; menu: Json; menu_pdf_url: string | null; reservable: boolean;
-  partner_status: PartnerStatusDb; trial_expires_at: string | null;
+  partner_status: PartnerStatusDb; trial_expires_at: string | null; is_partner: boolean;
   is_24_hours: boolean; temporarily_closed: boolean; permanently_closed: boolean;
   cafe_type: string | null; seating_capacity: number | null;
 };
@@ -119,14 +121,14 @@ type CityServiceRow = {
   id: string; slug: string; category: CityServiceCategoryDb; category_id: string; owner_id: string | null; name: string; name_ar: string | null; name_so: string | null;
   description: string | null; description_ar: string | null; description_so: string | null;
   phone: string | null; whatsapp: string | null; email: string | null;
-  opening_hours: string | null; maps_url: string | null; website: string | null; image: string | null; gallery: Json;
+  opening_hours: string | null; maps_url: string | null; website: string | null; image: string | null; logo_url: string | null; gallery: Json;
   videos: Json; lat: number; lng: number;
   amenities_v2: string[]; rating: number; review_count: number; favorite_count: number;
   opening_hours_structured: Json; is_24_hours: boolean; temporarily_closed: boolean; permanently_closed: boolean;
   social_instagram: string | null; social_facebook: string | null; social_tiktok: string | null; social_snapchat: string | null;
   social_x: string | null; social_youtube: string | null; social_telegram: string | null;
   service_tags: string[];
-  status: "draft" | "published" | "archived"; featured: boolean; sort_order: number;
+  status: "draft" | "published" | "archived"; featured: boolean; sort_order: number; is_partner: boolean;
   created_at: string; updated_at: string;
   // Schools + Universities
   school_type: string | null; curriculum: string | null; education_levels: string[];
@@ -164,6 +166,7 @@ type CityServiceRow = {
   // Pharmacy
   pharmacy_type: string | null; pharmacy_delivery_available: boolean | null; prescription_required: boolean | null;
   home_delivery: boolean | null; pharmacy_emergency_contact: string | null;
+  document_url: string | null;
 };
 type AttractionRow = ListingBase & SocialExtra & {
   history: string | null; best_time_to_visit: string | null; entry_fee: string; visitor_tips: string[];
@@ -181,7 +184,7 @@ type ServiceCategoryDb =
 type ServiceRow = ListingBase & {
   phone: string | null; website: string | null; opening_hours: string | null; services: string[];
   category: ServiceCategoryDb | null; category_id: string | null; owner_id: string | null;
-  custom_fields: Json;
+  custom_fields: Json; is_partner: boolean;
   logo_url: string | null; videos: Json; whatsapp: string | null; email: string | null;
   social_instagram: string | null; social_facebook: string | null; social_tiktok: string | null; opening_hours_structured: Json;
   // Travel Agency / Travel Office (slug 'tour-companies')
@@ -222,6 +225,7 @@ type ServiceRow = ListingBase & {
   intercity_transport_available: boolean | null; rental_available: boolean | null; daily_rental_available: boolean | null;
   weekly_rental_available: boolean | null; monthly_rental_available: boolean | null;
   delivery_service_available: boolean | null; cargo_service_available: boolean | null;
+  document_url: string | null;
 };
 
 /** The `categories` table — single source of truth for every business
@@ -235,6 +239,7 @@ type CategoryRow = {
   custom_fields_schema: Json;
   supports_gallery: boolean; supports_new_features: boolean; schema_org_type: string | null;
   supports_products: boolean; supports_appointments: boolean;
+  image_url: string | null;
   created_at: string; updated_at: string;
 };
 
@@ -258,11 +263,24 @@ type BookingStatusHistoryRow = {
 };
 
 type TableReservationRow = {
-  id: string; listing_type: "hotel" | "restaurant" | "cafe"; listing_id: string;
+  id: string; listing_type: "hotel" | "restaurant" | "cafe" | "service"; listing_id: string;
   customer_name: string; customer_phone: string;
   reservation_date: string; reservation_time: string; guests_count: number;
   notes: string | null; status: "pending" | "confirmed" | "cancelled" | "completed";
   reservation_reference: string; user_id: string | null;
+  created_at: string; updated_at: string;
+};
+
+type ProductOrderRow = {
+  id: string; listing_type: "city_service" | "service"; listing_id: string;
+  product_id: string | null;
+  customer_name: string; customer_phone: string;
+  fulfillment_type: "delivery" | "pickup"; delivery_address: string | null;
+  preferred_date: string | null;
+  recipient_name: string | null; recipient_phone: string | null;
+  occasion: string | null; message_note: string | null; notes: string | null;
+  status: "pending" | "confirmed" | "cancelled" | "completed";
+  order_reference: string; user_id: string | null;
   created_at: string; updated_at: string;
 };
 
@@ -486,6 +504,7 @@ export type Database = {
       bookings: Table<BookingRow>;
       booking_status_history: Table<BookingStatusHistoryRow>;
       table_reservations: Table<TableReservationRow>;
+      product_orders: Table<ProductOrderRow>;
       business_metric_events: Table<BusinessMetricEventRow>;
       business_subscriptions: Table<BusinessSubscriptionRow>;
       business_subscription_notes: Table<BusinessSubscriptionNoteRow>;

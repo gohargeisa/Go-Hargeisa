@@ -1,0 +1,13 @@
+-- Go Hargeisa — widen the shared listing_type_business enum to include
+-- 'service' (target_table = 'services' listings, e.g. Real Estate).
+--
+-- Split into its own migration file/transaction on purpose: Postgres does
+-- not allow a newly-added enum value to be referenced (even as a string
+-- literal compared against the enum column, e.g. `listing_type = 'service'`
+-- in a policy or function body) within the same transaction that added it.
+-- The next migration adds that usage (table_reservations reused for Real
+-- Estate property-viewing requests) and must run after this one commits.
+--
+-- Purely additive — 'hotel'/'restaurant'/'cafe' are untouched, every
+-- existing row and query keeps working exactly as before.
+alter type listing_type_business add value if not exists 'service';

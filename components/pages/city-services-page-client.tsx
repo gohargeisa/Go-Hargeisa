@@ -11,67 +11,21 @@ import { Reveal } from "@/components/home/reveal";
 import { DynamicIcon } from "@/lib/utils/dynamic-icon";
 import { categoryDisplayName } from "@/lib/utils/category-href";
 import { SERVICE_TAGS_BY_CATEGORY_SLUG, SERVICE_TAG_ICON, type ServiceTagCode } from "@/lib/config/service-tags";
+import {
+  MERGED_CATEGORIES,
+  ALL_MERGED_MEMBER_SLUGS,
+  mergedCategoryOf,
+  mergedCategoryDisplayName,
+  type MergedCategoryKey,
+} from "@/lib/config/city-service-category-groups";
 import type { CityServiceCategoryGroup } from "@/lib/data/city-services";
 import type { Locale } from "@/lib/i18n/config";
-
-/** Neither "Education" nor "Perfumes & Cosmetics" is a `categories` row —
- * every member slug stays its own real category/business in the database
- * exactly as before. This purely groups members for display (one premium
- * card instead of several), matching the requested "no duplicate top-level
- * cards, no new category data" structure. Add another entry here if a
- * future grouping is needed — no other code needs to change. */
-type MergedCategoryKey = "health" | "education" | "beauty" | "perfumes-cosmetics";
-
-type MergedCategoryConfig = {
-  key: MergedCategoryKey;
-  memberSlugs: string[];
-  icon: string;
-  color: string;
-  nameKey: "healthCategoryName" | "educationCategoryName" | "beautyCategoryName" | "perfumesCosmeticsCategoryName";
-};
-
-const MERGED_CATEGORIES: MergedCategoryConfig[] = [
-  {
-    key: "health",
-    memberSlugs: ["hospital", "clinic", "pharmacy"],
-    icon: "HeartPulse",
-    color: "#DC2626",
-    nameKey: "healthCategoryName",
-  },
-  {
-    key: "education",
-    memberSlugs: ["school", "university", "institute", "language-institute"],
-    icon: "GraduationCap",
-    color: "#16A34A",
-    nameKey: "educationCategoryName",
-  },
-  {
-    key: "beauty",
-    memberSlugs: ["beauty-salon", "men-barbershop"],
-    icon: "Scissors",
-    color: "#9333EA",
-    nameKey: "beautyCategoryName",
-  },
-  {
-    key: "perfumes-cosmetics",
-    memberSlugs: ["perfume-shop", "cosmetics-beauty"],
-    icon: "Sparkles",
-    color: "#DB2777",
-    nameKey: "perfumesCosmeticsCategoryName",
-  },
-];
-
-const ALL_MERGED_MEMBER_SLUGS = MERGED_CATEGORIES.flatMap((m) => m.memberSlugs);
-
-function mergedCategoryOf(key: string) {
-  return MERGED_CATEGORIES.find((m) => m.key === key);
-}
 
 /** Cards appear in this order first (only when present — a slug with no
  * published listings is simply skipped, same as today); everything else
  * keeps its existing count-descending order after these. Purely a display
  * concern — doesn't touch `categories.sort_order` in the database. */
-const CATEGORY_CARD_PRIORITY = ["health", "education", "beauty", "perfumes-cosmetics", "kids-family"];
+const CATEGORY_CARD_PRIORITY = ["health", "education", "automotive", "beauty", "perfumes-cosmetics", "kids-family"];
 
 /** Bounded, literal Tailwind class strings (safe for the JIT scanner) so a
  * sparse section never reads as "one tiny card lost in a huge empty grid" —
@@ -194,6 +148,7 @@ export function CityServicesPageClient({
       slug: string;
       icon: string;
       color?: string;
+      imageUrl?: string;
       name: string;
       count: number;
       active: boolean;
@@ -207,6 +162,7 @@ export function CityServicesPageClient({
         slug: g.category.slug,
         icon: g.category.icon,
         color: g.category.color,
+        imageUrl: g.category.imageUrl,
         name: categoryDisplayName(g.category, locale as Locale),
         count: g.items.length,
         active: activeCategoryId === g.category.id,
@@ -221,7 +177,7 @@ export function CityServicesPageClient({
         slug: merged.key,
         icon: merged.icon,
         color: merged.color,
-        name: t(merged.nameKey),
+        name: mergedCategoryDisplayName(merged, locale as Locale),
         count: memberGroups.reduce((sum, g) => sum + g.items.length, 0),
         active: activeCategoryId === merged.key,
         onSelect: () => selectCategory(activeCategoryId === merged.key ? "all" : merged.key),
@@ -247,7 +203,7 @@ export function CityServicesPageClient({
             {displayCards.map((card) => (
               <CityServiceCategoryCard
                 key={card.key}
-                category={{ slug: card.slug, icon: card.icon, color: card.color }}
+                category={{ slug: card.slug, icon: card.icon, color: card.color, imageUrl: card.imageUrl }}
                 name={card.name}
                 description={t(`categoryCardDescription_${card.slug}` as "categoryCardDescription_hospital")}
                 count={card.count}

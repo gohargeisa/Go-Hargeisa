@@ -47,6 +47,7 @@ export const CAFE_GALLERY_CATEGORIES: GalleryCategoryOption[] = [
 ];
 
 export const SERVICE_GALLERY_CATEGORIES: GalleryCategoryOption[] = [
+  { value: "product", label: "Product" },
   { value: "exterior", label: "Exterior" },
   { value: "interior", label: "Interior" },
   { value: "staff", label: "Staff" },

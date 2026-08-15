@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { Check, Loader2, AlertCircle } from "lucide-react";
 import { submitJoinRequest } from "@/lib/actions/business-requests";
@@ -12,10 +12,11 @@ import { DocumentsUploader } from "@/components/shared/documents-uploader-lazy";
 import { CoordinatesInput } from "@/components/shared/coordinates-input";
 import { CustomFieldsEditor, type CustomFieldValues } from "@/components/shared/custom-fields-editor";
 import { ServiceTagsPicker } from "@/components/admin/service-tags-picker";
-import { PARTNER_AMENITIES, PARTNER_AMENITY_ICON, targetTableToJoinCategory } from "@/lib/utils/partner-categories";
+import { PARTNER_AMENITIES, PARTNER_AMENITY_ICON } from "@/lib/utils/partner-categories";
 import { TagInput } from "@/components/admin/form-shared";
 import { DynamicIcon } from "@/lib/utils/dynamic-icon";
-import { categoryDisplayName } from "@/lib/utils/category-href";
+import { GroupedCategorySelect } from "@/components/shared/grouped-category-select";
+import { buildJoinPrimaryCards, ALL_JOIN_PROMOTED_SLUGS } from "@/lib/config/join-primary-groups";
 import { WEEK_DAYS_SAT_FIRST, defaultWeeklyHours } from "@/lib/utils/weekly-hours";
 import {
   HOTEL_TYPE_ORDER,
@@ -399,6 +400,17 @@ export function JoinRequestForm({
   const categoryAmenities = PARTNER_AMENITIES[category];
   const selectedServiceCategory = serviceCategories.find((c) => c.id === serviceCategoryId);
 
+  // The 7-card "Business Type" primary area (Hotels[+Apartments],
+  // Restaurants, Cafés, Education, Health, Car Services, Beauty & Care) —
+  // see lib/config/join-primary-groups.ts. Every promoted subcategory is
+  // removed from the "other" dropdown below so it never appears twice.
+  const primaryCards = useMemo(() => buildJoinPrimaryCards(coreCategories, serviceCategories, locale), [coreCategories, serviceCategories, locale]);
+  const promotedSlugs = useMemo(() => new Set(ALL_JOIN_PROMOTED_SLUGS), []);
+  const dropdownCategories = useMemo(
+    () => serviceCategories.filter((c) => !promotedSlugs.has(c.slug)),
+    [serviceCategories, promotedSlugs]
+  );
+
   const isHotel = category === "hotel";
   const isRestaurant = category === "restaurant";
   const isCafe = category === "cafe";
@@ -409,10 +421,11 @@ export function JoinRequestForm({
   const isCosmetics = category === "other" && selectedServiceCategory?.slug === "cosmetics-beauty";
   const isPerfume = category === "other" && selectedServiceCategory?.slug === "perfume-shop";
   const isCarRental = category === "other" && selectedServiceCategory?.slug === "car-rental";
-  // Dental Clinic is now one clinicType value ("dental") within the
-  // unified Clinics category (slug "clinic"), not a separate category —
-  // the dental-clinic slug itself is deactivated and can no longer be
-  // resolved via selection here.
+  // "clinic" covers general/medical Clinics, with its own clinicType
+  // ("dental" included as one option). The separate "dental-clinic" category
+  // (reactivated for the /join Health group) has no dedicated fields of its
+  // own and submits through the generic "other" category path instead, same
+  // as Quran Memorization Centers, Taxi Services, and Car Wash below.
   const isClinic = category === "other" && selectedServiceCategory?.slug === "clinic";
   const isAutoRepair = category === "other" && selectedServiceCategory?.slug === "auto-repair";
   const isGym = category === "other" && selectedServiceCategory?.slug === "gym";
@@ -938,14 +951,20 @@ export function JoinRequestForm({
       <div id="business-type" className="scroll-mt-24">
         <label className={labelClass}>{t("categoryLabel")}</label>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {coreCategories.map((c) => {
-            const cat = targetTableToJoinCategory(c.targetTable);
-            const active = category === cat;
+          {primaryCards.map((card) => {
+            function isMemberActive(m: (typeof card.members)[number]) {
+              return m.kind === "core" ? category === m.coreCategory : category === "other" && serviceCategoryId === m.categoryId;
+            }
+            const active = card.members.some(isMemberActive);
+            function selectMember(m: (typeof card.members)[number]) {
+              if (m.kind === "core" && m.coreCategory) selectCategory(m.coreCategory);
+              else if (m.categoryId) selectOtherCategory(m.categoryId);
+            }
             return (
               <button
-                key={c.id}
+                key={card.key}
                 type="button"
-                onClick={() => selectCategory(cat)}
+                onClick={() => selectMember(card.members[0])}
                 aria-pressed={active}
                 className={`flex flex-col items-center gap-2 rounded-2xl border p-4 text-center transition-all duration-200 ${
                   active
@@ -958,30 +977,68 @@ export function JoinRequestForm({
                     active ? "bg-primary text-white" : "bg-ink/5 text-ink/60 dark:bg-white/10 dark:text-sand/60"
                   }`}
                 >
-                  <DynamicIcon name={c.icon} size={20} aria-hidden="true" />
+                  <DynamicIcon name={card.icon} size={20} aria-hidden="true" />
                 </span>
                 <span className={`text-xs font-semibold ${active ? "text-primary-700" : "text-ink/75 dark:text-sand/75"}`}>
-                  {categoryDisplayName(c, locale)}
+                  {card.label}
                 </span>
               </button>
             );
           })}
         </div>
 
-        {serviceCategories.length > 0 && (
+        {/* Subcategory pills for whichever primary card is active and has
+            more than one real member (Hotels, Education, Health, Car
+            Services, Beauty & Care) — Restaurants/Cafés have exactly one
+            member so they never show this row, unchanged from before. */}
+        {primaryCards.map((card) => {
+          if (card.members.length <= 1) return null;
+          function isMemberActive(m: (typeof card.members)[number]) {
+            return m.kind === "core" ? category === m.coreCategory : category === "other" && serviceCategoryId === m.categoryId;
+          }
+          if (!card.members.some(isMemberActive)) return null;
+          return (
+            <div key={card.key} className="mt-3 flex flex-wrap gap-2">
+              {card.members.map((m, i) => {
+                const memberActive = isMemberActive(m);
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => {
+                      if (m.kind === "core" && m.coreCategory) selectCategory(m.coreCategory);
+                      else if (m.categoryId) selectOtherCategory(m.categoryId);
+                    }}
+                    aria-pressed={memberActive}
+                    className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
+                      memberActive
+                        ? "bg-primary text-white"
+                        : "border border-ink/12 text-ink/60 hover:border-primary/40 hover:text-primary dark:border-white/15 dark:text-sand/60"
+                    }`}
+                  >
+                    {m.label}
+                  </button>
+                );
+              })}
+            </div>
+          );
+        })}
+
+        {dropdownCategories.length > 0 && (
           <div className="mt-4">
-            <label htmlFor="jr-other-category" className={labelClass}>{t("otherCategoryLabel")}</label>
-            <select
-              id="jr-other-category"
-              value={category === "other" ? serviceCategoryId : ""}
-              onChange={(e) => selectOtherCategory(e.target.value)}
-              className={inputClass}
-            >
-              <option value="" disabled>{t("selectCategoryPlaceholder")}</option>
-              {serviceCategories.map((c) => (
-                <option key={c.id} value={c.id}>{categoryDisplayName(c, locale)}</option>
-              ))}
-            </select>
+            <GroupedCategorySelect
+              categories={dropdownCategories}
+              value={category === "other" && !promotedSlugs.has(selectedServiceCategory?.slug ?? "") ? serviceCategoryId : ""}
+              onChange={selectOtherCategory}
+              locale={locale}
+              groupLabel={t("otherCategoryLabel")}
+              groupPlaceholder={t("selectCategoryPlaceholder")}
+              subcategoryLabel={t("selectSubcategoryLabel")}
+              subcategoryPlaceholder={t("selectSubcategoryPlaceholder")}
+              inputClassName={inputClass}
+              labelClassName={labelClass}
+              idPrefix="jr-other-category"
+            />
           </div>
         )}
       </div>

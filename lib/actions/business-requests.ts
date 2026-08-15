@@ -1356,7 +1356,15 @@ export async function convertJoinRequest(
     if (request.restaurant_type) basePayload.restaurant_type = request.restaurant_type;
     if (request.seating_capacity) basePayload.seating_capacity = request.seating_capacity;
     if (request.number_of_tables) basePayload.number_of_tables = request.number_of_tables;
-    if (request.online_order_url) basePayload.online_order_url = request.online_order_url;
+    if (request.online_order_url) {
+      basePayload.online_order_url = request.online_order_url;
+      // A real ordering link at signup is itself the capability signal —
+      // online_ordering_enabled starts on so Order Now isn't silently dark
+      // until the new owner finds the dashboard toggle. phone_ordering_enabled
+      // stays off by default: opting in to call-in orders is a deliberate
+      // operational choice, not something to infer.
+      basePayload.online_ordering_enabled = true;
+    }
     if (request.is_24_hours) basePayload.is_24_hours = request.is_24_hours;
     if (request.languages && request.languages.length > 0) basePayload.languages = request.languages;
     // Restaurant facilities use the rich amenities_v2 vocabulary directly

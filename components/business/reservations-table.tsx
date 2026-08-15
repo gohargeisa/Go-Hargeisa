@@ -46,15 +46,21 @@ export function ReservationsTable({
   listingId,
   reservations,
   revalidatePath,
+  variant = "table",
 }: {
-  listingType: "restaurant" | "cafe";
+  listingType: "restaurant" | "cafe" | "service";
   listingId: string;
   reservations: TableReservation[];
   revalidatePath: string;
+  /** "viewing" switches the guest-count column/WhatsApp message wording to
+   * Real Estate's "viewers" instead of "guests" — see the customer-facing
+   * TableReservationForm's identical variant prop. */
+  variant?: "table" | "viewing";
 }) {
   const t = useTranslations("businessDashboard");
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const guestsLabel = variant === "viewing" ? t("viewers") : t("guests");
 
   function onStatusChange(reservation: TableReservation, status: TableReservation["status"]) {
     startTransition(async () => {
@@ -66,7 +72,9 @@ export function ReservationsTable({
   function contactHref(reservation: TableReservation): string {
     return toWhatsAppHref(
       reservation.customerPhone,
-      `Hi ${reservation.customerName}, this is regarding your table reservation (${reservation.reservationReference}).`
+      variant === "viewing"
+        ? `Hi ${reservation.customerName}, this is regarding your property viewing request (${reservation.reservationReference}).`
+        : `Hi ${reservation.customerName}, this is regarding your table reservation (${reservation.reservationReference}).`
     );
   }
 
@@ -90,7 +98,7 @@ export function ReservationsTable({
               <th className="px-4 py-3 text-start font-semibold">{t("phone")}</th>
               <th className="px-4 py-3 text-start font-semibold">{t("reservationDate")}</th>
               <th className="px-4 py-3 text-start font-semibold">{t("reservationTime")}</th>
-              <th className="px-4 py-3 text-start font-semibold">{t("guests")}</th>
+              <th className="px-4 py-3 text-start font-semibold">{guestsLabel}</th>
               <th className="px-4 py-3 text-start font-semibold">{t("status")}</th>
               <th className="px-4 py-3 text-end font-semibold">{t("actions")}</th>
             </tr>
@@ -179,7 +187,7 @@ export function ReservationsTable({
               <p>{formatDate(r.reservationDate)}</p>
               <p>{formatTime12h(r.reservationTime.slice(0, 5))}</p>
               <p className="col-span-2">
-                {t("guests")}: {r.guestsCount}
+                {guestsLabel}: {r.guestsCount}
               </p>
               {r.notes && <p className="col-span-2">{t("notes")}: {r.notes}</p>}
             </div>

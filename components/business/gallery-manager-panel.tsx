@@ -65,11 +65,12 @@ export function GalleryManagerPanel({
   function onSave() {
     setError(null);
     startTransition(async () => {
-      // city_services has no logo_url column and its cover field is called
-      // `image`, not `cover_image` — see updateCityServicePartial's comment.
+      // city_services' cover field is called `image`, not `cover_image` —
+      // see updateCityServicePartial's comment — but logo_url is now the
+      // same column/name every other listing table already uses.
       const result =
         listingType === "city_service"
-          ? await updateCityServicePartial(localeFromPath(currentPath), listingId, { image: cover, gallery, videos })
+          ? await updateCityServicePartial(localeFromPath(currentPath), listingId, { image: cover, logo_url: logo || null, gallery, videos })
           : await updateRecord(
               TABLE_BY_TYPE[listingType] as "hotels" | "restaurants" | "cafes" | "services",
               listingId,
@@ -83,11 +84,9 @@ export function GalleryManagerPanel({
 
   return (
     <div className="space-y-6">
-      <div className={`grid gap-6 rounded-2xl border border-ink/8 bg-white p-5 dark:border-white/10 dark:bg-white/[0.03] sm:p-6 ${listingType === "city_service" ? "" : "sm:grid-cols-2"}`}>
+      <div className="grid gap-6 rounded-2xl border border-ink/8 bg-white p-5 dark:border-white/10 dark:bg-white/[0.03] sm:grid-cols-2 sm:p-6">
         <ImageUploader folder={`${listingType}s`} value={cover} onChange={setCover} label={t("coverImage")} />
-        {listingType !== "city_service" && (
-          <ImageUploader folder={`${listingType}s/logos`} value={logo} onChange={setLogo} label={t("businessLogo")} rounded="rounded-full" />
-        )}
+        <ImageUploader folder={`${listingType}s/logos`} value={logo} onChange={setLogo} label={t("businessLogo")} rounded="rounded-full" />
       </div>
 
       <div className="rounded-2xl border border-ink/8 bg-white p-5 dark:border-white/10 dark:bg-white/[0.03] sm:p-6">

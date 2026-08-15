@@ -8,6 +8,9 @@ import { ChevronLeft, ChevronRight, Expand } from "lucide-react";
 import type { GalleryImage } from "@/types";
 import { Lightbox, type LightboxSlide } from "@/components/shared/lightbox";
 import { SHIMMER_BLUR_DATA_URL } from "@/lib/utils/shimmer";
+import { BrandedPlaceholder } from "@/components/shared/branded-placeholder";
+import { isPlaceholderImage } from "@/lib/utils/is-placeholder-image";
+import { getGalleryImageFit } from "@/lib/utils/gallery-image-fit";
 
 const AUTOPLAY_MS = 5000;
 
@@ -24,10 +27,17 @@ export function HotelGallerySlider({
   cover,
   images,
   alt,
+  productOriented = false,
 }: {
   cover: string;
   images: GalleryImage[];
   alt: string;
+  /** City Services only (categories.supports_products) — when true, any
+   * slide not explicitly tagged otherwise (see lib/utils/gallery-image-fit.ts)
+   * preserves the complete photo instead of cropping it to fill the wide
+   * hero frame. Never passed by hotels/restaurants/cafes/services, so their
+   * existing cover-only presentation is completely unchanged. */
+  productOriented?: boolean;
 }) {
   const t = useTranslations("hotelDetail");
   const tc = useTranslations("common");
@@ -36,6 +46,14 @@ export function HotelGallerySlider({
     { url: cover, alt },
     ...images.map((img, i) => ({ url: img.url, alt: img.alt || `${alt} — photo ${i + 2}`, caption: img.caption })),
   ];
+  const fits = [
+    getGalleryImageFit(undefined, productOriented),
+    ...images.map((img) => getGalleryImageFit(img, productOriented)),
+  ];
+  // No real gallery uploaded yet and the cover is just a generated
+  // placehold.co placeholder — show a branded placeholder instead of
+  // rendering that literal "text on a color block" image at full hero size.
+  const isSinglePlaceholder = slides.length === 1 && isPlaceholderImage(slides[0].url);
 
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: slides.length > 1, align: "start" });
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -94,25 +112,36 @@ export function HotelGallerySlider({
                 key={i}
                 className="relative h-[50vh] max-h-[520px] min-h-[300px] w-full shrink-0 grow-0 basis-full sm:h-[54vh]"
               >
-                {!loaded[i] && (
-                  <div className="absolute inset-0 animate-pulse bg-ink/10 dark:bg-white/10" aria-hidden="true" />
+                {isSinglePlaceholder ? (
+                  <BrandedPlaceholder name={alt} className="absolute inset-0" />
+                ) : (
+                  <>
+                    {!loaded[i] && (
+                      <div className="absolute inset-0 animate-pulse bg-ink/10 dark:bg-white/10" aria-hidden="true" />
+                    )}
+                    {fits[i] === "contain" && (
+                      <div className="absolute inset-0 bg-ink/5 dark:bg-white/5" aria-hidden="true" />
+                    )}
+                    <Image
+                      src={s.url}
+                      alt={s.alt}
+                      fill
+                      priority={i === 0}
+                      quality={90}
+                      sizes="100vw"
+                      placeholder="blur"
+                      blurDataURL={SHIMMER_BLUR_DATA_URL}
+                      onLoad={() => setLoaded((l) => ({ ...l, [i]: true }))}
+                      className={`${fits[i] === "contain" ? "object-contain" : "object-cover"} transition-opacity duration-500 ${loaded[i] ? "opacity-100" : "opacity-0"}`}
+                    />
+                    {fits[i] !== "contain" && (
+                      <div
+                        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent"
+                        aria-hidden="true"
+                      />
+                    )}
+                  </>
                 )}
-                <Image
-                  src={s.url}
-                  alt={s.alt}
-                  fill
-                  priority={i === 0}
-                  quality={90}
-                  sizes="100vw"
-                  placeholder="blur"
-                  blurDataURL={SHIMMER_BLUR_DATA_URL}
-                  onLoad={() => setLoaded((l) => ({ ...l, [i]: true }))}
-                  className={`object-cover transition-opacity duration-500 ${loaded[i] ? "opacity-100" : "opacity-0"}`}
-                />
-                <div
-                  className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent"
-                  aria-hidden="true"
-                />
               </div>
             ))}
           </div>
@@ -142,15 +171,17 @@ export function HotelGallerySlider({
           </>
         )}
 
-        <button
-          type="button"
-          onClick={() => setLightboxOpen(true)}
-          aria-label={t("viewFullscreenGallery")}
-          className="absolute bottom-3 end-3 z-10 inline-flex items-center gap-1.5 rounded-full bg-black/55 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm transition-colors hover:bg-black/70 sm:bottom-4 sm:end-4"
-        >
-          <Expand size={13} aria-hidden="true" />
-          {t("viewAllPhotos")}
-        </button>
+        {!isSinglePlaceholder && (
+          <button
+            type="button"
+            onClick={() => setLightboxOpen(true)}
+            aria-label={t("viewFullscreenGallery")}
+            className="absolute bottom-3 end-3 z-10 inline-flex items-center gap-1.5 rounded-full bg-black/55 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm transition-colors hover:bg-black/70 sm:bottom-4 sm:end-4"
+          >
+            <Expand size={13} aria-hidden="true" />
+            {t("viewAllPhotos")}
+          </button>
+        )}
       </div>
 
       {slides.length > 1 && (

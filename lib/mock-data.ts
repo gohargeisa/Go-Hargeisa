@@ -52,7 +52,7 @@ export const destinations: Destination[] = [
 // blank rather than guessed. Coordinates are best-effort placements based on
 // the venue's known road/neighborhood, not precise GPS pins, since exact
 // geocoding wasn't publicly available for most of these.
-export const hotels: Hotel[] = [
+const hotelsRaw: Omit<Hotel, "isPartner">[] = [
   {
     id: "h1",
     slug: "ambassador-hotel-hargeisa",
@@ -799,8 +799,9 @@ export const hotels: Hotel[] = [
     partnerStatus: "official",
   },
 ];
+export const hotels: Hotel[] = hotelsRaw.map((h) => ({ ...h, isPartner: false }));
 
-export const restaurants: Restaurant[] = [
+const restaurantsRaw: Omit<Restaurant, "isPartner" | "onlineOrderingEnabled" | "phoneOrderingEnabled">[] = [
   {
     id: "r1",
     slug: "sultan-restaurant",
@@ -1662,13 +1663,19 @@ featured: false,
     partnerStatus: "official",
   },
 ];
+export const restaurants: Restaurant[] = restaurantsRaw.map((r) => ({
+  ...r,
+  isPartner: false,
+  onlineOrderingEnabled: false,
+  phoneOrderingEnabled: false,
+}));
 
 // Real, independently-operating cafes in Hargeisa, researched from public
 // sources (official sites, Tripadvisor, Facebook/Instagram business pages)
 // in July 2026. Descriptions are original. rating/reviewCount start at 0 —
 // no ratings are carried over from other platforms. Coordinates are
 // best-effort placements by known road/neighborhood, not precise GPS pins.
-export const cafes: Cafe[] = [
+const cafesRaw: Omit<Cafe, "isPartner">[] = [
   {
     id: "c1",
     slug: "cup-of-art",
@@ -2231,6 +2238,7 @@ export const cafes: Cafe[] = [
     partnerStatus: "official",
   },
 ];
+export const cafes: Cafe[] = cafesRaw.map((c) => ({ ...c, isPartner: false }));
 
 // Phase 2 — Essential City Services (hospitals, pharmacies, dental clinics,
 // banks, ATMs, currency exchange, gas stations, car rentals). Populated
@@ -2268,7 +2276,7 @@ const MOCK_SERVICE_CATEGORY_META: Record<ServiceCategory, { slug: string; label:
   government_office: { slug: "government-offices", label: "Government Offices", icon: "Landmark", color: "#4F46E5" },
 };
 
-const rawServices: Omit<Service, "categorySlug" | "categoryLabel" | "categoryIcon" | "categoryColor" | "customFields">[] = [
+const rawServices: Omit<Service, "categorySlug" | "categoryLabel" | "categoryIcon" | "categoryColor" | "customFields" | "isPartner">[] = [
   // ---- Hospitals ----
   {
     id: "sv-h1",
@@ -2812,7 +2820,7 @@ const rawServices: Omit<Service, "categorySlug" | "categoryLabel" | "categoryIco
 export const services: Service[] = rawServices.map((s) => {
   // Every mock entry sets a real category literal (see the array above).
   const meta = MOCK_SERVICE_CATEGORY_META[s.category!];
-  return { ...s, categorySlug: meta.slug, categoryLabel: meta.label, categoryIcon: meta.icon, categoryColor: meta.color, customFields: {} };
+  return { ...s, categorySlug: meta.slug, categoryLabel: meta.label, categoryIcon: meta.icon, categoryColor: meta.color, customFields: {}, isPartner: false };
 });
 
 export const attractions: Attraction[] = [

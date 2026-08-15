@@ -2,7 +2,7 @@ import { safeJsonLd } from "@/lib/utils/json-ld";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { ExternalLink, MapPin, Navigation } from "lucide-react";
+import { ExternalLink, MapPin, Navigation, ShoppingBag, FileText } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
 import { getServiceBySlug, getAllServiceSlugs, getServices } from "@/lib/data/services";
@@ -31,6 +31,11 @@ import { ServiceTypedFieldsDisplay } from "@/components/shared/service-typed-fie
 import { SERVICES_PUBLIC_ENABLED } from "@/lib/config/features";
 import { getProductsForListing } from "@/lib/data/products";
 import { ProductsSection } from "@/components/shared/products-section";
+import { getPrimaryActionGroup } from "@/lib/utils/business-primary-action";
+import { getDocumentLabelGroup } from "@/lib/utils/business-document";
+import { TableReservationButton } from "@/components/shared/table-reservation-button";
+import { ProductOrderButton } from "@/components/shared/product-order-button";
+import { VideoGallery } from "@/components/shared/video-gallery";
 
 const TYPED_FIELD_CATEGORIES = new Set(["apartments", "real-estate", "electronics", "transportation", "flower-shops"]);
 
@@ -116,6 +121,26 @@ export default async function ServiceDetailPage({
   const similarServices = allServices.filter((s) => s.id !== service.id).slice(0, 4);
   const whatsappFallback = (siteSettings as { whatsapp_number?: string } | null)?.whatsapp_number ?? undefined;
 
+  // Category-aware primary CTA — see lib/utils/business-primary-action.ts.
+  // property_viewing (Real Estate) and product_order (Flower/Perfume-style
+  // shops, once products.length > 0) are real request flows rendered
+  // directly below, not just a label; every other group reuses
+  // HotelActionBar's existing website→phone fallback link, just with a
+  // category-appropriate label.
+  const primaryActionGroup = getPrimaryActionGroup(service.categorySlug, productsEligible);
+  const showViewingPrimary = primaryActionGroup === "property_viewing";
+  const showOrderPrimary = primaryActionGroup === "product_order" && products.length > 0;
+  const primaryActionLabel =
+    primaryActionGroup === "car_service"
+      ? t("bookService")
+      : primaryActionGroup === "education"
+        ? t("inquireNow")
+        : primaryActionGroup === "travel"
+          ? t("requestBooking")
+          : t("contactUs");
+  const documentLabelGroup = getDocumentLabelGroup({ listingType: "service", categorySlug: service.categorySlug });
+  const documentLabelKey = `document_${documentLabelGroup}` as const;
+
   const googleMapsHref = resolveMapsUrl(service.location);
   const directionsHref = resolveDirectionsUrl(service.location);
 
@@ -136,6 +161,7 @@ export default async function ServiceDetailPage({
     ...(hasDetails ? [{ id: "details", label: td("details") }] : []),
     ...(service.services.length > 0 ? [{ id: "services", label: "Services" }] : []),
     ...(galleryImages.length > 0 ? [{ id: "gallery", label: t("gallery") }] : []),
+    ...(service.videos && service.videos.length > 0 ? [{ id: "videos", label: td("videoGallery") }] : []),
     { id: "reviews", label: t("reviews") },
     { id: "location", label: td("location") },
   ];
@@ -174,8 +200,38 @@ export default async function ServiceDetailPage({
         reviewCount={service.reviewCount}
         categoryLabel={singularize(service.categoryLabel)}
         locale={locale}
-        isPartner
+        isPartner={service.isPartner}
       />
+
+      {(showViewingPrimary || showOrderPrimary) && (
+        <Reveal delay={0.05}>
+          <div className="container-px mx-auto mt-6 flex flex-wrap items-center justify-center gap-3">
+            {showViewingPrimary && (
+              <TableReservationButton
+                listingType="service"
+                listingId={service.id}
+                businessName={service.name}
+                locale={locale}
+                variant="viewing"
+                label={th("bookNow")}
+                className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-full bg-primary-700 px-8 text-[15px] font-bold text-white shadow-soft transition-all duration-300 ease-out hover:-translate-y-0.5 hover:scale-[1.03] hover:bg-primary-800 hover:shadow-card active:scale-95"
+              />
+            )}
+            {showOrderPrimary && (
+              <ProductOrderButton
+                listingType="service"
+                listingId={service.id}
+                businessName={service.name}
+                products={products}
+                locale={locale}
+                label={t("orderNow")}
+                className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-full bg-primary-700 px-8 text-[15px] font-bold text-white shadow-soft transition-all duration-300 ease-out hover:-translate-y-0.5 hover:scale-[1.03] hover:bg-primary-800 hover:shadow-card active:scale-95"
+                icon={<ShoppingBag size={16} aria-hidden="true" />}
+              />
+            )}
+          </div>
+        </Reveal>
+      )}
 
       <HotelActionBar
         locale={locale}
@@ -185,8 +241,23 @@ export default async function ServiceDetailPage({
         phone={service.phone}
         website={service.website}
         whatsappFallback={whatsappFallback}
-        showPrimary={false}
+        showPrimary={!showViewingPrimary && !showOrderPrimary}
+        primaryLabel={primaryActionLabel}
       />
+
+      {service.documentUrl && (
+        <div className="container-px mx-auto mt-3 flex flex-wrap items-center justify-center gap-3">
+          <a
+            href={service.documentUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-full border border-ink/15 px-4 text-sm font-semibold text-ink transition-all duration-200 hover:-translate-y-0.5 hover:border-primary hover:text-primary hover:shadow-soft active:scale-95 dark:border-white/20 dark:text-white"
+          >
+            <FileText size={15} aria-hidden="true" />
+            {t(documentLabelKey)}
+          </a>
+        </div>
+      )}
 
       {(service.socialInstagram || service.socialFacebook || service.socialTiktok) && (
         <SocialLinks
@@ -271,6 +342,17 @@ export default async function ServiceDetailPage({
                   {th("photoGallery")}
                 </h2>
                 <BusinessPhotoGallery images={galleryImages} alt={service.name} categories={SERVICE_GALLERY_CATEGORIES} />
+              </section>
+            </Reveal>
+          )}
+
+          {service.videos && service.videos.length > 0 && (
+            <Reveal>
+              <section id="videos" aria-labelledby="video-gallery-heading" className="scroll-mt-36">
+                <h2 id="video-gallery-heading" className="mb-5 font-display text-2xl font-semibold">
+                  {td("videoGallery")}
+                </h2>
+                <VideoGallery videos={service.videos} watchOnLabel={(platform) => td("watchOn", { platform })} />
               </section>
             </Reveal>
           )}

@@ -32,6 +32,7 @@ import { isListingFavorited } from "@/lib/data/favorites";
 import { getNearbyListings } from "@/lib/data/nearby";
 import { NearbyListings } from "@/components/shared/nearby-listings";
 import { resolveMapsUrl, resolveDirectionsUrl } from "@/lib/utils/google-maps";
+import { getRestaurantOrderCta } from "@/lib/utils/restaurant-cta";
 import { Reveal } from "@/components/home/reveal";
 import { PrimaryButton, SecondaryButton } from "@/components/shared/buttons";
 import { listingCategoryLabel } from "@/lib/utils/hotel-category";
@@ -108,6 +109,12 @@ export default async function RestaurantDetailPage({
 
   const googleMapsHref = resolveMapsUrl(restaurant.location, restaurant.googleMapsUrl);
   const directionsHref = resolveDirectionsUrl(restaurant.location);
+  const orderCta = getRestaurantOrderCta({
+    onlineOrderingEnabled: restaurant.onlineOrderingEnabled,
+    onlineOrderUrl: restaurant.onlineOrderUrl,
+    phoneOrderingEnabled: restaurant.phoneOrderingEnabled,
+    phone: restaurant.phone,
+  });
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -142,9 +149,13 @@ export default async function RestaurantDetailPage({
         name={restaurant.name}
         rating={restaurant.rating}
         reviewCount={restaurant.reviewCount}
-        categoryLabel={listingCategoryLabel(restaurant.priceRange, "Restaurant")}
+        categoryLabel={
+          restaurant.cuisine.length > 0
+            ? `${listingCategoryLabel(restaurant.priceRange, "Restaurant")} · ${restaurant.cuisine.join(", ")}`
+            : listingCategoryLabel(restaurant.priceRange, "Restaurant")
+        }
         locale={locale}
-        isPartner
+        isPartner={restaurant.isPartner}
       />
 
       <HotelActionBar
@@ -156,9 +167,10 @@ export default async function RestaurantDetailPage({
         website={restaurant.website}
         email={restaurant.email}
         whatsappFallback={whatsappFallback}
-        showPrimary={restaurant.reservable}
-        primaryLabel={t("reserveTable")}
+        showPrimary={restaurant.reservable || Boolean(orderCta)}
+        reserveLabel={t("reserveTable")}
         reservable={restaurant.reservable}
+        orderCta={orderCta}
       />
 
       <SocialLinks
@@ -403,6 +415,8 @@ export default async function RestaurantDetailPage({
             hoursLabel={t("openingHours")}
             reservable={restaurant.reservable}
             reserveLabel={t("reserveTable")}
+            orderCta={orderCta}
+            orderLabel={t("orderNow")}
             phone={restaurant.phone}
             website={restaurant.website}
             locale={locale}
@@ -467,7 +481,6 @@ export default async function RestaurantDetailPage({
         name={restaurant.name}
         phone={restaurant.phone}
         whatsappFallback={whatsappFallback}
-        directionsHref={directionsHref}
         locale={locale}
       />
     </>

@@ -60,14 +60,16 @@ export function TableReservationForm({
   listingType,
   listingId,
   locale,
+  variant = "table",
   onClose,
 }: {
-  listingType: "restaurant" | "cafe";
+  listingType: "restaurant" | "cafe" | "service";
   listingId: string;
   locale: string;
+  variant?: "table" | "viewing";
   onClose?: () => void;
 }) {
-  const t = useTranslations("tableReservation");
+  const t = useTranslations(variant === "viewing" ? "propertyViewing" : "tableReservation");
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [reservationDate, setReservationDate] = useState("");

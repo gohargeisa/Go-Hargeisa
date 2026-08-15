@@ -101,6 +101,7 @@ export default async function EditCafePage({
             : [],
           menuPdfUrl: cafe.menu_pdf_url ?? "",
           featured: cafe.featured,
+          isPartner: cafe.is_partner,
         }}
       />
     </section>

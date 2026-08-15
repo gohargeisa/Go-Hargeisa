@@ -30,6 +30,7 @@ import {
   Stethoscope,
   UserCog,
   CalendarCheck,
+  ShoppingBag,
 } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { SignOutButton } from "@/components/shared/sign-out-button";
@@ -57,6 +58,10 @@ const BASE_NAV_ITEMS = [
  * supports_appointments), so every hotel/restaurant/cafe/service owner's
  * sidebar is completely unaffected. */
 const PRODUCTS_NAV_ITEM = { href: "/products", icon: Package, key: "navProducts" } as const;
+/** Product orders/requests (Flower Shops, Perfume Shops, ...) — same
+ * supports_products gate as PRODUCTS_NAV_ITEM, since a listing can only
+ * receive orders once it has a real product catalog. */
+const ORDERS_NAV_ITEM = { href: "/orders", icon: ShoppingBag, key: "navOrders" } as const;
 
 function getNavItems(listing: OwnedListing) {
   const items: { href: string; icon: typeof Home; key: string }[] = [...BASE_NAV_ITEMS];
@@ -72,7 +77,7 @@ function getNavItems(listing: OwnedListing) {
     { href: "/appointments", icon: CalendarCheck, key: "navAppointments" },
   ];
   const inserts = [
-    ...(listing.supportsProducts ? [PRODUCTS_NAV_ITEM] : []),
+    ...(listing.supportsProducts ? [PRODUCTS_NAV_ITEM, ORDERS_NAV_ITEM] : []),
     ...(listing.supportsAppointments ? appointmentsNavItems : []),
   ];
   if (inserts.length > 0) items.splice(myBusinessIndex + 1, 0, ...inserts);

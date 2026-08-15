@@ -98,8 +98,10 @@ export interface CityServiceInput {
   mapsUrl?: string;
   website?: string;
   image?: string;
+  logoUrl?: string;
   gallery?: GalleryImage[];
   videos?: MediaVideo[];
+  documentUrl?: string;
   lat?: number;
   lng?: number;
   amenitiesV2?: string[];
@@ -125,6 +127,8 @@ export interface CityServiceInput {
   socialTelegram?: string;
   status?: "draft" | "published";
   featured?: boolean;
+  /** Manual, admin-only "GO HARGEISA PARTNER" badge flag — see types/index.ts CityService.isPartner. */
+  isPartner?: boolean;
   // Schools + Universities — every count below is optional and off by
   // default; none are gender-split. Ignored for every other category.
   schoolType?: string;
@@ -210,8 +214,10 @@ export async function createCityService(
     maps_url: input.mapsUrl?.trim() || null,
     website: input.website?.trim() || null,
     image: input.image || null,
+    logo_url: input.logoUrl || null,
     gallery: input.gallery ?? [],
     videos: input.videos ?? [],
+    document_url: input.documentUrl || null,
     lat: input.lat ?? 9.5624,
     lng: input.lng ?? 44.065,
     amenities_v2: input.amenitiesV2 ?? [],
@@ -229,6 +235,7 @@ export async function createCityService(
     social_telegram: input.socialTelegram?.trim() || null,
     status: input.status ?? "draft",
     featured: input.featured ?? false,
+    is_partner: input.isPartner ?? false,
     school_type: input.schoolType || null,
     curriculum: input.curriculum || null,
     education_levels: input.educationLevels ?? [],
@@ -321,8 +328,10 @@ export async function updateCityService(
       maps_url: input.mapsUrl?.trim() || null,
       website: input.website?.trim() || null,
       image: input.image || null,
+      logo_url: input.logoUrl || null,
       gallery: input.gallery ?? [],
       videos: input.videos ?? [],
+      document_url: input.documentUrl || null,
       lat: input.lat ?? 9.5624,
       lng: input.lng ?? 44.065,
       amenities_v2: input.amenitiesV2 ?? [],
@@ -340,6 +349,7 @@ export async function updateCityService(
       social_telegram: input.socialTelegram?.trim() || null,
       status: input.status,
       featured: input.featured ?? false,
+      is_partner: input.isPartner ?? false,
       school_type: input.schoolType || null,
       curriculum: input.curriculum || null,
       education_levels: input.educationLevels ?? [],

@@ -6,6 +6,7 @@ import { Check, Loader2 } from "lucide-react";
 import { ImageUploader } from "@/components/shared/image-uploader";
 import { GalleryManager } from "@/components/admin/gallery-manager-lazy";
 import { VideoUploader } from "@/components/shared/video-uploader-lazy";
+import { PdfUploader } from "@/components/admin/pdf-uploader";
 import { HOTEL_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import { HotelRoomsManager, type HotelRoomManagerRow } from "@/components/admin/hotel-rooms-manager";
 import { GoogleMapsLocationField } from "@/components/admin/google-maps-location-field";
@@ -29,6 +30,7 @@ export interface HotelFormInput {
   logo: string;
   gallery: GalleryImage[];
   videos: MediaVideo[];
+  documentUrl: string;
   address: string;
   lat: number;
   lng: number;
@@ -57,6 +59,7 @@ export interface HotelFormInput {
   restaurantId: string;
   cafeId: string;
   featured: boolean;
+  isPartner: boolean;
   bookingMode: HotelBookingMode;
   externalBookingOption: HotelExternalBookingOption | "";
   externalBookingUrl: string;
@@ -108,6 +111,7 @@ export function HotelForm({
     logo: initial?.logo ?? "",
     gallery: initial?.gallery ?? [],
     videos: initial?.videos ?? [],
+    documentUrl: initial?.documentUrl ?? "",
     address: initial?.address ?? "",
     lat: initial?.lat ?? 9.5624,
     lng: initial?.lng ?? 44.065,
@@ -136,6 +140,7 @@ export function HotelForm({
     restaurantId: initial?.restaurantId ?? "",
     cafeId: initial?.cafeId ?? "",
     featured: initial?.featured ?? false,
+    isPartner: initial?.isPartner ?? false,
     bookingMode: initial?.bookingMode ?? "go_hargeisa",
     externalBookingOption: initial?.externalBookingOption ?? "",
     externalBookingUrl: initial?.externalBookingUrl ?? "",
@@ -173,6 +178,7 @@ export function HotelForm({
       logo_url: form.logo || null,
       gallery: form.gallery,
       videos: form.videos,
+      document_url: form.documentUrl || null,
       address: form.address,
       lat: form.lat,
       lng: form.lng,
@@ -201,6 +207,7 @@ export function HotelForm({
       restaurant_id: form.restaurantId || null,
       cafe_id: form.cafeId || null,
       featured: form.featured,
+      is_partner: form.isPartner,
       booking_mode: form.bookingMode,
       external_booking_option: form.bookingMode === "external" ? form.externalBookingOption || null : null,
       external_booking_url: form.externalBookingUrl || null,
@@ -257,6 +264,13 @@ export function HotelForm({
           moveLaterAriaLabel={t("moveVideoLaterAriaLabel")}
           pasteUrlPlaceholder={t("pasteVideoUrlPlaceholder")}
           addUrlLabel={t("addVideoUrlLabel")}
+        />
+
+        <PdfUploader
+          folder="hotels"
+          value={form.documentUrl}
+          onChange={(url) => update("documentUrl", url)}
+          label="Hotel information PDF (optional)"
         />
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -511,6 +525,16 @@ export function HotelForm({
           <label className="flex items-center gap-2 text-sm font-medium">
             <input type="checkbox" checked={form.featured} onChange={(e) => update("featured", e.target.checked)} />
             {t("featureOnHomepage")}
+          </label>
+        )}
+
+        {/* Manual, owner-only "GO HARGEISA PARTNER" badge control — never
+            automatic (not tied to subscription/category/featured/reviews).
+            Same canFeature (owner-role) gate as "Feature on homepage" above. */}
+        {canFeature && (
+          <label className="flex items-center gap-2 text-sm font-medium">
+            <input type="checkbox" checked={form.isPartner} onChange={(e) => update("isPartner", e.target.checked)} />
+            {t("goHargeisaPartner")}
           </label>
         )}
 

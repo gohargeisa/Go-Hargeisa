@@ -4,6 +4,7 @@ import { createPublicClient } from "@/lib/supabase/public";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { SERVICES_PUBLIC_ENABLED, RESTAURANTS_PUBLIC_ENABLED, CAFES_PUBLIC_ENABLED, ATTRACTIONS_PUBLIC_ENABLED } from "@/lib/config/features";
+import { applyCityServiceCategoryGroups } from "@/lib/config/city-service-category-groups";
 import { mapCategory } from "./mappers";
 import type { Category, CategoryTargetTable } from "@/types";
 
@@ -43,29 +44,19 @@ const getCategoriesDurable = unstable_cache(_getCategories, ["categories-list"],
 export const getCategories = cache(getCategoriesDurable);
 
 /** getCategories(), minus whichever verticals are currently feature-flagged
- * off (lib/config/features.ts), minus every City Services SUB-category
- * (target_table='city_services', is_pinned=false — Hospitals, Pharmacies,
- * etc.). Those exist only to be grouped inside the City Services hub (see
- * getCityServiceCategories) and must never independently appear as a
- * top-level browsable category — the single "City Services" umbrella row
- * (is_pinned=true) still passes through here as one entry, same as every
- * other pinned top-level category. This is the one filter the navbar and
- * homepage "Browse by Category" grid both apply, so a disabled vertical —
- * or a City Services sub-category — can't leak into either surface while
- * still existing (and manageable) in the DB. */
+ * off (lib/config/features.ts). City Services SUB-categories (Hospitals,
+ * Pharmacies, Flowers & Gifts, English Language Institutes, ...) pass
+ * through here too — they're discoverable both on their natural home,
+ * /city-services, and as a shortcut in the site's "More" nav dropdown (see
+ * NavMegaMenu), the same as every other non-pinned category. The single
+ * pinned "City Services" umbrella row still passes through as its own
+ * top-level nav entry, same as every other pinned top-level category. This
+ * is the one filter the navbar and homepage "Browse by Category" grid both
+ * apply, so a disabled vertical can't leak into either surface while still
+ * existing (and manageable) in the DB. */
 export async function getVisibleCategories(): Promise<Category[]> {
   const categories = await getCategories();
   return categories.filter((c) => {
-    // "flower-shops" (Flowers & Gifts) is a deliberate, narrow exception:
-    // it moved from the standalone `services` vertical into City Services,
-    // which would otherwise make it (and the site's "More" nav dropdown,
-    // if this was the only non-pinned category with a real listing)
-    // disappear from top-level navigation entirely — City Services is still
-    // its primary, natural home (discoverable there like every other
-    // subcategory); this only keeps it reachable as a "More" shortcut too,
-    // same as it was before the move. No other city_services subcategory
-    // gets this treatment.
-    if (c.targetTable === "city_services" && !c.isPinned && c.slug !== "flower-shops") return false;
     if (c.targetTable === "services") return SERVICES_PUBLIC_ENABLED;
     if (c.targetTable === "restaurants") return RESTAURANTS_PUBLIC_ENABLED;
     if (c.targetTable === "cafes") return CAFES_PUBLIC_ENABLED;
@@ -204,8 +195,14 @@ export async function attachBusinessCounts(categories: Category[]): Promise<Cate
  * navbar and homepage category grid render. A category with zero listings
  * (never published anything yet, or just had its last listing removed) is
  * automatically excluded here with no code change ever needed elsewhere.
- * Cached (short TTL, not just React's per-request cache()) since this now
- * runs on every single page via the navbar — see CATEGORIES_CACHE_TAG. */
+ * City Services member categories (Hospitals/Clinics/Pharmacies, Schools/
+ * Universities/English Language Institutes, ...) are additionally collapsed
+ * into their merged parent entry (see applyCityServiceCategoryGroups) —
+ * the same grouping /city-services itself already shows — so the "More" nav
+ * menu, which reads this list, never leaks an individual member category as
+ * its own flat item. Cached (short TTL, not just React's per-request
+ * cache()) since this now runs on every single page via the navbar — see
+ * CATEGORIES_CACHE_TAG. */
 const _getVisibleCategoriesWithCountsDurable = unstable_cache(
   async () => attachBusinessCounts(await getVisibleCategories()),
   ["visible-categories-with-counts"],
@@ -215,7 +212,7 @@ const getVisibleCategoriesWithCountsCached = cache(_getVisibleCategoriesWithCoun
 
 export async function getVisibleCategoriesWithCounts(): Promise<Category[]> {
   const categories = await getVisibleCategoriesWithCountsCached();
-  return categories.filter((c) => (c.businessCount ?? 0) > 0);
+  return applyCityServiceCategoryGroups(categories.filter((c) => (c.businessCount ?? 0) > 0));
 }
 
 /** Resolves a free-text search query to a category when the query is really

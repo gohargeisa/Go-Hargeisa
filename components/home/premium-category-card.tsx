@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { memo, useState } from "react";
+import { memo } from "react";
 import { useTranslations } from "next-intl";
 import { ArrowRight } from "lucide-react";
 import { useImageLoaded } from "@/lib/hooks/use-image-loaded";
+import { useCategoryImage } from "@/lib/hooks/use-category-image";
 import { AnimatedCard } from "@/components/shared/animated-card";
 import { DynamicIcon } from "@/lib/utils/dynamic-icon";
 import { SecondaryButton } from "@/components/shared/buttons";
@@ -40,15 +41,14 @@ export function categoryImagePath(category: Category): string {
 function PremiumCategoryCardBase({ category, locale }: { category: Category; locale: Locale }) {
   const t = useTranslations("home");
   const { loaded, imgRef, onLoad } = useImageLoaded();
-  const [imageMissing, setImageMissing] = useState(false);
+  const { src: imageSrc, onError, showFallback } = useCategoryImage(category, categoryImagePath(category));
   const href = categoryHref(locale, category);
   const name = categoryDisplayName(category, locale);
-  const imageSrc = categoryImagePath(category);
 
   return (
     <AnimatedCard className="group flex h-full flex-col overflow-hidden rounded-xl3 border border-ink/8 bg-white shadow-soft transition-shadow duration-300 ease-premium hover:border-primary/25 hover:shadow-card dark:border-white/10 dark:bg-white/[0.04]">
       <div className="relative h-64 shrink-0 overflow-hidden rounded-t-xl3 sm:h-[17rem]">
-        {imageMissing ? (
+        {showFallback ? (
           <Link
             href={href}
             aria-label={name}
@@ -62,12 +62,12 @@ function PremiumCategoryCardBase({ category, locale }: { category: Category; loc
             <Link href={href} className="absolute inset-0 z-0" aria-label={name}>
               <Image
                 ref={imgRef}
-                src={imageSrc}
+                src={imageSrc!}
                 alt=""
                 fill
                 sizes="(max-width: 767px) 88vw, (max-width: 1024px) 45vw, 340px"
                 onLoad={onLoad}
-                onError={() => setImageMissing(true)}
+                onError={onError}
                 className={`object-cover transition-transform duration-500 ease-premium group-hover:scale-105 ${
                   loaded ? "opacity-100" : "opacity-0"
                 }`}

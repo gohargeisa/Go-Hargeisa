@@ -17,7 +17,7 @@ import { compressImageFile } from "@/lib/utils/compress-image";
  */
 export async function uploadImage(
   file: File,
-  options: { bucket: "listing-images" | "avatars"; folder: string }
+  options: { bucket: "listing-images" | "avatars" | "category-images"; folder: string }
 ): Promise<string> {
   const toUpload = await compressImageFile(file);
   return uploadFile(toUpload, options);
@@ -26,7 +26,7 @@ export async function uploadImage(
 /** Raw upload with no compression — for non-image binaries like PDF menus. */
 export async function uploadFile(
   file: File,
-  options: { bucket: "listing-images" | "avatars"; folder: string }
+  options: { bucket: "listing-images" | "avatars" | "category-images"; folder: string }
 ): Promise<string> {
   const supabase = createClient();
   const ext = file.name.split(".").pop() ?? "jpg";
@@ -57,5 +57,15 @@ export const MAX_VIDEO_BYTES = 30 * 1024 * 1024;
 export async function uploadVideo(file: File, options: { folder: string }): Promise<string> {
   if (!file.type.startsWith("video/")) throw new Error("Please choose a video file.");
   if (file.size > MAX_VIDEO_BYTES) throw new Error("Video must be 30MB or smaller.");
+  return uploadFile(file, { bucket: "listing-images", ...options });
+}
+
+/** Business documents (menus, brochures, price lists, catalogs, ...) — same
+ * cap-only validation shape as uploadVideo, just for PDFs. */
+export const MAX_PDF_BYTES = 15 * 1024 * 1024;
+
+export async function uploadPdf(file: File, options: { folder: string }): Promise<string> {
+  if (file.type !== "application/pdf") throw new Error("Please choose a PDF file.");
+  if (file.size > MAX_PDF_BYTES) throw new Error("PDF must be 15MB or smaller.");
   return uploadFile(file, { bucket: "listing-images", ...options });
 }

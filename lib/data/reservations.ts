@@ -12,7 +12,7 @@ import type { TableReservation } from "@/types";
  * id; this function doesn't re-implement that check.
  */
 export async function getReservationsForListing(
-  listingType: "restaurant" | "cafe",
+  listingType: "restaurant" | "cafe" | "service",
   listingId: string
 ): Promise<TableReservation[]> {
   const supabase = await createClient();

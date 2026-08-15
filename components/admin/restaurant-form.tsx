@@ -54,11 +54,14 @@ export interface RestaurantFormInput {
   menuPdfUrl: string;
   reservable: boolean;
   featured: boolean;
+  isPartner: boolean;
   amenitiesV2: string[];
   restaurantType: string;
   seatingCapacity?: number;
   numberOfTables?: number;
   onlineOrderUrl: string;
+  onlineOrderingEnabled: boolean;
+  phoneOrderingEnabled: boolean;
   languages: string[];
 }
 
@@ -117,11 +120,14 @@ export function RestaurantForm({
     menuPdfUrl: initial?.menuPdfUrl ?? "",
     reservable: initial?.reservable ?? false,
     featured: initial?.featured ?? false,
+    isPartner: initial?.isPartner ?? false,
     amenitiesV2: initial?.amenitiesV2 ?? [],
     restaurantType: initial?.restaurantType ?? "",
     seatingCapacity: initial?.seatingCapacity,
     numberOfTables: initial?.numberOfTables,
     onlineOrderUrl: initial?.onlineOrderUrl ?? "",
+    onlineOrderingEnabled: initial?.onlineOrderingEnabled ?? false,
+    phoneOrderingEnabled: initial?.phoneOrderingEnabled ?? false,
     languages: initial?.languages ?? [],
   });
   const [error, setError] = useState<string | null>(null);
@@ -191,11 +197,14 @@ export function RestaurantForm({
       menu_pdf_url: form.menuPdfUrl || null,
       reservable: form.reservable,
       featured: form.featured,
+      is_partner: form.isPartner,
       amenities_v2: form.amenitiesV2,
       restaurant_type: form.restaurantType || null,
       seating_capacity: form.seatingCapacity ?? null,
       number_of_tables: form.numberOfTables ?? null,
       online_order_url: form.onlineOrderUrl || null,
+      online_ordering_enabled: form.onlineOrderingEnabled,
+      phone_ordering_enabled: form.phoneOrderingEnabled,
       languages: form.languages,
     };
     const revalidatePaths = [`/${locale}/admin/restaurants`, `/${locale}/restaurants`, `/${locale}`];
@@ -347,6 +356,25 @@ export function RestaurantForm({
         </Field>
       </div>
 
+      <div className="flex flex-wrap gap-6">
+        <label className="flex items-center gap-2 text-sm font-medium">
+          <input
+            type="checkbox"
+            checked={form.onlineOrderingEnabled}
+            onChange={(e) => update("onlineOrderingEnabled", e.target.checked)}
+          />
+          {t("acceptsOnlineOrders")}
+        </label>
+        <label className="flex items-center gap-2 text-sm font-medium">
+          <input
+            type="checkbox"
+            checked={form.phoneOrderingEnabled}
+            onChange={(e) => update("phoneOrderingEnabled", e.target.checked)}
+          />
+          {t("acceptsPhoneOrders")}
+        </label>
+      </div>
+
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Seating capacity">
           <input type="number" min={1} value={form.seatingCapacity ?? ""} onChange={(e) => update("seatingCapacity", e.target.value ? Number(e.target.value) : undefined)} className={inputClass} />
@@ -434,6 +462,12 @@ export function RestaurantForm({
           <label className="flex items-center gap-2 text-sm font-medium">
             <input type="checkbox" checked={form.featured} onChange={(e) => update("featured", e.target.checked)} />
             {t("featureOnHomepage")}
+          </label>
+        )}
+        {canFeature && (
+          <label className="flex items-center gap-2 text-sm font-medium">
+            <input type="checkbox" checked={form.isPartner} onChange={(e) => update("isPartner", e.target.checked)} />
+            {t("goHargeisaPartner")}
           </label>
         )}
       </div>

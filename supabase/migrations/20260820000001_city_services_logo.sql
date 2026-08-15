@@ -1,0 +1,14 @@
+-- Go Hargeisa — City Services business logo
+--
+-- hotels/restaurants/cafes/services already have `logo_url`; city_services
+-- was the one listing table without it (see the explicit comment in
+-- lib/actions/city-services.ts's updateCityServicePartial explaining why
+-- updateRecord's ALLOWED_TABLES deliberately excludes city_services — its
+-- schema differs, and this was one of the differences). This adds the exact
+-- same column, same name, same convention as the other four tables — no new
+-- field shape, no second logo system.
+--
+-- Purely additive, nullable, safe to re-run. Existing city_services rows are
+-- unaffected (logo_url defaults to null, which already falls back cleanly
+-- to the category icon on the detail page).
+alter table city_services add column if not exists logo_url text;

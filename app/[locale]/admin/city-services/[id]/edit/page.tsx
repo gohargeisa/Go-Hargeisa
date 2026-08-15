@@ -122,8 +122,10 @@ export default async function EditCityServicePage({
           mapsUrl: service.maps_url ?? "",
           website: service.website ?? "",
           image: service.image ?? "",
+          logoUrl: service.logo_url ?? "",
           gallery: Array.isArray(service.gallery) ? (service.gallery as unknown as { url: string; alt?: string; category?: string }[]) : [],
           videos: Array.isArray(service.videos) ? (service.videos as unknown as { url: string; caption?: string }[]) : [],
+          documentUrl: service.document_url ?? "",
           lat: service.lat,
           lng: service.lng,
           amenitiesV2: service.amenities_v2 ?? [],
@@ -142,6 +144,7 @@ export default async function EditCityServicePage({
           socialTelegram: service.social_telegram ?? "",
           status: service.status === "archived" ? "draft" : service.status,
           featured: service.featured,
+          isPartner: service.is_partner,
         }}
       />
 

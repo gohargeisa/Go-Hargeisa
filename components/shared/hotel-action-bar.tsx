@@ -1,4 +1,4 @@
-import { ArrowUpRight, Globe, Mail, MessageCircle, Phone } from "lucide-react";
+import { ArrowUpRight, CalendarDays, Globe, Mail, MessageCircle, Phone, ShoppingBag } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Reveal } from "@/components/home/reveal";
 import { TrackedCtaLink } from "@/components/shared/tracked-cta-link";
@@ -10,6 +10,7 @@ import { normalizeExternalUrl } from "@/lib/utils/normalize-url";
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
 import type { BusinessListingType, HotelRoom } from "@/types";
 import type { HotelBookingCta } from "@/lib/utils/booking-cta";
+import type { OrderCta } from "@/lib/utils/restaurant-cta";
 import type { Locale } from "@/lib/i18n/config";
 
 const SECONDARY_CLASS =
@@ -26,9 +27,13 @@ const SECONDARY_CLASS =
  * here — it already lives in the sticky mobile bottom bar and the desktop
  * sidebar booking card. Reused as-is by the hotel, restaurant, and cafe
  * detail pages via `listingType` + `showPrimary`/`primaryLabel` overrides,
- * so the primary CTA can be "Book Now" (hotel), "Reserve a Table"
- * (reservable restaurants only), or hidden entirely (cafes, which have no
- * booking concept).
+ * so the primary CTA can be "Book Now" (hotel), "Order Now" (order-first
+ * restaurants, see lib/utils/restaurant-cta.ts), "Reserve a Table" (every
+ * other reservable restaurant/cafe), or hidden entirely (cafes/hotels with
+ * no booking concept). When a business supports both ordering and table
+ * reservations, Reserve a Table demotes to a secondary action instead of
+ * disappearing — never hardcoded per listing type, always driven by the
+ * real capability flags/fields the caller passes in.
  */
 const PRIMARY_CLASS =
   "inline-flex h-12 shrink-0 snap-start items-center justify-center gap-2 rounded-full bg-primary-700 px-8 text-[15px] font-bold text-white shadow-soft transition-all duration-300 ease-out hover:-translate-y-0.5 hover:scale-[1.03] hover:bg-primary-800 hover:shadow-card active:scale-95";
@@ -46,9 +51,11 @@ export async function HotelActionBar({
   whatsappFallback,
   showPrimary = true,
   primaryLabel,
+  reserveLabel,
   bookingCta,
   rooms,
   reservable,
+  orderCta,
 }: {
   locale: Locale;
   listingType: BusinessListingType;
@@ -64,16 +71,22 @@ export async function HotelActionBar({
   whatsappFallback?: string;
   showPrimary?: boolean;
   primaryLabel?: string;
+  /** Label for the Reserve a Table button specifically — used whether it
+   * renders as the primary action (no orderCta) or demoted to a secondary
+   * action (orderCta present). Falls back to primaryLabel, then bookNow. */
+  reserveLabel?: string;
   /** Hotel-only: when set, the primary button uses the hotel's configured
    * booking mode (Go Hargeisa request modal vs external redirect) instead
    * of the generic website/phone fallback below. */
   bookingCta?: HotelBookingCta;
   rooms?: HotelRoom[];
-  /** Restaurant/cafe only: when true, the primary button opens the real
-   * table-reservation request flow (TableReservationButton) instead of the
-   * generic website/phone fallback link below — same component regardless
-   * of which restaurant or cafe this is. */
+  /** Restaurant/cafe only: when true, the reservation request flow
+   * (TableReservationButton) is available — primary when the business has
+   * no orderCta, secondary (alongside "Order Now") when it does. */
   reservable?: boolean;
+  /** Restaurant only, see lib/utils/restaurant-cta.ts: when set, "Order Now"
+   * becomes the primary CTA instead of Reserve a Table/the generic fallback. */
+  orderCta?: OrderCta;
 }) {
   const t = await getTranslations("hotelDetail");
   const tc = await getTranslations("common");
@@ -102,18 +115,45 @@ export async function HotelActionBar({
           />
         )}
 
-        {showPrimary && !bookingCta && reservable && (
+        {showPrimary && !bookingCta && orderCta && (
+          <a
+            href={orderCta.href}
+            target={orderCta.external ? "_blank" : undefined}
+            rel={orderCta.external ? "noopener noreferrer" : undefined}
+            className={PRIMARY_CLASS}
+          >
+            <ShoppingBag size={16} aria-hidden="true" />
+            {tc("orderNow")}
+          </a>
+        )}
+
+        {showPrimary && !bookingCta && !orderCta && reservable && (
           <TableReservationButton
             listingType={listingType as "restaurant" | "cafe"}
             listingId={listingId}
             businessName={name}
             locale={locale}
-            label={primaryLabel ?? tc("bookNow")}
+            label={reserveLabel ?? primaryLabel ?? tc("bookNow")}
             className={PRIMARY_CLASS}
           />
         )}
 
-        {showPrimary && !bookingCta && !reservable && booking && (
+        {/* Reservations remain available as a secondary action when a
+            business supports both ordering and table booking, instead of
+            disappearing once Order Now takes the primary slot. */}
+        {orderCta && reservable && (
+          <TableReservationButton
+            listingType={listingType as "restaurant" | "cafe"}
+            listingId={listingId}
+            businessName={name}
+            locale={locale}
+            label={reserveLabel ?? primaryLabel ?? tc("bookNow")}
+            icon={<CalendarDays size={15} aria-hidden="true" />}
+            className={SECONDARY_CLASS}
+          />
+        )}
+
+        {showPrimary && !bookingCta && !orderCta && !reservable && booking && (
           <a
             href={booking.href}
             target={booking.external ? "_blank" : undefined}

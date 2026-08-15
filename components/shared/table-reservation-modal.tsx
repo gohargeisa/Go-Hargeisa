@@ -19,15 +19,17 @@ export function TableReservationModal({
   listingId,
   businessName,
   locale,
+  variant = "table",
   onClose,
 }: {
-  listingType: "restaurant" | "cafe";
+  listingType: "restaurant" | "cafe" | "service";
   listingId: string;
   businessName: string;
   locale: string;
+  variant?: "table" | "viewing";
   onClose: () => void;
 }) {
-  const t = useTranslations("tableReservation");
+  const t = useTranslations(variant === "viewing" ? "propertyViewing" : "tableReservation");
   const dialogRef = useRef<HTMLDivElement>(null);
   useFocusTrap(dialogRef);
   useScrollLock(true);
@@ -67,7 +69,7 @@ export function TableReservationModal({
         </div>
 
         <div className="flex-1 overflow-y-auto p-5">
-          <TableReservationForm listingType={listingType} listingId={listingId} locale={locale} onClose={onClose} />
+          <TableReservationForm listingType={listingType} listingId={listingId} locale={locale} variant={variant} onClose={onClose} />
         </div>
       </div>
     </div>

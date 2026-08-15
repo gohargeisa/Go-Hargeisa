@@ -26,8 +26,8 @@ android {
         // Bump versionCode by 1 for every build submitted to Play Console
         // (it must strictly increase — Play rejects a re-upload otherwise);
         // versionName is the human-facing "1.0.0" shown in Settings/Play Store.
-        versionCode 7
-        versionName "1.0.0"
+        versionCode 8
+        versionName "1.1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

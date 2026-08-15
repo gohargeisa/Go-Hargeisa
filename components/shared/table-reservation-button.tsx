@@ -18,14 +18,19 @@ export function TableReservationButton({
   label,
   className,
   icon,
+  variant = "table",
 }: {
-  listingType: "restaurant" | "cafe";
+  listingType: "restaurant" | "cafe" | "service";
   listingId: string;
   businessName: string;
   locale: string;
   label: string;
   className: string;
   icon?: React.ReactNode;
+  /** "viewing" switches the modal/form to Real Estate wording (Book a
+   * Viewing, Number of Viewers, ...) via the propertyViewing translation
+   * namespace instead of tableReservation — see TableReservationModal. */
+  variant?: "table" | "viewing";
 }) {
   const [open, setOpen] = useState(false);
 
@@ -41,6 +46,7 @@ export function TableReservationButton({
           listingId={listingId}
           businessName={businessName}
           locale={locale}
+          variant={variant}
           onClose={() => setOpen(false)}
         />
       )}

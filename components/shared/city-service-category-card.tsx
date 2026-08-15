@@ -1,10 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
 import { AnimatedCard } from "@/components/shared/animated-card";
 import { DynamicIcon } from "@/lib/utils/dynamic-icon";
-import { cityServiceCategoryImagePath } from "@/lib/config/city-service-category-images";
+import { useCategoryImage } from "@/lib/hooks/use-category-image";
 import type { Category } from "@/types";
 
 /**
@@ -35,7 +34,7 @@ export function CityServiceCategoryCard({
   active,
   onSelect,
 }: {
-  category: Pick<Category, "slug" | "icon" | "color">;
+  category: Pick<Category, "slug" | "icon" | "color" | "imageUrl">;
   name: string;
   description?: string;
   count: number;
@@ -43,8 +42,7 @@ export function CityServiceCategoryCard({
   active: boolean;
   onSelect: () => void;
 }) {
-  const [imageMissing, setImageMissing] = useState(false);
-  const imageSrc = cityServiceCategoryImagePath(category.slug);
+  const { src: imageSrc, onError, showFallback } = useCategoryImage(category);
 
   return (
     <AnimatedCard className="h-full">
@@ -57,13 +55,13 @@ export function CityServiceCategoryCard({
         }`}
       >
         <div className="relative aspect-[16/10] w-full shrink-0 overflow-hidden">
-          {imageSrc && !imageMissing ? (
+          {!showFallback ? (
             <Image
-              src={imageSrc}
+              src={imageSrc!}
               alt=""
               fill
               sizes="(max-width: 767px) 90vw, (max-width: 1024px) 45vw, 300px"
-              onError={() => setImageMissing(true)}
+              onError={onError}
               className="object-cover transition-transform duration-500 ease-premium group-hover:scale-105"
             />
           ) : (

@@ -6,7 +6,11 @@ import { createClient } from "@/lib/supabase/server";
 import { assertCanManageListing } from "@/lib/actions/business";
 
 export interface TableReservationInput {
-  listingType: "restaurant" | "cafe";
+  /** "service" is a Real Estate property-viewing request — table_reservations
+   * reused rather than a third near-identical booking table (see the
+   * migration comment); eligibility is enforced server-side by
+   * submit_table_reservation() same as restaurant/cafe. */
+  listingType: "restaurant" | "cafe" | "service";
   listingId: string;
   customerName: string;
   customerPhone: string;
@@ -46,7 +50,10 @@ function isPastDate(iso: string): boolean {
  * checks are a fast, friendly first pass, not the authoritative guard.
  */
 export async function submitTableReservation(input: TableReservationInput): Promise<TableReservationResult> {
-  const t = await getTranslations({ locale: input.locale ?? "en", namespace: "tableReservation" });
+  const t = await getTranslations({
+    locale: input.locale ?? "en",
+    namespace: input.listingType === "service" ? "propertyViewing" : "tableReservation",
+  });
 
   if (!input.customerName.trim() || !input.customerPhone.trim()) {
     return { ok: false, error: t("errorRequired") };
@@ -89,7 +96,7 @@ export async function submitTableReservation(input: TableReservationInput): Prom
  */
 export async function updateReservationStatus(
   reservationId: string,
-  listingType: "restaurant" | "cafe",
+  listingType: "restaurant" | "cafe" | "service",
   listingId: string,
   status: "pending" | "confirmed" | "cancelled" | "completed",
   revalidatePaths: string[]

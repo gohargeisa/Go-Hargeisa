@@ -6,7 +6,9 @@ import { Loader2, Plus, X } from "lucide-react";
 import { updateRecord } from "@/lib/actions/admin";
 import { updateCityServicePartial } from "@/lib/actions/city-services";
 import { ImageUploader } from "@/components/shared/image-uploader";
+import { PdfUploader } from "@/components/admin/pdf-uploader";
 import { OpeningHoursEditor } from "@/components/shared/opening-hours-editor";
+import { getDocumentLabelGroup } from "@/lib/utils/business-document";
 import type { BusinessListingType, OpeningHoursGroup } from "@/types";
 
 const TABLE_BY_TYPE: Record<BusinessListingType, "hotels" | "restaurants" | "cafes" | "services" | "city_services"> = {
@@ -54,6 +56,7 @@ export interface MyBusinessFormInitial {
   openingHoursStructured?: OpeningHoursGroup[];
   menuHighlights?: { name: string; price: string; description?: string }[];
   menuPdfUrl?: string;
+  documentUrl?: string;
 }
 
 const PRICE_LEVELS: NonNullable<MyBusinessFormInitial["priceRange"]>[] = ["$", "$$", "$$$", "$$$$"];
@@ -64,13 +67,18 @@ export function MyBusinessForm({
   listingId,
   initial,
   currentPath,
+  categorySlug,
 }: {
   listingType: BusinessListingType;
   listingId: string;
   initial: MyBusinessFormInitial;
   currentPath: string;
+  /** Only meaningful for city_service/service — drives the PDF section's
+   * category-aware label (see lib/utils/business-document.ts). */
+  categorySlug?: string;
 }) {
   const t = useTranslations("businessDashboard");
+  const tc = useTranslations("common");
   const tw = useTranslations("weekdays");
   const [form, setForm] = useState<MyBusinessFormInitial>({
     ...initial,
@@ -116,6 +124,7 @@ export function MyBusinessForm({
         website: form.website || null,
         opening_hours: form.openingHours || null,
         opening_hours_structured: form.openingHoursStructured ?? [],
+        document_url: form.documentUrl || null,
       };
       startTransition(async () => {
         const result = await updateCityServicePartial(localeFromPath(currentPath), listingId, patch);
@@ -139,6 +148,9 @@ export function MyBusinessForm({
     if (hasPriceRange) payload.price_range = form.priceRange;
     // cafes has no `website` column at all — every other type does.
     if (listingType !== "cafe") payload.website = form.website || null;
+    // document_url exists on hotels/services (and city_services, handled
+    // above) — restaurant/cafe keep their own separate menu_pdf_url below.
+    if (listingType === "hotel" || listingType === "service") payload.document_url = form.documentUrl || null;
 
     if (listingType === "hotel") {
       payload.check_in_time = form.checkInTime || null;
@@ -366,13 +378,40 @@ export function MyBusinessForm({
           </div>
 
           <div className="mt-4">
-            <ImageUploader
+            <PdfUploader
               folder={TABLE_BY_TYPE[listingType]}
               value={form.menuPdfUrl ?? ""}
               onChange={(url) => update("menuPdfUrl", url)}
               label={t("menuPdfLabel")}
+              viewCurrentLabel={t("pdfViewCurrent")}
+              uploadingLabel={t("pdfUploading")}
+              replaceLabel={t("pdfReplace")}
+              uploadLabel={t("pdfUpload")}
+              removeLabel={t("pdfRemove")}
+              invalidFileError={t("pdfInvalidFile")}
+              fileTooLargeError={t("pdfTooLarge")}
+              uploadFailedError={t("pdfUploadFailed")}
             />
           </div>
+        </div>
+      )}
+
+      {(listingType === "hotel" || listingType === "city_service" || listingType === "service") && (
+        <div>
+          <PdfUploader
+            folder={listingType === "city_service" ? "city_services" : TABLE_BY_TYPE[listingType]}
+            value={form.documentUrl ?? ""}
+            onChange={(url) => update("documentUrl", url)}
+            label={tc(`document_${getDocumentLabelGroup({ listingType, categorySlug })}` as "document_generic")}
+            viewCurrentLabel={t("pdfViewCurrent")}
+            uploadingLabel={t("pdfUploading")}
+            replaceLabel={t("pdfReplace")}
+            uploadLabel={t("pdfUpload")}
+            removeLabel={t("pdfRemove")}
+            invalidFileError={t("pdfInvalidFile")}
+            fileTooLargeError={t("pdfTooLarge")}
+            uploadFailedError={t("pdfUploadFailed")}
+          />
         </div>
       )}
 

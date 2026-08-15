@@ -31,7 +31,7 @@ export async function RestaurantQuickInfoCards({
   if (hasMeaningfulPrice(priceRange)) cards.push({ icon: DollarSign, label: tc("priceRange"), value: priceRange! });
   if (cuisine.length > 0) cards.push({ icon: UtensilsCrossed, label: tc("cuisine"), value: cuisine.join(", ") });
   if (openingHours) cards.push({ icon: Clock, label: tc("openingHours"), value: openingHours });
-  if (reservable) cards.push({ icon: CalendarCheck, label: t("category"), value: tc("reservable") });
+  if (reservable) cards.push({ icon: CalendarCheck, label: t("amenity"), value: tc("reservable") });
 
   return <InfoCardsStrip cards={cards} />;
 }

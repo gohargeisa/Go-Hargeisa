@@ -7,7 +7,10 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Pencil, Trash2, Eye, EyeOff, Star, Loader2, Search } from "lucide-react";
 import { deleteCityService, toggleCityServiceVisibility, toggleCityServiceFeatured } from "@/lib/actions/city-services";
+import { buildCategoryGroupOptions, mergedCategoryDisplayName } from "@/lib/config/city-service-category-groups";
+import { categoryDisplayName } from "@/lib/utils/category-href";
 import type { Locale } from "@/lib/i18n/config";
+import type { Category } from "@/types";
 
 export interface CityServiceListRow {
   id: string;
@@ -46,7 +49,7 @@ export function CityServicesList({
   /** Every city_services sub-category, active or not — an admin managing
    * existing listings needs to find one even under a category they've since
    * deactivated (e.g. Mosques). */
-  categories: { id: string; name: string }[];
+  categories: Category[];
   /** False for a business_owner viewing only their own assigned listings —
    * hides delete/feature/hide (RLS only grants them UPDATE, never
    * INSERT/DELETE, same restriction as the hotels admin list). Editing via
@@ -72,6 +75,13 @@ export function CityServicesList({
     published: "bg-accent/10 text-accent-700",
     archived: "bg-ink/10 text-ink/60 dark:bg-white/10 dark:text-sand/60",
   };
+
+  // Same grouping as /join and the city-service create/edit form (Education,
+  // Health, Automotive, ...) — a filter dropdown, so each group just becomes
+  // an <optgroup> of its real member categories rather than a two-step
+  // picker; a standalone (ungrouped) category renders as a plain top-level
+  // option, same as before.
+  const categoryGroups = useMemo(() => buildCategoryGroupOptions(categories), [categories]);
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -200,11 +210,21 @@ export function CityServicesList({
             className="h-10 rounded-full border border-ink/12 bg-white px-3.5 text-sm dark:border-white/15 dark:bg-white/5"
           >
             <option value="all">{t("allCategoriesFilter")}</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
+            {categoryGroups.map((g) =>
+              g.isMerged ? (
+                <optgroup key={g.key} label={mergedCategoryDisplayName(g.merged!, locale)}>
+                  {g.members.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {categoryDisplayName(m, locale)}
+                    </option>
+                  ))}
+                </optgroup>
+              ) : (
+                <option key={g.key} value={g.members[0].id}>
+                  {categoryDisplayName(g.members[0], locale)}
+                </option>
+              )
+            )}
           </select>
         )}
       </div>

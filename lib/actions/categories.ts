@@ -48,6 +48,7 @@ export interface CategoryInput {
   descriptionSo?: string;
   icon: string;
   color?: string;
+  imageUrl?: string;
   targetTable: CategoryTargetTable;
   isActive: boolean;
   isPinned: boolean;
@@ -76,6 +77,7 @@ export async function createCategory(locale: string, input: CategoryInput): Prom
       description_so: input.descriptionSo?.trim() || null,
       icon: input.icon.trim() || "Building2",
       color: input.color?.trim() || null,
+      image_url: input.imageUrl?.trim() || null,
       target_table: input.targetTable,
       is_active: input.isActive,
       is_pinned: input.isPinned,
@@ -116,6 +118,7 @@ export async function updateCategory(locale: string, id: string, input: Category
       description_so: input.descriptionSo?.trim() || null,
       icon: input.icon.trim() || "Building2",
       color: input.color?.trim() || null,
+      image_url: input.imageUrl?.trim() || null,
       target_table: input.targetTable,
       is_active: input.isActive,
       is_pinned: input.isPinned,

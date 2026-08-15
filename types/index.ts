@@ -69,7 +69,8 @@ export type ProductCategory =
   | "body_care" | "hair_care" | "gift_sets" | "accessories"
   | "skincare_creams" | "hair_extensions_wigs" | "perfumes_fragrances" | "bath_body"
   | "nail_care" | "beauty_tools_accessories" | "womens_personal_care"
-  | "spare_parts";
+  | "spare_parts"
+  | "bouquet" | "floral_arrangement" | "occasion_gift" | "plant" | "cake";
 
 export type ProductGender = "men" | "women" | "unisex" | "kids";
 
@@ -198,6 +199,11 @@ export interface Category {
   /** lucide-react icon export name (e.g. "Hotel", "Flower2") — resolve via lib/utils/dynamic-icon.tsx. */
   icon: string;
   color?: string;
+  /** Admin-uploaded category photo (Supabase Storage, `category-images`
+   * bucket) — the single source of truth for every category card across the
+   * platform. undefined/null means no custom image has been uploaded yet;
+   * see lib/utils/category-image.ts for the fallback chain callers use. */
+  imageUrl?: string;
   targetTable: CategoryTargetTable;
   isActive: boolean;
   isPinned: boolean;
@@ -541,6 +547,9 @@ export interface Hotel {
   coverImage: string;
   gallery: GalleryImage[];
   videos?: MediaVideo[];
+  /** Optional business document (hotel information/services PDF) — see
+   * lib/utils/business-document.ts for the category-aware public label. */
+  documentUrl?: string;
   address: string;
   location: Coordinates;
   googleMapsUrl?: string;
@@ -585,6 +594,10 @@ export interface Hotel {
   bookingWhatsapp?: string;
   bookingComUrl?: string;
   partnerStatus: PartnerStatus;
+  /** Manual, owner-controlled "GO HARGEISA PARTNER" badge flag — independent
+   * of partnerStatus/subscription/category/featured/reviews. Defaults to
+   * false; only an admin toggling it in the edit form changes it. */
+  isPartner: boolean;
   /** Self-declared classification, distinct from `rating` (a guest-review
    * score) — see lib/config/hotel-attributes.ts. */
   hotelType?: "hotel" | "boutique" | "resort" | "guesthouse" | "hostel" | "apartment_hotel";
@@ -651,6 +664,10 @@ export interface Restaurant {
   logo?: string;
   menuPdfUrl?: string;
   partnerStatus: PartnerStatus;
+  /** Manual, owner-controlled "GO HARGEISA PARTNER" badge flag — independent
+   * of partnerStatus/subscription/category/featured/reviews. Defaults to
+   * false; only an admin toggling it in the edit form changes it. */
+  isPartner: boolean;
   /** Fixed-vocabulary amenities for the detail-page Amenities section (lib/config/amenities.ts). */
   amenitiesV2?: string[];
   favoriteCount?: number;
@@ -658,6 +675,12 @@ export interface Restaurant {
   seatingCapacity?: number;
   numberOfTables?: number;
   onlineOrderUrl?: string;
+  /** Independent, owner-controlled capability flags — see
+   * lib/utils/restaurant-cta.ts. Order Now only ever appears when the
+   * matching flag is on; restaurant_type/onlineOrderUrl alone are never
+   * enough on their own. */
+  onlineOrderingEnabled: boolean;
+  phoneOrderingEnabled: boolean;
   languages?: string[];
 }
 
@@ -717,6 +740,10 @@ export interface Cafe {
   menuHighlights: RestaurantMenuItem[];
   menuPdfUrl?: string;
   partnerStatus: PartnerStatus;
+  /** Manual, owner-controlled "GO HARGEISA PARTNER" badge flag — independent
+   * of partnerStatus/subscription/category/featured/reviews. Defaults to
+   * false; only an admin toggling it in the edit form changes it. */
+  isPartner: boolean;
   favoriteCount?: number;
   cafeType?: "coffee_shop" | "dessert_cafe" | "study_cafe" | "rooftop_cafe" | "tea_house" | "other";
   seatingCapacity?: number;
@@ -733,7 +760,10 @@ export interface Cafe {
  * this is always a request the business owner reviews and confirms. */
 export interface TableReservation {
   id: string;
-  listingType: "restaurant" | "cafe";
+  /** "service" listings are always Real Estate property-viewing requests —
+   * table_reservations reused rather than a third near-identical table, see
+   * lib/utils/business-document.ts's sibling comment in the migration. */
+  listingType: "restaurant" | "cafe" | "service";
   listingId: string;
   customerName: string;
   customerPhone: string;
@@ -743,6 +773,33 @@ export interface TableReservation {
   notes?: string;
   status: "pending" | "confirmed" | "cancelled" | "completed";
   reservationReference: string;
+  userId?: string;
+  createdAt: string;
+}
+
+/** Product order/request — Flower Shops, Perfume Shops, and any future
+ * supports_products category. Deliberately its own table (not
+ * table_reservations): Flower Shop orders need fields (recipient, occasion,
+ * delivery address, card message) that don't fit a table-reservation shape.
+ * `productId` is optional — a customer can request without picking a
+ * specific catalog item. */
+export interface ProductOrder {
+  id: string;
+  listingType: "city_service" | "service";
+  listingId: string;
+  productId?: string;
+  customerName: string;
+  customerPhone: string;
+  fulfillmentType: "delivery" | "pickup";
+  deliveryAddress?: string;
+  preferredDate?: string;
+  recipientName?: string;
+  recipientPhone?: string;
+  occasion?: string;
+  messageNote?: string;
+  notes?: string;
+  status: "pending" | "confirmed" | "cancelled" | "completed";
+  orderReference: string;
   userId?: string;
   createdAt: string;
 }
@@ -778,6 +835,7 @@ export interface Service {
   coverImage: string;
   gallery: GalleryImage[];
   videos?: MediaVideo[];
+  documentUrl?: string;
   address: string;
   location: Coordinates;
   googleMapsUrl?: string;
@@ -805,6 +863,8 @@ export interface Service {
   customFields: Record<string, string | number | boolean>;
   featured?: boolean;
   logo?: string;
+  /** Manual, owner-controlled "GO HARGEISA PARTNER" badge flag — see Hotel.isPartner. */
+  isPartner: boolean;
   // Travel Agency / Travel Office (extends the existing "tour-companies"
   // category, displayed as "Travel Agencies"). Its existing
   // customFieldsSchema fields — destinations/specialties/license_number —
@@ -950,12 +1010,20 @@ export interface CityService {
   mapsUrl: string | null;
   website: string | null;
   image: string | null;
+  /** Business logo/brand image — shown in place of the category icon on the
+   * detail page's identity block when set (see HotelHeaderTop). Same
+   * `logo_url` column/convention already used by hotels/restaurants/cafes/
+   * services, just newly added here. */
+  logoUrl?: string;
   gallery: GalleryImage[];
   videos?: MediaVideo[];
+  documentUrl?: string;
   coords: Coordinates;
   status: "draft" | "published" | "archived";
   featured: boolean;
   sortOrder: number;
+  /** Manual, owner-controlled "GO HARGEISA PARTNER" badge flag — see Hotel.isPartner. */
+  isPartner: boolean;
   rating: number;
   reviewCount: number;
   reviews: Review[];

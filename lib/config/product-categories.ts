@@ -26,6 +26,11 @@ export const PRODUCT_CATEGORY_LABELS: Record<ProductCategory, { en: string; ar: 
   beauty_tools_accessories: { en: "Beauty Tools & Accessories", ar: "أدوات ومستلزمات التجميل", so: "Qalabka iyo Alaabta Qurxinta" },
   womens_personal_care: { en: "Women's Personal Care", ar: "العناية الشخصية للمرأة", so: "Daryeelka Shaqsiyeed ee Dumarka" },
   spare_parts: { en: "Spare Parts", ar: "قطع غيار", so: "Qaybaha Baabuurta" },
+  bouquet: { en: "Bouquet", ar: "باقة ورد", so: "Xidhmo Ubax" },
+  floral_arrangement: { en: "Floral Arrangement", ar: "تنسيق زهور", so: "Habaynta Ubaxa" },
+  occasion_gift: { en: "Occasion Gift", ar: "هدية مناسبة", so: "Hadiyad Munaasabad" },
+  plant: { en: "Plant", ar: "نبات", so: "Geed" },
+  cake: { en: "Cake", ar: "كعكة", so: "Keega" },
 };
 
 export const PRODUCT_CATEGORY_ORDER: ProductCategory[] = [
@@ -34,6 +39,15 @@ export const PRODUCT_CATEGORY_ORDER: ProductCategory[] = [
   "skincare_creams", "hair_extensions_wigs", "perfumes_fragrances", "bath_body",
   "nail_care", "beauty_tools_accessories", "womens_personal_care",
   "spare_parts",
+  "bouquet", "floral_arrangement", "occasion_gift", "plant", "cake",
+];
+
+/** The subset of ProductCategory specific to Flower Shops — same reuse
+ * pattern as COSMETICS_SPECIALTY_CATEGORIES/PERFUME_SPECIALTY_CATEGORIES: no
+ * new labels beyond the ones just added above, used to filter the category
+ * picker down to what a flower shop actually sells. */
+export const FLOWER_SPECIALTY_CATEGORIES: ProductCategory[] = [
+  "bouquet", "floral_arrangement", "occasion_gift", "plant", "cake", "gift_sets",
 ];
 
 export const PRODUCT_GENDER_LABELS: Record<ProductGender, { en: string; ar: string; so: string }> = {

@@ -7,6 +7,8 @@ import { Loader2 } from "lucide-react";
 import { ImageUploader } from "@/components/shared/image-uploader";
 import { GalleryManager } from "@/components/admin/gallery-manager-lazy";
 import { VideoUploader } from "@/components/shared/video-uploader-lazy";
+import { PdfUploader } from "@/components/admin/pdf-uploader";
+import { getDocumentLabelGroup } from "@/lib/utils/business-document";
 import { GoogleMapsLocationField } from "@/components/admin/google-maps-location-field";
 import { OpeningHoursEditor } from "@/components/shared/opening-hours-editor";
 import { AmenitiesPicker } from "@/components/admin/amenities-picker";
@@ -49,7 +51,7 @@ import { AssignedOwnerField, type AssignedOwner } from "@/components/admin/assig
 import { createCityService, updateCityService } from "@/lib/actions/city-services";
 import { useUnsavedChangesWarning } from "@/lib/hooks/use-unsaved-changes-warning";
 import { SERVICE_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
-import { categoryDisplayName } from "@/lib/utils/category-href";
+import { GroupedCategorySelect } from "@/components/shared/grouped-category-select";
 import type { Locale } from "@/lib/i18n/config";
 import type { Category, GalleryImage, MediaVideo, OpeningHoursGroup } from "@/types";
 
@@ -68,8 +70,10 @@ export interface CityServiceFormInput {
   mapsUrl: string;
   website: string;
   image: string;
+  logoUrl: string;
   gallery: GalleryImage[];
   videos: MediaVideo[];
+  documentUrl: string;
   lat: number;
   lng: number;
   amenitiesV2: string[];
@@ -87,6 +91,7 @@ export interface CityServiceFormInput {
   socialTelegram: string;
   status: "draft" | "published";
   featured: boolean;
+  isPartner: boolean;
   // Schools + Universities
   schoolType: string;
   curriculum: string;
@@ -168,6 +173,7 @@ export function CityServiceForm({
   initialOwner?: AssignedOwner | null;
 }) {
   const t = useTranslations("admin");
+  const tc = useTranslations("common");
   const tw = useTranslations("weekdays");
   const router = useRouter();
   const [owner, setOwner] = useState<AssignedOwner | null>(initialOwner);
@@ -186,8 +192,10 @@ export function CityServiceForm({
     mapsUrl: initial?.mapsUrl ?? "",
     website: initial?.website ?? "",
     image: initial?.image ?? "",
+    logoUrl: initial?.logoUrl ?? "",
     gallery: initial?.gallery ?? [],
     videos: initial?.videos ?? [],
+    documentUrl: initial?.documentUrl ?? "",
     lat: initial?.lat ?? 9.5624,
     lng: initial?.lng ?? 44.065,
     amenitiesV2: initial?.amenitiesV2 ?? [],
@@ -205,6 +213,7 @@ export function CityServiceForm({
     socialTelegram: initial?.socialTelegram ?? "",
     status: initial?.status ?? "draft",
     featured: initial?.featured ?? false,
+    isPartner: initial?.isPartner ?? false,
     schoolType: initial?.schoolType ?? "",
     curriculum: initial?.curriculum ?? "",
     educationLevels: initial?.educationLevels ?? [],
@@ -307,8 +316,10 @@ export function CityServiceForm({
       mapsUrl: form.mapsUrl || undefined,
       website: form.website || undefined,
       image: form.image || undefined,
+      logoUrl: form.logoUrl || undefined,
       gallery: form.gallery,
       videos: featureEligible ? form.videos : [],
+      documentUrl: featureEligible ? form.documentUrl || undefined : undefined,
       lat: form.lat,
       lng: form.lng,
       amenitiesV2: featureEligible ? form.amenitiesV2 : [],
@@ -326,6 +337,7 @@ export function CityServiceForm({
       socialTelegram: featureEligible ? form.socialTelegram || undefined : undefined,
       status: form.status,
       featured: form.featured,
+      isPartner: form.isPartner,
       schoolType: isSchool ? form.schoolType || undefined : undefined,
       curriculum: isSchool ? form.curriculum || undefined : undefined,
       educationLevels: isSchool ? form.educationLevels : undefined,
@@ -394,6 +406,14 @@ export function CityServiceForm({
     <form onSubmit={onSubmit} className="max-w-2xl space-y-6">
       <ImageUploader folder="city-services" value={form.image} onChange={(url) => update("image", url)} />
 
+      <ImageUploader
+        folder="city-services/logos"
+        value={form.logoUrl}
+        onChange={(url) => update("logoUrl", url)}
+        label="Business Logo (optional)"
+        rounded="rounded-full"
+      />
+
       {gallerySupported ? (
         <GalleryManager
           folder="city-services/gallery"
@@ -427,6 +447,15 @@ export function CityServiceForm({
         />
       )}
 
+      {featureEligible && (
+        <PdfUploader
+          folder="city-services"
+          value={form.documentUrl}
+          onChange={(url) => update("documentUrl", url)}
+          label={tc(`document_${getDocumentLabelGroup({ listingType: "city_service", categorySlug: selectedCategory?.slug })}` as "document_generic")}
+        />
+      )}
+
       {canAssignOwner && (
         <AssignedOwnerField
           locale={locale}
@@ -442,15 +471,19 @@ export function CityServiceForm({
         <Field label={t("cityServiceNameLabel")}>
           <input required value={form.name} onChange={(e) => update("name", e.target.value)} className={inputClass} />
         </Field>
-        <Field label={t("cityServiceCategoryLabel")}>
-          <select value={form.categoryId} onChange={(e) => update("categoryId", e.target.value)} className={inputClass}>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {categoryDisplayName(c, locale)}
-              </option>
-            ))}
-          </select>
-        </Field>
+        <GroupedCategorySelect
+          categories={categories}
+          value={form.categoryId}
+          onChange={(id) => update("categoryId", id)}
+          locale={locale}
+          groupLabel={t("cityServiceCategoryLabel")}
+          groupPlaceholder={t("cityServiceCategoryGroupPlaceholder")}
+          subcategoryLabel={t("cityServiceSubcategoryLabel")}
+          subcategoryPlaceholder={t("cityServiceSubcategoryPlaceholder")}
+          inputClassName={inputClass}
+          labelClassName="mb-1.5 block text-sm font-semibold"
+          idPrefix="admin-city-service-category"
+        />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -1106,6 +1139,20 @@ export function CityServiceForm({
           className="h-4 w-4 rounded border-ink/25 text-primary focus:ring-primary dark:border-white/25"
         />
         {t("cityServiceFeaturedLabel")}
+      </label>
+
+      {/* Manual, admin-only "GO HARGEISA PARTNER" badge control — never
+          automatic. This whole form is already admin-gated (requireAdmin),
+          so no extra role check is needed here, unlike the hotel/restaurant/
+          cafe forms which are also reused by business-owner dashboards. */}
+      <label className="flex items-center gap-2.5 text-sm font-semibold">
+        <input
+          type="checkbox"
+          checked={form.isPartner}
+          onChange={(e) => update("isPartner", e.target.checked)}
+          className="h-4 w-4 rounded border-ink/25 text-primary focus:ring-primary dark:border-white/25"
+        />
+        {t("goHargeisaPartner")}
       </label>
       <p className="-mt-4 text-xs text-ink/45 dark:text-sand/45">{t("cityServiceFeaturedHint")}</p>
 

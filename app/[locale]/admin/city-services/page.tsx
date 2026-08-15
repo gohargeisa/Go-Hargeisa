@@ -58,9 +58,7 @@ export default async function AdminCityServicesPage({ params: { locale } }: { pa
   // getCityServiceCategories() uses, except this admin filter dropdown
   // also needs currently-inactive categories (e.g. Mosques, deactivated
   // but still owning existing listings an admin may need to find/manage).
-  const filterCategories = allCategories
-    .filter((c) => c.targetTable === "city_services" && !c.isPinned)
-    .map((c) => ({ id: c.id, name: categoryDisplayName(c, locale) }));
+  const filterCategories = allCategories.filter((c) => c.targetTable === "city_services" && !c.isPinned);
 
   // Business owners may edit their own listings but never create/delete/
   // feature/hide new ones — same restriction as the hotels admin list
