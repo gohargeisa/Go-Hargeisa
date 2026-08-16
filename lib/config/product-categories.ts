@@ -81,10 +81,22 @@ export const PERFUME_SPECIALTY_CATEGORIES: ProductCategory[] = [
   "perfume", "oud", "bakhoor", "attar", "body_mist",
 ];
 
+/** products.category is free text (see 20260823000002_universal_cart_orders.sql
+ * — the DB CHECK constraint was dropped so any vertical, e.g. a Café's "hot
+ * coffee"/"brunch"/"cakes", can use its own vocabulary). Known categories
+ * still get a real translated label; anything else falls back to a
+ * humanized version of the raw string ("hot_coffee" -> "Hot Coffee") rather
+ * than requiring a translation entry for every possible category across
+ * every future business type. */
 export function productCategoryLabel(category: ProductCategory | undefined, locale: string): string | undefined {
   if (!category) return undefined;
   const entry = PRODUCT_CATEGORY_LABELS[category];
-  return (locale === "ar" && entry.ar) || (locale === "so" && entry.so) || entry.en;
+  if (entry) return (locale === "ar" && entry.ar) || (locale === "so" && entry.so) || entry.en;
+  return category
+    .split(/[_-]/)
+    .filter(Boolean)
+    .map((word) => word[0].toUpperCase() + word.slice(1))
+    .join(" ");
 }
 
 export function productGenderLabel(gender: ProductGender | undefined, locale: string): string | undefined {

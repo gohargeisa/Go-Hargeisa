@@ -19,6 +19,8 @@ import { HotelGallerySlider } from "@/components/shared/hotel-gallery-slider";
 import { HotelNavTabs, type HotelNavTab } from "@/components/shared/hotel-nav-tabs";
 import { BusinessPhotoGallery } from "@/components/shared/business-photo-gallery";
 import { RestaurantMenuSection } from "@/components/shared/restaurant-menu-section";
+import { getProductsForListing } from "@/lib/data/products";
+import { ProductsSection } from "@/components/shared/products-section";
 import { RESTAURANT_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import { RestaurantBookingCard } from "@/components/shared/restaurant-booking-card";
 import { TableReservationButton } from "@/components/shared/table-reservation-button";
@@ -82,14 +84,16 @@ export default async function RestaurantDetailPage({
   const tw = await getTranslations("weekdays");
   const tl = await getTranslations("listings");
   const tn = await getTranslations("nearby");
-  const [similarRestaurants, siteSettings, offers, myReview, isFavorited, nearbyPlaces] = await Promise.all([
+  const [similarRestaurants, siteSettings, offers, myReview, isFavorited, nearbyPlaces, restaurantProducts] = await Promise.all([
     getRelatedListings("restaurant", restaurant.id),
     getSiteSettings(),
     getPublicOffersForListing("restaurant", restaurant.id),
     getMyReviewForListing("restaurant", restaurant.id),
     isListingFavorited("restaurant", restaurant.id),
     getNearbyListings({ lat: restaurant.location.lat, lng: restaurant.location.lng, excludeType: "restaurant", excludeId: restaurant.id }),
+    restaurant.catalogOrderingEnabled ? getProductsForListing(restaurant.id, "restaurant") : Promise.resolve([]),
   ]);
+  const showProducts = Boolean(restaurant.catalogOrderingEnabled) && restaurantProducts.length > 0;
   const whatsappFallback = (siteSettings as { whatsapp_number?: string } | null)?.whatsapp_number ?? undefined;
   const hasStructuredHours = restaurant.openingHoursStructured && restaurant.openingHoursStructured.length > 0;
   const hasHoursInfo = hasStructuredHours || restaurant.is24Hours || restaurant.temporarilyClosed || restaurant.permanentlyClosed;
@@ -99,6 +103,7 @@ export default async function RestaurantDetailPage({
     ...(offers.length > 0 ? [{ id: "offers", label: td("offersTabLabel") }] : []),
     ...(hasHoursInfo ? [{ id: "hours", label: td("openingHoursByDay") }] : []),
     ...(restaurant.menuHighlights.length > 0 || restaurant.menuPdfUrl ? [{ id: "menu", label: td("menuHighlights") }] : []),
+    ...(showProducts ? [{ id: "shop", label: td("orderOnline") }] : []),
     ...(restaurant.reservable ? [{ id: "reservation", label: t("reserveTable") }] : []),
     ...(restaurant.gallery.length > 0 ? [{ id: "gallery", label: t("gallery") }] : []),
     ...(restaurant.videos && restaurant.videos.length > 0 ? [{ id: "videos", label: td("videoGallery") }] : []),
@@ -289,6 +294,28 @@ export default async function RestaurantDetailPage({
               ) : null}
             </section>
           </Reveal>
+
+          {showProducts && (
+            <Reveal>
+              <section id="shop" aria-labelledby="shop-heading" className="scroll-mt-36">
+                <h2 id="shop-heading" className="mb-5 font-display text-2xl font-semibold">
+                  {td("orderOnline")}
+                </h2>
+                <ProductsSection
+                  products={restaurantProducts}
+                  storeName={restaurant.name}
+                  business={{
+                    listingType: "restaurant",
+                    listingId: restaurant.id,
+                    businessName: restaurant.name,
+                    deliveryEnabled: Boolean(restaurant.productsDeliveryEnabled),
+                    addons: [],
+                  }}
+                  locale={locale}
+                />
+              </section>
+            </Reveal>
+          )}
 
           {restaurant.reservable && (
             <Reveal>

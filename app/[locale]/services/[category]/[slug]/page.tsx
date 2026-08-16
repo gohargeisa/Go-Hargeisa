@@ -34,7 +34,6 @@ import { ProductsSection } from "@/components/shared/products-section";
 import { getPrimaryActionGroup } from "@/lib/utils/business-primary-action";
 import { getDocumentLabelGroup } from "@/lib/utils/business-document";
 import { TableReservationButton } from "@/components/shared/table-reservation-button";
-import { ProductOrderButton } from "@/components/shared/product-order-button";
 import { VideoGallery } from "@/components/shared/video-gallery";
 
 const TYPED_FIELD_CATEGORIES = new Set(["apartments", "real-estate", "electronics", "transportation", "flower-shops"]);
@@ -218,16 +217,13 @@ export default async function ServiceDetailPage({
               />
             )}
             {showOrderPrimary && (
-              <ProductOrderButton
-                listingType="service"
-                listingId={service.id}
-                businessName={service.name}
-                products={products}
-                locale={locale}
-                label={t("orderNow")}
+              <a
+                href="#products"
                 className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-full bg-primary-700 px-8 text-[15px] font-bold text-white shadow-soft transition-all duration-300 ease-out hover:-translate-y-0.5 hover:scale-[1.03] hover:bg-primary-800 hover:shadow-card active:scale-95"
-                icon={<ShoppingBag size={16} aria-hidden="true" />}
-              />
+              >
+                <ShoppingBag size={16} aria-hidden="true" />
+                {t("viewProducts")}
+              </a>
             )}
           </div>
         </Reveal>
@@ -296,7 +292,12 @@ export default async function ServiceDetailPage({
                 <h2 id="products-heading" className="mb-5 font-display text-2xl font-semibold">
                   {tp("title")}
                 </h2>
-                <ProductsSection products={products} storeName={service.name} locale={locale} />
+                <ProductsSection
+                  products={products}
+                  storeName={service.name}
+                  business={{ listingType: "service", listingId: service.id, businessName: service.name, deliveryEnabled: true, addons: [] }}
+                  locale={locale}
+                />
               </section>
             </Reveal>
           )}

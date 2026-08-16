@@ -1,12 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { Star, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { ProductDetailModal } from "@/components/shared/product-detail-modal";
-import { PRODUCT_CATEGORY_ORDER, PRODUCT_CATEGORY_LABELS, PRODUCT_GENDER_ORDER, PRODUCT_GENDER_LABELS, productCategoryLabel } from "@/lib/config/product-categories";
-import { productLocalizedName } from "@/lib/utils/product-i18n";
+import { ProductCard } from "@/components/shared/product-card";
+import { PRODUCT_GENDER_ORDER, PRODUCT_GENDER_LABELS, productCategoryLabel } from "@/lib/config/product-categories";
+import type { AddToCartBusiness } from "@/lib/cart/cart-context";
 import type { Product, ProductCategory, ProductGender } from "@/types";
 
 function pillClass(active: boolean) {
@@ -18,13 +18,25 @@ function pillClass(active: boolean) {
 }
 
 /**
- * Products grid + filters for a Perfume & Cosmetics shop's city-services
- * detail page — only rendered when categories.supports_products is true.
- * Client-side filtering (category/gender/brand) is plenty for the product
- * volume a single shop carries; no new search infra needed. Detail view is
- * a modal (ProductDetailModal), not a new route.
+ * Universal products grid + filters — Restaurant menus, Café menus, Flower
+ * Shop bouquets, Perfume Shop bottles, any future vertical, only rendered
+ * when the listing is orderable. Client-side filtering (category/gender/
+ * brand) is plenty for the product volume a single business carries; no new
+ * search infra needed. Detail view is a modal (ProductDetailModal), not a
+ * new route. `business` carries the shared add-on vocabulary and cart
+ * identity every ProductCard/ProductDetailModal's Add to Cart button needs.
  */
-export function ProductsSection({ products, storeName, locale }: { products: Product[]; storeName: string; locale: string }) {
+export function ProductsSection({
+  products,
+  storeName,
+  business,
+  locale,
+}: {
+  products: Product[];
+  storeName: string;
+  business: AddToCartBusiness;
+  locale: string;
+}) {
   const t = useTranslations("products");
   const [categoryFilter, setCategoryFilter] = useState<ProductCategory | "all">("all");
   const [genderFilter, setGenderFilter] = useState<ProductGender | "all">("all");
@@ -33,9 +45,15 @@ export function ProductsSection({ products, storeName, locale }: { products: Pro
 
   const visible = useMemo(() => products.filter((p) => !p.isHidden), [products]);
 
+  // Category vocabulary is free text (any business can use its own) — the
+  // filter pills are whatever categories this product list actually has,
+  // in first-appearance order, not a fixed enum.
   const categoriesPresent = useMemo(() => {
-    const present = new Set(visible.map((p) => p.category).filter((c): c is ProductCategory => !!c));
-    return PRODUCT_CATEGORY_ORDER.filter((c) => present.has(c));
+    const seen: ProductCategory[] = [];
+    for (const p of visible) {
+      if (p.category && !seen.includes(p.category)) seen.push(p.category);
+    }
+    return seen;
   }, [visible]);
 
   const gendersPresent = useMemo(() => {
@@ -69,7 +87,7 @@ export function ProductsSection({ products, storeName, locale }: { products: Pro
             </button>
             {categoriesPresent.map((c) => (
               <button key={c} type="button" onClick={() => setCategoryFilter(c)} className={pillClass(categoryFilter === c)}>
-                {PRODUCT_CATEGORY_LABELS[c][locale as "en" | "ar" | "so"] ?? PRODUCT_CATEGORY_LABELS[c].en}
+                {productCategoryLabel(c, locale)}
               </button>
             ))}
           </div>
@@ -108,49 +126,14 @@ export function ProductsSection({ products, storeName, locale }: { products: Pro
         <p className="text-sm text-ink/50 dark:text-sand/50">{t("noProductsMatchFilters")}</p>
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {filtered.map((product) => {
-            const name = productLocalizedName(product, locale);
-            return (
-              <button
-                key={product.id}
-                type="button"
-                onClick={() => setSelected(product)}
-                className="group text-start focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-              >
-                <div className="relative aspect-square overflow-hidden rounded-xl2 bg-ink/5 dark:bg-white/5">
-                  {product.image && (
-                    <Image
-                      src={product.image}
-                      alt={name}
-                      fill
-                      sizes="(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 25vw"
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                  )}
-                  {product.isFeatured && (
-                    <span className="absolute start-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-amber-500 text-white">
-                      <Star size={13} aria-hidden="true" fill="currentColor" />
-                    </span>
-                  )}
-                  {!product.isAvailable && (
-                    <span className="absolute inset-x-0 bottom-0 bg-black/60 py-1 text-center text-xs font-bold text-white">
-                      {t("unavailable")}
-                    </span>
-                  )}
-                </div>
-                <p className="mt-2 truncate text-sm font-semibold">{name}</p>
-                <p className="text-xs text-ink/50 dark:text-sand/50">
-                  {product.category ? productCategoryLabel(product.category, locale) : ""}
-                  {product.price != null ? ` • ${product.price} ${product.currency}` : ` • ${t("priceOnRequest")}`}
-                </p>
-              </button>
-            );
-          })}
+          {filtered.map((product) => (
+            <ProductCard key={product.id} product={product} business={business} locale={locale} onOpenDetails={() => setSelected(product)} />
+          ))}
         </div>
       )}
 
       {selected && (
-        <ProductDetailModal product={selected} storeName={storeName} locale={locale} onClose={() => setSelected(null)} />
+        <ProductDetailModal product={selected} storeName={storeName} business={business} locale={locale} onClose={() => setSelected(null)} />
       )}
     </div>
   );

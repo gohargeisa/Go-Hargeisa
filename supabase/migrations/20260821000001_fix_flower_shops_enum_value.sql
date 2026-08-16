@@ -1,0 +1,27 @@
+-- ============================================================================
+-- Go Hargeisa — Fix the flower-shops enum value mismatch
+--
+-- 20260814000007_flowers_gifts_city_services.sql added 'flower_shop'
+-- (singular) to the city_service_category enum when it flipped the
+-- "flower-shops" category's target_table to city_services. But
+-- legacyCategoryEnum() (lib/actions/city-services.ts) and the equivalent
+-- inline derivation in convertJoinRequest (lib/actions/business-requests.ts)
+-- both compute the enum value directly from categories.slug by replacing
+-- hyphens with underscores: 'flower-shops' -> 'flower_shops' (PLURAL). The
+-- enum never got that exact value, so every attempt to create or convert a
+-- Flower Shops listing fails with "invalid input value for enum
+-- city_service_category: 'flower_shops'" (reproduced trying to convert the
+-- "Lavender Flowers Cakes" join request).
+--
+-- 'flower_shop' (singular) is left in place — dropping/renaming an existing
+-- enum value isn't supported without recreating the type, and nothing
+-- references it, so it's a harmless unused leftover.
+--
+-- Kept in its own migration file for the same can't-use-a-new-enum-value-
+-- in-the-same-transaction reason as every prior gap fix
+-- (20260808000002/20260808000005/20260810000004/20260814000007).
+--
+-- Safe to re-run (add value if not exists).
+-- ============================================================================
+
+alter type city_service_category add value if not exists 'flower_shops';

@@ -1,0 +1,205 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
+import { Loader2 } from "lucide-react";
+import { useCart } from "@/lib/cart/cart-context";
+import { submitCartOrder } from "@/lib/actions/product-orders";
+import { lineTotal } from "@/lib/cart/types";
+
+const inputClass =
+  "w-full rounded-xl border border-ink/12 bg-transparent px-3.5 py-2.5 text-sm outline-none focus:border-primary dark:border-white/15";
+
+function todayIso(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+/**
+ * Universal checkout — the cart's own fields (name/phone/fulfillment/
+ * delivery/recipient/occasion/card message/notes), same field set the old
+ * per-listing ProductOrderForm had, now submitting the whole cart
+ * (cart.items) in one submit_cart_order() call instead of one product per
+ * request. Works identically for Restaurant/Cafe/Flower Shop/Perfume Shop —
+ * whichever business the cart's items belong to.
+ */
+export function CheckoutForm({ locale }: { locale: string }) {
+  const t = useTranslations("productOrder");
+  const tCart = useTranslations("cart");
+  const cart = useCart();
+  const [customerName, setCustomerName] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [fulfillmentType, setFulfillmentType] = useState<"delivery" | "pickup">("pickup");
+  const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [preferredDate, setPreferredDate] = useState("");
+  const [recipientName, setRecipientName] = useState("");
+  const [recipientPhone, setRecipientPhone] = useState("");
+  const [occasion, setOccasion] = useState("");
+  const [messageNote, setMessageNote] = useState("");
+  const [notes, setNotes] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+
+  const deliveryEnabled = cart.cart.deliveryEnabled;
+
+  function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+
+    if (!customerName.trim() || !customerPhone.trim()) {
+      setError(t("errorRequired"));
+      return;
+    }
+    if (deliveryEnabled && fulfillmentType === "delivery" && !deliveryAddress.trim()) {
+      setError(t("errorDeliveryAddressRequired"));
+      return;
+    }
+    if (cart.cart.items.length === 0 || !cart.cart.listingType || !cart.cart.listingId) {
+      setError(t("errorCartEmpty"));
+      return;
+    }
+
+    startTransition(async () => {
+      const result = await submitCartOrder({
+        listingType: cart.cart.listingType!,
+        listingId: cart.cart.listingId!,
+        items: cart.cart.items.map((i) => ({
+          productId: i.productId,
+          quantity: i.quantity,
+          addonIds: i.addons.map((a) => a.id),
+        })),
+        customerName,
+        customerPhone,
+        fulfillmentType: deliveryEnabled ? fulfillmentType : "pickup",
+        deliveryAddress: deliveryAddress || undefined,
+        preferredDate: preferredDate || undefined,
+        recipientName: recipientName || undefined,
+        recipientPhone: recipientPhone || undefined,
+        occasion: occasion || undefined,
+        messageNote: messageNote || undefined,
+        notes: notes || undefined,
+        locale,
+      });
+
+      if (!result.ok) {
+        setError(result.error || t("errorGeneric"));
+        return;
+      }
+
+      cart.showConfirmation(result.orderReference);
+      cart.clearCart();
+    });
+  }
+
+  return (
+    <form onSubmit={onSubmit} className="space-y-4">
+      <div className="rounded-xl2 border border-ink/8 p-3.5 text-sm dark:border-white/10">
+        {cart.cart.items.map((item) => (
+          <div key={item.key} className="flex items-center justify-between gap-2 py-1">
+            <span className="truncate text-ink/70 dark:text-sand/70">
+              {item.name} × {item.quantity}
+            </span>
+            <span className="shrink-0 font-semibold">${lineTotal(item).toFixed(2)}</span>
+          </div>
+        ))}
+        <div className="mt-2 flex items-center justify-between border-t border-ink/8 pt-2 font-bold dark:border-white/10">
+          <span>{t("totalLabel")}</span>
+          <span>${cart.subtotal.toFixed(2)}</span>
+        </div>
+      </div>
+
+      <div>
+        <label htmlFor="checkout-name" className="sr-only">
+          {t("nameLabel")}
+        </label>
+        <input
+          id="checkout-name"
+          required
+          placeholder={t("nameLabel")}
+          value={customerName}
+          onChange={(e) => setCustomerName(e.target.value)}
+          className={inputClass}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="checkout-phone" className="sr-only">
+          {t("phoneLabel")}
+        </label>
+        <input
+          id="checkout-phone"
+          required
+          type="tel"
+          placeholder={t("phoneLabel")}
+          value={customerPhone}
+          onChange={(e) => setCustomerPhone(e.target.value)}
+          className={inputClass}
+        />
+      </div>
+
+      {deliveryEnabled && (
+        <div>
+          <label className="mb-1.5 block text-sm font-semibold">{t("fulfillmentLabel")}</label>
+          <div className="grid grid-cols-2 gap-2">
+            {(["pickup", "delivery"] as const).map((type) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => setFulfillmentType(type)}
+                className={`rounded-xl border py-2.5 text-center text-sm font-semibold transition-colors ${
+                  fulfillmentType === type
+                    ? "border-primary bg-primary/8 text-primary-800"
+                    : "border-ink/12 text-ink/60 hover:border-primary/40 dark:border-white/15 dark:text-sand/60"
+                }`}
+              >
+                {type === "pickup" ? t("fulfillmentPickup") : t("fulfillmentDelivery")}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {deliveryEnabled && fulfillmentType === "delivery" && (
+        <div>
+          <label htmlFor="checkout-address" className="sr-only">
+            {t("deliveryAddressLabel")}
+          </label>
+          <input
+            id="checkout-address"
+            required
+            placeholder={t("deliveryAddressLabel")}
+            value={deliveryAddress}
+            onChange={(e) => setDeliveryAddress(e.target.value)}
+            className={inputClass}
+          />
+        </div>
+      )}
+
+      <div>
+        <label className="mb-1 block text-xs font-semibold text-ink/50 dark:text-sand/50">{t("preferredDateLabel")}</label>
+        <input type="date" min={todayIso()} value={preferredDate} onChange={(e) => setPreferredDate(e.target.value)} className={inputClass} />
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <input placeholder={t("recipientNameLabel")} value={recipientName} onChange={(e) => setRecipientName(e.target.value)} className={inputClass} />
+        <input type="tel" placeholder={t("recipientPhoneLabel")} value={recipientPhone} onChange={(e) => setRecipientPhone(e.target.value)} className={inputClass} />
+      </div>
+
+      <input placeholder={t("occasionLabel")} value={occasion} onChange={(e) => setOccasion(e.target.value)} className={inputClass} />
+
+      <textarea rows={2} placeholder={t("messageNoteLabel")} value={messageNote} onChange={(e) => setMessageNote(e.target.value)} className={inputClass} />
+
+      <textarea rows={2} placeholder={t("notesLabel")} value={notes} onChange={(e) => setNotes(e.target.value)} className={inputClass} />
+
+      {error && <p className="text-sm text-red-600">{error}</p>}
+
+      <button
+        type="submit"
+        disabled={isPending}
+        className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary py-3.5 text-sm font-bold text-white transition-colors hover:bg-primary-700 disabled:opacity-70"
+      >
+        {isPending && <Loader2 size={15} className="animate-spin" />}
+        {isPending ? t("submitting") : tCart("placeOrder")}
+      </button>
+    </form>
+  );
+}

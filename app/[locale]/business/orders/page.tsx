@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/config";
+import type { OrderableListingType } from "@/types";
 import { getActiveListing } from "@/lib/data/business";
 import { getProductOrdersForListing } from "@/lib/data/product-orders";
 import { ProductOrdersTable } from "@/components/business/product-orders-table";
@@ -17,7 +18,7 @@ export default async function OrdersPage({ params: { locale } }: { params: { loc
   // has a real product catalog). redirect() rather than notFound() — see
   // the identical comment in app/[locale]/city-services/[slug]/book/page.tsx.
   if (!listing.supportsProducts) redirect(`/${locale}/business`);
-  const listingType = listing.listingType as "city_service" | "service";
+  const listingType = listing.listingType as OrderableListingType;
 
   const t = await getTranslations({ locale, namespace: "businessDashboard" });
   const orders = await getProductOrdersForListing(listingType, listing.id);

@@ -1,5 +1,5 @@
 import type { Database } from "@/types/database";
-import type { Hotel, HotelRoom, Restaurant, Cafe, Service, Attraction, EventItem, CityService, Article, GalleryImage, Review, BusinessOffer, MediaVideo, Notification, NotificationCategory, NotificationSeverity, Category, Product, Department, Doctor, Appointment, OpeningHoursGroup, RestaurantMenuItem, TableReservation, ProductOrder } from "@/types";
+import type { Hotel, HotelRoom, Restaurant, Cafe, Service, Attraction, EventItem, CityService, Article, GalleryImage, Review, BusinessOffer, MediaVideo, Notification, NotificationCategory, NotificationSeverity, Category, Product, Department, Doctor, Appointment, OpeningHoursGroup, RestaurantMenuItem, TableReservation, ProductOrder, OrderItem } from "@/types";
 
 type HotelRow = Database["public"]["Tables"]["hotels"]["Row"];
 type HotelRoomRow = Database["public"]["Tables"]["hotel_rooms"]["Row"];
@@ -18,6 +18,7 @@ type DoctorRow = Database["public"]["Tables"]["doctors"]["Row"];
 type AppointmentRow = Database["public"]["Tables"]["appointments"]["Row"];
 type TableReservationRow = Database["public"]["Tables"]["table_reservations"]["Row"];
 type ProductOrderRow = Database["public"]["Tables"]["product_orders"]["Row"];
+type OrderItemRow = Database["public"]["Tables"]["order_items"]["Row"];
 
 function toGallery(json: unknown): GalleryImage[] {
   if (!Array.isArray(json)) return [];
@@ -197,6 +198,8 @@ export function mapRestaurant(row: RestaurantRow, reviews: Review[] = []): Resta
     onlineOrderingEnabled: row.online_ordering_enabled,
     phoneOrderingEnabled: row.phone_ordering_enabled,
     languages: row.languages ?? [],
+    catalogOrderingEnabled: row.ordering_enabled,
+    productsDeliveryEnabled: row.products_delivery_enabled,
   };
 }
 
@@ -256,6 +259,10 @@ export function mapCafe(row: CafeRow, reviews: Review[] = [], locale?: string): 
     cafeType: (row.cafe_type as Cafe["cafeType"]) ?? undefined,
     seatingCapacity: row.seating_capacity ?? undefined,
     reservable: row.reservable,
+    sellsFlowers: row.sells_flowers,
+    flowerAddons: Array.isArray(row.flower_addons) ? (row.flower_addons as unknown as Cafe["flowerAddons"]) : [],
+    productsDeliveryEnabled: row.products_delivery_enabled,
+    orderingEnabled: row.ordering_enabled,
   };
 }
 
@@ -277,14 +284,35 @@ export function mapTableReservation(row: TableReservationRow): TableReservation 
   };
 }
 
-export function mapProductOrder(row: ProductOrderRow): ProductOrder {
+export function mapOrderItem(row: OrderItemRow): OrderItem {
+  return {
+    id: row.id,
+    orderId: row.order_id,
+    productId: row.product_id ?? undefined,
+    productName: row.product_name,
+    productNameAr: row.product_name_ar ?? undefined,
+    productNameSo: row.product_name_so ?? undefined,
+    productImage: row.product_image ?? undefined,
+    unitPrice: Number(row.unit_price),
+    quantity: row.quantity,
+    addons: Array.isArray(row.addons) ? (row.addons as unknown as OrderItem["addons"]) : [],
+    addonsTotal: Number(row.addons_total),
+    lineTotal: Number(row.line_total),
+  };
+}
+
+/** `row.order_items` is present when the caller's .select() joined it (every
+ * current caller does) — defaults to [] otherwise rather than throwing. */
+export function mapProductOrder(row: ProductOrderRow & { order_items?: OrderItemRow[] }): ProductOrder {
   return {
     id: row.id,
     listingType: row.listing_type,
     listingId: row.listing_id,
-    productId: row.product_id ?? undefined,
+    items: (row.order_items ?? []).map(mapOrderItem),
     customerName: row.customer_name,
     customerPhone: row.customer_phone,
+    subtotal: Number(row.subtotal),
+    total: row.total != null ? Number(row.total) : undefined,
     fulfillmentType: row.fulfillment_type,
     deliveryAddress: row.delivery_address ?? undefined,
     preferredDate: row.preferred_date ?? undefined,

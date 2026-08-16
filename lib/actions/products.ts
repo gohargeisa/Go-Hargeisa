@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import type { ProductCategory, ProductGender, GalleryImage } from "@/types";
+import type { ProductCategory, ProductGender, GalleryImage, OrderableListingType } from "@/types";
 
 export interface ProductInput {
   name: string;
@@ -26,7 +26,14 @@ export interface ProductInput {
   size?: string;
 }
 
-export type ProductListingType = "city_service" | "service";
+export type ProductListingType = OrderableListingType;
+
+const LISTING_TABLE: Record<ProductListingType, "city_services" | "services" | "cafes" | "restaurants"> = {
+  city_service: "city_services",
+  service: "services",
+  cafe: "cafes",
+  restaurant: "restaurants",
+};
 
 /**
  * Products authorize via their PARENT listing's owner_id, not a column of
@@ -34,8 +41,7 @@ export type ProductListingType = "city_service" | "service";
  * assertCanManageRoom (hotels.owner_id) and lib/actions/city-services.ts's
  * assertCanEditCityService. RLS on `products` mirrors this same check
  * server-side as the authoritative gate. `listingType` picks which parent
- * table owns the listing — city_services (Perfume/Cosmetics) or services
- * (Flowers & Gifts) — everything else about the check is identical.
+ * table owns the listing — any OrderableListingType.
  */
 async function assertCanManageProduct(listingId: string, listingType: ProductListingType) {
   const supabase = await createClient();
@@ -50,7 +56,7 @@ async function assertCanManageProduct(listingId: string, listingType: ProductLis
   if (role === "owner") return supabase;
 
   if (role === "business_owner") {
-    const table = listingType === "city_service" ? "city_services" : "services";
+    const table = LISTING_TABLE[listingType];
     const { data: listing } = await supabase.from(table).select("owner_id").eq("id", listingId).single();
     if ((listing as { owner_id: string | null } | null)?.owner_id === user.id) return supabase;
   }

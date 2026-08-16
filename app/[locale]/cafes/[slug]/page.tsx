@@ -19,6 +19,10 @@ import { HotelGallerySlider } from "@/components/shared/hotel-gallery-slider";
 import { HotelNavTabs, type HotelNavTab } from "@/components/shared/hotel-nav-tabs";
 import { BusinessPhotoGallery } from "@/components/shared/business-photo-gallery";
 import { RestaurantMenuSection } from "@/components/shared/restaurant-menu-section";
+import { getProductsForListing } from "@/lib/data/products";
+import { ProductsSection } from "@/components/shared/products-section";
+import { GroupedProductsSection } from "@/components/shared/grouped-products-section";
+import { LAVENDER_FLOWER_SECTION, LAVENDER_FLOWER_SORT_ORDER_BASE, LAVENDER_MENU_SECTIONS, LAVENDER_MENU_SORT_ORDER_BASE, groupProductsIntoSections } from "@/lib/config/lavender-menu-sections";
 import { CAFE_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import { AmenitiesSection, hasAmenities } from "@/components/shared/amenities-section";
 import { SocialLinks } from "@/components/shared/social-links";
@@ -71,6 +75,14 @@ export default async function CafeDetailPage({
 }) {
   const cafe = await getCafeBySlug(slug, locale);
   if (!cafe) notFound();
+  // Falls back to the older sellsFlowers flag until
+  // 20260823000002_universal_cart_orders.sql (adds cafes.ordering_enabled,
+  // backfilled from sellsFlowers) is reviewed and applied — keeps Lavender's
+  // already-shipped, already-verified product ordering working in the
+  // meantime instead of silently disappearing because the new column isn't
+  // live yet. Safe no-op once the migration lands and ordering_enabled is
+  // populated (true/false, never undefined).
+  const cafeOrderingEnabled = cafe.orderingEnabled ?? cafe.sellsFlowers;
   const t = await getTranslations("common");
   const tNav = await getTranslations("nav");
   const td = await getTranslations("detail");
@@ -78,14 +90,35 @@ export default async function CafeDetailPage({
   const tw = await getTranslations("weekdays");
   const tl = await getTranslations("listings");
   const tn = await getTranslations("nearby");
-  const [similarCafes, siteSettings, offers, myReview, isFavorited, nearbyPlaces] = await Promise.all([
+  const [similarCafes, siteSettings, offers, myReview, isFavorited, nearbyPlaces, cafeProducts] = await Promise.all([
     getRelatedListings("cafe", cafe.id),
     getSiteSettings(),
     getPublicOffersForListing("cafe", cafe.id),
     getMyReviewForListing("cafe", cafe.id),
     isListingFavorited("cafe", cafe.id),
     getNearbyListings({ lat: cafe.location.lat, lng: cafe.location.lng, excludeType: "cafe", excludeId: cafe.id }),
+    cafeOrderingEnabled ? getProductsForListing(cafe.id, "cafe") : Promise.resolve([]),
   ]);
+  // One shared catalog — menu items and flowers alike — through the
+  // universal cart. ProductsSection's own category filter (derived from
+  // whatever categories are present) is what lets a shopper narrow down to
+  // "Flowers & Bouquets" specifically; no separate flowers-only section.
+  const showProducts = Boolean(cafeOrderingEnabled) && cafeProducts.length > 0;
+  // Lavender-only: its 106 café-menu products carry no real category (the
+  // live products.category CHECK constraint doesn't allow café vocabulary —
+  // see lib/config/lavender-menu-sections.ts), so they're grouped into
+  // labeled sections positionally instead of via ProductsSection's normal
+  // category-pill filtering. Every other cafe keeps the generic flat view.
+  const lavenderMenuGroups =
+    cafe.slug === "lavender"
+      ? [
+          {
+            label: LAVENDER_FLOWER_SECTION.label,
+            items: cafeProducts.filter((p) => p.sortOrder >= LAVENDER_FLOWER_SORT_ORDER_BASE && p.sortOrder < LAVENDER_MENU_SORT_ORDER_BASE),
+          },
+          ...groupProductsIntoSections(cafeProducts, LAVENDER_MENU_SORT_ORDER_BASE, LAVENDER_MENU_SECTIONS),
+        ]
+      : null;
   const whatsappFallback = (siteSettings as { whatsapp_number?: string } | null)?.whatsapp_number ?? undefined;
 
   const googleMapsHref = resolveMapsUrl(cafe.location, cafe.googleMapsUrl);
@@ -101,6 +134,7 @@ export default async function CafeDetailPage({
     ...(hasHoursInfo ? [{ id: "hours", label: td("openingHoursByDay") }] : []),
     ...(cafe.specialDrinks.length > 0 ? [{ id: "specialties", label: td("coffeeSpecialties") }] : []),
     ...(cafe.menuHighlights.length > 0 || cafe.menuPdfUrl ? [{ id: "menu", label: td("menuHighlights") }] : []),
+    ...(showProducts ? [{ id: "shop", label: td("orderOnline") }] : []),
     ...(cafe.reservable ? [{ id: "reservation", label: t("reserveTable") }] : []),
     ...(cafe.gallery.length > 0 ? [{ id: "gallery", label: t("gallery") }] : []),
     ...(cafe.videos && cafe.videos.length > 0 ? [{ id: "videos", label: td("videoGallery") }] : []),
@@ -297,6 +331,43 @@ export default async function CafeDetailPage({
                     items={cafe.menuHighlights}
                     allCategoriesLabel={td("menuAllCategoriesLabel")}
                     featuredLabel={td("menuFeaturedLabel")}
+                  />
+                )}
+              </section>
+            </Reveal>
+          )}
+
+          {showProducts && (
+            <Reveal>
+              <section id="shop" aria-labelledby="shop-heading" className="scroll-mt-36">
+                <h2 id="shop-heading" className="mb-5 font-display text-2xl font-semibold">
+                  {td("orderOnline")}
+                </h2>
+                {lavenderMenuGroups ? (
+                  <GroupedProductsSection
+                    groups={lavenderMenuGroups}
+                    storeName={cafe.name}
+                    business={{
+                      listingType: "cafe",
+                      listingId: cafe.id,
+                      businessName: cafe.name,
+                      deliveryEnabled: Boolean(cafe.productsDeliveryEnabled),
+                      addons: cafe.flowerAddons ?? [],
+                    }}
+                    locale={locale}
+                  />
+                ) : (
+                  <ProductsSection
+                    products={cafeProducts}
+                    storeName={cafe.name}
+                    business={{
+                      listingType: "cafe",
+                      listingId: cafe.id,
+                      businessName: cafe.name,
+                      deliveryEnabled: Boolean(cafe.productsDeliveryEnabled),
+                      addons: cafe.flowerAddons ?? [],
+                    }}
+                    locale={locale}
                   />
                 )}
               </section>

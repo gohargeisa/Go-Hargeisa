@@ -18,6 +18,8 @@ import { SearchOverlayProvider } from "@/components/shared/search-overlay-provid
 import { NativeSplashGateProvider } from "@/components/shared/native-splash-gate";
 import { OfflineFavoritesProvider } from "@/components/shared/offline-favorites-provider";
 import { OfflineFavoritesSheet } from "@/components/shared/offline-favorites-sheet";
+import { CartProvider } from "@/lib/cart/cart-context";
+import { CartDrawer } from "@/components/shared/cart-drawer";
 import { RecentlyViewedTracker } from "@/components/shared/recently-viewed-tracker";
 import { PullToRefreshIndicator } from "@/components/shared/pull-to-refresh-indicator";
 import { getHeaderUser } from "@/lib/supabase/guards";
@@ -201,6 +203,7 @@ export default async function LocaleLayout({
             <NativeSplashGateProvider>
               <SearchOverlayProvider>
                 <OfflineFavoritesProvider>
+                <CartProvider>
                   <SiteHeader
                     locale={currentLocale}
                     initialUser={initialUser}
@@ -239,6 +242,8 @@ export default async function LocaleLayout({
                   <RecentlyViewedTracker />
                   <OfflineFavoritesSheet />
                   <BottomNav locale={currentLocale} />
+                  <CartDrawer locale={currentLocale} />
+                </CartProvider>
                 </OfflineFavoritesProvider>
               </SearchOverlayProvider>
             </NativeSplashGateProvider>

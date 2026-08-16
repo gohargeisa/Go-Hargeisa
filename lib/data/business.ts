@@ -27,11 +27,11 @@ export interface OwnedListing {
   /** 'trial' listings have a linked owner_id but no dashboard access yet —
    * see app/[locale]/business/layout.tsx, which is what actually enforces this. */
   partnerStatus: "trial" | "official";
-  /** Phase 4 — only ever true for city_service listings whose category has
-   * the matching categories.supports_products/supports_appointments flag
-   * (see lib/data/categories.ts's mapCategory). Always false for
-   * hotel/restaurant/cafe/service, which have no such flag. Drives the
-   * conditional "Products"/"Doctors"/"Appointments" nav items in
+  /** True for any listing the universal cart/order system is enabled on:
+   * city_service/service via their category's supports_products flag (see
+   * lib/data/categories.ts's mapCategory), cafe/restaurant via their own
+   * ordering_enabled column. Always false for hotel, which has neither.
+   * Drives the conditional "Products"/"Doctors"/"Appointments" nav items in
    * business-sidebar.tsx. */
   supportsProducts: boolean;
   supportsAppointments: boolean;
@@ -109,7 +109,7 @@ async function _getOwnedListings(userId: string): Promise<OwnedListing[]> {
       hasDescription: Boolean(r.description?.trim()),
       galleryCount: galleryLength(r.gallery),
       partnerStatus: r.partner_status,
-      supportsProducts: false,
+      supportsProducts: r.ordering_enabled ?? false,
       supportsAppointments: false,
     });
   }
@@ -131,7 +131,7 @@ async function _getOwnedListings(userId: string): Promise<OwnedListing[]> {
       hasDescription: Boolean(c.description?.trim()),
       galleryCount: galleryLength(c.gallery),
       partnerStatus: c.partner_status,
-      supportsProducts: false,
+      supportsProducts: c.ordering_enabled ?? false,
       supportsAppointments: false,
     });
   }

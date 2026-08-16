@@ -61,25 +61,27 @@ export type BusinessListingType = "hotel" | "restaurant" | "cafe" | "service" | 
  * this reads clearer at those call sites either way. */
 export type OwnableListingType = BusinessListingType;
 
-/** Fixed vocabulary for products.category — a CHECK constraint in the DB, not
- * a free-text field or a managed CRUD table (Phase 4 design decision). Labels
- * live in lib/config/product-categories.ts. */
-export type ProductCategory =
-  | "perfume" | "oud" | "bakhoor" | "attar" | "body_mist" | "cosmetics" | "makeup"
-  | "body_care" | "hair_care" | "gift_sets" | "accessories"
-  | "skincare_creams" | "hair_extensions_wigs" | "perfumes_fragrances" | "bath_body"
-  | "nail_care" | "beauty_tools_accessories" | "womens_personal_care"
-  | "spare_parts"
-  | "bouquet" | "floral_arrangement" | "occasion_gift" | "plant" | "cake";
+/** Free-text (products.category has no DB CHECK constraint — see
+ * 20260823000002_universal_cart_orders.sql) so any product-selling vertical
+ * (Perfume, Flowers, Café menu items, Restaurant dishes, Fashion, Grocery,
+ * ...) can use its own category vocabulary without a schema change. Known
+ * categories get a translated label from lib/config/product-categories.ts;
+ * anything else falls back to a humanized version of the raw string. */
+export type ProductCategory = string;
 
 export type ProductGender = "men" | "women" | "unisex" | "kids";
 
+/** Every listing type that can sell products through the universal cart —
+ * city_service/service via categories.supports_products, cafe/restaurant via
+ * their own ordering_enabled column (see 20260823000002). */
+export type OrderableListingType = "city_service" | "service" | "cafe" | "restaurant";
+
 /** Phase 4 Catalog/Product Engine — polymorphic owner (listingType/listingId),
- * same pattern as reviews/business_metric_events, currently only wired up for
- * listingType='city_service' (Perfume & Cosmetics shops). */
+ * same pattern as reviews/business_metric_events. Serves every vertical in
+ * OrderableListingType through one table (no per-category products table). */
 export interface Product {
   id: string;
-  listingType: "city_service" | "service";
+  listingType: OrderableListingType;
   listingId: string;
   name: string;
   nameAr?: string;
@@ -682,6 +684,13 @@ export interface Restaurant {
   onlineOrderingEnabled: boolean;
   phoneOrderingEnabled: boolean;
   languages?: string[];
+  /** Gates the universal cart/checkout system (browse this restaurant's own
+   * menu as real `products` rows, add to cart, place a real order) —
+   * unrelated to onlineOrderingEnabled/phoneOrderingEnabled above, which
+   * only ever produce a link out to a third-party ordering app or a phone
+   * call. Off by default for every restaurant. */
+  catalogOrderingEnabled: boolean;
+  productsDeliveryEnabled: boolean;
 }
 
 /** One opening-hours row spanning one or more days, e.g. Sat–Wed vs. a
@@ -751,6 +760,34 @@ export interface Cafe {
    * actually confirmed to take table reservations (see restaurants.reservable,
    * the same flag Restaurant already has). */
   reservable?: boolean;
+  /** Content flag: does this cafe have a flower/bouquet product line (used
+   * to label that part of the catalog "Flowers & Bouquets"). Whether
+   * ordering is actually available is `orderingEnabled` below, not this. */
+  sellsFlowers?: boolean;
+  /** Order-time modifiers a customer picks from when ordering any product
+   * from this cafe (e.g. "Extra Gypsophila +$3") — a cafe-wide list, not a
+   * property of one product. */
+  flowerAddons?: ProductAddon[];
+  /** Off by default — most cafes selling a secondary product line are
+   * pickup-only. When true, the delivery option appears in the order form. */
+  productsDeliveryEnabled?: boolean;
+  /** Gates the universal cart/checkout system for this cafe's whole
+   * products catalog (menu items and/or flowers — both live in the same
+   * `products` table). Off by default; backfilled true for every cafe that
+   * already had sellsFlowers true (see 20260823000002_universal_cart_orders.sql). */
+  orderingEnabled?: boolean;
+}
+
+/** An order-time modifier a customer can add to a product order (e.g.
+ * "Extra Gypsophila +$3", "Message Card" at $0). Lives on the parent
+ * listing (currently only cafes.flower_addons), resolved server-side by id
+ * in submit_product_order — the client never sends a price. */
+export interface ProductAddon {
+  id: string;
+  name: string;
+  nameAr?: string;
+  nameSo?: string;
+  price: number;
 }
 
 /** One reservation request for a restaurant or cafe table — same
@@ -777,19 +814,42 @@ export interface TableReservation {
   createdAt: string;
 }
 
-/** Product order/request — Flower Shops, Perfume Shops, and any future
- * supports_products category. Deliberately its own table (not
- * table_reservations): Flower Shop orders need fields (recipient, occasion,
- * delivery address, card message) that don't fit a table-reservation shape.
- * `productId` is optional — a customer can request without picking a
- * specific catalog item. */
+/** One cart line at checkout time, snapshotted server-side into order_items
+ * — an order placed today keeps showing today's name/price forever, even
+ * after the product is renamed, repriced, or deleted. */
+export interface OrderItem {
+  id: string;
+  orderId: string;
+  productId?: string;
+  productName: string;
+  productNameAr?: string;
+  productNameSo?: string;
+  productImage?: string;
+  unitPrice: number;
+  quantity: number;
+  addons: ProductAddon[];
+  addonsTotal: number;
+  lineTotal: number;
+}
+
+export type ProductOrderStatus = "pending" | "confirmed" | "preparing" | "ready" | "out_for_delivery" | "completed" | "cancelled";
+
+/** One universal order — Restaurants, Cafes, Flower Shops, Perfume Shops,
+ * and any future OrderableListingType, all through the same table/RPC
+ * (submit_cart_order). Holds the order HEADER (customer, fulfillment,
+ * status, totals); the products themselves live in `items` (order_items),
+ * one row per cart line. Deliberately its own table (not table_reservations):
+ * product orders need fields (recipient, occasion, delivery address, card
+ * message, line items) that don't fit a table-reservation shape. */
 export interface ProductOrder {
   id: string;
-  listingType: "city_service" | "service";
+  listingType: OrderableListingType;
   listingId: string;
-  productId?: string;
+  items: OrderItem[];
   customerName: string;
   customerPhone: string;
+  subtotal: number;
+  total?: number;
   fulfillmentType: "delivery" | "pickup";
   deliveryAddress?: string;
   preferredDate?: string;
@@ -798,7 +858,7 @@ export interface ProductOrder {
   occasion?: string;
   messageNote?: string;
   notes?: string;
-  status: "pending" | "confirmed" | "cancelled" | "completed";
+  status: ProductOrderStatus;
   orderReference: string;
   userId?: string;
   createdAt: string;

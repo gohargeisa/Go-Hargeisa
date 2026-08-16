@@ -6,13 +6,16 @@ import { useTranslations } from "next-intl";
 import { Check, MessageCircle, X } from "lucide-react";
 import { updateProductOrderStatus } from "@/lib/actions/product-orders";
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
-import type { ProductOrder } from "@/types";
+import type { ProductOrder, OrderableListingType } from "@/types";
 
-const STATUS_OPTIONS: ProductOrder["status"][] = ["pending", "confirmed", "cancelled", "completed"];
+const STATUS_OPTIONS: ProductOrder["status"][] = ["pending", "confirmed", "preparing", "ready", "out_for_delivery", "completed", "cancelled"];
 
 const STATUS_STYLES: Record<ProductOrder["status"], string> = {
   pending: "bg-amber-100 text-amber-700 dark:bg-amber-400/15 dark:text-amber-300",
   confirmed: "bg-accent/10 text-accent-700 dark:bg-accent/15 dark:text-accent-400",
+  preparing: "bg-blue-100 text-blue-700 dark:bg-blue-400/15 dark:text-blue-300",
+  ready: "bg-purple-100 text-purple-700 dark:bg-purple-400/15 dark:text-purple-300",
+  out_for_delivery: "bg-indigo-100 text-indigo-700 dark:bg-indigo-400/15 dark:text-indigo-300",
   cancelled: "bg-red-100 text-red-700 dark:bg-red-400/15 dark:text-red-300",
   completed: "bg-secondary/15 text-secondary-700 dark:bg-white/10 dark:text-sand/70",
 };
@@ -27,10 +30,12 @@ function formatDate(iso?: string): string | undefined {
 }
 
 /**
- * Owner-side product order/request management — same list-with-status-
- * dropdown pattern as ReservationsTable/BookingsTable, generic over
- * listingType/listingId. updateProductOrderStatus re-checks ownership
- * itself (assertCanManageListing).
+ * Owner-side product order management — same list-with-status-dropdown
+ * pattern as ReservationsTable/BookingsTable, generic over any
+ * OrderableListingType (Restaurant, Cafe, Flower Shop, Perfume Shop, ...).
+ * Each order can hold multiple line items (order.items) — the universal
+ * cart's whole point — so this renders the full basket, not one product.
+ * updateProductOrderStatus re-checks ownership itself (assertCanManageListing).
  */
 export function ProductOrdersTable({
   listingType,
@@ -38,7 +43,7 @@ export function ProductOrdersTable({
   orders,
   revalidatePath,
 }: {
-  listingType: "city_service" | "service";
+  listingType: OrderableListingType;
   listingId: string;
   orders: ProductOrder[];
   revalidatePath: string;
@@ -82,6 +87,25 @@ export function ProductOrdersTable({
               {t(`bookingStatus_${o.status}`)}
             </span>
           </div>
+
+          <div className="mt-3 space-y-1 rounded-xl bg-ink/[0.02] p-3 text-xs dark:bg-white/[0.03]">
+            {o.items.map((item) => (
+              <div key={item.id} className="flex items-center justify-between gap-2">
+                <span className="truncate text-ink/70 dark:text-sand/70">
+                  {item.productName} × {item.quantity}
+                  {item.addons.length > 0 && <span className="text-ink/40 dark:text-sand/40"> ({item.addons.map((a) => a.name).join(", ")})</span>}
+                </span>
+                <span className="shrink-0 font-semibold">${item.lineTotal.toFixed(2)}</span>
+              </div>
+            ))}
+            {o.total != null && (
+              <div className="flex items-center justify-between border-t border-ink/8 pt-1.5 font-bold dark:border-white/10">
+                <span>{tp("totalLabel")}</span>
+                <span>${o.total.toFixed(2)}</span>
+              </div>
+            )}
+          </div>
+
           <div className="mt-3 grid grid-cols-2 gap-y-1.5 text-xs text-ink/60 dark:text-sand/60 sm:grid-cols-3">
             <p>
               {tp("fulfillmentLabel")}: {o.fulfillmentType === "delivery" ? tp("fulfillmentDelivery") : tp("fulfillmentPickup")}

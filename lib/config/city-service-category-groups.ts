@@ -38,8 +38,19 @@ export const MERGED_CATEGORIES: MergedCategoryConfig[] = [
     nameSo: "Caafimaadka",
   },
   {
+    // "quran-memorization-center" added: it was a real, active city_services
+    // category (categories.slug='quran-memorization-center') but missing
+    // from this group's members, so it showed as its own flat top-level
+    // entry instead of nesting under Education alongside Schools/
+    // Universities/Institutes — the same class of bug this group exists to
+    // prevent. "language-institute" ("English Language Institutes") stays a
+    // member here for now (already correctly nested, not a flat top-level
+    // entry) — genuinely folding it into "institute" as a typed sub-field
+    // (institute_type = 'language') needs a real schema change; see
+    // supabase/migrations/20260824000001_institute_type.sql (written, not
+    // applied).
     key: "education",
-    memberSlugs: ["school", "university", "institute", "language-institute"],
+    memberSlugs: ["school", "university", "institute", "language-institute", "quran-memorization-center"],
     icon: "GraduationCap",
     color: "#16A34A",
     name: "Education",
@@ -56,8 +67,15 @@ export const MERGED_CATEGORIES: MergedCategoryConfig[] = [
     nameSo: "Qurux iyo Daryeel",
   },
   {
+    // "perfume-shop" was removed from this group's members: Perfumes is now
+    // pinned as its own top-level nav category (categories.is_pinned=true),
+    // same level as Hotels/Restaurants/Cafes — it must never also appear
+    // merged under City Services, or it would show up twice. Only
+    // Cosmetics & Women's Beauty remains here; buildCategoryGroupOptions
+    // already collapses a single-member group to a plain standalone option,
+    // so this key still resolves correctly with one member.
     key: "perfumes-cosmetics",
-    memberSlugs: ["perfume-shop", "cosmetics-beauty"],
+    memberSlugs: ["cosmetics-beauty"],
     icon: "Sparkles",
     color: "#DB2777",
     name: "Perfumes & Cosmetics",

@@ -87,6 +87,7 @@ type RestaurantRow = ListingBase & SocialExtra & {
   restaurant_type: string | null; seating_capacity: number | null; number_of_tables: number | null;
   online_order_url: string | null; languages: string[];
   online_ordering_enabled: boolean; phone_ordering_enabled: boolean;
+  ordering_enabled: boolean; products_delivery_enabled: boolean;
 };
 type CafeRow = ListingBase & SocialExtra & {
   description_ar: string | null; description_so: string | null;
@@ -98,6 +99,8 @@ type CafeRow = ListingBase & SocialExtra & {
   partner_status: PartnerStatusDb; trial_expires_at: string | null; is_partner: boolean;
   is_24_hours: boolean; temporarily_closed: boolean; permanently_closed: boolean;
   cafe_type: string | null; seating_capacity: number | null;
+  sells_flowers: boolean; flower_addons: Json; products_delivery_enabled: boolean;
+  ordering_enabled: boolean;
 };
 
 type BusinessOfferRow = {
@@ -166,7 +169,7 @@ type CityServiceRow = {
   // Pharmacy
   pharmacy_type: string | null; pharmacy_delivery_available: boolean | null; prescription_required: boolean | null;
   home_delivery: boolean | null; pharmacy_emergency_contact: string | null;
-  document_url: string | null;
+  document_url: string | null; products_delivery_enabled: boolean;
 };
 type AttractionRow = ListingBase & SocialExtra & {
   history: string | null; best_time_to_visit: string | null; entry_fee: string; visitor_tips: string[];
@@ -187,6 +190,7 @@ type ServiceRow = ListingBase & {
   custom_fields: Json; is_partner: boolean;
   logo_url: string | null; videos: Json; whatsapp: string | null; email: string | null;
   social_instagram: string | null; social_facebook: string | null; social_tiktok: string | null; opening_hours_structured: Json;
+  products_delivery_enabled: boolean;
   // Travel Agency / Travel Office (slug 'tour-companies')
   travel_agency_type: string | null; flight_ticketing: boolean | null; hotel_booking: boolean | null;
   visa_assistance: boolean | null; tour_packages: boolean | null; airport_transfers: boolean | null;
@@ -272,16 +276,25 @@ type TableReservationRow = {
 };
 
 type ProductOrderRow = {
-  id: string; listing_type: "city_service" | "service"; listing_id: string;
-  product_id: string | null;
+  id: string; listing_type: "city_service" | "service" | "cafe" | "restaurant"; listing_id: string;
   customer_name: string; customer_phone: string;
+  subtotal: number; total: number | null;
   fulfillment_type: "delivery" | "pickup"; delivery_address: string | null;
   preferred_date: string | null;
   recipient_name: string | null; recipient_phone: string | null;
   occasion: string | null; message_note: string | null; notes: string | null;
-  status: "pending" | "confirmed" | "cancelled" | "completed";
+  status: "pending" | "confirmed" | "preparing" | "ready" | "out_for_delivery" | "cancelled" | "completed";
   order_reference: string; user_id: string | null;
   created_at: string; updated_at: string;
+};
+
+type OrderItemRow = {
+  id: string; order_id: string; product_id: string | null;
+  product_name: string; product_name_ar: string | null; product_name_so: string | null;
+  product_image: string | null;
+  unit_price: number; quantity: number;
+  addons: Json; addons_total: number; line_total: number;
+  created_at: string;
 };
 
 type ProductRow = {
@@ -289,9 +302,7 @@ type ProductRow = {
   name: string; name_ar: string | null; name_so: string | null;
   description: string | null; description_ar: string | null; description_so: string | null;
   brand: string | null;
-  category:
-    | "perfume" | "oud" | "bakhoor" | "attar" | "body_mist" | "cosmetics" | "makeup"
-    | "body_care" | "hair_care" | "gift_sets" | "accessories" | null;
+  category: string | null;
   gender: "men" | "women" | "unisex" | "kids" | null;
   price: number | null; currency: string;
   image: string | null; gallery: Json;
@@ -505,6 +516,7 @@ export type Database = {
       booking_status_history: Table<BookingStatusHistoryRow>;
       table_reservations: Table<TableReservationRow>;
       product_orders: Table<ProductOrderRow>;
+      order_items: Table<OrderItemRow>;
       business_metric_events: Table<BusinessMetricEventRow>;
       business_subscriptions: Table<BusinessSubscriptionRow>;
       business_subscription_notes: Table<BusinessSubscriptionNoteRow>;

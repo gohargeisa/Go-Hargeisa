@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/config";
+import type { OrderableListingType } from "@/types";
 import { getActiveListing } from "@/lib/data/business";
 import { createClient } from "@/lib/supabase/server";
 import { mapProduct } from "@/lib/data/mappers";
@@ -13,15 +14,14 @@ export default async function ProductsPage({ params: { locale } }: { params: { l
   const currentPath = `/${locale}/business/products`;
   const listing = await getActiveListing(locale, currentPath);
   if (!listing) return null;
-  // Only categories with categories.supports_products get this page (today:
-  // Perfume & Cosmetics/city_services, Flowers & Gifts/services) — every
-  // other listing type/category has no products table concept.
+  // Only listings the universal cart/order system is enabled on get this
+  // page — every other listing type has no products table concept.
   // redirect() rather than notFound() — see the identical comment in
   // app/[locale]/city-services/[slug]/book/page.tsx for why.
   if (!listing.supportsProducts) redirect(`/${locale}/business`);
-  // supportsProducts is only ever true for city_service/service listings —
+  // supportsProducts is only ever true for OrderableListingType listings —
   // see lib/data/business.ts — so this narrowing is safe.
-  const listingType = listing.listingType as "city_service" | "service";
+  const listingType = listing.listingType as OrderableListingType;
 
   const t = await getTranslations({ locale, namespace: "products" });
   const supabase = await createClient();

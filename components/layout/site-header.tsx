@@ -15,6 +15,7 @@ import { useHeaderUser } from "./use-header-user";
 import type { HeaderUser } from "@/lib/supabase/header-user";
 import { SignOutButton } from "@/components/shared/sign-out-button";
 import { NotificationBell } from "@/components/shared/notification-bell";
+import { CartButton } from "@/components/shared/cart-button";
 import { GlobalSearch } from "@/components/shared/global-search";
 import { MegaMenuGrid } from "@/components/layout/nav-mega-menu";
 import { categoryHref, categoryDisplayName } from "@/lib/utils/category-href";
@@ -238,6 +239,8 @@ export function SiteHeader({
 
           <GlobalSearch locale={locale} scrolled={scrolled} />
 
+          <CartButton scrolled={scrolled} />
+
           {user && (
             <NotificationBell locale={locale} scrolled={scrolled} isOwner={user.isOwner} isBusinessOwner={user.isBusinessOwner} />
           )}
@@ -260,6 +263,7 @@ export function SiteHeader({
 
         <div className="ms-auto flex shrink-0 items-center gap-1.5 sm:gap-2 lg:hidden">
           <GlobalSearch locale={locale} scrolled={scrolled} />
+          <CartButton scrolled={scrolled} />
           {user && (
             <NotificationBell locale={locale} scrolled={scrolled} isOwner={user.isOwner} isBusinessOwner={user.isBusinessOwner} />
           )}

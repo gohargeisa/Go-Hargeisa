@@ -274,18 +274,25 @@ function ProductForm({
           <input value={draft.brand ?? ""} onChange={(e) => update("brand", e.target.value)} className={inputClass} />
         </Field>
         <Field label={t("categoryLabel")}>
-          <select
+          {/* Free text (see 20260823000002_universal_cart_orders.sql — the
+              category CHECK constraint was dropped) with a datalist of known
+              categories for quick-pick — any business can type its own
+              vocabulary (e.g. a café's "Hot Coffee"/"Brunch & Bites") instead
+              of being limited to the Perfume/Flower list below. */}
+          <input
+            list="product-category-options"
             value={draft.category ?? ""}
             onChange={(e) => update("category", (e.target.value || undefined) as ProductCategory | undefined)}
+            placeholder={t("selectCategory")}
             className={inputClass}
-          >
-            <option value="">{t("selectCategory")}</option>
+          />
+          <datalist id="product-category-options">
             {PRODUCT_CATEGORY_ORDER.map((c) => (
               <option key={c} value={c}>
                 {PRODUCT_CATEGORY_LABELS[c][locale as "en" | "ar" | "so"] ?? PRODUCT_CATEGORY_LABELS[c].en}
               </option>
             ))}
-          </select>
+          </datalist>
         </Field>
       </div>
 

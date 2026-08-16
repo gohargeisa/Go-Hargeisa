@@ -801,7 +801,7 @@ const hotelsRaw: Omit<Hotel, "isPartner">[] = [
 ];
 export const hotels: Hotel[] = hotelsRaw.map((h) => ({ ...h, isPartner: false }));
 
-const restaurantsRaw: Omit<Restaurant, "isPartner" | "onlineOrderingEnabled" | "phoneOrderingEnabled">[] = [
+const restaurantsRaw: Omit<Restaurant, "isPartner" | "onlineOrderingEnabled" | "phoneOrderingEnabled" | "catalogOrderingEnabled" | "productsDeliveryEnabled">[] = [
   {
     id: "r1",
     slug: "sultan-restaurant",
@@ -1668,6 +1668,8 @@ export const restaurants: Restaurant[] = restaurantsRaw.map((r) => ({
   isPartner: false,
   onlineOrderingEnabled: false,
   phoneOrderingEnabled: false,
+  catalogOrderingEnabled: false,
+  productsDeliveryEnabled: false,
 }));
 
 // Real, independently-operating cafes in Hargeisa, researched from public

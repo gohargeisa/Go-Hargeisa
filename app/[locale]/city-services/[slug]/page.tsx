@@ -45,7 +45,6 @@ import { safeJsonLd } from "@/lib/utils/json-ld";
 import { CityServiceTypedFieldsDisplay } from "@/components/shared/city-service-typed-fields-display";
 import { getPrimaryActionGroup } from "@/lib/utils/business-primary-action";
 import { getDocumentLabelGroup } from "@/lib/utils/business-document";
-import { ProductOrderButton } from "@/components/shared/product-order-button";
 import type { CityService } from "@/types";
 
 export const revalidate = 3600;
@@ -184,7 +183,7 @@ export default async function CityServiceDetailPage({
 
   // Category-aware primary action, mutually exclusive with the doctor/staff
   // appointment button above it — see lib/utils/business-primary-action.ts.
-  // "product_order" gets a real order-request flow (ProductOrderButton, see
+  // "product_order" scrolls to the universal cart/Products section (see
   // product_orders table) once the listing actually has products; otherwise
   // (and for every other non-appointment category) it falls back to the same
   // real contact channels already computed above, just wrapped in a
@@ -266,18 +265,12 @@ export default async function CityServiceDetailPage({
               </PrimaryButton>
             )}
             {showOrderPrimary && (
-              <ProductOrderButton
-                listingType="city_service"
-                listingId={service.id}
-                businessName={service.name}
-                products={products}
-                locale={locale}
-                label={t("orderNow")}
-                className="group inline-flex h-9 items-center justify-center gap-2 rounded-full bg-primary-700 px-4 text-sm font-semibold text-white shadow-soft transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-primary-800 hover:shadow-card active:scale-95"
-                icon={<ShoppingBag size={15} aria-hidden="true" />}
-              />
+              <PrimaryButton href="#products" size="sm">
+                <ShoppingBag size={15} aria-hidden="true" />
+                {t("viewProducts")}
+              </PrimaryButton>
             )}
-            {showCatalogSecondary && (
+            {!showOrderPrimary && showCatalogSecondary && (
               <SecondaryButton href="#products" size="sm">
                 <ShoppingBag size={15} aria-hidden="true" />
                 {t("viewProducts")}
@@ -391,7 +384,12 @@ export default async function CityServiceDetailPage({
                 <h2 id="products-heading" className="mb-5 font-display text-2xl font-semibold">
                   {tp("title")}
                 </h2>
-                <ProductsSection products={products} storeName={service.name} locale={locale} />
+                <ProductsSection
+                  products={products}
+                  storeName={service.name}
+                  business={{ listingType: "city_service", listingId: service.id, businessName: service.name, deliveryEnabled: true, addons: [] }}
+                  locale={locale}
+                />
               </section>
             </Reveal>
           )}

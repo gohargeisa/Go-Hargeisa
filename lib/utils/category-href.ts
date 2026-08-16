@@ -26,7 +26,14 @@ export function categoryHref(locale: string, category: Category): string {
     case "events":
       return `/${locale}/events`;
     case "city_services":
-      return category.isPinned ? `/${locale}/city-services` : `/${locale}/city-services?category=${category.slug}`;
+      // Only the single umbrella "City Services" row (slug === "city-services")
+      // itself should resolve to the unfiltered page. Any other pinned
+      // city_services row (e.g. Perfumes, promoted to its own top-level nav
+      // entry via is_pinned=true) is still a real sub-category and must link
+      // to its own filtered view, exactly like a non-pinned one does.
+      return category.isPinned && category.slug === "city-services"
+        ? `/${locale}/city-services`
+        : `/${locale}/city-services?category=${category.slug}`;
     case "services":
       return `/${locale}/services/${category.slug}`;
   }

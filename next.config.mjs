@@ -37,6 +37,14 @@ const nextConfig = {
       "https://*.supabase.co",
       "https://placehold.co",
     ];
+    // Uploaded videos (components/shared/video-gallery.tsx) are served from
+    // Supabase Storage, a cross-origin host — with no media-src directive,
+    // CSP falls back to default-src 'self' and silently blocks every
+    // uploaded video's playback. YouTube embeds go through the nocookie
+    // iframe host, which frame-src must allow explicitly (frame-src 'none'
+    // blocked those too, sitewide, since the Media Manager shipped).
+    const mediaSrc = ["'self'", "https://*.supabase.co"];
+    const frameSrc = ["'self'", "https://www.youtube-nocookie.com"];
     // Dev-mode-only relaxation: Next.js's Fast Refresh / webpack HMR runtime
     // (next/dist/compiled/@next/react-refresh-utils) calls eval() to wrap
     // modules with source maps — with no 'unsafe-eval', that throws on
@@ -62,9 +70,10 @@ const nextConfig = {
       scriptSrc,
       `style-src 'self' 'unsafe-inline'`,
       `img-src ${imgSrc.join(" ")}`,
+      `media-src ${mediaSrc.join(" ")}`,
       `font-src 'self' data:`,
       `connect-src ${connectSrc.join(" ")}`,
-      `frame-src 'none'`,
+      `frame-src ${frameSrc.join(" ")}`,
       `object-src 'none'`,
       `base-uri 'self'`,
       `form-action 'self'`,
