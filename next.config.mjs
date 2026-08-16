@@ -16,6 +16,19 @@ const nextConfig = {
       { protocol: "https", hostname: "**.supabase.co" },
       { protocol: "https", hostname: "placehold.co" },
     ],
+    // Every /_next/image request (every product/listing photo — all remote,
+    // hosted on Supabase Storage) started failing in production with 402
+    // "OPTIMIZED_IMAGE_REQUEST_PAYMENT_REQUIRED" — Vercel's Image
+    // Optimization API billing/quota rejecting the request outright, not a
+    // bug in this app's own code, CSP, or remotePatterns (all confirmed
+    // correct independently: the same URLs return 200 when fetched
+    // directly). `unoptimized: true` makes next/image render a plain <img
+    // src="{original-url}"> instead of proxying through /_next/image, so
+    // every image loads straight from Supabase Storage's own CDN — no
+    // dependency on Vercel's paid optimization pipeline at all. Trade-off:
+    // no automatic AVIF/WebP re-encoding or responsive resizing; acceptable
+    // here since Storage already serves reasonably-sized uploaded photos.
+    unoptimized: true,
   },
   experimental: {
     optimizePackageImports: ["lucide-react"],
