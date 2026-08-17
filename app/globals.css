@@ -128,3 +128,104 @@ body {
     display: none !important;
   }
 }
+
+/* ---------------------------------------------------------------------
+   Partner Theme System (opt-in, scoped, additive-only)
+   ---------------------------------------------------------------------
+   Lets a specific partner's detail page (currently only Lavender
+   Flowers & Cakes, /cafes/lavender) render every shared "primary" token
+   — buttons, active tabs, borders, icons, badges — in that partner's own
+   brand colors instead of the site's amber, WITHOUT editing any of the
+   shared component files those tokens live in (hotel-header-top,
+   hotel-action-bar, buttons.tsx, product-card, reviews-section, etc. —
+   many of them shared/locked across Hotels/Restaurants/Cafes).
+
+   How it works: components/shared/partner/partner-theme-scope.tsx wraps
+   a themed page's whole render tree in a `[data-partner-theme]` div and
+   sets the `--pt-*` custom properties below from lib/config/partner-
+   themes.ts. Every rule here targets `[data-partner-theme] <utility
+   class>` and reads its color from those custom properties — the rules
+   themselves are brand-color-agnostic, so adding a second partner theme
+   later is just a new entry in partner-themes.ts, not new CSS. Every
+   selector is scoped under that attribute, so this block has *zero*
+   effect on any page that doesn't render the wrapper — every other
+   listing keeps the exact default amber palette.
+
+   These rules live outside any `@layer` block, so — regardless of
+   selector specificity — they already win the cascade against Tailwind's
+   utilities, which `@tailwind utilities` emits inside `@layer utilities`
+   (unlayered CSS always beats layered CSS). No `!important` needed.
+   ------------------------------------------------------------------- */
+
+/* Solid backgrounds */
+[data-partner-theme] .bg-primary { background-color: var(--pt-primary); }
+[data-partner-theme] .bg-primary-700 { background-color: var(--pt-primary-strong); }
+[data-partner-theme] .bg-primary-800 { background-color: var(--pt-primary-deep); }
+
+/* Solid text */
+[data-partner-theme] .text-primary { color: var(--pt-primary); }
+[data-partner-theme] .text-primary-600 { color: var(--pt-primary-mid); }
+[data-partner-theme] .text-primary-700 { color: var(--pt-primary-strong); }
+[data-partner-theme] .text-primary-800 { color: var(--pt-primary-deep); }
+.dark [data-partner-theme] .dark\:text-primary-300 { color: var(--pt-primary-soft); }
+[data-partner-theme] .text-primary\/50 { color: rgb(var(--pt-primary-rgb) / 0.5); }
+
+/* Solid borders / outline / ring + interactive variants */
+[data-partner-theme] .border-primary { border-color: var(--pt-primary); }
+[data-partner-theme] .outline-primary { outline-color: var(--pt-primary); }
+[data-partner-theme] .ring-primary { --tw-ring-color: var(--pt-primary); }
+[data-partner-theme] .focus\:ring-primary:focus { --tw-ring-color: var(--pt-primary); }
+[data-partner-theme] .focus\:border-primary:focus { border-color: var(--pt-primary); }
+[data-partner-theme] .focus-visible\:outline-primary:focus-visible { outline-color: var(--pt-primary); }
+[data-partner-theme] .hover\:border-primary:hover { border-color: var(--pt-primary); }
+[data-partner-theme] .hover\:text-primary:hover { color: var(--pt-primary); }
+[data-partner-theme] .group:hover .group-hover\:text-primary { color: var(--pt-primary); }
+
+/* Opacity borders */
+[data-partner-theme] .border-primary\/15 { border-color: rgb(var(--pt-primary-rgb) / 0.15); }
+[data-partner-theme] .border-primary\/20 { border-color: rgb(var(--pt-primary-rgb) / 0.2); }
+[data-partner-theme] .border-primary\/25 { border-color: rgb(var(--pt-primary-rgb) / 0.25); }
+[data-partner-theme] .border-primary\/30 { border-color: rgb(var(--pt-primary-rgb) / 0.3); }
+[data-partner-theme] .border-primary\/40 { border-color: rgb(var(--pt-primary-rgb) / 0.4); }
+[data-partner-theme] .hover\:border-primary\/30:hover { border-color: rgb(var(--pt-primary-rgb) / 0.3); }
+[data-partner-theme] .hover\:border-primary\/40:hover { border-color: rgb(var(--pt-primary-rgb) / 0.4); }
+[data-partner-theme] .hover\:border-primary\/25:hover { border-color: rgb(var(--pt-primary-rgb) / 0.25); }
+.dark [data-partner-theme] .dark\:border-primary\/20 { border-color: rgb(var(--pt-primary-rgb) / 0.2); }
+
+/* Opacity backgrounds */
+[data-partner-theme] .bg-primary\/5 { background-color: rgb(var(--pt-primary-rgb) / 0.05); }
+[data-partner-theme] .bg-primary\/8 { background-color: rgb(var(--pt-primary-rgb) / 0.08); }
+[data-partner-theme] .bg-primary\/10 { background-color: rgb(var(--pt-primary-rgb) / 0.1); }
+[data-partner-theme] .bg-primary\/15 { background-color: rgb(var(--pt-primary-rgb) / 0.15); }
+[data-partner-theme] .hover\:bg-primary\/8:hover { background-color: rgb(var(--pt-primary-rgb) / 0.08); }
+.dark [data-partner-theme] .dark\:bg-primary\/15 { background-color: rgb(var(--pt-primary-rgb) / 0.15); }
+[data-partner-theme] .bg-primary\/\[0\.03\] { background-color: rgb(var(--pt-primary-rgb) / 0.03); }
+.dark [data-partner-theme] .dark\:bg-primary\/\[0\.06\] { background-color: rgb(var(--pt-primary-rgb) / 0.06); }
+
+/* Gradients (Tailwind's `from-*`/`to-*` set --tw-gradient-from/to, which
+   --tw-gradient-stops references live — overriding just those two custom
+   properties is enough to retint the gradient, no need to touch stops). */
+[data-partner-theme] .from-primary\/15 {
+  --tw-gradient-from: rgb(var(--pt-primary-rgb) / 0.15) var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(var(--pt-primary-rgb) / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+[data-partner-theme] .from-primary\/20 {
+  --tw-gradient-from: rgb(var(--pt-primary-rgb) / 0.2) var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(var(--pt-primary-rgb) / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+[data-partner-theme] .to-primary\/5 { --tw-gradient-to: rgb(var(--pt-primary-rgb) / 0.05) var(--tw-gradient-to-position); }
+[data-partner-theme] .from-primary-600 {
+  --tw-gradient-from: var(--pt-primary-mid) var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(var(--pt-primary-mid-rgb) / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+[data-partner-theme] .to-primary-800 { --tw-gradient-to: var(--pt-primary-deep) var(--tw-gradient-to-position); }
+
+/* Product card's "featured" star badge (components/shared/product-card.tsx)
+   hardcodes amber rather than using the `primary` token. Retinted to the
+   partner's accent color via its distinctive h-7/w-7 size, which the
+   unrelated open-status-badge "opens soon" dot (h-1.5/w-1.5) never shares —
+   that status color stays untouched everywhere, including on this page. */
+[data-partner-theme] .h-7.w-7.bg-amber-500 { background-color: var(--pt-accent); }

@@ -42,6 +42,9 @@ import { NearbyListings } from "@/components/shared/nearby-listings";
 import { resolveMapsUrl, resolveDirectionsUrl } from "@/lib/utils/google-maps";
 import { Reveal } from "@/components/home/reveal";
 import { PrimaryButton, SecondaryButton } from "@/components/shared/buttons";
+import { getPartnerTheme } from "@/lib/config/partner-themes";
+import { PartnerThemeScope } from "@/components/shared/partner/partner-theme-scope";
+import { PartnerHeroBanner } from "@/components/shared/partner/partner-hero-banner";
 
 // Public content changes infrequently; revalidate hourly instead of
 // rendering on every request (this page no longer reads cookies, so
@@ -132,6 +135,11 @@ export default async function CafeDetailPage({
         ]
       : null;
   const whatsappFallback = (siteSettings as { whatsapp_number?: string } | null)?.whatsapp_number ?? undefined;
+  // Everything partner-specific (hero image, fit mode, brand colors) lives
+  // in lib/config/partner-themes.ts — this page stays generic for any
+  // current or future themed partner, and renders exactly as before for any
+  // listing with no theme configured (getPartnerTheme returns null).
+  const partnerTheme = getPartnerTheme("cafe", cafe.slug);
 
   const googleMapsHref = resolveMapsUrl(cafe.location, cafe.googleMapsUrl);
   const directionsHref = resolveDirectionsUrl(cafe.location);
@@ -178,7 +186,7 @@ export default async function CafeDetailPage({
   };
 
   return (
-    <>
+    <PartnerThemeScope theme={partnerTheme}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <ViewTracker listingType="cafe" listingId={cafe.id} />
 
@@ -188,6 +196,8 @@ export default async function CafeDetailPage({
           { label: cafe.name, href: `/${locale}/cafes/${cafe.slug}` },
         ]}
       />
+
+      {partnerTheme && <PartnerHeroBanner theme={partnerTheme} alt={cafe.name} locale={locale} />}
 
       <HotelHeaderTop
         logo={cafe.logo}
@@ -571,6 +581,6 @@ export default async function CafeDetailPage({
         whatsappFallback={whatsappFallback}
         locale={locale}
       />
-    </>
+    </PartnerThemeScope>
   );
 }
