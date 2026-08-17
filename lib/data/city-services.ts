@@ -48,11 +48,19 @@ export async function getCityServicesGroupedByCategory(locale?: string): Promise
     return [];
   }
 
-  // Excludes the single is_pinned "City Services" nav-entry row — only the
-  // (is_pinned=false) sub-categories group listings. getCategories() already
-  // filters to is_active=true, so a deactivated category's listings are
-  // excluded even though the rows themselves are still published.
-  const categoryById = new Map(allCategories.filter((c) => !c.isPinned).map((c) => [c.id, c]));
+  // Excludes only the single umbrella "City Services" nav-entry row
+  // (slug === "city-services") — every other category groups its listings
+  // here regardless of is_pinned, since a sub-category can also be pinned to
+  // its own top-level nav entry (e.g. Perfumes — see the matching comment in
+  // categoryHref()) while still being a real, filterable sub-category whose
+  // listings must appear here. Excluding all is_pinned rows previously
+  // dropped Perfumes' listings from these groups entirely, even though the
+  // rows themselves were published and correctly categorized — this line
+  // must stay in sync with categoryHref()'s own umbrella-row check.
+  // getCategories() already filters to is_active=true, so a deactivated
+  // category's listings are excluded even though the rows themselves are
+  // still published.
+  const categoryById = new Map(allCategories.filter((c) => !(c.isPinned && c.slug === "city-services")).map((c) => [c.id, c]));
 
   const byCategory = new Map<string, { category: Category; items: CityService[] }>();
   for (const row of data ?? []) {

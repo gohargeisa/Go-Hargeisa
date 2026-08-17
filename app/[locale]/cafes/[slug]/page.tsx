@@ -99,11 +99,23 @@ export default async function CafeDetailPage({
     getNearbyListings({ lat: cafe.location.lat, lng: cafe.location.lng, excludeType: "cafe", excludeId: cafe.id }),
     cafeOrderingEnabled ? getProductsForListing(cafe.id, "cafe") : Promise.resolve([]),
   ]);
+  // Lavender-only, temporary: most of its 106 café-menu products don't have
+  // a genuine individual photo yet (only a positional/generic menu-page
+  // scan would be available, which the product-image cleanup task
+  // explicitly ruled out using) — showing those as bare gray placeholder
+  // cards next to the ones that do have real photos reads as broken/
+  // unprofessional. Hides them from this customer-facing page only; the
+  // underlying rows are untouched (still is_available/is_hidden=false in
+  // the DB) and reappear automatically the moment a real image is attached
+  // to products.image. Every other cafe/listing type is unaffected — this
+  // never runs for them, since `cafe.slug === "lavender"` guards it.
+  const visibleCafeProducts =
+    cafe.slug === "lavender" ? cafeProducts.filter((p) => typeof p.image === "string" && p.image.trim().length > 0) : cafeProducts;
   // One shared catalog — menu items and flowers alike — through the
   // universal cart. ProductsSection's own category filter (derived from
   // whatever categories are present) is what lets a shopper narrow down to
   // "Flowers & Bouquets" specifically; no separate flowers-only section.
-  const showProducts = Boolean(cafeOrderingEnabled) && cafeProducts.length > 0;
+  const showProducts = Boolean(cafeOrderingEnabled) && visibleCafeProducts.length > 0;
   // Lavender-only: its 106 café-menu products carry no real category (the
   // live products.category CHECK constraint doesn't allow café vocabulary —
   // see lib/config/lavender-menu-sections.ts), so they're grouped into
@@ -114,9 +126,9 @@ export default async function CafeDetailPage({
       ? [
           {
             label: LAVENDER_FLOWER_SECTION.label,
-            items: cafeProducts.filter((p) => p.sortOrder >= LAVENDER_FLOWER_SORT_ORDER_BASE && p.sortOrder < LAVENDER_MENU_SORT_ORDER_BASE),
+            items: visibleCafeProducts.filter((p) => p.sortOrder >= LAVENDER_FLOWER_SORT_ORDER_BASE && p.sortOrder < LAVENDER_MENU_SORT_ORDER_BASE),
           },
-          ...groupProductsIntoSections(cafeProducts, LAVENDER_MENU_SORT_ORDER_BASE, LAVENDER_MENU_SECTIONS),
+          ...groupProductsIntoSections(visibleCafeProducts, LAVENDER_MENU_SORT_ORDER_BASE, LAVENDER_MENU_SECTIONS),
         ]
       : null;
   const whatsappFallback = (siteSettings as { whatsapp_number?: string } | null)?.whatsapp_number ?? undefined;
@@ -358,7 +370,7 @@ export default async function CafeDetailPage({
                   />
                 ) : (
                   <ProductsSection
-                    products={cafeProducts}
+                    products={visibleCafeProducts}
                     storeName={cafe.name}
                     business={{
                       listingType: "cafe",
