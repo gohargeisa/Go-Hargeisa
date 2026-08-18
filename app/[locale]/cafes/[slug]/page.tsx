@@ -22,7 +22,7 @@ import { RestaurantMenuSection } from "@/components/shared/restaurant-menu-secti
 import { getProductsForListing } from "@/lib/data/products";
 import { ProductsSection } from "@/components/shared/products-section";
 import { GroupedProductsSection } from "@/components/shared/grouped-products-section";
-import { LAVENDER_FLOWER_SECTION, LAVENDER_FLOWER_SORT_ORDER_BASE, LAVENDER_MENU_SECTIONS, LAVENDER_MENU_SORT_ORDER_BASE, groupProductsIntoSections } from "@/lib/config/lavender-menu-sections";
+import { LAVENDER_MENU_SECTIONS, LAVENDER_MENU_SORT_ORDER_BASE, groupProductsIntoSections } from "@/lib/config/lavender-menu-sections";
 import { CAFE_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import { AmenitiesSection, hasAmenities } from "@/components/shared/amenities-section";
 import { SocialLinks } from "@/components/shared/social-links";
@@ -124,16 +124,12 @@ export default async function CafeDetailPage({
   // see lib/config/lavender-menu-sections.ts), so they're grouped into
   // labeled sections positionally instead of via ProductsSection's normal
   // category-pill filtering. Every other cafe keeps the generic flat view.
+  // Flower products no longer live on this listing at all (moved to the
+  // separate Lavender Flowers listing — see /flowers/[slug]) — the "start
+  // of café sections" cutoff (LAVENDER_MENU_SORT_ORDER_BASE) is kept only
+  // because it's still what separates one café section from the next.
   const lavenderMenuGroups =
-    cafe.slug === "lavender"
-      ? [
-          {
-            label: LAVENDER_FLOWER_SECTION.label,
-            items: visibleCafeProducts.filter((p) => p.sortOrder >= LAVENDER_FLOWER_SORT_ORDER_BASE && p.sortOrder < LAVENDER_MENU_SORT_ORDER_BASE),
-          },
-          ...groupProductsIntoSections(visibleCafeProducts, LAVENDER_MENU_SORT_ORDER_BASE, LAVENDER_MENU_SECTIONS),
-        ]
-      : null;
+    cafe.slug === "lavender" ? groupProductsIntoSections(visibleCafeProducts, LAVENDER_MENU_SORT_ORDER_BASE, LAVENDER_MENU_SECTIONS) : null;
   const whatsappFallback = (siteSettings as { whatsapp_number?: string } | null)?.whatsapp_number ?? undefined;
   // Everything partner-specific (hero image, fit mode, brand colors) lives
   // in lib/config/partner-themes.ts — this page stays generic for any
@@ -222,6 +218,14 @@ export default async function CafeDetailPage({
         primaryLabel={t("reserveTable")}
         reservable={cafe.reservable}
       />
+
+      {cafe.slug === "lavender" && (
+        <div className="container-px mx-auto mt-3 flex justify-center">
+          <SecondaryButton href={`/${locale}/flowers/lavender`} size="sm">
+            {td("visitLavenderFlowers")}
+          </SecondaryButton>
+        </div>
+      )}
 
       <SocialLinks
         instagram={cafe.socialInstagram}
