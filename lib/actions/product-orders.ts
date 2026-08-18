@@ -27,6 +27,10 @@ export interface CartOrderInput {
   messageNote?: string;
   notes?: string;
   locale?: string;
+  /** Idempotency key for this checkout attempt — see CartContext.
+   * getOrderAttemptId(). Optional and additive: omitted entirely, the RPC
+   * behaves exactly as it does today (no dedup applied to that call). */
+  idempotencyKey?: string;
 }
 
 export type CartOrderResult =
@@ -76,6 +80,7 @@ export async function submitCartOrder(input: CartOrderInput): Promise<CartOrderR
       p_message_note: input.messageNote?.trim() || null,
       p_notes: input.notes?.trim() || null,
       p_items: input.items.map((i) => ({ product_id: i.productId, quantity: i.quantity, addon_ids: i.addonIds ?? [] })),
+      p_idempotency_key: input.idempotencyKey ?? null,
     });
 
     if (error) return { ok: false, error: error.message };

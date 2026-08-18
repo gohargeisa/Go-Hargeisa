@@ -58,10 +58,13 @@ export function CheckoutForm({ locale }: { locale: string }) {
       return;
     }
 
+    const idempotencyKey = cart.getOrderAttemptId();
+
     startTransition(async () => {
       const result = await submitCartOrder({
         listingType: cart.cart.listingType!,
         listingId: cart.cart.listingId!,
+        idempotencyKey,
         items: cart.cart.items.map((i) => ({
           productId: i.productId,
           quantity: i.quantity,

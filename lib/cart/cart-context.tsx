@@ -13,6 +13,7 @@ const EMPTY_CART: CartState = {
   deliveryEnabled: false,
   addons: [],
   items: [],
+  orderAttemptId: null,
 };
 
 function loadCart(): CartState {
@@ -71,6 +72,13 @@ interface CartContextValue {
   removeItem: (key: string) => void;
   setQuantity: (key: string, quantity: number) => void;
   clearCart: () => void;
+  /** Returns the current checkout attempt's idempotency key, generating and
+   * persisting one (into cart state, and so into localStorage) the first
+   * time it's called for a given cart. Calling it again before the cart is
+   * cleared always returns the same value — a submit retry (double-click,
+   * network retry, resubmission after a refresh) reuses it; clearCart()
+   * resets it to null, so the next order starts with a fresh one. */
+  getOrderAttemptId: () => string;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -128,6 +136,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
           deliveryEnabled: business.deliveryEnabled,
           addons: business.addons,
           items,
+          // Preserved, not reset — adding another line to a cart already
+          // mid-checkout must not silently issue a new idempotency key out
+          // from under an in-flight submit.
+          orderAttemptId: prev.orderAttemptId,
         };
       });
       return result;
@@ -144,6 +156,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
         businessName: business.businessName,
         deliveryEnabled: business.deliveryEnabled,
         addons: business.addons,
+        // Explicitly fresh — this replaces a whole different cart (the
+        // conflict-confirmation path), so any pending attempt id for the
+        // abandoned cart must not carry over.
+        orderAttemptId: null,
         items: [line],
       });
     },
@@ -169,6 +185,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const clearCart = useCallback(() => setCart(EMPTY_CART), []);
+
+  const getOrderAttemptId = useCallback((): string => {
+    if (cart.orderAttemptId) return cart.orderAttemptId;
+    const id = crypto.randomUUID();
+    setCart((prev) => (prev.orderAttemptId ? prev : { ...prev, orderAttemptId: id }));
+    return id;
+  }, [cart.orderAttemptId]);
 
   const openCart = useCallback(() => {
     setView("cart");
@@ -200,8 +223,25 @@ export function CartProvider({ children }: { children: ReactNode }) {
       removeItem,
       setQuantity,
       clearCart,
+      getOrderAttemptId,
     }),
-    [cart, isOpen, view, lastOrderReference, openCart, closeCart, goToCheckout, backToCart, showConfirmation, addItem, clearAndAdd, removeItem, setQuantity, clearCart]
+    [
+      cart,
+      isOpen,
+      view,
+      lastOrderReference,
+      openCart,
+      closeCart,
+      goToCheckout,
+      backToCart,
+      showConfirmation,
+      addItem,
+      clearAndAdd,
+      removeItem,
+      setQuantity,
+      clearCart,
+      getOrderAttemptId,
+    ]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

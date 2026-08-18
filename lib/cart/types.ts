@@ -24,6 +24,12 @@ export interface CartState {
   deliveryEnabled: boolean;
   addons: ProductAddon[];
   items: CartItem[];
+  /** Idempotency key for the current checkout attempt — generated once
+   * (see CartContext.getOrderAttemptId) and cleared only when the cart is,
+   * so a retry (double-click, network retry, refresh mid-flight) of the
+   * same attempt always carries the same key, while a genuinely new order
+   * always starts with a fresh one. Not user data — never rendered. */
+  orderAttemptId: string | null;
 }
 
 export function cartItemKey(productId: string, addonIds: string[]): string {
