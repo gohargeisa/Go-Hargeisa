@@ -29,6 +29,18 @@ export interface PartnerTheme {
   /** Master on/off switch — flip false to instantly revert a partner to the
    * default Go Hargeisa design without deleting its tuned config. */
   enabled: boolean;
+  /** Display name used only by partner-scoped chrome that isn't already
+   * fed by the listing row itself (the Partnership Footer's alt text /
+   * "Go Hargeisa × {name}" — see partner-partnership-footer.tsx). The Hero
+   * name/H1 etc. still come from the real listing row (cafe.name and
+   * friends), not this — kept deliberately narrow to avoid the
+   * "duplicated, can drift out of sync" risk noted below. */
+  partnerName: string;
+  /** Official partner logo — same rules as any other brand asset in this
+   * project: never redrawn/recolored/AI-generated, used exactly as
+   * supplied. A static `/public` path (once a real file exists) or an
+   * absolute URL both work. Used only by the Partnership Footer. */
+  partnerLogo: string;
 
   /** Deep brand color — replaces the site's amber "primary" token wherever
    * it appears inside the themed scope (buttons, active tabs, icons, borders). */
@@ -83,9 +95,6 @@ export interface PartnerTheme {
   /**
    * Deliberately NOT part of this config yet (kept out to avoid dead,
    * unused fields until a real partner needs them):
-   * - name / logo: already sourced reliably from the listing's own DB row
-   *   (cafe.name / cafe.logo) — duplicating them here would risk drifting
-   *   out of sync whenever a business updates its listing.
    * - secondary / background / text color: every partner so far keeps
    *   backgrounds neutral (Go Hargeisa's existing sand/ink tokens) per the
    *   "don't make the whole page purple" brief — primary/primaryMid already
@@ -123,6 +132,11 @@ export interface PartnerTheme {
 const LAVENDER_THEME: PartnerTheme = {
   slug: "lavender",
   enabled: true,
+  partnerName: "Lavender Flowers & Cakes",
+  // The real, already-live logo (Supabase Storage) — same file the site's
+  // own HotelHeaderTop already renders for Lavender's page; reused here
+  // rather than duplicated into /public.
+  partnerLogo: "https://pvzuibidhfuizmaleznx.supabase.co/storage/v1/object/public/listing-images/cafes/logos/313ce245-44a8-4d38-9a00-f098834b4d91.jpeg",
   primary: "#583C89",
   primaryRgb: "88 60 137",
   primaryMid: "#71599B",
@@ -140,9 +154,65 @@ const LAVENDER_THEME: PartnerTheme = {
   heroImageHeight: 1024,
 };
 
+/**
+ * Lavender Flowers — the standalone flower-shop listing split out of the
+ * café (see 20260828000001_lavender_flowers_cafe_split.sql). Same real
+ * brand — same colors, same real logo file as LAVENDER_THEME above — but a
+ * DISTINCT theme object, not a shared reference, for two reasons:
+ *
+ *  1. partnerName must read "Lavender Flowers" here, never "& Cakes" — the
+ *     Flowers page's whole reason to exist is presenting the flower side of
+ *     the business on its own terms. (Note: the underlying city_services
+ *     row's own `name` column has since been edited back to "Lavender
+ *     Flowers & Cakes" through the live admin dashboard, outside of any
+ *     migration — this page deliberately does NOT read that column for its
+ *     displayed identity, see FLOWERS_DISPLAY_NAME in the page file, so it
+ *     stays correct regardless of what the raw listing row says.)
+ *  2. heroImage (revision 2, 2026-08-19): the business owner supplied a new,
+ *     dedicated hero composition for this page — bouquet + cake + baked-in
+ *     "Lavender Flowers & Cakes" wordmark/tagline — copied verbatim from
+ *     their Desktop into public/images/partners/lavender/hero-flowers.png
+ *     (own file, NOT the café's public/images/partners/lavender/hero.png —
+ *     different composition/revision, kept separate on purpose). This
+ *     supersedes the earlier "cover"-mode product photo (a real image, just
+ *     an ordinary photo the owner found blurry/low-impact as a hero) and
+ *     deliberately reintroduces "& Cakes" branding onto this page — an
+ *     explicit choice by the business owner, not a reversion by mistake.
+ *     "contain" mode (same as LAVENDER_THEME) because this is a finished,
+ *     self-contained graphic with its own logo/tagline/copy already baked
+ *     in — never cropped, no overlay added on top of it.
+ */
+const LAVENDER_FLOWERS_THEME: PartnerTheme = {
+  slug: "lavender",
+  enabled: true,
+  partnerName: "Lavender Flowers",
+  partnerLogo: "https://pvzuibidhfuizmaleznx.supabase.co/storage/v1/object/public/listing-images/cafes/logos/313ce245-44a8-4d38-9a00-f098834b4d91.jpeg",
+  primary: "#583C89",
+  primaryRgb: "88 60 137",
+  primaryMid: "#71599B",
+  primaryMidRgb: "113 89 155",
+  primaryStrong: "#4B3374",
+  primaryDeep: "#3E2A60",
+  primarySoft: "#CDC5DC",
+  accent: "#C3986D",
+  accentRgb: "195 152 109",
+  accentStrong: "#927252",
+  accentSoft: "#E1CCB6",
+  heroImage: "/images/partners/lavender/hero-flowers.png",
+  heroImageFit: "contain",
+  heroImageWidth: 1536,
+  heroImageHeight: 1024,
+};
+
 const PARTNER_THEMES: Partial<Record<BusinessListingType, Record<string, PartnerTheme>>> = {
   cafe: {
     lavender: LAVENDER_THEME,
+  },
+  city_service: {
+    // Distinct object from the cafe entry above (see LAVENDER_FLOWERS_THEME's
+    // own header for why) — same real brand, same real logo/colors, correct
+    // "Lavender Flowers" identity and flower-only hero imagery.
+    lavender: LAVENDER_FLOWERS_THEME,
   },
 };
 

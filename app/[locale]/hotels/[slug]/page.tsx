@@ -309,7 +309,7 @@ export default async function HotelDetailPage({
                 <h2 id="video-gallery-heading" className="mb-5 font-display text-2xl font-semibold">
                   {td("videoGallery")}
                 </h2>
-                <VideoGallery videos={hotel.videos} watchOnLabel={(platform) => td("watchOn", { platform })} />
+                <VideoGallery videos={hotel.videos} />
               </section>
             </Reveal>
           )}

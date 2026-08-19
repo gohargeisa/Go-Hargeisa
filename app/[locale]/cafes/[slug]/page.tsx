@@ -45,6 +45,7 @@ import { PrimaryButton, SecondaryButton } from "@/components/shared/buttons";
 import { getPartnerTheme } from "@/lib/config/partner-themes";
 import { PartnerThemeScope } from "@/components/shared/partner/partner-theme-scope";
 import { PartnerHeroBanner } from "@/components/shared/partner/partner-hero-banner";
+import { PartnerPartnershipFooter } from "@/components/shared/partner/partner-partnership-footer";
 
 // Public content changes infrequently; revalidate hourly instead of
 // rendering on every request (this page no longer reads cookies, so
@@ -440,7 +441,7 @@ export default async function CafeDetailPage({
                 <h2 id="video-gallery-heading" className="mb-5 font-display text-2xl font-semibold">
                   {td("videoGallery")}
                 </h2>
-                <VideoGallery videos={cafe.videos} watchOnLabel={(platform) => td("watchOn", { platform })} />
+                <VideoGallery videos={cafe.videos} />
               </section>
             </Reveal>
           )}
@@ -534,6 +535,22 @@ export default async function CafeDetailPage({
         </aside>
       </div>
 
+      {cafe.slug === "lavender" && (
+        <Reveal>
+          <div className="container-px mx-auto pb-4">
+            <div className="flex flex-col items-center justify-between gap-4 rounded-xl3 border border-ink/8 bg-white p-6 text-center dark:border-white/10 dark:bg-white/[0.03] sm:flex-row sm:text-start sm:p-8">
+              <div>
+                <h3 className="font-display text-lg font-semibold">{td("lookingForLavenderFlowersTitle")}</h3>
+                <p className="mt-1 text-sm text-ink/65 dark:text-sand/65">{td("lookingForLavenderFlowersBody")}</p>
+              </div>
+              <PrimaryButton href={`/${locale}/flowers/lavender`} size="sm" className="shrink-0">
+                {td("visitLavenderFlowers")}
+              </PrimaryButton>
+            </div>
+          </div>
+        </Reveal>
+      )}
+
       {similarCafes.length > 0 && (
         <section className="border-t border-ink/8 bg-white py-14 dark:border-white/10 dark:bg-white/[0.03] sm:py-20">
           <div className="container-px mx-auto">
@@ -576,6 +593,8 @@ export default async function CafeDetailPage({
           </div>
         </section>
       )}
+
+      {partnerTheme && <PartnerPartnershipFooter theme={partnerTheme} locale={locale} />}
 
       <MobileBookingBar
         listingType="cafe"

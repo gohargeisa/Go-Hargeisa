@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { MapPin, Navigation, ExternalLink } from "lucide-react";
+import { MapPin, Navigation, ExternalLink, Flower2, Gift, Package, Truck, ShieldCheck, MessageCircle } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
 import { getCityServiceBySlug } from "@/lib/data/city-services";
+import { getCafeBySlug } from "@/lib/data/cafes";
 import { getProductsForListing } from "@/lib/data/products";
 import { ProductsSection } from "@/components/shared/products-section";
 import { getMyReviewForListing } from "@/lib/data/reviews";
@@ -26,10 +27,30 @@ import { resolveMapsUrl, resolveDirectionsUrl } from "@/lib/utils/google-maps";
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
 import { Reveal } from "@/components/home/reveal";
 import { safeJsonLd } from "@/lib/utils/json-ld";
+import { MobileBookingBar } from "@/components/shared/mobile-booking-bar";
+import { getPartnerTheme } from "@/lib/config/partner-themes";
+import { PartnerThemeScope } from "@/components/shared/partner/partner-theme-scope";
+import { PartnerHeroBanner } from "@/components/shared/partner/partner-hero-banner";
+import { PartnerPartnershipFooter } from "@/components/shared/partner/partner-partnership-footer";
+import { PartnerAcquisitionCta } from "@/components/shared/partner-acquisition-cta";
 
 // Same reasoning as every other public listing page in this codebase:
 // content changes infrequently, so ISR beats rendering on every request.
 export const revalidate = 3600;
+
+/**
+ * The page's own identity — deliberately NOT `service.name`. The underlying
+ * city_services row was created with name="Lavender Flowers" (the split
+ * migration) but has since been edited back to "Lavender Flowers & Cakes"
+ * through the live admin dashboard, outside of anything this codebase
+ * controls. This page's whole reason to exist is presenting the flower side
+ * of the business on its own terms — "Lavender Flowers", never "& Cakes" —
+ * so it uses this constant everywhere the business's display name appears
+ * (title, breadcrumb, header, JSON-LD, contact message templates), rather
+ * than trusting whatever the raw listing row currently says. No database
+ * write happens anywhere in this file — the row itself is untouched.
+ */
+const FLOWERS_DISPLAY_NAME = "Lavender Flowers";
 
 export async function generateMetadata({
   params: { locale, slug },
@@ -39,7 +60,7 @@ export async function generateMetadata({
   const service = await getCityServiceBySlug(slug, locale);
   if (!service) return {};
   return {
-    title: `${service.name} — Flower Shop in Hargeisa`,
+    title: `${FLOWERS_DISPLAY_NAME} — Premium Flower Shop in Hargeisa`,
     description: service.description ?? undefined,
     openGraph: service.image ? { images: [service.image] } : undefined,
     alternates: localeAlternates(locale, `/flowers/${service.slug}`),
@@ -66,33 +87,54 @@ export default async function FlowersDetailPage({
   if (!service) notFound();
 
   const t = await getTranslations("common");
-  const tNav = await getTranslations("nav");
   const td = await getTranslations("detail");
   const th = await getTranslations("hotelDetail");
   const tw = await getTranslations("weekdays");
   const tl = await getTranslations("listings");
   const tn = await getTranslations("nearby");
   const tp = await getTranslations("products");
+  const tpa = await getTranslations("partnerAcquisition");
 
-  const [myReview, isFavorited, nearbyPlaces, products] = await Promise.all([
+  const [myReview, isFavorited, nearbyPlaces, products, sisterCafe] = await Promise.all([
     getMyReviewForListing("city_service", service.id),
     isListingFavorited("city_service", service.id),
     getNearbyListings({ lat: service.coords.lat, lng: service.coords.lng, excludeType: "city_service", excludeId: service.id }),
     getProductsForListing(service.id),
+    // Lavender Flowers and Lavender Café are the same real brand, split
+    // into two listings — this listing's own logo/social columns are empty
+    // (never duplicated at split time, on purpose: one edit to the café's
+    // real profile shouldn't need a second edit here to stay in sync), so
+    // read-only fall back to the café's already-verified real values below.
+    // No database write happens anywhere in this file.
+    getCafeBySlug("lavender", locale),
   ]);
 
   const showProducts = products.length > 0;
   const hasStructuredHours = !!service.openingHoursStructured && service.openingHoursStructured.length > 0;
   const hasHoursInfo = hasStructuredHours || service.is24Hours || service.temporarilyClosed || service.permanentlyClosed;
-  const serviceWhatsappHref = service.whatsapp
-    ? toWhatsAppHref(service.whatsapp, `Hi, I'd like to know more about ${service.name}.`)
+  const servicePhone = service.phone ?? sisterCafe?.phone;
+  const serviceWhatsapp = service.whatsapp ?? sisterCafe?.whatsapp;
+  const serviceWhatsappHref = serviceWhatsapp
+    ? toWhatsAppHref(serviceWhatsapp, `Hi, I'd like to know more about ${FLOWERS_DISPLAY_NAME}.`)
     : undefined;
+  const serviceLogo = service.logoUrl ?? sisterCafe?.logo;
+  // Real product photography for the gallery/hero — every one of the 12
+  // verified flower products already has a real image (see the split's data
+  // verification), so this is a genuine multi-photo florist showcase, not
+  // one image stretched into an empty slider. service.image/service.gallery
+  // (both still empty on this listing) stay the first choice if either is
+  // ever populated for real; the product photos are the fallback, not a
+  // replacement.
+  const productImages = products.map((p) => p.image).filter((img): img is string => !!img);
+  const coverImage = service.image ?? productImages[0] ?? undefined;
+  const galleryImages = service.gallery.length > 0 ? service.gallery : productImages.slice(1).map((url) => ({ url }));
+  const partnerTheme = getPartnerTheme("city_service", "lavender");
 
   const navTabs: HotelNavTab[] = [
     { id: "overview", label: td("overview") },
     ...(showProducts ? [{ id: "shop", label: td("orderOnline") }] : []),
     ...(hasHoursInfo ? [{ id: "hours", label: td("openingHoursByDay") }] : []),
-    ...(service.gallery.length > 0 ? [{ id: "gallery", label: t("gallery") }] : []),
+    ...(galleryImages.length > 0 ? [{ id: "gallery", label: t("gallery") }] : []),
     { id: "location", label: td("location") },
     { id: "reviews", label: t("reviews") },
   ];
@@ -103,9 +145,9 @@ export default async function FlowersDetailPage({
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "FlowerShop",
-    name: service.name,
+    name: FLOWERS_DISPLAY_NAME,
     description: service.description ?? undefined,
-    image: service.image ?? undefined,
+    image: coverImage,
     telephone: service.phone ?? undefined,
     ...(service.reviewCount > 0
       ? { aggregateRating: { "@type": "AggregateRating", ratingValue: service.rating, reviewCount: service.reviewCount } }
@@ -113,19 +155,22 @@ export default async function FlowersDetailPage({
   };
 
   return (
-    <>
+    <PartnerThemeScope theme={partnerTheme}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
 
-      <Breadcrumbs
-        items={[
-          { label: tNav("flowers"), href: `/${locale}/flowers` },
-          { label: service.name, href: `/${locale}/flowers/${service.slug}` },
-        ]}
-      />
+      {/* Single crumb, not "Flowers > {name}" — there's no /flowers index
+         page (out of scope; this listing links to Lavender Café directly
+         instead, see the cross-link button below), so a leading "Flowers"
+         entry would just be a second dead link to the same broken route.
+         Breadcrumbs already renders a lone/last item as plain, non-clickable
+         text — exactly the "current page" treatment wanted here. */}
+      <Breadcrumbs items={[{ label: FLOWERS_DISPLAY_NAME, href: `/${locale}/flowers/${service.slug}` }]} />
+
+      {partnerTheme && <PartnerHeroBanner theme={partnerTheme} alt={FLOWERS_DISPLAY_NAME} locale={locale} />}
 
       <HotelHeaderTop
-        logo={service.logoUrl}
-        name={service.name}
+        logo={serviceLogo}
+        name={FLOWERS_DISPLAY_NAME}
         rating={service.rating}
         reviewCount={service.reviewCount}
         categoryLabel={td("flowersAndBouquets")}
@@ -139,8 +184,8 @@ export default async function FlowersDetailPage({
             {td("orderOnline")}
           </PrimaryButton>
         )}
-        {service.phone && (
-          <SecondaryButton href={`tel:${service.phone}`} size="sm">
+        {servicePhone && (
+          <SecondaryButton href={`tel:${servicePhone}`} size="sm">
             {th("call")}
           </SecondaryButton>
         )}
@@ -157,13 +202,13 @@ export default async function FlowersDetailPage({
       </div>
 
       <SocialLinks
-        instagram={service.socialInstagram}
-        facebook={service.socialFacebook}
-        tiktok={service.socialTiktok}
-        snapchat={service.socialSnapchat}
-        x={service.socialX}
-        youtube={service.socialYoutube}
-        telegram={service.socialTelegram}
+        instagram={service.socialInstagram ?? sisterCafe?.socialInstagram}
+        facebook={service.socialFacebook ?? sisterCafe?.socialFacebook}
+        tiktok={service.socialTiktok ?? sisterCafe?.socialTiktok}
+        snapchat={service.socialSnapchat ?? sisterCafe?.socialSnapchat}
+        x={service.socialX ?? sisterCafe?.socialX}
+        youtube={service.socialYoutube ?? sisterCafe?.socialYoutube}
+        telegram={service.socialTelegram ?? sisterCafe?.socialTelegram}
         labels={{
           instagram: td("followInstagram"),
           facebook: td("followFacebook"),
@@ -176,8 +221,32 @@ export default async function FlowersDetailPage({
         className="container-px mx-auto mt-3 justify-center"
       />
 
-      {service.image && (
-        <HotelGallerySlider cover={service.image} images={service.gallery} alt={service.name} productOriented />
+      {/* Trust strip — small, factual credibility signals, each gated on a
+         real condition already computed above (isPartner, WhatsApp
+         availability). Nothing here is invented; delivery is the same real
+         claim already carried by ProductsSection's deliveryEnabled + the
+         existing "offerDelivery" copy used in the offer grid below. */}
+      <div className="container-px mx-auto mt-5 flex flex-wrap items-center justify-center gap-2.5">
+        {service.isPartner && (
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/[0.06] px-3.5 py-1.5 text-xs font-semibold text-primary-800 dark:border-primary/30 dark:bg-primary/15 dark:text-primary-300">
+            <ShieldCheck size={13} className="shrink-0" aria-hidden="true" />
+            {tpa("badgeLabel")}
+          </span>
+        )}
+        {serviceWhatsappHref && (
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-ink/10 bg-white px-3.5 py-1.5 text-xs font-semibold text-ink/75 dark:border-white/10 dark:bg-white/[0.04] dark:text-sand/75">
+            <MessageCircle size={13} className="shrink-0 text-primary" aria-hidden="true" />
+            {td("trustDirectWhatsapp")}
+          </span>
+        )}
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-ink/10 bg-white px-3.5 py-1.5 text-xs font-semibold text-ink/75 dark:border-white/10 dark:bg-white/[0.04] dark:text-sand/75">
+          <Truck size={13} className="shrink-0 text-primary" aria-hidden="true" />
+          {td("offerDelivery")}
+        </span>
+      </div>
+
+      {coverImage && (
+        <HotelGallerySlider cover={coverImage} images={galleryImages} alt={FLOWERS_DISPLAY_NAME} productOriented />
       )}
 
       <div className="mt-8">
@@ -189,24 +258,65 @@ export default async function FlowersDetailPage({
           {service.description && (
             <Reveal>
               <section id="overview" aria-labelledby="overview-heading" className="scroll-mt-36">
-                <h2 id="overview-heading" className="mb-5 font-display text-2xl font-semibold">
+                <span className="mb-2 block text-xs font-bold uppercase tracking-[0.14em] text-primary">
+                  {td("eyebrowAbout")}
+                </span>
+                <h2 id="overview-heading" className="mb-5 font-display text-2xl font-semibold sm:text-3xl">
                   {td("overview")}
                 </h2>
-                <p className="leading-relaxed text-ink/75 dark:text-sand/75">{service.description}</p>
+                <p className="max-w-2xl text-lg leading-relaxed text-ink/75 dark:text-sand/75">{service.description}</p>
+
+                {/* Page-specific presentation only, built from facts already
+                   established elsewhere on this page (the real product
+                   catalog is 100% rose bouquets/arrangements/boxes; delivery
+                   is stated in the real description above) — not a new
+                   services system and not invented claims. */}
+                <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+                  {[
+                    { icon: Flower2, label: td("offerFreshBouquets") },
+                    { icon: Gift, label: td("offerGiftFlowers") },
+                    { icon: Package, label: td("offerBoxedArrangements") },
+                    { icon: Truck, label: td("offerDelivery") },
+                  ].map(({ icon: Icon, label }) => (
+                    <div
+                      key={label}
+                      className="group flex flex-col items-center gap-3 rounded-xl2 border border-ink/8 bg-white p-5 text-center shadow-soft transition-all duration-300 ease-premium hover:-translate-y-1 hover:border-primary/25 hover:shadow-card dark:border-white/10 dark:bg-white/[0.03]"
+                    >
+                      <span className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-primary/15 to-primary/5 text-primary transition-transform duration-300 ease-premium group-hover:scale-110">
+                        <Icon size={19} aria-hidden="true" />
+                      </span>
+                      <span className="text-xs font-semibold leading-tight text-ink/75 dark:text-sand/75">{label}</span>
+                    </div>
+                  ))}
+                </div>
               </section>
             </Reveal>
           )}
 
           {showProducts && (
             <Reveal>
-              <section id="shop" aria-labelledby="shop-heading" className="scroll-mt-36">
-                <h2 id="shop-heading" className="mb-5 font-display text-2xl font-semibold">
-                  {td("orderOnline")}
+              <section
+                id="shop"
+                aria-labelledby="shop-heading"
+                className="scroll-mt-36 rounded-xl3 border border-primary/10 bg-gradient-to-b from-primary/[0.04] to-transparent p-5 dark:border-primary/15 dark:from-primary/[0.06] sm:p-8"
+              >
+                <span className="mb-2 block text-xs font-bold uppercase tracking-[0.14em] text-primary">
+                  {td("eyebrowCollection")}
+                </span>
+                <h2 id="shop-heading" className="mb-2 font-display text-2xl font-semibold sm:text-3xl">
+                  {td("flowersAndBouquets")}
                 </h2>
+                <p className="mb-6 text-sm text-ink/60 dark:text-sand/60">{td("roseCollectionSubtitle")}</p>
                 <ProductsSection
                   products={products}
-                  storeName={service.name}
-                  business={{ listingType: "city_service", listingId: service.id, businessName: service.name, deliveryEnabled: true, addons: [] }}
+                  storeName={FLOWERS_DISPLAY_NAME}
+                  business={{
+                    listingType: "city_service",
+                    listingId: service.id,
+                    businessName: FLOWERS_DISPLAY_NAME,
+                    deliveryEnabled: true,
+                    addons: [],
+                  }}
                   locale={locale}
                 />
               </section>
@@ -245,10 +355,13 @@ export default async function FlowersDetailPage({
 
           <Reveal>
             <section id="location" aria-labelledby="location-heading" className="scroll-mt-36">
+              <span className="mb-2 block text-xs font-bold uppercase tracking-[0.14em] text-primary">
+                {td("eyebrowFindUs")}
+              </span>
               <h2 id="location-heading" className="mb-5 font-display text-2xl font-semibold">
                 {td("location")}
               </h2>
-              <div className="flex flex-col gap-4 rounded-xl3 border border-ink/8 bg-white p-5 dark:border-white/10 dark:bg-white/[0.03] sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col gap-4 rounded-xl3 border border-ink/8 bg-white p-5 shadow-soft transition-shadow duration-300 hover:shadow-card dark:border-white/10 dark:bg-white/[0.03] sm:flex-row sm:items-center sm:justify-between">
                 <p className="flex items-center gap-2 text-sm text-ink/70 dark:text-sand/70">
                   <MapPin size={16} className="shrink-0 text-primary" aria-hidden="true" />
                   {td("flowersAndBouquets")}
@@ -273,6 +386,9 @@ export default async function FlowersDetailPage({
 
           <Reveal>
             <section id="reviews" aria-labelledby="reviews-heading" className="scroll-mt-36">
+              <span className="mb-2 block text-xs font-bold uppercase tracking-[0.14em] text-primary">
+                {td("eyebrowReviews")}
+              </span>
               <h2 id="reviews-heading" className="mb-5 font-display text-2xl font-semibold">
                 {t("reviews")}
               </h2>
@@ -308,8 +424,8 @@ export default async function FlowersDetailPage({
             showSpinner={false}
             size={15}
             className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-ink/15 py-3 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
-            addLabel={tl("addToFavorites", { name: service.name })}
-            removeLabel={tl("removeFromFavorites", { name: service.name })}
+            addLabel={tl("addToFavorites", { name: FLOWERS_DISPLAY_NAME })}
+            removeLabel={tl("removeFromFavorites", { name: FLOWERS_DISPLAY_NAME })}
           />
           <SecondaryButton href={`/${locale}/cafes/lavender`} className="w-full justify-center">
             {td("visitLavenderCafe")}
@@ -317,10 +433,85 @@ export default async function FlowersDetailPage({
         </aside>
       </div>
 
+      {showProducts && partnerTheme && (
+        <Reveal>
+          <section className="container-px mx-auto pb-4">
+            <div
+              className="relative overflow-hidden rounded-xl3 px-6 py-12 text-center text-white sm:px-10 sm:py-16"
+              style={{
+                background: `linear-gradient(135deg, ${partnerTheme.primaryDeep} 0%, ${partnerTheme.primary} 60%, ${partnerTheme.primaryMid} 100%)`,
+              }}
+            >
+              {/* Restrained decorative accents — soft radial blooms in the
+                 theme's own colors, not a generic stock gradient. */}
+              <div
+                className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full blur-3xl"
+                style={{ backgroundColor: `rgba(${partnerTheme.accentRgb}, 0.28)` }}
+                aria-hidden="true"
+              />
+              <div
+                className="pointer-events-none absolute -bottom-20 -left-10 h-56 w-56 rounded-full blur-3xl"
+                style={{ backgroundColor: `rgba(${partnerTheme.primaryMidRgb}, 0.35)` }}
+                aria-hidden="true"
+              />
+
+              <div className="relative">
+                <span
+                  className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-wide backdrop-blur-md"
+                  style={{ backgroundColor: "rgba(255,255,255,0.14)", border: `1px solid rgba(${partnerTheme.accentRgb}, 0.6)` }}
+                >
+                  <Flower2 size={12} aria-hidden="true" />
+                  {FLOWERS_DISPLAY_NAME}
+                </span>
+                <h2 className="mt-4 font-display text-2xl font-bold sm:text-3xl">{td("exploreFlowersCtaTitle")}</h2>
+                <p className="mx-auto mt-3 max-w-md text-sm text-white/85 sm:text-base">{td("exploreFlowersCtaSubtitle")}</p>
+                <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+                  <PrimaryButton href="#shop" size="lg" className="!bg-white !text-primary-800 hover:!bg-white/90">
+                    {td("exploreFlowersButton")}
+                  </PrimaryButton>
+                  {serviceWhatsappHref && (
+                    <SecondaryButton
+                      href={serviceWhatsappHref}
+                      external
+                      size="lg"
+                      className="!border-white/40 !text-white hover:!border-white hover:!text-white"
+                    >
+                      <MessageCircle size={16} aria-hidden="true" />
+                      {th("whatsapp")}
+                    </SecondaryButton>
+                  )}
+                </div>
+              </div>
+            </div>
+          </section>
+        </Reveal>
+      )}
+
+      {/* Polished sister-listing cross-link — the two businesses share one
+         physical shop but are now fully separate listings/ordering
+         contexts; this is the "content" version of the quick action-row
+         button above, matching the reciprocal card on the café page. */}
+      <Reveal>
+        <div className="container-px mx-auto pb-4">
+          <div className="flex flex-col items-center justify-between gap-4 rounded-xl3 border border-ink/8 bg-white p-6 text-center shadow-soft transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-card dark:border-white/10 dark:bg-white/[0.03] sm:flex-row sm:text-start sm:p-8">
+            <div>
+              <h3 className="font-display text-lg font-semibold">{td("lookingForLavenderCafeTitle")}</h3>
+              <p className="mt-1 text-sm text-ink/65 dark:text-sand/65">{td("lookingForLavenderCafeBody")}</p>
+            </div>
+            <PrimaryButton href={`/${locale}/cafes/lavender`} size="sm" className="shrink-0">
+              {td("visitLavenderCafe")}
+            </PrimaryButton>
+          </div>
+        </div>
+      </Reveal>
+
       {nearbyPlaces.length > 0 && (
         <section className="border-t border-ink/8 bg-white py-14 dark:border-white/10 dark:bg-white/[0.03] sm:py-20">
           <div className="container-px mx-auto">
             <Reveal>
+              <span className="mb-2 block text-xs font-bold uppercase tracking-[0.14em] text-primary">
+                {td("eyebrowNearby")}
+              </span>
               <h2 className="mb-6 font-display text-2xl font-semibold sm:text-3xl">{tn("nearbyPlaces")}</h2>
             </Reveal>
             <Reveal delay={0.1}>
@@ -329,6 +520,19 @@ export default async function FlowersDetailPage({
           </div>
         </section>
       )}
-    </>
+
+      {partnerTheme && <PartnerPartnershipFooter theme={partnerTheme} locale={locale} />}
+
+      <PartnerAcquisitionCta locale={locale} />
+
+      <MobileBookingBar
+        listingType="city_service"
+        listingId={service.id}
+        name={FLOWERS_DISPLAY_NAME}
+        phone={servicePhone}
+        whatsappFallback={serviceWhatsapp}
+        locale={locale}
+      />
+    </PartnerThemeScope>
   );
 }

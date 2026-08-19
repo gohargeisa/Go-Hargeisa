@@ -84,12 +84,6 @@ export function SiteFooter({
             className="mb-6 h-auto w-auto transition-transform duration-300 ease-premium hover:scale-105"
           />
           <p className="max-w-sm text-sm leading-7 text-ink/60 dark:text-sand/60">{footerText || t("tagline")}</p>
-          {(contactEmail || contactPhone) && (
-            <p className="mt-3 space-y-0.5 text-sm text-ink/60 dark:text-sand/60">
-              {contactEmail && <a href={`mailto:${contactEmail}`} className="block hover:text-primary">{contactEmail}</a>}
-              {contactPhone && <a href={`tel:${contactPhone}`} className="block hover:text-primary">{contactPhone}</a>}
-            </p>
-          )}
           <div className="mt-6 flex flex-wrap gap-2.5">
             {socialLinks.map(({ icon: Icon, href, label, iconClassName }) => (
               <a

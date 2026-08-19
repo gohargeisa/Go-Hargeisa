@@ -233,7 +233,7 @@ export default async function EventDetailPage({
                 <h2 id="video-gallery-heading" className="mb-5 font-display text-2xl font-semibold">
                   {td("videoGallery")}
                 </h2>
-                <VideoGallery videos={event.videos} watchOnLabel={(platform) => td("watchOn", { platform })} />
+                <VideoGallery videos={event.videos} />
               </section>
             </Reveal>
           )}
