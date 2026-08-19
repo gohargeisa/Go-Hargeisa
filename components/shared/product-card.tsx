@@ -1,12 +1,14 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
-import { Star, ShoppingCart } from "lucide-react";
+import { Star, ShoppingCart, Heart } from "lucide-react";
 import { AddToCartButton } from "@/components/shared/add-to-cart-button";
 import { ProductImage } from "@/components/shared/product-image";
 import { getValidAddonsForProduct } from "@/lib/cart/product-addons";
 import { productCategoryLabel } from "@/lib/config/product-categories";
 import { productLocalizedName } from "@/lib/utils/product-i18n";
+import { getProductPricing } from "@/lib/utils/product-pricing";
 import type { AddToCartBusiness } from "@/lib/cart/cart-context";
 import type { Product } from "@/types";
 
@@ -22,16 +24,142 @@ export function ProductCard({
   business,
   locale,
   onOpenDetails,
+  imageFallback,
+  variant = "default",
+  isWishlisted,
+  onToggleWishlist,
 }: {
   product: Product;
   business: AddToCartBusiness;
   locale: string;
   onOpenDetails: () => void;
+  /** Passed straight through to ProductImage's own `fallback` — see its doc
+   * comment. Omit for the default plain "no photo" icon. */
+  imageFallback?: ReactNode;
+  /** "default" (every existing caller, unchanged) is the compact square
+   * cover-crop tile this component has always rendered. "premium" is
+   * opt-in — a taller e-commerce-catalog tile: contain-fit image canvas
+   * (nothing cropped), sale-price/discount-badge support driven by
+   * `getProductPricing`, and an optional wishlist heart. Built for
+   * Flormar's catalog but generic (no Flormar-specific markup), so any
+   * future partner that wants this presentation can opt in the same way. */
+  variant?: "default" | "premium";
+  /** premium variant only. Omit both to hide the wishlist heart entirely —
+   * every caller that doesn't pass them keeps the exact same card it has
+   * today. */
+  isWishlisted?: boolean;
+  onToggleWishlist?: () => void;
 }) {
   const t = useTranslations("products");
   const name = productLocalizedName(product, locale);
   const validAddons = getValidAddonsForProduct(product, business);
-  const canQuickAdd = product.isAvailable && product.price != null && validAddons.length === 0;
+  const hasVariants = (product.variants?.length ?? 0) > 0;
+  // A variant product (e.g. a lipstick with 5 shades) can never quick-add
+  // straight from the grid — there is no shade to attach to the cart line
+  // yet, and defaulting to the base product price would silently ignore
+  // that a shade like "12 Burgundy" costs more than "09 Rosewood". Routes
+  // to the same "View details" flow addon-bearing products already use,
+  // where ProductDetailModal's ProductVariantSelector makes the shopper
+  // pick one before Add to Cart is even shown.
+  const canQuickAdd = product.isAvailable && product.price != null && validAddons.length === 0 && !hasVariants;
+
+  if (variant === "premium") {
+    const pricing = getProductPricing(product);
+    return (
+      <div className="group flex h-full flex-col overflow-hidden rounded-xl2 border border-ink/8 bg-white shadow-soft transition-all duration-300 ease-premium hover:-translate-y-1 hover:shadow-card dark:border-white/10 dark:bg-white/[0.03]">
+        <div className="relative aspect-square w-full shrink-0 overflow-hidden">
+          <button
+            type="button"
+            onClick={onOpenDetails}
+            aria-label={`${name} — ${t("viewDetails")}`}
+            className="absolute inset-0 z-0 block text-start focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          >
+            <ProductImage
+              src={product.image}
+              alt={name}
+              sizes="(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 25vw"
+              className="object-contain transition-transform duration-500 group-hover:scale-[1.04]"
+              fallback={imageFallback}
+              fit="contain"
+            />
+          </button>
+          {pricing.hasDiscount && (
+            <span className="pointer-events-none absolute start-2.5 top-2.5 z-10 rounded-full bg-primary-800 px-2.5 py-1 text-[11px] font-bold tracking-wide text-white shadow-sm">
+              -{pricing.discountPercent}%
+            </span>
+          )}
+          {!product.isAvailable && (
+            <span className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-black/60 py-1 text-center text-xs font-bold text-white">
+              {t("unavailable")}
+            </span>
+          )}
+          {onToggleWishlist && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleWishlist();
+              }}
+              aria-label={isWishlisted ? t("removeFromWishlist") : t("addToWishlist")}
+              aria-pressed={isWishlisted}
+              className="absolute end-2.5 top-2.5 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/95 text-ink/50 shadow-sm backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:text-primary-700 dark:bg-ink/85 dark:text-sand/60"
+            >
+              <Heart
+                size={15}
+                aria-hidden="true"
+                fill={isWishlisted ? "currentColor" : "none"}
+                className={isWishlisted ? "text-primary-700" : undefined}
+              />
+            </button>
+          )}
+        </div>
+
+        <div className="flex flex-1 flex-col p-3.5">
+          <button type="button" onClick={onOpenDetails} className="block flex-1 text-start">
+            <p className="line-clamp-2 text-sm font-semibold leading-snug">{name}</p>
+            <p className="mt-0.5 text-xs text-ink/45 dark:text-sand/45">
+              {product.category ? productCategoryLabel(product.category, locale) : ""}
+            </p>
+          </button>
+
+          <div className="mt-2 flex items-baseline gap-1.5">
+            {product.price != null ? (
+              <>
+                <span className="text-base font-bold text-ink dark:text-white">
+                  {product.price.toFixed(2)} {product.currency}
+                </span>
+                {pricing.hasDiscount && (
+                  <span className="text-xs font-medium text-ink/40 line-through dark:text-sand/40">
+                    {pricing.originalPrice!.toFixed(2)}
+                  </span>
+                )}
+              </>
+            ) : (
+              <span className="text-sm font-semibold text-ink/50 dark:text-sand/50">{t("priceOnRequest")}</span>
+            )}
+          </div>
+
+          <div className="mt-3">
+            {canQuickAdd ? (
+              <AddToCartButton
+                business={business}
+                product={{ productId: product.id, name: product.name, nameAr: product.nameAr, nameSo: product.nameSo, image: product.image, unitPrice: product.price! }}
+                className="inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-primary-700 py-2 text-xs font-bold text-white transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-primary-800 active:scale-95"
+              />
+            ) : product.isAvailable && product.price != null ? (
+              <button
+                type="button"
+                onClick={onOpenDetails}
+                className="inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-primary/30 py-2 text-xs font-semibold text-primary-700 transition-colors hover:bg-primary/8 dark:text-primary-300"
+              >
+                <ShoppingCart size={13} aria-hidden="true" /> {t("viewDetails")}
+              </button>
+            ) : null}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="group">
@@ -46,6 +174,7 @@ export function ProductCard({
           alt={name}
           sizes="(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 25vw"
           className="object-cover transition-transform duration-500 group-hover:scale-105"
+          fallback={imageFallback}
         />
         {product.isFeatured && (
           <span className="absolute start-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-amber-500 text-white">
@@ -64,6 +193,32 @@ export function ProductCard({
           {product.category ? productCategoryLabel(product.category, locale) : ""}
           {product.price != null ? ` • ${product.price} ${product.currency}` : ` • ${t("priceOnRequest")}`}
         </p>
+        {hasVariants && (
+          <span className="mt-1 flex items-center gap-1">
+            {product.variants!.some((v) => v.hexColor) ? (
+              <>
+                {product.variants!
+                  .filter((v) => v.hexColor)
+                  .slice(0, 4)
+                  .map((v) => (
+                    <span
+                      key={v.id}
+                      aria-hidden="true"
+                      className="h-3 w-3 shrink-0 rounded-full ring-1 ring-inset ring-ink/10 dark:ring-white/20"
+                      style={{ backgroundColor: v.hexColor }}
+                    />
+                  ))}
+                {product.variants!.length > 4 && (
+                  <span className="text-[10px] font-semibold text-ink/40 dark:text-sand/40">+{product.variants!.length - 4}</span>
+                )}
+              </>
+            ) : (
+              <span className="text-[10px] font-semibold text-ink/40 dark:text-sand/40">
+                {t("optionsAvailable", { count: product.variants!.length })}
+              </span>
+            )}
+          </span>
+        )}
       </button>
       {canQuickAdd ? (
         <AddToCartButton

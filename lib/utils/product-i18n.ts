@@ -1,4 +1,4 @@
-import type { Product } from "@/types";
+import type { Product, ProductVariant } from "@/types";
 
 /** Same locale-resolution shape already used by mapCityService/mapEvent for
  * name/description — kept here since Product ships all three languages
@@ -9,4 +9,8 @@ export function productLocalizedName(product: Product, locale: string): string {
 
 export function productLocalizedDescription(product: Product, locale: string): string | undefined {
   return (locale === "ar" && product.descriptionAr) || (locale === "so" && product.descriptionSo) || product.description;
+}
+
+export function variantLocalizedName(variant: ProductVariant, locale: string): string {
+  return (locale === "ar" && variant.nameAr) || (locale === "so" && variant.nameSo) || variant.name;
 }

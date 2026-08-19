@@ -13,6 +13,12 @@ export interface CartItem {
   unitPrice: number;
   quantity: number;
   addons: ProductAddon[];
+  /** Present only for a product ordered in a specific shade/finish/size —
+   * see types/index.ts's ProductVariant. Absent for every non-variant
+   * product (everything on the platform before variants existed). */
+  variantId?: string;
+  variantName?: string;
+  variantSku?: string;
 }
 
 /** ONE CART = ONE BUSINESS — every item in `items` belongs to
@@ -32,8 +38,13 @@ export interface CartState {
   orderAttemptId: string | null;
 }
 
-export function cartItemKey(productId: string, addonIds: string[]): string {
-  return `${productId}::${[...addonIds].sort().join(",")}`;
+/** `variantId` is optional and appended only when present, so every
+ * existing call site (two-arg, no variant) keeps producing the exact same
+ * key string as before — different shades of the same product become
+ * distinct cart lines without changing any non-variant product's key. */
+export function cartItemKey(productId: string, addonIds: string[], variantId?: string): string {
+  const base = `${productId}::${[...addonIds].sort().join(",")}`;
+  return variantId ? `${base}::${variantId}` : base;
 }
 
 /** Matches submit_cart_order()'s server-side formula exactly: unit price

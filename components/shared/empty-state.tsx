@@ -1,4 +1,5 @@
 import type { LucideIcon } from "lucide-react";
+import type { ReactNode } from "react";
 
 /**
  * Shared empty-state block (icon + title + description) — extracted from
@@ -10,11 +11,17 @@ export function EmptyState({
   icon: Icon,
   title,
   description,
+  action,
   className = "",
 }: {
   icon: LucideIcon;
   title: string;
   description: string;
+  /** Optional recovery action (e.g. "Clear search") rendered below the
+   * description — omitted entirely by every existing caller, so this is a
+   * purely additive slot that changes nothing for the 20+ places already
+   * using this component. */
+  action?: ReactNode;
   className?: string;
 }) {
   return (
@@ -30,6 +37,7 @@ export function EmptyState({
           risk skipping levels somewhere (axe heading-order). */}
       <p className="mt-5 font-display text-xl font-semibold">{title}</p>
       <p className="mt-2 max-w-sm text-sm leading-6 text-ink/55 dark:text-sand/60">{description}</p>
+      {action && <div className="mt-4">{action}</div>}
     </div>
   );
 }

@@ -93,6 +93,16 @@ export interface Product {
   category?: ProductCategory;
   gender?: ProductGender;
   price?: number;
+  /** Pre-discount "compare at" price — optional, same nullable-numeric shape
+   * as `price`. A product is "on sale" purely by this being present and
+   * greater than `price`; no separate boolean flag exists on purpose (one
+   * fewer field that could drift out of sync — set both prices, or unset
+   * this one to end the sale). The discount percent is always derived
+   * (`lib/utils/product-pricing.ts`), never stored, so it can't go stale.
+   * Absent for every product until a caller explicitly sets it — every
+   * existing reader of `Product` that doesn't know about this field keeps
+   * working unchanged. */
+  originalPrice?: number;
   currency: string;
   image?: string;
   gallery: GalleryImage[];
@@ -104,6 +114,46 @@ export interface Product {
   updatedAt: string;
   /** Free-text size/variant descriptor (e.g. "50ml", "Large", "Set of 3") — optional, most products won't need it. */
   size?: string;
+  /** Structured variants (shade/color/finish/size combinations) — present
+   * only for products that actually have them (e.g. a lipstick with 12
+   * shades). Absent/empty means "just this one product", identical to
+   * every product on the platform before variants existed — every existing
+   * caller that never reads this field keeps working unchanged. See
+   * ProductVariant below and supabase/migrations/20260825000001_product_variants.sql. */
+  variants?: ProductVariant[];
+}
+
+/** One purchasable variant of a Product (a specific shade/finish/size).
+ * Deliberately a child of `products` (see the migration), not a second
+ * product system — a product with no variants behaves exactly as it always
+ * has; a product with variants gets an interactive swatch/size picker
+ * wherever ProductCard/ProductDetailModal render it. Any field left unset
+ * on a variant falls back to the parent Product's own value (e.g. a variant
+ * with no `image` shows the product's base image). */
+export interface ProductVariant {
+  id: string;
+  productId: string;
+  /** Display name for this variant, e.g. "09 Rosewood" or "Small". */
+  name: string;
+  nameAr?: string;
+  nameSo?: string;
+  /** Human shade name alone, e.g. "Rosewood" (name may combine code + this). */
+  shadeName?: string;
+  /** Shade/reference code, e.g. "09". */
+  shadeCode?: string;
+  /** Swatch color for the picker UI, e.g. "#A85751". */
+  hexColor?: string;
+  /** e.g. "Matte", "Glossy", "Shimmer". */
+  finish?: string;
+  /** e.g. "30ml", "Large" — for variants that vary by size rather than color. */
+  size?: string;
+  /** Falls back to the parent product's image when unset. */
+  image?: string;
+  sku?: string;
+  /** Falls back to the parent product's price when unset. */
+  price?: number;
+  isAvailable: boolean;
+  sortOrder: number;
 }
 
 /** Phase 4 Medical Appointment Engine — one shared engine for Hospitals,

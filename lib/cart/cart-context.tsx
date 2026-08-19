@@ -47,6 +47,12 @@ export interface AddToCartProduct {
   nameSo?: string;
   image?: string;
   unitPrice: number;
+  /** Present only when a specific shade/finish/size was selected — see
+   * ProductVariant (types/index.ts). Omit entirely for a non-variant
+   * product, identical to every product before variants existed. */
+  variantId?: string;
+  variantName?: string;
+  variantSku?: string;
 }
 
 type AddResult = "added" | "conflict";
@@ -102,7 +108,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const buildLine = useCallback(
     (product: AddToCartProduct, quantity: number, selectedAddons: ProductAddon[]): CartItem => ({
-      key: cartItemKey(product.productId, selectedAddons.map((a) => a.id)),
+      key: cartItemKey(product.productId, selectedAddons.map((a) => a.id), product.variantId),
       productId: product.productId,
       name: product.name,
       nameAr: product.nameAr,
@@ -111,6 +117,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
       unitPrice: product.unitPrice,
       quantity,
       addons: selectedAddons,
+      variantId: product.variantId,
+      variantName: product.variantName,
+      variantSku: product.variantSku,
     }),
     []
   );

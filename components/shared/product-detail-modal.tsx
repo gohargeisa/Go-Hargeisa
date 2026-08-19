@@ -6,14 +6,17 @@ import { useTranslations } from "next-intl";
 import { X, Images as ImagesIcon, Minus, Plus } from "lucide-react";
 import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
+import { useImageLoaded } from "@/lib/hooks/use-image-loaded";
 import { Lightbox, type LightboxSlide } from "@/components/shared/lightbox";
 import { AddToCartButton } from "@/components/shared/add-to-cart-button";
 import { ProductImage } from "@/components/shared/product-image";
+import { ProductVariantSelector } from "@/components/shared/product-variant-selector";
 import { getValidAddonsForProduct } from "@/lib/cart/product-addons";
 import { productCategoryLabel, productGenderLabel } from "@/lib/config/product-categories";
-import { productLocalizedName, productLocalizedDescription } from "@/lib/utils/product-i18n";
+import { productLocalizedName, productLocalizedDescription, variantLocalizedName } from "@/lib/utils/product-i18n";
+import { getProductPricing } from "@/lib/utils/product-pricing";
 import type { AddToCartBusiness } from "@/lib/cart/cart-context";
-import type { Product, ProductAddon } from "@/types";
+import type { Product, ProductAddon, ProductVariant } from "@/types";
 
 /**
  * Product detail as a centered dialog rather than a dedicated route — same
@@ -49,6 +52,14 @@ export function ProductDetailModal({
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [selectedAddonIds, setSelectedAddonIds] = useState<string[]>([]);
+  // Data-driven variant support — absent entirely for the vast majority of
+  // products (no `variants`), in which case everything below falls back to
+  // the product's own image/price/name exactly as before variants existed.
+  const hasVariants = (product.variants?.length ?? 0) > 0;
+  const [selectedVariantId, setSelectedVariantId] = useState<string | undefined>(product.variants?.[0]?.id);
+  const activeVariant: ProductVariant | undefined = hasVariants
+    ? (product.variants!.find((v) => v.id === selectedVariantId) ?? product.variants![0])
+    : undefined;
 
   function toggleAddon(id: string) {
     setSelectedAddonIds((prev) => (prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]));
@@ -70,11 +81,23 @@ export function ProductDetailModal({
 
   const name = productLocalizedName(product, locale);
   const description = productLocalizedDescription(product, locale);
+  // Variant-specific image takes over the hero photo (with its own gallery
+  // entry so the lightbox/photo-count badge stay correct); an unset
+  // variant image falls back to the product's own — never a broken/blank
+  // photo just because one shade never got a dedicated shot.
+  const heroImage = activeVariant?.image || product.image;
   const photos = [
-    ...(product.image ? [{ url: product.image, alt: name }] : []),
-    ...product.gallery.map((g) => ({ url: g.url, alt: g.alt || name })),
+    ...(heroImage ? [{ url: heroImage, alt: name }] : []),
+    ...product.gallery.filter((g) => g.url !== heroImage).map((g) => ({ url: g.url, alt: g.alt || name })),
   ];
   const slides: LightboxSlide[] = photos.map((p) => ({ url: p.url, alt: p.alt }));
+  const displayPrice = activeVariant?.price ?? product.price;
+  const isOrderable = (activeVariant ? activeVariant.isAvailable : product.isAvailable) && displayPrice != null;
+  // Sale pricing only applies to the base product's own price — a variant
+  // (e.g. "12 Burgundy" priced differently from "09 Rosewood") has no
+  // discount math of its own, so this intentionally stays hidden once a
+  // variant is selected rather than showing a stale/incorrect strikethrough.
+  const pricing = activeVariant ? { hasDiscount: false } : getProductPricing(product);
 
   return (
     <div className="fixed inset-0 z-modal flex items-center justify-center p-0 sm:p-4">
@@ -107,7 +130,7 @@ export function ProductDetailModal({
               className="group relative block h-52 w-full overflow-hidden rounded-xl2 bg-ink/5 dark:bg-white/5 sm:h-60"
               aria-label={t("viewGallery")}
             >
-              <Image src={photos[0].url} alt={name} fill sizes="(max-width: 639px) 100vw, 448px" className="object-cover transition-transform duration-500 group-hover:scale-105" />
+              <CrossfadeImage key={photos[0].url} src={photos[0].url} alt={name} />
               {photos.length > 1 && (
                 <span className="absolute bottom-2.5 end-2.5 inline-flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1.5 text-xs font-semibold text-white">
                   <ImagesIcon size={13} aria-hidden="true" /> {photos.length}
@@ -131,22 +154,37 @@ export function ProductDetailModal({
                 {productGenderLabel(product.gender, locale)}
               </span>
             )}
-            {!product.isAvailable && (
+            {!isOrderable && (
               <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-bold text-red-700 dark:bg-red-400/15 dark:text-red-300">
-                {t("unavailable")}
+                {activeVariant && !activeVariant.isAvailable ? t("outOfStock") : t("unavailable")}
               </span>
             )}
           </div>
 
           {product.brand && <p className="text-sm font-semibold text-ink/70 dark:text-sand/70">{product.brand}</p>}
 
-          <p className="font-display text-xl font-bold">
-            {product.price != null ? `${product.price} ${product.currency}` : t("priceOnRequest")}
+          <p className="flex flex-wrap items-baseline gap-2 font-display text-xl font-bold transition-all duration-200">
+            {displayPrice != null ? `${displayPrice} ${product.currency}` : t("priceOnRequest")}
+            {pricing.hasDiscount && (
+              <span className="font-body text-sm font-medium text-ink/40 line-through dark:text-sand/40">
+                {product.originalPrice!.toFixed(2)} {product.currency}
+              </span>
+            )}
+            {activeVariant?.sku && <span className="ms-2 text-xs font-medium text-ink/40 dark:text-sand/40">SKU {activeVariant.sku}</span>}
           </p>
+
+          {hasVariants && (
+            <ProductVariantSelector
+              variants={product.variants!}
+              selectedId={activeVariant!.id}
+              onSelect={(v) => setSelectedVariantId(v.id)}
+              locale={locale}
+            />
+          )}
 
           {description && <p className="text-sm leading-relaxed text-ink/75 dark:text-sand/75">{description}</p>}
 
-          {product.isAvailable && product.price != null ? (
+          {isOrderable ? (
             <div className="space-y-3.5 border-t border-ink/8 pt-3.5 dark:border-white/10">
               <div>
                 <label className="mb-1 block text-xs font-semibold text-ink/50 dark:text-sand/50">{tp("quantityLabel")}</label>
@@ -200,7 +238,17 @@ export function ProductDetailModal({
 
               <AddToCartButton
                 business={business}
-                product={{ productId: product.id, name: product.name, nameAr: product.nameAr, nameSo: product.nameSo, image: product.image, unitPrice: product.price }}
+                product={{
+                  productId: product.id,
+                  name: product.name,
+                  nameAr: product.nameAr,
+                  nameSo: product.nameSo,
+                  image: heroImage,
+                  unitPrice: displayPrice!,
+                  variantId: activeVariant?.id,
+                  variantName: activeVariant ? variantLocalizedName(activeVariant, locale) : undefined,
+                  variantSku: activeVariant?.sku,
+                }}
                 quantity={quantity}
                 selectedAddons={selectedAddons}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary-700 py-3 text-sm font-bold text-white transition-colors hover:bg-primary-800"
@@ -216,5 +264,27 @@ export function ProductDetailModal({
         <Lightbox slides={slides} index={lightboxIndex} onClose={() => setLightboxIndex(null)} onIndexChange={setLightboxIndex} />
       )}
     </div>
+  );
+}
+
+/** Fades the new photo in over the skeleton rather than popping instantly —
+ * mounted fresh (via the caller's `key={src}`) every time the hero image
+ * changes, e.g. on a shade switch, so each new variant photo gets its own
+ * clean fade-in instead of jump-cutting to a different picture. */
+function CrossfadeImage({ src, alt }: { src: string; alt: string }) {
+  const { loaded, imgRef, onLoad } = useImageLoaded();
+  return (
+    <>
+      {!loaded && <div className="skeleton absolute inset-0" aria-hidden="true" />}
+      <Image
+        ref={imgRef}
+        src={src}
+        alt={alt}
+        fill
+        sizes="(max-width: 639px) 100vw, 448px"
+        onLoad={onLoad}
+        className={`object-cover transition-opacity duration-300 ease-premium group-hover:scale-105 ${loaded ? "opacity-100" : "opacity-0"}`}
+      />
+    </>
   );
 }
