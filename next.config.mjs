@@ -15,6 +15,20 @@ const nextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "**.supabase.co" },
       { protocol: "https", hostname: "placehold.co" },
+      // Real Flormar product photography for the private, unlisted Flormar
+      // partner preview (app/[locale]/preview/flormar) — sourced only from
+      // Flormar's own official CDNs (flormar.com, flormar.com.tr,
+      // flormar.ma) during the product reconciliation research
+      // (docs/flormar-product-catalog.json), never downloaded/re-hosted.
+      // A one-off retailer CDN (idefix.com) was briefly here for a single
+      // product image that turned out not to match the real product on
+      // closer verification — removed along with the image itself; see
+      // docs/flormar-product-reconciliation.md's resolution log. Harmless
+      // to keep even after `unoptimized: true` below, which is the actual
+      // reason these don't need proxying.
+      { protocol: "https", hostname: "d1ak51zwgmtslz.cloudfront.net" },
+      { protocol: "https", hostname: "afb801.a-cdn.akinoncloud.com" },
+      { protocol: "https", hostname: "admin.flormar.ma" },
     ],
     // Every /_next/image request (every product/listing photo — all remote,
     // hosted on Supabase Storage) started failing in production with 402
@@ -49,6 +63,11 @@ const nextConfig = {
       "blob:",
       "https://*.supabase.co",
       "https://placehold.co",
+      // Real Flormar product photography sources, private Flormar preview
+      // only — see the matching remotePatterns comment above.
+      "https://d1ak51zwgmtslz.cloudfront.net",
+      "https://afb801.a-cdn.akinoncloud.com",
+      "https://admin.flormar.ma",
     ];
     // Uploaded videos (components/shared/video-gallery.tsx) are served from
     // Supabase Storage, a cross-origin host — with no media-src directive,
