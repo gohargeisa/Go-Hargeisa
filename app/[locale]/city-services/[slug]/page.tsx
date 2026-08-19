@@ -127,6 +127,15 @@ export async function generateMetadata({
   };
 }
 
+// Lavender's own redirect to /flowers/lavender is NOT handled here —
+// deliberately. This route streams behind app/[locale]/loading.tsx's
+// Suspense boundary, so by the time a page-level redirect() runs, the 200
+// response has often already started and Next falls back to a client-side
+// <meta refresh> instead of a real HTTP redirect (same reasoning already
+// documented in middleware.ts for the /dashboard, /admin, /business gates
+// above). See middleware.ts's CITY_SERVICE_OWN_ROUTE_REDIRECTS for the
+// actual redirect, which runs before any rendering starts and guarantees a
+// genuine HTTP 307 every time, including for curl/bots without JS.
 export default async function CityServiceDetailPage({
   params: { locale, slug },
 }: {

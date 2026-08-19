@@ -17,10 +17,43 @@ const intlMiddleware = createMiddleware({
 // index) is owner-only.
 const BUSINESS_OWNER_ADMIN_SECTIONS = new Set(["hotels", "restaurants", "cafes", "city-services"]);
 
+// city_services rows that also have their own dedicated, canonical route
+// elsewhere on the site — the old /city-services/[slug] presentation must
+// redirect there instead of rendering its own competing page. Lavender is
+// a real `city_services` row (category "Flower Shops") with a premium page
+// at /flowers/[slug] (app/[locale]/flowers/[slug]/page.tsx) reading the
+// exact same row via the exact same getCityServiceBySlug() — before this
+// redirect existed, both routes independently rendered the same underlying
+// record with no way to retire the old one without also breaking the new
+// one (and no way to "hide" the old page without hiding the data the new
+// page depends on, since neither route filters by status). The row itself
+// stays fully published — that's required for the Flowers page, its
+// products, and this redirect target to keep working; only the old
+// presentation is retired, at the routing layer, not the data.
+const CITY_SERVICE_OWN_ROUTE_REDIRECTS: Record<string, string> = {
+  lavender: "flowers",
+};
+
 export default async function middleware(request: NextRequest) {
   // Locale routing runs first and produces the response we'll actually
   // return — including the correct /en, /ar, /so rewrite/redirect.
   const response = intlMiddleware(request);
+
+  // Gated here, before any rendering starts, for the same reason the auth
+  // checks below are: every route under app/[locale] streams behind
+  // app/[locale]/loading.tsx's Suspense boundary, so a page-level
+  // `redirect()` call doesn't reliably produce a real HTTP redirect (the
+  // 200 response has often already started streaming by the time it runs,
+  // so Next falls back to a client-side <meta refresh> that curl/bots/
+  // crawlers without JS never follow). This one needs no Supabase session,
+  // so it runs unconditionally, ahead of the Supabase-gated block below.
+  {
+    const segments = request.nextUrl.pathname.split("/").filter(Boolean);
+    if (isLocale(segments[0]) && segments[1] === "city-services" && segments[2]) {
+      const ownRoute = CITY_SERVICE_OWN_ROUTE_REDIRECTS[segments[2]];
+      if (ownRoute) return NextResponse.redirect(new URL(`/${segments[0]}/${ownRoute}/${segments[2]}`, request.url));
+    }
+  }
 
   // Supabase session refresh writes its cookies onto that SAME response
   // object (see lib/supabase/middleware.ts) so nothing gets dropped. It's
