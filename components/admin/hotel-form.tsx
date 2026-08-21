@@ -14,6 +14,7 @@ import { Field, TagInput, inputClass } from "@/components/admin/form-shared";
 import { AmenitiesPicker } from "@/components/admin/amenities-picker";
 import { OpeningHoursEditor } from "@/components/shared/opening-hours-editor";
 import { AssignedOwnerField, type AssignedOwner } from "@/components/admin/assigned-owner-field";
+import { FeaturedPartnerPromoEditor } from "@/components/admin/featured-partner-promo-editor";
 import { createRecord, updateRecord } from "@/lib/actions/admin";
 import { useUnsavedChangesWarning } from "@/lib/hooks/use-unsaved-changes-warning";
 import { HOTEL_TYPE_ORDER, hotelTypeLabel, starRatingLabel, STAR_RATING_OPTIONS, type HotelType } from "@/lib/config/hotel-attributes";
@@ -561,6 +562,10 @@ export function HotelForm({
             <input type="checkbox" checked={form.isPartner} onChange={(e) => update("isPartner", e.target.checked)} />
             {t("goHargeisaPartner")}
           </label>
+        )}
+
+        {canFeature && mode === "edit" && hotelId && form.isPartner && (
+          <FeaturedPartnerPromoEditor listingType="hotel" listingId={hotelId} />
         )}
 
         {error && <p className="text-sm text-red-600">{error}</p>}

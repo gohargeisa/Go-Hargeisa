@@ -29,13 +29,12 @@ function slugify(value: string): string {
 
 function revalidateCategoryPaths(locale: string) {
   // Tag first — every unstable_cache()-wrapped category read (navbar,
-  // homepage grid, /services routing) shares this one tag, so an admin
-  // edit is visible on the next request instead of waiting out the
-  // 5-minute safety-net revalidate window.
+  // homepage grid) shares this one tag, so an admin edit is visible on the
+  // next request instead of waiting out the 5-minute safety-net revalidate
+  // window.
   revalidateTag(CATEGORIES_CACHE_TAG);
   revalidatePath(`/${locale}/admin/categories`);
   revalidatePath(`/${locale}`);
-  revalidatePath(`/${locale}/services`, "layout");
 }
 
 export interface CategoryInput {

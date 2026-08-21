@@ -1,84 +1,37 @@
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { getTranslations } from "next-intl/server";
-import { Building2 } from "lucide-react";
+import { redirect } from "next/navigation";
 import type { Locale } from "@/lib/i18n/config";
-import { localeAlternates } from "@/lib/i18n/alternates";
-import { getCityServicesGroupedByCategory } from "@/lib/data/city-services";
-import { PremiumPageHero } from "@/components/shared/premium-page-hero";
-import { EmptyState } from "@/components/shared/empty-state";
-import { CityServicesPageClient } from "@/components/pages/city-services-page-client";
-import { SERVICES_PUBLIC_ENABLED } from "@/lib/config/features";
-
-/** Reuses the shared hero photo — same swap-in-place pattern as attractions-hero.tsx / about-hero.tsx. */
-const SERVICES_HERO_IMAGE = "/images/hero-bg.png";
-
-export const revalidate = 3600;
-
-export async function generateMetadata({
-  params: { locale },
-}: {
-  params: { locale: string };
-}): Promise<Metadata> {
-  if (!SERVICES_PUBLIC_ENABLED) return {};
-  return {
-    title: "Essential Services in Hargeisa — Hospitals, Pharmacies & More",
-    description:
-      "Find hospitals, pharmacies, dental clinics, schools, mosques, gas stations and more essential services in Hargeisa, Somaliland.",
-    alternates: localeAlternates(locale as Locale, "/services"),
-  };
-}
 
 /**
- * /services is a second, differently-URL'd entry point onto the exact same
- * city_services data /city-services already renders — not a separate
- * `services`-table hub. The `services` table (and its own category
- * taxonomy, target_table='services') is real and untouched, but currently
- * has zero rows in production, so a hub built on it had nothing to ever
- * show. Reuses getCityServicesGroupedByCategory and CityServicesPageClient
- * verbatim (same component /city-services uses) rather than building a
- * second rendering path for the same data — city service detail links
- * still resolve to /city-services/[slug] (CityServiceCard's own hardcoded
- * href), the one real detail route, regardless of which hub page a visitor
- * arrived from.
+ * /services (the bare index, not /services/[category]) never had its own
+ * content — it rendered the exact same city_services data as /city-services
+ * (same getCityServicesGroupedByCategory call, same CityServicesPageClient),
+ * because the real `services` table (target_table='services': Travel
+ * Agencies, Apartments, Real Estate, Electronics, Transportation) has zero
+ * rows in production and never had a hub of its own to show. That made this
+ * a literal duplicate render of /city-services under a second URL — the
+ * exact confusing "generic Services vs City Services" overlap this route
+ * existed to paper over. /city-services is the one canonical page for this
+ * content now.
+ *
+ * The real redirect happens in middleware.ts (a page-level redirect() here
+ * doesn't reliably produce a real HTTP redirect behind app/[locale]/
+ * loading.tsx's Suspense boundary — see that file's own comment on the
+ * identical Lavender case) — this component is just a defensive fallback
+ * for that same target, never expected to actually render in practice.
+ *
+ * /services/[category] and /services/[category]/[slug] (the real generic
+ * `services`-table routes) have since been removed entirely — that whole
+ * vertical was retired in favor of City Services as the one public category
+ * system (see SERVICES_PUBLIC_ENABLED in lib/config/features.ts). The
+ * `services` table itself and its category rows are untouched.
  */
-export default async function ServicesPage({
+export default function ServicesPage({
   params: { locale },
   searchParams,
 }: {
   params: { locale: Locale };
   searchParams: { q?: string };
 }) {
-  if (!SERVICES_PUBLIC_ENABLED) notFound();
-
-  const t = await getTranslations("home");
-  const tCityServices = await getTranslations({ locale, namespace: "cityServices" });
-  const groups = await getCityServicesGroupedByCategory(locale);
-  const allServices = groups.flatMap((g) => g.items);
-
-  return (
-    <>
-      <PremiumPageHero
-        image={SERVICES_HERO_IMAGE}
-        imageAlt="Panoramic view of Hargeisa"
-        eyebrow={t("servicesEyebrow")}
-        title={t("servicesTitle")}
-        subtitle={t("servicesSubtitle")}
-        scrollHint={t("servicesScrollHint")}
-      />
-
-      <section className="container-px mx-auto py-10 md:py-14">
-        {allServices.length === 0 ? (
-          <EmptyState
-            icon={Building2}
-            title={tCityServices("noServicesTitle")}
-            description={tCityServices("noServicesDescription")}
-            className="mt-4"
-          />
-        ) : (
-          <CityServicesPageClient groups={groups} locale={locale} initialQuery={searchParams.q} basePath={`/${locale}/services`} />
-        )}
-      </section>
-    </>
-  );
+  const qs = searchParams.q ? `?q=${encodeURIComponent(searchParams.q)}` : "";
+  redirect(`/${locale}/city-services${qs}`);
 }

@@ -1,19 +1,16 @@
 import type { Coordinates } from "@/types";
 
 /**
- * No embedded map, no API key, no billing — every "View on Map"/
- * "Directions" action across the app is a plain link out to Google Maps,
- * built from this one shared set of helpers so the URL shape (and the
- * "prefer a saved link over a built one" rule) never drifts between
- * hotels/restaurants/cafes/attractions/city services.
+ * No API key, no paid service — the single "Open in Google Maps" action
+ * across the app (Directions was removed sitewide in favor of this one
+ * consistent action, see components/shared/location-map-section.tsx) is a
+ * plain link out to Google Maps, built from this one shared helper so the
+ * URL shape (and the "prefer a saved link over a built one" rule) never
+ * drifts between hotels/restaurants/cafes/attractions/city services.
  */
 
 export function buildGoogleMapsUrl(lat: number, lng: number): string {
   return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
-}
-
-export function buildDirectionsUrl(lat: number, lng: number): string {
-  return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
 }
 
 /** A business's own saved Google Maps link (e.g. city_services.maps_url)
@@ -23,13 +20,6 @@ export function resolveMapsUrl(coords: Coordinates | null | undefined, savedUrl?
   if (savedUrl) return savedUrl;
   if (coords && Number.isFinite(coords.lat) && Number.isFinite(coords.lng)) {
     return buildGoogleMapsUrl(coords.lat, coords.lng);
-  }
-  return undefined;
-}
-
-export function resolveDirectionsUrl(coords: Coordinates | null | undefined): string | undefined {
-  if (coords && Number.isFinite(coords.lat) && Number.isFinite(coords.lng)) {
-    return buildDirectionsUrl(coords.lat, coords.lng);
   }
   return undefined;
 }

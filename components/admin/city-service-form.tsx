@@ -37,6 +37,7 @@ import { LANGUAGE_SPOKEN_OPTIONS, languageSpokenLabel } from "@/lib/config/hotel
 import { STORE_TYPE_ORDER, storeTypeLabel } from "@/lib/config/retail-store-attributes";
 import { RENTAL_TYPE_ORDER, rentalTypeLabel, VEHICLE_TYPE_ORDER, vehicleTypeLabel } from "@/lib/config/car-rental-attributes";
 import { CLINIC_TYPE_ORDER, clinicTypeLabel } from "@/lib/config/clinic-attributes";
+import { FeaturedPartnerPromoEditor } from "@/components/admin/featured-partner-promo-editor";
 import { GARAGE_TYPE_ORDER, garageTypeLabel } from "@/lib/config/auto-repair-attributes";
 import {
   GYM_TYPE_ORDER,
@@ -1155,6 +1156,10 @@ export function CityServiceForm({
         {t("goHargeisaPartner")}
       </label>
       <p className="-mt-4 text-xs text-ink/45 dark:text-sand/45">{t("cityServiceFeaturedHint")}</p>
+
+      {mode === "edit" && serviceId && form.isPartner && (
+        <FeaturedPartnerPromoEditor listingType="city_service" listingId={serviceId} />
+      )}
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 

@@ -51,11 +51,13 @@ const nextConfig = {
     // CSP origins are an exact inventory of what this app actually loads —
     // verified by grep, not guessed: Supabase (API + Storage) and the
     // placeholder-image host already declared in images.remotePatterns
-    // above. No map SDK/embed of any kind runs in this app — every "View
-    // on Map"/"Directions" action is a plain <a target="_blank"> out to
-    // Google Maps (lib/utils/google-maps.ts), which needs no CSP entry
-    // since it's a normal top-level navigation, not a fetch/script/iframe
-    // load this page makes itself.
+    // above. "Open in Google Maps" is a plain <a target="_blank"> out to
+    // Google Maps (lib/utils/google-maps.ts) and needs no CSP entry — a
+    // normal top-level navigation, not a fetch/script/iframe load this page
+    // makes itself. LocationMapSection's embedded map preview is different:
+    // it's a real <iframe src="https://maps.google.com/maps?...&output=
+    // embed">, so that host must be allowed in frame-src below, the same
+    // way the YouTube embed already is.
     const connectSrc = ["'self'", "https://*.supabase.co", "wss://*.supabase.co"];
     const imgSrc = [
       "'self'",
@@ -76,7 +78,12 @@ const nextConfig = {
     // iframe host, which frame-src must allow explicitly (frame-src 'none'
     // blocked those too, sitewide, since the Media Manager shipped).
     const mediaSrc = ["'self'", "https://*.supabase.co"];
-    const frameSrc = ["'self'", "https://www.youtube-nocookie.com"];
+    // maps.google.com/maps?...&output=embed redirects to
+    // www.google.com/maps/embed?... — confirmed by following the actual
+    // redirect in a browser, not assumed — so frame-src must allow the
+    // real final destination, not just the URL this app's own <iframe src>
+    // literally specifies.
+    const frameSrc = ["'self'", "https://www.youtube-nocookie.com", "https://maps.google.com", "https://www.google.com"];
     // Dev-mode-only relaxation: Next.js's Fast Refresh / webpack HMR runtime
     // (next/dist/compiled/@next/react-refresh-utils) calls eval() to wrap
     // modules with source maps — with no 'unsafe-eval', that throws on

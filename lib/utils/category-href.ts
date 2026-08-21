@@ -3,9 +3,14 @@ import type { Locale } from "@/lib/i18n/config";
 
 /**
  * Where a category's listings actually live, per its `target_table`. The 5
- * core verticals + City Services each have their own dedicated route;
- * every `services`-vertical (long-tail) category nests under /services/[slug]
- * — see lib/utils/service-categories.ts serviceHref for why.
+ * core verticals + City Services each have their own dedicated route. The
+ * generic `services` vertical (target_table='services') has been retired —
+ * its categories are excluded from every public category list
+ * (SERVICES_PUBLIC_ENABLED=false in lib/data/categories.ts), so this case
+ * is unreachable from any current caller; it falls back to /city-services
+ * rather than a deleted route, in case a future caller ever passes one of
+ * these category rows through directly (they still exist in the database,
+ * untouched — see lib/config/features.ts's SERVICES_PUBLIC_ENABLED comment).
  *
  * A real city_services sub-category (Hospitals, Pharmacies, ...) deep-links
  * straight to its own tab on /city-services via ?category=<slug> — see
@@ -35,7 +40,7 @@ export function categoryHref(locale: string, category: Category): string {
         ? `/${locale}/city-services`
         : `/${locale}/city-services?category=${category.slug}`;
     case "services":
-      return `/${locale}/services/${category.slug}`;
+      return `/${locale}/city-services`;
   }
 }
 

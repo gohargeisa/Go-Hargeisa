@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { AnimatePresence, m, useReducedMotion } from "framer-motion";
 import { X } from "lucide-react";
 import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
@@ -23,6 +24,7 @@ export function BottomSheet({
   title?: string;
   children: ReactNode;
 }) {
+  const t = useTranslations("common");
   const reduceMotion = useReducedMotion();
   const sheetRef = useRef<HTMLDivElement>(null);
   useFocusTrap(sheetRef, open);
@@ -66,7 +68,7 @@ export function BottomSheet({
               <button
                 type="button"
                 onClick={onClose}
-                aria-label="Close"
+                aria-label={t("close")}
                 className="ms-auto flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-ink/5 transition-colors hover:bg-ink/10 dark:bg-white/10 dark:hover:bg-white/15"
               >
                 <X size={18} aria-hidden="true" />

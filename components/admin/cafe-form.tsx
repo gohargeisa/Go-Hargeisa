@@ -14,6 +14,7 @@ import { useUnsavedChangesWarning } from "@/lib/hooks/use-unsaved-changes-warnin
 import { CAFE_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import { AmenitiesPicker } from "@/components/admin/amenities-picker";
 import { AssignedOwnerField, type AssignedOwner } from "@/components/admin/assigned-owner-field";
+import { FeaturedPartnerPromoEditor } from "@/components/admin/featured-partner-promo-editor";
 import { CAFE_TYPE_ORDER, cafeTypeLabel } from "@/lib/config/cafe-attributes";
 import { OpeningHoursEditor } from "@/components/shared/opening-hours-editor";
 import type { Locale } from "@/lib/i18n/config";
@@ -444,6 +445,9 @@ export function CafeForm({
             <input type="checkbox" checked={form.isPartner} onChange={(e) => update("isPartner", e.target.checked)} />
             {t("goHargeisaPartner")}
           </label>
+        )}
+        {canFeature && mode === "edit" && cafeId && form.isPartner && (
+          <FeaturedPartnerPromoEditor listingType="cafe" listingId={cafeId} />
         )}
       </div>
 

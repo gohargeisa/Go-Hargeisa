@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
@@ -14,6 +15,7 @@ import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
  * original.
  */
 export function ModalShell({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
+  const t = useTranslations("common");
   const dialogRef = useRef<HTMLDivElement>(null);
   useFocusTrap(dialogRef);
   useScrollLock(true);
@@ -42,7 +44,7 @@ export function ModalShell({ title, onClose, children }: { title: string; onClos
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close"
+            aria-label={t("close")}
             className="flex h-8 w-8 items-center justify-center rounded-full bg-ink/5 dark:bg-white/10"
           >
             <X size={16} aria-hidden="true" />

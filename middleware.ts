@@ -53,6 +53,20 @@ export default async function middleware(request: NextRequest) {
       const ownRoute = CITY_SERVICE_OWN_ROUTE_REDIRECTS[segments[2]];
       if (ownRoute) return NextResponse.redirect(new URL(`/${segments[0]}/${ownRoute}/${segments[2]}`, request.url));
     }
+
+    // /services (the bare index only, never /services/[category]) has no
+    // content of its own — it used to duplicate-render the exact same
+    // city_services data /city-services already shows. /city-services is
+    // now the one canonical URL for that content; this keeps any existing
+    // bookmark/search-engine link to /services working. Same reasoning as
+    // the redirect right above: a page-level redirect() here wouldn't
+    // reliably produce a real HTTP redirect behind loading.tsx's Suspense
+    // boundary, so this has to happen in middleware to guarantee one.
+    if (isLocale(segments[0]) && segments[1] === "services" && !segments[2]) {
+      const target = new URL(`/${segments[0]}/city-services`, request.url);
+      target.search = request.nextUrl.search;
+      return NextResponse.redirect(target);
+    }
   }
 
   // Supabase session refresh writes its cookies onto that SAME response

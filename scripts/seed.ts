@@ -12,7 +12,7 @@ dotenv.config({ path: ".env.local" });
  *   2. Run: npm run seed
  */
 import { createClient } from "@supabase/supabase-js";
-import { hotels, restaurants, cafes, services, attractions, events, articles } from "../lib/mock-data";
+import { hotels, restaurants, cafes, attractions, events, articles } from "../lib/mock-data";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -100,31 +100,6 @@ async function seedCafes() {
   const { error } = await supabase.from("cafes").upsert(rows, { onConflict: "slug" });
   if (error) throw error;
   console.log(`✔ Seeded ${rows.length} cafes`);
-}
-
-async function seedServices() {
-  const rows = services.map((s) => ({
-    slug: s.slug,
-    name: s.name,
-    short_description: s.shortDescription,
-    description: s.description,
-    cover_image: s.coverImage,
-    gallery: s.gallery,
-    address: s.address,
-    lat: s.location.lat,
-    lng: s.location.lng,
-    phone: s.phone,
-    website: s.website,
-    opening_hours: s.openingHours,
-    services: s.services,
-    category: s.category,
-    rating: s.rating,
-    review_count: s.reviewCount,
-    featured: s.featured ?? false,
-  }));
-  const { error } = await supabase.from("services").upsert(rows, { onConflict: "slug" });
-  if (error) throw error;
-  console.log(`✔ Seeded ${rows.length} services`);
 }
 
 async function seedAttractions() {
@@ -269,7 +244,6 @@ async function main() {
   await seedHotels();
   await seedRestaurants();
   await seedCafes();
-  await seedServices();
   await seedAttractions();
   await seedEvents();
   await seedArticles();

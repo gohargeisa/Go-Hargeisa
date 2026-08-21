@@ -183,7 +183,7 @@ export function NavMegaMenu({
               <MegaMenuGrid locale={locale} categories={categories} onNavigate={close} autoFocusSearch />
 
               <Link
-                href={`/${locale}/services`}
+                href={`/${locale}/city-services`}
                 onClick={close}
                 className="mt-3 flex items-center justify-between rounded-xl border-t border-ink/8 px-3 pt-3 text-sm font-semibold text-primary dark:border-white/10"
               >

@@ -3,13 +3,13 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { Clock, Landmark, MapPin, Navigation, Sparkles, Star, Timer } from "lucide-react";
+import { Clock, Landmark, MapPin, Sparkles, Star, Timer } from "lucide-react";
 import { FavoriteButton } from "@/components/shared/favorite-button";
 import { AnimatedCard } from "@/components/shared/animated-card";
 import { FloatingBadge } from "@/components/shared/floating-badge";
 import { PrimaryButton, SecondaryButton } from "@/components/shared/buttons";
 import { getCategoryMeta } from "@/lib/config/attraction-categories";
-import { resolveDirectionsUrl } from "@/lib/utils/google-maps";
+import { resolveMapsUrl } from "@/lib/utils/google-maps";
 import { useImageLoaded } from "@/lib/hooks/use-image-loaded";
 import type { Coordinates } from "@/types";
 
@@ -55,7 +55,7 @@ export function AttractionCard({
   const CategoryIcon = categoryMeta.icon;
   const categoryLabel = tp(categoryMeta.labelKey);
 
-  const directionsHref = resolveDirectionsUrl(location);
+  const googleMapsHref = resolveMapsUrl(location);
 
   const hasRealImage = Boolean(image) && !image.includes("placehold.co");
   const imageHeight = size === "lg" ? "h-72 sm:h-80" : "h-56 sm:h-60";
@@ -167,10 +167,10 @@ export function AttractionCard({
           <PrimaryButton href={href} size="sm" compact fullWidth>
             {t("viewDetails")}
           </PrimaryButton>
-          {directionsHref && (
-            <SecondaryButton href={directionsHref} external size="sm" compact fullWidth aria-label={t("getDirections")}>
-              <Navigation size={14} aria-hidden="true" />
-              {t("getDirections")}
+          {googleMapsHref && (
+            <SecondaryButton href={googleMapsHref} external size="sm" compact fullWidth aria-label={t("viewOnMap")}>
+              <MapPin size={14} aria-hidden="true" />
+              {t("viewOnMap")}
             </SecondaryButton>
           )}
         </div>

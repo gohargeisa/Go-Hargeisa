@@ -332,14 +332,14 @@ export async function submitJoinRequest(input: JoinRequestInput): Promise<{ ok: 
       .select("id, slug, target_table, is_active")
       .eq("id", input.categoryId)
       .maybeSingle();
-    // Long-tail `services` categories (Flower Shops, Real Estate, ...) and
     // City Services categories (Hospitals & Clinics, Pharmacies, ...) are
-    // both valid "other" selections — the same dynamic category source the
+    // valid "other" selections — the same dynamic category source the
     // /join form's dropdown reads from (see app/[locale]/join/page.tsx).
-    // A City Services selection is never auto-convertible into a listing
-    // (see isConvertibleCategory) — it stays an admin-reviewed lead, same
-    // as any other non-convertible category.
-    if (!cat || !cat.is_active || (cat.target_table !== "services" && cat.target_table !== "city_services")) {
+    // The generic `services` vertical (target_table='services': Travel
+    // Agencies, Apartments, Real Estate, Electronics, Transportation) has
+    // been retired — its categories are no longer offered by the join form
+    // and are rejected here too, in case of a direct/bypassed submission.
+    if (!cat || !cat.is_active || cat.target_table !== "city_services") {
       return { ok: false, error: "Invalid category." };
     }
     resolvedOtherSlug = cat.slug;
@@ -696,13 +696,15 @@ export async function convertJoinRequest(
   // category lookup instead of duplicating it.
   const resolvedCategory = request.category_id ? await getCategoryById(request.category_id) : null;
 
-  // Dynamic categories can live in either the general services table or
-  // the City Services table. Both are valid conversion targets now.
+  // Dynamic categories convert into the City Services table. The generic
+  // `services` vertical has been retired — a request nominally categorized
+  // under it (a stale pending request from before the retirement, or a
+  // direct/bypassed submission) is rejected below, same as any other
+  // non-convertible category.
   const isDynamicCategory =
     request.category === "other" &&
     Boolean(request.category_id) &&
-    (resolvedCategory?.targetTable === "services" ||
-      resolvedCategory?.targetTable === "city_services");
+    resolvedCategory?.targetTable === "city_services";
 
   if (
     !isDynamicCategory &&
@@ -1041,7 +1043,6 @@ export async function convertJoinRequest(
       revalidatePath(`/${locale}/admin/partners`);
       revalidatePath(`/${locale}/admin/city-services`);
       revalidatePath(`/${locale}/city-services`);
-      revalidatePath(`/${locale}/services`);
 
       return {
         ok: true,
@@ -1050,207 +1051,17 @@ export async function convertJoinRequest(
       };
     }
 
-    if (targetTable !== "services") {
-      return {
-        ok: false,
-        error: "This business category cannot be converted into a service listing.",
-      };
-    }
-
-    const { data: slugTaken } = await supabase
-      .from("services")
-      .select("id")
-      .eq("slug", slug)
-      .maybeSingle();
-
-    if (slugTaken) {
-      return {
-        ok: false,
-        error: "That slug is already in use — please choose another.",
-      };
-    }
-
-    const servicePayload: Record<string, unknown> = {
-      slug,
-      name: request.business_name,
-      short_description: shortDescription,
-      description: request.description,
-      cover_image: coverImage,
-      gallery,
-      address: request.address,
-      lat: completion.lat,
-      lng: completion.lng,
-      phone: request.phone,
-      website: request.website ?? null,
-      owner_id: user?.id ?? null,
-      category_id: request.category_id,
-      custom_fields: request.custom_fields ?? {},
-      services: request.services_offered && request.services_offered.length > 0 ? request.services_offered : categoryName ? [categoryName] : [],
-    };
-
-    // Travel Agency / Travel Office (slug "tour-companies") — its existing
-    // custom_fields_schema (destinations/specialties/license_number) is
-    // untouched above; these are additional, more structured fields.
-    if (resolvedCategory.slug === "tour-companies") {
-      if (request.travel_agency_type) servicePayload.travel_agency_type = request.travel_agency_type;
-      if (request.flight_ticketing !== null) servicePayload.flight_ticketing = request.flight_ticketing;
-      if (request.hotel_booking !== null) servicePayload.hotel_booking = request.hotel_booking;
-      if (request.visa_assistance !== null) servicePayload.visa_assistance = request.visa_assistance;
-      if (request.tour_packages !== null) servicePayload.tour_packages = request.tour_packages;
-      if (request.airport_transfers !== null) servicePayload.airport_transfers = request.airport_transfers;
-      if (request.car_rental_assistance !== null) servicePayload.car_rental_assistance = request.car_rental_assistance;
-      if (request.hajj_umrah_services !== null) servicePayload.hajj_umrah_services = request.hajj_umrah_services;
-      if (request.local_tours !== null) servicePayload.local_tours = request.local_tours;
-      if (request.international_tours !== null) servicePayload.international_tours = request.international_tours;
-      if (request.group_tours !== null) servicePayload.group_tours = request.group_tours;
-      if (request.travel_insurance_assistance !== null) servicePayload.travel_insurance_assistance = request.travel_insurance_assistance;
-      if (request.languages && request.languages.length > 0) servicePayload.languages = request.languages;
-    }
-
-    // Flower Shop (slug "flower-shops") — its existing custom_fields_schema
-    // (delivery_available/specialties/custom_arrangements) is untouched
-    // above; these are additional fields.
-    if (resolvedCategory.slug === "flower-shops") {
-      if (request.flower_shop_type) servicePayload.flower_shop_type = request.flower_shop_type;
-      if (request.flower_delivery_available !== null) servicePayload.flower_delivery_available = request.flower_delivery_available;
-      if (request.same_day_delivery !== null) servicePayload.same_day_delivery = request.same_day_delivery;
-      if (request.custom_bouquets !== null) servicePayload.custom_bouquets = request.custom_bouquets;
-      if (request.wedding_arrangements !== null) servicePayload.wedding_arrangements = request.wedding_arrangements;
-      if (request.event_decoration_service !== null) servicePayload.event_decoration_service = request.event_decoration_service;
-      if (request.gift_wrapping !== null) servicePayload.gift_wrapping = request.gift_wrapping;
-      if (request.indoor_plants !== null) servicePayload.indoor_plants = request.indoor_plants;
-      if (request.outdoor_plants !== null) servicePayload.outdoor_plants = request.outdoor_plants;
-      if (request.online_ordering_available !== null) servicePayload.online_ordering_available = request.online_ordering_available;
-      if (request.delivery_areas && request.delivery_areas.length > 0) servicePayload.delivery_areas = request.delivery_areas;
-    }
-
-    // Apartments (slug "apartments")
-    if (resolvedCategory.slug === "apartments") {
-      if (request.apartment_type) servicePayload.apartment_type = request.apartment_type;
-      if (request.bedrooms) servicePayload.bedrooms = request.bedrooms;
-      if (request.bathrooms) servicePayload.bathrooms = request.bathrooms;
-      if (request.units_count) servicePayload.units_count = request.units_count;
-      if (request.floor_number) servicePayload.floor_number = request.floor_number;
-      if (request.building_floors) servicePayload.building_floors = request.building_floors;
-      if (request.furnished !== null) servicePayload.furnished = request.furnished;
-      if (request.monthly_rent) servicePayload.monthly_rent = request.monthly_rent;
-      if (request.daily_rent) servicePayload.daily_rent = request.daily_rent;
-      if (request.security_deposit) servicePayload.security_deposit = request.security_deposit;
-      if (request.min_stay_nights) servicePayload.min_stay_nights = request.min_stay_nights;
-      if (request.max_stay_nights) servicePayload.max_stay_nights = request.max_stay_nights;
-      if (request.parking_available !== null) servicePayload.parking_available = request.parking_available;
-      if (request.wifi_available !== null) servicePayload.wifi_available = request.wifi_available;
-      if (request.air_conditioning !== null) servicePayload.air_conditioning = request.air_conditioning;
-      if (request.kitchen_available !== null) servicePayload.kitchen_available = request.kitchen_available;
-      if (request.electricity_included !== null) servicePayload.electricity_included = request.electricity_included;
-      if (request.water_included !== null) servicePayload.water_included = request.water_included;
-      if (request.generator_available !== null) servicePayload.generator_available = request.generator_available;
-      if (request.security_available !== null) servicePayload.security_available = request.security_available;
-      if (request.elevator_available !== null) servicePayload.elevator_available = request.elevator_available;
-      if (request.swimming_pool !== null) servicePayload.swimming_pool = request.swimming_pool;
-      if (request.laundry_available !== null) servicePayload.laundry_available = request.laundry_available;
-      if (request.family_friendly !== null) servicePayload.family_friendly = request.family_friendly;
-      if (request.pet_policy) servicePayload.pet_policy = request.pet_policy;
-    }
-
-    // Real Estate (slug "real-estate") — its retired custom_fields_schema
-    // (see 20260812000001) means custom_fields above is now always empty
-    // for new submissions; these typed columns are the real data going forward.
-    if (resolvedCategory.slug === "real-estate") {
-      if (request.property_type) servicePayload.property_type = request.property_type;
-      if (request.listing_purpose) servicePayload.listing_purpose = request.listing_purpose;
-      if (request.price) servicePayload.price = request.price;
-      if (request.price_currency) servicePayload.price_currency = request.price_currency;
-      if (request.real_estate_bedrooms) servicePayload.real_estate_bedrooms = request.real_estate_bedrooms;
-      if (request.real_estate_bathrooms) servicePayload.real_estate_bathrooms = request.real_estate_bathrooms;
-      if (request.floors_count) servicePayload.floors_count = request.floors_count;
-      if (request.year_built) servicePayload.year_built = request.year_built;
-      if (request.area_sqm) servicePayload.area_sqm = request.area_sqm;
-      if (request.land_area_sqm) servicePayload.land_area_sqm = request.land_area_sqm;
-      if (request.building_area_sqm) servicePayload.building_area_sqm = request.building_area_sqm;
-      if (request.real_estate_parking_available !== null) servicePayload.real_estate_parking_available = request.real_estate_parking_available;
-      if (request.real_estate_furnished !== null) servicePayload.real_estate_furnished = request.real_estate_furnished;
-      if (request.documents_available !== null) servicePayload.documents_available = request.documents_available;
-      if (request.viewing_available !== null) servicePayload.viewing_available = request.viewing_available;
-      if (request.property_condition) servicePayload.property_condition = request.property_condition;
-      if (request.ownership_status) servicePayload.ownership_status = request.ownership_status;
-    }
-
-    // Electronics (slug "electronics")
-    if (resolvedCategory.slug === "electronics") {
-      if (request.electronics_business_type) servicePayload.electronics_business_type = request.electronics_business_type;
-      if (request.brands_available && request.brands_available.length > 0) servicePayload.brands_available = request.brands_available;
-      if (request.sells_new !== null) servicePayload.sells_new = request.sells_new;
-      if (request.sells_used !== null) servicePayload.sells_used = request.sells_used;
-      if (request.warranty_available !== null) servicePayload.warranty_available = request.warranty_available;
-      if (request.electronics_delivery_available !== null) servicePayload.electronics_delivery_available = request.electronics_delivery_available;
-      if (request.electronics_repair_available !== null) servicePayload.electronics_repair_available = request.electronics_repair_available;
-      if (request.installation_available !== null) servicePayload.installation_available = request.installation_available;
-      if (request.payment_options && request.payment_options.length > 0) servicePayload.payment_options = request.payment_options;
-    }
-
-    // Transportation (slug "transportation")
-    if (resolvedCategory.slug === "transportation") {
-      if (request.transportation_type) servicePayload.transportation_type = request.transportation_type;
-      if (request.vehicle_count) servicePayload.vehicle_count = request.vehicle_count;
-      if (request.passenger_capacity) servicePayload.passenger_capacity = request.passenger_capacity;
-      if (request.driver_available !== null) servicePayload.driver_available = request.driver_available;
-      if (request.airport_transfer_available !== null) servicePayload.airport_transfer_available = request.airport_transfer_available;
-      if (request.city_transfers_available !== null) servicePayload.city_transfers_available = request.city_transfers_available;
-      if (request.intercity_transport_available !== null) servicePayload.intercity_transport_available = request.intercity_transport_available;
-      if (request.rental_available !== null) servicePayload.rental_available = request.rental_available;
-      if (request.daily_rental_available !== null) servicePayload.daily_rental_available = request.daily_rental_available;
-      if (request.weekly_rental_available !== null) servicePayload.weekly_rental_available = request.weekly_rental_available;
-      if (request.monthly_rental_available !== null) servicePayload.monthly_rental_available = request.monthly_rental_available;
-      if (request.delivery_service_available !== null) servicePayload.delivery_service_available = request.delivery_service_available;
-      if (request.cargo_service_available !== null) servicePayload.cargo_service_available = request.cargo_service_available;
-    }
-
-    const { data: created, error: insertError } = await supabase
-      .from("services")
-      .insert(servicePayload as never)
-      .select("id")
-      .single();
-
-    if (insertError || !created) {
-      return {
-        ok: false,
-        error:
-          insertError?.message ??
-          "Could not create the service listing.",
-      };
-    }
-
-    const { error: updateError } = await supabase
-      .from("business_join_requests")
-      .update({
-        status: "approved",
-        converted_listing_type: "service",
-        converted_listing_id: created.id,
-        converted_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      } as never)
-      .eq("id", requestId);
-
-    if (updateError) {
-      return { ok: false, error: updateError.message };
-    }
-
-    await logActivity("create", "services", created.id, {
-      fromJoinRequest: requestId,
-      categoryId: request.category_id,
-      partnerStatus: targetPartnerStatus,
-    });
-
-    revalidatePath(`/${locale}/admin/requests`);
-    revalidatePath(`/${locale}/admin/partners`);
-    revalidatePath(`/${locale}/admin/services`);
-    revalidatePath(`/${locale}/services`);
-
+    // The generic `services` vertical (target_table='services': Travel
+    // Agencies, Apartments, Real Estate, Electronics, Transportation, Flower
+    // Shops) has been retired — there is no public route or data layer left
+    // to show a listing created here. Unreachable in practice today (the
+    // outer isConvertibleCategory/isDynamicCategory gate above already
+    // rejects any non-city_services "other" category before this point),
+    // kept only as an explicit, honest fallback rather than a silent
+    // fall-through.
     return {
-      ok: true,
-      listingId: created.id,
-      table: "services",
+      ok: false,
+      error: "This business category is no longer available for conversion.",
     };
   }
 

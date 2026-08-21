@@ -1,42 +1,31 @@
 import { safeJsonLd } from "@/lib/utils/json-ld";
-import { ArrowUpRight } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/config";
 
 import { getHotels } from "@/lib/data/hotels";
 import { getRestaurants } from "@/lib/data/restaurants";
 import { getCafes } from "@/lib/data/cafes";
-import { getServices } from "@/lib/data/services";
-import { getAttractions } from "@/lib/data/attractions";
-import { getEvents } from "@/lib/data/events";
-import {
-  SERVICES_PUBLIC_ENABLED,
-  RESTAURANTS_PUBLIC_ENABLED,
-  CAFES_PUBLIC_ENABLED,
-  filterHotelsForPresentation,
-} from "@/lib/config/features";
+import { RESTAURANTS_PUBLIC_ENABLED, CAFES_PUBLIC_ENABLED, filterHotelsForPresentation } from "@/lib/config/features";
 
 import { getLatestAnnouncement } from "@/lib/data/announcements";
 import { getFeaturedOffersForHomepage } from "@/lib/data/offers";
+import { getFeaturedPartnerShowcase } from "@/lib/data/featured-partner-showcase";
 import { getCityServiceCategoryCounts } from "@/lib/data/city-services";
 import { getVisibleCategoriesWithCounts } from "@/lib/data/categories";
 import { Hero } from "@/components/home/hero";
 import { SplashScreenOverlay } from "@/components/shared/splash-overlay";
 import { OfferCard } from "@/components/home/offer-card";
 import { AnnouncementBanner } from "@/components/home/announcement-banner";
+import { FeaturedPartnersShowcase } from "@/components/home/featured-partners-showcase";
+import { AppPromotionSection } from "@/components/home/app-promotion-section";
 import { ExploreHargeisaSection } from "@/components/home/explore-hargeisa-section";
 import { NewsletterSection } from "@/components/home/newsletter-section";
 import { Reveal } from "@/components/home/reveal";
 import { ScrollRow } from "@/components/shared/scroll-row";
-import { ListingCard } from "@/components/shared/listing-card";
 import { PremiumHotelCard } from "@/components/home/premium-hotel-card";
 import { PremiumRestaurantCard } from "@/components/home/premium-restaurant-card";
 import { PremiumCafeCard } from "@/components/home/premium-cafe-card";
-import { PremiumServiceCard } from "@/components/home/premium-service-card";
-import { PremiumAttractionCard } from "@/components/home/premium-attraction-card";
 import { ViewAllButton } from "@/components/home/view-all-button";
-import { SecondaryButton } from "@/components/shared/buttons";
-import { serviceHref } from "@/lib/utils/service-categories";
 
 export const revalidate = 3600;
 
@@ -44,10 +33,8 @@ export const revalidate = 3600;
 // database is untouched, only fetched at this cap (rather than fetching
 // everything and slicing) so the homepage doesn't pull the entire table
 // just to show 3 rows. The real listing pages (/hotels, /restaurants,
-// /cafes, /services) call the same functions with no limit and show
-// everything.
+// /cafes) call the same functions with no limit and show everything.
 const HOMEPAGE_PREVIEW_COUNT = 3;
-const HOMEPAGE_SERVICES_PREVIEW_COUNT = 4;
 
 export default async function HomePage({
   params: { locale },
@@ -56,16 +43,14 @@ export default async function HomePage({
 }) {
   const t = await getTranslations("home");
 
-  const [hotelsRaw, restaurants, cafes, services, attractions, eventsRaw, announcement, featuredOffers, cityServiceCategoryCounts, categories] =
+  const [hotelsRaw, restaurants, cafes, announcement, featuredOffers, featuredPartners, cityServiceCategoryCounts, categories] =
     await Promise.all([
       getHotels({ limit: HOMEPAGE_PREVIEW_COUNT }),
       RESTAURANTS_PUBLIC_ENABLED ? getRestaurants({ limit: HOMEPAGE_PREVIEW_COUNT }) : Promise.resolve([]),
       CAFES_PUBLIC_ENABLED ? getCafes({ limit: HOMEPAGE_PREVIEW_COUNT, locale }) : Promise.resolve([]),
-      SERVICES_PUBLIC_ENABLED ? getServices({ limit: HOMEPAGE_SERVICES_PREVIEW_COUNT }) : Promise.resolve([]),
-      getAttractions(),
-      getEvents(),
       getLatestAnnouncement(),
       getFeaturedOffersForHomepage(),
+      getFeaturedPartnerShowcase(locale),
       getCityServiceCategoryCounts(),
       getVisibleCategoriesWithCounts(),
     ]);
@@ -81,14 +66,6 @@ export default async function HomePage({
     ...serviceVerticalCategories,
     ...cityServiceCategoryCounts.map(({ category, count }) => ({ ...category, businessCount: count })),
   ].sort((a, b) => a.sortOrder - b.sortOrder);
-
-  const now = Date.now();
-  // getEvents() already sorts by start_date ascending — only the "still
-  // relevant" filter (hasn't ended yet) and the homepage's own preview cap
-  // are needed here.
-  const upcomingEvents = eventsRaw
-    .filter((e) => new Date(e.endDate ?? e.startDate).getTime() >= now)
-    .slice(0, HOMEPAGE_PREVIEW_COUNT);
 
   return (
     <>
@@ -111,6 +88,10 @@ export default async function HomePage({
       {announcement && <AnnouncementBanner announcement={announcement} />}
 
       <Hero locale={locale} />
+
+      <FeaturedPartnersShowcase partners={featuredPartners} locale={locale} />
+
+      <AppPromotionSection locale={locale} />
 
       {featuredOffers.length > 0 && (
         <section className="py-16 md:py-24">
@@ -259,132 +240,7 @@ export default async function HomePage({
         </section>
       )}
 
-      {services.length > 0 && (
-        <section className="py-16 md:py-24">
-          <div className="container-px mx-auto">
-            <Reveal>
-              <div className="mx-auto mb-10 max-w-2xl text-center md:mb-14">
-                <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary-800">
-                  {t("servicesEyebrow")}
-                </span>
-                <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">
-                  {t("servicesTitle")}
-                </h2>
-                <p className="mt-2 text-ink/60 dark:text-sand/60">{t("servicesSubtitle")}</p>
-              </div>
-            </Reveal>
-            <Reveal delay={0.1}>
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                {services.map((s) => (
-                  <PremiumServiceCard
-                    key={s.id}
-                    href={`/${locale}${serviceHref(s.categorySlug, s.slug)}`}
-                    image={s.coverImage}
-                    name={s.name}
-                    address={s.address}
-                    rating={s.rating}
-                    reviewCount={s.reviewCount}
-                    categoryLabel={s.categoryLabel}
-                    categoryIcon={s.categoryIcon}
-                    categoryColor={s.categoryColor}
-                    featured={s.featured}
-                    serviceId={s.id}
-                    locale={locale}
-                    phone={s.phone}
-                  />
-                ))}
-              </div>
-            </Reveal>
-            <ViewAllButton href={`/${locale}/services`} label={t("viewAllServicesButton")} />
-          </div>
-        </section>
-      )}
-
-      {attractions.length > 0 && (
-        <section className="py-16 md:py-24">
-          <div className="container-px mx-auto">
-            <Reveal>
-              <div className="mb-10 flex flex-col gap-5 md:mb-14 md:flex-row md:items-end md:justify-between">
-                <div>
-                  <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary-800">
-                    {t("attractionsEyebrow")}
-                  </span>
-                  <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">
-                    {t("attractionsTitle")}
-                  </h2>
-                </div>
-                <SecondaryButton href={`/${locale}/attractions`} className="self-start md:self-auto">
-                  {t("viewAll")}
-                  <ArrowUpRight size={16} aria-hidden="true" />
-                </SecondaryButton>
-              </div>
-            </Reveal>
-            <Reveal delay={0.1}>
-              <ScrollRow>
-                {attractions.map((a) => (
-                  <PremiumAttractionCard
-                    key={a.id}
-                    href={`/${locale}/attractions/${a.slug}`}
-                    image={a.coverImage}
-                    name={a.name}
-                    address={a.address}
-                    rating={a.rating}
-                    reviewCount={a.reviewCount}
-                    category={a.category}
-                    shortDescription={a.shortDescription}
-                    featured={a.featured}
-                    attractionId={a.id}
-                    locale={locale}
-                  />
-                ))}
-              </ScrollRow>
-            </Reveal>
-          </div>
-        </section>
-      )}
-
       <ExploreHargeisaSection locale={locale} categories={cityServicesShowcaseCategories} />
-
-      {upcomingEvents.length > 0 && (
-        <section className="bg-white py-16 dark:bg-white/[0.03] md:py-24">
-          <div className="container-px mx-auto">
-            <Reveal>
-              <div className="mb-10 flex flex-col gap-5 md:mb-14 md:flex-row md:items-end md:justify-between">
-                <div>
-                  <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary-800">
-                    {t("eventsEyebrow")}
-                  </span>
-                  <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">
-                    {t("eventsTitle")}
-                  </h2>
-                  <p className="mt-2 text-ink/60 dark:text-sand/60">{t("eventsSubtitle")}</p>
-                </div>
-                <SecondaryButton href={`/${locale}/events`} className="self-start md:self-auto">
-                  {t("viewAllEventsButton")}
-                  <ArrowUpRight size={16} aria-hidden="true" />
-                </SecondaryButton>
-              </div>
-            </Reveal>
-            <Reveal delay={0.1}>
-              <ScrollRow>
-                {upcomingEvents.map((event) => (
-                  <ListingCard
-                    key={event.id}
-                    href={`/${locale}/events/${event.slug}`}
-                    image={event.coverImage}
-                    title={event.title}
-                    subtitle={event.location}
-                    rating={event.rating}
-                    reviewCount={event.reviewCount}
-                    tag={new Date(event.startDate).toLocaleDateString(locale, { month: "short", day: "numeric" })}
-                    locale={locale}
-                  />
-                ))}
-              </ScrollRow>
-            </Reveal>
-          </div>
-        </section>
-      )}
 
       <NewsletterSection locale={locale} />
     </>

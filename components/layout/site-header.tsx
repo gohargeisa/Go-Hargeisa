@@ -378,7 +378,7 @@ export function SiteHeader({
                   </p>
                   <MegaMenuGrid locale={locale} categories={moreCategories} onNavigate={() => setOpen(false)} />
                   <Link
-                    href={`/${locale}/services`}
+                    href={`/${locale}/city-services`}
                     onClick={() => setOpen(false)}
                     className="mt-2 flex items-center justify-between rounded-2xl px-3 py-2.5 text-sm font-semibold text-primary-700"
                   >

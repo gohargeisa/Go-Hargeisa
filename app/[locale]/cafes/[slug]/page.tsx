@@ -2,7 +2,7 @@ import { safeJsonLd } from "@/lib/utils/json-ld";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { ExternalLink, FileText, MapPin, Navigation } from "lucide-react";
+import { FileText } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
 import { getCafeBySlug, getAllCafeSlugs } from "@/lib/data/cafes";
@@ -39,7 +39,8 @@ import { getMyReviewForListing } from "@/lib/data/reviews";
 import { isListingFavorited } from "@/lib/data/favorites";
 import { getNearbyListings } from "@/lib/data/nearby";
 import { NearbyListings } from "@/components/shared/nearby-listings";
-import { resolveMapsUrl, resolveDirectionsUrl } from "@/lib/utils/google-maps";
+import { resolveMapsUrl } from "@/lib/utils/google-maps";
+import { LocationMapSection } from "@/components/shared/location-map-section";
 import { Reveal } from "@/components/home/reveal";
 import { PrimaryButton, SecondaryButton } from "@/components/shared/buttons";
 import { getPartnerTheme } from "@/lib/config/partner-themes";
@@ -139,7 +140,6 @@ export default async function CafeDetailPage({
   const partnerTheme = getPartnerTheme("cafe", cafe.slug);
 
   const googleMapsHref = resolveMapsUrl(cafe.location, cafe.googleMapsUrl);
-  const directionsHref = resolveDirectionsUrl(cafe.location);
   const showAmenities = hasAmenities(cafe.amenitiesV2);
 
   const hasStructuredHours = cafe.openingHoursStructured && cafe.openingHoursStructured.length > 0;
@@ -457,33 +457,7 @@ export default async function CafeDetailPage({
             </Reveal>
           )}
 
-          <Reveal>
-            <section id="location" aria-labelledby="location-heading" className="scroll-mt-36">
-              <h2 id="location-heading" className="mb-5 font-display text-2xl font-semibold">
-                {td("location")}
-              </h2>
-              <div className="flex flex-col gap-4 rounded-xl3 border border-ink/8 bg-white p-5 dark:border-white/10 dark:bg-white/[0.03] sm:flex-row sm:items-center sm:justify-between">
-                <p className="flex items-center gap-2 text-sm text-ink/70 dark:text-sand/70">
-                  <MapPin size={16} className="shrink-0 text-primary" aria-hidden="true" />
-                  {cafe.address}
-                </p>
-                <div className="flex flex-wrap gap-2.5">
-                  {directionsHref && (
-                    <PrimaryButton href={directionsHref} external size="sm">
-                      <Navigation size={14} aria-hidden="true" />
-                      {th("directions")}
-                    </PrimaryButton>
-                  )}
-                  {googleMapsHref && (
-                    <SecondaryButton href={googleMapsHref} external size="sm">
-                      {td("openInGoogleMaps")}
-                      <ExternalLink size={14} aria-hidden="true" />
-                    </SecondaryButton>
-                  )}
-                </div>
-              </div>
-            </section>
-          </Reveal>
+          <LocationMapSection locale={locale} address={cafe.address} coords={cafe.location} mapsHref={googleMapsHref} name={cafe.name} />
 
           <Reveal>
             <section id="reviews" aria-labelledby="reviews-heading" className="scroll-mt-36">

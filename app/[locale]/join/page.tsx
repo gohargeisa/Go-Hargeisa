@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
-import { getServiceCategories, getCityServiceCategories, getCategories } from "@/lib/data/categories";
+import { getCityServiceCategories, getCategories } from "@/lib/data/categories";
 import { JoinRequestForm } from "@/components/shared/join-request-form";
 import { JoinHero } from "@/components/join/join-hero";
 import { WhyJoinSection } from "@/components/join/why-join-section";
@@ -32,19 +32,20 @@ export default async function JoinPage({ params: { locale } }: { params: { local
   // hardcoded category *name*/icon/label list. Every displayed label/icon
   // below comes live from these categories rows. Attractions/events are
   // deliberately excluded — no owner/claims workflow exists for them.
-  // The "other" dropdown's source: every long-tail services category PLUS
-  // every City Services category (Hospitals & Clinics, Pharmacies, ...) —
-  // the exact same getCityServiceCategories() the City Services page itself
-  // reads from, so there is one source of truth for that taxonomy, not a
-  // second copy sourced separately here.
-  const [serviceCategoriesRaw, cityServiceCategories, hotelCategories, restaurantCategories, cafeCategories] = await Promise.all([
-    getServiceCategories(),
+  // The "other" dropdown's source: every City Services category (Hospitals
+  // & Clinics, Pharmacies, ...) — the exact same getCityServiceCategories()
+  // the City Services page itself reads from, so there is one source of
+  // truth for that taxonomy, not a second copy sourced separately here.
+  // The generic `services` vertical (Travel Agencies, Apartments, Real
+  // Estate, Electronics, Transportation) has been retired and is no longer
+  // offered here.
+  const [cityServiceCategories, hotelCategories, restaurantCategories, cafeCategories] = await Promise.all([
     getCityServiceCategories(),
     getCategories("hotels"),
     getCategories("restaurants"),
     getCategories("cafes"),
   ]);
-  const serviceCategories = [...serviceCategoriesRaw, ...cityServiceCategories];
+  const serviceCategories = cityServiceCategories;
   const coreCategories = [...hotelCategories, ...restaurantCategories, ...cafeCategories];
 
   return (

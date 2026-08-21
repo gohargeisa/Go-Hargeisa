@@ -30,6 +30,7 @@ export function TableReservationModal({
   onClose: () => void;
 }) {
   const t = useTranslations(variant === "viewing" ? "propertyViewing" : "tableReservation");
+  const tCommon = useTranslations("common");
   const dialogRef = useRef<HTMLDivElement>(null);
   useFocusTrap(dialogRef);
   useScrollLock(true);
@@ -61,7 +62,7 @@ export function TableReservationModal({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close"
+            aria-label={tCommon("close")}
             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-ink/5 transition-colors hover:bg-ink/10 dark:bg-white/10 dark:hover:bg-white/15"
           >
             <X size={17} aria-hidden="true" />

@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { ExternalLink, MapPin, Navigation, Phone } from "lucide-react";
+import { ExternalLink, MapPin, Phone } from "lucide-react";
 import type { CityServicePoint } from "@/types";
 import { CATEGORY_CONFIG } from "@/components/city-map/category-config";
 import { ClaimBusinessButton } from "@/components/shared/claim-business-button";
 import { OpenStatusBadge } from "@/components/shared/open-status-badge";
 import type { VisitorLocation } from "@/lib/hooks/use-visitor-location";
 import { serviceHref } from "@/lib/utils/service-categories";
-import { resolveMapsUrl, resolveDirectionsUrl } from "@/lib/utils/google-maps";
+import { resolveMapsUrl } from "@/lib/utils/google-maps";
 import { distanceKm } from "@/lib/utils/geo";
 
 export function PointInfoCard({
@@ -30,7 +30,6 @@ export function PointInfoCard({
   const Icon = meta.icon;
   const hasCoordinates = Number.isFinite(point.location?.lat) && Number.isFinite(point.location?.lng);
   const googleMapsHref = resolveMapsUrl(point.location);
-  const directionsHref = resolveDirectionsUrl(point.location);
   const km =
     visitorLocation && hasCoordinates
       ? distanceKm(visitorLocation.lat, visitorLocation.lng, point.location.lat, point.location.lng)
@@ -92,7 +91,7 @@ export function PointInfoCard({
       )}
 
       {point.phone && (
-        <div className={`grid gap-2.5 ${directionsHref ? "grid-cols-2" : "grid-cols-1"}`}>
+        <div className={`grid gap-2.5 ${googleMapsHref ? "grid-cols-2" : "grid-cols-1"}`}>
           <a
             href={`tel:${point.phone}`}
             className="inline-flex h-11 items-center justify-center gap-1.5 rounded-full border border-ink/15 text-sm font-semibold text-ink transition-all duration-300 hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
@@ -100,15 +99,15 @@ export function PointInfoCard({
             <Phone size={14} aria-hidden="true" />
             {tl("call")}
           </a>
-          {directionsHref && (
+          {googleMapsHref && (
             <a
-              href={directionsHref}
+              href={googleMapsHref}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex h-11 items-center justify-center gap-1.5 rounded-full border border-ink/15 text-sm font-semibold text-ink transition-all duration-300 hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
             >
-              <Navigation size={14} aria-hidden="true" />
-              {td("directions")}
+              <ExternalLink size={14} aria-hidden="true" />
+              {td("openInGoogleMaps")}
             </a>
           )}
         </div>
@@ -124,19 +123,7 @@ export function PointInfoCard({
           </Link>
         )}
 
-        {!point.phone && directionsHref && (
-          <a
-            href={directionsHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-full border border-ink/15 text-sm font-semibold text-ink transition-all duration-300 hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
-          >
-            <Navigation size={14} aria-hidden="true" />
-            {td("directions")}
-          </a>
-        )}
-
-        {!directionsHref && googleMapsHref && (
+        {!point.phone && googleMapsHref && (
           <a
             href={googleMapsHref}
             target="_blank"

@@ -7,15 +7,12 @@ import { getAllAttractionSlugs } from "@/lib/data/attractions";
 import { getAllEventSlugs } from "@/lib/data/events";
 import { getAllCityServiceSlugs } from "@/lib/data/city-services";
 import { getAllArticleSlugs } from "@/lib/data/articles";
-import { getAllServiceSlugs } from "@/lib/data/services";
 import { getDestinations } from "@/lib/data/destinations";
-import { serviceHref } from "@/lib/utils/service-categories";
 import {
   HOTELS_PRESENTATION_MODE,
   PRESENTATION_HOTEL_SLUG,
   RESTAURANTS_PUBLIC_ENABLED,
   CAFES_PUBLIC_ENABLED,
-  SERVICES_PUBLIC_ENABLED,
   SUPERMARKET_ENABLED,
 } from "@/lib/config/features";
 
@@ -29,7 +26,6 @@ const staticRoutes = [
   "cafes",
   "attractions",
   "city-services",
-  "services",
   "city-map",
   "shopping",
   "events",
@@ -54,7 +50,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     eventSlugs,
     cityServiceSlugs,
     articleSlugs,
-    serviceEntries,
     destinations,
   ] = await Promise.all([
     getAllHotelSlugs(),
@@ -64,7 +59,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     getAllEventSlugs(),
     getAllCityServiceSlugs(),
     getAllArticleSlugs(),
-    SERVICES_PUBLIC_ENABLED ? getAllServiceSlugs() : Promise.resolve([]),
     getDestinations(),
   ]);
 
@@ -95,7 +89,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     for (const slug of eventSlugs) entries.push(url(`${locale}/events/${slug}`));
     for (const slug of cityServiceSlugs) entries.push(url(`${locale}/city-services/${slug}`));
     for (const slug of articleSlugs) entries.push(url(`${locale}/blog/${slug}`));
-    for (const service of serviceEntries) entries.push(url(`${locale}${serviceHref(service.categorySlug, service.slug)}`));
     for (const destination of destinations) entries.push(url(`${locale}/explore/${destination.slug}`));
   }
 

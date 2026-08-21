@@ -35,6 +35,12 @@ export function getNotificationText(
       return { title: t("joinRequestRejectedTitle"), body: t("joinRequestRejectedBody", { name: str(d.businessName) }), href };
     case "booking_new":
       return { title: t("bookingNewTitle"), body: t("bookingNewBody", { guest: str(d.guestName), listing: str(d.listingName) }), href };
+    case "reservation_new":
+      return { title: t("reservationNewTitle"), body: t("reservationNewBody", { guest: str(d.customerName), listing: str(d.listingName) }), href };
+    case "order_new":
+      return { title: t("orderNewTitle"), body: t("orderNewBody", { guest: str(d.customerName), listing: str(d.listingName) }), href };
+    case "appointment_new":
+      return { title: t("appointmentNewTitle"), body: t("appointmentNewBody", { guest: str(d.patientName), listing: str(d.listingName) }), href };
     case "booking_status": {
       const status = typeof d.status === "string" && BOOKING_STATUSES.has(d.status) ? d.status : "pending";
       return { title: t("bookingStatusTitle"), body: t(`bookingStatusBody_${status}`, { listing: str(d.listingName) }), href };

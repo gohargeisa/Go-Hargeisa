@@ -15,6 +15,7 @@ import { RESTAURANT_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import { OpeningHoursEditor } from "@/components/shared/opening-hours-editor";
 import { AmenitiesPicker } from "@/components/admin/amenities-picker";
 import { AssignedOwnerField, type AssignedOwner } from "@/components/admin/assigned-owner-field";
+import { FeaturedPartnerPromoEditor } from "@/components/admin/featured-partner-promo-editor";
 import { RESTAURANT_TYPE_ORDER, restaurantTypeLabel } from "@/lib/config/restaurant-attributes";
 import { LANGUAGE_SPOKEN_OPTIONS, languageSpokenLabel } from "@/lib/config/hotel-attributes";
 import type { Locale } from "@/lib/i18n/config";
@@ -483,6 +484,9 @@ export function RestaurantForm({
             <input type="checkbox" checked={form.isPartner} onChange={(e) => update("isPartner", e.target.checked)} />
             {t("goHargeisaPartner")}
           </label>
+        )}
+        {canFeature && mode === "edit" && restaurantId && form.isPartner && (
+          <FeaturedPartnerPromoEditor listingType="restaurant" listingId={restaurantId} />
         )}
       </div>
 

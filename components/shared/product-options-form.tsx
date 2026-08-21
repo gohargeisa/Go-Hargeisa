@@ -1,8 +1,21 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Minus, Plus } from "lucide-react";
 import type { Product, ProductOption } from "@/types";
 import { localizedOptionLabel, localizedChoiceLabel, type ProductOptionValues } from "@/lib/cart/product-options";
+
+/** "Free" for a genuinely $0 option/choice, never a bare "$0.00" — the price
+ * badge is always shown for these 4 priced types (never blank), so a
+ * shopper sees every option has a definite cost, free or not. */
+function PriceBadge({ priceDelta, suffix, className }: { priceDelta: number; suffix?: string; className?: string }) {
+  const t = useTranslations("productOrder");
+  return (
+    <span className={className ?? "text-ink/50 dark:text-sand/50"}>
+      {priceDelta > 0 ? `+$${priceDelta.toFixed(2)}${suffix ?? ""}` : t("free")}
+    </span>
+  );
+}
 
 /**
  * Renders whatever options THIS product actually declares — one control per
@@ -73,8 +86,7 @@ function ProductOptionField({
                     : "border-ink/15 text-ink/70 hover:border-primary dark:border-white/20 dark:text-sand/70"
                 }`}
               >
-                {choiceLabel}
-                {!!c.priceDelta && ` (+$${c.priceDelta.toFixed(2)})`}
+                {choiceLabel} <PriceBadge priceDelta={c.priceDelta ?? 0} className="text-xs opacity-75" />
               </button>
             );
           })}
@@ -109,7 +121,7 @@ function ProductOptionField({
                   />
                   {choiceLabel}
                 </span>
-                {!!c.priceDelta && <span className="text-ink/50 dark:text-sand/50">+${c.priceDelta.toFixed(2)}</span>}
+                <PriceBadge priceDelta={c.priceDelta ?? 0} />
               </label>
             );
           })}
@@ -132,7 +144,7 @@ function ProductOptionField({
           {label}
           {requiredMark}
         </span>
-        {!!option.priceDelta && <span className="text-ink/50 dark:text-sand/50">+${option.priceDelta.toFixed(2)}</span>}
+        <PriceBadge priceDelta={option.priceDelta} />
       </label>
     );
   }
@@ -161,7 +173,7 @@ function ProductOptionField({
           >
             <Plus size={14} aria-hidden="true" />
           </button>
-          {!!option.priceDelta && <span className="text-xs text-ink/50 dark:text-sand/50">+${option.priceDelta.toFixed(2)} each</span>}
+          <PriceBadge priceDelta={option.priceDelta} suffix=" each" className="text-xs text-ink/50 dark:text-sand/50" />
         </div>
       </div>
     );

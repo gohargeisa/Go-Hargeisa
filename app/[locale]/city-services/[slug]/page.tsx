@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { MapPin, Navigation, ExternalLink, Phone as PhoneIcon, Mail, Globe, Wrench, GraduationCap, Send, ShoppingBag, FileText } from "lucide-react";
+import { Phone as PhoneIcon, Mail, Globe, Wrench, GraduationCap, Send, ShoppingBag, FileText } from "lucide-react";
 import { WhatsAppIcon } from "@/components/shared/brand-icons";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
@@ -38,7 +38,8 @@ import { FavoriteButton } from "@/components/shared/favorite-button";
 import { NearbyListings } from "@/components/shared/nearby-listings";
 import { CityServiceCard } from "@/components/shared/city-service-card";
 import { SecondaryButton, PrimaryButton } from "@/components/shared/buttons";
-import { resolveMapsUrl, resolveDirectionsUrl } from "@/lib/utils/google-maps";
+import { resolveMapsUrl } from "@/lib/utils/google-maps";
+import { LocationMapSection } from "@/components/shared/location-map-section";
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
 import { normalizeExternalUrl } from "@/lib/utils/normalize-url";
 import { Reveal } from "@/components/home/reveal";
@@ -227,7 +228,6 @@ export default async function CityServiceDetailPage({
   ];
 
   const googleMapsHref = resolveMapsUrl(service.coords, service.mapsUrl);
-  const directionsHref = resolveDirectionsUrl(service.coords);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -509,33 +509,7 @@ export default async function CityServiceDetailPage({
             </Reveal>
           )}
 
-          <Reveal>
-            <section id="location" aria-labelledby="location-heading" className="scroll-mt-36">
-              <h2 id="location-heading" className="mb-5 font-display text-2xl font-semibold">
-                {td("location")}
-              </h2>
-              <div className="flex flex-col gap-4 rounded-xl3 border border-ink/8 bg-white p-5 dark:border-white/10 dark:bg-white/[0.03] sm:flex-row sm:items-center sm:justify-between">
-                <p className="flex items-center gap-2 text-sm text-ink/70 dark:text-sand/70">
-                  <MapPin size={16} className="shrink-0 text-primary" aria-hidden="true" />
-                  {categoryLabel}
-                </p>
-                <div className="flex flex-wrap gap-2.5">
-                  {directionsHref && (
-                    <PrimaryButton href={directionsHref} external size="sm">
-                      <Navigation size={14} aria-hidden="true" />
-                      {th("directions")}
-                    </PrimaryButton>
-                  )}
-                  {googleMapsHref && (
-                    <SecondaryButton href={googleMapsHref} external size="sm">
-                      {td("openInGoogleMaps")}
-                      <ExternalLink size={14} aria-hidden="true" />
-                    </SecondaryButton>
-                  )}
-                </div>
-              </div>
-            </section>
-          </Reveal>
+          <LocationMapSection locale={locale} address={categoryLabel} coords={service.coords} mapsHref={googleMapsHref} name={service.name} />
 
           {featureEligible && (
             <Reveal>

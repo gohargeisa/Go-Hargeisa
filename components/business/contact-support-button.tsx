@@ -22,6 +22,7 @@ export function ContactSupportButton({
   className?: string;
 }) {
   const t = useTranslations("businessDashboard");
+  const tCommon = useTranslations("common");
   const [open, setOpen] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
   useFocusTrap(dialogRef, open);
@@ -72,7 +73,7 @@ export function ContactSupportButton({
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                aria-label="Close"
+                aria-label={tCommon("close")}
                 className="flex h-8 w-8 items-center justify-center rounded-full bg-ink/5 dark:bg-white/10"
               >
                 <X size={16} aria-hidden="true" />

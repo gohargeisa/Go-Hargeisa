@@ -71,7 +71,7 @@ export function CartDrawer({ locale }: { locale: Locale }) {
           <button
             type="button"
             onClick={cart.closeCart}
-            aria-label="Close"
+            aria-label={t("close")}
             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-ink/5 transition-colors hover:bg-ink/10 dark:bg-white/10 dark:hover:bg-white/15"
           >
             <X size={17} aria-hidden="true" />
@@ -93,7 +93,7 @@ export function CartDrawer({ locale }: { locale: Locale }) {
               <button
                 type="button"
                 onClick={cart.closeCart}
-                className="mt-2 inline-flex items-center justify-center rounded-full border border-ink/15 px-5 py-2.5 text-sm font-semibold transition-colors hover:border-primary hover:text-primary dark:border-white/20"
+                className="mt-2 inline-flex items-center justify-center rounded-full border border-ink/15 px-5 py-3 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
               >
                 {t("continueShopping")}
               </button>
@@ -108,7 +108,7 @@ export function CartDrawer({ locale }: { locale: Locale }) {
               <button
                 type="button"
                 onClick={cart.closeCart}
-                className="mt-1 inline-flex items-center justify-center rounded-full border border-ink/15 px-5 py-2.5 text-sm font-semibold transition-colors hover:border-primary hover:text-primary dark:border-white/20"
+                className="mt-1 inline-flex items-center justify-center rounded-full border border-ink/15 px-5 py-3 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
               >
                 {t("continueShopping")}
               </button>
@@ -132,7 +132,7 @@ export function CartDrawer({ locale }: { locale: Locale }) {
         </div>
 
         {cart.view === "cart" && cart.cart.items.length > 0 && (
-          <div className="border-t border-ink/8 p-5 dark:border-white/10">
+          <div className="border-t border-ink/8 p-5 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] dark:border-white/10">
             <div className="mb-3 flex items-center justify-between text-sm font-bold">
               <span>{t("subtotal")}</span>
               <span>${cart.subtotal.toFixed(2)}</span>
@@ -141,7 +141,7 @@ export function CartDrawer({ locale }: { locale: Locale }) {
               <button
                 type="button"
                 onClick={cart.closeCart}
-                className="flex-1 rounded-full border border-ink/15 py-3 text-sm font-semibold dark:border-white/20"
+                className="flex-1 rounded-full border border-ink/15 py-3 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
               >
                 {t("continueShopping")}
               </button>

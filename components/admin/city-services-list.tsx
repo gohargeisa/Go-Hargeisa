@@ -34,7 +34,7 @@ const STATUS_FILTERS = ["all", "draft", "published", "archived"] as const;
  * has its own small list component rather than being forced into the generic
  * one built for the six other slug-based content types (different owner-only
  * auth model, extra featured/category-group affordances). Filters are
- * client-side (same pattern as ServicesPageClient/admin-bookings-list.tsx) —
+ * client-side (same pattern as admin-bookings-list.tsx) —
  * the page already fetches every row in one query, so there's no separate
  * server round-trip to add. */
 export function CityServicesList({

@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { ExternalLink, MapPin, Navigation, FileText } from "lucide-react";
+import { FileText } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
 import { getHotelBySlug, getAllHotelSlugs, getNearbyAttractionsForHotel } from "@/lib/data/hotels";
@@ -41,9 +41,9 @@ import { isListingFavorited } from "@/lib/data/favorites";
 import { getNearbyListings, mergeCuratedNearby } from "@/lib/data/nearby";
 import { NearbyListings } from "@/components/shared/nearby-listings";
 import { Reveal } from "@/components/home/reveal";
-import { PrimaryButton, SecondaryButton } from "@/components/shared/buttons";
 import { getHotelBookingCta } from "@/lib/utils/booking-cta";
-import { resolveMapsUrl, resolveDirectionsUrl } from "@/lib/utils/google-maps";
+import { resolveMapsUrl } from "@/lib/utils/google-maps";
+import { LocationMapSection } from "@/components/shared/location-map-section";
 import {
   HOTELS_PRESENTATION_MODE,
   PRESENTATION_HOTEL_SLUG,
@@ -142,7 +142,6 @@ export default async function HotelDetailPage({
   ];
 
   const googleMapsHref = resolveMapsUrl(hotel.location, hotel.googleMapsUrl);
-  const directionsHref = resolveDirectionsUrl(hotel.location);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -382,33 +381,7 @@ export default async function HotelDetailPage({
             </Reveal>
           )}
 
-          <Reveal>
-            <section id="location" aria-labelledby="location-heading" className="scroll-mt-36">
-              <h2 id="location-heading" className="mb-5 font-display text-2xl font-semibold">
-                {td("location")}
-              </h2>
-              <div className="flex flex-col gap-4 rounded-xl3 border border-ink/8 bg-white p-5 dark:border-white/10 dark:bg-white/[0.03] sm:flex-row sm:items-center sm:justify-between">
-                <p className="flex items-center gap-2 text-sm text-ink/70 dark:text-sand/70">
-                  <MapPin size={16} className="shrink-0 text-primary" aria-hidden="true" />
-                  {hotel.address}
-                </p>
-                <div className="flex flex-wrap gap-2.5">
-                  {directionsHref && (
-                    <PrimaryButton href={directionsHref} external size="sm">
-                      <Navigation size={14} aria-hidden="true" />
-                      {th("directions")}
-                    </PrimaryButton>
-                  )}
-                  {googleMapsHref && (
-                    <SecondaryButton href={googleMapsHref} external size="sm">
-                      {td("openInGoogleMaps")}
-                      <ExternalLink size={14} aria-hidden="true" />
-                    </SecondaryButton>
-                  )}
-                </div>
-              </div>
-            </section>
-          </Reveal>
+          <LocationMapSection locale={locale} address={hotel.address} coords={hotel.location} mapsHref={googleMapsHref} name={hotel.name} />
 
           <Reveal>
             <section aria-labelledby="policies-heading">

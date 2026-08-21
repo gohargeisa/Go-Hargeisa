@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useTranslations, useFormatter } from "next-intl";
 import { AnimatePresence, m } from "framer-motion";
-import { Bell, Check, CheckCheck, Sparkles, Trash2 } from "lucide-react";
+import { Bell, BellRing, Check, CheckCheck, Sparkles, Trash2 } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { getUserNotifications, getUnreadNotificationCount } from "@/lib/actions/notifications";
 import { useLiveNotifications } from "@/lib/hooks/use-live-notifications";
+import { useBrowserNotificationPermission } from "@/lib/hooks/use-browser-notification-permission";
+import { playNotificationSound } from "@/lib/utils/notification-sound";
 import { getNotificationText } from "@/lib/utils/notification-text";
 import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
 import type { Notification } from "@/types";
@@ -62,7 +64,22 @@ export function NotificationBell({
     };
   }, []);
 
-  const { items, unreadCount, markOneRead, markAllRead, deleteOne } = useLiveNotifications(seed.items, seed.unread);
+  const { permission: browserPermission, request: requestBrowserPermission, notify: notifyBrowser } = useBrowserNotificationPermission();
+
+  const { items, unreadCount, markOneRead, markAllRead, deleteOne } = useLiveNotifications(
+    seed.items,
+    seed.unread,
+    20,
+    // Best-effort "you're not looking at this tab" alert for a genuinely
+    // new incoming request — a sound (if autoplay isn't blocked) plus a
+    // native browser notification (only if the owner already opted in via
+    // the bell's own toggle below; never auto-requested here).
+    (n) => {
+      playNotificationSound();
+      const { title, body } = getNotificationText(t, locale, n);
+      notifyBrowser(title, body ? { body } : undefined);
+    }
+  );
 
   const homeHref = isOwner
     ? `/${locale}/admin/notifications`
@@ -109,15 +126,28 @@ export function NotificationBell({
             >
               <div className="flex items-center justify-between gap-2 border-b border-ink/8 px-4 py-3 dark:border-white/10">
                 <p className="text-sm font-bold">{t("panelTitle")}</p>
-                {unreadCount > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => void markAllRead()}
-                    className="flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
-                  >
-                    <CheckCheck size={13} aria-hidden="true" /> {t("markAllRead")}
-                  </button>
-                )}
+                <div className="flex items-center gap-3">
+                  {browserPermission === "default" && (
+                    <button
+                      type="button"
+                      onClick={() => void requestBrowserPermission()}
+                      title={t("enableBrowserNotifications")}
+                      aria-label={t("enableBrowserNotifications")}
+                      className="flex h-8 w-8 items-center justify-center rounded-full text-ink/50 hover:bg-primary/10 hover:text-primary dark:text-sand/50"
+                    >
+                      <BellRing size={14} aria-hidden="true" />
+                    </button>
+                  )}
+                  {unreadCount > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => void markAllRead()}
+                      className="flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+                    >
+                      <CheckCheck size={13} aria-hidden="true" /> {t("markAllRead")}
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div className="max-h-96 overflow-y-auto">
@@ -162,7 +192,7 @@ export function NotificationBell({
                                 e.stopPropagation();
                                 void markOneRead(n.id);
                               }}
-                              className="flex h-6 w-6 items-center justify-center rounded-full border border-ink/10 text-ink/40 hover:border-primary hover:text-primary dark:border-white/15"
+                              className="flex h-8 w-8 items-center justify-center rounded-full border border-ink/10 text-ink/40 hover:border-primary hover:text-primary dark:border-white/15"
                             >
                               <Check size={12} />
                             </button>
@@ -174,7 +204,7 @@ export function NotificationBell({
                               e.stopPropagation();
                               void deleteOne(n.id);
                             }}
-                            className="flex h-6 w-6 items-center justify-center rounded-full border border-ink/10 text-ink/40 hover:border-red-500 hover:text-red-500 dark:border-white/15"
+                            className="flex h-8 w-8 items-center justify-center rounded-full border border-ink/10 text-ink/40 hover:border-red-500 hover:text-red-500 dark:border-white/15"
                           >
                             <Trash2 size={12} />
                           </button>

@@ -512,6 +512,9 @@ export type NotificationCategory =
   | "join_request_rejected"
   | "booking_new"
   | "booking_status"
+  | "reservation_new"
+  | "order_new"
+  | "appointment_new"
   | "review_new"
   | "offer_approved"
   | "offer_rejected"
@@ -1522,8 +1525,13 @@ export interface CityServicePoint {
    * without a second fetch. Absent for legacy map_points pins. */
   slug?: string;
   /** Phase 2 service points only — the `categories` table slug (e.g.
-   * "hospitals"), for building a working /services/[category]/[slug] link.
-   * Distinct from `category` above, which is the map-pin styling taxonomy. */
+   * "hospitals"), used with serviceHref() to build a detail link. The
+   * generic `services` vertical is retired (SERVICES_PUBLIC_ENABLED=false
+   * in lib/config/features.ts) so map-points.ts never fetches these rows
+   * today — this field stays typed for the shared serviceHref()/dashboard/
+   * reviews/favorites machinery, which also resolves other "service"-type
+   * records. Distinct from `category` above, which is the map-pin styling
+   * taxonomy. */
   categorySlug?: string;
   address?: string;
   description?: string;

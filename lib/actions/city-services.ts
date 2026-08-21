@@ -296,11 +296,6 @@ export async function createCityService(
   revalidatePath(`/${locale}/admin/city-services`);
   revalidatePath(`/${locale}/city-services`);
   revalidatePath(`/${locale}/city-services/${slug}`);
-  // /services shares this exact same city_services data (getCityServicesGroupedByCategory)
-  // — see app/[locale]/services/page.tsx — and is separately ISR-cached
-  // (revalidate = 3600), so without this it can show stale data for up to
-  // an hour after any write here.
-  revalidatePath(`/${locale}/services`);
   revalidatePath(`/${locale}`);
   return { ok: true };
 }
@@ -411,7 +406,6 @@ export async function updateCityService(
   revalidatePath(`/${locale}/city-services`);
   const { data: row } = await supabase.from("city_services").select("slug").eq("id", id).single();
   if (row?.slug) revalidatePath(`/${locale}/city-services/${row.slug}`);
-  revalidatePath(`/${locale}/services`);
   revalidatePath(`/${locale}`);
   return { ok: true };
 }
@@ -446,7 +440,6 @@ export async function updateCityServicePartial(
   revalidatePath(`/${locale}/city-services`);
   const { data: row } = await supabase.from("city_services").select("slug").eq("id", id).single();
   if (row?.slug) revalidatePath(`/${locale}/city-services/${row.slug}`);
-  revalidatePath(`/${locale}/services`);
   revalidatePath(`/${locale}`);
   return { ok: true };
 }
@@ -467,7 +460,6 @@ export async function toggleCityServiceFeatured(
   await logActivity("update", "city_service_featured", id, { featured: nextFeatured });
   revalidatePath(`/${locale}/admin/city-services`);
   revalidatePath(`/${locale}/city-services`);
-  revalidatePath(`/${locale}/services`);
   return { ok: true };
 }
 
@@ -480,7 +472,6 @@ export async function deleteCityService(locale: string, id: string): Promise<{ o
   await logActivity("delete", "city_service", id);
   revalidatePath(`/${locale}/admin/city-services`);
   revalidatePath(`/${locale}/city-services`);
-  revalidatePath(`/${locale}/services`);
   revalidatePath(`/${locale}`);
   return { ok: true };
 }
@@ -498,7 +489,6 @@ export async function toggleCityServiceVisibility(
   await logActivity(nextStatus === "published" ? "publish" : "archive", "city_service", id);
   revalidatePath(`/${locale}/admin/city-services`);
   revalidatePath(`/${locale}/city-services`);
-  revalidatePath(`/${locale}/services`);
   revalidatePath(`/${locale}`);
   return { ok: true };
 }

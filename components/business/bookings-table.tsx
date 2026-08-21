@@ -205,7 +205,7 @@ export function BookingsTable({
                       {t("checkOut")}: {formatDate(b.checkOut)}
                     </p>
                   </div>
-                  <div className="mt-3 flex gap-2">
+                  <div className="mt-3 flex flex-wrap gap-2">
                     {b.status === "pending" && (
                       <>
                         <button

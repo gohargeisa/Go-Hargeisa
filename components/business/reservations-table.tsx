@@ -252,7 +252,7 @@ export function ReservationsTable({
               </p>
               {r.notes && <p className="col-span-2">{t("notes")}: {r.notes}</p>}
             </div>
-            <div className="mt-3 flex gap-2">
+            <div className="mt-3 flex flex-wrap gap-2">
               {r.status === "pending" && (
                 <>
                   <button

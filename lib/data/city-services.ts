@@ -12,16 +12,26 @@ export interface CityServiceCategoryGroup {
 
 /**
  * Fully dynamic — group membership comes entirely from `city_services.category_id`
- * joined against the `categories` table (target_table='city_services'), the
- * same single source of truth every other listing type uses — see
- * docs and lib/data/categories.ts. One fetch of every published row
- * (regardless of category), grouped in JS and sorted by real listing count,
- * descending. A category with zero published rows, or one that's been
- * deactivated in the admin panel, simply never appears in the result — no
- * hardcoded category list gates this, and no code change is ever needed
- * when the first listing in a new category goes live, the last one is
- * removed, or an admin creates a brand-new City Services category. Within a
- * category, featured listings sort first, then by sort_order/created_at.
+ * joined against the `categories` table. Deliberately fetches the FULL,
+ * unfiltered category list (not getCategories("city_services")) — a
+ * category's own `target_table` reflects its nominal home page, but a real
+ * city_services row can reference one whose target_table says "services"
+ * instead (e.g. "Flower Shops": nominally target_table='services', yet the
+ * real row — Lavender — lives in city_services and links to it via
+ * category_id). Filtering the lookup to target_table='city_services' would
+ * silently drop that category from the map, so a fully real, published row
+ * simply vanishes from every group with no error — exactly what happened
+ * here before this fix. See lib/data/featured-partner-showcase.ts's
+ * categoryById for the identical fix applied to that same root cause.
+ *
+ * One fetch of every published row (regardless of category), grouped in JS
+ * and sorted by real listing count, descending. A category with zero
+ * published rows, or one that's been deactivated in the admin panel, simply
+ * never appears in the result — no hardcoded category list gates this, and
+ * no code change is ever needed when the first listing in a new category
+ * goes live, the last one is removed, or an admin creates a brand-new City
+ * Services category. Within a category, featured listings sort first, then
+ * by sort_order/created_at.
  *
  * No mock-data fallback: unlike every other content type, this directory is
  * meant to ship empty until the owner adds real entries, so "not
@@ -40,7 +50,7 @@ export async function getCityServicesGroupedByCategory(locale?: string): Promise
       .order("featured", { ascending: false })
       .order("sort_order", { ascending: true })
       .order("created_at", { ascending: true }),
-    getCategories("city_services"),
+    getCategories(),
   ]);
 
   if (error) {

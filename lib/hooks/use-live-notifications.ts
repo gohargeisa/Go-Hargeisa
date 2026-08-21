@@ -77,7 +77,12 @@ function subscribeShared(userId: string, onInsert: InsertListener): () => void {
  * which independently enforce "own rows only" via RLS/auth.uid(), so
  * callers don't need to source or pass an id themselves.
  */
-export function useLiveNotifications(initialItems: Notification[], initialUnread: number, pageSize = 20) {
+export function useLiveNotifications(
+  initialItems: Notification[],
+  initialUnread: number,
+  pageSize = 20,
+  onInsert?: (n: Notification) => void
+) {
   const [items, setItems] = useState<Notification[]>(initialItems);
   const [unreadCount, setUnreadCount] = useState(initialUnread);
   const [userId, setUserId] = useState<string | null>(null);
@@ -113,7 +118,11 @@ export function useLiveNotifications(initialItems: Notification[], initialUnread
     return subscribeShared(userId, (next) => {
       setItems((prev) => [next, ...prev].slice(0, 50));
       if (!next.isRead) setUnreadCount((count) => count + 1);
+      onInsert?.(next);
     });
+    // onInsert is a per-render closure (usually inline in the caller); only
+    // userId should ever re-subscribe the channel.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
   // Every Server Action call below is wrapped in try/catch, not just

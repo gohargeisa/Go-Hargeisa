@@ -1,14 +1,19 @@
 import type { Hotel } from "@/types";
 
 /**
- * Public-facing Services feature switch. Every public surface that shows or
- * links to Services — the nav, the homepage section, the Explore Hargeisa
- * cards, the /services routes, and the Interactive Map — reads this one
- * flag. Re-enabled so long-tail categories (Flower Shops, Travel Agencies,
- * Real Estate, ...) converted from /join business requests are publicly
- * discoverable immediately, matching every other category's behavior.
+ * The generic `services` vertical (Travel Agencies, Apartments, Real
+ * Estate, Electronics, Transportation, Flower Shops — target_table=
+ * 'services' in the categories table) has been retired: its routes, data
+ * layer, and /join conversion path were removed in favor of City Services
+ * as the one public category system. This flag stays permanently `false`
+ * — a handful of remaining consumers (lib/data/categories.ts's nav
+ * visibility filter, lib/data/map-points.ts's city-map query,
+ * lib/data/owner-dashboard.ts's platform-status list) key off it rather
+ * than each hardcoding their own `false`. The `services` table and its
+ * category rows are untouched — this only keeps them from surfacing
+ * anywhere in the public app.
  */
-export const SERVICES_PUBLIC_ENABLED = true;
+export const SERVICES_PUBLIC_ENABLED = false;
 
 /**
  * Hotel presentation mode — temporarily restricts the public site to a
@@ -60,3 +65,14 @@ export const ATTRACTIONS_PUBLIC_ENABLED = false;
  * no listing data to filter yet.
  */
 export const SUPERMARKET_ENABLED = true;
+
+/**
+ * Official Go Hargeisa Google Play listing — not published yet. The
+ * homepage app-promotion section (components/home/app-promotion-section.tsx)
+ * shows a plain, non-clickable "Coming Soon" status while this is null; the
+ * moment a real listing exists, set this to that exact URL and the section
+ * automatically switches to a live, clickable "Get it on Google Play" CTA
+ * — no other code change needed. Never set this to a placeholder/guessed
+ * URL — an unpublished app must never claim to be downloadable.
+ */
+export const GOOGLE_PLAY_URL: string | null = null;

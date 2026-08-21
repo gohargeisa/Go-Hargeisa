@@ -212,6 +212,14 @@ const getVisibleCategoriesWithCountsCached = cache(_getVisibleCategoriesWithCoun
 
 export async function getVisibleCategoriesWithCounts(): Promise<Category[]> {
   const categories = await getVisibleCategoriesWithCountsCached();
+  // Every category — pinned primary sections (Hotels, Restaurants, Cafes,
+  // City Services, Perfumes, ...) included — hides itself the moment it has
+  // zero published listings, and reappears automatically the moment it has
+  // one again. No category is ever force-shown regardless of real data.
+  // Supermarket is deliberately NOT part of this: it isn't a `categories`
+  // row at all (see SUPERMARKET_ENABLED in lib/config/features.ts and its
+  // own hardcoded nav entry in site-header.tsx) — its "Coming Soon" nav
+  // link and placeholder page are unaffected by this filter either way.
   return applyCityServiceCategoryGroups(categories.filter((c) => (c.businessCount ?? 0) > 0));
 }
 
