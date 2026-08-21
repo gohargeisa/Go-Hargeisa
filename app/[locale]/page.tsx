@@ -24,7 +24,6 @@ import { Hero } from "@/components/home/hero";
 import { SplashScreenOverlay } from "@/components/shared/splash-overlay";
 import { OfferCard } from "@/components/home/offer-card";
 import { AnnouncementBanner } from "@/components/home/announcement-banner";
-import { BusinessJoinBanner } from "@/components/home/business-join-banner";
 import { ExploreHargeisaSection } from "@/components/home/explore-hargeisa-section";
 import { NewsletterSection } from "@/components/home/newsletter-section";
 import { Reveal } from "@/components/home/reveal";
@@ -112,57 +111,6 @@ export default async function HomePage({
       {announcement && <AnnouncementBanner announcement={announcement} />}
 
       <Hero locale={locale} />
-
-      <BusinessJoinBanner locale={locale} />
-
-      {/* About Go Hargeisa */}
-      <section className="mx-auto max-w-7xl px-5 pb-20 pt-2 md:px-8 md:pb-28 md:pt-12 lg:px-12">
-        <Reveal>
-          <div className="mx-auto max-w-5xl rounded-[32px] border border-primary/20 bg-gradient-to-br from-primary via-primary-700 to-secondary-800 p-8 shadow-premium-lg sm:p-12 md:p-16">
-            <div className="text-center">
-              <span className="inline-flex rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm font-semibold text-white backdrop-blur-sm">
-                {t("aboutBadge")}
-              </span>
-
-              <h2 className="mt-6 text-balance font-display text-3xl font-bold tracking-tight text-white sm:text-4xl md:text-5xl">
-                {t("aboutTitle")}
-              </h2>
-
-              <p className="mx-auto mt-6 max-w-3xl text-balance text-base leading-8 text-white/90 md:mt-8 md:text-lg md:leading-9">
-                {t("aboutDescription1")}
-              </p>
-            </div>
-
-            <div className="mt-12 grid gap-5 sm:grid-cols-3 md:mt-14 md:gap-6">
-              {[
-                { emoji: "🏨", titleKey: "exploreTitle", descKey: "exploreDescription", bg: "bg-amber-100 dark:bg-amber-400/15" },
-                { emoji: "❤️", titleKey: "saveTitle", descKey: "saveDescription", bg: "bg-red-100 dark:bg-red-400/15" },
-                { emoji: "⭐", titleKey: "shareTitle", descKey: "shareDescription", bg: "bg-yellow-100 dark:bg-yellow-400/15" },
-              ].map(({ emoji, titleKey, descKey, bg }) => (
-                <div
-                  key={titleKey}
-                  className="rounded-xl3 bg-white p-6 shadow-soft transition-all duration-300 ease-premium hover:-translate-y-2 hover:shadow-card dark:bg-ink/90 dark:shadow-none sm:p-8"
-                >
-                  <div
-                    className={`mb-5 flex h-14 w-14 items-center justify-center rounded-2xl text-3xl ${bg}`}
-                    aria-hidden="true"
-                  >
-                    {emoji}
-                  </div>
-
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-                    {t(titleKey)}
-                  </h3>
-
-                  <p className="mt-4 leading-7 text-slate-600 dark:text-sand/70">
-                    {t(descKey)}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Reveal>
-      </section>
 
       {featuredOffers.length > 0 && (
         <section className="py-16 md:py-24">
