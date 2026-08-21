@@ -41,8 +41,8 @@ export async function JoinHero({ locale }: { locale: Locale }) {
           <Image
             src="/images/logo.png"
             alt="Go Hargeisa"
-            width={520}
-            height={180}
+            width={1536}
+            height={1024}
             className="mx-auto h-16 w-auto object-contain sm:h-20 md:h-24"
           />
         </Reveal>

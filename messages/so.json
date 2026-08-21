@@ -40,10 +40,10 @@
   "hero": {
     "premiumBadge": "Ta Ugu Horreysay Nooceeda",
     "eyebrow": "Caasimadda Somaliland",
-    "title": "Waxaan Hargeysa ka dhigaynaa mid ka caqli badan",
-    "positioning": "Baadh • La Xidhiidh • Qabso",
-    "subtitle": "Hudheello • Daryeel Caafimaad • Cunto • Wax Ka Badan",
-    "searchPlaceholder": "Raadi hudheello, maqaayado, goobo aad booqato…",
+    "title": "Hargeysa Ka Dhigno Mid Ka Casrisan",
+    "positioning": "Sahami • Xidhiidh • Qabso",
+    "subtitle": "Hudheello • Daryeel Caafimaad • Cunto • Adeegyo • Wax Ka Badan",
+    "searchPlaceholder": "Raadi hudheello, maqaayado, adeegyo, goobo iyo wax kale…",
     "searchButton": "Raadi",
 
     "highlightHotels": "Hudheello",
@@ -123,12 +123,12 @@
     "offerValidUntil": "Waa ansax ilaa {date}",
 
     "hotelsEyebrow": "Degitaan",
-    "hotelsTitle": "Halka Aad Degi Karto",
+    "hotelsTitle": "Hel Halka Aad Degi Karto",
     "hotelsSubtitle": "Hudheello si taxaddar leh loo doortay oo ku habboon miisaaniyad kasta",
     "restaurantsEyebrow": "Cunto",
-    "restaurantsTitle": "Halka Aad Wax Ka Cuni Karto",
+    "restaurantsTitle": "Hel Cuntadaada Xigta",
     "cafesEyebrow": "Cabbid",
-    "cafesTitle": "Dhaqanka Qaxwada iyo Kafateeriyada",
+    "cafesTitle": "Qaxwo, Shaqo iyo Xidhiidh",
     "cafesSubtitle": "Kafateeriyo aad uga shaqayn karto, ku nasan karto ama saaxiibbo kula kulmi karto",
     "viewAllHotelsButton": "Eeg Dhammaan Hudheellada",
     "viewAllRestaurantsButton": "Eeg Dhammaan Maqaayadaha",
@@ -137,16 +137,16 @@
     "attractionsEyebrow": "Sahami",
     "attractionsTitle": "Goobaha Dalxiiska",
     "eventsEyebrow": "Ku Raaxayso",
-    "eventsTitle": "Dhacdooyinka Soo Socda",
-    "eventsSubtitle": "Ha seegin waxa ka socda Hargeysa",
+    "eventsTitle": "Ogow Waxa Ka Socda",
+    "eventsSubtitle": "Hel dhacdooyinka. La xidhiidh magaalada.",
     "viewAllEventsButton": "Eeg Dhammaan Dhacdooyinka",
     "experiencesTitle": "Waayo-aragnimooyin Maxalli ah",
     "featuredTitle": "Ganacsiyada La Xushay",
     "articlesTitle": "Maqaalladii Ugu Dambeeyay",
     "mapTitle": "Khariidadda Hargeysa",
     "exploreHargeisaEyebrow": "Agtaada",
-    "exploreHargeisaTitle": "Sahami Hargeysa",
-    "exploreHargeisaSubtitle": "Wax kasta oo aad u baahan tahay ee magaalada ku wareegsan.",
+    "exploreHargeisaTitle": "Wax Kasta Oo Aad Uga Baahan Tahay Hargeysa",
+    "exploreHargeisaSubtitle": "Daryeel caafimaad, waxbarasho, iibsi iyo adeeg kasta oo muhiim ah — dhammaantood hal meel.",
     "browseCategoriesEyebrow": "Sahami",
     "browseCategoriesTitle": "Sahami Qaybaha",
     "browseCategoriesSubtitle": "Qayb kasta, si toos ah loo cusboonaysiiyay — dooro mid si aad u bilowdo sahaminta.",
@@ -158,10 +158,10 @@
     "exploreHargeisaComingSoonBadge": "Dhawaan",
     "exploreHargeisaComingSoonToast": "Qaybtan ayaa dhawaan iman doonta. Waxaan hadda xaqiijineynaa goobaha si aan kuu siino hage magaalo sax ah.",
     "exploreHargeisaComingSoonDismiss": "Xir",
-    "newsletterTitle": "Hel Wararka Hargeysa",
-    "newsletterSubtitle": "Hel wararkii ugu dambeeyay, dhacdooyinka iyo talooyinka safarka bishiiba mar.",
+    "newsletterTitle": "La Soco Waxa Ka Socda Hargeysa",
+    "newsletterSubtitle": "Ogow wixii cusub • La soco dhacdooyinka • Ha seegin fursadaha",
     "newsletterPlaceholder": "Cinwaanka iimaylkaaga",
-    "newsletterButton": "Isdiiwaangeli",
+    "newsletterButton": "Isdiiwaangeli Hadda",
     "newsletterSuccess": "Mahadsanid — waad isdiiwaangelisay.",
     "newsletterError": "Wax baa qaldamay. Fadlan isku day mar kale.",
     "viewAll": "Dhammaan Arag"
@@ -260,7 +260,7 @@
     "logoPending": "Sumadda rasmiga ah ee la sugayo"
   },
   "footer": {
-    "tagline": "Waxaan Hargeysa ka dhigaynaa mid ka caqli badan — hel meelaha, la xidhiidh ganacsiyada maxalliga ah, kuna qabso si fudud.",
+    "tagline": "Waxaan Hargeysa ka dhigaynaa mid ka caqli badan — hel meelaha, adeegyada, ganacsiyada iyo waaya-aragnimada ee magaalada oo dhan.",
     "explore": "Sahami",
     "company": "Shirkadda",
     "support": "Taageero",
@@ -536,11 +536,11 @@
     "successDescription": "Kooxdayadu waxay dib u eegi doontaa codsigaaga dhawaan.",
     "somethingWentWrong": "Wax baa qaldamay. Fadlan isku day mar kale.",
 
-    "heroHeadline": "Ku Biir Go Hargeisa",
-    "heroSubtitle": "Kobcii ganacsigaaga adigoo gaarsiinaya kumanaan booqdayaal maxalli iyo caalami ah oo adeegsanaya goobta dalxiiska ee ugu horreysa Hargeisa.",
+    "heroHeadline": "Ku Biir Mustaqbalka Hargeysa",
+    "heroSubtitle": "Hargeysa mid ka caqli badan ka dhigami waxay la macno tahay inaan wada koreno — noqo mid la ogaan karo, la xidhiidh macaamiishaada, oo hel ballan-qaadyo, dhammaantood hal meel.",
     "heroCtaButton": "Bilow Diiwaangelinta",
     "heroBenefit1Title": "Aragti Dheeraad ah",
-    "heroBenefit1Description": "Ha lagu dhex helo dalxiisayaasha.",
+    "heroBenefit1Description": "Ha lagu helo dadka wax ka raadinaya Hargeysa.",
     "heroBenefit2Title": "Macaamiil Dheeraad ah",
     "heroBenefit2Description": "Hel codsiyo buugsi iyo xiriir toos ah.",
     "heroBenefit3Title": "Lammaane La Xaqiijiyay",
@@ -561,7 +561,7 @@
 
     "whyJoinTitle": "Waa Maxay Sababta aad Ugu Biirayso Go Hargeisa?",
     "benefit1Title": "Muuqaal Badan",
-    "benefit1Description": "Ka soo muuqo meesha booqdayaashu wax ka raadinayaan.",
+    "benefit1Description": "Ka soo muuqo meesha dadku wax ka raadinayaan Hargeysa.",
     "benefit2Title": "Macaamiil Badan",
     "benefit2Description": "La xiriir dalxiisayaal iyo dadka deegaanka.",
     "benefit3Title": "Khariidad Falgal ah",
@@ -580,7 +580,7 @@
     "step2Title": "Kooxdayadu way eegtaa ganacsigaaga",
     "step2Description": "Waxaan hubinaa faahfaahin kasta ka hor inta aan wax la daabicin.",
     "step3Title": "Ganacsigaagu wuu firfircoonaadaa",
-    "step3Description": "Bilow inaad gaadho booqdayaasha Hargeisa oo dhan.",
+    "step3Description": "Bilow inaad gaadho macaamiishaada Hargeysa oo dhan.",
 
     "formSectionTitle": "Nooga Sheeg Ganacsigaaga",
     "formSectionSubtitle": "Buuxi macluumaadka hoose waana ku eegi doonaa codsigaaga.",
@@ -608,7 +608,8 @@
     "faq5Answer": "Haa. Ganacsiyada cusub waxay ku bilaabmaan Partner Tijaabo ah, oo ka muuqda bogga, ka hor inta aan loo kicin heerka Partner Rasmi ah oo buuxa.",
 
     "finalCtaTitle": "Ma diyaar u tahay inaad korsiiso ganacsigaaga?",
-    "finalCtaSubtitle": "Maanta ku biir Go Hargeisa oo la xiriir kumanaan booqdayaal ah.",
+    "finalCtaSubtitle": "Maanta ku biir Go Hargeisa oo la xidhiidh dadka deggan iyo booqdayaasha magaalada oo dhan.",
+    "finalCtaMobileNote": "Go Hargeisa ayaa dhawaan iman doonta Android iyo iOS — hadda ku biir oo la koro madasha marka ay ku fidayso mobile-ka.",
     "finalCtaButton": "Gudbi Ganacsigaaga"
   },
   "partnerCategories": {
@@ -1839,15 +1840,15 @@
   "about": {
     "eyebrow": "Sheekadayada",
     "title": "Ku Saabsan Go Hargeisa",
-    "heroSubtitle": "Baaro howsheena ee ah in aan soo bandhigno quruxda, dhaqanka iyo martiqaadka Hargeysa dadka safarka ah ee adduunka oo dhan.",
+    "heroSubtitle": "Madal caqli badan oo kugu xidha wax kasta oo aad uga baahan tahay Hargeysa.",
     "heroExplore": "Baaro Hargeysa",
     "heroContact": "Nala Soo Xiriir",
     "scrollHint": "Dhaadhac si aad u baarto",
 
     "storyEyebrow": "Ahaanshahayaga",
     "storyTitle": "U Sheekeynayna Hargeysa Adduunka",
-    "paragraph1": "Go Hargeisa waa <highlight>hage dalxiis oo madax-bannaan</highlight> oo loo dhisay si loogu soo bandhigo Hargeysa — caasimadda Somaliland — booqdayaasha caalamiga ah, safarayaasha ganacsiga, iyo shirkooyinka Soomaalida ee adduunka oo dhan.",
-    "paragraph2": "Waxaan la shaqeynaa hudheellada, maqaayadaha, hagayaasha, iyo machadyada dhaqanka ee maxalliga ah si aan u hayno liistooyinkeena <highlight>sax ah, cusub, oo waxtar dhab ah leh</highlight>, hadday tahay inaad qorsheynayso booqashadaada ugu horreysa ama aad raadinayso kafateeriya cusub oo aad jeceshahay oo kuu dhow.",
+    "paragraph1": "Go Hargeisa waa <highlight>madal caqli badan oo daalacid iyo adeegyo</highlight> loo dhisay si loogu xidho dadka deggan, booqdayaasha, iyo shirkooyinka Soomaalida ee adduunka oo dhan wax kasta oo Hargeysa bixiso — meelaha, ganacsiyada, adeegyada, iyo waaya-aragnimada.",
+    "paragraph2": "Waxaan la shaqeynaa hudheellada, maqaayadaha, adeegyada, iyo machadyada dhaqanka ee maxalliga ah si aan u hayno liistooyinkeena <highlight>sax ah, cusub, oo waxtar dhab ah leh</highlight>, hadday tahay inaad halkan deggan tahay, booqasho ku timid, ama aad raadinayso wax cusub oo kuu dhow.",
     "paragraph3": "Ma haysaa ganacsi aad rabto in la liistoyo, mise waxaad aragtay macluumaad aan la cusboonaysiin? Nala soo xiriir <link>bogga xiriirka</link> — waan ku faraxsanahay inaan ka maqalno.",
 
     "storyStep1Title": "Waxay Ku Bilaabatay Su'aal",
@@ -2052,9 +2053,9 @@
     "emptyStateTitle": "Wali Meelo Wax Iibsi Lama Helin"
   },
   "blog": {
-    "eyebrow": "Joornaalka",
-    "title": "Blog-ga Safarka Hargeysa",
-    "subtitle": "Sheekooyin, hage, iyo talooyin ka yimid dad yaqaan magaalada.",
+    "eyebrow": "Majalada",
+    "title": "Hargeysa Gacantaada Ku Jirta",
+    "subtitle": "Ogow wixii cusub ee Hargeysa — meelaha, adeegyada, iyo dhacdooyinka ka dhigaya magaaladeena mid ka caqli badan oo firfircoon.",
     "scrollHint": "Dhaadhac si aad u baarto",
     "emptyState": "Wali maqaallo lama daabicin.",
     "emptyStateTitle": "Wali Maqaallo Lama Helin",
@@ -3017,7 +3018,7 @@
     "noStaffYetPublic": "Meeshan wali shaqaale lagama darin."
   },
   "siteMetadata": {
-    "titleDefault": "Go Hargeisa | Hagaha Dalxiiska Rasmiga ah ee Hargeysa, Somaliland",
+    "titleDefault": "Go Hargeisa | Waxaan Hargeysa ka dhigaynaa mid ka caqli badan",
     "titleTemplate": "%s | Go Hargeisa",
     "description": "La sahamiso Hargeysa Go Hargeisa. Soo ogow hudheellada, maqaayadaha, kafateeriyada, goobaha dalxiiska, dhacdooyinka, iyo talooyinka safarka ee Somaliland oo dhan.",
     "ogDescription": "Hagaha dalxiiska rasmiga ah ee Hargeysa, Somaliland."
@@ -3028,7 +3029,7 @@
     "sectionsTitle": "Hel Waxa Aad U Baahan Tahay",
     "sectionsSubtitle": "Meelaha muhiimka ah ee Hargeysa oo dhan, loo kala saaray qaybo.",
     "pageTitle": "Adeegyada Magaalada",
-    "pageSubtitle": "Adeegyada muhiimka ah ee Hargeysa — isbitaallada, masaajidada, dugsiyada, iyo waxa u dhexeeya.",
+    "pageSubtitle": "Ogow daryeelka caafimaadka, waxbarashada, qurxinta iyo adeegyada muhiimka ah ee Hargeysa oo dhan — ka dibna la xidhiidh oo si fudud u qabso.",
     "categoryLabel_hospital": "Isbitaallada iyo Xarumaha Caafimaadka",
     "categoryLabel_pharmacy": "Farmashiyada",
     "categoryLabel_mosque": "Masaajidada",

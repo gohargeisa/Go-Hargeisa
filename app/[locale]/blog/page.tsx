@@ -24,8 +24,8 @@ export async function generateMetadata({
   params: { locale: string };
 }): Promise<Metadata> {
   return {
-    title: "Hargeisa Travel Blog",
-  description: "Guides, food, culture and travel tips for visiting Hargeisa, Somaliland.",
+    title: "Hargeisa, At Your Fingertips",
+  description: "Discover what's new in Hargeisa — places, services, events and stories from a smarter city.",
     alternates: localeAlternates(locale as Locale, "/blog"),
   };
 }

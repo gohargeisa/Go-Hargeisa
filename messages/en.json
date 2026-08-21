@@ -43,7 +43,7 @@
     "title": "Making Hargeisa Smarter",
     "positioning": "Discover • Connect • Book",
     "subtitle": "Hotels • Healthcare • Food • More",
-    "searchPlaceholder": "Search hotels, restaurants, places to visit…",
+    "searchPlaceholder": "Search hotels, restaurants, services, places and more…",
     "searchButton": "Search",
 
     "highlightHotels": "Hotels",
@@ -123,12 +123,12 @@
     "offerValidUntil": "Valid until {date}",
 
     "hotelsEyebrow": "Stay",
-    "hotelsTitle": "Where to Stay",
+    "hotelsTitle": "Find Your Stay",
     "hotelsSubtitle": "Handpicked hotels across every budget",
     "restaurantsEyebrow": "Eat",
-    "restaurantsTitle": "Where to Eat",
+    "restaurantsTitle": "Find Your Next Meal",
     "cafesEyebrow": "Sip",
-    "cafesTitle": "Coffee & Cafe Culture",
+    "cafesTitle": "Coffee, Work & Connect",
     "cafesSubtitle": "Coffee shops and cafes to work, relax or catch up",
     "viewAllHotelsButton": "View All Hotels",
     "viewAllRestaurantsButton": "View All Restaurants",
@@ -137,16 +137,16 @@
     "attractionsEyebrow": "Discover",
     "attractionsTitle": "Tourist Attractions",
     "eventsEyebrow": "Enjoy",
-    "eventsTitle": "Upcoming Events",
-    "eventsSubtitle": "Don't miss what's on in Hargeisa",
+    "eventsTitle": "Discover What's Happening",
+    "eventsSubtitle": "Find events. Connect with the city.",
     "viewAllEventsButton": "View All Events",
     "experiencesTitle": "Local Experiences",
     "featuredTitle": "Featured Businesses",
     "articlesTitle": "Latest From the Journal",
     "mapTitle": "Explore Hargeisa on the Map",
     "exploreHargeisaEyebrow": "Around You",
-    "exploreHargeisaTitle": "Explore Hargeisa",
-    "exploreHargeisaSubtitle": "Everything you need around the city.",
+    "exploreHargeisaTitle": "Everything You Need Around Hargeisa",
+    "exploreHargeisaSubtitle": "Healthcare, education, shopping and every essential service — all in one place.",
     "browseCategoriesEyebrow": "Browse",
     "browseCategoriesTitle": "Browse by Category",
     "browseCategoriesSubtitle": "Every category, updated live — pick one to start exploring.",
@@ -158,10 +158,10 @@
     "exploreHargeisaComingSoonBadge": "Coming Soon",
     "exploreHargeisaComingSoonToast": "This section is coming soon. We're currently verifying locations to provide the most accurate city guide.",
     "exploreHargeisaComingSoonDismiss": "Dismiss",
-    "newsletterTitle": "Get Hargeisa in Your Inbox",
-    "newsletterSubtitle": "Monthly picks on new openings, events and travel tips. No spam.",
+    "newsletterTitle": "Stay Updated on Hargeisa",
+    "newsletterSubtitle": "Discover what's new • Follow events • Don't miss out",
     "newsletterPlaceholder": "Your email address",
-    "newsletterButton": "Subscribe",
+    "newsletterButton": "Subscribe Now",
     "newsletterSuccess": "Thanks — you're subscribed.",
     "newsletterError": "Something went wrong. Please try again.",
     "viewAll": "View all"
@@ -260,7 +260,7 @@
     "logoPending": "Official logo pending"
   },
   "footer": {
-    "tagline": "Making Hargeisa smarter — discover places, connect with local businesses, and book with ease.",
+    "tagline": "Making Hargeisa smarter — discover places, services, businesses and experiences across the city.",
     "explore": "Explore",
     "company": "Company",
     "support": "Support",
@@ -536,11 +536,11 @@
     "successDescription": "Our team will review your application shortly.",
     "somethingWentWrong": "Something went wrong. Please try again.",
 
-    "heroHeadline": "Join Go Hargeisa",
-    "heroSubtitle": "Grow your business by reaching thousands of local and international visitors through the leading tourism platform in Hargeisa.",
+    "heroHeadline": "Join the Future of Hargeisa",
+    "heroSubtitle": "Making Hargeisa smarter means growing together — become discoverable, connect with customers, and get booked, all in one place.",
     "heroCtaButton": "Start Your Registration",
     "heroBenefit1Title": "More Visibility",
-    "heroBenefit1Description": "Get discovered by travelers.",
+    "heroBenefit1Description": "Get discovered by people searching in Hargeisa.",
     "heroBenefit2Title": "More Customers",
     "heroBenefit2Description": "Receive direct booking and contact requests.",
     "heroBenefit3Title": "Verified Partner",
@@ -561,7 +561,7 @@
 
     "whyJoinTitle": "Why Join Go Hargeisa?",
     "benefit1Title": "More Visibility",
-    "benefit1Description": "Appear where visitors search.",
+    "benefit1Description": "Appear where people search in Hargeisa.",
     "benefit2Title": "More Customers",
     "benefit2Description": "Reach tourists and local residents.",
     "benefit3Title": "Interactive Map",
@@ -580,7 +580,7 @@
     "step2Title": "Our team reviews your business",
     "step2Description": "We check every detail before anything goes live.",
     "step3Title": "Your business goes live",
-    "step3Description": "Start reaching visitors across Hargeisa.",
+    "step3Description": "Start reaching customers across Hargeisa.",
 
     "formSectionTitle": "Tell Us About Your Business",
     "formSectionSubtitle": "Complete the information below and we'll review your request.",
@@ -608,8 +608,9 @@
     "faq5Answer": "Yes. New businesses start as Trial Partners, visible on the site, before being upgraded to full Official Partner status.",
 
     "finalCtaTitle": "Ready to grow your business?",
-    "finalCtaSubtitle": "Join Go Hargeisa today and connect with thousands of visitors.",
-    "finalCtaButton": "Submit Your Business"
+    "finalCtaSubtitle": "Join Go Hargeisa today and connect with residents and visitors across the city.",
+    "finalCtaButton": "Submit Your Business",
+    "finalCtaMobileNote": "Go Hargeisa is coming soon to Android and iOS — join now and grow with the platform as it expands to mobile."
   },
   "partnerCategories": {
     "hotel": "Hotel",
@@ -1839,15 +1840,15 @@
   "about": {
     "eyebrow": "Our Story",
     "title": "About Go Hargeisa",
-    "heroSubtitle": "Discover our mission to showcase the beauty, culture and hospitality of Hargeisa to travelers from around the world.",
+    "heroSubtitle": "A smart platform connecting you with everything you need in Hargeisa — places, services, businesses and experiences.",
     "heroExplore": "Explore Hargeisa",
     "heroContact": "Contact Us",
     "scrollHint": "Scroll to discover",
 
     "storyEyebrow": "Who We Are",
     "storyTitle": "Telling Hargeisa's Story to the World",
-    "paragraph1": "Go Hargeisa is an <highlight>independent tourism guide</highlight> built to introduce Hargeisa — the capital of Somaliland — to international visitors, business travelers, and the global Somali diaspora.",
-    "paragraph2": "We work with local hotels, restaurants, guides and cultural institutions to keep our listings <highlight>accurate, current and genuinely useful</highlight>, whether you're planning a first visit or looking for a new favorite cafe close to home.",
+    "paragraph1": "Go Hargeisa is a <highlight>smart discovery and services platform</highlight> built to connect residents, visitors and the global Somali diaspora with everything Hargeisa has to offer — places, businesses, services and experiences.",
+    "paragraph2": "We work with local hotels, restaurants, services and cultural institutions to keep our listings <highlight>accurate, current and genuinely useful</highlight>, whether you live here, are visiting, or are just looking for what's new nearby.",
     "paragraph3": "Have a business you'd like listed, or spotted something out of date? Reach out through our <link>contact page</link> — we'd love to hear from you.",
 
     "storyStep1Title": "It Started With a Question",
@@ -2052,9 +2053,9 @@
     "emptyStateTitle": "No Shopping Listings Yet"
   },
   "blog": {
-    "eyebrow": "The Journal",
-    "title": "Hargeisa Travel Blog",
-    "subtitle": "Stories, guides and tips from people who know the city.",
+    "eyebrow": "The Magazine",
+    "title": "Hargeisa, At Your Fingertips",
+    "subtitle": "Discover what's new in Hargeisa — the places, services and events shaping a smarter, more vibrant city.",
     "scrollHint": "Scroll to discover",
     "emptyState": "No articles published yet.",
     "emptyStateTitle": "No Articles Yet",
@@ -3017,7 +3018,7 @@
     "noStaffYetPublic": "This listing hasn't added any staff yet."
   },
   "siteMetadata": {
-    "titleDefault": "Go Hargeisa | Official Tourism Guide to Hargeisa, Somaliland",
+    "titleDefault": "Go Hargeisa | Making Hargeisa Smarter",
     "titleTemplate": "%s | Go Hargeisa",
     "description": "Explore Hargeisa with Go Hargeisa. Discover hotels, restaurants, cafés, attractions, events, and travel tips across Somaliland.",
     "ogDescription": "The official tourism guide to Hargeisa, Somaliland."
@@ -3028,7 +3029,7 @@
     "sectionsTitle": "Find What You Need",
     "sectionsSubtitle": "Essential places across Hargeisa, organized by category.",
     "pageTitle": "City Services",
-    "pageSubtitle": "Essential services around Hargeisa — hospitals, mosques, schools, and everything in between.",
+    "pageSubtitle": "Discover healthcare, education, beauty, automotive and every essential service around Hargeisa — then connect and book with ease.",
     "categoryLabel_hospital": "Hospitals & Clinics",
     "categoryLabel_pharmacy": "Pharmacies",
     "categoryLabel_mosque": "Mosques",

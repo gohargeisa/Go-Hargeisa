@@ -164,8 +164,8 @@ export function SiteHeader({
             <Image
               src={logoUrl || "/images/logo.png"}
               alt="Go Hargeisa"
-              width={520}
-              height={180}
+              width={1536}
+              height={1024}
               priority
               className="h-12 sm:h-20 md:h-24 w-auto object-contain"
             />

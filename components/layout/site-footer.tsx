@@ -79,7 +79,7 @@ export function SiteFooter({
           <Image
             src={logoUrl || "/images/logo.png"}
             alt="Go Hargeisa"
-            width={280}
+            width={165}
             height={110}
             loading="lazy"
             className="mb-6 h-auto w-auto transition-transform duration-300 ease-premium hover:scale-105"

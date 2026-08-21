@@ -40,7 +40,7 @@ export async function generateMetadata({
   return {
     title: "About Go Hargeisa",
     description:
-      "Go Hargeisa is an independent guide to the capital of Somaliland, built for travelers, business visitors and the diaspora.",
+      "Go Hargeisa is a smart discovery and services platform for Hargeisa — connecting residents, visitors and the diaspora with places, businesses, services and experiences across the city.",
     alternates: localeAlternates(locale as Locale, "/about"),
   };
 }

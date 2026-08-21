@@ -23,6 +23,8 @@ export async function JoinFinalCta({ locale }: { locale: Locale }) {
             {t("finalCtaButton")}
             <ArrowRight size={18} aria-hidden="true" />
           </a>
+
+          <p className="relative mx-auto mt-6 max-w-lg text-balance text-xs text-white/70 sm:text-sm">{t("finalCtaMobileNote")}</p>
         </div>
       </Reveal>
     </section>
