@@ -54,6 +54,82 @@ export interface Review {
  * maps_url not google_maps_url, amenities_v2 for tags) differs from theirs. */
 export type BusinessListingType = "hotel" | "restaurant" | "cafe" | "service" | "city_service";
 
+/** Per-business permission keys a team member can be granted on one
+ * business_access_grants row — see supabase/migrations/20260901000001_
+ * access_control_system.sql. Absent/false means "no access"; an empty
+ * grant object is the default (visible, can do nothing). */
+export type BusinessPermissionKey =
+  | "orders_view"
+  | "orders_manage"
+  | "bookings_view"
+  | "bookings_manage"
+  | "appointments_view"
+  | "appointments_manage"
+  | "businesses_view"
+  | "businesses_edit"
+  | "reviews_view"
+  | "reviews_moderate";
+
+/** Platform-wide (not tied to one business) permission keys a team member
+ * can be granted on their single team_platform_permissions row. */
+export type PlatformPermissionKey =
+  | "partners_view"
+  | "partners_add"
+  | "partners_edit"
+  | "partners_manage_status"
+  | "content_view"
+  | "content_create"
+  | "content_edit"
+  | "content_publish"
+  | "reports_view"
+  | "reports_export"
+  | "analytics_view"
+  | "requests_view"
+  | "requests_manage";
+
+export type BusinessPermissions = Partial<Record<BusinessPermissionKey, boolean>>;
+export type PlatformPermissions = Partial<Record<PlatformPermissionKey, boolean>>;
+
+/** One team member's access to one specific business — see
+ * business_access_grants. */
+export interface BusinessAccessGrant {
+  id: string;
+  userId: string;
+  listingType: BusinessListingType;
+  listingId: string;
+  permissions: BusinessPermissions;
+  isActive: boolean;
+  grantedBy?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** One team member's platform-wide admin permissions — see
+ * team_platform_permissions. At most one row per user. */
+export interface TeamPlatformPermissionsGrant {
+  id: string;
+  userId: string;
+  permissions: PlatformPermissions;
+  isActive: boolean;
+  grantedBy?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** A recognition-only honorary title (e.g. Father/Mother) — see
+ * honorary_members. Carries zero permissions; never read by any
+ * authorization check. */
+export interface HonoraryMember {
+  id: string;
+  userId: string;
+  titleEn: string;
+  titleAr?: string;
+  titleSo?: string;
+  isPublic: boolean;
+  createdBy?: string;
+  createdAt: string;
+}
+
 /** Listing types the admin ownership-assignment system (lib/actions/claims.ts:
  * getOwnedListings/transferOwnership/removeOwnership) can operate on. Kept as
  * its own alias (rather than inlining BusinessListingType at each call site)
@@ -121,6 +197,13 @@ export interface Product {
    * caller that never reads this field keeps working unchanged. See
    * ProductVariant below and supabase/migrations/20260825000001_product_variants.sql. */
   variants?: ProductVariant[];
+  /** Product-specific configurable options (shade is NOT here — that's
+   * `variants`; this is everything else: gift wrap, cake writing, milk
+   * type, toppings, candles...). Present only for products an owner has
+   * actually configured — absent/empty means "nothing to configure", the
+   * same as every product before this system existed. See ProductOption
+   * below and supabase/migrations/20260829000001_product_options.sql. */
+  options?: ProductOption[];
 }
 
 /** One purchasable variant of a Product (a specific shade/finish/size).
@@ -154,6 +237,59 @@ export interface ProductVariant {
   price?: number;
   isAvailable: boolean;
   sortOrder: number;
+}
+
+/** One selectable choice within a 'select'/'multiselect' ProductOption
+ * (e.g. {value:"oat", label:"Oat Milk", priceDelta:0.5}). */
+export interface ProductOptionChoice {
+  value: string;
+  label: string;
+  labelAr?: string;
+  labelSo?: string;
+  priceDelta?: number;
+}
+
+/** One configurable option a specific product exposes — the reusable
+ * mechanism behind every category's "own" ordering fields (gift wrap on a
+ * bouquet, milk type on a latte, writing text on a cake, toppings on a
+ * pizza, candle count on a birthday cake). Owned by exactly one product
+ * (`productId`), never shared across products or inferred from category —
+ * two products in the same category can have entirely different option
+ * sets. A product with no options renders exactly as it always has. See
+ * supabase/migrations/20260829000001_product_options.sql. */
+export interface ProductOption {
+  id: string;
+  productId: string;
+  key: string;
+  label: string;
+  labelAr?: string;
+  labelSo?: string;
+  type: "select" | "multiselect" | "boolean" | "text" | "number";
+  required: boolean;
+  /** Flat price impact for 'boolean' (added when true) and per-unit
+   * multiplier for 'number' (price * entered quantity). 'select'/
+   * 'multiselect' price from each choice's own `priceDelta` instead. */
+  priceDelta: number;
+  choices: ProductOptionChoice[];
+  placeholder?: string;
+  placeholderAr?: string;
+  placeholderSo?: string;
+  maxLength?: number;
+  sortOrder: number;
+}
+
+/** The frozen snapshot of one ProductOption selection at order time — lives
+ * on OrderItem.selectedOptions, resolved and priced server-side in
+ * submit_cart_order(), never trusted from the client. `value` is the raw
+ * selection (a string, string[], boolean, or number depending on `type`);
+ * `valueLabel` is what's actually shown to the business owner/admin. */
+export interface SelectedProductOption {
+  key: string;
+  label: string;
+  type: ProductOption["type"];
+  value: string | string[] | boolean | number;
+  valueLabel: string;
+  priceDelta: number;
 }
 
 /** Phase 4 Medical Appointment Engine — one shared engine for Hospitals,
@@ -880,6 +1016,17 @@ export interface OrderItem {
   addons: ProductAddon[];
   addonsTotal: number;
   lineTotal: number;
+  /** Present only when this line was a specific shade/finish/size — see
+   * ProductVariant. Was previously captured client-side but silently
+   * dropped when read back (mapOrderItem never read these columns) — now
+   * fixed, so the business owner and admin actually see what was ordered. */
+  variantId?: string;
+  variantName?: string;
+  variantSku?: string;
+  /** Frozen configuration snapshot — see SelectedProductOption. Absent for
+   * every line with no configured options, i.e. every order on the
+   * platform before this system existed. */
+  selectedOptions?: SelectedProductOption[];
 }
 
 export type ProductOrderStatus = "pending" | "confirmed" | "preparing" | "ready" | "out_for_delivery" | "completed" | "cancelled";
@@ -903,6 +1050,12 @@ export interface ProductOrder {
   fulfillmentType: "delivery" | "pickup";
   deliveryAddress?: string;
   preferredDate?: string;
+  /** Free-form time/window (e.g. "14:00" or "Afternoon (2-5 PM)") — only
+   * ever collected for gift-oriented orders (flowers, cakes, ...); absent
+   * for every order before this existed and for restaurant/cafe/other
+   * generic orders, which never show the field. See
+   * 20260831000001_product_order_preferred_time.sql. */
+  preferredTime?: string;
   recipientName?: string;
   recipientPhone?: string;
   occasion?: string;

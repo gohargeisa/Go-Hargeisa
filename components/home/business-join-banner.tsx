@@ -168,34 +168,19 @@ export function BusinessJoinBanner({ locale }: { locale: Locale }) {
         )}
 
         <div className="relative mx-auto max-w-2xl">
-          <m.span
+          <m.h2
             custom={0}
             initial={initial}
             whileInView="show"
             viewport={{ once: true }}
             variants={fadeUp}
-            className="relative inline-flex items-center gap-2 rounded-full border border-primary-300/40 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-primary-200 shadow-[0_0_24px_rgba(245,158,11,0.25)] backdrop-blur-md"
-          >
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary-300 opacity-75" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary-300" />
-            </span>
-            {t("badge")}
-          </m.span>
-
-          <m.h2
-            custom={1}
-            initial={initial}
-            whileInView="show"
-            viewport={{ once: true }}
-            variants={fadeUp}
-            className="mt-8 text-balance font-display text-3xl font-bold leading-[1.15] tracking-tight text-white sm:text-4xl md:text-[2.75rem]"
+            className="text-balance font-display text-3xl font-bold leading-[1.15] tracking-tight text-white sm:text-4xl md:text-[2.75rem]"
           >
             {t.rich("headline", { gold: goldChunk })}
           </m.h2>
 
           <m.p
-            custom={2}
+            custom={1}
             initial={initial}
             whileInView="show"
             viewport={{ once: true }}
@@ -207,7 +192,7 @@ export function BusinessJoinBanner({ locale }: { locale: Locale }) {
 
           {/* Scarcity label — plain static copy, no live counter. */}
           <m.span
-            custom={3}
+            custom={2}
             initial={initial}
             whileInView="show"
             viewport={{ once: true }}
@@ -220,7 +205,7 @@ export function BusinessJoinBanner({ locale }: { locale: Locale }) {
           {/* The main offer — deliberately the single largest, brightest
               element on the card, with FREE as the clear focal point. */}
           <m.div
-            custom={4}
+            custom={3}
             initial={initial}
             whileInView="show"
             viewport={{ once: true }}
@@ -245,7 +230,7 @@ export function BusinessJoinBanner({ locale }: { locale: Locale }) {
           </m.div>
 
           <m.div
-            custom={5}
+            custom={4}
             initial={initial}
             whileInView="show"
             viewport={{ once: true }}
@@ -267,7 +252,7 @@ export function BusinessJoinBanner({ locale }: { locale: Locale }) {
               with a hover shine sweep and lift; "Learn More" is a plain
               text link underneath so it reads as clearly secondary. */}
           <m.div
-            custom={6}
+            custom={5}
             initial={initial}
             whileInView="show"
             viewport={{ once: true }}
@@ -304,7 +289,7 @@ export function BusinessJoinBanner({ locale }: { locale: Locale }) {
           {/* QR card — glass panel, static SVG (public/images/join-qr.svg),
               no next/image since local SVGs need dangerouslyAllowSVG. */}
           <m.div
-            custom={7}
+            custom={6}
             initial={initial}
             whileInView="show"
             viewport={{ once: true }}
@@ -321,7 +306,7 @@ export function BusinessJoinBanner({ locale }: { locale: Locale }) {
           </m.div>
 
           <m.p
-            custom={8}
+            custom={7}
             initial={initial}
             whileInView="show"
             viewport={{ once: true }}
@@ -332,7 +317,7 @@ export function BusinessJoinBanner({ locale }: { locale: Locale }) {
           </m.p>
 
           <m.div
-            custom={9}
+            custom={8}
             initial={initial}
             whileInView="show"
             viewport={{ once: true }}

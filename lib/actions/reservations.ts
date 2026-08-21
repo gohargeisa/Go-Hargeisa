@@ -101,7 +101,7 @@ export async function updateReservationStatus(
   status: "pending" | "confirmed" | "cancelled" | "completed",
   revalidatePaths: string[]
 ): Promise<{ ok: boolean; error?: string }> {
-  const supabase = await assertCanManageListing(listingType, listingId);
+  const supabase = await assertCanManageListing(listingType, listingId, "bookings_manage");
 
   const { error } = await supabase
     .from("table_reservations")

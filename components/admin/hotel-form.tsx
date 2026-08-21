@@ -13,6 +13,7 @@ import { GoogleMapsLocationField } from "@/components/admin/google-maps-location
 import { Field, TagInput, inputClass } from "@/components/admin/form-shared";
 import { AmenitiesPicker } from "@/components/admin/amenities-picker";
 import { OpeningHoursEditor } from "@/components/shared/opening-hours-editor";
+import { AssignedOwnerField, type AssignedOwner } from "@/components/admin/assigned-owner-field";
 import { createRecord, updateRecord } from "@/lib/actions/admin";
 import { useUnsavedChangesWarning } from "@/lib/hooks/use-unsaved-changes-warning";
 import { HOTEL_TYPE_ORDER, hotelTypeLabel, starRatingLabel, STAR_RATING_OPTIONS, type HotelType } from "@/lib/config/hotel-attributes";
@@ -87,6 +88,8 @@ export function HotelForm({
   cafeOptions = [],
   initialRooms = [],
   canFeature = true,
+  canAssignOwner = false,
+  initialOwner = null,
 }: {
   locale: Locale;
   mode: "create" | "edit";
@@ -99,6 +102,10 @@ export function HotelForm({
   // owners reach this same form (requireListingsAccess) to manage their
   // own listing, but self-promoting to "featured" isn't theirs to grant.
   canFeature?: boolean;
+  // Same owner-only gate as canFeature — a business_owner never sees the
+  // Assigned Owner field at all (see AssignedOwnerField's own doc comment).
+  canAssignOwner?: boolean;
+  initialOwner?: AssignedOwner | null;
 }) {
   const t = useTranslations("admin");
   const tw = useTranslations("weekdays");
@@ -151,6 +158,7 @@ export function HotelForm({
     numberOfFloors: initial?.numberOfFloors ?? "",
     yearEstablished: initial?.yearEstablished ?? "",
   });
+  const [owner, setOwner] = useState<AssignedOwner | null>(initialOwner);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [dirty, setDirty] = useState(false);
@@ -170,6 +178,12 @@ export function HotelForm({
     }
 
     const payload = {
+      // Only meaningful on create — an edit's owner changes are persisted
+      // immediately by AssignedOwnerField via transferOwnership/
+      // removeOwnership, not through this payload (updateRecord never
+      // reads owner_id at all, so a business_owner submitting this form
+      // has no field here that could change ownership).
+      owner_id: mode === "create" ? owner?.id ?? null : undefined,
       slug: form.slug,
       name: form.name,
       short_description: form.shortDescription,
@@ -520,6 +534,17 @@ export function HotelForm({
             </select>
           </Field>
         </div>
+
+        {canAssignOwner && (
+          <AssignedOwnerField
+            locale={locale}
+            mode={mode}
+            listingType="hotel"
+            listingId={hotelId}
+            value={owner}
+            onChange={setOwner}
+          />
+        )}
 
         {canFeature && (
           <label className="flex items-center gap-2 text-sm font-medium">

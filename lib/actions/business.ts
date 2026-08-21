@@ -1,12 +1,16 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendEmail } from "@/lib/email/send";
 import { bookingStatusEmail, reviewReplyEmail } from "@/lib/email/templates";
+import { getAccessibleListings, ACTIVE_BUSINESS_COOKIE } from "@/lib/data/business";
+import { hasBusinessGrantPermission } from "@/lib/data/access-control";
+import { listingKey } from "@/lib/utils/listing-key";
 import type { Locale } from "@/lib/i18n/config";
-import type { BusinessListingType } from "@/types";
+import type { BusinessListingType, BusinessPermissionKey } from "@/types";
 
 /** Every server action here receives revalidatePaths[0] as `/${locale}/...`
  * (verified across every caller) — reused as a best-effort signal for which
@@ -29,8 +33,16 @@ const LISTING_TABLE: Record<BusinessListingType, "hotels" | "restaurants" | "caf
  * since bookings/reviews/messages/subscriptions all authorize the same way:
  * via the parent listing's owner_id, not a column of their own. RLS on each
  * new table mirrors this server-side as the authoritative backstop.
+ *
+ * `requiredPermission` is the Team Member fallback: when the caller isn't
+ * the platform owner and doesn't own this listing, they're only let through
+ * if they hold an active business_access_grants row for this exact
+ * (listingType, listingId) with that specific permission set true. Callers
+ * that don't pass it get owner/business_owner-only behavior, unchanged from
+ * before this fallback existed — a team grant never widens access beyond
+ * what a caller explicitly asked to check.
  */
-export async function assertCanManageListing(listingType: BusinessListingType, listingId: string) {
+export async function assertCanManageListing(listingType: BusinessListingType, listingId: string, requiredPermission?: BusinessPermissionKey) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -46,6 +58,10 @@ export async function assertCanManageListing(listingType: BusinessListingType, l
     const table = LISTING_TABLE[listingType];
     const { data: listing } = await supabase.from(table).select("owner_id").eq("id", listingId).single();
     if ((listing as { owner_id: string | null } | null)?.owner_id === user.id) return supabase;
+  }
+
+  if (requiredPermission && (await hasBusinessGrantPermission(user.id, listingType, listingId, requiredPermission))) {
+    return supabase;
   }
 
   throw new Error("Not authorized.");
@@ -106,7 +122,7 @@ export async function createBooking(
   input: BookingInput,
   revalidatePaths: string[]
 ): Promise<{ ok: boolean; error?: string }> {
-  const supabase = await assertCanManageListing("hotel", hotelId);
+  const supabase = await assertCanManageListing("hotel", hotelId, "bookings_manage");
 
   if (input.roomId) {
     const { data: available } = await supabase.rpc("room_capacity_available", {
@@ -133,7 +149,7 @@ export async function updateBookingStatus(
   status: BookingInput["status"],
   revalidatePaths: string[]
 ): Promise<{ ok: boolean; error?: string }> {
-  const supabase = await assertCanManageListing("hotel", hotelId);
+  const supabase = await assertCanManageListing("hotel", hotelId, "bookings_manage");
 
   const { data: existing } = await supabase
     .from("bookings")
@@ -194,7 +210,7 @@ export async function replyToReview(
   replyText: string,
   revalidatePaths: string[]
 ): Promise<{ ok: boolean; error?: string }> {
-  const supabase = await assertCanManageListing(listingType, listingId);
+  const supabase = await assertCanManageListing(listingType, listingId, "reviews_moderate");
 
   const { data: existingReview } = await supabase
     .from("reviews")
@@ -255,13 +271,46 @@ export async function reportReview(
   return { ok: true };
 }
 
+/**
+ * "My Businesses" switcher — sets which listing (BusinessHeader) the
+ * dashboard is scoped to, for both a Business Partner's own listings AND a
+ * Team Member's granted ones. Re-derives the user's accessible listings
+ * server-side and only accepts a (listingType, id) pair that's actually in
+ * that set — the cookie can never point a session at a listing this user
+ * neither owns nor was granted, matching the same server-scoped read every
+ * other business data fetch already uses (getAccessibleListings). Every
+ * mutating action still re-checks its own listingId independently
+ * (assertCanManageListing), so this selection carries no authorization
+ * weight — it only decides what the dashboard SHOWS, never what it allows.
+ */
+export async function setActiveBusiness(listingType: BusinessListingType, listingId: string): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Not signed in." };
+
+  const listings = await getAccessibleListings(user.id);
+  const match = listings.find((l) => l.listingType === listingType && l.id === listingId && l.partnerStatus === "official");
+  if (!match) return { ok: false, error: "Not authorized." };
+
+  const cookieStore = await cookies();
+  cookieStore.set(ACTIVE_BUSINESS_COOKIE, listingKey(match), {
+    path: "/",
+    httpOnly: true,
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 365,
+  });
+  return { ok: true };
+}
+
 export async function markMessageRead(
   messageId: string,
   listingType: BusinessListingType,
   listingId: string,
   revalidatePaths: string[]
 ): Promise<{ ok: boolean; error?: string }> {
-  const supabase = await assertCanManageListing(listingType, listingId);
+  const supabase = await assertCanManageListing(listingType, listingId, "businesses_view");
 
   const { error } = await supabase
     .from("business_messages")

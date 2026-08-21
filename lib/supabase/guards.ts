@@ -2,7 +2,9 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { toHeaderUser, type HeaderUser } from "@/lib/supabase/header-user";
+import { hasPlatformPermission } from "@/lib/data/access-control";
 import type { Locale } from "@/lib/i18n/config";
+import type { PlatformPermissionKey } from "@/types";
 
 /**
  * Resolves the signed-in user's header info (name, role, avatar) server-side
@@ -128,4 +130,123 @@ export async function requireListingsAccess(
   }
 
   return { userId: user.id, role: profile.role };
+}
+
+/**
+ * Same door as requireListingsAccess, widened for the /business dashboard
+ * specifically: also lets in a Team Member (role = 'user') who holds at
+ * least one active business_access_grants row, so they can reach the
+ * dashboard shell without needing role = 'business_owner'. Kept as its own
+ * function (not a change to requireListingsAccess) since that guard is
+ * also used by /admin/{hotels,restaurants,cafes,city-services}/[id]/edit,
+ * which are unaffected by this — a team member's grant is dashboard access,
+ * not full listing-editor access.
+ */
+export async function requireBusinessAccess(
+  locale: Locale,
+  redirectTo: string
+): Promise<{ userId: string; role: "owner" | "business_owner" | "team_member" } | null> {
+  if (!isSupabaseConfigured()) return null;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect(`/${locale}/auth/login?next=${encodeURIComponent(redirectTo)}`);
+  }
+
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+
+  if (profile?.role === "owner" || profile?.role === "business_owner") {
+    return { userId: user.id, role: profile.role };
+  }
+
+  const { count } = await supabase
+    .from("business_access_grants")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .eq("is_active", true);
+
+  if (!count) {
+    redirect(`/${locale}`);
+  }
+
+  return { userId: user.id, role: "team_member" };
+}
+
+/**
+ * Guards one platform-wide admin section (Partners, Content, Reports,
+ * Analytics, join Requests) for a Team Member: role = 'owner' always
+ * passes; anyone else needs an active team_platform_permissions row with
+ * this exact permission true. Used in place of requireAdmin/requireOwner
+ * on the specific admin pages a team member's platform permission should
+ * unlock — every other /admin page (Users, Settings, Categories, ...)
+ * still requires requireOwner unchanged.
+ */
+export async function requirePlatformPermission(locale: Locale, redirectTo: string, permission: PlatformPermissionKey) {
+  if (!isSupabaseConfigured()) return null;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect(`/${locale}/auth/login?next=${encodeURIComponent(redirectTo)}`);
+  }
+
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  if (profile?.role === "owner") return user;
+
+  if (await hasPlatformPermission(user.id, permission)) return user;
+
+  redirect(`/${locale}`);
+}
+
+/**
+ * Same "get past the door" role as requireListingsAccess, widened for
+ * app/[locale]/admin/layout.tsx specifically: also lets in a Team Member
+ * (role = 'user') who holds an active team_platform_permissions row with
+ * ANY permission granted — the shell itself doesn't care which one, each
+ * individual page still enforces its own exact requirement via
+ * requirePlatformPermission (Partners/Requests/Content) or requireOwner
+ * (everything else). Fixes the gap where a team member granted e.g.
+ * partners_view could never reach /admin/partners at all, because this
+ * layout's own gate — previously plain requireListingsAccess — redirected
+ * them home before their page-level check ever ran.
+ */
+export async function requireAdminAreaAccess(
+  locale: Locale,
+  redirectTo: string
+): Promise<{ userId: string; role: "owner" | "business_owner" | "team_member" } | null> {
+  if (!isSupabaseConfigured()) return null;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect(`/${locale}/auth/login?next=${encodeURIComponent(redirectTo)}`);
+  }
+
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+
+  if (profile?.role === "owner" || profile?.role === "business_owner") {
+    return { userId: user.id, role: profile.role };
+  }
+
+  const { count } = await supabase
+    .from("team_platform_permissions")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .eq("is_active", true);
+
+  if (!count) {
+    redirect(`/${locale}`);
+  }
+
+  return { userId: user.id, role: "team_member" };
 }

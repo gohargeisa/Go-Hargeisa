@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { logActivity } from "./activity";
+import { upgradeToBusinessOwner } from "./claims";
+import { hasAnyBusinessGrantPermission } from "@/lib/data/access-control";
 
 const ALLOWED_TABLES = ["hotels", "restaurants", "cafes", "services", "attractions", "events", "articles"] as const;
 export type AllowedTable = (typeof ALLOWED_TABLES)[number];
@@ -71,11 +73,16 @@ if (userProfile?.role !== "owner") {
 }
 
 /**
- * Same door as assertOwner, but also lets a business_owner through for
- * the three tables they're allowed to edit. This only decides whether the
- * request is allowed to reach the database — RLS (owner_id = auth.uid())
- * is what actually stops a business_owner from touching a listing they
- * don't own, so it stays authoritative even if this check is ever wrong.
+ * Same door as assertOwner, but also lets a business_owner (or a team
+ * member granted businesses_edit) through for the tables they're allowed
+ * to edit. This only decides whether the request is allowed to reach the
+ * database — RLS (owner_id = auth.uid(), or has_business_permission(...,
+ * 'businesses_edit') for a team member) is what actually stops anyone from
+ * touching a listing they don't own or weren't granted, so it stays
+ * authoritative even if this check is ever wrong. The team-member check is
+ * deliberately coarse (any active businesses_edit grant, not this specific
+ * row) for the exact same reason the business_owner check above is
+ * role-only — this function has no listing id to check against yet.
  */
 async function assertOwnerOrBusinessOwner(table: AllowedTable) {
   const supabase = await createClient();
@@ -89,6 +96,10 @@ async function assertOwnerOrBusinessOwner(table: AllowedTable) {
 
   if (role === "owner") return { supabase, role };
   if (role === "business_owner" && BUSINESS_OWNER_TABLES.has(table)) return { supabase, role };
+
+  if (BUSINESS_OWNER_TABLES.has(table) && (await hasAnyBusinessGrantPermission(user.id, "businesses_edit"))) {
+    return { supabase, role: "team_member" as const };
+  }
 
   throw new Error("Not authorized.");
 }
@@ -201,11 +212,11 @@ export async function toggleListingVisibility(
   return { ok: true };
 }
 
-// Feature/Pin only apply to the tables built on the shared listing shape
-// (hotels/restaurants/cafes/attractions all carry `featured` and
-// `is_pinned`) — events/articles use a different, simpler row shape and
-// have neither column.
-const FEATURABLE_TABLES = ["hotels", "restaurants", "cafes", "attractions"] as const;
+// Feature/Pin apply to every table that carries `featured` and `is_pinned`
+// columns — confirmed directly against the schema for all six (hotels,
+// restaurants, cafes, attractions, city_services, services); events/
+// articles use a different, simpler row shape and have neither column.
+const FEATURABLE_TABLES = ["hotels", "restaurants", "cafes", "attractions", "city_services", "services"] as const;
 export type FeaturableTable = (typeof FEATURABLE_TABLES)[number];
 
 /** Owner-only one-click "Feature" toggle — the column already existed and
@@ -303,6 +314,17 @@ export async function createRecord(
 
   if (error || !inserted) {
     return { ok: false, error: error?.message ?? "Create failed — the record was not saved." };
+  }
+
+  // Assigning an owner at creation time (hotels/restaurants/cafes' admin
+  // forms, via AssignedOwnerField) needs the same role bump
+  // transferOwnership already gives an existing listing's new owner —
+  // otherwise the account would have owner_id set on a row but no
+  // 'business_owner' role, and requireListingsAccess would still bounce
+  // them from /business.
+  const assignedOwnerId = (payload as { owner_id?: string | null }).owner_id;
+  if (assignedOwnerId) {
+    await upgradeToBusinessOwner(supabase, assignedOwnerId);
   }
 
   for (const path of revalidatePaths) {

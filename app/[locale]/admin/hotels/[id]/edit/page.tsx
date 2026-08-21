@@ -9,6 +9,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { HotelForm } from "@/components/admin/hotel-form";
 import { getRestaurants } from "@/lib/data/restaurants";
 import { getCafes } from "@/lib/data/cafes";
+import { getUserDisplayInfo } from "@/lib/actions/claims";
 import type { MediaVideo, OpeningHoursGroup } from "@/types";
 
 export const metadata: Metadata = { title: "Edit Hotel — Admin" };
@@ -57,6 +58,12 @@ export default async function EditHotelPage({
     supabase.from("hotel_rooms" as any).select("*, room_images(*)").eq("hotel_id", hotel.id).order("sort_order", { ascending: true }),
   ]);
 
+  // Only a site admin may see/change the Assigned Owner field —
+  // getUserDisplayInfo is itself admin-gated (assertOwner), so this only
+  // ever runs for role='owner'.
+  const canAssignOwner = access?.role === "owner";
+  const initialOwner = canAssignOwner && hotel.owner_id ? await getUserDisplayInfo(hotel.owner_id) : null;
+
   const gallery = Array.isArray(hotel.gallery)
     ? (hotel.gallery as unknown as { url: string; alt?: string; category?: string }[])
     : [];
@@ -69,6 +76,8 @@ export default async function EditHotelPage({
         mode="edit"
         hotelId={hotel.id}
         canFeature={access?.role === "owner"}
+        canAssignOwner={canAssignOwner}
+        initialOwner={initialOwner ? { id: initialOwner.id, name: initialOwner.fullName, email: initialOwner.email } : null}
         restaurantOptions={restaurants.map((r) => ({ id: r.id, name: r.name }))}
         cafeOptions={cafes.map((c) => ({ id: c.id, name: c.name }))}
         initialRooms={(roomRows ?? []).map((r: any) => ({

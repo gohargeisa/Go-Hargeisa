@@ -36,13 +36,12 @@ import type { Locale } from "@/lib/i18n/config";
 import { SignOutButton } from "@/components/shared/sign-out-button";
 import type { OwnedListing } from "@/lib/data/business";
 import { isMedicalAppointmentCategory } from "@/lib/utils/appointment-domain";
+import type { BusinessPermissionKey } from "@/types";
 
 const BASE_NAV_ITEMS = [
   { href: "", icon: Home, key: "navDashboard" },
   { href: "/listing", icon: Building2, key: "navMyBusiness" },
   { href: "/offers", icon: Tag, key: "navOffers" },
-  { href: "/bookings", icon: CalendarDays, key: "navBookings" },
-  { href: "/reservations", icon: CalendarClock, key: "navReservations" },
   { href: "/gallery", icon: Images, key: "navGallery" },
   { href: "/reviews", icon: Star, key: "navReviews" },
   { href: "/analytics", icon: BarChart3, key: "navAnalytics" },
@@ -53,6 +52,14 @@ const BASE_NAV_ITEMS = [
   { href: "/support", icon: HelpCircle, key: "navSupport" },
 ] as const;
 
+/** Room bookings only apply to hotels; table reservations only apply to
+ * restaurants/cafes — previously both were unconditionally in
+ * BASE_NAV_ITEMS, so e.g. a flower shop or clinic owner saw "Bookings" and
+ * "Reservations" tabs that could never apply to them. Gated the same way
+ * PRODUCTS_NAV_ITEM/appointmentsNavItems already are below. */
+const BOOKINGS_NAV_ITEM = { href: "/bookings", icon: CalendarDays, key: "navBookings" } as const;
+const RESERVATIONS_NAV_ITEM = { href: "/reservations", icon: CalendarClock, key: "navReservations" } as const;
+
 /** Phase 4 — inserted right after "My Business" only for the listing types
  * that actually have these engines wired up (categories.supports_products/
  * supports_appointments), so every hotel/restaurant/cafe/service owner's
@@ -62,6 +69,35 @@ const PRODUCTS_NAV_ITEM = { href: "/products", icon: Package, key: "navProducts"
  * supports_products gate as PRODUCTS_NAV_ITEM, since a listing can only
  * receive orders once it has a real product catalog. */
 const ORDERS_NAV_ITEM = { href: "/orders", icon: ShoppingBag, key: "navOrders" } as const;
+
+/** Which business_access_grants permission unlocks each nav item, for a
+ * Team Member (listing.accessKind === "granted") — items with no entry
+ * here are visible to any team member with an active grant on the
+ * business, regardless of which specific permissions they hold. This
+ * mapping is a judgment call (the approved permission set has no 1:1 key
+ * per nav item, e.g. no separate "products" key): "edit" is required for
+ * anything that changes the business's own public-facing data or billing
+ * (listing, offers, gallery, products, subscription, settings), "view"
+ * covers read-only pages, and a handful of low-sensitivity personal pages
+ * (dashboard home, notifications, support) always show. */
+const NAV_PERMISSION: Partial<Record<string, BusinessPermissionKey>> = {
+  navMyBusiness: "businesses_edit",
+  navOffers: "businesses_edit",
+  navGallery: "businesses_edit",
+  navReviews: "reviews_view",
+  navAnalytics: "businesses_view",
+  navMessages: "businesses_view",
+  navSubscription: "businesses_edit",
+  navSettings: "businesses_edit",
+  navBookings: "bookings_view",
+  navReservations: "bookings_view",
+  navOrders: "orders_view",
+  navProducts: "businesses_edit",
+  navDepartments: "appointments_view",
+  navDoctors: "appointments_view",
+  staffLabel: "appointments_view",
+  navAppointments: "appointments_view",
+};
 
 function getNavItems(listing: OwnedListing) {
   const items: { href: string; icon: typeof Home; key: string }[] = [...BASE_NAV_ITEMS];
@@ -76,12 +112,36 @@ function getNavItems(listing: OwnedListing) {
     { href: "/doctors", icon: isMedical ? Stethoscope : UserCog, key: isMedical ? "navDoctors" : "staffLabel" },
     { href: "/appointments", icon: CalendarCheck, key: "navAppointments" },
   ];
-  const inserts = [
+  const afterMyBusiness = [
     ...(listing.supportsProducts ? [PRODUCTS_NAV_ITEM, ORDERS_NAV_ITEM] : []),
     ...(listing.supportsAppointments ? appointmentsNavItems : []),
   ];
-  if (inserts.length > 0) items.splice(myBusinessIndex + 1, 0, ...inserts);
-  return items;
+  if (afterMyBusiness.length > 0) items.splice(myBusinessIndex + 1, 0, ...afterMyBusiness);
+
+  const offersIndex = items.findIndex((i) => i.key === "navOffers");
+  // "service" listings only ever use /reservations for Real Estate's
+  // property-viewing requests (table_reservations reused — see
+  // app/[locale]/business/reservations/page.tsx and
+  // lib/utils/business-primary-action.ts) — must match that page's own gate
+  // exactly, or a Real Estate owner loses the nav link to a page that still
+  // works for them.
+  const isRealEstateViewings = listing.listingType === "service" && listing.categorySlug === "real-estate";
+  const afterOffers = [
+    ...(listing.listingType === "hotel" ? [BOOKINGS_NAV_ITEM] : []),
+    ...(listing.listingType === "restaurant" || listing.listingType === "cafe" || isRealEstateViewings ? [RESERVATIONS_NAV_ITEM] : []),
+  ];
+  if (afterOffers.length > 0) items.splice(offersIndex + 1, 0, ...afterOffers);
+
+  if (listing.accessKind !== "granted") return items;
+
+  // Team member: hide any item whose mapped permission isn't in their
+  // grant for this business. Items with no mapping (dashboard home,
+  // notifications, support) stay visible to anyone with any active grant.
+  const perms = listing.permissions ?? {};
+  return items.filter((item) => {
+    const required = NAV_PERMISSION[item.key];
+    return !required || perms[required] === true;
+  });
 }
 
 const PUBLIC_SEGMENT: Record<OwnedListing["listingType"], string> = {
@@ -199,7 +259,12 @@ export function BusinessSidebar({ locale, listing }: { locale: Locale; listing: 
         <div className="h-10 w-10" aria-hidden="true" />
       </div>
 
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-e border-ink/8 bg-white dark:border-white/10 dark:bg-ink lg:flex">
+      {/* top/h- match the fixed SiteHeader's height (see the container's own
+          lg:pt- in business/layout.tsx) — plain `sticky top-0` would slide
+          this back underneath the header once the page scrolls, since 0 is
+          measured from the true viewport edge, not this element's own
+          (already-offset) starting position. */}
+      <aside className="sticky top-[calc(env(safe-area-inset-top)+5rem)] hidden h-[calc(100vh-env(safe-area-inset-top)-5rem)] w-64 shrink-0 flex-col border-e border-ink/8 bg-white dark:border-white/10 dark:bg-ink lg:flex">
         <div className="flex items-center gap-2 px-5 py-5">
           <span className="font-display text-lg font-bold text-primary-700">Go Hargeisa</span>
           <span className="text-xs font-semibold text-ink/40 dark:text-sand/40">{t("businessBadge")}</span>

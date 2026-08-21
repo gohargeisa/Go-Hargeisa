@@ -66,7 +66,7 @@ export async function createOffer(
 ): Promise<{ ok: boolean; error?: string }> {
   const validationError = validateOffer(input);
   if (validationError) return { ok: false, error: validationError };
-  const supabase = await assertCanManageListing(listingType, listingId);
+  const supabase = await assertCanManageListing(listingType, listingId, "businesses_edit");
 
   const { error } = await supabase.from("business_offers").insert({
     listing_type: listingType,
@@ -94,7 +94,7 @@ export async function updateOffer(
 ): Promise<{ ok: boolean; error?: string }> {
   const validationError = validateOffer(input);
   if (validationError) return { ok: false, error: validationError };
-  const supabase = await assertCanManageListing(listingType, listingId);
+  const supabase = await assertCanManageListing(listingType, listingId, "businesses_edit");
 
   const { error } = await supabase
     .from("business_offers")
@@ -119,7 +119,7 @@ export async function toggleOfferActive(
   isActive: boolean,
   revalidatePaths: string[]
 ): Promise<{ ok: boolean; error?: string }> {
-  const supabase = await assertCanManageListing(listingType, listingId);
+  const supabase = await assertCanManageListing(listingType, listingId, "businesses_edit");
 
   const { error } = await supabase
     .from("business_offers")
@@ -139,7 +139,7 @@ export async function deleteOffer(
   listingId: string,
   revalidatePaths: string[]
 ): Promise<{ ok: boolean; error?: string }> {
-  const supabase = await assertCanManageListing(listingType, listingId);
+  const supabase = await assertCanManageListing(listingType, listingId, "businesses_edit");
 
   const { error } = await supabase
     .from("business_offers")

@@ -13,7 +13,7 @@ export default async function NewCafePage({ params: { locale } }: { params: { lo
   return (
     <section className="container-px mx-auto py-14">
       <h1 className="font-display text-2xl font-semibold mb-8">{t("addCafeTitle")}</h1>
-      <CafeForm locale={locale} mode="create" />
+      <CafeForm locale={locale} mode="create" canAssignOwner />
     </section>
   );
 }

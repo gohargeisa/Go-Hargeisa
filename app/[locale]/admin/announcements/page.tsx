@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/config";
-import { requireAdmin } from "@/lib/supabase/guards";
+import { requirePlatformPermission } from "@/lib/supabase/guards";
 import { createClient } from "@/lib/supabase/server";
 import { AnnouncementsManager } from "@/components/admin/announcements-manager";
 import type { SiteAnnouncement } from "@/types";
@@ -9,7 +9,7 @@ import type { SiteAnnouncement } from "@/types";
 export const metadata: Metadata = { title: "Announcements — Admin", robots: { index: false, follow: false } };
 
 export default async function AdminAnnouncementsPage({ params: { locale } }: { params: { locale: Locale } }) {
-  await requireAdmin(locale, `/${locale}/admin/announcements`);
+  await requirePlatformPermission(locale, `/${locale}/admin/announcements`, "content_view");
   const t = await getTranslations({ locale, namespace: "admin" });
 
   const supabase = await createClient();

@@ -1,10 +1,13 @@
 import { cache } from "react";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { requireListingsAccess } from "@/lib/supabase/guards";
+import { listingKey } from "@/lib/utils/listing-key";
+import { requireBusinessAccess } from "@/lib/supabase/guards";
 import { mapReview, mapBusinessOffer } from "./mappers";
 import type { Locale } from "@/lib/i18n/config";
-import type { BusinessListingType, Booking, BusinessSubscription, BusinessMessage, Review, BusinessOffer } from "@/types";
+import type { Database } from "@/types/database";
+import type { BusinessListingType, Booking, BusinessSubscription, BusinessMessage, Review, BusinessOffer, BusinessPermissions } from "@/types";
 
 export interface OwnedListing {
   listingType: BusinessListingType;
@@ -27,6 +30,12 @@ export interface OwnedListing {
   /** 'trial' listings have a linked owner_id but no dashboard access yet —
    * see app/[locale]/business/layout.tsx, which is what actually enforces this. */
   partnerStatus: "trial" | "official";
+  /** Admin-only override, independent of partnerStatus/listing status — see
+   * 20260830000001_partner_suspension_and_status_parity.sql. A suspended
+   * listing is invisible on the public site but the owner still reaches
+   * their dashboard (business/layout.tsx shows a banner, doesn't block
+   * access) so they can see why and get in touch. */
+  isSuspended: boolean;
   /** True for any listing the universal cart/order system is enabled on:
    * city_service/service via their category's supports_products flag (see
    * lib/data/categories.ts's mapCategory), cafe/restaurant via their own
@@ -40,11 +49,118 @@ export interface OwnedListing {
    * engine's dashboard copy should read as medical (Hospital/Clinic) or
    * generic (every other supportsAppointments category, e.g. Beauty Salon). */
   categorySlug?: string;
+  /** "owner" — a Business Partner's own listing, via owner_id, full access
+   * (permissions is undefined/ignored). "granted" — a Team Member's access
+   * via an active business_access_grants row; `permissions` is that row's
+   * jsonb and the dashboard must gate actions by it. Defaults to "owner"
+   * everywhere getOwnedListings has always been used, so no existing call
+   * site needs to change. */
+  accessKind?: "owner" | "granted";
+  permissions?: BusinessPermissions;
 }
 
 function galleryLength(gallery: unknown): number {
   return Array.isArray(gallery) ? gallery.length : 0;
 }
+
+type ListingAccess = { accessKind: "owner" | "granted"; permissions?: BusinessPermissions };
+
+// Each of these turns one raw row (as returned by the exact `.select(...)`
+// shapes below) into an OwnedListing — shared between _getOwnedListings
+// (queries by owner_id) and _getGrantedListings (queries by id, for rows a
+// team member was explicitly granted access to) so the two query paths
+// never duplicate this field-mapping.
+function hotelRowToListing(h: HotelQueryRow, access: ListingAccess): OwnedListing {
+  return {
+    listingType: "hotel", id: h.id, slug: h.slug, name: h.name,
+    logo: h.logo_url ?? undefined, coverImage: h.cover_image, address: h.address,
+    phone: h.phone ?? undefined, website: h.website ?? undefined,
+    rating: Number(h.rating), reviewCount: h.review_count, createdAt: h.created_at,
+    serviceTags: h.amenities ?? [], hasDescription: Boolean(h.description?.trim()),
+    galleryCount: galleryLength(h.gallery), partnerStatus: h.partner_status,
+    isSuspended: h.is_suspended ?? false, supportsProducts: false, supportsAppointments: false,
+    ...access,
+  };
+}
+
+function restaurantRowToListing(r: RestaurantQueryRow, access: ListingAccess): OwnedListing {
+  return {
+    listingType: "restaurant", id: r.id, slug: r.slug, name: r.name,
+    logo: r.logo_url ?? undefined, coverImage: r.cover_image, address: r.address,
+    phone: r.phone ?? undefined, website: r.website ?? undefined,
+    rating: Number(r.rating), reviewCount: r.review_count, createdAt: r.created_at,
+    serviceTags: r.cuisine ?? [], hasDescription: Boolean(r.description?.trim()),
+    galleryCount: galleryLength(r.gallery), partnerStatus: r.partner_status,
+    isSuspended: r.is_suspended ?? false, supportsProducts: r.ordering_enabled ?? false, supportsAppointments: false,
+    ...access,
+  };
+}
+
+function cafeRowToListing(c: CafeQueryRow, access: ListingAccess): OwnedListing {
+  return {
+    listingType: "cafe", id: c.id, slug: c.slug, name: c.name,
+    logo: c.logo_url ?? undefined, coverImage: c.cover_image, address: c.address,
+    phone: c.phone ?? undefined, website: undefined,
+    rating: Number(c.rating), reviewCount: c.review_count, createdAt: c.created_at,
+    serviceTags: c.special_drinks ?? [], hasDescription: Boolean(c.description?.trim()),
+    galleryCount: galleryLength(c.gallery), partnerStatus: c.partner_status,
+    isSuspended: c.is_suspended ?? false, supportsProducts: c.ordering_enabled ?? false, supportsAppointments: false,
+    ...access,
+  };
+}
+
+// Services has no logo_url column and (as of 20260830000001) DOES have a
+// partner_status column, but no UI ever sets it to 'trial' — there's no
+// trial flow for this listing type (owner_id is set directly by an admin,
+// not via a convertJoinRequest-style upgrade path), so every service
+// owner is still treated as "official" here and gets dashboard access
+// immediately, regardless of what /admin/partners' Trial/Official toggle
+// (which IS wired up for services now) actually shows.
+function serviceRowToListing(s: ServiceQueryRow, access: ListingAccess): OwnedListing {
+  const category = s.categories;
+  return {
+    listingType: "service", id: s.id, slug: s.slug, name: s.name,
+    logo: undefined, coverImage: s.cover_image, address: s.address,
+    phone: s.phone ?? undefined, website: s.website ?? undefined,
+    rating: Number(s.rating), reviewCount: s.review_count, createdAt: s.created_at,
+    serviceTags: s.services ?? [], hasDescription: Boolean(s.description?.trim()),
+    galleryCount: galleryLength(s.gallery), partnerStatus: "official",
+    isSuspended: s.is_suspended ?? false,
+    supportsProducts: category?.supports_products ?? false, supportsAppointments: category?.supports_appointments ?? false,
+    categorySlug: category?.slug,
+    ...access,
+  };
+}
+
+// city_services (as of 20260830000001) DOES have a partner_status column
+// too, same "no trial flow, always official" rationale as `services`
+// above — owner_id is set directly by an admin (transferOwnership). No
+// address column either (city_services only stores lat/lng + maps_url) —
+// "" rather than undefined since OwnedListing.address is required.
+function cityServiceRowToListing(cs: CityServiceQueryRow, access: ListingAccess): OwnedListing {
+  const category = cs.categories;
+  return {
+    listingType: "city_service", id: cs.id, slug: cs.slug, name: cs.name,
+    logo: undefined, coverImage: cs.image ?? "", address: "",
+    phone: cs.phone ?? undefined, website: cs.website ?? undefined,
+    rating: Number(cs.rating), reviewCount: cs.review_count, createdAt: cs.created_at,
+    serviceTags: cs.amenities_v2 ?? [], hasDescription: Boolean(cs.description?.trim()),
+    galleryCount: galleryLength(cs.gallery), partnerStatus: "official",
+    isSuspended: cs.is_suspended ?? false,
+    supportsProducts: category?.supports_products ?? false, supportsAppointments: category?.supports_appointments ?? false,
+    categorySlug: category?.slug,
+    ...access,
+  };
+}
+
+type CategoryJoin = { supports_products: boolean; supports_appointments: boolean; slug: string } | null;
+type HotelQueryRow = Database["public"]["Tables"]["hotels"]["Row"];
+type RestaurantQueryRow = Database["public"]["Tables"]["restaurants"]["Row"];
+type CafeQueryRow = Database["public"]["Tables"]["cafes"]["Row"];
+type ServiceQueryRow = Database["public"]["Tables"]["services"]["Row"] & { categories: CategoryJoin };
+type CityServiceQueryRow = Database["public"]["Tables"]["city_services"]["Row"] & { categories: CategoryJoin };
+
+const OWNER_ACCESS: ListingAccess = { accessKind: "owner" };
 
 /**
  * Every listing table a business_owner row could be attached to. Reads all
@@ -68,150 +184,128 @@ async function _getOwnedListings(userId: string): Promise<OwnedListing[]> {
   ]);
 
   const out: OwnedListing[] = [];
-
-  for (const h of hotels ?? []) {
-    out.push({
-      listingType: "hotel",
-      id: h.id,
-      slug: h.slug,
-      name: h.name,
-      logo: h.logo_url ?? undefined,
-      coverImage: h.cover_image,
-      address: h.address,
-      phone: h.phone ?? undefined,
-      website: h.website ?? undefined,
-      rating: Number(h.rating),
-      reviewCount: h.review_count,
-      createdAt: h.created_at,
-      serviceTags: h.amenities ?? [],
-      hasDescription: Boolean(h.description?.trim()),
-      galleryCount: galleryLength(h.gallery),
-      partnerStatus: h.partner_status,
-      supportsProducts: false,
-      supportsAppointments: false,
-    });
-  }
-  for (const r of restaurants ?? []) {
-    out.push({
-      listingType: "restaurant",
-      id: r.id,
-      slug: r.slug,
-      name: r.name,
-      logo: r.logo_url ?? undefined,
-      coverImage: r.cover_image,
-      address: r.address,
-      phone: r.phone ?? undefined,
-      website: r.website ?? undefined,
-      rating: Number(r.rating),
-      reviewCount: r.review_count,
-      createdAt: r.created_at,
-      serviceTags: r.cuisine ?? [],
-      hasDescription: Boolean(r.description?.trim()),
-      galleryCount: galleryLength(r.gallery),
-      partnerStatus: r.partner_status,
-      supportsProducts: r.ordering_enabled ?? false,
-      supportsAppointments: false,
-    });
-  }
-  for (const c of cafes ?? []) {
-    out.push({
-      listingType: "cafe",
-      id: c.id,
-      slug: c.slug,
-      name: c.name,
-      logo: c.logo_url ?? undefined,
-      coverImage: c.cover_image,
-      address: c.address,
-      phone: c.phone ?? undefined,
-      website: undefined,
-      rating: Number(c.rating),
-      reviewCount: c.review_count,
-      createdAt: c.created_at,
-      serviceTags: c.special_drinks ?? [],
-      hasDescription: Boolean(c.description?.trim()),
-      galleryCount: galleryLength(c.gallery),
-      partnerStatus: c.partner_status,
-      supportsProducts: c.ordering_enabled ?? false,
-      supportsAppointments: false,
-    });
-  }
-  // Services has no partner_status/logo_url column — there's no trial
-  // flow for this listing type (owner_id is set directly by an admin, not
-  // via a convertJoinRequest-style upgrade path), so every service owner
-  // is treated as "official" and gets dashboard access immediately.
-  for (const s of services ?? []) {
-    const category = (s as unknown as { categories: { supports_products: boolean; supports_appointments: boolean; slug: string } | null }).categories;
-    out.push({
-      listingType: "service",
-      id: s.id,
-      slug: s.slug,
-      name: s.name,
-      logo: undefined,
-      coverImage: s.cover_image,
-      address: s.address,
-      phone: s.phone ?? undefined,
-      website: s.website ?? undefined,
-      rating: Number(s.rating),
-      reviewCount: s.review_count,
-      createdAt: s.created_at,
-      serviceTags: s.services ?? [],
-      hasDescription: Boolean(s.description?.trim()),
-      galleryCount: galleryLength(s.gallery),
-      partnerStatus: "official",
-      supportsProducts: category?.supports_products ?? false,
-      supportsAppointments: category?.supports_appointments ?? false,
-      categorySlug: category?.slug,
-    });
-  }
-  // city_services has no partner_status column and no trial flow, same
-  // rationale as `services` above — owner_id is set directly by an admin
-  // (transferOwnership), so it's always "official". No address column
-  // either (city_services only stores lat/lng + maps_url) — "" rather than
-  // undefined since OwnedListing.address is required.
-  for (const cs of cityServices ?? []) {
-    const category = (cs as unknown as { categories: { supports_products: boolean; supports_appointments: boolean; slug: string } | null }).categories;
-    out.push({
-      listingType: "city_service",
-      id: cs.id,
-      slug: cs.slug,
-      name: cs.name,
-      logo: undefined,
-      coverImage: cs.image ?? "",
-      address: "",
-      phone: cs.phone ?? undefined,
-      website: cs.website ?? undefined,
-      rating: Number(cs.rating),
-      reviewCount: cs.review_count,
-      createdAt: cs.created_at,
-      serviceTags: cs.amenities_v2 ?? [],
-      hasDescription: Boolean(cs.description?.trim()),
-      galleryCount: galleryLength(cs.gallery),
-      partnerStatus: "official",
-      supportsProducts: category?.supports_products ?? false,
-      supportsAppointments: category?.supports_appointments ?? false,
-      categorySlug: category?.slug,
-    });
-  }
+  for (const h of hotels ?? []) out.push(hotelRowToListing(h, OWNER_ACCESS));
+  for (const r of restaurants ?? []) out.push(restaurantRowToListing(r, OWNER_ACCESS));
+  for (const c of cafes ?? []) out.push(cafeRowToListing(c, OWNER_ACCESS));
+  for (const s of (services ?? []) as unknown as ServiceQueryRow[]) out.push(serviceRowToListing(s, OWNER_ACCESS));
+  for (const cs of (cityServices ?? []) as unknown as CityServiceQueryRow[]) out.push(cityServiceRowToListing(cs, OWNER_ACCESS));
 
   return out;
 }
 
+/**
+ * Every listing a Team Member has been explicitly granted access to (via an
+ * active business_access_grants row) — NOT businesses they own. Queries
+ * business_access_grants first, groups the granted ids by listing_type,
+ * then fetches only those specific rows from each table (never the whole
+ * table) so a team member's access is bounded to exactly what was granted,
+ * mirroring the same owner_id-scoping discipline _getOwnedListings uses.
+ */
+async function _getGrantedListings(userId: string): Promise<OwnedListing[]> {
+  const supabase = await createClient();
+
+  const { data: rawGrants } = await supabase
+    .from("business_access_grants")
+    .select("listing_type, listing_id, permissions")
+    .eq("user_id", userId)
+    .eq("is_active", true);
+  const grants = (rawGrants ?? []) as { listing_type: BusinessListingType; listing_id: string; permissions: BusinessPermissions }[];
+  if (grants.length === 0) return [];
+
+  const idsByType: Record<BusinessListingType, string[]> = { hotel: [], restaurant: [], cafe: [], service: [], city_service: [] };
+  const permsByKey = new Map<string, BusinessPermissions>();
+  for (const g of grants) {
+    idsByType[g.listing_type].push(g.listing_id);
+    permsByKey.set(`${g.listing_type}:${g.listing_id}`, (g.permissions ?? {}) as BusinessPermissions);
+  }
+  function accessFor(listingType: BusinessListingType, id: string): ListingAccess {
+    return { accessKind: "granted", permissions: permsByKey.get(`${listingType}:${id}`) ?? {} };
+  }
+
+  const [{ data: hotels }, { data: restaurants }, { data: cafes }, { data: services }, { data: cityServices }] = await Promise.all([
+    idsByType.hotel.length ? supabase.from("hotels").select("*").in("id", idsByType.hotel) : Promise.resolve({ data: [] as HotelQueryRow[] }),
+    idsByType.restaurant.length ? supabase.from("restaurants").select("*").in("id", idsByType.restaurant) : Promise.resolve({ data: [] as RestaurantQueryRow[] }),
+    idsByType.cafe.length ? supabase.from("cafes").select("*").in("id", idsByType.cafe) : Promise.resolve({ data: [] as CafeQueryRow[] }),
+    idsByType.service.length
+      ? supabase.from("services").select("*, categories(supports_products, supports_appointments, slug)").in("id", idsByType.service)
+      : Promise.resolve({ data: [] as ServiceQueryRow[] }),
+    idsByType.city_service.length
+      ? supabase.from("city_services").select("*, categories(supports_products, supports_appointments, slug)").in("id", idsByType.city_service)
+      : Promise.resolve({ data: [] as CityServiceQueryRow[] }),
+  ]);
+
+  const out: OwnedListing[] = [];
+  for (const h of hotels ?? []) out.push(hotelRowToListing(h, accessFor("hotel", h.id)));
+  for (const r of restaurants ?? []) out.push(restaurantRowToListing(r, accessFor("restaurant", r.id)));
+  for (const c of cafes ?? []) out.push(cafeRowToListing(c, accessFor("cafe", c.id)));
+  for (const s of (services ?? []) as unknown as ServiceQueryRow[]) out.push(serviceRowToListing(s, accessFor("service", s.id)));
+  for (const cs of (cityServices ?? []) as unknown as CityServiceQueryRow[]) out.push(cityServiceRowToListing(cs, accessFor("city_service", cs.id)));
+
+  return out;
+}
+
+/** Everything a user can reach on the /business dashboard: what they own
+ * (full access) plus what's been explicitly granted to them as a team
+ * member (scoped access). Used by the business switcher and layout so
+ * both Business Partners and Team Members see the same kind of "My
+ * Businesses" list, each entry carrying enough info (accessKind,
+ * permissions) for the UI to know what to show. */
+export const getAccessibleListings = cache(async function _getAccessibleListings(userId: string): Promise<OwnedListing[]> {
+  const [owned, granted] = await Promise.all([getOwnedListings(userId), _getGrantedListings(userId)]);
+  return [...owned, ...granted];
+});
+
 /** Cached per-request: the /business layout and every sub-page independently need this — dedupes the 3 owner_id lookups to one. */
 export const getOwnedListings = cache(_getOwnedListings);
 
+/** Which of a business_owner's (possibly several — Lavender Café + Lavender
+ * Flowers under one login is the canonical example) listings the dashboard
+ * is currently scoped to. A plain cookie, not a DB column: nothing about
+ * "which business am I looking at right now" is account state, it's this
+ * browser session's UI selection, so it needs no migration and no RLS
+ * change. Every actual read/write below this selection still re-derives its
+ * candidate set from `listings` (itself owner_id-scoped server-side) and
+ * re-checks ownership per call (assertCanManageListing) — this cookie can
+ * only ever pick among listings the signed-in user already owns, tampered
+ * or not, so it carries no authorization weight of its own. */
+export const ACTIVE_BUSINESS_COOKIE = "gh_active_business";
+
+/**
+ * Picks the listing the dashboard should render right now: the cookie's
+ * choice if it's still one of this user's OFFICIAL listings, else the first
+ * official one (matches the dashboard's own "trial listings don't get
+ * dashboard access yet" rule) — never a trial-only listing, and never a
+ * listing this user no longer owns or has been granted.
+ *
+ * `listings` may mix accessKind: "owner" (a Business Partner's own listing,
+ * full access) and "granted" (a Team Member's scoped access) — both are
+ * eligible to become the active listing; the dashboard gates individual
+ * actions by `listing.permissions` when accessKind is "granted".
+ */
+export async function selectActiveListing(listings: OwnedListing[]): Promise<OwnedListing | null> {
+  const official = listings.filter((l) => l.partnerStatus === "official");
+  if (official.length === 0) return null;
+
+  const cookieStore = await cookies();
+  const selected = cookieStore.get(ACTIVE_BUSINESS_COOKIE)?.value;
+  const match = selected ? official.find((l) => listingKey(l) === selected) : undefined;
+  return match ?? official[0];
+}
+
 /**
  * Every /business/* page starts the same way: confirm the signed-in user is
- * an owner/business_owner, then resolve which listing they're managing.
- * Redirects to login (via requireListingsAccess) or renders nothing further
- * if they have zero listings — callers should treat a null return as "show
- * the empty state", not an error.
+ * an owner/business_owner/team-member-with-a-grant, then resolve which
+ * listing they're managing. Redirects to login (via requireBusinessAccess)
+ * or renders nothing further if they have zero accessible listings —
+ * callers should treat a null return as "show the empty state", not an
+ * error.
  */
 export async function getActiveListing(locale: Locale, redirectTo: string): Promise<OwnedListing | null> {
-  const access = await requireListingsAccess(locale, redirectTo);
+  const access = await requireBusinessAccess(locale, redirectTo);
   if (!access) redirect(`/${locale}/auth/login?next=${encodeURIComponent(redirectTo)}`);
 
-  const listings = await getOwnedListings(access.userId);
-  return listings[0] ?? null;
+  const listings = await getAccessibleListings(access.userId);
+  return selectActiveListing(listings);
 }
 
 /** The signed-in business owner's display name + email — used by the header and everywhere ContactSupportButton needs a "from" identity. */

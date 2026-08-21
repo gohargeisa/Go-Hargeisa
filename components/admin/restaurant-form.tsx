@@ -14,6 +14,7 @@ import { useUnsavedChangesWarning } from "@/lib/hooks/use-unsaved-changes-warnin
 import { RESTAURANT_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import { OpeningHoursEditor } from "@/components/shared/opening-hours-editor";
 import { AmenitiesPicker } from "@/components/admin/amenities-picker";
+import { AssignedOwnerField, type AssignedOwner } from "@/components/admin/assigned-owner-field";
 import { RESTAURANT_TYPE_ORDER, restaurantTypeLabel } from "@/lib/config/restaurant-attributes";
 import { LANGUAGE_SPOKEN_OPTIONS, languageSpokenLabel } from "@/lib/config/hotel-attributes";
 import type { Locale } from "@/lib/i18n/config";
@@ -73,6 +74,8 @@ export function RestaurantForm({
   restaurantId,
   initial,
   canFeature = true,
+  canAssignOwner = false,
+  initialOwner = null,
 }: {
   locale: Locale;
   mode: "create" | "edit";
@@ -82,6 +85,10 @@ export function RestaurantForm({
   // owners reach this same form (requireListingsAccess) to manage their
   // own listing, but self-promoting to "featured" isn't theirs to grant.
   canFeature?: boolean;
+  // Same owner-only gate as canFeature — a business_owner never sees the
+  // Assigned Owner field at all (see AssignedOwnerField's own doc comment).
+  canAssignOwner?: boolean;
+  initialOwner?: AssignedOwner | null;
 }) {
   const t = useTranslations("admin");
   const tw = useTranslations("weekdays");
@@ -130,6 +137,7 @@ export function RestaurantForm({
     phoneOrderingEnabled: initial?.phoneOrderingEnabled ?? false,
     languages: initial?.languages ?? [],
   });
+  const [owner, setOwner] = useState<AssignedOwner | null>(initialOwner);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -163,6 +171,12 @@ export function RestaurantForm({
     }
 
     const payload = {
+      // Only meaningful on create — an edit's owner changes are persisted
+      // immediately by AssignedOwnerField via transferOwnership/
+      // removeOwnership, not through this payload (updateRecord never
+      // reads owner_id at all, so a business_owner submitting this form
+      // has no field here that could change ownership).
+      owner_id: mode === "create" ? owner?.id ?? null : undefined,
       slug: form.slug,
       name: form.name,
       short_description: form.shortDescription,
@@ -471,6 +485,17 @@ export function RestaurantForm({
           </label>
         )}
       </div>
+
+      {canAssignOwner && (
+        <AssignedOwnerField
+          locale={locale}
+          mode={mode}
+          listingType="restaurant"
+          listingId={restaurantId}
+          value={owner}
+          onChange={setOwner}
+        />
+      )}
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 

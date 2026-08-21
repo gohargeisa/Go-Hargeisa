@@ -1,4 +1,4 @@
-import type { OrderableListingType, ProductAddon } from "@/types";
+import type { OrderableListingType, ProductAddon, ProductCategory, SelectedProductOption } from "@/types";
 
 /** One line in the cart. `key` identifies a distinct line (same product with
  * a different add-on selection is a separate line, e.g. two "10 Roses"
@@ -19,6 +19,18 @@ export interface CartItem {
   variantId?: string;
   variantName?: string;
   variantSku?: string;
+  /** The product's own category (e.g. "bouquet", "cake", "makeup") — used
+   * ONLY to decide which order-level fields checkout shows (e.g. recipient
+   * name/phone/occasion are meaningless on a restaurant food order); never
+   * used for pricing or option resolution, which stay strictly per-product.
+   * Absent for products with no category set. */
+  category?: ProductCategory;
+  /** The exact per-product configuration selected (gift wrap, cake text,
+   * milk type, toppings...) — see ProductOption/SelectedProductOption.
+   * Absent for every product with no configured options. `value`/
+   * `priceLabel` here are for cart-UI display only; the server always
+   * re-resolves the real price from product_options at submit time. */
+  selectedOptions?: SelectedProductOption[];
 }
 
 /** ONE CART = ONE BUSINESS — every item in `items` belongs to
@@ -38,23 +50,41 @@ export interface CartState {
   orderAttemptId: string | null;
 }
 
-/** `variantId` is optional and appended only when present, so every
- * existing call site (two-arg, no variant) keeps producing the exact same
- * key string as before — different shades of the same product become
- * distinct cart lines without changing any non-variant product's key. */
-export function cartItemKey(productId: string, addonIds: string[], variantId?: string): string {
-  const base = `${productId}::${[...addonIds].sort().join(",")}`;
-  return variantId ? `${base}::${variantId}` : base;
+/** `variantId`/`selectedOptions` are optional and appended only when
+ * present, so every existing call site (two-arg, no variant/options) keeps
+ * producing the exact same key string as before — different shades or
+ * different configurations of the same product become distinct cart lines
+ * without changing any unconfigured product's key. Option values are
+ * serialized as sorted `key=value` pairs so the same configuration always
+ * produces the same key regardless of selection order. */
+export function cartItemKey(
+  productId: string,
+  addonIds: string[],
+  variantId?: string,
+  selectedOptions?: SelectedProductOption[]
+): string {
+  let key = `${productId}::${[...addonIds].sort().join(",")}`;
+  if (variantId) key += `::${variantId}`;
+  if (selectedOptions && selectedOptions.length > 0) {
+    const serialized = [...selectedOptions]
+      .map((o) => `${o.key}=${Array.isArray(o.value) ? [...o.value].sort().join(",") : String(o.value)}`)
+      .sort()
+      .join("|");
+    key += `::opts:${serialized}`;
+  }
+  return key;
 }
 
 /** Matches submit_cart_order()'s server-side formula exactly: unit price
- * scales with quantity, add-ons are a flat per-line charge (not multiplied
- * by quantity) — e.g. "10 Roses x2 + Extra Gypsophila" is (20*2)+3, not
- * (20+3)*2. Client-side total must equal what the server actually charges,
- * or the cart shows a number the checkout doesn't honor. */
+ * scales with quantity, add-ons AND selected options are each a flat
+ * per-line charge (not multiplied by quantity) — e.g. "10 Roses x2 + Extra
+ * Gypsophila" is (20*2)+3, not (20+3)*2. Client-side total must equal what
+ * the server actually charges, or the cart shows a number the checkout
+ * doesn't honor. */
 export function lineTotal(item: CartItem): number {
   const addonsTotal = item.addons.reduce((sum, a) => sum + a.price, 0);
-  return item.unitPrice * item.quantity + addonsTotal;
+  const optionsTotal = (item.selectedOptions ?? []).reduce((sum, o) => sum + o.priceDelta, 0);
+  return item.unitPrice * item.quantity + addonsTotal + optionsTotal;
 }
 
 export function cartSubtotal(items: CartItem[]): number {

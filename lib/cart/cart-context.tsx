@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import type { OrderableListingType, ProductAddon } from "@/types";
+import type { OrderableListingType, ProductAddon, ProductCategory, SelectedProductOption } from "@/types";
 import { cartItemKey, cartItemCount, cartSubtotal, type CartItem, type CartState } from "./types";
 
 const STORAGE_KEY = "gohargeisa_cart_v1";
@@ -53,6 +53,13 @@ export interface AddToCartProduct {
   variantId?: string;
   variantName?: string;
   variantSku?: string;
+  /** The product's own category — see CartItem's identical field for why
+   * this exists (gating which order-level fields checkout shows). */
+  category?: ProductCategory;
+  /** The exact per-product configuration selected on the product page — see
+   * ProductOptionsForm/ProductOption. Omit entirely for a product with no
+   * configured options, identical to every product before this existed. */
+  selectedOptions?: SelectedProductOption[];
 }
 
 type AddResult = "added" | "conflict";
@@ -108,7 +115,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const buildLine = useCallback(
     (product: AddToCartProduct, quantity: number, selectedAddons: ProductAddon[]): CartItem => ({
-      key: cartItemKey(product.productId, selectedAddons.map((a) => a.id), product.variantId),
+      key: cartItemKey(product.productId, selectedAddons.map((a) => a.id), product.variantId, product.selectedOptions),
       productId: product.productId,
       name: product.name,
       nameAr: product.nameAr,
@@ -120,6 +127,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       variantId: product.variantId,
       variantName: product.variantName,
       variantSku: product.variantSku,
+      category: product.category,
+      selectedOptions: product.selectedOptions,
     }),
     []
   );

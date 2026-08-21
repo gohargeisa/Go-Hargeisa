@@ -6,10 +6,29 @@ import { createClient } from "@/lib/supabase/server";
 import { assertCanManageListing } from "@/lib/actions/business";
 import type { OrderableListingType, ProductOrderStatus } from "@/types";
 
+/** What the client actually sends for one selected product option — just
+ * the key and the raw value. Everything else (label, valueLabel, price) is
+ * always resolved server-side from product_options, exactly like variantId
+ * is resolved into a name/price and addonIds are resolved into priced
+ * add-ons — the client only ever names what it wants, never what it costs. */
+export interface CartOrderOptionInput {
+  key: string;
+  value: string | string[] | boolean | number;
+}
+
 export interface CartOrderItemInput {
   productId: string;
   quantity: number;
   addonIds?: string[];
+  /** Present only when the shopper picked a specific shade/finish/size —
+   * see ProductVariant (types/index.ts). The RPC re-resolves this
+   * server-side (price/name/sku), never trusting anything the client sends
+   * beyond the id itself. */
+  variantId?: string;
+  /** The exact per-product configuration the shopper picked — see
+   * ProductOption/SelectedProductOption (types/index.ts). Omit entirely for
+   * a product with no configured options. */
+  selectedOptions?: CartOrderOptionInput[];
 }
 
 export interface CartOrderInput {
@@ -21,6 +40,12 @@ export interface CartOrderInput {
   fulfillmentType: "delivery" | "pickup";
   deliveryAddress?: string;
   preferredDate?: string;
+  /** Free-form time/window (e.g. "14:00") — only ever collected/sent for
+   * gift-oriented categories (checkout-form.tsx gates the field itself);
+   * the RPC accepts it for any order regardless, same posture as every
+   * other optional field here. See
+   * 20260831000001_product_order_preferred_time.sql. */
+  preferredTime?: string;
   recipientName?: string;
   recipientPhone?: string;
   occasion?: string;
@@ -79,8 +104,15 @@ export async function submitCartOrder(input: CartOrderInput): Promise<CartOrderR
       p_occasion: input.occasion?.trim() || null,
       p_message_note: input.messageNote?.trim() || null,
       p_notes: input.notes?.trim() || null,
-      p_items: input.items.map((i) => ({ product_id: i.productId, quantity: i.quantity, addon_ids: i.addonIds ?? [] })),
+      p_items: input.items.map((i) => ({
+        product_id: i.productId,
+        quantity: i.quantity,
+        addon_ids: i.addonIds ?? [],
+        variant_id: i.variantId ?? null,
+        selected_options: (i.selectedOptions ?? []).map((o) => ({ key: o.key, value: o.value })),
+      })),
       p_idempotency_key: input.idempotencyKey ?? null,
+      p_preferred_time: input.preferredTime?.trim() || null,
     });
 
     if (error) return { ok: false, error: error.message };
@@ -106,7 +138,7 @@ export async function updateProductOrderStatus(
   status: ProductOrderStatus,
   revalidatePaths: string[]
 ): Promise<{ ok: boolean; error?: string }> {
-  const supabase = await assertCanManageListing(listingType, listingId);
+  const supabase = await assertCanManageListing(listingType, listingId, "orders_manage");
 
   const { error } = await supabase
     .from("product_orders")
@@ -115,6 +147,73 @@ export async function updateProductOrderStatus(
     .eq("listing_id", listingId);
 
   if (error) return { ok: false, error: error.message };
+
+  for (const path of revalidatePaths) revalidatePath(path);
+  return { ok: true };
+}
+
+/**
+ * Owner-side bulk cleanup — deletes every COMPLETED or CANCELLED order for
+ * this listing only. Deliberately narrow: the `.in("status", [...])` filter
+ * means an active order (pending/confirmed/preparing/ready/
+ * out_for_delivery) can never be swept up by this action, no matter what —
+ * there is no "delete all" variant. `order_items.order_id` has
+ * `on delete cascade` (verified live), so each deleted order's line items
+ * are removed automatically; nothing extra to clean up here.
+ *
+ * Authorization is the same double gate every mutation in this file uses:
+ * assertCanManageListing re-verifies ownership server-side, and the
+ * existing "Business owners manage their listing product orders" RLS
+ * policy (ALL commands, scoped to owner_id = auth.uid()) independently
+ * enforces the same boundary at the database level — this required no new
+ * migration, since that policy already covers DELETE.
+ */
+export async function deleteOldProductOrders(
+  listingType: OrderableListingType,
+  listingId: string,
+  revalidatePaths: string[]
+): Promise<{ ok: boolean; error?: string; deletedCount?: number }> {
+  const supabase = await assertCanManageListing(listingType, listingId, "orders_manage");
+
+  const { data, error } = await supabase
+    .from("product_orders")
+    .delete()
+    .eq("listing_type", listingType)
+    .eq("listing_id", listingId)
+    .in("status", ["completed", "cancelled"])
+    .select("id");
+
+  if (error) return { ok: false, error: error.message };
+
+  for (const path of revalidatePaths) revalidatePath(path);
+  return { ok: true, deletedCount: data?.length ?? 0 };
+}
+
+/**
+ * Owner-side single-order delete — same authorization and
+ * completed/cancelled-only gate as deleteOldProductOrders above, just for
+ * one order at a time instead of every eligible one. An active order can
+ * never be targeted, no matter what id is passed in.
+ */
+export async function deleteProductOrder(
+  orderId: string,
+  listingType: OrderableListingType,
+  listingId: string,
+  revalidatePaths: string[]
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await assertCanManageListing(listingType, listingId, "orders_manage");
+
+  const { data, error } = await supabase
+    .from("product_orders")
+    .delete()
+    .eq("id", orderId)
+    .eq("listing_type", listingType)
+    .eq("listing_id", listingId)
+    .in("status", ["completed", "cancelled"])
+    .select("id");
+
+  if (error) return { ok: false, error: error.message };
+  if (!data || data.length === 0) return { ok: false, error: "Only completed or cancelled orders can be deleted." };
 
   for (const path of revalidatePaths) revalidatePath(path);
   return { ok: true };

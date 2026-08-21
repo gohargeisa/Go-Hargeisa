@@ -9,11 +9,16 @@ import { createProduct, deleteProduct, updateProduct, type ProductInput, type Pr
 import { ImageUploader } from "@/components/shared/image-uploader";
 import { GalleryManager } from "@/components/admin/gallery-manager-lazy";
 import { Field, inputClass } from "@/components/admin/form-shared";
+import { ProductOptionsManager } from "@/components/business/product-options-manager";
 import { PRODUCT_CATEGORY_ORDER, PRODUCT_CATEGORY_LABELS, PRODUCT_GENDER_ORDER, PRODUCT_GENDER_LABELS } from "@/lib/config/product-categories";
-import type { GalleryImage, ProductCategory, ProductGender } from "@/types";
+import type { GalleryImage, ProductCategory, ProductGender, ProductOption } from "@/types";
 
 export interface ProductManagerRow extends ProductInput {
   id: string;
+  /** Configured only for an already-saved product — see
+   * ProductOptionsManager. Absent/empty for every product before this
+   * system existed. */
+  options?: ProductOption[];
 }
 
 const BLANK: ProductInput = {
@@ -139,6 +144,10 @@ export function ProductsManager({
               error={error}
               t={t}
               locale={locale}
+              productId={product.id}
+              options={product.options ?? []}
+              revalidatePaths={revalidatePaths}
+              listingType={listingType}
             />
           ) : (
             <div
@@ -217,6 +226,10 @@ function ProductForm({
   error,
   t,
   locale,
+  productId,
+  options,
+  revalidatePaths,
+  listingType,
 }: {
   draft: ProductInput;
   setDraft: (d: ProductInput) => void;
@@ -226,6 +239,13 @@ function ProductForm({
   error: string | null;
   t: ReturnType<typeof useTranslations>;
   locale: string;
+  /** Undefined while creating a brand-new product (no id yet to attach
+   * options to) — the options section only renders once the product has
+   * been saved at least once. */
+  productId?: string;
+  options?: ProductOption[];
+  revalidatePaths?: string[];
+  listingType?: ProductListingType;
 }) {
   function update<K extends keyof ProductInput>(key: K, value: ProductInput[K]) {
     setDraft({ ...draft, [key]: value });
@@ -347,6 +367,20 @@ function ProductForm({
           {t("hiddenCheckbox")}
         </label>
       </div>
+
+      {productId ? (
+        <ProductOptionsManager
+          productId={productId}
+          initialOptions={options ?? []}
+          revalidatePaths={revalidatePaths ?? []}
+          category={draft.category}
+          listingType={listingType}
+          locale={locale}
+          t={t}
+        />
+      ) : (
+        <p className="text-xs text-ink/45 dark:text-sand/45">{t("saveProductFirstForOptions")}</p>
+      )}
 
       {error && <p className="text-xs text-red-600">{error}</p>}
 

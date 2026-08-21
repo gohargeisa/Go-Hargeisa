@@ -9,8 +9,25 @@ import { logActivity } from "./activity";
 import type { Locale } from "@/lib/i18n/config";
 import type { SubscriptionPlanId } from "@/lib/config/subscription-plans";
 
-const PARTNER_TABLES = ["hotels", "restaurants", "cafes"] as const;
+// Every table here carries the identical partner-management column set
+// (owner_id, partner_status, is_suspended, featured, is_pinned,
+// trial_expires_at) — confirmed directly against the live schema, not
+// assumed. City services and services categories (florists, perfumeries,
+// clinics, salons, etc.) are exactly as partner-manageable as hotels/
+// restaurants/cafes; there's nothing hotel/restaurant/cafe-specific about
+// any action in this file. Attractions/events are NOT included — they
+// genuinely have no owner_id/partner_status/is_suspended columns today, so
+// they can't participate in this workflow without a real migration.
+const PARTNER_TABLES = ["hotels", "restaurants", "cafes", "city_services", "services"] as const;
 type PartnerTable = (typeof PARTNER_TABLES)[number];
+
+const TABLE_TO_LISTING_TYPE: Record<PartnerTable, "hotel" | "restaurant" | "cafe" | "city_service" | "service"> = {
+  hotels: "hotel",
+  restaurants: "restaurant",
+  cafes: "cafe",
+  city_services: "city_service",
+  services: "service",
+};
 
 async function assertOwner() {
   const supabase = await createClient();
@@ -26,11 +43,16 @@ async function assertOwner() {
 }
 
 /**
- * Owner-only. Also enforced at the database level (see
- * enforce_partner_status_owner_only in
+ * Owner-only. Also enforced at the database level for hotels/restaurants/
+ * cafes (see enforce_partner_status_owner_only in
  * supabase/migrations/20260730000002_partner_status.sql) — this
- * application-level check is just the door; the trigger is what actually
- * stops a business_owner from setting their own status via a direct API call.
+ * application-level check is what actually stops a business_owner from
+ * setting their own status everywhere; the trigger is defense-in-depth
+ * against a direct API call bypassing this action entirely, and it does NOT
+ * yet exist on city_services/services (a real, pre-existing gap — flagged,
+ * not fixed here, since closing it means a migration and this function's
+ * job is only to make the four write paths behave identically once a
+ * migration decision is made).
  */
 export async function setPartnerStatus(
   locale: string,
@@ -45,18 +67,7 @@ export async function setPartnerStatus(
   const { data: before } = await supabase.from(table).select("partner_status, owner_id, name").eq("id", id).single();
   const previous = before as { partner_status: "trial" | "official"; owner_id: string | null; name: string } | null;
 
-  let error = null;
-  switch (table) {
-    case "hotels":
-      ({ error } = await supabase.from("hotels").update({ partner_status: status }).eq("id", id));
-      break;
-    case "restaurants":
-      ({ error } = await supabase.from("restaurants").update({ partner_status: status }).eq("id", id));
-      break;
-    case "cafes":
-      ({ error } = await supabase.from("cafes").update({ partner_status: status }).eq("id", id));
-      break;
-  }
+  const { error } = await supabase.from(table).update({ partner_status: status } as never).eq("id", id);
 
   if (error) return { ok: false, error: error.message };
 
@@ -80,6 +91,36 @@ export async function setPartnerStatus(
 }
 
 /**
+ * Owner-only. Admin override, independent of partner_status/listing status —
+ * see 20260830000001_partner_suspension_and_status_parity.sql. Suspending a
+ * listing does not touch its own draft/published/archived choice; the
+ * public SELECT policy on hotels/restaurants/cafes/city_services/services
+ * additionally requires is_suspended = false, so this alone takes a
+ * published listing off the public site immediately, and un-suspending
+ * restores exactly whatever status it already had. Works identically for
+ * every PARTNER_TABLES entry — is_suspended is the same column on all five.
+ */
+export async function setListingSuspended(
+  locale: string,
+  table: PartnerTable,
+  id: string,
+  suspended: boolean
+): Promise<{ ok: boolean; error?: string }> {
+  if (!PARTNER_TABLES.includes(table)) return { ok: false, error: "Invalid table." };
+
+  const supabase = await assertOwner();
+
+  const { error } = await supabase.from(table).update({ is_suspended: suspended } as never).eq("id", id);
+
+  if (error) return { ok: false, error: error.message };
+
+  await logActivity("update", "listing_suspended", id, { table, suspended });
+  revalidatePath(`/${locale}/admin/partners`);
+  revalidatePath(`/${locale}/business`);
+  return { ok: true };
+}
+
+/**
  * Owner-only manual plan assignment — there is no payment gateway in this
  * phase, this just sets the plan_tier label the business dashboard reads.
  * RLS backs this up (see 20260730000001_subscription_tiers.sql): only the
@@ -94,7 +135,7 @@ export async function assignSubscriptionPlan(
   if (!PARTNER_TABLES.includes(table)) return { ok: false, error: "Invalid table." };
 
   const supabase = await assertOwner();
-  const listingType = table === "hotels" ? "hotel" : table === "restaurants" ? "restaurant" : "cafe";
+  const listingType = TABLE_TO_LISTING_TYPE[table];
 
   const { error } = await supabase
     .from("business_subscriptions")
@@ -126,7 +167,7 @@ export async function setSubscriptionStatus(
   if (!PARTNER_TABLES.includes(table)) return { ok: false, error: "Invalid table." };
 
   const supabase = await assertOwner();
-  const listingType = table === "hotels" ? "hotel" : table === "restaurants" ? "restaurant" : "cafe";
+  const listingType = TABLE_TO_LISTING_TYPE[table];
 
   const { error } = await supabase
     .from("business_subscriptions")
@@ -154,7 +195,7 @@ export async function extendSubscription(
   if (!/^\d{4}-\d{2}-\d{2}$/.test(newRenewsAt)) return { ok: false, error: "Invalid date." };
 
   const supabase = await assertOwner();
-  const listingType = table === "hotels" ? "hotel" : table === "restaurants" ? "restaurant" : "cafe";
+  const listingType = TABLE_TO_LISTING_TYPE[table];
 
   const { error } = await supabase
     .from("business_subscriptions")
@@ -188,7 +229,7 @@ export async function setCustomPrice(
   }
 
   const supabase = await assertOwner();
-  const listingType = table === "hotels" ? "hotel" : table === "restaurants" ? "restaurant" : "cafe";
+  const listingType = TABLE_TO_LISTING_TYPE[table];
 
   const { error } = await supabase
     .from("business_subscriptions")
@@ -219,7 +260,7 @@ export async function addSubscriptionNote(
   if (!trimmed) return { ok: false, error: "Note can't be empty." };
 
   const supabase = await assertOwner();
-  const listingType = table === "hotels" ? "hotel" : table === "restaurants" ? "restaurant" : "cafe";
+  const listingType = TABLE_TO_LISTING_TYPE[table];
 
   const { data: sub, error: subError } = await supabase
     .from("business_subscriptions")
@@ -261,18 +302,7 @@ export async function extendTrial(
 
   const supabase = await assertOwner();
 
-  let error = null;
-  switch (table) {
-    case "hotels":
-      ({ error } = await supabase.from("hotels").update({ trial_expires_at: newExpiresAt } as never).eq("id", id));
-      break;
-    case "restaurants":
-      ({ error } = await supabase.from("restaurants").update({ trial_expires_at: newExpiresAt } as never).eq("id", id));
-      break;
-    case "cafes":
-      ({ error } = await supabase.from("cafes").update({ trial_expires_at: newExpiresAt } as never).eq("id", id));
-      break;
-  }
+  const { error } = await supabase.from(table).update({ trial_expires_at: newExpiresAt } as never).eq("id", id);
 
   if (error) return { ok: false, error: error.message };
 
@@ -296,18 +326,7 @@ export async function expireTrialNow(
   const supabase = await assertOwner();
   const now = new Date().toISOString();
 
-  let error = null;
-  switch (table) {
-    case "hotels":
-      ({ error } = await supabase.from("hotels").update({ trial_expires_at: now } as never).eq("id", id));
-      break;
-    case "restaurants":
-      ({ error } = await supabase.from("restaurants").update({ trial_expires_at: now } as never).eq("id", id));
-      break;
-    case "cafes":
-      ({ error } = await supabase.from("cafes").update({ trial_expires_at: now } as never).eq("id", id));
-      break;
-  }
+  const { error } = await supabase.from(table).update({ trial_expires_at: now } as never).eq("id", id);
 
   if (error) return { ok: false, error: error.message };
 

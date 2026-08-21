@@ -6,6 +6,7 @@ import {
   Inbox, LayoutGrid, Building2, Users, Star, Flag, BarChart3, Settings,
   Hotel, UtensilsCrossed, Coffee, Landmark, CalendarDays, Newspaper,
   CalendarCheck, Handshake, Megaphone, Tag, Bell, Stethoscope, ShoppingBag,
+  ShieldCheck,
 } from "lucide-react";
 import type { SidebarNavItem } from "@/components/shared/sidebar-nav";
 import type { Locale } from "@/lib/i18n/config";
@@ -42,6 +43,7 @@ export function useAdminNavItems(locale: Locale): { primaryItems: SidebarNavItem
     { key: "cityServices", label: t("cityServicesNav"), icon: Building2, href: `/${locale}/admin/city-services`, isActive: isActive("/admin/city-services"), indent: true },
     { key: "articles", label: t("articlesNavShort"), icon: Newspaper, href: `/${locale}/admin/articles`, isActive: isActive("/admin/articles"), indent: true },
     { key: "users", label: t("usersNav"), icon: Users, href: `/${locale}/admin/users`, isActive: isActive("/admin/users") },
+    { key: "teamAccess", label: t("teamAccessNav"), icon: ShieldCheck, href: `/${locale}/admin/team-access`, isActive: isActive("/admin/team-access") },
     { key: "reviews", label: t("reviewsNav"), icon: Star, href: `/${locale}/admin/reviews`, isActive: isActive("/admin/reviews") },
     { key: "reports", label: t("reportsNav"), icon: Flag, href: `/${locale}/admin/claims`, isActive: isActive("/admin/claims") },
     { key: "analytics", label: t("analyticsNav"), icon: BarChart3, href: `/${locale}/admin`, isActive: isActive("/admin", true) },

@@ -54,14 +54,15 @@ export function ProductCard({
   const name = productLocalizedName(product, locale);
   const validAddons = getValidAddonsForProduct(product, business);
   const hasVariants = (product.variants?.length ?? 0) > 0;
-  // A variant product (e.g. a lipstick with 5 shades) can never quick-add
-  // straight from the grid — there is no shade to attach to the cart line
-  // yet, and defaulting to the base product price would silently ignore
-  // that a shade like "12 Burgundy" costs more than "09 Rosewood". Routes
-  // to the same "View details" flow addon-bearing products already use,
-  // where ProductDetailModal's ProductVariantSelector makes the shopper
-  // pick one before Add to Cart is even shown.
-  const canQuickAdd = product.isAvailable && product.price != null && validAddons.length === 0 && !hasVariants;
+  const hasOptions = (product.options?.length ?? 0) > 0;
+  // A variant product (e.g. a lipstick with 5 shades) or one with its own
+  // configurable options (a cake's writing text, a latte's milk type) can
+  // never quick-add straight from the grid — there is no shade/config to
+  // attach to the cart line yet, and skipping it would silently drop what
+  // the shopper actually wants. Routes to the same "View details" flow
+  // addon-bearing products already use, where ProductDetailModal's
+  // ProductVariantSelector/ProductOptionsForm collect it first.
+  const canQuickAdd = product.isAvailable && product.price != null && validAddons.length === 0 && !hasVariants && !hasOptions;
 
   if (variant === "premium") {
     const pricing = getProductPricing(product);
@@ -143,7 +144,7 @@ export function ProductCard({
             {canQuickAdd ? (
               <AddToCartButton
                 business={business}
-                product={{ productId: product.id, name: product.name, nameAr: product.nameAr, nameSo: product.nameSo, image: product.image, unitPrice: product.price! }}
+                product={{ productId: product.id, name: product.name, nameAr: product.nameAr, nameSo: product.nameSo, image: product.image, unitPrice: product.price!, category: product.category }}
                 className="inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-primary-700 py-2 text-xs font-bold text-white transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-primary-800 active:scale-95"
               />
             ) : product.isAvailable && product.price != null ? (
@@ -223,7 +224,7 @@ export function ProductCard({
       {canQuickAdd ? (
         <AddToCartButton
           business={business}
-          product={{ productId: product.id, name: product.name, nameAr: product.nameAr, nameSo: product.nameSo, image: product.image, unitPrice: product.price! }}
+          product={{ productId: product.id, name: product.name, nameAr: product.nameAr, nameSo: product.nameSo, image: product.image, unitPrice: product.price!, category: product.category }}
           className="mt-2 inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-primary/30 py-1.5 text-xs font-semibold text-primary-700 transition-colors hover:bg-primary/8 dark:text-primary-300"
         />
       ) : product.isAvailable && product.price != null ? (

@@ -7,6 +7,7 @@ import { requireListingsAccess } from "@/lib/supabase/guards";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { RestaurantForm } from "@/components/admin/restaurant-form";
+import { getUserDisplayInfo } from "@/lib/actions/claims";
 import type { OpeningHoursGroup, MediaVideo } from "@/types";
 
 export const metadata: Metadata = { title: "Edit Restaurant — Admin" };
@@ -52,6 +53,12 @@ export default async function EditRestaurantPage({
     ? (restaurant.gallery as unknown as { url: string; alt?: string; category?: string }[])
     : [];
 
+  // Only a site admin may see/change the Assigned Owner field —
+  // getUserDisplayInfo is itself admin-gated (assertOwner), so this only
+  // ever runs for role='owner'.
+  const canAssignOwner = access?.role === "owner";
+  const initialOwner = canAssignOwner && restaurant.owner_id ? await getUserDisplayInfo(restaurant.owner_id) : null;
+
   return (
     <section className="container-px mx-auto py-14">
       <h1 className="font-display text-2xl font-semibold mb-8">
@@ -63,6 +70,8 @@ export default async function EditRestaurantPage({
         mode="edit"
         restaurantId={restaurant.id}
         canFeature={access?.role === "owner"}
+        canAssignOwner={canAssignOwner}
+        initialOwner={initialOwner ? { id: initialOwner.id, name: initialOwner.fullName, email: initialOwner.email } : null}
         initial={{
           slug: restaurant.slug,
           name: restaurant.name,

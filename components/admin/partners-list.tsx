@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Loader2, ChevronDown, ChevronUp, Pencil, Megaphone } from "lucide-react";
+import { Loader2, ChevronDown, ChevronUp, Pencil, Megaphone, Ban, CircleCheck } from "lucide-react";
 import {
   setPartnerStatus,
   assignSubscriptionPlan,
@@ -13,14 +13,59 @@ import {
   extendTrial,
   expireTrialNow,
   setCustomPrice,
+  setListingSuspended,
 } from "@/lib/actions/partners";
 import { ListingStatusMenu } from "@/components/shared/listing-status-menu";
 import { FeatureListingButton } from "@/components/shared/feature-listing-button";
 import { PinListingButton } from "@/components/shared/pin-listing-button";
 import { DeleteListingButton } from "@/components/shared/delete-listing-button";
+import { AssignedOwnerField, type AssignedOwner } from "@/components/admin/assigned-owner-field";
 import { SUBSCRIPTION_PLAN_ORDER, SUBSCRIPTION_PLANS, type SubscriptionPlanId } from "@/lib/config/subscription-plans";
 import type { Locale } from "@/lib/i18n/config";
-import type { SubscriptionStatus } from "@/types";
+import type { OwnableListingType, SubscriptionStatus } from "@/types";
+
+const TABLE_TO_LISTING_TYPE: Record<PartnerRow["table"], OwnableListingType> = {
+  hotels: "hotel",
+  restaurants: "restaurant",
+  cafes: "cafe",
+  city_services: "city_service",
+  services: "service",
+};
+
+// Category-agnostic type label for the row header — every business category
+// (hotels, restaurants, cafes, and every city_service/service category:
+// florists, perfumeries, clinics, salons, ...) is one of these five tables,
+// so this never needs a new case as categories are added.
+const TABLE_LABEL: Record<PartnerRow["table"], string> = {
+  hotels: "Hotel",
+  restaurants: "Restaurant",
+  cafes: "Cafe",
+  city_services: "City Service",
+  services: "Service",
+};
+
+// ListingStatusMenu (draft/published/archived) and DeleteListingButton are
+// hardcoded to a stale table allowlist elsewhere (lib/actions/admin.ts,
+// components/shared/delete-listing-button.tsx) that's never been kept in
+// sync with which tables actually gained columns — that's a pre-existing
+// inconsistency across the admin area, not something specific to partner
+// management, and fixing it fully is out of scope here. city_services has
+// its own dedicated edit route and delete path; services has neither yet.
+const EDIT_HREF: Partial<Record<PartnerRow["table"], (locale: Locale, id: string) => string>> = {
+  city_services: (locale, id) => `/${locale}/admin/city-services/${id}/edit`,
+};
+
+/** Wraps AssignedOwnerField with its own local state seeded from the row's
+ * current owner — a fully separate, optional action from partner_status/
+ * plan/suspend above it. Persists immediately via transferOwnership/
+ * removeOwnership (see AssignedOwnerField), same as the hotel/restaurant/
+ * cafe edit forms; nothing here is tied to Save/Add Partner at all. */
+function PartnerOwnerField({ locale, table, id, owner }: { locale: Locale; table: PartnerRow["table"]; id: string; owner: AssignedOwner | null }) {
+  const [value, setValue] = useState(owner);
+  return (
+    <AssignedOwnerField locale={locale} mode="edit" listingType={TABLE_TO_LISTING_TYPE[table]} listingId={id} value={value} onChange={setValue} />
+  );
+}
 
 export interface PartnerNote {
   id: string;
@@ -30,12 +75,17 @@ export interface PartnerNote {
 
 export interface PartnerRow {
   id: string;
-  table: "hotels" | "restaurants" | "cafes";
+  table: "hotels" | "restaurants" | "cafes" | "city_services" | "services";
   name: string;
+  /** null = "No owner assigned" — a fully valid, expected state (see
+   * PartnerOwnerField below). Assigning one is optional and separate from
+   * everything else this row manages. */
+  owner: AssignedOwner | null;
   partnerStatus: "trial" | "official";
   listingStatus: "draft" | "published" | "archived";
   featured: boolean;
   isPinned: boolean;
+  isSuspended: boolean;
   trialExpiresAt: string | null;
   planTier: SubscriptionPlanId | null;
   subscriptionStatus: SubscriptionStatus;
@@ -82,6 +132,11 @@ export function PartnersList({ locale, rows }: { locale: Locale; rows: PartnerRo
   function onToggleStatus(row: PartnerRow) {
     const next = row.partnerStatus === "official" ? "trial" : "official";
     run(row.id, () => setPartnerStatus(locale, row.table, row.id, next));
+  }
+
+  function onToggleSuspend(row: PartnerRow) {
+    if (!row.isSuspended && !confirm(t("confirmSuspend", { name: row.name }))) return;
+    run(row.id, () => setListingSuspended(locale, row.table, row.id, !row.isSuspended));
   }
 
   function onChangePlan(row: PartnerRow, plan: SubscriptionPlanId) {
@@ -220,7 +275,7 @@ export function PartnersList({ locale, rows }: { locale: Locale; rows: PartnerRo
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
                 <p className="truncate font-display font-semibold">{row.name}</p>
-                <p className="text-xs capitalize text-ink/45 dark:text-sand/45">{row.table.slice(0, -1)}</p>
+                <p className="text-xs text-ink/45 dark:text-sand/45">{TABLE_LABEL[row.table]}</p>
                 <p className={`mt-0.5 flex items-center gap-1 text-[11px] font-medium ${row.partnerStatus === "official" ? "text-violet-600 dark:text-violet-400" : "text-ink/35 dark:text-sand/35"}`}>
                   <Megaphone size={11} aria-hidden="true" />
                   {row.partnerStatus === "official" ? t("socialEligibleLabel") : t("socialNotEligibleLabel")}
@@ -237,6 +292,11 @@ export function PartnersList({ locale, rows }: { locale: Locale; rows: PartnerRo
                 >
                   {row.partnerStatus === "official" ? t("partnerStatusOfficial") : t("partnerStatusTrial")}
                 </span>
+                {row.isSuspended && (
+                  <span className="rounded-full bg-red-100 px-2.5 py-1 text-xs font-bold text-red-700 dark:bg-red-400/15 dark:text-red-300">
+                    {t("suspendedBadge")}
+                  </span>
+                )}
                 <button
                   type="button"
                   onClick={() => onToggleStatus(row)}
@@ -246,11 +306,44 @@ export function PartnersList({ locale, rows }: { locale: Locale; rows: PartnerRo
                   {busy && <Loader2 size={12} className="animate-spin" />}
                   {row.partnerStatus === "official" ? t("makeTrial") : t("makeOfficial")}
                 </button>
+                <button
+                  type="button"
+                  onClick={() => onToggleSuspend(row)}
+                  disabled={busy}
+                  className={`flex h-8 items-center gap-1.5 rounded-lg border px-3 text-xs font-semibold transition-colors disabled:opacity-60 ${
+                    row.isSuspended
+                      ? "border-accent/30 text-accent-700 hover:border-accent hover:bg-accent/5"
+                      : "border-red-200 text-red-700 hover:border-red-400 hover:bg-red-50 dark:border-red-400/30 dark:text-red-300 dark:hover:bg-red-400/10"
+                  }`}
+                >
+                  {busy ? <Loader2 size={12} className="animate-spin" /> : row.isSuspended ? <CircleCheck size={12} /> : <Ban size={12} />}
+                  {row.isSuspended ? t("unsuspendAction") : t("suspendAction")}
+                </button>
                 <FeatureListingButton table={row.table} id={row.id} featured={row.featured} />
                 <PinListingButton table={row.table} id={row.id} pinned={row.isPinned} />
-                <ListingStatusMenu table={row.table} id={row.id} status={row.listingStatus} />
-                <DeleteListingButton table={row.table} id={row.id} name={row.name} />
+                {row.table === "hotels" || row.table === "restaurants" || row.table === "cafes" ? (
+                  <>
+                    <ListingStatusMenu table={row.table} id={row.id} status={row.listingStatus} />
+                    <DeleteListingButton table={row.table} id={row.id} name={row.name} />
+                  </>
+                ) : (
+                  EDIT_HREF[row.table] && (
+                    <a
+                      href={EDIT_HREF[row.table]!(locale, row.id)}
+                      className="flex h-8 items-center rounded-lg border border-ink/10 px-3 text-xs font-semibold transition-colors hover:border-primary hover:text-primary dark:border-white/15"
+                    >
+                      {t("editAction")}
+                    </a>
+                  )
+                )}
               </div>
+            </div>
+
+            {/* Assigned owner — fully separate, optional action from
+                everything above; "No owner assigned" is a normal, valid
+                state (see PartnerOwnerField's own doc comment). */}
+            <div className="mt-4 max-w-md">
+              <PartnerOwnerField locale={locale} table={row.table} id={row.id} owner={row.owner} />
             </div>
 
             {/* Trial section */}

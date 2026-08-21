@@ -5,7 +5,7 @@ import type { Locale } from "@/lib/i18n/config";
 import type { OrderableListingType } from "@/types";
 import { getActiveListing } from "@/lib/data/business";
 import { createClient } from "@/lib/supabase/server";
-import { mapProduct } from "@/lib/data/mappers";
+import { mapProduct, mapProductOption } from "@/lib/data/mappers";
 import { ProductsManager, type ProductManagerRow } from "@/components/business/products-manager";
 
 export const metadata: Metadata = { title: "Products — Dashboard", robots: { index: false } };
@@ -32,29 +32,48 @@ export default async function ProductsPage({ params: { locale } }: { params: { l
     .eq("listing_id", listing.id)
     .order("sort_order", { ascending: true });
 
-  const rows: ProductManagerRow[] = (data ?? []).map((row) => {
-    const p = mapProduct(row);
-    return {
-      id: p.id,
-      name: p.name,
-      nameAr: p.nameAr,
-      nameSo: p.nameSo,
-      description: p.description,
-      descriptionAr: p.descriptionAr,
-      descriptionSo: p.descriptionSo,
-      brand: p.brand,
-      category: p.category,
-      gender: p.gender,
-      price: p.price,
-      currency: p.currency,
-      image: p.image,
-      gallery: p.gallery,
-      isAvailable: p.isAvailable,
-      isFeatured: p.isFeatured,
-      isHidden: p.isHidden,
-      sortOrder: p.sortOrder,
-    };
-  });
+  const products = (data ?? []).map(mapProduct);
+
+  // Graceful degradation, same pattern as getProductsForListing — a missing
+  // table (migration not applied yet) just means "no options anywhere",
+  // not a failed page.
+  const { data: optionRows, error: optionError } = await supabase
+    .from("product_options")
+    .select("*")
+    .in("product_id", products.map((p) => p.id))
+    .order("sort_order", { ascending: true });
+  const optionsByProduct = new Map<string, ProductManagerRow["options"]>();
+  if (!optionError) {
+    for (const row of optionRows ?? []) {
+      const option = mapProductOption(row);
+      const list = optionsByProduct.get(option.productId) ?? [];
+      list.push(option);
+      optionsByProduct.set(option.productId, list);
+    }
+  }
+
+  const rows: ProductManagerRow[] = products.map((p) => ({
+    id: p.id,
+    name: p.name,
+    nameAr: p.nameAr,
+    nameSo: p.nameSo,
+    description: p.description,
+    descriptionAr: p.descriptionAr,
+    descriptionSo: p.descriptionSo,
+    brand: p.brand,
+    category: p.category,
+    gender: p.gender,
+    price: p.price,
+    currency: p.currency,
+    image: p.image,
+    gallery: p.gallery,
+    isAvailable: p.isAvailable,
+    isFeatured: p.isFeatured,
+    isHidden: p.isHidden,
+    sortOrder: p.sortOrder,
+    size: p.size,
+    options: optionsByProduct.get(p.id) ?? [],
+  }));
 
   return (
     <div className="max-w-3xl space-y-2">

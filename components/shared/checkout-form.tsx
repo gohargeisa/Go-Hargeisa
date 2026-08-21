@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 import { useCart } from "@/lib/cart/cart-context";
 import { submitCartOrder } from "@/lib/actions/product-orders";
 import { lineTotal } from "@/lib/cart/types";
+import { FLOWER_SPECIALTY_CATEGORIES } from "@/lib/config/product-categories";
 
 const inputClass =
   "w-full rounded-xl border border-ink/12 bg-transparent px-3.5 py-2.5 text-sm outline-none focus:border-primary dark:border-white/15";
@@ -31,6 +32,7 @@ export function CheckoutForm({ locale }: { locale: string }) {
   const [fulfillmentType, setFulfillmentType] = useState<"delivery" | "pickup">("pickup");
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [preferredDate, setPreferredDate] = useState("");
+  const [preferredTime, setPreferredTime] = useState("");
   const [recipientName, setRecipientName] = useState("");
   const [recipientPhone, setRecipientPhone] = useState("");
   const [occasion, setOccasion] = useState("");
@@ -40,6 +42,14 @@ export function CheckoutForm({ locale }: { locale: string }) {
   const [isPending, startTransition] = useTransition();
 
   const deliveryEnabled = cart.cart.deliveryEnabled;
+  // Recipient/occasion/card-message only make sense for gift-oriented items
+  // (flowers, cakes, gift sets, plants — the same FLOWER_SPECIALTY_CATEGORIES
+  // list the addon/pricing system already uses, not a new taxonomy). A
+  // restaurant food order or a makeup order has no "recipient" — showing
+  // these fields there was exactly the "one generic ordering form for every
+  // category" problem. A mixed cart (rare — one business selling both) shows
+  // them if ANY line needs them, since it's still one order/one recipient.
+  const hasGiftItem = cart.cart.items.some((i) => i.category && FLOWER_SPECIALTY_CATEGORIES.includes(i.category));
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -69,12 +79,15 @@ export function CheckoutForm({ locale }: { locale: string }) {
           productId: i.productId,
           quantity: i.quantity,
           addonIds: i.addons.map((a) => a.id),
+          variantId: i.variantId,
+          selectedOptions: i.selectedOptions?.map((o) => ({ key: o.key, value: o.value })),
         })),
         customerName,
         customerPhone,
         fulfillmentType: deliveryEnabled ? fulfillmentType : "pickup",
         deliveryAddress: deliveryAddress || undefined,
         preferredDate: preferredDate || undefined,
+        preferredTime: hasGiftItem ? preferredTime || undefined : undefined,
         recipientName: recipientName || undefined,
         recipientPhone: recipientPhone || undefined,
         occasion: occasion || undefined,
@@ -97,11 +110,19 @@ export function CheckoutForm({ locale }: { locale: string }) {
     <form onSubmit={onSubmit} className="space-y-4">
       <div className="rounded-xl2 border border-ink/8 p-3.5 text-sm dark:border-white/10">
         {cart.cart.items.map((item) => (
-          <div key={item.key} className="flex items-center justify-between gap-2 py-1">
-            <span className="truncate text-ink/70 dark:text-sand/70">
-              {item.name} × {item.quantity}
-            </span>
-            <span className="shrink-0 font-semibold">${lineTotal(item).toFixed(2)}</span>
+          <div key={item.key} className="py-1">
+            <div className="flex items-center justify-between gap-2">
+              <span className="truncate text-ink/70 dark:text-sand/70">
+                {item.name}
+                {item.variantName ? ` (${item.variantName})` : ""} × {item.quantity}
+              </span>
+              <span className="shrink-0 font-semibold">${lineTotal(item).toFixed(2)}</span>
+            </div>
+            {item.selectedOptions && item.selectedOptions.length > 0 && (
+              <p className="truncate text-xs text-ink/50 dark:text-sand/50">
+                {item.selectedOptions.map((o) => `${o.label}: ${o.valueLabel}`).join(" · ")}
+              </p>
+            )}
           </div>
         ))}
         <div className="mt-2 flex items-center justify-between border-t border-ink/8 pt-2 font-bold dark:border-white/10">
@@ -177,19 +198,35 @@ export function CheckoutForm({ locale }: { locale: string }) {
         </div>
       )}
 
-      <div>
-        <label className="mb-1 block text-xs font-semibold text-ink/50 dark:text-sand/50">{t("preferredDateLabel")}</label>
-        <input type="date" min={todayIso()} value={preferredDate} onChange={(e) => setPreferredDate(e.target.value)} className={inputClass} />
+      <div className={hasGiftItem ? "grid gap-3 sm:grid-cols-2" : undefined}>
+        <div>
+          <label className="mb-1 block text-xs font-semibold text-ink/50 dark:text-sand/50">{t("preferredDateLabel")}</label>
+          <input type="date" min={todayIso()} value={preferredDate} onChange={(e) => setPreferredDate(e.target.value)} className={inputClass} />
+        </div>
+        {/* Delivery TIME — unlike the date, only meaningful for gift-oriented
+            orders (a flower/cake needs a scheduled delivery window; a
+            restaurant/cafe order doesn't). Same hasGiftItem gate as
+            recipient/occasion/card-message below. */}
+        {hasGiftItem && (
+          <div>
+            <label className="mb-1 block text-xs font-semibold text-ink/50 dark:text-sand/50">{t("preferredTimeLabel")}</label>
+            <input type="time" value={preferredTime} onChange={(e) => setPreferredTime(e.target.value)} className={inputClass} />
+          </div>
+        )}
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        <input placeholder={t("recipientNameLabel")} value={recipientName} onChange={(e) => setRecipientName(e.target.value)} className={inputClass} />
-        <input type="tel" placeholder={t("recipientPhoneLabel")} value={recipientPhone} onChange={(e) => setRecipientPhone(e.target.value)} className={inputClass} />
-      </div>
+      {hasGiftItem && (
+        <>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <input placeholder={t("recipientNameLabel")} value={recipientName} onChange={(e) => setRecipientName(e.target.value)} className={inputClass} />
+            <input type="tel" placeholder={t("recipientPhoneLabel")} value={recipientPhone} onChange={(e) => setRecipientPhone(e.target.value)} className={inputClass} />
+          </div>
 
-      <input placeholder={t("occasionLabel")} value={occasion} onChange={(e) => setOccasion(e.target.value)} className={inputClass} />
+          <input placeholder={t("occasionLabel")} value={occasion} onChange={(e) => setOccasion(e.target.value)} className={inputClass} />
 
-      <textarea rows={2} placeholder={t("messageNoteLabel")} value={messageNote} onChange={(e) => setMessageNote(e.target.value)} className={inputClass} />
+          <textarea rows={2} placeholder={t("messageNoteLabel")} value={messageNote} onChange={(e) => setMessageNote(e.target.value)} className={inputClass} />
+        </>
+      )}
 
       <textarea rows={2} placeholder={t("notesLabel")} value={notes} onChange={(e) => setNotes(e.target.value)} className={inputClass} />
 

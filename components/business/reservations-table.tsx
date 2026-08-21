@@ -1,12 +1,14 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { Check, MessageCircle, X } from "lucide-react";
+import { useTranslations, useLocale } from "next-intl";
+import { Check, Eye, X } from "lucide-react";
+import { WhatsAppIcon } from "@/components/shared/brand-icons";
 import { updateReservationStatus } from "@/lib/actions/reservations";
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
 import { formatTime12h } from "@/lib/utils/opening-hours";
+import { ModalShell } from "@/components/shared/modal-shell";
 import type { TableReservation } from "@/types";
 
 const STATUS_OPTIONS: TableReservation["status"][] = ["pending", "confirmed", "cancelled", "completed"];
@@ -31,6 +33,55 @@ function formatDate(iso: string): string {
   const [y, m, d] = iso.split("-").map(Number);
   if (!y || !m || !d) return iso;
   return `${MONTH_ABBR[m - 1]} ${d}, ${y}`;
+}
+
+function formatCreatedAt(iso: string, locale: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  const datePart = `${MONTH_ABBR[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+  const timePart = date.toLocaleTimeString(locale, { hour: "numeric", minute: "2-digit" });
+  return `${datePart} · ${timePart}`;
+}
+
+/** Full-detail modal — every existing TableReservation field, reusing the
+ * same ModalShell BookingDetailModal (components/business/bookings-table
+ * .tsx) already established, so reservations/bookings/appointments all open
+ * the same kind of detail view instead of three different patterns. */
+function ReservationDetailModal({
+  reservation,
+  guestsLabel,
+  onClose,
+}: {
+  reservation: TableReservation;
+  guestsLabel: string;
+  onClose: () => void;
+}) {
+  const t = useTranslations("businessDashboard");
+  const locale = useLocale();
+  const rows: [string, string][] = [
+    [t("reference"), reservation.reservationReference],
+    [t("customerName"), reservation.customerName],
+    [t("phone"), reservation.customerPhone],
+    [t("reservationDate"), formatDate(reservation.reservationDate)],
+    [t("reservationTime"), formatTime12h(reservation.reservationTime.slice(0, 5))],
+    [guestsLabel, String(reservation.guestsCount)],
+    [t("status"), t(`bookingStatus_${reservation.status}`)],
+  ];
+  if (reservation.notes) rows.push([t("notes"), reservation.notes]);
+  if (reservation.createdAt) rows.push([t("createdLabel"), formatCreatedAt(reservation.createdAt, locale)]);
+
+  return (
+    <ModalShell title={t("reservationDetails")} onClose={onClose}>
+      <dl className="space-y-3 text-sm">
+        {rows.map(([label, value]) => (
+          <div key={label} className="flex items-start justify-between gap-4 border-b border-ink/8 pb-2 dark:border-white/10">
+            <dt className="text-ink/50 dark:text-sand/50">{label}</dt>
+            <dd className="text-end font-medium">{value}</dd>
+          </div>
+        ))}
+      </dl>
+    </ModalShell>
+  );
 }
 
 /**
@@ -60,6 +111,7 @@ export function ReservationsTable({
   const t = useTranslations("businessDashboard");
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [viewing, setViewing] = useState<TableReservation | null>(null);
   const guestsLabel = variant === "viewing" ? t("viewers") : t("guests");
 
   function onStatusChange(reservation: TableReservation, status: TableReservation["status"]) {
@@ -128,6 +180,15 @@ export function ReservationsTable({
                 </td>
                 <td className="px-4 py-3 text-end">
                   <div className="flex items-center justify-end gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setViewing(r)}
+                      aria-label={t("view")}
+                      title={t("view")}
+                      className="flex h-8 w-8 items-center justify-center rounded-full border border-ink/15 text-ink/60 transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-sand/60"
+                    >
+                      <Eye size={14} aria-hidden="true" />
+                    </button>
                     {r.status === "pending" && (
                       <>
                         <button
@@ -160,7 +221,7 @@ export function ReservationsTable({
                       title={t("contactGuest")}
                       className="flex h-8 w-8 items-center justify-center rounded-full border border-ink/15 text-[#25D366] transition-colors hover:border-[#25D366] dark:border-white/20"
                     >
-                      <MessageCircle size={14} aria-hidden="true" />
+                      <WhatsAppIcon size={14} aria-hidden="true" />
                     </a>
                   </div>
                 </td>
@@ -212,18 +273,28 @@ export function ReservationsTable({
                   </button>
                 </>
               )}
+              <button
+                type="button"
+                onClick={() => setViewing(r)}
+                aria-label={t("view")}
+                className="flex items-center justify-center rounded-full border border-ink/15 p-2 text-ink/60 dark:border-white/20 dark:text-sand/60"
+              >
+                <Eye size={14} aria-hidden="true" />
+              </button>
               <a
                 href={contactHref(r)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex flex-1 items-center justify-center gap-1 rounded-full border border-ink/15 py-2 text-xs font-semibold dark:border-white/20"
               >
-                <MessageCircle size={13} aria-hidden="true" /> {t("contactGuest")}
+                <WhatsAppIcon size={13} aria-hidden="true" /> {t("contactGuest")}
               </a>
             </div>
           </div>
         ))}
       </div>
+
+      {viewing && <ReservationDetailModal reservation={viewing} guestsLabel={guestsLabel} onClose={() => setViewing(null)} />}
     </>
   );
 }

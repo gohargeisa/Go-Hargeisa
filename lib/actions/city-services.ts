@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { logActivity } from "./activity";
 import { upgradeToBusinessOwner } from "./claims";
+import { hasBusinessGrantPermission } from "@/lib/data/access-control";
 import type { GalleryImage, MediaVideo, OpeningHoursGroup } from "@/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -73,6 +74,8 @@ async function assertCanEditCityService(id: string) {
     const { data: listing } = await supabase.from("city_services").select("owner_id").eq("id", id).single();
     if ((listing as { owner_id: string | null } | null)?.owner_id === user.id) return supabase;
   }
+
+  if (await hasBusinessGrantPermission(user.id, "city_service", id, "businesses_edit")) return supabase;
 
   throw new Error("Not authorized.");
 }

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { hasBusinessGrantPermission } from "@/lib/data/access-control";
 import type { ProductCategory, ProductGender, GalleryImage, OrderableListingType } from "@/types";
 
 export interface ProductInput {
@@ -60,6 +61,8 @@ async function assertCanManageProduct(listingId: string, listingType: ProductLis
     const { data: listing } = await supabase.from(table).select("owner_id").eq("id", listingId).single();
     if ((listing as { owner_id: string | null } | null)?.owner_id === user.id) return supabase;
   }
+
+  if (await hasBusinessGrantPermission(user.id, listingType, listingId, "businesses_edit")) return supabase;
 
   throw new Error("Not authorized.");
 }

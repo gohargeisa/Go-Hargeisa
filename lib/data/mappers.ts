@@ -1,5 +1,5 @@
 import type { Database } from "@/types/database";
-import type { Hotel, HotelRoom, Restaurant, Cafe, Service, Attraction, EventItem, CityService, Article, GalleryImage, Review, BusinessOffer, MediaVideo, Notification, NotificationCategory, NotificationSeverity, Category, Product, Department, Doctor, Appointment, OpeningHoursGroup, RestaurantMenuItem, TableReservation, ProductOrder, OrderItem } from "@/types";
+import type { Hotel, HotelRoom, Restaurant, Cafe, Service, Attraction, EventItem, CityService, Article, GalleryImage, Review, BusinessOffer, MediaVideo, Notification, NotificationCategory, NotificationSeverity, Category, Product, ProductVariant, ProductOption, Department, Doctor, Appointment, OpeningHoursGroup, RestaurantMenuItem, TableReservation, ProductOrder, OrderItem, BusinessAccessGrant, BusinessPermissions, TeamPlatformPermissionsGrant, PlatformPermissions, HonoraryMember } from "@/types";
 
 type HotelRow = Database["public"]["Tables"]["hotels"]["Row"];
 type HotelRoomRow = Database["public"]["Tables"]["hotel_rooms"]["Row"];
@@ -13,12 +13,17 @@ type ArticleRow = Database["public"]["Tables"]["articles"]["Row"];
 type ReviewRow = Database["public"]["Tables"]["reviews"]["Row"];
 type CategoryRow = Database["public"]["Tables"]["categories"]["Row"];
 type ProductRow = Database["public"]["Tables"]["products"]["Row"];
+type ProductVariantRow = Database["public"]["Tables"]["product_variants"]["Row"];
+type ProductOptionRow = Database["public"]["Tables"]["product_options"]["Row"];
 type DepartmentRow = Database["public"]["Tables"]["departments"]["Row"];
 type DoctorRow = Database["public"]["Tables"]["doctors"]["Row"];
 type AppointmentRow = Database["public"]["Tables"]["appointments"]["Row"];
 type TableReservationRow = Database["public"]["Tables"]["table_reservations"]["Row"];
 type ProductOrderRow = Database["public"]["Tables"]["product_orders"]["Row"];
 type OrderItemRow = Database["public"]["Tables"]["order_items"]["Row"];
+type BusinessAccessGrantRow = Database["public"]["Tables"]["business_access_grants"]["Row"];
+type TeamPlatformPermissionsRow = Database["public"]["Tables"]["team_platform_permissions"]["Row"];
+type HonoraryMemberRow = Database["public"]["Tables"]["honorary_members"]["Row"];
 
 function toGallery(json: unknown): GalleryImage[] {
   if (!Array.isArray(json)) return [];
@@ -298,6 +303,15 @@ export function mapOrderItem(row: OrderItemRow): OrderItem {
     addons: Array.isArray(row.addons) ? (row.addons as unknown as OrderItem["addons"]) : [],
     addonsTotal: Number(row.addons_total),
     lineTotal: Number(row.line_total),
+    // Previously captured server-side (once the variant migration is
+    // applied) but never read back here — the business owner/admin order
+    // views silently never showed which shade/variant a customer picked.
+    variantId: row.variant_id ?? undefined,
+    variantName: row.variant_name ?? undefined,
+    variantSku: row.variant_sku ?? undefined,
+    selectedOptions: Array.isArray(row.selected_options)
+      ? (row.selected_options as unknown as OrderItem["selectedOptions"])
+      : undefined,
   };
 }
 
@@ -316,6 +330,7 @@ export function mapProductOrder(row: ProductOrderRow & { order_items?: OrderItem
     fulfillmentType: row.fulfillment_type,
     deliveryAddress: row.delivery_address ?? undefined,
     preferredDate: row.preferred_date ?? undefined,
+    preferredTime: row.preferred_time ?? undefined,
     recipientName: row.recipient_name ?? undefined,
     recipientPhone: row.recipient_phone ?? undefined,
     occasion: row.occasion ?? undefined,
@@ -726,6 +741,46 @@ export function mapProduct(row: ProductRow): Product {
   };
 }
 
+export function mapProductVariant(row: ProductVariantRow): ProductVariant {
+  return {
+    id: row.id,
+    productId: row.product_id,
+    name: row.name,
+    nameAr: row.name_ar ?? undefined,
+    nameSo: row.name_so ?? undefined,
+    shadeName: row.shade_name ?? undefined,
+    shadeCode: row.shade_code ?? undefined,
+    hexColor: row.hex_color ?? undefined,
+    finish: row.finish ?? undefined,
+    size: row.size ?? undefined,
+    image: row.image ?? undefined,
+    sku: row.sku ?? undefined,
+    price: row.price != null ? Number(row.price) : undefined,
+    isAvailable: row.is_available,
+    sortOrder: row.sort_order,
+  };
+}
+
+export function mapProductOption(row: ProductOptionRow): ProductOption {
+  return {
+    id: row.id,
+    productId: row.product_id,
+    key: row.key,
+    label: row.label,
+    labelAr: row.label_ar ?? undefined,
+    labelSo: row.label_so ?? undefined,
+    type: row.type,
+    required: row.required,
+    priceDelta: Number(row.price_delta),
+    choices: Array.isArray(row.choices) ? (row.choices as unknown as ProductOption["choices"]) : [],
+    placeholder: row.placeholder ?? undefined,
+    placeholderAr: row.placeholder_ar ?? undefined,
+    placeholderSo: row.placeholder_so ?? undefined,
+    maxLength: row.max_length ?? undefined,
+    sortOrder: row.sort_order,
+  };
+}
+
 export function mapDepartment(row: DepartmentRow): Department {
   return {
     id: row.id,
@@ -809,6 +864,45 @@ export function mapBusinessOffer(row: BusinessOfferRow): BusinessOffer {
     featured: row.featured,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+  };
+}
+
+export function mapBusinessAccessGrant(row: BusinessAccessGrantRow): BusinessAccessGrant {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    listingType: row.listing_type,
+    listingId: row.listing_id,
+    permissions: (row.permissions ?? {}) as BusinessPermissions,
+    isActive: row.is_active,
+    grantedBy: row.granted_by ?? undefined,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+export function mapTeamPlatformPermissions(row: TeamPlatformPermissionsRow): TeamPlatformPermissionsGrant {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    permissions: (row.permissions ?? {}) as PlatformPermissions,
+    isActive: row.is_active,
+    grantedBy: row.granted_by ?? undefined,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+export function mapHonoraryMember(row: HonoraryMemberRow): HonoraryMember {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    titleEn: row.title_en,
+    titleAr: row.title_ar ?? undefined,
+    titleSo: row.title_so ?? undefined,
+    isPublic: row.is_public,
+    createdBy: row.created_by ?? undefined,
+    createdAt: row.created_at,
   };
 }
 

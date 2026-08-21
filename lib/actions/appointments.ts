@@ -5,7 +5,8 @@ import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAvailableSlots as computeAvailableSlots } from "@/lib/utils/doctor-availability";
-import type { AppointmentStatus, OpeningHoursGroup } from "@/types";
+import { hasBusinessGrantPermission } from "@/lib/data/access-control";
+import type { AppointmentStatus, OpeningHoursGroup, BusinessPermissionKey } from "@/types";
 import type { Locale } from "@/lib/i18n/config";
 
 export interface AppointmentRequestInput {
@@ -104,8 +105,11 @@ export async function getAvailableSlots(doctorId: string, date: string): Promise
 
 /** Same ownership shape as lib/actions/doctors.ts's assertCanManageDoctor,
  * joined one level further through doctors -> city_services (matches the
- * "Owners manage their own doctors' appointments" RLS policy exactly). */
-async function assertCanManageAppointment(doctorId: string) {
+ * "Owners manage their own doctors' appointments" RLS policy exactly).
+ * `requiredPermission` is the Team Member fallback, mirroring
+ * assertCanManageListing's — a caller that doesn't pass it keeps the
+ * original owner/business_owner-only behavior. */
+async function assertCanManageAppointment(doctorId: string, requiredPermission?: BusinessPermissionKey) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -117,13 +121,16 @@ async function assertCanManageAppointment(doctorId: string) {
 
   if (role === "owner") return supabase;
 
-  if (role === "business_owner") {
-    const { data: doctor } = await supabase.from("doctors").select("city_service_id").eq("id", doctorId).single();
-    const cityServiceId = (doctor as { city_service_id: string } | null)?.city_service_id;
-    if (cityServiceId) {
-      const { data: listing } = await supabase.from("city_services").select("owner_id").eq("id", cityServiceId).single();
-      if ((listing as { owner_id: string | null } | null)?.owner_id === user.id) return supabase;
-    }
+  const { data: doctor } = await supabase.from("doctors").select("city_service_id").eq("id", doctorId).single();
+  const cityServiceId = (doctor as { city_service_id: string } | null)?.city_service_id;
+
+  if (role === "business_owner" && cityServiceId) {
+    const { data: listing } = await supabase.from("city_services").select("owner_id").eq("id", cityServiceId).single();
+    if ((listing as { owner_id: string | null } | null)?.owner_id === user.id) return supabase;
+  }
+
+  if (requiredPermission && cityServiceId && (await hasBusinessGrantPermission(user.id, "city_service", cityServiceId, requiredPermission))) {
+    return supabase;
   }
 
   throw new Error("Not authorized.");
@@ -140,7 +147,7 @@ export async function updateAppointmentStatus(
   status: AppointmentStatus,
   revalidatePaths: string[]
 ): Promise<{ ok: boolean; error?: string }> {
-  const supabase = await assertCanManageAppointment(doctorId);
+  const supabase = await assertCanManageAppointment(doctorId, "appointments_manage");
 
   const { data: existing } = await supabase.from("appointments").select("status").eq("id", appointmentId).single();
   const previousStatus = (existing as { status: AppointmentStatus } | null)?.status;

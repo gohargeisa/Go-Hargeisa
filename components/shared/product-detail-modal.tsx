@@ -11,7 +11,9 @@ import { Lightbox, type LightboxSlide } from "@/components/shared/lightbox";
 import { AddToCartButton } from "@/components/shared/add-to-cart-button";
 import { ProductImage } from "@/components/shared/product-image";
 import { ProductVariantSelector } from "@/components/shared/product-variant-selector";
+import { ProductOptionsForm } from "@/components/shared/product-options-form";
 import { getValidAddonsForProduct } from "@/lib/cart/product-addons";
+import { hasMissingRequiredOptions, resolveSelectedOptions, type ProductOptionValues } from "@/lib/cart/product-options";
 import { productCategoryLabel, productGenderLabel } from "@/lib/config/product-categories";
 import { productLocalizedName, productLocalizedDescription, variantLocalizedName } from "@/lib/utils/product-i18n";
 import { getProductPricing } from "@/lib/utils/product-pricing";
@@ -52,6 +54,7 @@ export function ProductDetailModal({
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [selectedAddonIds, setSelectedAddonIds] = useState<string[]>([]);
+  const [optionValues, setOptionValues] = useState<ProductOptionValues>({});
   // Data-driven variant support — absent entirely for the vast majority of
   // products (no `variants`), in which case everything below falls back to
   // the product's own image/price/name exactly as before variants existed.
@@ -70,6 +73,8 @@ export function ProductDetailModal({
   // business's whole add-on vocabulary. See lib/cart/product-addons.ts.
   const validAddons = getValidAddonsForProduct(product, business);
   const selectedAddons: ProductAddon[] = validAddons.filter((a) => selectedAddonIds.includes(a.id));
+  const missingRequiredOptions = hasMissingRequiredOptions(product.options, optionValues);
+  const selectedOptions = resolveSelectedOptions(product.options, optionValues, locale);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -236,6 +241,13 @@ export function ProductDetailModal({
                 </div>
               )}
 
+              <ProductOptionsForm
+                options={product.options}
+                locale={locale}
+                values={optionValues}
+                onChange={(key, v) => setOptionValues((prev) => ({ ...prev, [key]: v }))}
+              />
+
               <AddToCartButton
                 business={business}
                 product={{
@@ -248,9 +260,12 @@ export function ProductDetailModal({
                   variantId: activeVariant?.id,
                   variantName: activeVariant ? variantLocalizedName(activeVariant, locale) : undefined,
                   variantSku: activeVariant?.sku,
+                  category: product.category,
+                  selectedOptions,
                 }}
                 quantity={quantity}
                 selectedAddons={selectedAddons}
+                disabled={missingRequiredOptions}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary-700 py-3 text-sm font-bold text-white transition-colors hover:bg-primary-800"
               />
             </div>

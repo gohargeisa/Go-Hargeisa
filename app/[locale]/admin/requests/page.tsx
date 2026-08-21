@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/config";
-import { requireAdmin } from "@/lib/supabase/guards";
+import { requirePlatformPermission } from "@/lib/supabase/guards";
 import { createClient } from "@/lib/supabase/server";
 import { RequestsList, type RequestRow } from "@/components/admin/requests-list";
 
 export const metadata: Metadata = { title: "Requests — Admin", robots: { index: false, follow: false } };
 
 export default async function AdminRequestsPage({ params: { locale } }: { params: { locale: Locale } }) {
-  await requireAdmin(locale, `/${locale}/admin/requests`);
+  await requirePlatformPermission(locale, `/${locale}/admin/requests`, "requests_view");
   const t = await getTranslations({ locale, namespace: "admin" });
 
   const supabase = await createClient();

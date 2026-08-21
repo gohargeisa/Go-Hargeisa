@@ -21,6 +21,7 @@ export default async function NewHotelPage({ params: { locale } }: { params: { l
         mode="create"
         restaurantOptions={restaurants.map((r) => ({ id: r.id, name: r.name }))}
         cafeOptions={cafes.map((c) => ({ id: c.id, name: c.name }))}
+        canAssignOwner
       />
     </section>
   );

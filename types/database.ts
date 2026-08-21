@@ -58,6 +58,7 @@ type HotelRow = ListingBase & SocialExtra & {
   hotel_type: string | null; star_rating: number | null;
   number_of_floors: number | null; year_established: number | null;
   document_url: string | null;
+  is_suspended: boolean;
 };
 
 type RoomTypeDb = "standard" | "deluxe" | "twin" | "family" | "executive_suite";
@@ -88,6 +89,7 @@ type RestaurantRow = ListingBase & SocialExtra & {
   online_order_url: string | null; languages: string[];
   online_ordering_enabled: boolean; phone_ordering_enabled: boolean;
   ordering_enabled: boolean; products_delivery_enabled: boolean;
+  is_suspended: boolean;
 };
 type CafeRow = ListingBase & SocialExtra & {
   description_ar: string | null; description_so: string | null;
@@ -101,6 +103,7 @@ type CafeRow = ListingBase & SocialExtra & {
   cafe_type: string | null; seating_capacity: number | null;
   sells_flowers: boolean; flower_addons: Json; products_delivery_enabled: boolean;
   ordering_enabled: boolean;
+  is_suspended: boolean;
 };
 
 type BusinessOfferRow = {
@@ -170,6 +173,7 @@ type CityServiceRow = {
   pharmacy_type: string | null; pharmacy_delivery_available: boolean | null; prescription_required: boolean | null;
   home_delivery: boolean | null; pharmacy_emergency_contact: string | null;
   document_url: string | null; products_delivery_enabled: boolean;
+  is_suspended: boolean;
 };
 type AttractionRow = ListingBase & SocialExtra & {
   history: string | null; best_time_to_visit: string | null; entry_fee: string; visitor_tips: string[];
@@ -230,6 +234,7 @@ type ServiceRow = ListingBase & {
   weekly_rental_available: boolean | null; monthly_rental_available: boolean | null;
   delivery_service_available: boolean | null; cargo_service_available: boolean | null;
   document_url: string | null;
+  is_suspended: boolean;
 };
 
 /** The `categories` table — single source of truth for every business
@@ -281,6 +286,7 @@ type ProductOrderRow = {
   subtotal: number; total: number | null;
   fulfillment_type: "delivery" | "pickup"; delivery_address: string | null;
   preferred_date: string | null;
+  preferred_time: string | null;
   recipient_name: string | null; recipient_phone: string | null;
   occasion: string | null; message_note: string | null; notes: string | null;
   status: "pending" | "confirmed" | "preparing" | "ready" | "out_for_delivery" | "cancelled" | "completed";
@@ -294,6 +300,8 @@ type OrderItemRow = {
   product_image: string | null;
   unit_price: number; quantity: number;
   addons: Json; addons_total: number; line_total: number;
+  variant_id: string | null; variant_name: string | null; variant_sku: string | null;
+  selected_options: Json | null;
   created_at: string;
 };
 
@@ -309,6 +317,24 @@ type ProductRow = {
   is_available: boolean; is_featured: boolean; is_hidden: boolean;
   sort_order: number; created_at: string; updated_at: string;
   size: string | null;
+};
+
+type ProductVariantRow = {
+  id: string; product_id: string;
+  name: string; name_ar: string | null; name_so: string | null;
+  shade_name: string | null; shade_code: string | null; hex_color: string | null;
+  finish: string | null; size: string | null;
+  image: string | null; sku: string | null; price: number | null;
+  is_available: boolean; sort_order: number; created_at: string;
+};
+
+type ProductOptionRow = {
+  id: string; product_id: string;
+  key: string; label: string; label_ar: string | null; label_so: string | null;
+  type: "select" | "multiselect" | "boolean" | "text" | "number";
+  required: boolean; price_delta: number; choices: Json;
+  placeholder: string | null; placeholder_ar: string | null; placeholder_so: string | null;
+  max_length: number | null; sort_order: number; created_at: string;
 };
 
 type DepartmentRow = {
@@ -481,6 +507,22 @@ type BusinessMessageRow = {
   sender_email: string | null; sender_phone: string | null; message: string; is_read: boolean; created_at: string;
 };
 
+type BusinessAccessGrantRow = {
+  id: string; user_id: string; listing_type: BusinessListingType; listing_id: string;
+  permissions: Json; is_active: boolean; granted_by: string | null;
+  created_at: string; updated_at: string;
+};
+
+type TeamPlatformPermissionsRow = {
+  id: string; user_id: string; permissions: Json; is_active: boolean; granted_by: string | null;
+  created_at: string; updated_at: string;
+};
+
+type HonoraryMemberRow = {
+  id: string; user_id: string; title_en: string; title_ar: string | null; title_so: string | null;
+  is_public: boolean; created_by: string | null; created_at: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -539,10 +581,15 @@ export type Database = {
       business_hours: Table<{ id: string; entity_type: string; entity_id: string; day_of_week: number; opens_at: string | null; closes_at: string | null; is_closed: boolean; special_note: string | null; created_at: string; updated_at: string }>;
       amenity_categories: Table<{ id: string; name: string; icon: string | null; sort_order: number; created_at: string }>;
       products: Table<ProductRow>;
+      product_variants: Table<ProductVariantRow>;
+      product_options: Table<ProductOptionRow>;
       departments: Table<DepartmentRow>;
       doctors: Table<DoctorRow>;
       appointments: Table<AppointmentRow>;
       appointment_status_history: Table<AppointmentStatusHistoryRow>;
+      business_access_grants: Table<BusinessAccessGrantRow>;
+      team_platform_permissions: Table<TeamPlatformPermissionsRow>;
+      honorary_members: Table<HonoraryMemberRow>;
     } & Record<string, Table<Record<string, unknown>, Record<string, unknown>, Record<string, unknown>>>;
     Views: Record<string, never>;
     Functions: {
