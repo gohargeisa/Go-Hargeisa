@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { CalendarDays, Ticket, MapPin, Navigation, ExternalLink, Phone as PhoneIcon, MessageCircle, Mail, Globe } from "lucide-react";
+import { CalendarDays, Ticket, MapPin, Navigation, ExternalLink, Phone as PhoneIcon, Mail, Globe } from "lucide-react";
+import { WhatsAppIcon } from "@/components/shared/brand-icons";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
 import { getEventBySlug, getAllEventSlugs, getEvents } from "@/lib/data/events";
@@ -148,7 +149,7 @@ export default async function EventDetailPage({
             )}
             {eventWhatsappHref && (
               <SecondaryButton href={eventWhatsappHref} external size="sm">
-                <MessageCircle size={15} aria-hidden="true" />
+                <WhatsAppIcon size={15} aria-hidden="true" />
                 {th("whatsapp")}
               </SecondaryButton>
             )}

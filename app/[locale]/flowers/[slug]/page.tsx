@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { MapPin, Navigation, ExternalLink, Flower2, Gift, Package, Truck, ShieldCheck, MessageCircle } from "lucide-react";
+import { MapPin, Navigation, ExternalLink, Flower2, Gift, Package, Truck, ShieldCheck } from "lucide-react";
+import { WhatsAppIcon } from "@/components/shared/brand-icons";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
 import { getCityServiceBySlug } from "@/lib/data/city-services";
@@ -235,7 +236,7 @@ export default async function FlowersDetailPage({
         )}
         {serviceWhatsappHref && (
           <span className="inline-flex items-center gap-1.5 rounded-full border border-ink/10 bg-white px-3.5 py-1.5 text-xs font-semibold text-ink/75 dark:border-white/10 dark:bg-white/[0.04] dark:text-sand/75">
-            <MessageCircle size={13} className="shrink-0 text-primary" aria-hidden="true" />
+            <WhatsAppIcon size={13} className="shrink-0 text-primary" aria-hidden="true" />
             {td("trustDirectWhatsapp")}
           </span>
         )}
@@ -476,7 +477,7 @@ export default async function FlowersDetailPage({
                       size="lg"
                       className="!border-white/40 !text-white hover:!border-white hover:!text-white"
                     >
-                      <MessageCircle size={16} aria-hidden="true" />
+                      <WhatsAppIcon size={16} aria-hidden="true" />
                       {th("whatsapp")}
                     </SecondaryButton>
                   )}

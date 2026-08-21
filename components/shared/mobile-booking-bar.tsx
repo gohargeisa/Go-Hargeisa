@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Check, MessageCircle, Phone, Share2 } from "lucide-react";
+import { Check, Phone, Share2 } from "lucide-react";
+import { WhatsAppIcon } from "@/components/shared/brand-icons";
 import type { Locale } from "@/lib/i18n/config";
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
 import { FavoriteButton } from "@/components/shared/favorite-button";
@@ -105,7 +106,7 @@ export function MobileBookingBar({
           aria-label={`${t("whatsapp")} — ${name}`}
           className={`${ICON_BUTTON_CLASS} hover:!text-[#25D366]`}
         >
-          <MessageCircle size={18} aria-hidden="true" />
+          <WhatsAppIcon size={18} aria-hidden="true" />
         </a>
       )}
 

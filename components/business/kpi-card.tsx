@@ -1,4 +1,4 @@
-import type { LucideIcon } from "lucide-react";
+import type { ElementType } from "react";
 import { TrendingDown, TrendingUp } from "lucide-react";
 
 export function KpiCard({
@@ -9,7 +9,13 @@ export function KpiCard({
   subtitle,
   tone = "bg-primary/10 text-primary",
 }: {
-  icon: LucideIcon;
+  /** LucideIcon (most KPIs) or one of components/shared/brand-icons.tsx's
+   * plain-function brand glyphs (WhatsApp) — unconstrained ElementType
+   * (rather than LucideIcon's exact forwardRef type, whose `propTypes`
+   * static member doesn't structurally match a narrower prop shape) so
+   * either family drops in as-is; both already accept the `size`/
+   * `aria-hidden` props this component itself passes below. */
+  icon: ElementType;
   value: string | number;
   /** null when there's no prior-day data to compare against yet. */
   growthPercent: number | null;

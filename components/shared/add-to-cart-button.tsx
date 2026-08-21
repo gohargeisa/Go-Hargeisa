@@ -19,12 +19,17 @@ export function AddToCartButton({
   product,
   quantity = 1,
   selectedAddons = [],
+  disabled = false,
   className,
 }: {
   business: AddToCartBusiness;
   product: AddToCartProduct;
   quantity?: number;
   selectedAddons?: ProductAddon[];
+  /** Blocks adding — e.g. a required product option hasn't been filled in
+   * yet. Purely additive: every existing caller that never passes this
+   * keeps behaving exactly as before. */
+  disabled?: boolean;
   className?: string;
 }) {
   const t = useTranslations("products");
@@ -54,9 +59,11 @@ export function AddToCartButton({
       <button
         type="button"
         onClick={handleAdd}
+        disabled={disabled}
         className={
-          className ??
-          "inline-flex items-center justify-center gap-1.5 rounded-full bg-primary-700 px-4 py-2 text-sm font-semibold text-white transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-primary-800 active:scale-95"
+          (className ??
+            "inline-flex items-center justify-center gap-1.5 rounded-full bg-primary-700 px-4 py-2 text-sm font-semibold text-white transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-primary-800 active:scale-95") +
+          (disabled ? " cursor-not-allowed opacity-50 hover:translate-y-0" : "")
         }
       >
         {justAdded ? <Check size={15} aria-hidden="true" /> : <ShoppingCart size={15} aria-hidden="true" />}

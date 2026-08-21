@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { MapPin, Navigation, ExternalLink, Phone as PhoneIcon, MessageCircle, Mail, Globe, Wrench, GraduationCap, Send, ShoppingBag, FileText } from "lucide-react";
+import { MapPin, Navigation, ExternalLink, Phone as PhoneIcon, Mail, Globe, Wrench, GraduationCap, Send, ShoppingBag, FileText } from "lucide-react";
+import { WhatsAppIcon } from "@/components/shared/brand-icons";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
 import { getCityServiceBySlug, getAllCityServiceSlugs, getCityServicesGroupedByCategory } from "@/lib/data/city-services";
@@ -294,7 +295,7 @@ export default async function CityServiceDetailPage({
                 ) : genericGroup === "travel" ? (
                   <Send size={15} aria-hidden="true" />
                 ) : (
-                  <MessageCircle size={15} aria-hidden="true" />
+                  <WhatsAppIcon size={15} aria-hidden="true" />
                 )}
                 {genericGroup === "car_service"
                   ? t("bookService")
@@ -313,7 +314,7 @@ export default async function CityServiceDetailPage({
             )}
             {serviceWhatsappHref && (
               <SecondaryButton href={serviceWhatsappHref} external size="sm">
-                <MessageCircle size={15} aria-hidden="true" />
+                <WhatsAppIcon size={15} aria-hidden="true" />
                 {th("whatsapp")}
               </SecondaryButton>
             )}

@@ -2,10 +2,11 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { Download, Loader2, Search } from "lucide-react";
+import { useTranslations, useLocale } from "next-intl";
+import { Download, Eye, Loader2, Search } from "lucide-react";
 import { updateAppointmentStatus } from "@/lib/actions/appointments";
 import { formatTime12h } from "@/lib/utils/opening-hours";
+import { ModalShell } from "@/components/shared/modal-shell";
 import type { MyAppointment } from "@/lib/data/business";
 import type { AppointmentStatus } from "@/types";
 
@@ -21,10 +22,60 @@ const STATUS_STYLES: Record<AppointmentStatus, string> = {
   no_show: "bg-ink/10 text-ink/60 dark:bg-white/10 dark:text-sand/60",
 };
 
+const MONTH_ABBR = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+// Deterministic, not locale-dependent — toLocaleDateString(undefined, ...)
+// resolves against the server process's own default ICU locale, not the
+// page's language, and can render Arabic month names on an English admin
+// screen (see components/business/reservations-table.tsx's identical fix).
 function formatDate(iso: string): string {
-  const d = new Date(`${iso}T00:00:00`);
-  if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  const [y, m, d] = iso.split("-").map(Number);
+  if (!y || !m || !d) return iso;
+  return `${MONTH_ABBR[m - 1]} ${d}, ${y}`;
+}
+
+function formatCreatedAt(iso: string, locale: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  const datePart = formatDate(date.toISOString().slice(0, 10));
+  const timePart = date.toLocaleTimeString(locale, { hour: "numeric", minute: "2-digit" });
+  return `${datePart} · ${timePart}`;
+}
+
+/** Every existing MyAppointment field, platform-wide (Founder/Owner) view —
+ * reuses the same ModalShell/field-row pattern as the owner-side
+ * AppointmentDetailModal (components/business/appointments-table.tsx). */
+function AdminAppointmentDetailModal({ appointment, onClose }: { appointment: MyAppointment; onClose: () => void }) {
+  const t = useTranslations("appointments");
+  const ta = useTranslations("admin");
+  const locale = useLocale();
+  const rows: [string, string][] = [
+    [t("patientName"), appointment.patientName],
+    [t("phone"), appointment.patientPhone],
+    [t("doctorLabel"), appointment.doctorName || "—"],
+  ];
+  if (appointment.hospitalName) rows.push([ta("bookingsColHotel"), appointment.hospitalName]);
+  if (appointment.departmentName) rows.push([t("departmentLabel"), appointment.departmentName]);
+  rows.push(
+    [t("appointmentDate"), formatDate(appointment.appointmentDate)],
+    [t("appointmentTime"), formatTime12h(appointment.appointmentTime)],
+    [t("status"), t(`appointmentStatus_${appointment.status}`)]
+  );
+  if (appointment.notes) rows.push([t("notes"), appointment.notes]);
+  if (appointment.createdAt) rows.push([t("createdLabel"), formatCreatedAt(appointment.createdAt, locale)]);
+
+  return (
+    <ModalShell title={t("appointmentDetails")} onClose={onClose}>
+      <dl className="space-y-3 text-sm">
+        {rows.map(([label, value]) => (
+          <div key={label} className="flex items-start justify-between gap-4 border-b border-ink/8 pb-2 dark:border-white/10">
+            <dt className="text-ink/50 dark:text-sand/50">{label}</dt>
+            <dd className="text-end font-medium">{value}</dd>
+          </div>
+        ))}
+      </dl>
+    </ModalShell>
+  );
 }
 
 function csvCell(value: string): string {
@@ -56,6 +107,7 @@ export function AdminAppointmentsList({ appointments }: { appointments: MyAppoin
   const [hospitalFilter, setHospitalFilter] = useState("all");
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [viewing, setViewing] = useState<MyAppointment | null>(null);
 
   function onChangeStatus(appointment: MyAppointment, status: AppointmentStatus) {
     if (status === appointment.status) return;
@@ -154,6 +206,7 @@ export function AdminAppointmentsList({ appointments }: { appointments: MyAppoin
                 <th className="px-4 py-3 text-start font-semibold">{ta("patientName")}</th>
                 <th className="px-4 py-3 text-start font-semibold">{t("bookingsColDates")}</th>
                 <th className="px-4 py-3 text-start font-semibold">{t("bookingsColStatus")}</th>
+                <th className="px-4 py-3 text-end font-semibold">{t("colActions")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-ink/5 dark:divide-white/5">
@@ -188,12 +241,25 @@ export function AdminAppointmentsList({ appointments }: { appointments: MyAppoin
                       {isPending && pendingId === a.id && <Loader2 size={12} className="animate-spin text-ink/40" />}
                     </div>
                   </td>
+                  <td className="px-4 py-3 text-end">
+                    <button
+                      type="button"
+                      onClick={() => setViewing(a)}
+                      aria-label={t("productOrdersViewDetails")}
+                      title={t("productOrdersViewDetails")}
+                      className="ms-auto flex h-8 w-8 items-center justify-center rounded-full border border-ink/15 text-ink/60 transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-sand/60"
+                    >
+                      <Eye size={14} aria-hidden="true" />
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       )}
+
+      {viewing && <AdminAppointmentDetailModal appointment={viewing} onClose={() => setViewing(null)} />}
     </div>
   );
 }

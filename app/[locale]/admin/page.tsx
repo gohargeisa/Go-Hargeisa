@@ -93,7 +93,7 @@ export default async function OwnerDashboardPage({ params: { locale } }: { param
         <div className="container-px relative mx-auto">
           <div>
             <span className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-white/80 backdrop-blur-sm">
-              Owner Control Center
+              {t("ownerControlCenterBadge")}
             </span>
             <h1 className="mt-3 font-display text-3xl font-bold text-white md:text-4xl">{t("dashboardTitle")}</h1>
             <p className="mt-2 text-sm text-white/70">{t("dashboardSubtitle")}</p>
@@ -104,29 +104,29 @@ export default async function OwnerDashboardPage({ params: { locale } }: { param
             <GlassStatCard
               icon={Handshake}
               value={partnerOverview.officialCount}
-              label="Official Partners"
-              sublabel="Full dashboard access"
+              label={t("officialPartnersLabel")}
+              sublabel={t("officialPartnersSublabel")}
               tone="bg-violet-400/25 text-violet-50"
             />
             <GlassStatCard
               icon={Users}
               value={partnerOverview.trialCount}
-              label="Trial Partners"
-              sublabel="Visible, no dashboard yet"
+              label={t("trialPartnersCardLabel")}
+              sublabel={t("trialPartnersCardSublabel")}
               tone="bg-violet-400/25 text-violet-50"
             />
             <GlassStatCard
               icon={Building}
               value={`${cityCoverage.totalPublished}/${cityCoverage.totalTarget}`}
-              label="City Coverage"
-              sublabel={`${Math.round((cityCoverage.totalPublished / cityCoverage.totalTarget) * 100)}% of target filled`}
+              label={t("cityCoverageLabel")}
+              sublabel={t("cityCoverageSublabel", { percent: Math.round((cityCoverage.totalPublished / cityCoverage.totalTarget) * 100) })}
               progressPercent={(cityCoverage.totalPublished / cityCoverage.totalTarget) * 100}
             />
             <GlassStatCard
               icon={Eye}
               value={ownerKpis.totalViews.toLocaleString()}
-              label="Total Views"
-              sublabel="All-time, platform-wide"
+              label={t("totalViewsLabel")}
+              sublabel={t("totalViewsAllTimeSublabel")}
               tone="bg-sky-400/25 text-sky-50"
             />
           </div>
@@ -137,20 +137,20 @@ export default async function OwnerDashboardPage({ params: { locale } }: { param
         {/* ============ Premium Analytics ============ */}
         <Reveal>
           <div className="mb-10">
-            <h2 className="font-display text-xl font-semibold">Premium Analytics</h2>
-            <p className="mt-1 text-sm text-ink/55 dark:text-sand/55">Platform-wide traffic and activity, across every partner listing.</p>
+            <h2 className="font-display text-xl font-semibold">{t("premiumAnalyticsTitle")}</h2>
+            <p className="mt-1 text-sm text-ink/55 dark:text-sand/55">{t("premiumAnalyticsSubtitle")}</p>
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
-              <KpiCard icon={Eye} value={ownerKpis.totalViews.toLocaleString()} growthPercent={null} label="Total Views" subtitle="Across every partner" tone="bg-sky-500/10 text-sky-600 dark:text-sky-400" />
-              <KpiCard icon={MousePointerClick} value={ownerKpis.totalClicks.toLocaleString()} growthPercent={null} label="Total Clicks" subtitle="Website, call & WhatsApp" tone="bg-orange-500/10 text-orange-600 dark:text-orange-400" />
-              <KpiCard icon={CalendarCheck} value={ownerKpis.totalBookings.toLocaleString()} growthPercent={null} label="Total Bookings" subtitle="All hotels, all time" tone="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" />
+              <KpiCard icon={Eye} value={ownerKpis.totalViews.toLocaleString()} growthPercent={null} label={t("totalViewsLabel")} subtitle={t("totalViewsAcrossPartnersSublabel")} tone="bg-sky-500/10 text-sky-600 dark:text-sky-400" />
+              <KpiCard icon={MousePointerClick} value={ownerKpis.totalClicks.toLocaleString()} growthPercent={null} label={t("totalClicksLabel")} subtitle={t("totalClicksSublabel")} tone="bg-orange-500/10 text-orange-600 dark:text-orange-400" />
+              <KpiCard icon={CalendarCheck} value={ownerKpis.totalBookings.toLocaleString()} growthPercent={null} label={t("totalBookingsLabel")} subtitle={t("totalBookingsSublabel")} tone="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div className="mt-3 grid gap-3 sm:grid-cols-3">
-              <KpiCard icon={Eye} value={ownerKpis.todayViews.toLocaleString()} growthPercent={null} label="Today's Views" subtitle="Since midnight" tone="bg-sky-500/10 text-sky-600 dark:text-sky-400" />
-              <KpiCard icon={Eye} value={ownerKpis.weekViews.toLocaleString()} growthPercent={null} label="This Week's Views" subtitle="Last 7 days" tone="bg-sky-500/10 text-sky-600 dark:text-sky-400" />
-              <KpiCard icon={Eye} value={ownerKpis.monthViews.toLocaleString()} growthPercent={null} label="This Month's Views" subtitle="Since the 1st" tone="bg-sky-500/10 text-sky-600 dark:text-sky-400" />
+              <KpiCard icon={Eye} value={ownerKpis.todayViews.toLocaleString()} growthPercent={null} label={t("todayViewsLabel")} subtitle={t("todayViewsSublabel")} tone="bg-sky-500/10 text-sky-600 dark:text-sky-400" />
+              <KpiCard icon={Eye} value={ownerKpis.weekViews.toLocaleString()} growthPercent={null} label={t("weekViewsLabel")} subtitle={t("weekViewsSublabel")} tone="bg-sky-500/10 text-sky-600 dark:text-sky-400" />
+              <KpiCard icon={Eye} value={ownerKpis.monthViews.toLocaleString()} growthPercent={null} label={t("monthViewsLabel")} subtitle={t("monthViewsSublabel")} tone="bg-sky-500/10 text-sky-600 dark:text-sky-400" />
             </div>
             <div className="mt-4">
-              <ViewsChart series={ownerViewsSeries} title="Platform Views" />
+              <ViewsChart series={ownerViewsSeries} title={t("platformViewsChartTitle")} />
             </div>
           </div>
         </Reveal>

@@ -7,6 +7,21 @@ import { createClient } from "@/lib/supabase/client";
 import { Loader2, Eye, EyeOff, Check, X } from "lucide-react";
 import { PrimaryButton } from "@/components/shared/buttons";
 import type { Locale } from "@/lib/i18n/config";
+import { defaultPostLoginPath } from "@/lib/utils/post-login-redirect";
+
+/** Looks up the just-signed-in user's role and resolves it to a landing
+ * path via defaultPostLoginPath — falls back to the plain /dashboard path
+ * if the id or profile row is unexpectedly missing, same as an unrecognized
+ * role would. */
+async function resolveDefaultDestination(
+  supabase: ReturnType<typeof createClient>,
+  userId: string | undefined,
+  locale: Locale
+): Promise<string> {
+  if (!userId) return defaultPostLoginPath(locale, null);
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", userId).single();
+  return defaultPostLoginPath(locale, profile?.role ?? null);
+}
 
 function getPasswordStrength(
   password: string,
@@ -39,7 +54,12 @@ export function AuthForm({ mode, locale }: { mode: "login" | "register"; locale:
   const router = useRouter();
   const searchParams = useSearchParams();
   const requestedNext = searchParams.get("next");
-  const next = requestedNext?.startsWith(`/${locale}/`) ? requestedNext : `/${locale}/dashboard`;
+  // Only set when a specific protected page bounced the visitor here (e.g.
+  // requireOwner redirecting an unauthenticated /admin visit) — that exact
+  // destination is always honored as-is. Otherwise (a plain, direct visit
+  // to /auth/login) the post-sign-in destination is resolved by role once
+  // the session is known, via defaultPostLoginPath below.
+  const explicitNext = requestedNext?.startsWith(`/${locale}/`) ? requestedNext : null;
 
   const passwordRequirements = [
     { label: t("reqLength"), check: (p: string) => p.length >= 8 },
@@ -58,7 +78,7 @@ export function AuthForm({ mode, locale }: { mode: "login" | "register"; locale:
     const supabase = createClient();
 
     if (mode === "login") {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data: signInData, error } = await supabase.auth.signInWithPassword({ email, password });
       setLoading(false);
       if (error) {
         if (error.message.includes("Invalid login credentials")) {
@@ -70,7 +90,7 @@ export function AuthForm({ mode, locale }: { mode: "login" | "register"; locale:
         }
         return;
       }
-      router.push(next);
+      router.push(explicitNext ?? (await resolveDefaultDestination(supabase, signInData.user?.id, locale)));
       router.refresh();
       return;
     }
@@ -87,7 +107,9 @@ export function AuthForm({ mode, locale }: { mode: "login" | "register"; locale:
       password,
       options: {
         data: { full_name: name },
-        emailRedirectTo: `${window.location.origin}/${locale}/auth/callback?next=${encodeURIComponent(next)}`,
+        emailRedirectTo: explicitNext
+          ? `${window.location.origin}/${locale}/auth/callback?next=${encodeURIComponent(explicitNext)}`
+          : `${window.location.origin}/${locale}/auth/callback`,
       },
     });
 
@@ -106,7 +128,7 @@ export function AuthForm({ mode, locale }: { mode: "login" | "register"; locale:
       return;
     }
 
-    router.push(next);
+    router.push(explicitNext ?? (await resolveDefaultDestination(supabase, data.user?.id, locale)));
     router.refresh();
   }
 

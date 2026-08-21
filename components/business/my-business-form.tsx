@@ -8,8 +8,9 @@ import { updateCityServicePartial } from "@/lib/actions/city-services";
 import { ImageUploader } from "@/components/shared/image-uploader";
 import { PdfUploader } from "@/components/admin/pdf-uploader";
 import { OpeningHoursEditor } from "@/components/shared/opening-hours-editor";
+import { CustomFieldsEditor, type CustomFieldValues } from "@/components/shared/custom-fields-editor";
 import { getDocumentLabelGroup } from "@/lib/utils/business-document";
-import type { BusinessListingType, OpeningHoursGroup } from "@/types";
+import type { BusinessListingType, OpeningHoursGroup, CategoryCustomField } from "@/types";
 
 const TABLE_BY_TYPE: Record<BusinessListingType, "hotels" | "restaurants" | "cafes" | "services" | "city_services"> = {
   hotel: "hotels",
@@ -57,6 +58,9 @@ export interface MyBusinessFormInitial {
   menuHighlights?: { name: string; price: string; description?: string }[];
   menuPdfUrl?: string;
   documentUrl?: string;
+  /** Values for the listing's category customFieldsSchema, keyed by field
+   * `key` — {} for hotel/restaurant/cafe or a category with no schema. */
+  customFields?: CustomFieldValues;
 }
 
 const PRICE_LEVELS: NonNullable<MyBusinessFormInitial["priceRange"]>[] = ["$", "$$", "$$$", "$$$$"];
@@ -68,6 +72,7 @@ export function MyBusinessForm({
   initial,
   currentPath,
   categorySlug,
+  customFieldsSchema = [],
 }: {
   listingType: BusinessListingType;
   listingId: string;
@@ -76,6 +81,16 @@ export function MyBusinessForm({
   /** Only meaningful for city_service/service — drives the PDF section's
    * category-aware label (see lib/utils/business-document.ts). */
   categorySlug?: string;
+  /** The listing's category's admin-defined custom fields (see
+   * components/admin/categories-manager.tsx) — only ever non-empty for
+   * `service` listings. `city_services` has NO `custom_fields` column
+   * (verified live 2026-08-20, unlike `services`) — there is nowhere to
+   * persist this for a city_service today, so the page-level loader never
+   * populates this prop for that listing type. Adding that column would be
+   * a separate, explicitly-approved migration, not assumed here. Renders
+   * nothing when empty (every hotel/restaurant/cafe, and any category with
+   * no schema). */
+  customFieldsSchema?: CategoryCustomField[];
 }) {
   const t = useTranslations("businessDashboard");
   const tc = useTranslations("common");
@@ -84,6 +99,7 @@ export function MyBusinessForm({
     ...initial,
     priceRange: initial.priceRange ?? "$$",
     openingHoursStructured: initial.openingHoursStructured ?? [],
+    customFields: initial.customFields ?? {},
   });
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -125,6 +141,10 @@ export function MyBusinessForm({
         opening_hours: form.openingHours || null,
         opening_hours_structured: form.openingHoursStructured ?? [],
         document_url: form.documentUrl || null,
+        // NOT custom_fields — unlike `services`, the `city_services` table
+        // has no such column (verified live 2026-08-20); see
+        // customFieldsSchema's doc comment above for why this branch never
+        // receives a non-empty schema to begin with.
       };
       startTransition(async () => {
         const result = await updateCityServicePartial(localeFromPath(currentPath), listingId, patch);
@@ -168,6 +188,7 @@ export function MyBusinessForm({
     } else {
       payload.opening_hours = form.openingHours || null;
     }
+    if (customFieldsSchema.length > 0) payload.custom_fields = form.customFields ?? {};
 
     startTransition(async () => {
       // On success updateRecord redirects server-side (to this same page,
@@ -221,6 +242,18 @@ export function MyBusinessForm({
         <div>
           <label className="mb-1.5 block text-sm font-semibold">{t("addressLabel")}</label>
           <input required value={form.address} onChange={(e) => update("address", e.target.value)} className={inputClass} />
+        </div>
+      )}
+
+      {customFieldsSchema.length > 0 && (
+        <div>
+          <label className="mb-1.5 block text-sm font-semibold">{t("categoryDetailsLabel")}</label>
+          <CustomFieldsEditor
+            schema={customFieldsSchema}
+            values={form.customFields ?? {}}
+            onChange={(next) => update("customFields", next)}
+            inputClass={inputClass}
+          />
         </div>
       )}
 

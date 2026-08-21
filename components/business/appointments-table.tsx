@@ -1,12 +1,14 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { MessageCircle } from "lucide-react";
+import { useTranslations, useLocale } from "next-intl";
+import { Eye } from "lucide-react";
+import { WhatsAppIcon } from "@/components/shared/brand-icons";
 import { updateAppointmentStatus } from "@/lib/actions/appointments";
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
 import { formatTime12h } from "@/lib/utils/opening-hours";
+import { ModalShell } from "@/components/shared/modal-shell";
 import type { Appointment, AppointmentStatus } from "@/types";
 
 export interface AppointmentManagerRow extends Appointment {
@@ -35,6 +37,54 @@ function formatDate(iso: string): string {
   return `${MONTH_ABBR[m - 1]} ${d}, ${y}`;
 }
 
+function formatCreatedAt(iso: string, locale: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  const datePart = `${MONTH_ABBR[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+  const timePart = date.toLocaleTimeString(locale, { hour: "numeric", minute: "2-digit" });
+  return `${datePart} · ${timePart}`;
+}
+
+/** Full-detail modal — every existing Appointment field, reusing the same
+ * ModalShell as bookings/reservations so all transaction types open the
+ * same kind of detail view instead of separate patterns per table. */
+function AppointmentDetailModal({
+  appointment,
+  isMedical,
+  onClose,
+}: {
+  appointment: AppointmentManagerRow;
+  isMedical: boolean;
+  onClose: () => void;
+}) {
+  const t = useTranslations("appointments");
+  const locale = useLocale();
+  const rows: [string, string][] = [
+    [t(isMedical ? "patientName" : "customerLabel"), appointment.patientName],
+    [t("phone"), appointment.patientPhone],
+    [t(isMedical ? "doctorLabel" : "staffLabel"), appointment.doctorName],
+    [t("appointmentDate"), formatDate(appointment.appointmentDate)],
+    [t("appointmentTime"), formatTime12h(appointment.appointmentTime)],
+    [t("status"), t(`appointmentStatus_${appointment.status}`)],
+  ];
+  if (appointment.patientEmail) rows.push([t("email"), appointment.patientEmail]);
+  if (appointment.notes) rows.push([t("notes"), appointment.notes]);
+  if (appointment.createdAt) rows.push([t("createdLabel"), formatCreatedAt(appointment.createdAt, locale)]);
+
+  return (
+    <ModalShell title={t("appointmentDetails")} onClose={onClose}>
+      <dl className="space-y-3 text-sm">
+        {rows.map(([label, value]) => (
+          <div key={label} className="flex items-start justify-between gap-4 border-b border-ink/8 pb-2 dark:border-white/10">
+            <dt className="text-ink/50 dark:text-sand/50">{label}</dt>
+            <dd className="text-end font-medium">{value}</dd>
+          </div>
+        ))}
+      </dl>
+    </ModalShell>
+  );
+}
+
 /** Mirrors components/business/bookings-table.tsx's structure — one shared
  * shape for "list of requests, change status inline" across both engines.
  * `isMedical` swaps "Patient"/"Doctor" copy for generic "Customer"/"Staff"
@@ -51,6 +101,7 @@ export function AppointmentsTable({
   const t = useTranslations("appointments");
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [viewing, setViewing] = useState<AppointmentManagerRow | null>(null);
 
   function onStatusChange(appointment: AppointmentManagerRow, status: AppointmentStatus) {
     startTransition(async () => {
@@ -112,18 +163,29 @@ export function AppointmentsTable({
                     </select>
                   </td>
                   <td className="px-4 py-3 text-end">
-                    {whatsappHref && (
-                      <a
-                        href={whatsappHref}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={t(isMedical ? "contactPatient" : "contactCustomerLabel")}
-                        title={t(isMedical ? "contactPatient" : "contactCustomerLabel")}
-                        className="ms-auto flex h-8 w-8 items-center justify-center rounded-full border border-ink/15 text-[#25D366] transition-colors hover:border-[#25D366] dark:border-white/20"
+                    <div className="ms-auto flex items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setViewing(a)}
+                        aria-label={t("view")}
+                        title={t("view")}
+                        className="flex h-8 w-8 items-center justify-center rounded-full border border-ink/15 text-ink/60 transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-sand/60"
                       >
-                        <MessageCircle size={14} aria-hidden="true" />
-                      </a>
-                    )}
+                        <Eye size={14} aria-hidden="true" />
+                      </button>
+                      {whatsappHref && (
+                        <a
+                          href={whatsappHref}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={t(isMedical ? "contactPatient" : "contactCustomerLabel")}
+                          title={t(isMedical ? "contactPatient" : "contactCustomerLabel")}
+                          className="flex h-8 w-8 items-center justify-center rounded-full border border-ink/15 text-[#25D366] transition-colors hover:border-[#25D366] dark:border-white/20"
+                        >
+                          <WhatsAppIcon size={14} aria-hidden="true" />
+                        </a>
+                      )}
+                    </div>
                   </td>
                 </tr>
               );
@@ -169,20 +231,32 @@ export function AppointmentsTable({
                   </button>
                 ))}
               </div>
-              {whatsappHref && (
-                <a
-                  href={whatsappHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-2 flex items-center justify-center gap-1 rounded-full border border-ink/15 py-2 text-xs font-semibold dark:border-white/20"
+              <div className="mt-2 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setViewing(a)}
+                  aria-label={t("view")}
+                  className="flex items-center justify-center rounded-full border border-ink/15 p-2 text-ink/60 dark:border-white/20 dark:text-sand/60"
                 >
-                  <MessageCircle size={13} aria-hidden="true" /> {t(isMedical ? "contactPatient" : "contactCustomerLabel")}
-                </a>
-              )}
+                  <Eye size={14} aria-hidden="true" />
+                </button>
+                {whatsappHref && (
+                  <a
+                    href={whatsappHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex flex-1 items-center justify-center gap-1 rounded-full border border-ink/15 py-2 text-xs font-semibold dark:border-white/20"
+                  >
+                    <WhatsAppIcon size={13} aria-hidden="true" /> {t(isMedical ? "contactPatient" : "contactCustomerLabel")}
+                  </a>
+                )}
+              </div>
             </div>
           );
         })}
       </div>
+
+      {viewing && <AppointmentDetailModal appointment={viewing} isMedical={isMedical} onClose={() => setViewing(null)} />}
     </div>
   );
 }

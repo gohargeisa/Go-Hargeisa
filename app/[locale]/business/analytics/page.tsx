@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { Eye, Globe, MessageCircle, Phone } from "lucide-react";
+import { Eye, Globe, Phone } from "lucide-react";
+import { WhatsAppIcon } from "@/components/shared/brand-icons";
 import type { Locale } from "@/lib/i18n/config";
 import { getActiveListing, getKpiStats, getViewsSeries, getBusinessSummary, type AnalyticsRange } from "@/lib/data/business";
 import { ViewsChart } from "@/components/business/views-chart";
@@ -37,7 +38,7 @@ export default async function AnalyticsPage({ params: { locale } }: { params: { 
         <KpiCard icon={Eye} value={kpiByType.view?.today ?? 0} growthPercent={kpiByType.view?.growthPercent ?? null} label={t("kpiProfileViews")} subtitle={t("kpiTodaySubtitle")} />
         <KpiCard icon={Globe} value={kpiByType.website_click?.today ?? 0} growthPercent={kpiByType.website_click?.growthPercent ?? null} label={t("kpiWebsiteClicks")} subtitle={t("kpiTodaySubtitle")} />
         <KpiCard icon={Phone} value={kpiByType.call_click?.today ?? 0} growthPercent={kpiByType.call_click?.growthPercent ?? null} label={t("kpiPhoneCalls")} subtitle={t("kpiTodaySubtitle")} />
-        <KpiCard icon={MessageCircle} value={kpiByType.whatsapp_click?.today ?? 0} growthPercent={kpiByType.whatsapp_click?.growthPercent ?? null} label={t("kpiWhatsappClicks")} subtitle={t("kpiTodaySubtitle")} />
+        <KpiCard icon={WhatsAppIcon} value={kpiByType.whatsapp_click?.today ?? 0} growthPercent={kpiByType.whatsapp_click?.growthPercent ?? null} label={t("kpiWhatsappClicks")} subtitle={t("kpiTodaySubtitle")} />
       </div>
 
       <ViewsChart series={series} title={t("viewsChartTitle")} />

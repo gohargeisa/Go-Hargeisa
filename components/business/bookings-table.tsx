@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { Check, Loader2, MessageCircle, Plus, X } from "lucide-react";
+import { useTranslations, useLocale } from "next-intl";
+import { Check, Loader2, Plus, X } from "lucide-react";
+import { WhatsAppIcon } from "@/components/shared/brand-icons";
 import { createBooking, updateBookingStatus, type BookingInput } from "@/lib/actions/business";
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
-import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
-import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
+import { ModalShell } from "@/components/shared/modal-shell";
 import type { Booking, HotelRoom } from "@/types";
 
 const STATUS_OPTIONS: Booking["status"][] = ["pending", "confirmed", "cancelled", "completed"];
@@ -155,7 +155,7 @@ export function BookingsTable({
                               title={t("contactGuest")}
                               className="flex h-8 w-8 items-center justify-center rounded-full border border-ink/15 text-[#25D366] transition-colors hover:border-[#25D366] dark:border-white/20"
                             >
-                              <MessageCircle size={14} aria-hidden="true" />
+                              <WhatsAppIcon size={14} aria-hidden="true" />
                             </a>
                           )}
                           <button
@@ -233,7 +233,7 @@ export function BookingsTable({
                         rel="noopener noreferrer"
                         className="flex flex-1 items-center justify-center gap-1 rounded-full border border-ink/15 py-2 text-xs font-semibold dark:border-white/20"
                       >
-                        <MessageCircle size={13} aria-hidden="true" /> {t("contactGuest")}
+                        <WhatsAppIcon size={13} aria-hidden="true" /> {t("contactGuest")}
                       </a>
                     )}
                   </div>
@@ -259,49 +259,28 @@ export function BookingsTable({
   );
 }
 
-function ModalShell({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
-  const dialogRef = useRef<HTMLDivElement>(null);
-  useFocusTrap(dialogRef);
-  useScrollLock(true);
+/** Nights between two date-only ISO strings — pure display-side arithmetic
+ * on fields that already exist (checkIn/checkOut), not a new stored field. */
+function nightsBetween(checkIn: string, checkOut: string): number | null {
+  const start = new Date(`${checkIn}T00:00:00`);
+  const end = new Date(`${checkOut}T00:00:00`);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return null;
+  const diff = Math.round((end.getTime() - start.getTime()) / 86400000);
+  return diff > 0 ? diff : null;
+}
 
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
-    }
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
-
-  return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />
-      <div
-        ref={dialogRef}
-        role="dialog"
-        aria-modal="true"
-        aria-label={title}
-        tabIndex={-1}
-        className="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl dark:bg-ink"
-      >
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="font-display text-lg font-bold">{title}</h3>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-ink/5 dark:bg-white/10"
-          >
-            <X size={16} aria-hidden="true" />
-          </button>
-        </div>
-        {children}
-      </div>
-    </div>
-  );
+function formatDateTime(iso: string, locale: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  const datePart = formatDate(date.toISOString().slice(0, 10));
+  const timePart = date.toLocaleTimeString(locale, { hour: "numeric", minute: "2-digit" });
+  return `${datePart} · ${timePart}`;
 }
 
 function BookingDetailModal({ booking, onClose }: { booking: Booking; onClose: () => void }) {
   const t = useTranslations("businessDashboard");
+  const locale = useLocale();
+  const nights = nightsBetween(booking.checkIn, booking.checkOut);
   const rows: [string, string][] = [];
   if (booking.bookingReference) rows.push([t("reference"), booking.bookingReference]);
   rows.push(
@@ -311,12 +290,16 @@ function BookingDetailModal({ booking, onClose }: { booking: Booking; onClose: (
     [t("children"), String(booking.children)],
     [t("rooms"), String(booking.roomsCount)],
     [t("checkIn"), formatDate(booking.checkIn)],
-    [t("checkOut"), formatDate(booking.checkOut)],
-    [t("status"), t(`bookingStatus_${booking.status}`)]
+    [t("checkOut"), formatDate(booking.checkOut)]
   );
+  if (nights !== null) rows.push([t("nights"), String(nights)]);
+  rows.push([t("status"), t(`bookingStatus_${booking.status}`)]);
   if (booking.guestPhone) rows.push([t("phone"), booking.guestPhone]);
-  if (booking.guestEmail) rows.push(["Email", booking.guestEmail]);
+  if (booking.guestEmail) rows.push([t("email"), booking.guestEmail]);
+  if (booking.guestCountry) rows.push([t("guestCountry"), booking.guestCountry]);
+  if (booking.paymentStatus) rows.push([t("paymentStatus"), t(`paymentStatus_${booking.paymentStatus}`)]);
   if (booking.notes) rows.push([t("notes"), booking.notes]);
+  if (booking.createdAt) rows.push([t("createdLabel"), formatDateTime(booking.createdAt, locale)]);
 
   return (
     <ModalShell title={t("bookingDetails")} onClose={onClose}>

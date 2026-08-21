@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/config";
 import { getActiveListing } from "@/lib/data/business";
+import { getCategoryById } from "@/lib/data/categories";
 import { createClient } from "@/lib/supabase/server";
 import { MyBusinessForm } from "@/components/business/my-business-form";
 import { ServiceBadges } from "@/components/business/service-badges";
@@ -35,6 +36,19 @@ export default async function MyBusinessPage({ params: { locale } }: { params: {
       ? await supabase.from("hotel_rooms" as any).select("*").eq("hotel_id", listing.id).order("sort_order", { ascending: true })
       : { data: null };
 
+  // Category-specific fields (see components/admin/categories-manager.tsx's
+  // schema builder) — `service` listings only. `city_services` has a
+  // category_id but NO custom_fields column (verified live 2026-08-20,
+  // unlike `services`), so there's nowhere to persist this for a
+  // city_service today; adding that column is a separate, explicitly-
+  // approved migration, not assumed here. Previously only ever set once, at
+  // /join submission time — a `service` owner could never come back and
+  // edit their own category-specific fields (delivery radius, specialties,
+  // license number, ...) afterward. undefined for hotel/restaurant/cafe/
+  // city_service.
+  const categoryId = (row as { category_id?: string } | null)?.category_id;
+  const category = listing.listingType === "service" && categoryId ? await getCategoryById(categoryId) : null;
+
   return (
     <div className="max-w-2xl space-y-8">
       <div>
@@ -47,7 +61,9 @@ export default async function MyBusinessPage({ params: { locale } }: { params: {
         listingId={listing.id}
         currentPath={currentPath}
         categorySlug={listing.categorySlug}
+        customFieldsSchema={category?.customFieldsSchema ?? []}
         initial={{
+          customFields: (row as { custom_fields?: Record<string, string | number | boolean> })?.custom_fields ?? {},
           name: row?.name ?? listing.name,
           shortDescription: row?.short_description ?? "",
           description: row?.description ?? "",

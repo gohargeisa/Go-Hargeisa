@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { Eye, Globe, Phone, MessageCircle, CalendarCheck, Star, ArrowUpRight } from "lucide-react";
+import { Eye, Globe, Phone, CalendarCheck, Star, ArrowUpRight } from "lucide-react";
+import { WhatsAppIcon } from "@/components/shared/brand-icons";
 import type { Locale } from "@/lib/i18n/config";
 import {
   getActiveListing,
@@ -74,7 +75,7 @@ export default async function BusinessOverviewPage({ params: { locale } }: { par
           subtitle={t("kpiTodaySubtitle")}
         />
         <KpiCard
-          icon={MessageCircle}
+          icon={WhatsAppIcon}
           value={kpiByType.whatsapp_click?.today ?? 0}
           growthPercent={kpiByType.whatsapp_click?.growthPercent ?? null}
           label={t("kpiWhatsappClicks")}

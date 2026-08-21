@@ -157,10 +157,14 @@ body {
    (unlayered CSS always beats layered CSS). No `!important` needed.
    ------------------------------------------------------------------- */
 
-/* Solid backgrounds */
+/* Solid backgrounds (+ the hover:bg-primary-700/800 darken-on-hover pattern
+   nearly every button in the app uses — missing this meant every themed
+   button flashed back to default amber the instant the pointer touched it). */
 [data-partner-theme] .bg-primary { background-color: var(--pt-primary); }
 [data-partner-theme] .bg-primary-700 { background-color: var(--pt-primary-strong); }
 [data-partner-theme] .bg-primary-800 { background-color: var(--pt-primary-deep); }
+[data-partner-theme] .hover\:bg-primary-700:hover { background-color: var(--pt-primary-strong); }
+[data-partner-theme] .hover\:bg-primary-800:hover { background-color: var(--pt-primary-deep); }
 
 /* Solid text */
 [data-partner-theme] .text-primary { color: var(--pt-primary); }
@@ -222,6 +226,21 @@ body {
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
 [data-partner-theme] .to-primary-800 { --tw-gradient-to: var(--pt-primary-deep) var(--tw-gradient-to-position); }
+/* BrandedPlaceholder (components/shared/branded-placeholder.tsx) — reused
+   by any partner scope wherever a real photo is still missing, e.g.
+   Flormar's "Shop by Category" tiles. Neither rule touches
+   --tw-gradient-to, so a same-element `to-ink` (BrandedPlaceholder's own
+   third stop, not a primary token) keeps winning that specific property —
+   these only add the from/via stops and relink --tw-gradient-stops to
+   reference all three symbolically. */
+[data-partner-theme] .from-primary-800 {
+  --tw-gradient-from: var(--pt-primary-deep) var(--tw-gradient-from-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+[data-partner-theme] .via-primary-700 {
+  --tw-gradient-via: var(--pt-primary-strong) var(--tw-gradient-via-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-via), var(--tw-gradient-to);
+}
 
 /* Product card's "featured" star badge (components/shared/product-card.tsx)
    hardcodes amber rather than using the `primary` token. Retinted to the

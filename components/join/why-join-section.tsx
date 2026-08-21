@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
-import { Eye, Users, Map, MessageCircle, CalendarCheck, BadgeCheck } from "lucide-react";
+import { Eye, Users, Map, CalendarCheck, BadgeCheck } from "lucide-react";
+import { WhatsAppIcon } from "@/components/shared/brand-icons";
 import type { Locale } from "@/lib/i18n/config";
 import { Reveal } from "@/components/home/reveal";
 
@@ -7,7 +8,7 @@ const benefits = [
   { icon: Eye, key: 1 },
   { icon: Users, key: 2 },
   { icon: Map, key: 3 },
-  { icon: MessageCircle, key: 4 },
+  { icon: WhatsAppIcon, key: 4 },
   { icon: CalendarCheck, key: 5 },
   { icon: BadgeCheck, key: 6 },
 ] as const;

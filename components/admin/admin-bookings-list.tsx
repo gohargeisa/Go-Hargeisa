@@ -2,9 +2,10 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { Download, Loader2, Search } from "lucide-react";
+import { useTranslations, useLocale } from "next-intl";
+import { Download, Eye, Loader2, Search } from "lucide-react";
 import { updateBookingStatus } from "@/lib/actions/business";
+import { ModalShell } from "@/components/shared/modal-shell";
 import type { Booking } from "@/types";
 
 const STATUS_FILTERS: (Booking["status"] | "all")[] = ["all", "pending", "confirmed", "cancelled", "completed"];
@@ -16,10 +17,76 @@ const STATUS_STYLES: Record<Booking["status"], string> = {
   completed: "bg-secondary/15 text-secondary-700 dark:bg-white/10 dark:text-sand/70",
 };
 
+const MONTH_ABBR = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+// Deterministic, not locale-dependent — toLocaleDateString(undefined, ...)
+// resolves against the server process's own default ICU locale, not the
+// page's language, and can render Arabic month names on an English admin
+// screen (see components/business/reservations-table.tsx's identical fix).
 function formatDate(iso: string): string {
-  const d = new Date(`${iso}T00:00:00`);
-  if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  const [y, m, d] = iso.split("-").map(Number);
+  if (!y || !m || !d) return iso;
+  return `${MONTH_ABBR[m - 1]} ${d}, ${y}`;
+}
+
+function formatDateTime(iso: string, locale: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  const datePart = formatDate(date.toISOString().slice(0, 10));
+  const timePart = date.toLocaleTimeString(locale, { hour: "numeric", minute: "2-digit" });
+  return `${datePart} · ${timePart}`;
+}
+
+function nightsBetween(checkIn: string, checkOut: string): number | null {
+  const start = new Date(`${checkIn}T00:00:00`);
+  const end = new Date(`${checkOut}T00:00:00`);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return null;
+  const diff = Math.round((end.getTime() - start.getTime()) / 86400000);
+  return diff > 0 ? diff : null;
+}
+
+/** Every existing Booking field, platform-wide (Founder/Owner) view — reuses
+ * the same ModalShell/field-row pattern as the owner-side BookingDetailModal
+ * (components/business/bookings-table.tsx) instead of a separate admin-only
+ * detail UI. */
+function AdminBookingDetailModal({ booking, onClose }: { booking: Booking; onClose: () => void }) {
+  const t = useTranslations("businessDashboard");
+  const ta = useTranslations("admin");
+  const locale = useLocale();
+  const nights = nightsBetween(booking.checkIn, booking.checkOut);
+  const rows: [string, string][] = [];
+  if (booking.bookingReference) rows.push([t("reference"), booking.bookingReference]);
+  if (booking.hotelName) rows.push([ta("bookingsColHotel"), booking.hotelName]);
+  rows.push(
+    [t("guestName"), booking.guestName],
+    [t("room"), booking.roomName ?? "—"],
+    [t("adults"), String(booking.adults)],
+    [t("children"), String(booking.children)],
+    [t("rooms"), String(booking.roomsCount)],
+    [t("checkIn"), formatDate(booking.checkIn)],
+    [t("checkOut"), formatDate(booking.checkOut)]
+  );
+  if (nights !== null) rows.push([t("nights"), String(nights)]);
+  rows.push([t("status"), t(`bookingStatus_${booking.status}`)]);
+  if (booking.guestPhone) rows.push([t("phone"), booking.guestPhone]);
+  if (booking.guestEmail) rows.push([t("email"), booking.guestEmail]);
+  if (booking.guestCountry) rows.push([t("guestCountry"), booking.guestCountry]);
+  if (booking.paymentStatus) rows.push([t("paymentStatus"), t(`paymentStatus_${booking.paymentStatus}`)]);
+  if (booking.notes) rows.push([t("notes"), booking.notes]);
+  if (booking.createdAt) rows.push([t("createdLabel"), formatDateTime(booking.createdAt, locale)]);
+
+  return (
+    <ModalShell title={t("bookingDetails")} onClose={onClose}>
+      <dl className="space-y-3 text-sm">
+        {rows.map(([label, value]) => (
+          <div key={label} className="flex items-start justify-between gap-4 border-b border-ink/8 pb-2 dark:border-white/10">
+            <dt className="text-ink/50 dark:text-sand/50">{label}</dt>
+            <dd className="text-end font-medium">{value}</dd>
+          </div>
+        ))}
+      </dl>
+    </ModalShell>
+  );
 }
 
 function csvCell(value: string): string {
@@ -54,6 +121,7 @@ export function AdminBookingsList({ bookings }: { bookings: Booking[] }) {
   const [hotelFilter, setHotelFilter] = useState("all");
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [viewing, setViewing] = useState<Booking | null>(null);
 
   function onChangeStatus(booking: Booking, status: Booking["status"]) {
     if (!booking.hotelId || status === booking.status) return;
@@ -153,6 +221,7 @@ export function AdminBookingsList({ bookings }: { bookings: Booking[] }) {
                 <th className="px-4 py-3 text-start font-semibold">{t("bookingsColGuest")}</th>
                 <th className="px-4 py-3 text-start font-semibold">{t("bookingsColDates")}</th>
                 <th className="px-4 py-3 text-start font-semibold">{t("bookingsColStatus")}</th>
+                <th className="px-4 py-3 text-end font-semibold">{t("colActions")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-ink/5 dark:divide-white/5">
@@ -187,12 +256,25 @@ export function AdminBookingsList({ bookings }: { bookings: Booking[] }) {
                       {isPending && pendingId === b.id && <Loader2 size={12} className="animate-spin text-ink/40" />}
                     </div>
                   </td>
+                  <td className="px-4 py-3 text-end">
+                    <button
+                      type="button"
+                      onClick={() => setViewing(b)}
+                      aria-label={t("productOrdersViewDetails")}
+                      title={t("productOrdersViewDetails")}
+                      className="ms-auto flex h-8 w-8 items-center justify-center rounded-full border border-ink/15 text-ink/60 transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-sand/60"
+                    >
+                      <Eye size={14} aria-hidden="true" />
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       )}
+
+      {viewing && <AdminBookingDetailModal booking={viewing} onClose={() => setViewing(null)} />}
     </div>
   );
 }

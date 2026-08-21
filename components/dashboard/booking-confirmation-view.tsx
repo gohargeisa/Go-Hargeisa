@@ -33,7 +33,10 @@ export function BookingConfirmationView({
   const t = useTranslations("dashboard");
 
   return (
-    <section className="container-px mx-auto py-10 md:py-14">
+    // pt- clears the fixed global <SiteHeader> (h-20 + safe-area-inset-top)
+    // — same calc(env(safe-area-inset-top)+5rem) header-height pattern used
+    // in AdminLayout/BusinessLayout/dashboard/page.tsx.
+    <section className="container-px mx-auto pb-10 pt-[calc(env(safe-area-inset-top)+5.5rem)] md:pb-14">
       <div className="mx-auto flex max-w-2xl items-center justify-between gap-3 print:hidden">
         <Link
           href={`/${locale}/dashboard?tab=bookings`}

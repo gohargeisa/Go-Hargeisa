@@ -69,6 +69,7 @@ export function SiteFooter({
     { icon: SOCIAL_ICON.x, href: socialTwitter || "https://x.com/go_hargeisa", label: "X" },
     { icon: SOCIAL_ICON.tiktok, href: socialTiktok || "https://www.tiktok.com/@gohargeisa", label: "TikTok" },
     { icon: SOCIAL_ICON.youtube, href: socialYoutube || "https://youtube.com/@go.hargeisa", label: "YouTube" },
+    { icon: SOCIAL_ICON.snapchat, href: "https://www.snapchat.com/add/gohargeisa", label: "Snapchat" },
   ];
 
   return (

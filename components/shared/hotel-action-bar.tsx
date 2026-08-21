@@ -1,4 +1,5 @@
-import { ArrowUpRight, CalendarDays, Globe, Mail, MessageCircle, Phone, ShoppingBag } from "lucide-react";
+import { ArrowUpRight, CalendarDays, Globe, Mail, Phone, ShoppingBag } from "lucide-react";
+import { WhatsAppIcon } from "@/components/shared/brand-icons";
 import { getTranslations } from "next-intl/server";
 import { Reveal } from "@/components/home/reveal";
 import { TrackedCtaLink } from "@/components/shared/tracked-cta-link";
@@ -182,7 +183,7 @@ export async function HotelActionBar({
             rel="noopener noreferrer"
             className={`${SECONDARY_CLASS} hover:!border-[#25D366] hover:!text-[#25D366]`}
           >
-            <MessageCircle size={15} aria-hidden="true" />
+            <WhatsAppIcon size={15} aria-hidden="true" />
             {t("whatsapp")}
           </TrackedCtaLink>
         )}

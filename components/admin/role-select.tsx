@@ -18,8 +18,15 @@ export function RoleSelect({
   const t = useTranslations("admin");
   const [isPending, startTransition] = useTransition();
 
+  const ROLE_LABEL_KEY = { user: "roleUser", business_owner: "roleBusinessOwner", owner: "roleOwner" } as const;
+
   function onChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const next = e.target.value as "user" | "business_owner" | "owner";
+    if (next === role) return;
+    // A role change is a real permission grant/revoke (business_owner can
+    // manage a listing; owner is full platform admin) — confirm before
+    // applying instead of changing it the instant the <select> fires.
+    if (!confirm(t("confirmRoleChange", { role: t(ROLE_LABEL_KEY[next]) }))) return;
     startTransition(async () => {
       const result = await updateUserRole(locale, userId, next);
       if (!result.ok) alert(result.error ?? t("couldNotUpdateRole"));

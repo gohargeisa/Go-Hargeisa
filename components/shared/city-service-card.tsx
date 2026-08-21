@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Phone, Clock, MapPin, Globe, ImageOff, MessageCircle, Mail, Images } from "lucide-react";
+import { Phone, Clock, MapPin, Globe, ImageOff, Mail, Images } from "lucide-react";
+import { WhatsAppIcon } from "@/components/shared/brand-icons";
 import { useTranslations } from "next-intl";
 import { AnimatedCard } from "./animated-card";
 import { SecondaryButton } from "./buttons";
@@ -102,7 +103,7 @@ export function CityServiceCard({ service, category, locale }: { service: CitySe
               rel="noopener noreferrer"
               className="flex items-center gap-2 hover:text-primary"
             >
-              <MessageCircle size={14} className="shrink-0 text-primary" aria-hidden="true" />
+              <WhatsAppIcon size={14} className="shrink-0 text-primary" aria-hidden="true" />
               {service.whatsapp}
             </a>
           )}

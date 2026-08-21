@@ -69,7 +69,7 @@ export async function PartnerHeroBanner({ theme, alt, locale }: { theme: Partner
     );
   }
 
-  const hasPhoto = !isPlaceholderImage(theme.heroImage);
+  const hasPhoto = !!theme.heroImage && !isPlaceholderImage(theme.heroImage);
 
   return (
     <Reveal y={0}>

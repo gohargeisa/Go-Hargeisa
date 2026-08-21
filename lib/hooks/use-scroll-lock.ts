@@ -14,6 +14,19 @@ let savedScrollY = 0;
  * just `overflow: hidden` — plain overflow:hidden doesn't stop iOS Safari's
  * background rubber-band/touch scroll, which is exactly the "page still
  * scrolls behind the overlay" bug this exists to close off.
+ *
+ * The restore-on-unlock scroll MUST be instant, not animated: `html` sets
+ * `scroll-behavior: smooth` globally (app/globals.css), which a plain
+ * `window.scrollTo(x, y)` inherits — restoring the background position
+ * this way visibly animates the page scrolling back into place instead of
+ * silently reappearing where the user actually left it, and worse, in dev
+ * (React 18 Strict Mode double-invokes every effect: mount → cleanup →
+ * mount) the *second* mount's `window.scrollY` read lands mid-animation
+ * (effectively still ~0), permanently corrupting `savedScrollY` and
+ * producing a real "page jumps to the top and stays there" bug on close.
+ * `behavior: "instant"` in the options-object form of scrollTo overrides
+ * the inherited CSS smoothness for this one call, closing both the visible
+ * jank and the Strict Mode race in one fix.
  */
 export function useScrollLock(active: boolean) {
   useEffect(() => {
@@ -37,7 +50,7 @@ export function useScrollLock(active: boolean) {
         document.body.style.left = "";
         document.body.style.right = "";
         document.body.style.overflow = "";
-        window.scrollTo(0, savedScrollY);
+        window.scrollTo({ top: savedScrollY, left: 0, behavior: "instant" });
       }
     };
   }, [active]);
