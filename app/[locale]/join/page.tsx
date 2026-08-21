@@ -19,7 +19,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   return {
     title: "List Your Business — Go Hargeisa",
-    description: "Apply to list your hotel, restaurant, or café on Go Hargeisa.",
+    description: "Apply to list your business on Go Hargeisa — hotels, restaurants, cafés, healthcare, beauty, automotive and more.",
     alternates: localeAlternates(locale as Locale, "/join"),
   };
 }

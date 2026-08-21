@@ -24,7 +24,8 @@ export async function JoinFinalCta({ locale }: { locale: Locale }) {
             <ArrowRight size={18} aria-hidden="true" />
           </a>
 
-          <p className="relative mx-auto mt-6 max-w-lg text-balance text-xs text-white/70 sm:text-sm">{t("finalCtaMobileNote")}</p>
+          <p className="relative mx-auto mt-8 text-balance text-xs font-bold uppercase tracking-[0.14em] text-white/60">{t("finalCtaMobileTitle")}</p>
+          <p className="relative mx-auto mt-2 max-w-lg text-balance text-xs text-white/70 sm:text-sm">{t("finalCtaMobileNote")}</p>
         </div>
       </Reveal>
     </section>
