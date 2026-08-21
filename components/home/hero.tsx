@@ -4,48 +4,11 @@ import { useId, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { m, useReducedMotion } from "framer-motion";
-import {
-  Search,
-  MapPin,
-  Hotel as HotelIcon,
-  UtensilsCrossed,
-  Coffee,
-} from "lucide-react";
+import { Search, MapPin } from "lucide-react";
 
 import type { Locale } from "@/lib/i18n/config";
 import { useSearchOverlay } from "@/components/shared/search-overlay-provider";
 import { HeroBackground } from "@/components/home/hero-background";
-
-const categoryCards = [
-  {
-    key: "hotels",
-    icon: HotelIcon,
-    titleKey: "hotelCardTitle",
-    descriptionKey: "hotelCardDescription",
-  },
-  {
-    key: "restaurants",
-    icon: UtensilsCrossed,
-    titleKey: "restaurantCardTitle",
-    descriptionKey: "restaurantCardDescription",
-  },
-  {
-    key: "cafes",
-    icon: Coffee,
-    titleKey: "cafeCardTitle",
-    descriptionKey: "cafeCardDescription",
-  },
-] as const;
-
-const highlightPills = [
-  { emoji: "🏨", labelKey: "highlightHotels" },
-  { emoji: "🍽", labelKey: "highlightRestaurants" },
-  { emoji: "☕", labelKey: "highlightCafes" },
-  { emoji: "📍", labelKey: "highlightAttractions" },
-  { emoji: "🎉", labelKey: "highlightEvents" },
-] as const;
-
-type Category = (typeof categoryCards)[number]["key"];
 
 const fadeUp = {
   hidden: { opacity: 0, y: 22 },
@@ -62,14 +25,17 @@ export function Hero({ locale }: { locale: Locale }) {
   const searchInputId = useId();
 
   const [query, setQuery] = useState("");
-  const [category, setCategory] = useState<Category>("hotels");
 
   const router = useRouter();
   const { open: openSearchOverlay } = useSearchOverlay();
 
+  // No category picker to scope this to anymore — routes to the existing
+  // cross-category /search results page (same destination the mobile
+  // search overlay button below already uses) instead of a single
+  // hardcoded listing type.
   function onSearch(e: React.FormEvent) {
     e.preventDefault();
-    router.push(`/${locale}/${category}?q=${encodeURIComponent(query)}`);
+    router.push(`/${locale}/search?q=${encodeURIComponent(query)}`);
   }
 
   const initial = reduceMotion ? "show" : "hidden";
@@ -142,24 +108,6 @@ export function Hero({ locale }: { locale: Locale }) {
           initial={initial}
           animate="show"
           variants={fadeUp}
-          className="mt-6 flex flex-wrap items-center justify-center gap-2.5 sm:gap-3 lg:mt-4"
-        >
-          {highlightPills.map(({ emoji, labelKey }) => (
-            <span
-              key={labelKey}
-              className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:border-white/40 hover:bg-white/20"
-            >
-              <span aria-hidden="true">{emoji}</span>
-              {t(labelKey)}
-            </span>
-          ))}
-        </m.div>
-
-        <m.div
-          custom={6}
-          initial={initial}
-          animate="show"
-          variants={fadeUp}
           className="glass mt-8 w-full max-w-2xl rounded-2xl p-2 shadow-[0_20px_60px_rgba(0,0,0,0.25)] ring-1 ring-white/15 backdrop-saturate-150 sm:mt-9 md:rounded-full lg:mt-4"
         >
           {/* Mobile/tablet: tapping opens the full-screen native search
@@ -205,59 +153,6 @@ export function Hero({ locale }: { locale: Locale }) {
               {t("searchButton")}
             </button>
           </form>
-        </m.div>
-
-        <m.div
-          custom={7}
-          initial={initial}
-          animate="show"
-          variants={fadeUp}
-          className="mt-10 grid w-full max-w-4xl grid-cols-1 gap-4 md:mt-12 md:grid-cols-3 lg:mt-4"
-        >
-          {categoryCards.map(
-            ({ key, icon: Icon, titleKey, descriptionKey }) => {
-              const active = category === key;
-
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  aria-label={t(titleKey)}
-                  aria-pressed={active}
-                  onClick={() => setCategory(key)}
-                  className={`group rounded-2xl border p-5 text-start backdrop-blur-xl transition-all duration-300 active:scale-[0.97] lg:p-4 ${
-                    active
-                      ? "scale-[1.02] border-white bg-white text-ink shadow-2xl ring-4 ring-white/20"
-                      : "border-white/20 bg-white/15 text-white hover:-translate-y-1 hover:border-white/40 hover:bg-white/20 hover:shadow-2xl"
-                  }`}
-                >
-                  <div
-                    className={`mb-4 inline-flex h-14 w-14 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-105 lg:mb-2 lg:h-11 lg:w-11 ${
-                      active
-                        ? "bg-primary text-white"
-                        : "bg-white/15 text-white"
-                    }`}
-                  >
-                    <Icon size={28} strokeWidth={2.2} aria-hidden="true" />
-                  </div>
-
-                  {/* Not a heading — this is a button caption (the button
-                      already has an equivalent aria-label above), and a
-                      fixed heading level here would skip past the hero's
-                      own h1 with nothing in between (axe heading-order). */}
-                  <p className="text-lg font-bold">{t(titleKey)}</p>
-
-                  <p
-                    className={`mt-2 text-sm leading-relaxed ${
-                      active ? "text-gray-600" : "text-white/75"
-                    }`}
-                  >
-                    {t(descriptionKey)}
-                  </p>
-                </button>
-              );
-            }
-          )}
         </m.div>
       </div>
     </section>
