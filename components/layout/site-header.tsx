@@ -23,6 +23,8 @@ import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
 import { useAdminNavItems } from "@/lib/hooks/use-admin-nav-items";
 import { SUPERMARKET_ENABLED } from "@/lib/config/features";
+import { WeatherIndicator } from "@/components/shared/weather-indicator";
+import type { WeatherSnapshot } from "@/lib/data/weather";
 import type { SidebarNavItem } from "@/components/shared/sidebar-nav";
 import type { Category } from "@/types";
 
@@ -78,6 +80,7 @@ export function SiteHeader({
   initialUser,
   logoUrl,
   categories,
+  weather,
 }: {
   locale: Locale;
   initialUser: HeaderUser | null;
@@ -87,6 +90,10 @@ export function SiteHeader({
    * getVisibleCategories) — pinned ones render directly in the nav, the
    * rest live in the "More" mega menu. Single source of truth for both. */
   categories: Category[];
+  /** Server-fetched, cached current Hargeisa weather (lib/data/weather.ts)
+   * — null when the provider is unreachable, in which case WeatherIndicator
+   * renders nothing rather than a broken/placeholder state. */
+  weather: WeatherSnapshot | null;
 }) {
   const t = useTranslations("nav");
   const pinnedCategories = categories.filter((c) => c.isPinned);
@@ -229,6 +236,8 @@ export function SiteHeader({
         </nav>
 
         <div className="hidden lg:flex shrink-0 items-center gap-3 ms-auto">
+          <WeatherIndicator weather={weather} scrolled={scrolled} />
+
           <div
             className={`flex items-center gap-2 ${
               scrolled ? "text-gray-900" : "text-white"
@@ -335,6 +344,11 @@ export function SiteHeader({
                 </>
               ) : (
                 <>
+              {weather && (
+                <div className="px-1 pb-2">
+                  <WeatherIndicator weather={weather} scrolled className="w-fit" />
+                </div>
+              )}
               {pinnedCategories.map((category) => {
                 const href = categoryHref(locale, category);
                 const active = pathname === href || pathname.startsWith(`${href}/`);

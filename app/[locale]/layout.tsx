@@ -25,6 +25,7 @@ import { PullToRefreshIndicator } from "@/components/shared/pull-to-refresh-indi
 import { getHeaderUser } from "@/lib/supabase/guards";
 import { getSiteSettings } from "@/lib/actions/settings";
 import { getVisibleCategoriesWithCounts } from "@/lib/data/categories";
+import { getHargeisaWeather } from "@/lib/data/weather";
 
 // next-intl's request-based APIs read headers in the installed version, so
 // these locale routes must render dynamically instead of being prerendered.
@@ -171,12 +172,13 @@ export default async function LocaleLayout({
   if (!locales.includes(locale as Locale)) notFound();
 
   const currentLocale = locale as Locale;
-  const [messages, initialUser, tCommon, siteSettings, categories] = await Promise.all([
+  const [messages, initialUser, tCommon, siteSettings, categories, weather] = await Promise.all([
     getMessages(),
     getHeaderUser(),
     getTranslations({ locale: currentLocale, namespace: "common" }),
     getSiteSettings(),
     getVisibleCategoriesWithCounts(),
+    getHargeisaWeather(),
   ]);
 
   return (
@@ -209,6 +211,7 @@ export default async function LocaleLayout({
                     initialUser={initialUser}
                     logoUrl={siteSettings?.logo_url ?? undefined}
                     categories={categories}
+                    weather={weather}
                   />
                   <main id="main-content">
                     <PageTransition>{children}</PageTransition>

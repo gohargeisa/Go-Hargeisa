@@ -3164,5 +3164,17 @@
     "benefitDiscovery": "اجعل عملاء هرجيسا يكتشفون نشاطك",
     "benefitBooking": "الحجز والمواعيد حيثما ينطبق ذلك",
     "cta": "انضم إلى جو هرجيسا"
+  },
+  "weather": {
+    "location": "هرجيسا",
+    "unitSuffix": "°م",
+    "condition_clear": "صافي",
+    "condition_partlyCloudy": "غائم جزئيًا",
+    "condition_cloudy": "غائم",
+    "condition_fog": "ضباب",
+    "condition_rain": "أمطار",
+    "condition_storm": "عاصفة",
+    "condition_snow": "ثلج",
+    "ariaLabel": "طقس {location}: {temperature} درجة، {condition}"
   }
 }

@@ -3164,5 +3164,17 @@
     "benefitDiscovery": "Get discovered by customers searching Hargeisa",
     "benefitBooking": "Booking and appointments where applicable",
     "cta": "Join Go Hargeisa"
+  },
+  "weather": {
+    "location": "Hargeisa",
+    "unitSuffix": "°C",
+    "condition_clear": "Clear",
+    "condition_partlyCloudy": "Partly Cloudy",
+    "condition_cloudy": "Cloudy",
+    "condition_fog": "Fog",
+    "condition_rain": "Rain",
+    "condition_storm": "Storm",
+    "condition_snow": "Snow",
+    "ariaLabel": "{location} weather: {temperature} degrees, {condition}"
   }
 }

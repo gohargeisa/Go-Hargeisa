@@ -3164,5 +3164,17 @@
     "benefitDiscovery": "Macaamiisha Hargeysa ha ku helaan ganacsigaaga",
     "benefitBooking": "Ballan qabashada meelaha ay khuseyso",
     "cta": "Ku Biir Go Hargeisa"
+  },
+  "weather": {
+    "location": "Hargeysa",
+    "unitSuffix": "°C",
+    "condition_clear": "Cad",
+    "condition_partlyCloudy": "Daruur Qeyb ah",
+    "condition_cloudy": "Daruuran",
+    "condition_fog": "Ceeryaamo",
+    "condition_rain": "Roob",
+    "condition_storm": "Duufaan",
+    "condition_snow": "Baraf",
+    "ariaLabel": "Cimilada {location}: {temperature} darajo, {condition}"
   }
 }
