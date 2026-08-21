@@ -51,7 +51,7 @@ insert into city_services (
 ) values (
   'b3a8e2f0-6c4d-4a1b-9e5f-7d2c8a9b6e10',
   'flower_shops',
-  'eb8e16de-6cf3-4240-9f12-97ffc2a9ba6f',
+  (select id from categories where slug = 'flower-shops'),
   'Lavender Flowers',
   'lavender',
   'published',

@@ -51,6 +51,7 @@ alter table business_offers add column if not exists featured boolean not null d
 create index if not exists idx_business_offers_approval on business_offers (approval_status, is_active);
 
 drop policy if exists "Public reads active offers for published listings" on business_offers;
+drop policy if exists "Public reads approved offers for published listings" on business_offers;
 create policy "Public reads approved offers for published listings" on business_offers for select
   using (
     is_active = true
