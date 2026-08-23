@@ -33,6 +33,10 @@ export function getNotificationText(
       return { title: t("joinRequestApprovedTitle"), body: t("joinRequestApprovedBody", { name: str(d.businessName) }), href };
     case "join_request_rejected":
       return { title: t("joinRequestRejectedTitle"), body: t("joinRequestRejectedBody", { name: str(d.businessName) }), href };
+    case "business_claim_approved":
+      return { title: t("businessClaimApprovedTitle"), body: t("businessClaimApprovedBody"), href };
+    case "business_claim_rejected":
+      return { title: t("businessClaimRejectedTitle"), body: t("businessClaimRejectedBody"), href };
     case "booking_new":
       return { title: t("bookingNewTitle"), body: t("bookingNewBody", { guest: str(d.guestName), listing: str(d.listingName) }), href };
     case "reservation_new":

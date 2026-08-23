@@ -513,6 +513,8 @@ export interface BusinessOffer {
  * title/message instead of a localized string. */
 export type NotificationCategory =
   | "business_claim_new"
+  | "business_claim_approved"
+  | "business_claim_rejected"
   | "contact_message_new"
   | "join_request_new"
   | "join_request_approved"
