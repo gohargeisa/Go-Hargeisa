@@ -31,6 +31,7 @@ export const PRODUCT_CATEGORY_LABELS: Record<ProductCategory, { en: string; ar: 
   occasion_gift: { en: "Occasion Gift", ar: "هدية مناسبة", so: "Hadiyad Munaasabad" },
   plant: { en: "Plant", ar: "نبات", so: "Geed" },
   cake: { en: "Cake", ar: "كعكة", so: "Keega" },
+  kids_clothing: { en: "Kids Clothing", ar: "ملابس الأطفال", so: "Dharka Carruurta" },
 };
 
 export const PRODUCT_CATEGORY_ORDER: ProductCategory[] = [

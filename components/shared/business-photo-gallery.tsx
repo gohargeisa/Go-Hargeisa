@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Image from "next/image";
 import type { GalleryCategoryOption } from "@/lib/utils/gallery-categories";
 import { Lightbox, type LightboxSlide } from "@/components/shared/lightbox";
+import { WhatsAppIcon } from "@/components/shared/brand-icons";
 import type { GalleryImage } from "@/types";
 
 function pillClass(active: boolean) {
@@ -24,10 +25,26 @@ export function BusinessPhotoGallery({
   images,
   alt,
   categories,
+  whatsappHref,
+  whatsappPromptText,
+  whatsappButtonLabel,
 }: {
   images: GalleryImage[];
   alt: string;
   categories: GalleryCategoryOption[];
+  /** Opt-in, real-data-only: a wa.me link built by the caller (see
+   * toWhatsAppHref) from the business's own WhatsApp number. Renders a
+   * "Chat on WhatsApp" strip below the grid when set; omitted entirely
+   * (default) for every existing caller, so hotels/restaurants/cafes render
+   * byte-identical to before. */
+  whatsappHref?: string;
+  /** Required alongside `whatsappHref` — the already-translated prompt text
+   * shown above the button (e.g. "See something you like? Chat with {name}
+   * on WhatsApp to ask about it."). */
+  whatsappPromptText?: string;
+  /** Required alongside `whatsappHref` — the already-translated button label
+   * (e.g. "WhatsApp"). */
+  whatsappButtonLabel?: string;
 }) {
   const categoriesPresent = useMemo(() => {
     const present = new Set<string>();
@@ -86,6 +103,21 @@ export function BusinessPhotoGallery({
           </button>
         ))}
       </div>
+
+      {whatsappHref && whatsappPromptText && whatsappButtonLabel && (
+        <div className="mt-6 flex flex-col items-center gap-2.5 text-center">
+          <p className="max-w-md text-sm text-ink/65 dark:text-sand/65">{whatsappPromptText}</p>
+          <a
+            href={whatsappHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-5 py-2.5 text-sm font-bold text-white transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-[#1FB855] active:scale-95"
+          >
+            <WhatsAppIcon size={16} aria-hidden="true" />
+            {whatsappButtonLabel}
+          </a>
+        </div>
+      )}
 
       {openAt !== null && (
         <Lightbox slides={slides} index={openAt} onClose={() => setOpenAt(null)} onIndexChange={setOpenAt} />

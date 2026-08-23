@@ -190,6 +190,13 @@ export interface Product {
   updatedAt: string;
   /** Free-text size/variant descriptor (e.g. "50ml", "Large", "Set of 3") — optional, most products won't need it. */
   size?: string;
+  /** Optional external inventory reference (e.g. an Odoo Internal Reference)
+   * — lets a re-import from the same source reconcile against this exact
+   * row instead of guessing by name. Not customer-facing UI unless a
+   * partner surface chooses to show it. */
+  sku?: string;
+  /** Optional on-hand count from the source inventory system — informational only. */
+  stockQuantity?: number;
   /** Structured variants (shade/color/finish/size combinations) — present
    * only for products that actually have them (e.g. a lipstick with 12
    * shades). Absent/empty means "just this one product", identical to
@@ -1295,6 +1302,17 @@ export interface CityService {
   reviews: Review[];
   favoriteCount?: number;
   amenitiesV2?: string[];
+  /** Business-wide add-on vocabulary for this listing's own products (e.g.
+   * a flower shop's "Extra Gypsophila"/"Premium Wrapping"/"Message Card"),
+   * narrowed per-product by getValidAddonsForProduct same as every other
+   * listing type — never applied unconditionally. Resolved in
+   * lib/data/city-services.ts by matching this row's own real add-on data
+   * ONLY: a `cafes` row sharing the exact same slug (the documented pattern
+   * from a business that was split into two listing rows, e.g. Lavender
+   * Café → Lavender Flowers) contributes its `flower_addons` here — no
+   * other city_services row is affected, and nothing is invented when no
+   * matching cafe/slug exists (empty array). */
+  flowerAddons?: ProductAddon[];
   /** "Services offered" tags for categories with a services-offered
    * vocabulary (Beauty Salons, Men's Barbershops, Auto Repair & Services) —
    * see lib/config/service-tags.ts. Empty/absent for every other category. */

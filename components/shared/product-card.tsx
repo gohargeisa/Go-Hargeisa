@@ -5,10 +5,12 @@ import { useTranslations } from "next-intl";
 import { Star, ShoppingCart, Heart } from "lucide-react";
 import { AddToCartButton } from "@/components/shared/add-to-cart-button";
 import { ProductImage } from "@/components/shared/product-image";
+import { WhatsAppIcon } from "@/components/shared/brand-icons";
 import { getValidAddonsForProduct } from "@/lib/cart/product-addons";
 import { productCategoryLabel } from "@/lib/config/product-categories";
 import { productLocalizedName } from "@/lib/utils/product-i18n";
 import { getProductPricing } from "@/lib/utils/product-pricing";
+import { toWhatsAppHref } from "@/lib/utils/whatsapp";
 import type { AddToCartBusiness } from "@/lib/cart/cart-context";
 import type { Product } from "@/types";
 
@@ -63,6 +65,14 @@ export function ProductCard({
   // addon-bearing products already use, where ProductDetailModal's
   // ProductVariantSelector/ProductOptionsForm collect it first.
   const canQuickAdd = product.isAvailable && product.price != null && validAddons.length === 0 && !hasVariants && !hasOptions;
+  // Opt-in by data: only appears when the business has a real WhatsApp
+  // number on file (AddToCartBusiness.whatsapp) AND this product has no
+  // price — see toWhatsAppHref/AddToCartBusiness for why nothing is ever
+  // hardcoded here.
+  const showAskForPrice = product.isAvailable && product.price == null && !!business.whatsapp;
+  const askForPriceHref = showAskForPrice
+    ? toWhatsAppHref(business.whatsapp!, t("askForPriceMessage", { store: business.businessName, product: name }))
+    : undefined;
 
   if (variant === "premium") {
     const pricing = getProductPricing(product);
@@ -155,6 +165,16 @@ export function ProductCard({
               >
                 <ShoppingCart size={13} aria-hidden="true" /> {t("viewDetails")}
               </button>
+            ) : askForPriceHref ? (
+              <a
+                href={askForPriceHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-[#25D366] py-2 text-xs font-bold text-white transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-[#1FB855] active:scale-95"
+              >
+                <WhatsAppIcon size={14} aria-hidden="true" /> {t("askForPrice")}
+              </a>
             ) : null}
           </div>
         </div>
@@ -235,6 +255,15 @@ export function ProductCard({
         >
           <ShoppingCart size={13} aria-hidden="true" /> {t("viewDetails")}
         </button>
+      ) : askForPriceHref ? (
+        <a
+          href={askForPriceHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-2 inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-[#25D366] py-1.5 text-xs font-bold text-white transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-[#1FB855] active:scale-95"
+        >
+          <WhatsAppIcon size={13} aria-hidden="true" /> {t("askForPrice")}
+        </a>
       ) : null}
     </div>
   );

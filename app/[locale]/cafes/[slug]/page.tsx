@@ -256,6 +256,57 @@ export default async function CafeDetailPage({
         priceRange={cafe.priceRange}
       />
 
+      {/* MENU — the main offering, promoted above the generic gallery/tabs
+          (the real, orderable, 100+ item catalog — same GroupedProductsSection
+          / ProductsSection this section always rendered, just moved so it's
+          the star instead of something a visitor has to scroll past
+          Overview/Hours/Specialties to reach). */}
+      {showProducts && (
+        <Reveal>
+          <section
+            id="shop"
+            aria-labelledby="shop-heading"
+            className="scroll-mt-36 border-t border-ink/8 bg-white py-14 dark:border-white/10 dark:bg-white/[0.03] sm:py-20"
+          >
+            <div className="container-px mx-auto">
+              <div className="mx-auto mb-8 max-w-2xl text-center">
+                <span className="mb-2 block text-xs font-bold uppercase tracking-[0.14em] text-primary">{td("menuEyebrow")}</span>
+                <h2 id="shop-heading" className="font-display text-2xl font-semibold sm:text-3xl">
+                  {td("orderOnline")}
+                </h2>
+              </div>
+              {lavenderMenuGroups ? (
+                <GroupedProductsSection
+                  groups={lavenderMenuGroups}
+                  storeName={cafe.name}
+                  business={{
+                    listingType: "cafe",
+                    listingId: cafe.id,
+                    businessName: cafe.name,
+                    deliveryEnabled: Boolean(cafe.productsDeliveryEnabled),
+                    addons: cafe.flowerAddons ?? [],
+                  }}
+                  locale={locale}
+                />
+              ) : (
+                <ProductsSection
+                  products={visibleCafeProducts}
+                  storeName={cafe.name}
+                  business={{
+                    listingType: "cafe",
+                    listingId: cafe.id,
+                    businessName: cafe.name,
+                    deliveryEnabled: Boolean(cafe.productsDeliveryEnabled),
+                    addons: cafe.flowerAddons ?? [],
+                  }}
+                  locale={locale}
+                />
+              )}
+            </div>
+          </section>
+        </Reveal>
+      )}
+
       <HotelGallerySlider cover={cafe.coverImage} images={cafe.gallery} alt={cafe.name} />
 
       <div className="mt-8">
@@ -358,43 +409,6 @@ export default async function CafeDetailPage({
                     items={cafe.menuHighlights}
                     allCategoriesLabel={td("menuAllCategoriesLabel")}
                     featuredLabel={td("menuFeaturedLabel")}
-                  />
-                )}
-              </section>
-            </Reveal>
-          )}
-
-          {showProducts && (
-            <Reveal>
-              <section id="shop" aria-labelledby="shop-heading" className="scroll-mt-36">
-                <h2 id="shop-heading" className="mb-5 font-display text-2xl font-semibold">
-                  {td("orderOnline")}
-                </h2>
-                {lavenderMenuGroups ? (
-                  <GroupedProductsSection
-                    groups={lavenderMenuGroups}
-                    storeName={cafe.name}
-                    business={{
-                      listingType: "cafe",
-                      listingId: cafe.id,
-                      businessName: cafe.name,
-                      deliveryEnabled: Boolean(cafe.productsDeliveryEnabled),
-                      addons: cafe.flowerAddons ?? [],
-                    }}
-                    locale={locale}
-                  />
-                ) : (
-                  <ProductsSection
-                    products={visibleCafeProducts}
-                    storeName={cafe.name}
-                    business={{
-                      listingType: "cafe",
-                      listingId: cafe.id,
-                      businessName: cafe.name,
-                      deliveryEnabled: Boolean(cafe.productsDeliveryEnabled),
-                      addons: cafe.flowerAddons ?? [],
-                    }}
-                    locale={locale}
                   />
                 )}
               </section>

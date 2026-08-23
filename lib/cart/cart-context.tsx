@@ -38,6 +38,12 @@ export interface AddToCartBusiness {
    * product it sells (e.g. cafes.flower_addons) — empty when the business
    * has none. */
   addons: ProductAddon[];
+  /** The business's real WhatsApp number, when it has one on file — powers
+   * the "Ask for Price" button on a product with no `price` set (see
+   * ProductCard/ProductDetailModal). Omitted entirely for a business with no
+   * WhatsApp number, in which case those components fall back to their
+   * existing plain "ask about price" text with no button. */
+  whatsapp?: string;
 }
 
 export interface AddToCartProduct {

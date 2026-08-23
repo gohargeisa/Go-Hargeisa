@@ -7,6 +7,7 @@ import { FavoriteButton } from "@/components/shared/favorite-button";
 import { HotelBookNowButton } from "@/components/shared/hotel-book-now-button";
 import { normalizeExternalUrl } from "@/lib/utils/normalize-url";
 import { hasMeaningfulPrice } from "@/lib/utils/price-range";
+import { getStartingPrice } from "@/lib/utils/starting-price";
 import type { HotelBookingCta } from "@/lib/utils/booking-cta";
 import type { HotelRoom } from "@/types";
 
@@ -41,6 +42,15 @@ export async function HotelBookingCard({
   const th = await getTranslations("hotelDetail");
   const tNav = await getTranslations("nav");
   const websiteHref = website ? normalizeExternalUrl(website) : undefined;
+  // Real room prices (see lib/utils/starting-price.ts) take priority over
+  // `priceRange` (just a "$"/"$$"/"$$$" tier symbol, not an actual price) —
+  // this is what previously let the room cards show real prices while this
+  // sidebar still said "Contact for pricing" for the same hotel.
+  const startingPrice = getStartingPrice(
+    rooms,
+    (r) => r.pricePerNight,
+    (r) => r.isAvailable !== false
+  );
 
   return (
     <div className="space-y-5">
@@ -48,7 +58,12 @@ export async function HotelBookingCard({
         <p className="text-[11px] font-semibold uppercase tracking-wide text-ink/70 dark:text-sand/70">
           {t("startingFrom")}
         </p>
-        {hasMeaningfulPrice(priceRange) ? (
+        {startingPrice != null ? (
+          <p className="font-display text-2xl font-bold text-primary-700">
+            ${startingPrice}
+            <span className="ms-1 text-sm font-medium text-ink/50 dark:text-sand/50">{t("perNight")}</span>
+          </p>
+        ) : hasMeaningfulPrice(priceRange) ? (
           <p className="font-display text-2xl font-bold text-primary-700">
             {priceRange}
             <span className="ms-1 text-sm font-medium text-ink/50 dark:text-sand/50">{t("perNight")}</span>

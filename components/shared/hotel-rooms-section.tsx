@@ -10,6 +10,7 @@ export function HotelRoomsSection({
   hotelName,
   hotelRating,
   bookingCta,
+  size = "default",
 }: {
   rooms: HotelRoom[];
   locale: Locale;
@@ -17,11 +18,16 @@ export function HotelRoomsSection({
   hotelName: string;
   hotelRating?: number;
   bookingCta: HotelBookingCta;
+  /** "large" — the promoted, full-width "Rooms & Suites" showcase (the main
+   * offering, near the top of the page). "default" (unchanged) is the
+   * original compact 2-up grid, kept available for any future secondary
+   * use. */
+  size?: "default" | "large";
 }) {
   if (rooms.length === 0) return null;
 
   return (
-    <div className="grid gap-5 sm:grid-cols-2">
+    <div className={`grid gap-5 sm:grid-cols-2 ${size === "large" ? "lg:grid-cols-3" : ""}`}>
       {rooms.map((room) => (
         <HotelRoomCard
           key={room.id}
@@ -32,6 +38,7 @@ export function HotelRoomsSection({
           hotelName={hotelName}
           hotelRating={hotelRating}
           bookingCta={bookingCta}
+          size={size}
         />
       ))}
     </div>

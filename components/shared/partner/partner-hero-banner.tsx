@@ -33,6 +33,13 @@ import type { Locale } from "@/lib/i18n/config";
 export async function PartnerHeroBanner({ theme, alt, locale }: { theme: PartnerTheme; alt: string; locale: Locale }) {
   const td = await getTranslations({ locale, namespace: "detail" });
 
+  // Callers already gate on `theme.heroImage` before rendering this
+  // component (see each page's `{partnerTheme?.heroImage && <PartnerHeroBanner .../>}`),
+  // but this guard keeps the component safe to call directly too, and
+  // narrows `heroImage` from optional to string for everything below.
+  if (!theme.heroImage) return null;
+  const heroImage = theme.heroImage;
+
   const badge = (
     <span
       className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-wide"
@@ -52,7 +59,7 @@ export async function PartnerHeroBanner({ theme, alt, locale }: { theme: Partner
       <Reveal y={0}>
         <div className="w-full">
           <Image
-            src={theme.heroImage}
+            src={heroImage}
             alt={alt}
             width={theme.heroImageWidth ?? 1600}
             height={theme.heroImageHeight ?? 900}
@@ -69,14 +76,14 @@ export async function PartnerHeroBanner({ theme, alt, locale }: { theme: Partner
     );
   }
 
-  const hasPhoto = !!theme.heroImage && !isPlaceholderImage(theme.heroImage);
+  const hasPhoto = !isPlaceholderImage(heroImage);
 
   return (
     <Reveal y={0}>
       <div className="relative h-[42vh] max-h-[420px] min-h-[260px] w-full overflow-hidden sm:h-[50vh] sm:max-h-[480px]">
         {hasPhoto ? (
           <Image
-            src={theme.heroImage}
+            src={heroImage}
             alt={alt}
             fill
             priority

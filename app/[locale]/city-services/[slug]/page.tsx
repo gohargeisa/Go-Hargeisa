@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { Phone as PhoneIcon, Mail, Globe, Wrench, GraduationCap, Send, ShoppingBag, FileText } from "lucide-react";
+import { Phone as PhoneIcon, Mail, Globe, Wrench, GraduationCap, Send, ShoppingBag, FileText, Sparkles } from "lucide-react";
 import { WhatsAppIcon } from "@/components/shared/brand-icons";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
@@ -20,6 +20,9 @@ import { HotelGallerySlider } from "@/components/shared/hotel-gallery-slider";
 import { HotelNavTabs, type HotelNavTab } from "@/components/shared/hotel-nav-tabs";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { BusinessPhotoGallery } from "@/components/shared/business-photo-gallery";
+import { EmptyState } from "@/components/shared/empty-state";
+import { ImageOnlyProductGrid } from "@/components/shared/image-only-product-grid";
+import { getCuratedProductImages } from "@/lib/config/curated-product-images";
 import { SERVICE_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import { VideoGallery } from "@/components/shared/video-gallery";
 import { AddToTripButton } from "@/components/shared/add-to-trip-button";
@@ -47,6 +50,9 @@ import { safeJsonLd } from "@/lib/utils/json-ld";
 import { CityServiceTypedFieldsDisplay } from "@/components/shared/city-service-typed-fields-display";
 import { getPrimaryActionGroup } from "@/lib/utils/business-primary-action";
 import { getDocumentLabelGroup } from "@/lib/utils/business-document";
+import { getPartnerTheme } from "@/lib/config/partner-themes";
+import { PartnerThemeScope } from "@/components/shared/partner/partner-theme-scope";
+import { PartnerHeroBanner } from "@/components/shared/partner/partner-hero-banner";
 import type { CityService } from "@/types";
 
 export const revalidate = 3600;
@@ -185,6 +191,14 @@ export default async function CityServiceDetailPage({
   const moreInCategory = (allGroups.find((g) => g.category.id === service.categoryId)?.items ?? [])
     .filter((s) => s.id !== service.id)
     .slice(0, 4);
+  // Image-only bridge for real photos that don't (yet) have their own
+  // verified name/price — see lib/config/curated-product-images.ts. Renders
+  // alongside any real `products` rows (not only when there are none), so a
+  // partner can have some real product cards and some "photo, ask on
+  // WhatsApp" entries at once. `null` for every listing without a curated
+  // entry, so this changes nothing for any city_service other than the ones
+  // explicitly configured there.
+  const curatedProductImages = getCuratedProductImages("city_service", service.slug);
 
   const showTypedDetails = hasTypedDetails(service, category.slug);
   const hasStructuredHours = !!service.openingHoursStructured && service.openingHoursStructured.length > 0;
@@ -215,7 +229,7 @@ export default async function CityServiceDetailPage({
 
   const navTabs: HotelNavTab[] = [
     { id: "overview", label: td("overview") },
-    ...(productsEligible && products.length > 0 ? [{ id: "products", label: tp("title") }] : []),
+    ...(productsEligible ? [{ id: "products", label: tp("title") }] : []),
     ...(showTypedDetails ? [{ id: "details", label: td("details") }] : []),
     ...(appointmentsEligible && doctors.length > 0 ? [{ id: "doctors", label: ta(isMedical ? "doctorsTitle" : "staffLabel") }] : []),
     ...(galleryEligible && service.gallery.length > 0 ? [{ id: "gallery", label: t("gallery") }] : []),
@@ -228,6 +242,11 @@ export default async function CityServiceDetailPage({
   ];
 
   const googleMapsHref = resolveMapsUrl(service.coords, service.mapsUrl);
+  // Everything partner-specific (colors, optional hero image) lives in
+  // lib/config/partner-themes.ts — this page stays generic for every other
+  // city service (getPartnerTheme returns null for the hundreds of
+  // unthemed listings, rendering this page exactly as before).
+  const partnerTheme = getPartnerTheme("city_service", service.slug);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -242,7 +261,7 @@ export default async function CityServiceDetailPage({
   };
 
   return (
-    <>
+    <PartnerThemeScope theme={partnerTheme}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
 
       <Breadcrumbs
@@ -251,6 +270,8 @@ export default async function CityServiceDetailPage({
           { label: service.name, href: `/${locale}/city-services/${service.slug}` },
         ]}
       />
+
+      {partnerTheme?.heroImage && <PartnerHeroBanner theme={partnerTheme} alt={service.name} locale={locale} />}
 
       <HotelHeaderTop
         logo={service.logoUrl}
@@ -362,6 +383,107 @@ export default async function CityServiceDetailPage({
         />
       )}
 
+      {service.isPartner && (
+        <Reveal delay={0.08}>
+          <div className="container-px mx-auto mt-5 flex flex-col items-center gap-1 text-center">
+            <span className="inline-flex items-center gap-1.5 text-sm font-bold text-primary-700 dark:text-primary-300">
+              <Sparkles size={14} aria-hidden="true" />
+              {td("featuredOnGoHargeisa")}
+            </span>
+            <p className="max-w-md text-xs text-ink/55 dark:text-sand/55">{td("featuredOnGoHargeisaBody")}</p>
+          </div>
+        </Reveal>
+      )}
+
+      {/* SHOP — the main offering for any products-eligible city_service
+          category (retail/flowers/perfume/cosmetics etc., not just Mama
+          Baby Care), promoted above the generic gallery/tabs so the actual
+          products are the star. Renders nothing for every category without
+          products (hospitals, schools, mosques...) — same `productsEligible`
+          gate as before, just moved up and given real visual weight. */}
+      {productsEligible && (
+        <Reveal>
+          <section
+            id="products"
+            aria-labelledby="products-heading"
+            className="scroll-mt-36 border-t border-ink/8 bg-white py-14 dark:border-white/10 dark:bg-white/[0.03] sm:py-20"
+          >
+            <div className="container-px mx-auto">
+              <div className="mx-auto mb-8 max-w-2xl text-center">
+                <span className="mb-2 block text-xs font-bold uppercase tracking-[0.14em] text-primary">{tp("shopEyebrow")}</span>
+                <h2 id="products-heading" className="font-display text-2xl font-semibold sm:text-3xl">
+                  {tp("shopSectionTitle", { store: service.name })}
+                </h2>
+              </div>
+              {products.length > 0 || curatedProductImages ? (
+                <div>
+                  {products.length > 0 && (
+                    <ProductsSection
+                      products={products}
+                      storeName={service.name}
+                      business={{
+                        listingType: "city_service",
+                        listingId: service.id,
+                        businessName: service.name,
+                        deliveryEnabled: true,
+                        addons: service.flowerAddons ?? [],
+                        whatsapp: service.whatsapp ?? undefined,
+                      }}
+                      locale={locale}
+                    />
+                  )}
+                  {/* Real photos with no verified name/price of their own —
+                      shown alongside (not instead of) any real product rows
+                      above, never re-showing a photo already promoted to a
+                      real product card (see curated-product-images.ts). */}
+                  {curatedProductImages && (
+                    <div className={products.length > 0 ? "mt-10 border-t border-ink/8 pt-10 dark:border-white/10" : undefined}>
+                      {products.length > 0 && (
+                        <p className="mb-4 text-center text-sm font-semibold text-ink/60 dark:text-sand/60">{tp("morePhotosTitle", { store: service.name })}</p>
+                      )}
+                      <ImageOnlyProductGrid images={curatedProductImages} alt={service.name} />
+                      {serviceWhatsappHref && (
+                        <div className="mt-6 flex flex-col items-center gap-2.5 text-center">
+                          <p className="max-w-md text-sm text-ink/60 dark:text-sand/60">{tp("shopComingSoonBody", { store: service.name })}</p>
+                          <a
+                            href={serviceWhatsappHref}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-5 py-2.5 text-sm font-bold text-white transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-[#1FB855] active:scale-95"
+                          >
+                            <WhatsAppIcon size={16} aria-hidden="true" />
+                            {th("whatsapp")}
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <EmptyState
+                  icon={ShoppingBag}
+                  title={tp("shopComingSoonTitle")}
+                  description={tp("shopComingSoonBody", { store: service.name })}
+                  action={
+                    serviceWhatsappHref ? (
+                      <a
+                        href={serviceWhatsappHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-5 py-2.5 text-sm font-bold text-white transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-[#1FB855] active:scale-95"
+                      >
+                        <WhatsAppIcon size={16} aria-hidden="true" />
+                        {th("whatsapp")}
+                      </a>
+                    ) : undefined
+                  }
+                />
+              )}
+            </div>
+          </section>
+        </Reveal>
+      )}
+
       {service.image && (
         <HotelGallerySlider
           cover={service.image}
@@ -384,22 +506,6 @@ export default async function CityServiceDetailPage({
                   {td("overview")}
                 </h2>
                 <p className="leading-relaxed text-ink/75 dark:text-sand/75">{service.description}</p>
-              </section>
-            </Reveal>
-          )}
-
-          {productsEligible && products.length > 0 && (
-            <Reveal>
-              <section id="products" aria-labelledby="products-heading" className="scroll-mt-36">
-                <h2 id="products-heading" className="mb-5 font-display text-2xl font-semibold">
-                  {tp("title")}
-                </h2>
-                <ProductsSection
-                  products={products}
-                  storeName={service.name}
-                  business={{ listingType: "city_service", listingId: service.id, businessName: service.name, deliveryEnabled: true, addons: [] }}
-                  locale={locale}
-                />
               </section>
             </Reveal>
           )}
@@ -439,7 +545,16 @@ export default async function CityServiceDetailPage({
                 <h2 id="photo-gallery-heading" className="mb-5 font-display text-2xl font-semibold">
                   {th("photoGallery")}
                 </h2>
-                <BusinessPhotoGallery images={service.gallery} alt={service.name} categories={SERVICE_GALLERY_CATEGORIES} />
+                <BusinessPhotoGallery
+                  images={service.gallery}
+                  alt={service.name}
+                  categories={SERVICE_GALLERY_CATEGORIES}
+                  whatsappHref={
+                    service.whatsapp ? toWhatsAppHref(service.whatsapp, td("chatAboutGalleryMessage", { name: service.name })) : undefined
+                  }
+                  whatsappPromptText={td("chatAboutGallery", { name: service.name })}
+                  whatsappButtonLabel={th("whatsapp")}
+                />
               </section>
             </Reveal>
           )}
@@ -596,6 +711,6 @@ export default async function CityServiceDetailPage({
       )}
 
       <PartnerAcquisitionCta locale={locale} />
-    </>
+    </PartnerThemeScope>
   );
 }

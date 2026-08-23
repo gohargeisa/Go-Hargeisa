@@ -317,6 +317,7 @@ type ProductRow = {
   is_available: boolean; is_featured: boolean; is_hidden: boolean;
   sort_order: number; created_at: string; updated_at: string;
   size: string | null;
+  sku: string | null; stock_quantity: number | null;
 };
 
 type ProductVariantRow = {

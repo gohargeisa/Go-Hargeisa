@@ -599,11 +599,17 @@ export function mapEvent(row: EventRow, reviews: Review[] = []): EventItem {
  * description_so to resolve to, matching the pre-existing (pre-Phase-11)
  * behavior of this table's list-view mapper — kept here so both the list
  * grouping query and the new by-slug detail query share one mapper. */
-export function mapCityService(row: CityServiceRow, reviews: Review[] = [], locale?: string): CityService {
+export function mapCityService(
+  row: CityServiceRow,
+  reviews: Review[] = [],
+  locale?: string,
+  flowerAddons?: CityService["flowerAddons"]
+): CityService {
   const openingHoursStructured = Array.isArray(row.opening_hours_structured)
     ? (row.opening_hours_structured as unknown as CityService["openingHoursStructured"])
     : [];
   return {
+    flowerAddons,
     id: row.id,
     slug: row.slug,
     category: row.category,
@@ -738,6 +744,8 @@ export function mapProduct(row: ProductRow): Product {
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     size: row.size ?? undefined,
+    sku: row.sku ?? undefined,
+    stockQuantity: row.stock_quantity ?? undefined,
   };
 }
 

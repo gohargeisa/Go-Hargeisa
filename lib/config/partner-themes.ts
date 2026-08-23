@@ -66,8 +66,14 @@ export interface PartnerTheme {
   /** Hero image for PartnerHeroBanner. A static `/public` path (a manually
    * supplied brand asset, like Lavender's) or any absolute URL (e.g. a real
    * business photo already in Supabase Storage) both work — the component
-   * just passes it to next/image. */
-  heroImage: string;
+   * just passes it to next/image. Omit entirely (leave unset) when the
+   * partner has no genuine hero-worthy photo/graphic on file — the page
+   * simply skips rendering PartnerHeroBanner in that case (see each page's
+   * `{partnerTheme?.heroImage && <PartnerHeroBanner .../>}` gate) and falls
+   * back to the color retint alone. Never fill this with an unrelated stock
+   * or third-party product photo just to have *something* here — see
+   * MAMA_BABY_CARE_THEME's own comment for why that matters. */
+  heroImage?: string;
   /** "contain" — use for a pre-designed, self-contained hero graphic that
    * already has its own logo/wordmark/copy
    * baked in (like Lavender's): shown at full native aspect ratio, width
@@ -78,7 +84,7 @@ export interface PartnerTheme {
    * "cover" — use for an ordinary photo (no baked-in text) that should
    * fill a full-bleed banner; gets a brand-color gradient wash for legibility
    * and the badge overlaid at the bottom. See `heroImagePosition`. */
-  heroImageFit: "cover" | "contain";
+  heroImageFit?: "cover" | "contain";
   /** "cover" fit only: Tailwind `object-[X%_Y%]` class(es) to art-direct
    * which part of the photo stays in frame from a near-square mobile crop
    * up to a very wide desktop one. Ignored (and unnecessary) for "contain". */
@@ -221,11 +227,12 @@ const LAVENDER_FLOWERS_THEME: PartnerTheme = {
 /**
  * Flormar Hargeisa — the platform's second partner theme, deliberately
  * built to prove this file (not the shared components) is the only thing
- * that changes when onboarding a new partner. Real business status: no
- * `city_services` row exists for it yet (see lib/mock-data/flormar.ts,
- * used only by the private preview at app/[locale]/preview/flormar) —
- * this entry exists so the theme/scoping machinery is ready the moment a
- * real listing row is created, matching this exact slug.
+ * that changes when onboarding a new partner. A real `city_services` row +
+ * real `products` rows now exist for this slug (status: 'draft', RLS-
+ * invisible to the public site — see lib/data/flormar-preview.ts), used
+ * only by the private preview at app/[locale]/preview/flormar. This entry
+ * is what the theme/scoping machinery reads once that row is ever flipped
+ * to `status: 'published'`, matching this exact slug.
  *
  * partnerLogo (revision 2, 2026-08-19): the business owner replaced the
  * earlier flat-background file with a new approved logo — same real
@@ -288,6 +295,96 @@ const FLORMAR_THEME: PartnerTheme = {
   tiktok: "https://tiktok.com/@flormar.hargeisa",
 };
 
+/**
+ * Mama Baby Care (`city-services/mama-baby-care`) — a real, live, published
+ * partner (`is_partner: true`). Colors sampled directly from the real logo
+ * (`logo_url` on the listing — solid magenta/pink card, white "m"/parent-
+ * and-child mark, "Mama & Baby Care" wordmark), not invented: corner pixels
+ * sampled at #CC1A75, contrast-checked at 5.2:1 white-on-primary (clears
+ * WCAG AA for normal text). `accent` is a neutral warm gold paired for
+ * visual variety only — same role Lavender's and Flormar's accents play —
+ * not asserted as a verified second brand color, since the logo itself only
+ * uses pink/white.
+ *
+ * Deliberately has NO `heroImage`: this listing's 34 gallery photos turned
+ * out, on inspection, to be third-party supplier/wholesale catalog images
+ * (other brands' own product photography — e.g. a UK pharmacy brand's boxed
+ * product shot, a shoe brand's studio photo with a foreign price baked into
+ * the pixels) rather than the shop's own documentary photography, and its
+ * `image`/`cover_image` column is actually a second copy of the logo (same
+ * known-bug shape as Lavender's, see [[partner_theme_system]]). Using any of
+ * those as this partner's "hero" would misrepresent what the business
+ * itself looks like or sells. Omitting `heroImage` means the page simply
+ * skips `PartnerHeroBanner` and relies on the color retint alone for a
+ * premium feel — see each themed page's `{partnerTheme?.heroImage && ...}`
+ * gate. Replace with a real storefront/product photo the moment the owner
+ * supplies one.
+ */
+const MAMA_BABY_CARE_THEME: PartnerTheme = {
+  slug: "mama-baby-care",
+  enabled: true,
+  partnerName: "Mama Baby Care",
+  partnerLogo: "https://pvzuibidhfuizmaleznx.supabase.co/storage/v1/object/public/listing-images/city-services/logos/1a0e84a0-822c-493d-865a-1051063bb94c.jpeg",
+  primary: "#CC1A75",
+  primaryRgb: "204 26 117",
+  primaryMid: "#DB5F9E",
+  primaryMidRgb: "219 95 158",
+  primaryStrong: "#AD1663",
+  primaryDeep: "#8F1252",
+  primarySoft: "#F0BAD6",
+  accent: "#D4A24E",
+  accentRgb: "212 162 78",
+  accentStrong: "#A87D34",
+  accentSoft: "#EDD2A0",
+};
+
+/**
+ * Grand Haadi Hotel & Resort (`hotels/grand-haadi-hotel`) — a real, live,
+ * published listing, and currently the ONE hotel the whole public site shows
+ * (see `HOTELS_PRESENTATION_MODE` in lib/config/features.ts) — the platform's
+ * hotel showcase. Colors sampled directly from the hotel's own real logo
+ * (`logo_url` — dark green shield background, gold kudu/laurel crest, "GRAND
+ * HAADI HOTEL & RESORT" wordmark): primary #0B3A26 sampled from the logo's
+ * background field (contrast-checked ~12.7:1 white-on-primary, WCAG AAA),
+ * accent #B2A55F sampled from the gold laurel leaves. `partnerName` is the
+ * hotel's official full name exactly as it appears on the real logo and
+ * matches independently (Facebook page title, Tripadvisor listing title
+ * found via web search) — the underlying `hotels.name` DB column stays
+ * "Grand Haadi Hotel" (no column change), since every booking/breadcrumb/
+ * search path already reads that exact string; this is display-only, same
+ * pattern as LAVENDER_FLOWERS_THEME's `partnerName` vs. its own listing row.
+ *
+ * heroImage is a REAL photo (`hotels/gallery/b059c5b5-...jpg` — the hotel's
+ * own exterior shot with its rooftop signage visible, verified by viewing
+ * the image directly), not the logo — this hotel actually has genuine
+ * documentary photography unlike some other partners, so `heroImageFit:
+ * "cover"` is used as intended (full-bleed photo + gradient wash), not the
+ * "contain" fallback. Same file the listing's own `cover_image` column now
+ * points to — that column previously
+ * duplicated the logo file, corrected as part of this build).
+ */
+const GRAND_HAADI_THEME: PartnerTheme = {
+  slug: "grand-haadi-hotel",
+  enabled: true,
+  partnerName: "Grand Haadi Hotel & Resort",
+  partnerLogo: "https://pvzuibidhfuizmaleznx.supabase.co/storage/v1/object/public/listing-images/hotels/logos/4f4573b0-bced-4932-9e11-252219555f89.jpg",
+  primary: "#0B3A26",
+  primaryRgb: "11 58 38",
+  primaryMid: "#476B5C",
+  primaryMidRgb: "71 107 92",
+  primaryStrong: "#093120",
+  primaryDeep: "#002B19",
+  primarySoft: "#B5C4BE",
+  accent: "#B2A55F",
+  accentRgb: "178 165 95",
+  accentStrong: "#8E844C",
+  accentSoft: "#D2C99F",
+  heroImage: "https://pvzuibidhfuizmaleznx.supabase.co/storage/v1/object/public/listing-images/hotels/gallery/b059c5b5-7bd5-414f-98a9-e0be5f2c9604.jpg",
+  heroImageFit: "cover",
+  heroImagePosition: "object-[50%_35%]",
+  phone: "+252634622117",
+};
+
 const PARTNER_THEMES: Partial<Record<BusinessListingType, Record<string, PartnerTheme>>> = {
   cafe: {
     lavender: LAVENDER_THEME,
@@ -298,6 +395,10 @@ const PARTNER_THEMES: Partial<Record<BusinessListingType, Record<string, Partner
     // "Lavender Flowers" identity and flower-only hero imagery.
     lavender: LAVENDER_FLOWERS_THEME,
     "flormar-hargeisa": FLORMAR_THEME,
+    "mama-baby-care": MAMA_BABY_CARE_THEME,
+  },
+  hotel: {
+    "grand-haadi-hotel": GRAND_HAADI_THEME,
   },
 };
 

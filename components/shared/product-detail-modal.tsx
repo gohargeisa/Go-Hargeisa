@@ -10,6 +10,7 @@ import { useImageLoaded } from "@/lib/hooks/use-image-loaded";
 import { Lightbox, type LightboxSlide } from "@/components/shared/lightbox";
 import { AddToCartButton } from "@/components/shared/add-to-cart-button";
 import { ProductImage } from "@/components/shared/product-image";
+import { WhatsAppIcon } from "@/components/shared/brand-icons";
 import { ProductVariantSelector } from "@/components/shared/product-variant-selector";
 import { ProductOptionsForm } from "@/components/shared/product-options-form";
 import { getValidAddonsForProduct } from "@/lib/cart/product-addons";
@@ -17,6 +18,7 @@ import { hasMissingRequiredOptions, resolveSelectedOptions, type ProductOptionVa
 import { productCategoryLabel, productGenderLabel } from "@/lib/config/product-categories";
 import { productLocalizedName, productLocalizedDescription, variantLocalizedName } from "@/lib/utils/product-i18n";
 import { getProductPricing } from "@/lib/utils/product-pricing";
+import { toWhatsAppHref } from "@/lib/utils/whatsapp";
 import type { AddToCartBusiness } from "@/lib/cart/cart-context";
 import type { Product, ProductAddon, ProductVariant } from "@/types";
 
@@ -103,6 +105,10 @@ export function ProductDetailModal({
   // discount math of its own, so this intentionally stays hidden once a
   // variant is selected rather than showing a stale/incorrect strikethrough.
   const pricing = activeVariant ? { hasDiscount: false } : getProductPricing(product);
+  const showAskForPrice = !isOrderable && displayPrice == null && !!business.whatsapp;
+  const askForPriceHref = showAskForPrice
+    ? toWhatsAppHref(business.whatsapp!, t("askForPriceMessage", { store: storeName, product: name }))
+    : undefined;
 
   return (
     <div className="fixed inset-0 z-modal flex items-center justify-center p-0 sm:p-4">
@@ -269,6 +275,15 @@ export function ProductDetailModal({
                 className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary-700 py-3 text-sm font-bold text-white transition-colors hover:bg-primary-800"
               />
             </div>
+          ) : askForPriceHref ? (
+            <a
+              href={askForPriceHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#25D366] py-3 text-sm font-bold text-white transition-colors hover:bg-[#1FB855]"
+            >
+              <WhatsAppIcon size={16} aria-hidden="true" /> {t("askForPrice")}
+            </a>
           ) : (
             <p className="text-xs text-ink/45 dark:text-sand/45">{t("askAboutProduct", { store: storeName })}</p>
           )}

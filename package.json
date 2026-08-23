@@ -8,6 +8,7 @@
     "start": "next start -p 3001",
     "lint": "next lint",
     "seed": "tsx scripts/seed.ts",
+    "seed:village-menu": "tsx scripts/seed-village-menu.ts",
     "mobile:assets": "node scripts/generate-mobile-assets.mjs",
     "mobile:sync": "npx cap sync && node scripts/fix-ios-package-swift.mjs"
   },

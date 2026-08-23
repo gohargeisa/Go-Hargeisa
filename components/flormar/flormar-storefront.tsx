@@ -18,7 +18,7 @@ import { productCategoryLabel } from "@/lib/config/product-categories";
 import { getProductPricing } from "@/lib/utils/product-pricing";
 import { useCart } from "@/lib/cart/cart-context";
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
-import { FLORMAR_MOCK_PRODUCTS, FLORMAR_MOCK_CATEGORIES, FLORMAR_MOCK_LOOKS } from "@/lib/mock-data/flormar";
+import { FLORMAR_CATEGORY_TILES } from "@/lib/config/flormar-categories";
 import type { PartnerTheme } from "@/lib/config/partner-themes";
 import type { Locale } from "@/lib/i18n/config";
 import type { AddToCartBusiness } from "@/lib/cart/cart-context";
@@ -69,33 +69,6 @@ function useLocalWishlist() {
 }
 
 /**
- * Demo-only sale pricing for a handful of real products, so the discount
- * system (badge, strikethrough, calculated percent) is genuinely visible
- * and verifiable on this preview page. NOT read from any real business
- * decision — Flormar Hargeisa hasn't set any real sale prices yet (no real
- * listing/admin row exists for this business at all, see this file's own
- * header comment) — so this is intentionally kept as a small, isolated,
- * clearly-labeled override applied at render time in this component only,
- * rather than hand-edited into lib/mock-data/flormar.ts (a generated file —
- * hand edits there are lost on the next regeneration, see its own header
- * comment). Delete this map the moment real sale pricing exists; nothing
- * else in the discount system depends on it.
- *
- * Deliberately mixes featured and non-featured products — Offers
- * (originalPrice > price) and Best Sellers (isFeatured, a separate,
- * independent curation flag on the real catalog) are genuinely different
- * concepts with different real data behind them; picking three from the
- * same isFeatured=true set would make every Offer *look* like it's simply
- * "the Best Sellers, discounted" by coincidence of this demo selection,
- * not because the two tabs are actually the same thing.
- */
-const DEMO_SALE_PRICING: Record<string, number> = {
-  "flormar-31000243": 3.2, // Baked Blush-On — was $2.00 (isFeatured: true)
-  "flormar-33000021": 2.4, // Silk Matte Liquid Lipstick — was $1.65 (isFeatured: true)
-  "flormar-32000018": 6.5, // Precious Curl Mascara — was $4.40 (isFeatured: false — proves Offers ≠ Best Sellers)
-};
-
-/**
  * Flormar Hargeisa — private preview storefront (client half). Structure
  * only this file owns (hero copy, section order, category tiles);
  * everything that actually renders a product (ProductCard,
@@ -112,18 +85,22 @@ const DEMO_SALE_PRICING: Record<string, number> = {
  * component only needs "use client" for the product-detail-modal open/
  * close state; page.tsx wraps it (and the footer) in PartnerThemeScope.
  *
- * Every product image is BrandedPlaceholder (an honest "photo coming
- * soon" placeholder), never a generated or downloaded photo — passed into
- * the real ProductCard via its `imageFallback` prop (product-image.tsx),
- * not a parallel card implementation, so featured/unavailable badges, the
- * shade-swatch indicator, and the variant-safe quick-add gate all still
- * apply here exactly as they do for every other partner. See
- * lib/mock-data/flormar.ts's header comment. This whole page is mock-data
- * powered (no real business row exists yet) and intentionally unreachable
- * except by direct URL (see page.tsx's robots/sitemap notes).
+ * Every product image without a verified official photo is
+ * BrandedPlaceholder (an honest "photo coming soon" placeholder), never a
+ * generated or downloaded photo — passed into the real ProductCard via its
+ * `imageFallback` prop (product-image.tsx), not a parallel card
+ * implementation, so featured/unavailable badges, the shade-swatch
+ * indicator, and the variant-safe quick-add gate all still apply here
+ * exactly as they do for every other partner.
+ *
+ * `products` is real, database-driven data (see lib/data/flormar-preview.ts)
+ * reconciled against the authoritative Excel catalog — not a static mock
+ * import. The listing row itself is `status: 'draft'`, which is what
+ * actually keeps this private (RLS), independent of this route also being
+ * unlinked/noindex (see page.tsx's robots/sitemap notes).
  */
 type FlormarPreviewT = ReturnType<typeof useTranslations<"flormarPreview">>;
-const CATEGORY_LABELS: Record<(typeof FLORMAR_MOCK_CATEGORIES)[number]["labelKey"], (t: FlormarPreviewT) => string> = {
+const CATEGORY_LABELS: Record<(typeof FLORMAR_CATEGORY_TILES)[number]["labelKey"], (t: FlormarPreviewT) => string> = {
   makeup: (t) => t("categoryMakeup"),
   skincare: (t) => t("categorySkincare"),
   nails: (t) => t("categoryNails"),
@@ -133,15 +110,13 @@ const CATEGORY_LABELS: Record<(typeof FLORMAR_MOCK_CATEGORIES)[number]["labelKey
 type SortKey = "featured" | "newest" | "priceLow" | "priceHigh";
 type DiscoveryTab = "all" | "new" | "featured" | "offers";
 
-const MOCK_BUSINESS: AddToCartBusiness = {
-  listingType: "city_service",
-  listingId: "mock-flormar",
-  businessName: "Flormar Hargeisa",
-  deliveryEnabled: false,
-  addons: [],
-};
+const EDIT_LOOKS: { key: string; titleKey: "lookEveryday" | "lookSoftGlam" | "lookDefinedEyes"; descriptionKey: "lookEverydayBody" | "lookSoftGlamBody" | "lookDefinedEyesBody"; match: string[] }[] = [
+  { key: "everyday-glow", titleKey: "lookEveryday", descriptionKey: "lookEverydayBody", match: ["BB Cream", "Baked Powder"] },
+  { key: "soft-glam", titleKey: "lookSoftGlam", descriptionKey: "lookSoftGlamBody", match: ["Baked Blush-On", "Baked Eyeshadow"] },
+  { key: "defined-eyes", titleKey: "lookDefinedEyes", descriptionKey: "lookDefinedEyesBody", match: ["Baked Eyeshadow", "Angled Brow Pencil"] },
+];
 
-export function FlormarStorefront({ theme, locale }: { theme: PartnerTheme; locale: Locale }) {
+export function FlormarStorefront({ theme, locale, products: catalogProducts }: { theme: PartnerTheme; locale: Locale; products: Product[] }) {
   const t = useTranslations("flormarPreview");
   const tp = useTranslations("products");
   const tc = useTranslations("cart");
@@ -164,17 +139,27 @@ export function FlormarStorefront({ theme, locale }: { theme: PartnerTheme; loca
   }
 
   // Single derived catalog every section below reads from (Featured, Shop
-  // by Category, The Edit, Product Discovery, the detail modal) — applies
-  // DEMO_SALE_PRICING once, in one place, instead of each section
-  // re-deriving its own pricing. Every field except `originalPrice` is
-  // untouched real catalog data.
-  const productsWithPricing = useMemo(
-    () => FLORMAR_MOCK_PRODUCTS.map((p) => (DEMO_SALE_PRICING[p.id] ? { ...p, originalPrice: DEMO_SALE_PRICING[p.id] } : p)),
-    []
-  );
+  // by Category, The Edit, Product Discovery, the detail modal). No
+  // `originalPrice` override is applied here — Flormar Hargeisa hasn't set
+  // any real sale prices yet, so the "Offers" tab below legitimately shows
+  // its empty state until real discount data exists; a fabricated
+  // strikethrough price is not an acceptable stand-in for that.
+  const productsWithPricing = catalogProducts;
   const featured = productsWithPricing.filter((p) => p.isFeatured);
 
-  // FLORMAR_MOCK_CATEGORIES carries no `image` of its own (no dedicated
+  // Real city_services.id (shared by every row in catalogProducts — they're
+  // all one listing) — NOT a "mock-flormar" placeholder string. Falls back
+  // to the placeholder only in the impossible case of an empty catalog, so
+  // AddToCartBusiness always has a syntactically valid listingId.
+  const business: AddToCartBusiness = {
+    listingType: "city_service",
+    listingId: catalogProducts[0]?.listingId ?? "mock-flormar",
+    businessName: "Flormar Hargeisa",
+    deliveryEnabled: false,
+    addons: [],
+  };
+
+  // FLORMAR_CATEGORY_TILES carries no `image` of its own (no dedicated
   // category-photography asset exists) — the tile previously fell straight
   // through to the placeholder for every category, every time, which is
   // exactly the "logo standing in for a missing photo" bug: the placeholder
@@ -187,7 +172,7 @@ export function FlormarStorefront({ theme, locale }: { theme: PartnerTheme; loca
   // to any product in the category with a real photo.
   const categoryImages = useMemo(() => {
     const map = new Map<string, string>();
-    for (const cat of FLORMAR_MOCK_CATEGORIES) {
+    for (const cat of FLORMAR_CATEGORY_TILES) {
       const inCategory = productsWithPricing.filter((p) => p.category === cat.category && p.image);
       const pick = inCategory.find((p) => p.isFeatured) ?? inCategory[0];
       if (pick?.image) map.set(cat.key, pick.image);
@@ -221,6 +206,18 @@ export function FlormarStorefront({ theme, locale }: { theme: PartnerTheme; loca
   const [discoveryCategory, setDiscoveryCategory] = useState<Product["category"] | null>(null);
   const [discoveryQuery, setDiscoveryQuery] = useState("");
   const [discoverySort, setDiscoverySort] = useState<SortKey>("featured");
+
+  // Catalogs this size (1000+ products for Flormar) can't reasonably mount
+  // every ProductCard/Image at once — that's a real DOM/network cost, not
+  // just a long scroll. Render only the first PAGE_SIZE matches, "Load
+  // More" grows it in the same fixed steps. Resets to one page whenever the
+  // active filter/search/sort actually changes the result set, so switching
+  // tabs never silently keeps 500 stale rendered cards around.
+  const DISCOVERY_PAGE_SIZE = 48;
+  const [discoveryVisibleCount, setDiscoveryVisibleCount] = useState(DISCOVERY_PAGE_SIZE);
+  useEffect(() => {
+    setDiscoveryVisibleCount(DISCOVERY_PAGE_SIZE);
+  }, [discoveryTab, discoveryCategory, discoveryQuery, discoverySort]);
 
   function goToCategory(category: Product["category"]) {
     setDiscoveryCategory(category);
@@ -281,7 +278,7 @@ export function FlormarStorefront({ theme, locale }: { theme: PartnerTheme; loca
           </button>
 
           <nav aria-label={t("categoryTitle")} className="hidden shrink-0 items-center gap-1 lg:flex">
-            {FLORMAR_MOCK_CATEGORIES.map((cat) => (
+            {FLORMAR_CATEGORY_TILES.map((cat) => (
               <button
                 key={cat.key}
                 type="button"
@@ -589,7 +586,7 @@ export function FlormarStorefront({ theme, locale }: { theme: PartnerTheme; loca
               <ProductCard
                 key={product.id}
                 product={product}
-                business={MOCK_BUSINESS}
+                business={business}
                 locale={locale}
                 onOpenDetails={() => setSelectedProduct(product)}
                 imageFallback={<PartnerProductPlaceholder name={productLocalizedName(product, locale)} category={product.category ? productCategoryLabel(product.category, locale) : undefined} theme={theme} />}
@@ -633,7 +630,7 @@ export function FlormarStorefront({ theme, locale }: { theme: PartnerTheme; loca
             </div>
           </Reveal>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            {FLORMAR_MOCK_CATEGORIES.map((cat) => (
+            {FLORMAR_CATEGORY_TILES.map((cat) => (
               <button
                 key={cat.key}
                 type="button"
@@ -678,11 +675,15 @@ export function FlormarStorefront({ theme, locale }: { theme: PartnerTheme; loca
         </div>
       </section>
 
-      {/* 06 — The Flormar Edit — editorial styling groupings, each linking
-          only to real mock products already defined in
-          lib/mock-data/flormar.ts (FLORMAR_MOCK_LOOKS). Titles/descriptions
-          are generic styling concepts (translated, see editSubtitle),
-          explicitly not presented as an official Flormar campaign. */}
+      {/* 06 — The Flormar Edit — editorial styling groupings computed live
+          from the real database-backed catalog (name-prefix match against
+          the actual product lines, not a hardcoded product-id list) — so
+          this section can never reference a product that's been removed
+          from the catalog. Titles/descriptions are generic styling concepts
+          (translated, see editSubtitle), explicitly not presented as an
+          official Flormar campaign. Only groupings with at least one real
+          match render — e.g. no lipstick line exists in this catalog, so
+          no "bold lips" card is shown rather than one pointing at nothing. */}
       <section className="bg-white py-16 dark:bg-white/[0.03] sm:py-24">
         <div className="container-px mx-auto">
           <Reveal>
@@ -698,22 +699,15 @@ export function FlormarStorefront({ theme, locale }: { theme: PartnerTheme; loca
             <p className="mx-auto mb-10 max-w-md text-center text-xs text-ink/45 dark:text-sand/45 md:mb-14">{t("editSubtitle")}</p>
           </Reveal>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {FLORMAR_MOCK_LOOKS.map((look) => {
-              const products = look.productIds.map((id) => productsWithPricing.find((p) => p.id === id)).filter((p): p is Product => !!p);
-              // Real photography from one of this look's own real referenced
-              // products — same "no dedicated editorial asset exists, so
-              // reuse a real, already-photographed product from the
-              // grouping" fix as the category tiles above. Prefers a
-              // product that actually has an image (skips the rare
-              // imageless one in the group) rather than blindly taking
-              // products[0], which previously landed on the placeholder
-              // (showing the logo) whenever that first product had no photo.
-              const lookImage = products.find((p) => p.image)?.image;
+            {EDIT_LOOKS.map((look) => {
+              const matches = productsWithPricing.filter((p) => look.match.some((prefix) => p.name.startsWith(prefix)));
+              if (matches.length === 0) return null;
+              const lookImage = matches.find((p) => p.image)?.image;
               return (
                 <div key={look.key} className="overflow-hidden rounded-xl3 border border-ink/8 shadow-soft dark:border-white/10">
                   <button
                     type="button"
-                    onClick={() => products[0] && setSelectedProduct(products[0])}
+                    onClick={() => matches[0] && setSelectedProduct(matches[0])}
                     className="relative block aspect-[4/3] w-full"
                   >
                     {lookImage && !brokenImageKeys.has(`look-${look.key}`) ? (
@@ -737,7 +731,7 @@ export function FlormarStorefront({ theme, locale }: { theme: PartnerTheme; loca
                     <p className="mt-1 text-xs leading-relaxed text-ink/60 dark:text-sand/60">{t(look.descriptionKey)}</p>
                     <button
                       type="button"
-                      onClick={() => products[0] && setSelectedProduct(products[0])}
+                      onClick={() => matches[0] && setSelectedProduct(matches[0])}
                       className="mt-3 text-xs font-bold uppercase tracking-wide"
                       style={{ color: theme.primaryStrong }}
                     >
@@ -800,7 +794,7 @@ export function FlormarStorefront({ theme, locale }: { theme: PartnerTheme; loca
                 className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold"
                 style={{ backgroundColor: `rgba(${theme.primaryRgb}, 0.1)`, color: theme.primaryStrong }}
               >
-                {CATEGORY_LABELS[FLORMAR_MOCK_CATEGORIES.find((c) => c.category === discoveryCategory)?.labelKey ?? "makeup"](t)}
+                {CATEGORY_LABELS[FLORMAR_CATEGORY_TILES.find((c) => c.category === discoveryCategory)?.labelKey ?? "makeup"](t)}
                 <span aria-hidden="true">×</span>
               </button>
             </div>
@@ -884,11 +878,11 @@ export function FlormarStorefront({ theme, locale }: { theme: PartnerTheme; loca
             <>
               <p className="mb-4 text-sm text-ink/50 dark:text-sand/50">{t("resultsCount", { count: discoveryResults.length })}</p>
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-                {discoveryResults.map((product) => (
+                {discoveryResults.slice(0, discoveryVisibleCount).map((product) => (
                   <ProductCard
                     key={product.id}
                     product={product}
-                    business={MOCK_BUSINESS}
+                    business={business}
                     locale={locale}
                     onOpenDetails={() => setSelectedProduct(product)}
                     imageFallback={<PartnerProductPlaceholder name={productLocalizedName(product, locale)} category={product.category ? productCategoryLabel(product.category, locale) : undefined} theme={theme} />}
@@ -898,6 +892,21 @@ export function FlormarStorefront({ theme, locale }: { theme: PartnerTheme; loca
                   />
                 ))}
               </div>
+              {discoveryVisibleCount < discoveryResults.length && (
+                <div className="mt-8 flex flex-col items-center gap-2">
+                  <p className="text-xs text-ink/45 dark:text-sand/45">
+                    {t("loadMoreCount", { shown: Math.min(discoveryVisibleCount, discoveryResults.length), total: discoveryResults.length })}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setDiscoveryVisibleCount((n) => n + DISCOVERY_PAGE_SIZE)}
+                    className="rounded-full px-6 py-2.5 text-sm font-bold text-white transition-all duration-300 ease-premium hover:-translate-y-0.5"
+                    style={{ backgroundColor: theme.primaryStrong }}
+                  >
+                    {t("loadMore")}
+                  </button>
+                </div>
+              )}
             </>
           )}
         </div>
@@ -973,8 +982,8 @@ export function FlormarStorefront({ theme, locale }: { theme: PartnerTheme; loca
       {selectedProduct && (
         <ProductDetailModal
           product={selectedProduct}
-          storeName={MOCK_BUSINESS.businessName}
-          business={MOCK_BUSINESS}
+          storeName={business.businessName}
+          business={business}
           locale={locale}
           onClose={() => setSelectedProduct(null)}
         />

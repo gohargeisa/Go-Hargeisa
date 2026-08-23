@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { FileText } from "lucide-react";
+import { FileText, UtensilsCrossed, Dumbbell, Presentation, Sparkles } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
 import { getHotelBySlug, getAllHotelSlugs, getNearbyAttractionsForHotel } from "@/lib/data/hotels";
@@ -50,6 +50,9 @@ import {
   RESTAURANTS_PUBLIC_ENABLED,
   CAFES_PUBLIC_ENABLED,
 } from "@/lib/config/features";
+import { getPartnerTheme } from "@/lib/config/partner-themes";
+import { PartnerThemeScope } from "@/components/shared/partner/partner-theme-scope";
+import { PartnerHeroBanner } from "@/components/shared/partner/partner-hero-banner";
 
 // Public content changes infrequently; revalidate hourly instead of
 // rendering on every request (this page no longer reads cookies, so
@@ -142,6 +145,18 @@ export default async function HotelDetailPage({
   ];
 
   const googleMapsHref = resolveMapsUrl(hotel.location, hotel.googleMapsUrl);
+  // Everything partner-specific (colors, hero photo) lives in
+  // lib/config/partner-themes.ts — this page stays generic for every other
+  // hotel (getPartnerTheme returns null when none is configured).
+  const partnerTheme = getPartnerTheme("hotel", hotel.slug);
+
+  // Real amenity tags this hotel already has on file (amenitiesV2) — used
+  // only to decide whether to show that facility's highlight card below;
+  // no capacity/hours/menu specifics are ever added since none are verified.
+  const hasRestaurant = hotel.amenitiesV2?.includes("restaurant");
+  const hasGym = hotel.amenitiesV2?.includes("gym");
+  const hasMeetingRooms = hotel.amenitiesV2?.includes("meeting_rooms");
+  const showSignatureFacilities = Boolean(hasRestaurant || hasGym || hasMeetingRooms);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -159,7 +174,7 @@ export default async function HotelDetailPage({
   };
 
   return (
-    <>
+    <PartnerThemeScope theme={partnerTheme}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <ViewTracker listingType="hotel" listingId={hotel.id} />
 
@@ -170,6 +185,8 @@ export default async function HotelDetailPage({
         ]}
       />
 
+      {partnerTheme?.heroImage && <PartnerHeroBanner theme={partnerTheme} alt={hotel.name} locale={locale} />}
+
       <HotelHeaderTop
         logo={hotel.logo}
         name={hotel.name}
@@ -179,6 +196,16 @@ export default async function HotelDetailPage({
         locale={locale}
         isPartner={hotel.isPartner}
       />
+
+      {/* Official full brand name, exactly as it appears on the hotel's own
+          logo (verified independently against its Facebook page and
+          Tripadvisor listing title) — display-only, the underlying
+          `hotel.name` used for booking/breadcrumbs/search stays unchanged. */}
+      {partnerTheme?.partnerName && partnerTheme.partnerName !== hotel.name && (
+        <p className="container-px mx-auto mt-1.5 text-center text-sm font-medium italic text-ink/50 dark:text-sand/50">
+          {partnerTheme.partnerName}
+        </p>
+      )}
 
       <HotelActionBar
         locale={locale}
@@ -239,6 +266,82 @@ export default async function HotelDetailPage({
         amenities={hotel.amenities}
       />
 
+      {/* Real amenity tags this hotel already has on file get elevated,
+          premium presentation here — no facility is shown unless its exact
+          amenitiesV2 code is present, and no capacity/hours/menu specifics
+          are invented (see hasRestaurant/hasGym/hasMeetingRooms above). */}
+      {showSignatureFacilities && (
+        <Reveal delay={0.08}>
+          <div className="container-px mx-auto mt-6">
+            <h2 className="mb-4 flex items-center justify-center gap-2 text-center font-display text-lg font-bold">
+              <Sparkles size={16} className="text-primary" aria-hidden="true" />
+              {th("signatureFacilities")}
+            </h2>
+            <div className="mx-auto grid max-w-3xl gap-3 sm:grid-cols-3">
+              {hasRestaurant && (
+                <div className="flex items-center gap-3 rounded-xl2 border border-ink/8 bg-white px-4 py-3.5 dark:border-white/10 dark:bg-white/[0.03]">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                    <UtensilsCrossed size={18} className="text-primary" aria-hidden="true" />
+                  </span>
+                  <p className="text-xs leading-snug text-ink/60 dark:text-sand/60">{th("restaurantHighlight")}</p>
+                </div>
+              )}
+              {hasGym && (
+                <div className="flex items-center gap-3 rounded-xl2 border border-ink/8 bg-white px-4 py-3.5 dark:border-white/10 dark:bg-white/[0.03]">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                    <Dumbbell size={18} className="text-primary" aria-hidden="true" />
+                  </span>
+                  <p className="text-xs leading-snug text-ink/60 dark:text-sand/60">{th("gymHighlight")}</p>
+                </div>
+              )}
+              {hasMeetingRooms && (
+                <div className="flex items-center gap-3 rounded-xl2 border border-ink/8 bg-white px-4 py-3.5 dark:border-white/10 dark:bg-white/[0.03]">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                    <Presentation size={18} className="text-primary" aria-hidden="true" />
+                  </span>
+                  <p className="text-xs leading-snug text-ink/60 dark:text-sand/60">{th("meetingsHighlight")}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </Reveal>
+      )}
+
+      {/* ROOMS & SUITES — the main offering, promoted above the generic
+          gallery so it's the first real content a visitor scrolls into
+          (per the Premium Partner Showcase direction: the actual product —
+          here, real rooms with real prices — must be the star, not buried
+          below photos/tabs). Full-width, not confined to the 2/3 column
+          the old in-grid section lived in. Uses the exact same real data
+          (hotel.rooms) and booking flow as before — nothing invented,
+          nothing duplicated below. */}
+      {hotel.rooms.length > 0 && (
+        <Reveal>
+          <section id="rooms" aria-labelledby="rooms-heading" className="scroll-mt-36 border-t border-ink/8 bg-white py-14 dark:border-white/10 dark:bg-white/[0.03] sm:py-20">
+            <div className="container-px mx-auto">
+              <div className="mx-auto mb-8 max-w-2xl text-center">
+                <span className="mb-2 block text-xs font-bold uppercase tracking-[0.14em] text-primary">
+                  {th("roomsEyebrow")}
+                </span>
+                <h2 id="rooms-heading" className="font-display text-2xl font-semibold sm:text-3xl">
+                  {th("roomsAndSuites")}
+                </h2>
+                <p className="mt-3 text-sm text-ink/60 dark:text-sand/60 sm:text-base">{th("roomsSubtitle")}</p>
+              </div>
+              <HotelRoomsSection
+                rooms={hotel.rooms}
+                locale={locale}
+                hotelId={hotel.id}
+                hotelName={hotel.name}
+                hotelRating={hotel.rating}
+                bookingCta={bookingCta}
+                size="large"
+              />
+            </div>
+          </section>
+        </Reveal>
+      )}
+
       <HotelGallerySlider cover={hotel.coverImage} images={hotel.gallery} alt={hotel.name} />
 
       <div className="mt-8">
@@ -270,24 +373,6 @@ export default async function HotelDetailPage({
                 couponLabel={td("offerCouponCodeLabel")}
                 validUntilLabel={(date) => td("offerValidUntil", { date })}
               />
-            </Reveal>
-          )}
-
-          {hotel.rooms.length > 0 && (
-            <Reveal>
-              <section id="rooms" aria-labelledby="rooms-heading" className="scroll-mt-36">
-                <h2 id="rooms-heading" className="mb-5 font-display text-2xl font-semibold">
-                  {th("rooms")}
-                </h2>
-                <HotelRoomsSection
-                  rooms={hotel.rooms}
-                  locale={locale}
-                  hotelId={hotel.id}
-                  hotelName={hotel.name}
-                  hotelRating={hotel.rating}
-                  bookingCta={bookingCta}
-                />
-              </section>
             </Reveal>
           )}
 
@@ -493,6 +578,6 @@ export default async function HotelDetailPage({
         whatsappFallback={whatsappFallback}
         locale={locale}
       />
-    </>
+    </PartnerThemeScope>
   );
 }

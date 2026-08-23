@@ -246,6 +246,45 @@ export default async function FlowersDetailPage({
         </span>
       </div>
 
+      {/* FLOWERS / BOUQUETS / GIFTS — the main offering, promoted above the
+          generic gallery (same real 12-item rose/bouquet catalog + real
+          verified add-ons, just moved so it's the star instead of
+          something below Overview/a photo slider). */}
+      {showProducts && (
+        <Reveal>
+          <section
+            id="shop"
+            aria-labelledby="shop-heading"
+            className="scroll-mt-36 border-t border-ink/8 bg-gradient-to-b from-primary/[0.04] to-transparent py-14 dark:border-white/10 sm:py-20"
+          >
+            <div className="container-px mx-auto">
+              <div className="mx-auto mb-8 max-w-2xl text-center">
+                <span className="mb-2 block text-xs font-bold uppercase tracking-[0.14em] text-primary">
+                  {td("eyebrowCollection")}
+                </span>
+                <h2 id="shop-heading" className="font-display text-2xl font-semibold sm:text-3xl">
+                  {td("flowersAndBouquets")}
+                </h2>
+                <p className="mt-3 text-sm text-ink/60 dark:text-sand/60 sm:text-base">{td("roseCollectionSubtitle")}</p>
+              </div>
+              <ProductsSection
+                products={products}
+                storeName={FLOWERS_DISPLAY_NAME}
+                business={{
+                  listingType: "city_service",
+                  listingId: service.id,
+                  businessName: FLOWERS_DISPLAY_NAME,
+                  deliveryEnabled: true,
+                  addons: sisterCafe?.flowerAddons ?? [],
+                  whatsapp: serviceWhatsapp,
+                }}
+                locale={locale}
+              />
+            </div>
+          </section>
+        </Reveal>
+      )}
+
       {coverImage && (
         <HotelGallerySlider cover={coverImage} images={galleryImages} alt={FLOWERS_DISPLAY_NAME} productOriented />
       )}
@@ -290,36 +329,6 @@ export default async function FlowersDetailPage({
                     </div>
                   ))}
                 </div>
-              </section>
-            </Reveal>
-          )}
-
-          {showProducts && (
-            <Reveal>
-              <section
-                id="shop"
-                aria-labelledby="shop-heading"
-                className="scroll-mt-36 rounded-xl3 border border-primary/10 bg-gradient-to-b from-primary/[0.04] to-transparent p-5 dark:border-primary/15 dark:from-primary/[0.06] sm:p-8"
-              >
-                <span className="mb-2 block text-xs font-bold uppercase tracking-[0.14em] text-primary">
-                  {td("eyebrowCollection")}
-                </span>
-                <h2 id="shop-heading" className="mb-2 font-display text-2xl font-semibold sm:text-3xl">
-                  {td("flowersAndBouquets")}
-                </h2>
-                <p className="mb-6 text-sm text-ink/60 dark:text-sand/60">{td("roseCollectionSubtitle")}</p>
-                <ProductsSection
-                  products={products}
-                  storeName={FLOWERS_DISPLAY_NAME}
-                  business={{
-                    listingType: "city_service",
-                    listingId: service.id,
-                    businessName: FLOWERS_DISPLAY_NAME,
-                    deliveryEnabled: true,
-                    addons: [],
-                  }}
-                  locale={locale}
-                />
               </section>
             </Reveal>
           )}

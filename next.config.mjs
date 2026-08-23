@@ -29,6 +29,18 @@ const nextConfig = {
       { protocol: "https", hostname: "d1ak51zwgmtslz.cloudfront.net" },
       { protocol: "https", hostname: "afb801.a-cdn.akinoncloud.com" },
       { protocol: "https", hostname: "admin.flormar.ma" },
+      // Flormar Bahrain's official storefront — the only official source
+      // found for the "4 In 1 Complete Care" product photo (barcode-matched
+      // against the authoritative Odoo catalog export before use).
+      { protocol: "https", hostname: "flormarbh.com" },
+      // Instagram's own official post embed (instagram.com/p/{id}/embed) —
+      // used by components/the-village/instagram-post-embed.tsx to show a
+      // real, verified public post without downloading/re-hosting it
+      // ourselves (no distribution rights to Instagram photos otherwise).
+      // cdninstagram.com serves the embed's own thumbnail/avatar images.
+      { protocol: "https", hostname: "*.cdninstagram.com" },
+      { protocol: "https", hostname: "instagram.com" },
+      { protocol: "https", hostname: "*.instagram.com" },
     ],
     // Every /_next/image request (every product/listing photo — all remote,
     // hosted on Supabase Storage) started failing in production with 402
@@ -70,6 +82,10 @@ const nextConfig = {
       "https://d1ak51zwgmtslz.cloudfront.net",
       "https://afb801.a-cdn.akinoncloud.com",
       "https://admin.flormar.ma",
+      // Instagram's official post embed — see the matching remotePatterns
+      // comment above.
+      "https://*.cdninstagram.com",
+      "https://*.instagram.com",
     ];
     // Uploaded videos (components/shared/video-gallery.tsx) are served from
     // Supabase Storage, a cross-origin host — with no media-src directive,
@@ -83,7 +99,11 @@ const nextConfig = {
     // redirect in a browser, not assumed — so frame-src must allow the
     // real final destination, not just the URL this app's own <iframe src>
     // literally specifies.
-    const frameSrc = ["'self'", "https://www.youtube-nocookie.com", "https://maps.google.com", "https://www.google.com"];
+    // instagram.com/{p,reel}/{id}/embed — Instagram's own official public
+    // post/reel embed iframe, loaded by instagram-post-embed.tsx. Public,
+    // no API key/auth required; this is Instagram serving its own content
+    // in its own frame, not us downloading/re-hosting the media.
+    const frameSrc = ["'self'", "https://www.youtube-nocookie.com", "https://maps.google.com", "https://www.google.com", "https://www.instagram.com"];
     // Dev-mode-only relaxation: Next.js's Fast Refresh / webpack HMR runtime
     // (next/dist/compiled/@next/react-refresh-utils) calls eval() to wrap
     // modules with source maps — with no 'unsafe-eval', that throws on

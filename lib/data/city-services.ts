@@ -101,16 +101,29 @@ async function _getCityServiceBySlug(slug: string, locale?: string): Promise<Cit
   const { data: row, error } = await supabase.from("city_services").select("*").eq("slug", slug).single();
   if (error || !row) return null;
 
-  const { data: reviewRows } = await supabase
-    .from("reviews")
-    .select("*, profiles(full_name)")
-    .eq("listing_type", "city_service")
-    .eq("listing_id", row.id)
-    .eq("status", "published")
-    .order("created_at", { ascending: false });
+  const [{ data: reviewRows }, { data: matchingCafe }] = await Promise.all([
+    supabase
+      .from("reviews")
+      .select("*, profiles(full_name)")
+      .eq("listing_type", "city_service")
+      .eq("listing_id", row.id)
+      .eq("status", "published")
+      .order("created_at", { ascending: false }),
+    // A city_services row's own real add-on vocabulary, when this business
+    // was split out from a `cafes` row sharing the same slug (the
+    // documented Lavender Café → Lavender Flowers pattern — see
+    // CityService.flowerAddons). Matched by slug only, never by name, so
+    // this never affects any other city_services row; a plain "not found"
+    // (the overwhelming majority of listings) just means no add-ons, not
+    // an error.
+    supabase.from("cafes").select("flower_addons").eq("slug", row.slug).maybeSingle(),
+  ]);
 
   const reviews = (reviewRows ?? []).map((r: any) => mapReview(r, r.profiles?.full_name ?? "Guest"));
-  return mapCityService(row, reviews, locale);
+  const flowerAddons = Array.isArray(matchingCafe?.flower_addons)
+    ? (matchingCafe.flower_addons as unknown as CityService["flowerAddons"])
+    : undefined;
+  return mapCityService(row, reviews, locale, flowerAddons);
 }
 
 /** Cached per-request: dedupes calls from generateMetadata + the page itself. */

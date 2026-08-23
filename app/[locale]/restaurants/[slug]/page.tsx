@@ -310,6 +310,7 @@ export default async function RestaurantDetailPage({
                     businessName: restaurant.name,
                     deliveryEnabled: Boolean(restaurant.productsDeliveryEnabled),
                     addons: [],
+                    whatsapp: restaurant.whatsapp,
                   }}
                   locale={locale}
                 />
