@@ -2880,6 +2880,8 @@
     "planBasic": "Basic",
     "planSilver": "Silver",
     "planGold": "Gold",
+    "planPremium": "Premium Partner",
+    "premiumPartnerBadge": "Premium Partner",
     "planPriceSuffix": "/month",
     "partnerStatusLabel": "Partner Status",
     "partnerStatusTrialBanner": "Your account is linked, but dashboard access hasn't been activated by the Go Hargeisa team yet.",

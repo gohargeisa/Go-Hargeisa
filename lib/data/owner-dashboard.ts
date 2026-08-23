@@ -99,7 +99,7 @@ export async function getOwnerPartnerOverview(): Promise<OwnerPartnerOverview> {
     ...toRows(cafes, "cafes", "cafe"),
   ];
 
-  const planCounts: Record<SubscriptionPlanId, number> = { basic: 0, silver: 0, gold: 0 };
+  const planCounts: Record<SubscriptionPlanId, number> = { basic: 0, silver: 0, gold: 0, premium: 0 };
   for (const p of partners) if (p.planTier) planCounts[p.planTier]++;
 
   return {

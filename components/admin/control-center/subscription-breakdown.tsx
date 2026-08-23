@@ -6,6 +6,7 @@ const PLAN_COLOR: Record<SubscriptionPlanId, string> = {
   basic: "bg-secondary-400",
   silver: "bg-slate-400",
   gold: "bg-primary",
+  premium: "bg-violet-600",
 };
 
 export function SubscriptionBreakdown({ planCounts }: { planCounts: Record<SubscriptionPlanId, number> }) {

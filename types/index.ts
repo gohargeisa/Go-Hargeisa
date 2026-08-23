@@ -471,7 +471,7 @@ export interface BusinessSubscription {
   id: string;
   listingType: BusinessListingType;
   listingId: string;
-  planTier: "basic" | "silver" | "gold";
+  planTier: "basic" | "silver" | "gold" | "premium";
   status: SubscriptionStatus;
   renewsAt?: string;
 }

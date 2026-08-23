@@ -2880,6 +2880,8 @@
     "planBasic": "أساسي",
     "planSilver": "فضي",
     "planGold": "ذهبي",
+    "planPremium": "شريك مميز",
+    "premiumPartnerBadge": "شريك مميز",
     "planPriceSuffix": "/شهريًا",
     "partnerStatusLabel": "حالة الشراكة",
     "partnerStatusTrialBanner": "تم ربط حسابك، لكن فريق Go Hargeisa لم يفعّل بعد الوصول إلى لوحة التحكم.",

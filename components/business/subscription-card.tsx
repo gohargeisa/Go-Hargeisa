@@ -15,7 +15,8 @@ export async function SubscriptionCard({
 }) {
   const t = await getTranslations("businessDashboard");
   const plan = SUBSCRIPTION_PLANS[subscription.planTier];
-  const planNameKey = { basic: "planBasic", silver: "planSilver", gold: "planGold" } as const;
+  const planNameKey = { basic: "planBasic", silver: "planSilver", gold: "planGold", premium: "planPremium" } as const;
+  const isPremium = subscription.planTier === "premium";
 
   return (
     <div className="rounded-2xl border border-ink/8 bg-white p-5 dark:border-white/10 dark:bg-white/[0.03]">
@@ -37,8 +38,14 @@ export async function SubscriptionCard({
             </span>
           </p>
         </div>
-        {subscription.planTier !== "basic" && (
-          <span className="rounded-full bg-primary-700 px-3 py-1 text-xs font-bold text-white">★</span>
+        {isPremium ? (
+          <span className="inline-flex items-center gap-1 rounded-full bg-violet-600 px-3 py-1 text-xs font-bold text-white">
+            ★ {t("premiumPartnerBadge")}
+          </span>
+        ) : (
+          subscription.planTier !== "basic" && (
+            <span className="rounded-full bg-primary-700 px-3 py-1 text-xs font-bold text-white">★</span>
+          )
         )}
       </div>
 
