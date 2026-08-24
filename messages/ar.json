@@ -311,6 +311,16 @@
     "visitEyebrow": "زورونا",
     "visitTitle": "تفضلوا بزيارتنا في هرجيسا"
   },
+  "flormarComingSoonBanner": {
+    "eyebrow": "قريبًا جدًا في Go Hargeisa",
+    "tagline": "تجربة جمال جديدة قادمة إلى <hargeisa>هرجيسا</hargeisa>.",
+    "featurePremium": "مستحضرات تجميل فاخرة",
+    "featureCollection": "مجموعة جديدة",
+    "featureBeauty": "جمال من أجلك",
+    "featureQuality": "جودة تثق بها",
+    "ctaTitle": "ترقبونا",
+    "ctaSubtitle": "شيء جميل في الطريق"
+  },
   "flormarPromoBanner": {
     "badge": "جديد على Go Hargeisa",
     "headline": "فلورمار هرجيسا",

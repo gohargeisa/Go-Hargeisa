@@ -311,6 +311,16 @@
     "visitEyebrow": "Visit Us",
     "visitTitle": "Come See Us in Hargeisa"
   },
+  "flormarComingSoonBanner": {
+    "eyebrow": "Coming Very Soon to Go Hargeisa",
+    "tagline": "A new beauty experience is coming to <hargeisa>Hargeisa</hargeisa>.",
+    "featurePremium": "Premium Cosmetics",
+    "featureCollection": "New Collection",
+    "featureBeauty": "Beauty For You",
+    "featureQuality": "Quality You Trust",
+    "ctaTitle": "Stay Tuned",
+    "ctaSubtitle": "Something beautiful is on the way"
+  },
   "flormarPromoBanner": {
     "badge": "New on Go Hargeisa",
     "headline": "Flormar Hargeisa",

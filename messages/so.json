@@ -311,6 +311,16 @@
     "visitEyebrow": "Na Booqo",
     "visitTitle": "Nagu Booqo Hargeysa"
   },
+  "flormarComingSoonBanner": {
+    "eyebrow": "Waxay dhawaan iman doontaa Go Hargeisa",
+    "tagline": "Waayo-aragnimo cusub oo qurux ah ayaa u socota <hargeisa>Hargeysa</hargeisa>.",
+    "featurePremium": "Alaabta Qurxinta Sare",
+    "featureCollection": "Ururin Cusub",
+    "featureBeauty": "Qurux Kuu Gaar Ah",
+    "featureQuality": "Tayo Aad Ku Kalsoonaan Karto",
+    "ctaTitle": "Sug",
+    "ctaSubtitle": "Wax qurux badan ayaa soo socda"
+  },
   "flormarPromoBanner": {
     "badge": "Cusub Go Hargeisa",
     "headline": "Flormar Hargeisa",

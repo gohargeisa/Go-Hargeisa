@@ -90,11 +90,11 @@ export default async function HomePage({
 
       <Hero locale={locale} />
 
-      <FlormarComingSoonBanner />
+      <FlormarComingSoonBanner locale={locale} />
 
       <FeaturedPartnersShowcase partners={featuredPartners} locale={locale} />
 
-      <AppPromotionSection locale={locale} />
+      <AppPromotionSection locale={locale} previewHotel={hotels[0]} />
 
       {featuredOffers.length > 0 && (
         <section className="py-16 md:py-24">

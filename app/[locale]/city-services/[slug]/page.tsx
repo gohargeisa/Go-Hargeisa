@@ -55,6 +55,8 @@ import { PartnerThemeScope } from "@/components/shared/partner/partner-theme-sco
 import { PartnerHeroBanner } from "@/components/shared/partner/partner-hero-banner";
 import { PinnacleStorefront } from "@/components/pinnacle/pinnacle-storefront";
 import { MobileBookingBar } from "@/components/shared/mobile-booking-bar";
+import { FlormarStorefront } from "@/components/flormar/flormar-storefront";
+import { PartnerPartnershipFooter } from "@/components/shared/partner/partner-partnership-footer";
 import type { CityService } from "@/types";
 
 // Pinnacle Perfumes & Cosmetics only — a real, published listing whose page
@@ -64,6 +66,19 @@ import type { CityService } from "@/types";
 // other city_service listing (hundreds of them) renders this page exactly
 // as before — see the early return in the component body.
 const PINNACLE_SLUG = "pinnacle-perfumes-and-cosmatics";
+
+// Flormar Hargeisa only — the same premium storefront already approved and
+// live-reviewed at the private /preview/flormar route. This branch reuses
+// the EXACT same FlormarStorefront component (source of truth for the
+// approved design), so the day this listing's `status` flips from 'draft'
+// to 'published' this route renders identically to the preview — no second
+// storefront implementation to keep in sync. Until that flip, RLS keeps
+// `city_services.status = 'draft'` invisible to this page's own PUBLIC,
+// RLS-respecting `products`/service fetch (same as any other unpublished
+// listing), so this branch is unreachable by the public today even though
+// the code path exists. Scoped by exact slug match; every other
+// city_service listing is unaffected.
+const FLORMAR_SLUG = "flormar-hargeisa";
 
 export const revalidate = 3600;
 
@@ -281,6 +296,25 @@ export default async function CityServiceDetailPage({
           ]}
         />
         <PinnacleStorefront theme={partnerTheme} service={service} products={products} locale={locale} />
+        <MobileBookingBar
+          listingType="city_service"
+          listingId={service.id}
+          name={service.name}
+          phone={service.phone ?? undefined}
+          whatsappFallback={partnerTheme.whatsapp}
+          locale={locale}
+          initiallyFavorited={isFavorited}
+        />
+      </PartnerThemeScope>
+    );
+  }
+
+  if (service.slug === FLORMAR_SLUG && partnerTheme) {
+    return (
+      <PartnerThemeScope theme={partnerTheme}>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
+        <FlormarStorefront theme={partnerTheme} locale={locale} products={products} />
+        <PartnerPartnershipFooter theme={partnerTheme} locale={locale} />
         <MobileBookingBar
           listingType="city_service"
           listingId={service.id}

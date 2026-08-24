@@ -47,6 +47,10 @@ export async function PinnacleStorefront({
 }) {
   const t = await getTranslations({ locale, namespace: "pinnacleStorefront" });
   const th = await getTranslations({ locale, namespace: "hotelDetail" });
+  // "getDirections" lives in the "listings" namespace, not "hotelDetail" —
+  // calling th("getDirections") rendered the raw key "hotelDetail.
+  // getDirections" to customers instead of translated text.
+  const tl = await getTranslations({ locale, namespace: "listings" });
 
   const whatsappNumber = theme.whatsapp ?? theme.phone;
   const productWhatsappHref = (productName: string) =>
@@ -116,7 +120,7 @@ export async function PinnacleStorefront({
             {service.mapsUrl && (
               <SecondaryButton href={service.mapsUrl} external size="lg" className="!border-white/40 !text-white hover:!border-white">
                 <MapPin size={16} aria-hidden="true" />
-                {th("getDirections")}
+                {tl("getDirections")}
               </SecondaryButton>
             )}
           </div>
@@ -316,7 +320,7 @@ export async function PinnacleStorefront({
               {service.mapsUrl && (
                 <SecondaryButton href={service.mapsUrl} external size="md">
                   <MapPin size={15} aria-hidden="true" />
-                  {th("getDirections")}
+                  {tl("getDirections")}
                 </SecondaryButton>
               )}
             </div>

@@ -48,7 +48,7 @@ export async function getHotels(options?: { q?: string; featuredOnly?: boolean; 
   return (data ?? []).map((row) => mapHotel(row));
 }
 
-async function _getHotelBySlug(slug: string): Promise<Hotel | null> {
+async function _getHotelBySlug(slug: string, locale?: string): Promise<Hotel | null> {
   if (!isSupabaseConfigured()) {
     return mockHotels.find((h) => h.slug === slug) ?? null;
   }
@@ -90,12 +90,16 @@ async function _getHotelBySlug(slug: string): Promise<Hotel | null> {
   );
   const rooms = (roomRows ?? []).map((r: any) => mapHotelRoom(r));
 
-  return mapHotel(hotel, {
-    reviews,
-    rooms,
-    restaurant: restaurantRow ? mapRestaurant(restaurantRow as any) : null,
-    cafe: cafeRow ? mapCafe(cafeRow as any) : null,
-  });
+  return mapHotel(
+    hotel,
+    {
+      reviews,
+      rooms,
+      restaurant: restaurantRow ? mapRestaurant(restaurantRow as any) : null,
+      cafe: cafeRow ? mapCafe(cafeRow as any) : null,
+    },
+    locale
+  );
 }
 
 /** Cached per-request: dedupes calls from generateMetadata + the page itself. */

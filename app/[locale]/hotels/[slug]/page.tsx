@@ -72,7 +72,7 @@ export async function generateMetadata({
 }: {
   params: { locale: Locale; slug: string };
 }): Promise<Metadata> {
-  const hotel = await getHotelBySlug(slug);
+  const hotel = await getHotelBySlug(slug, locale);
   if (!hotel) return {};
   return {
     title: `${hotel.name} — Hotel in Hargeisa`,
@@ -87,7 +87,7 @@ export default async function HotelDetailPage({
 }: {
   params: { locale: Locale; slug: string };
 }) {
-  const hotel = await getHotelBySlug(slug);
+  const hotel = await getHotelBySlug(slug, locale);
   if (!hotel) notFound();
   if (HOTELS_PRESENTATION_MODE && slug !== PRESENTATION_HOTEL_SLUG) notFound();
 

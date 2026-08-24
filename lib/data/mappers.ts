@@ -85,18 +85,22 @@ export function mapHotelRoom(row: HotelRoomRow & { room_images?: unknown }): Hot
 
 export function mapHotel(
   row: HotelRow,
-  extras: { reviews?: Review[]; rooms?: HotelRoom[]; restaurant?: Restaurant | null; cafe?: Cafe | null } = {}
+  extras: { reviews?: Review[]; rooms?: HotelRoom[]; restaurant?: Restaurant | null; cafe?: Cafe | null } = {},
+  locale?: string
 ): Hotel {
   const { reviews = [], rooms = [], restaurant = null, cafe = null } = extras;
   const openingHoursStructured = Array.isArray(row.opening_hours_structured)
     ? (row.opening_hours_structured as unknown as Hotel["openingHoursStructured"])
     : [];
+  const name = (locale === "ar" && row.name_ar) || (locale === "so" && row.name_so) || row.name;
+  const description =
+    (locale === "ar" && row.description_ar) || (locale === "so" && row.description_so) || row.description;
   return {
     id: row.id,
     slug: row.slug,
-    name: row.name,
+    name,
     shortDescription: row.short_description,
-    description: row.description,
+    description,
     coverImage: row.cover_image,
     gallery: toGallery(row.gallery),
     videos: toVideos(row.videos),
