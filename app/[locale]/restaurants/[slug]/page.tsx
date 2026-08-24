@@ -45,6 +45,21 @@ import { VideoGallery } from "@/components/shared/video-gallery";
 import { OpenStatusBadge } from "@/components/shared/open-status-badge";
 import { PartnerAcquisitionCta } from "@/components/shared/partner-acquisition-cta";
 import { formatDayRange, formatTime12h } from "@/lib/utils/opening-hours";
+import { InstagramPostEmbed } from "@/components/shared/instagram-post-embed";
+import { Instagram } from "lucide-react";
+
+// The Village Hargeisa (restaurants/the-village-hargeisa) only — a second,
+// independently-verified Instagram account for this specific business (see
+// app/[locale]/preview/the-village's own research notes, which found it
+// carries the same real logo and, via its linked Facebook Page, the same
+// verified phone number as the primary account already on
+// restaurant.socialInstagram) and one confirmed-public real post from that
+// primary account, embedded via Instagram's own official iframe — never
+// downloaded/re-hosted, so no photo-rights issue. Scoped by exact slug
+// match below; has zero effect on any other restaurant's page.
+const VILLAGE_HARGEISA_SLUG = "the-village-hargeisa";
+const VILLAGE_SECONDARY_INSTAGRAM = { handle: "@thevillagehargeisa", url: "https://www.instagram.com/thevillagehargeisa/" };
+const VILLAGE_FEATURED_INSTAGRAM_POST = "https://www.instagram.com/p/DI6RSkEMOaM/";
 
 // Public content changes infrequently; revalidate hourly instead of
 // rendering on every request (this page no longer reads cookies, so
@@ -106,7 +121,7 @@ export default async function RestaurantDetailPage({
     ...(restaurant.menuHighlights.length > 0 || restaurant.menuPdfUrl ? [{ id: "menu", label: td("menuHighlights") }] : []),
     ...(showProducts ? [{ id: "shop", label: td("orderOnline") }] : []),
     ...(restaurant.reservable ? [{ id: "reservation", label: t("reserveTable") }] : []),
-    ...(restaurant.gallery.length > 0 ? [{ id: "gallery", label: t("gallery") }] : []),
+    ...(restaurant.gallery.length > 0 || restaurant.slug === VILLAGE_HARGEISA_SLUG ? [{ id: "gallery", label: t("gallery") }] : []),
     ...(restaurant.videos && restaurant.videos.length > 0 ? [{ id: "videos", label: td("videoGallery") }] : []),
     ...(hasAmenities(restaurant.amenitiesV2) ? [{ id: "amenities", label: t("amenities") }] : []),
     { id: "reviews", label: t("reviews") },
@@ -341,7 +356,7 @@ export default async function RestaurantDetailPage({
             </Reveal>
           )}
 
-          {restaurant.gallery.length > 0 && (
+          {restaurant.gallery.length > 0 ? (
             <Reveal>
               <section id="gallery" aria-labelledby="photo-gallery-heading" className="scroll-mt-36">
                 <h2 id="photo-gallery-heading" className="mb-5 font-display text-2xl font-semibold">
@@ -354,7 +369,36 @@ export default async function RestaurantDetailPage({
                 />
               </section>
             </Reveal>
-          )}
+          ) : restaurant.slug === VILLAGE_HARGEISA_SLUG ? (
+            <Reveal>
+              <section id="gallery" aria-labelledby="photo-gallery-heading" className="scroll-mt-36">
+                <h2 id="photo-gallery-heading" className="mb-5 font-display text-2xl font-semibold">
+                  {th("photoGallery")}
+                </h2>
+                <div className="grid gap-6 sm:grid-cols-[1.1fr_0.9fr]">
+                  <InstagramPostEmbed url={VILLAGE_FEATURED_INSTAGRAM_POST} />
+                  <div className="flex flex-col gap-3">
+                    {[
+                      ...(restaurant.socialInstagram ? [{ handle: `@${new URL(restaurant.socialInstagram).pathname.replaceAll("/", "")}`, url: restaurant.socialInstagram }] : []),
+                      VILLAGE_SECONDARY_INSTAGRAM,
+                    ].map((acc) => (
+                      <a
+                        key={acc.handle}
+                        href={acc.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`${td("followInstagram")} — ${acc.handle}`}
+                        className="flex items-center gap-3 rounded-xl2 border border-ink/12 bg-white px-4 py-3.5 text-sm transition-colors hover:border-primary dark:border-white/15 dark:bg-white/[0.03]"
+                      >
+                        <Instagram size={18} className="shrink-0 text-ink/50 dark:text-sand/50" aria-hidden="true" />
+                        <span className="font-semibold">{acc.handle}</span>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            </Reveal>
+          ) : null}
 
           {restaurant.videos && restaurant.videos.length > 0 && (
             <Reveal>

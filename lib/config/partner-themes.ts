@@ -385,6 +385,56 @@ const GRAND_HAADI_THEME: PartnerTheme = {
   phone: "+252634622117",
 };
 
+/**
+ * Pinnacle Perfumes & Cosmetics (`city-services/pinnacle-perfumes-and-cosmatics`)
+ * — a real, live, published listing. Colors are a premium black/gold palette
+ * sampled from the business's own real logo (`logo_url`/`image` on the
+ * listing — a black perfume-bottle mark + "PINNACLE / PERFUMES & COSMETICS"
+ * wordmark on white; both DB image fields turned out, on direct visual
+ * inspection, to be the same logo mark, not distinct store photography).
+ * accent gold (#B08D4F) is a generic premium-fragrance-retail pairing for a
+ * black logo, not sampled from an asset that doesn't exist — same "not
+ * asserted as verified" caveat FLORMAR_THEME's accent carries above.
+ *
+ * Deliberately has NO `heroImage`: research against the business's own real
+ * corporate website (pinnacleperfumes.com — confirmed real via its Odoo
+ * shop/about/contact structure) and their Hargeisa DB record (`gallery: []`)
+ * found no interior/exterior/store photography for the Hargeisa branch
+ * anywhere — same "don't fabricate a hero from a logo-duplicate or stock
+ * photo" reasoning as MAMA_BABY_CARE_THEME above. The storefront's own hero
+ * section (components/pinnacle/pinnacle-storefront.tsx) uses a plain
+ * gradient + the real logo instead, same fallback treatment
+ * FlormarStorefront's own "no heroImage" branch already renders.
+ *
+ * phone is the listing's own real, verified Hargeisa number (`city_services
+ * .phone`) — NOT anything from pinnacleperfumes.com's Contact page, which
+ * is Tanzania-branch information (different phone, different address) for
+ * the same corporate brand. No dedicated `whatsapp` number was found on
+ * their real site or in this listing's DB row (`whatsapp: null`); the
+ * storefront falls back to this same verified phone number for WhatsApp
+ * deep links, the same `phone`-as-WhatsApp-fallback pattern already used by
+ * components/shared/mobile-booking-bar.tsx.
+ */
+const PINNACLE_THEME: PartnerTheme = {
+  slug: "pinnacle-perfumes-and-cosmatics",
+  enabled: true,
+  partnerName: "Pinnacle Perfumes & Cosmetics",
+  partnerLogo: "https://pvzuibidhfuizmaleznx.supabase.co/storage/v1/object/public/listing-images/join-requests/logos/a92a5a54-71cf-42fb-a00c-25e4482fe13d.jpeg",
+  primary: "#1A1A1A",
+  primaryRgb: "26 26 26",
+  primaryMid: "#4A4A4A",
+  primaryMidRgb: "74 74 74",
+  primaryStrong: "#0D0D0D",
+  primaryDeep: "#000000",
+  primarySoft: "#D4D4D4",
+  accent: "#B08D4F",
+  accentRgb: "176 141 79",
+  accentStrong: "#8C6F3E",
+  accentSoft: "#E4D3B0",
+  phone: "+252637653947",
+  whatsapp: "+252637653947",
+};
+
 const PARTNER_THEMES: Partial<Record<BusinessListingType, Record<string, PartnerTheme>>> = {
   cafe: {
     lavender: LAVENDER_THEME,
@@ -396,6 +446,7 @@ const PARTNER_THEMES: Partial<Record<BusinessListingType, Record<string, Partner
     lavender: LAVENDER_FLOWERS_THEME,
     "flormar-hargeisa": FLORMAR_THEME,
     "mama-baby-care": MAMA_BABY_CARE_THEME,
+    "pinnacle-perfumes-and-cosmatics": PINNACLE_THEME,
   },
   hotel: {
     "grand-haadi-hotel": GRAND_HAADI_THEME,

@@ -14,7 +14,7 @@ import { SocialLinks } from "@/components/shared/social-links";
 import { PartnerVideoShowcase } from "@/components/shared/partner/partner-video-showcase";
 import { Reveal } from "@/components/home/reveal";
 import { productLocalizedName } from "@/lib/utils/product-i18n";
-import { productCategoryLabel } from "@/lib/config/product-categories";
+import { productCategoryLabel, productGenderLabel } from "@/lib/config/product-categories";
 import { getProductPricing } from "@/lib/utils/product-pricing";
 import { useCart } from "@/lib/cart/cart-context";
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
@@ -206,6 +206,19 @@ export function FlormarStorefront({ theme, locale, products: catalogProducts }: 
   const [discoveryCategory, setDiscoveryCategory] = useState<Product["category"] | null>(null);
   const [discoveryQuery, setDiscoveryQuery] = useState("");
   const [discoverySort, setDiscoverySort] = useState<SortKey>("featured");
+  // Collection/gender filter — "All Products" plus one pill per gender value
+  // actually present in the real catalog (today that's just "women", since
+  // every Flormar product's gender is women — see the Unisex -> Women data
+  // fix). Computed from real data, not a hardcoded list, so it degrades to
+  // "All Products" only if the catalog ever has zero gendered products, and
+  // grows automatically (no code change) if men's/kids items are ever added
+  // — never a fake/empty pill for a gender nothing in the catalog carries.
+  const [discoveryGender, setDiscoveryGender] = useState<Product["gender"] | "all">("all");
+  const availableGenders = useMemo(() => {
+    const present = new Set<NonNullable<Product["gender"]>>();
+    for (const p of productsWithPricing) if (p.gender) present.add(p.gender);
+    return Array.from(present);
+  }, [productsWithPricing]);
 
   // Catalogs this size (1000+ products for Flormar) can't reasonably mount
   // every ProductCard/Image at once — that's a real DOM/network cost, not
@@ -217,7 +230,7 @@ export function FlormarStorefront({ theme, locale, products: catalogProducts }: 
   const [discoveryVisibleCount, setDiscoveryVisibleCount] = useState(DISCOVERY_PAGE_SIZE);
   useEffect(() => {
     setDiscoveryVisibleCount(DISCOVERY_PAGE_SIZE);
-  }, [discoveryTab, discoveryCategory, discoveryQuery, discoverySort]);
+  }, [discoveryTab, discoveryCategory, discoveryQuery, discoverySort, discoveryGender]);
 
   function goToCategory(category: Product["category"]) {
     setDiscoveryCategory(category);
@@ -227,6 +240,7 @@ export function FlormarStorefront({ theme, locale, products: catalogProducts }: 
 
   const discoveryResults = useMemo(() => {
     let list = productsWithPricing;
+    if (discoveryGender !== "all") list = list.filter((p) => p.gender === discoveryGender);
     if (discoveryCategory) list = list.filter((p) => p.category === discoveryCategory);
     if (discoveryTab === "new") list = [...list].sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt)).slice(0, 4);
     if (discoveryTab === "featured") list = list.filter((p) => p.isFeatured);
@@ -241,7 +255,7 @@ export function FlormarStorefront({ theme, locale, products: catalogProducts }: 
     else if (discoverySort === "priceHigh") sorted.sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
     else sorted.sort((a, b) => Number(b.isFeatured) - Number(a.isFeatured) || a.sortOrder - b.sortOrder);
     return sorted;
-  }, [productsWithPricing, discoveryCategory, discoveryTab, discoveryQuery, discoverySort, locale]);
+  }, [productsWithPricing, discoveryGender, discoveryCategory, discoveryTab, discoveryQuery, discoverySort, locale]);
 
   return (
     <>
@@ -762,6 +776,47 @@ export function FlormarStorefront({ theme, locale, products: catalogProducts }: 
               <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">{t("discoveryTitle")}</h2>
             </div>
           </Reveal>
+
+          {/* Collection filter — "All Products" plus one pill per gender the
+              real catalog actually carries (see availableGenders above).
+              Visually distinct (outline pill row, own label) from the
+              tab/sort row below it so it reads as "which collection" rather
+              than another sort tab. Never renders a pill for a gender with
+              zero matching products. */}
+          {availableGenders.length > 0 && (
+            <div className="mb-4 flex flex-wrap items-center justify-center gap-2">
+              <span className="me-1 text-xs font-bold uppercase tracking-wide text-ink/40 dark:text-sand/40">{t("collectionLabel")}</span>
+              <button
+                type="button"
+                onClick={() => setDiscoveryGender("all")}
+                aria-pressed={discoveryGender === "all"}
+                className="rounded-full border px-3.5 py-1.5 text-xs font-bold transition-colors"
+                style={
+                  discoveryGender === "all"
+                    ? { backgroundColor: theme.accentStrong, borderColor: theme.accentStrong, color: "#fff" }
+                    : { borderColor: `rgba(${theme.primaryRgb}, 0.25)`, color: theme.primaryStrong }
+                }
+              >
+                {t("tabAll")}
+              </button>
+              {availableGenders.map((g) => (
+                <button
+                  key={g}
+                  type="button"
+                  onClick={() => setDiscoveryGender(g)}
+                  aria-pressed={discoveryGender === g}
+                  className="rounded-full border px-3.5 py-1.5 text-xs font-bold transition-colors"
+                  style={
+                    discoveryGender === g
+                      ? { backgroundColor: theme.accentStrong, borderColor: theme.accentStrong, color: "#fff" }
+                      : { borderColor: `rgba(${theme.primaryRgb}, 0.25)`, color: theme.primaryStrong }
+                  }
+                >
+                  {productGenderLabel(g, locale)}
+                </button>
+              ))}
+            </div>
+          )}
 
           <div className="mb-6 flex flex-wrap items-center justify-center gap-2">
             {(["all", "new", "featured", "offers"] as DiscoveryTab[]).map((tab) => {

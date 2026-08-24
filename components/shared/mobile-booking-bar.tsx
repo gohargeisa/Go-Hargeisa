@@ -76,43 +76,56 @@ export function MobileBookingBar({
   }
 
   return (
-    <div
-      className="animate-fadeUp glass fixed inset-x-3 z-chrome flex items-center justify-around rounded-[1.75rem] px-2 py-2 shadow-premium lg:hidden"
-      style={{ bottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
-    >
-      <FavoriteButton
-        listingType={listingType}
-        listingId={listingId}
-        initiallyFavorited={initiallyFavorited}
-        locale={locale}
-        size={18}
-        showSpinner={false}
-        className={`${ICON_BUTTON_CLASS} disabled:opacity-60`}
-        addLabel={t("save")}
-        removeLabel={t("save")}
-      />
+    <>
+      {/* In-flow spacer, same breakpoint as the fixed bar below (lg:hidden)
+       * — the bar itself is `position: fixed` and out of flow, so without
+       * this the page's last section (map, cards, headings) can end up
+       * rendered underneath it with no way to scroll past. Height matches
+       * the bar's own footprint: h-11 (44px) icon buttons + py-2 (16px)
+       * padding = 60px, plus the bar's own `bottom` offset (the same
+       * `max(0.75rem, env(safe-area-inset-bottom))` formula, so Android
+       * with no safe-area-inset and notched iPhones both get exactly
+       * enough room), plus a little breathing room so content isn't
+       * flush against the bar. */}
+      <div aria-hidden="true" className="lg:hidden" style={{ height: "calc(4.75rem + max(0.75rem, env(safe-area-inset-bottom)))" }} />
+      <div
+        className="animate-fadeUp glass fixed inset-x-3 z-chrome flex items-center justify-around rounded-[1.75rem] px-2 py-2 shadow-premium lg:hidden"
+        style={{ bottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
+      >
+        <FavoriteButton
+          listingType={listingType}
+          listingId={listingId}
+          initiallyFavorited={initiallyFavorited}
+          locale={locale}
+          size={18}
+          showSpinner={false}
+          className={`${ICON_BUTTON_CLASS} disabled:opacity-60`}
+          addLabel={t("save")}
+          removeLabel={t("save")}
+        />
 
-      {phone && (
-        <a href={`tel:${phone}`} aria-label={`${t("call")} — ${name}`} className={ICON_BUTTON_CLASS}>
-          <Phone size={18} aria-hidden="true" />
-        </a>
-      )}
+        {phone && (
+          <a href={`tel:${phone}`} aria-label={`${t("call")} — ${name}`} className={ICON_BUTTON_CLASS}>
+            <Phone size={18} aria-hidden="true" />
+          </a>
+        )}
 
-      {whatsappHref && (
-        <a
-          href={whatsappHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={`${t("whatsapp")} — ${name}`}
-          className={`${ICON_BUTTON_CLASS} hover:!text-[#25D366]`}
-        >
-          <WhatsAppIcon size={18} aria-hidden="true" />
-        </a>
-      )}
+        {whatsappHref && (
+          <a
+            href={whatsappHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`${t("whatsapp")} — ${name}`}
+            className={`${ICON_BUTTON_CLASS} hover:!text-[#25D366]`}
+          >
+            <WhatsAppIcon size={18} aria-hidden="true" />
+          </a>
+        )}
 
-      <button type="button" onClick={onShare} aria-label={t("share")} className={ICON_BUTTON_CLASS}>
-        {copied ? <Check size={18} aria-hidden="true" /> : <Share2 size={18} aria-hidden="true" />}
-      </button>
-    </div>
+        <button type="button" onClick={onShare} aria-label={t("share")} className={ICON_BUTTON_CLASS}>
+          {copied ? <Check size={18} aria-hidden="true" /> : <Share2 size={18} aria-hidden="true" />}
+        </button>
+      </div>
+    </>
   );
 }

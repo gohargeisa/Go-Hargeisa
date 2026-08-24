@@ -50,6 +50,10 @@ const nextConfig = {
       { protocol: "https", hostname: "upload.wikimedia.org" },
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "images.pexels.com" },
+      // Pinnacle Perfumes & Cosmetics product photography, hotlinked from
+      // their own real corporate catalog site (pinnacleperfumes.com — an
+      // Odoo e-commerce store, confirmed live) — never downloaded/re-hosted.
+      { protocol: "https", hostname: "www.pinnacleperfumes.com" },
     ],
     // Every /_next/image request (every product/listing photo — all remote,
     // hosted on Supabase Storage) started failing in production with 402
@@ -100,6 +104,9 @@ const nextConfig = {
       "https://upload.wikimedia.org",
       "https://images.unsplash.com",
       "https://images.pexels.com",
+      // Pinnacle Perfumes & Cosmetics product photography — see the
+      // matching remotePatterns comment above.
+      "https://www.pinnacleperfumes.com",
     ];
     // Uploaded videos (components/shared/video-gallery.tsx) are served from
     // Supabase Storage, a cross-origin host — with no media-src directive,

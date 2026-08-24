@@ -17,6 +17,7 @@ import { SplashScreenOverlay } from "@/components/shared/splash-overlay";
 import { OfferCard } from "@/components/home/offer-card";
 import { AnnouncementBanner } from "@/components/home/announcement-banner";
 import { FeaturedPartnersShowcase } from "@/components/home/featured-partners-showcase";
+import { FlormarComingSoonBanner } from "@/components/home/flormar-coming-soon-banner";
 import { AppPromotionSection } from "@/components/home/app-promotion-section";
 import { ExploreHargeisaSection } from "@/components/home/explore-hargeisa-section";
 import { NewsletterSection } from "@/components/home/newsletter-section";
@@ -88,6 +89,8 @@ export default async function HomePage({
       {announcement && <AnnouncementBanner announcement={announcement} />}
 
       <Hero locale={locale} />
+
+      <FlormarComingSoonBanner />
 
       <FeaturedPartnersShowcase partners={featuredPartners} locale={locale} />
 

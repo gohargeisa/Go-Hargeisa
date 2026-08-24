@@ -53,7 +53,17 @@ import { getDocumentLabelGroup } from "@/lib/utils/business-document";
 import { getPartnerTheme } from "@/lib/config/partner-themes";
 import { PartnerThemeScope } from "@/components/shared/partner/partner-theme-scope";
 import { PartnerHeroBanner } from "@/components/shared/partner/partner-hero-banner";
+import { PinnacleStorefront } from "@/components/pinnacle/pinnacle-storefront";
+import { MobileBookingBar } from "@/components/shared/mobile-booking-bar";
 import type { CityService } from "@/types";
+
+// Pinnacle Perfumes & Cosmetics only — a real, published listing whose page
+// is transformed into a premium storefront (hero, brand story, categories,
+// no-price product catalog with WhatsApp CTAs, featured brands) instead of
+// the generic city-services layout below. Scoped by exact slug match; every
+// other city_service listing (hundreds of them) renders this page exactly
+// as before — see the early return in the component body.
+const PINNACLE_SLUG = "pinnacle-perfumes-and-cosmatics";
 
 export const revalidate = 3600;
 
@@ -259,6 +269,30 @@ export default async function CityServiceDetailPage({
       ? { aggregateRating: { "@type": "AggregateRating", ratingValue: service.rating, reviewCount: service.reviewCount } }
       : {}),
   };
+
+  if (service.slug === PINNACLE_SLUG && partnerTheme) {
+    return (
+      <PartnerThemeScope theme={partnerTheme}>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
+        <Breadcrumbs
+          items={[
+            { label: tNav("cityServices"), href: `/${locale}/city-services` },
+            { label: service.name, href: `/${locale}/city-services/${service.slug}` },
+          ]}
+        />
+        <PinnacleStorefront theme={partnerTheme} service={service} products={products} locale={locale} />
+        <MobileBookingBar
+          listingType="city_service"
+          listingId={service.id}
+          name={service.name}
+          phone={service.phone ?? undefined}
+          whatsappFallback={partnerTheme.whatsapp}
+          locale={locale}
+          initiallyFavorited={isFavorited}
+        />
+      </PartnerThemeScope>
+    );
+  }
 
   return (
     <PartnerThemeScope theme={partnerTheme}>
