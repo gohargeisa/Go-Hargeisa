@@ -73,7 +73,9 @@
     "featuredPartnersSubtitle": "أعمال محلية موثوقة وهي جزء رسمي من Go Hargeisa.",
 
     "appPromoEyebrow": "تطبيق Go Hargeisa",
-    "appPromoTitle": "Go Hargeisa في جيبك",
+    "appPromoTitle": "هرجيسا في جيبك، أينما كنت.",
+    "appCardBookingConfirmed": "تم تأكيد الحجز",
+    "appCardNewPlace": "تم اكتشاف مكان جديد",
     "appPromoDescription": "استكشف هرجيسا، اكتشف الأعمال المحلية، احجز واطلب وتواصل — أينما كنت.",
     "appHighlightExplore": "استكشف الفنادق والمطاعم والمقاهي والمعالم السياحية",
     "appHighlightOrder": "احجز واطلب مباشرة من هاتفك",
@@ -337,7 +339,9 @@
   "partnerFooter": {
     "heading": "بالشراكة مع",
     "lockupLabel": "Go Hargeisa × {partner}",
-    "logoPending": "الشعار الرسمي قيد الإضافة"
+    "logoPending": "الشعار الرسمي قيد الإضافة",
+    "premiumPartnerBadge": "شريك مميز",
+    "discoverOnGoHargeisa": "اكتشف هذا العمل على Go Hargeisa"
   },
   "footer": {
     "tagline": "نجعل هرجيسا أكثر ذكاءً — اكتشف الأماكن والخدمات والأنشطة التجارية والتجارب في جميع أنحاء المدينة.",

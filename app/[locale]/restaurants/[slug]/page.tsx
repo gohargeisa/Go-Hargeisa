@@ -43,7 +43,7 @@ import { AmenitiesSection, hasAmenities } from "@/components/shared/amenities-se
 import { SocialLinks } from "@/components/shared/social-links";
 import { VideoGallery } from "@/components/shared/video-gallery";
 import { OpenStatusBadge } from "@/components/shared/open-status-badge";
-import { PartnerAcquisitionCta } from "@/components/shared/partner-acquisition-cta";
+import { PartnerStatusSection } from "@/components/shared/partner/partner-status-section";
 import { formatDayRange, formatTime12h } from "@/lib/utils/opening-hours";
 import { InstagramPostEmbed } from "@/components/shared/instagram-post-embed";
 import { Instagram } from "lucide-react";
@@ -519,7 +519,13 @@ export default async function RestaurantDetailPage({
         </section>
       )}
 
-      <PartnerAcquisitionCta locale={locale} />
+      <PartnerStatusSection
+        isPartner={restaurant.isPartner}
+        partnerStatus={restaurant.partnerStatus}
+        logoUrl={restaurant.logo}
+        businessName={restaurant.name}
+        locale={locale}
+      />
 
       <MobileBookingBar
         listingType="restaurant"

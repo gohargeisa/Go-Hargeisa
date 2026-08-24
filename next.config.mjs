@@ -54,6 +54,22 @@ const nextConfig = {
       // their own real corporate catalog site (pinnacleperfumes.com — an
       // Odoo e-commerce store, confirmed live) — never downloaded/re-hosted.
       { protocol: "https", hostname: "www.pinnacleperfumes.com" },
+      // A handful of Pinnacle's own pinnacleperfumes.com product image URLs
+      // resolve (HTTP 200) to Odoo's own generic "no image" placeholder
+      // graphic rather than a real photo — that's the site's own data gap,
+      // not a broken link. For those specific SKUs only (verified byte-for-
+      // byte against the placeholder's own hash before ever touching this
+      // list), real authentic photos were hotlinked from each brand's own
+      // official site or a major authorized retailer, verified by name +
+      // brand + visible size text on the pack shot itself — never re-hosted.
+      { protocol: "https", hostname: "www.dkny.com" },
+      { protocol: "https", hostname: "fragrancemarket.com" },
+      // Multi-tenant e-commerce CDN (theperfumespot.com's own storefront
+      // platform) — allowlisted the same way *.cdninstagram.com already is
+      // below for the same reason: it's the real CDN serving the one
+      // specific, verified photo actually used, not a general-purpose
+      // catch-all for arbitrary BigCommerce merchants.
+      { protocol: "https", hostname: "cdn11.bigcommerce.com" },
     ],
     // Every /_next/image request (every product/listing photo — all remote,
     // hosted on Supabase Storage) started failing in production with 402
@@ -107,6 +123,9 @@ const nextConfig = {
       // Pinnacle Perfumes & Cosmetics product photography — see the
       // matching remotePatterns comment above.
       "https://www.pinnacleperfumes.com",
+      "https://www.dkny.com",
+      "https://fragrancemarket.com",
+      "https://cdn11.bigcommerce.com",
     ];
     // Uploaded videos (components/shared/video-gallery.tsx) are served from
     // Supabase Storage, a cross-origin host — with no media-src directive,

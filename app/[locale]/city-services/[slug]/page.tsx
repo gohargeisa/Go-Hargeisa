@@ -26,7 +26,7 @@ import { getCuratedProductImages } from "@/lib/config/curated-product-images";
 import { SERVICE_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import { VideoGallery } from "@/components/shared/video-gallery";
 import { AddToTripButton } from "@/components/shared/add-to-trip-button";
-import { PartnerAcquisitionCta } from "@/components/shared/partner-acquisition-cta";
+import { PartnerStatusSection } from "@/components/shared/partner/partner-status-section";
 import { isMedicalAppointmentCategory } from "@/lib/utils/appointment-domain";
 import { ClaimBusinessButton } from "@/components/shared/claim-business-button";
 import { AmenitiesSection, hasAmenities } from "@/components/shared/amenities-section";
@@ -296,6 +296,12 @@ export default async function CityServiceDetailPage({
           ]}
         />
         <PinnacleStorefront theme={partnerTheme} service={service} products={products} locale={locale} />
+        <PartnerStatusSection
+          isPartner={service.isPartner}
+          logoUrl={partnerTheme.partnerLogo}
+          businessName={service.name}
+          locale={locale}
+        />
         <MobileBookingBar
           listingType="city_service"
           listingId={service.id}
@@ -778,7 +784,12 @@ export default async function CityServiceDetailPage({
         </section>
       )}
 
-      <PartnerAcquisitionCta locale={locale} />
+      <PartnerStatusSection
+        isPartner={service.isPartner}
+        logoUrl={service.logoUrl}
+        businessName={service.name}
+        locale={locale}
+      />
     </PartnerThemeScope>
   );
 }

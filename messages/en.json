@@ -73,7 +73,9 @@
     "featuredPartnersSubtitle": "Trusted local businesses that are officially part of Go Hargeisa.",
 
     "appPromoEyebrow": "Go Hargeisa Mobile App",
-    "appPromoTitle": "Go Hargeisa in Your Pocket",
+    "appPromoTitle": "Your Hargeisa, In Your Pocket.",
+    "appCardBookingConfirmed": "Booking Confirmed",
+    "appCardNewPlace": "New Place Discovered",
     "appPromoDescription": "Explore Hargeisa, discover local businesses, book, order and connect — wherever you are.",
     "appHighlightExplore": "Explore hotels, restaurants, cafes and attractions",
     "appHighlightOrder": "Book and order directly from your phone",
@@ -337,7 +339,9 @@
   "partnerFooter": {
     "heading": "In Partnership",
     "lockupLabel": "Go Hargeisa × {partner}",
-    "logoPending": "Official logo pending"
+    "logoPending": "Official logo pending",
+    "premiumPartnerBadge": "Premium Partner",
+    "discoverOnGoHargeisa": "Discover this business on Go Hargeisa"
   },
   "footer": {
     "tagline": "Making Hargeisa smarter — discover places, services, businesses and experiences across the city.",

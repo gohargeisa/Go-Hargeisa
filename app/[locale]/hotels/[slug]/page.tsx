@@ -53,6 +53,7 @@ import {
 import { getPartnerTheme } from "@/lib/config/partner-themes";
 import { PartnerThemeScope } from "@/components/shared/partner/partner-theme-scope";
 import { PartnerHeroBanner } from "@/components/shared/partner/partner-hero-banner";
+import { PartnerStatusSection } from "@/components/shared/partner/partner-status-section";
 
 // Public content changes infrequently; revalidate hourly instead of
 // rendering on every request (this page no longer reads cookies, so
@@ -569,6 +570,14 @@ export default async function HotelDetailPage({
           </div>
         </section>
       )}
+
+      <PartnerStatusSection
+        isPartner={hotel.isPartner}
+        partnerStatus={hotel.partnerStatus}
+        logoUrl={hotel.logo}
+        businessName={hotel.name}
+        locale={locale}
+      />
 
       <MobileBookingBar
         listingType="hotel"

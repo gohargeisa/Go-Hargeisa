@@ -49,6 +49,7 @@ import { PartnerHeroBanner } from "@/components/shared/partner/partner-hero-bann
 import { PartnerPartnershipFooter } from "@/components/shared/partner/partner-partnership-footer";
 import { PremiumPartnerStory } from "@/components/shared/partner/premium-partner-story";
 import { PremiumPartnerCTA } from "@/components/shared/partner/premium-partner-cta";
+import { PartnerStatusSection } from "@/components/shared/partner/partner-status-section";
 
 // Public content changes infrequently; revalidate hourly instead of
 // rendering on every request (this page no longer reads cookies, so
@@ -647,7 +648,17 @@ export default async function CafeDetailPage({
         />
       )}
 
-      {partnerTheme && <PartnerPartnershipFooter theme={partnerTheme} locale={locale} />}
+      {partnerTheme ? (
+        <PartnerPartnershipFooter theme={partnerTheme} locale={locale} />
+      ) : (
+        <PartnerStatusSection
+          isPartner={cafe.isPartner}
+          partnerStatus={cafe.partnerStatus}
+          logoUrl={cafe.logo}
+          businessName={cafe.name}
+          locale={locale}
+        />
+      )}
 
       <MobileBookingBar
         listingType="cafe"

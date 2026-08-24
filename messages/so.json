@@ -73,7 +73,9 @@
     "featuredPartnersSubtitle": "Ganacsiyo maxalli ah oo la kalsoon yahay oo si rasmi ah uga tirsan Go Hargeisa.",
 
     "appPromoEyebrow": "Abka Go Hargeisa",
-    "appPromoTitle": "Go Hargeisa Jeebkaaga Ku Sii Jir",
+    "appPromoTitle": "Hargeysa, Jeebkaaga Ku Sii Jirta.",
+    "appCardBookingConfirmed": "Buugsigii Waa La Xaqiijiyay",
+    "appCardNewPlace": "Meel Cusub Ayaa La Helay",
     "appPromoDescription": "Sahmi Hargeysa, ka daalac ganacsiyada maxalliga ah, ballan qaado, dalbo oo la xiriir — meel kastoo aad joogtaba.",
     "appHighlightExplore": "Sahmi hudheelada, maqaayadaha, kafeyada iyo goobaha xiisaha leh",
     "appHighlightOrder": "Ka ballan qaado oo ka dalbo si toos ah taleefankaaga",
@@ -337,7 +339,9 @@
   "partnerFooter": {
     "heading": "Iskaashi La",
     "lockupLabel": "Go Hargeisa × {partner}",
-    "logoPending": "Sumadda rasmiga ah ee la sugayo"
+    "logoPending": "Sumadda rasmiga ah ee la sugayo",
+    "premiumPartnerBadge": "Iskaashi Premium ah",
+    "discoverOnGoHargeisa": "Ka daalac ganacsigan Go Hargeisa"
   },
   "footer": {
     "tagline": "Waxaan Hargeysa ka dhigaynaa mid ka caqli badan — hel meelaha, adeegyada, ganacsiyada iyo waaya-aragnimada ee magaalada oo dhan.",
