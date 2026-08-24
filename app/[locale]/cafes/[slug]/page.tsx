@@ -2,7 +2,7 @@ import { safeJsonLd } from "@/lib/utils/json-ld";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { FileText } from "lucide-react";
+import { FileText, Coffee, Wifi, Laptop, CalendarCheck } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
 import { getCafeBySlug, getAllCafeSlugs } from "@/lib/data/cafes";
@@ -47,11 +47,40 @@ import { getPartnerTheme } from "@/lib/config/partner-themes";
 import { PartnerThemeScope } from "@/components/shared/partner/partner-theme-scope";
 import { PartnerHeroBanner } from "@/components/shared/partner/partner-hero-banner";
 import { PartnerPartnershipFooter } from "@/components/shared/partner/partner-partnership-footer";
+import { PremiumPartnerStory } from "@/components/shared/partner/premium-partner-story";
+import { PremiumPartnerCTA } from "@/components/shared/partner/premium-partner-cta";
 
 // Public content changes infrequently; revalidate hourly instead of
 // rendering on every request (this page no longer reads cookies, so
 // it's eligible for static generation + ISR).
 export const revalidate = 3600;
+
+/**
+ * Lavender Café's real, verified display address — Alamada, not the generic
+ * "Hargeisa, Somaliland" currently stored in `cafes.address` (or the wrong
+ * neighborhood some other business might sit in). Supplied directly by the
+ * project owner and used for DISPLAY only, same override-without-a-DB-write
+ * pattern as FLOWERS_DISPLAY_NAME on the sibling Flowers page — no database
+ * column is touched by this constant.
+ *
+ * The café's own `cafes.google_maps_url` / `lat`/`lng` are deliberately NOT
+ * used for this listing: verified directly (the saved short link was
+ * followed and resolved) to point at the *Lavender Flowers* Google Maps
+ * Place — a real, pre-existing data bug where the café listing was set up
+ * with the flower shop's saved map link instead of its own. Rather than
+ * show a "Get Directions" button that sends a customer to a different
+ * business, or invent a coordinate/link that was never verified, the café's
+ * LocationMapSection call below passes no coords/mapsHref at all — it falls
+ * back to its own supported address-only presentation. See this file's
+ * LocationMapSection call and lib/utils/google-maps.ts for the shared
+ * "prefer a saved link over built one" resolver this deliberately bypasses
+ * for this one listing.
+ */
+const LAVENDER_CAFE_ADDRESS: Record<Locale, string> = {
+  en: "Alamada, Hargeisa, Somaliland — near Scandinavian Hotel",
+  ar: "علامادا، هرجيسا، صوماليلاند — بالقرب من فندق سكاندنافيا",
+  so: "Alamada, Hargeisa, Somaliland — u dhow Scandinavian Hotel",
+};
 
 export async function generateStaticParams() {
   const slugs = await getAllCafeSlugs();
@@ -316,12 +345,27 @@ export default async function CafeDetailPage({
       <div className="container-px mx-auto grid gap-10 pb-28 pt-10 lg:grid-cols-3 lg:gap-12 lg:pb-10">
         <div className="space-y-14 lg:col-span-2">
           <Reveal>
-            <section id="overview" aria-labelledby="overview-heading" className="scroll-mt-36">
-              <h2 id="overview-heading" className="mb-5 font-display text-2xl font-semibold">
-                {td("overview")}
-              </h2>
-              <p className="leading-relaxed text-ink/75 dark:text-sand/75">{cafe.description}</p>
-            </section>
+            {partnerTheme ? (
+              <PremiumPartnerStory
+                eyebrow={td("eyebrowAbout")}
+                title={td("overview")}
+                description={cafe.description}
+                highlightsLabel={td("whatWeOfferTitle")}
+                highlights={[
+                  ...(cafe.specialDrinks.length > 0 ? [{ icon: Coffee, label: td("coffeeSpecialties") }] : []),
+                  ...(cafe.wifi ? [{ icon: Wifi, label: td("freeWifi") }] : []),
+                  ...(cafe.workingSpace ? [{ icon: Laptop, label: td("workingSpace") }] : []),
+                  ...(cafe.reservable ? [{ icon: CalendarCheck, label: t("reserveTable") }] : []),
+                ]}
+              />
+            ) : (
+              <section id="overview" aria-labelledby="overview-heading" className="scroll-mt-36">
+                <h2 id="overview-heading" className="mb-5 font-display text-2xl font-semibold">
+                  {td("overview")}
+                </h2>
+                <p className="leading-relaxed text-ink/75 dark:text-sand/75">{cafe.description}</p>
+              </section>
+            )}
           </Reveal>
 
           {offers.length > 0 && (
@@ -471,7 +515,13 @@ export default async function CafeDetailPage({
             </Reveal>
           )}
 
-          <LocationMapSection locale={locale} address={cafe.address} coords={cafe.location} mapsHref={googleMapsHref} name={cafe.name} />
+          <LocationMapSection
+            locale={locale}
+            address={cafe.slug === "lavender" ? LAVENDER_CAFE_ADDRESS[locale] : cafe.address}
+            coords={cafe.slug === "lavender" ? undefined : cafe.location}
+            mapsHref={cafe.slug === "lavender" ? undefined : googleMapsHref}
+            name={cafe.name}
+          />
 
           <Reveal>
             <section id="reviews" aria-labelledby="reviews-heading" className="scroll-mt-36">
@@ -580,6 +630,21 @@ export default async function CafeDetailPage({
             </Reveal>
           </div>
         </section>
+      )}
+
+      {showProducts && partnerTheme && (
+        <PremiumPartnerCTA
+          theme={partnerTheme}
+          icon={Coffee}
+          badgeLabel={cafe.name}
+          title={td("exploreCafeCtaTitle")}
+          subtitle={td("exploreCafeCtaSubtitle")}
+          primaryHref="#shop"
+          primaryLabel={td("exploreCafeButton")}
+          secondaryHref={cafe.reservable ? "#reservation" : undefined}
+          secondaryLabel={cafe.reservable ? t("reserveTable") : undefined}
+          secondaryIcon={CalendarCheck}
+        />
       )}
 
       {partnerTheme && <PartnerPartnershipFooter theme={partnerTheme} locale={locale} />}

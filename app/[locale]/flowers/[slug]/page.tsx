@@ -30,10 +30,13 @@ import { toWhatsAppHref } from "@/lib/utils/whatsapp";
 import { Reveal } from "@/components/home/reveal";
 import { safeJsonLd } from "@/lib/utils/json-ld";
 import { MobileBookingBar } from "@/components/shared/mobile-booking-bar";
+import { AmenitiesSection, hasAmenities } from "@/components/shared/amenities-section";
 import { getPartnerTheme } from "@/lib/config/partner-themes";
 import { PartnerThemeScope } from "@/components/shared/partner/partner-theme-scope";
 import { PartnerHeroBanner } from "@/components/shared/partner/partner-hero-banner";
 import { PartnerPartnershipFooter } from "@/components/shared/partner/partner-partnership-footer";
+import { PremiumPartnerStory } from "@/components/shared/partner/premium-partner-story";
+import { PremiumPartnerCTA } from "@/components/shared/partner/premium-partner-cta";
 import { PartnerAcquisitionCta } from "@/components/shared/partner-acquisition-cta";
 
 // Same reasoning as every other public listing page in this codebase:
@@ -53,6 +56,28 @@ export const revalidate = 3600;
  * write happens anywhere in this file — the row itself is untouched.
  */
 const FLOWERS_DISPLAY_NAME = "Lavender Flowers";
+
+/**
+ * Lavender Flowers' real, verified display address — Jigjiga Yar /
+ * Degelsame iyo Indhobirta, cross-verified two independent ways: (1) this
+ * listing's own saved `city_services.maps_url` short link resolves to a
+ * real Google Maps Place literally titled "Lavender Flowers, Degelsame iyo
+ * Indhobirta ..., Jigjigayar ..., Hargeisa"; (2) the business's own public
+ * Instagram bio (@lavenderflowers_sl) separately states "Wadaad-diid Mall",
+ * matching the "Wadaad Diid" landmark named in that same resolved Maps
+ * listing. This listing has no generic `address` text column at all (see
+ * `city_services` schema — location here is coords/maps_url only), so the
+ * page previously fell back to showing the category label
+ * ("Flowers & Bouquets") as a fake "address" — replaced here with the real
+ * verified place name. `service.coords`/`googleMapsHref` below are already
+ * correct for this listing (confirmed by the same Maps resolution) and are
+ * left untouched.
+ */
+const LAVENDER_FLOWERS_ADDRESS: Record<Locale, string> = {
+  en: "Jigjiga Yar, Hargeisa, Somaliland — Degelsame iyo Indhobirta, near Wadaad-diid Mall",
+  ar: "جيجيغا يار، هرجيسا، صوماليلاند — ديغلسامي إيو إندوبيرتا، بالقرب من مول وداد ديد",
+  so: "Jigjiga Yar, Hargeisa, Somaliland — Degelsame iyo Indhobirta, u dhow Wadaad-diid Mall",
+};
 
 export async function generateMetadata({
   params: { locale, slug },
@@ -114,6 +139,11 @@ export default async function FlowersDetailPage({
   const showProducts = products.length > 0;
   const hasStructuredHours = !!service.openingHoursStructured && service.openingHoursStructured.length > 0;
   const hasHoursInfo = hasStructuredHours || service.is24Hours || service.temporarilyClosed || service.permanentlyClosed;
+  // Real, already-verified amenity tags on this listing (wifi, parking,
+  // prayer room, restrooms, CCTV, security, cash accepted) that were never
+  // actually surfaced on this page before — same shared AmenitiesSection
+  // every other listing type already uses, not a new feature.
+  const showAmenities = hasAmenities(service.amenitiesV2);
   const servicePhone = service.phone ?? sisterCafe?.phone;
   const serviceWhatsapp = service.whatsapp ?? sisterCafe?.whatsapp;
   const serviceWhatsappHref = serviceWhatsapp
@@ -137,6 +167,7 @@ export default async function FlowersDetailPage({
     ...(showProducts ? [{ id: "shop", label: td("orderOnline") }] : []),
     ...(hasHoursInfo ? [{ id: "hours", label: td("openingHoursByDay") }] : []),
     ...(galleryImages.length > 0 ? [{ id: "gallery", label: t("gallery") }] : []),
+    ...(showAmenities ? [{ id: "amenities", label: t("amenities") }] : []),
     { id: "location", label: td("location") },
     { id: "reviews", label: t("reviews") },
   ];
@@ -297,39 +328,18 @@ export default async function FlowersDetailPage({
         <div className="space-y-14 lg:col-span-2">
           {service.description && (
             <Reveal>
-              <section id="overview" aria-labelledby="overview-heading" className="scroll-mt-36">
-                <span className="mb-2 block text-xs font-bold uppercase tracking-[0.14em] text-primary">
-                  {td("eyebrowAbout")}
-                </span>
-                <h2 id="overview-heading" className="mb-5 font-display text-2xl font-semibold sm:text-3xl">
-                  {td("overview")}
-                </h2>
-                <p className="max-w-2xl text-lg leading-relaxed text-ink/75 dark:text-sand/75">{service.description}</p>
-
-                {/* Page-specific presentation only, built from facts already
-                   established elsewhere on this page (the real product
-                   catalog is 100% rose bouquets/arrangements/boxes; delivery
-                   is stated in the real description above) — not a new
-                   services system and not invented claims. */}
-                <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
-                  {[
-                    { icon: Flower2, label: td("offerFreshBouquets") },
-                    { icon: Gift, label: td("offerGiftFlowers") },
-                    { icon: Package, label: td("offerBoxedArrangements") },
-                    { icon: Truck, label: td("offerDelivery") },
-                  ].map(({ icon: Icon, label }) => (
-                    <div
-                      key={label}
-                      className="group flex flex-col items-center gap-3 rounded-xl2 border border-ink/8 bg-white p-5 text-center shadow-soft transition-all duration-300 ease-premium hover:-translate-y-1 hover:border-primary/25 hover:shadow-card dark:border-white/10 dark:bg-white/[0.03]"
-                    >
-                      <span className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-primary/15 to-primary/5 text-primary transition-transform duration-300 ease-premium group-hover:scale-110">
-                        <Icon size={19} aria-hidden="true" />
-                      </span>
-                      <span className="text-xs font-semibold leading-tight text-ink/75 dark:text-sand/75">{label}</span>
-                    </div>
-                  ))}
-                </div>
-              </section>
+              <PremiumPartnerStory
+                eyebrow={td("eyebrowAbout")}
+                title={td("overview")}
+                description={service.description}
+                highlightsLabel={td("whatWeOfferTitle")}
+                highlights={[
+                  { icon: Flower2, label: td("offerFreshBouquets") },
+                  { icon: Gift, label: td("offerGiftFlowers") },
+                  { icon: Package, label: td("offerBoxedArrangements") },
+                  { icon: Truck, label: td("offerDelivery") },
+                ]}
+              />
             </Reveal>
           )}
 
@@ -363,7 +373,18 @@ export default async function FlowersDetailPage({
             </Reveal>
           )}
 
-          <LocationMapSection locale={locale} address={td("flowersAndBouquets")} coords={service.coords} mapsHref={googleMapsHref} name={service.name} />
+          {showAmenities && (
+            <Reveal>
+              <section id="amenities" aria-labelledby="amenities-heading" className="scroll-mt-36">
+                <h2 id="amenities-heading" className="mb-5 font-display text-2xl font-semibold">
+                  {t("amenities")}
+                </h2>
+                <AmenitiesSection amenities={service.amenitiesV2} />
+              </section>
+            </Reveal>
+          )}
+
+          <LocationMapSection locale={locale} address={LAVENDER_FLOWERS_ADDRESS[locale]} coords={service.coords} mapsHref={googleMapsHref} name={service.name} />
 
           <Reveal>
             <section id="reviews" aria-labelledby="reviews-heading" className="scroll-mt-36">
@@ -415,57 +436,19 @@ export default async function FlowersDetailPage({
       </div>
 
       {showProducts && partnerTheme && (
-        <Reveal>
-          <section className="container-px mx-auto pb-4">
-            <div
-              className="relative overflow-hidden rounded-xl3 px-6 py-12 text-center text-white sm:px-10 sm:py-16"
-              style={{
-                background: `linear-gradient(135deg, ${partnerTheme.primaryDeep} 0%, ${partnerTheme.primary} 60%, ${partnerTheme.primaryMid} 100%)`,
-              }}
-            >
-              {/* Restrained decorative accents — soft radial blooms in the
-                 theme's own colors, not a generic stock gradient. */}
-              <div
-                className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full blur-3xl"
-                style={{ backgroundColor: `rgba(${partnerTheme.accentRgb}, 0.28)` }}
-                aria-hidden="true"
-              />
-              <div
-                className="pointer-events-none absolute -bottom-20 -left-10 h-56 w-56 rounded-full blur-3xl"
-                style={{ backgroundColor: `rgba(${partnerTheme.primaryMidRgb}, 0.35)` }}
-                aria-hidden="true"
-              />
-
-              <div className="relative">
-                <span
-                  className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-wide backdrop-blur-md"
-                  style={{ backgroundColor: "rgba(255,255,255,0.14)", border: `1px solid rgba(${partnerTheme.accentRgb}, 0.6)` }}
-                >
-                  <Flower2 size={12} aria-hidden="true" />
-                  {FLOWERS_DISPLAY_NAME}
-                </span>
-                <h2 className="mt-4 font-display text-2xl font-bold sm:text-3xl">{td("exploreFlowersCtaTitle")}</h2>
-                <p className="mx-auto mt-3 max-w-md text-sm text-white/85 sm:text-base">{td("exploreFlowersCtaSubtitle")}</p>
-                <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
-                  <PrimaryButton href="#shop" size="lg" className="!bg-white !text-primary-800 hover:!bg-white/90">
-                    {td("exploreFlowersButton")}
-                  </PrimaryButton>
-                  {serviceWhatsappHref && (
-                    <SecondaryButton
-                      href={serviceWhatsappHref}
-                      external
-                      size="lg"
-                      className="!border-white/40 !text-white hover:!border-white hover:!text-white"
-                    >
-                      <WhatsAppIcon size={16} aria-hidden="true" />
-                      {th("whatsapp")}
-                    </SecondaryButton>
-                  )}
-                </div>
-              </div>
-            </div>
-          </section>
-        </Reveal>
+        <PremiumPartnerCTA
+          theme={partnerTheme}
+          icon={Flower2}
+          badgeLabel={FLOWERS_DISPLAY_NAME}
+          title={td("exploreFlowersCtaTitle")}
+          subtitle={td("exploreFlowersCtaSubtitle")}
+          primaryHref="#shop"
+          primaryLabel={td("exploreFlowersButton")}
+          secondaryHref={serviceWhatsappHref}
+          secondaryLabel={serviceWhatsappHref ? th("whatsapp") : undefined}
+          secondaryIcon={WhatsAppIcon}
+          secondaryExternal
+        />
       )}
 
       {/* Polished sister-listing cross-link — the two businesses share one
@@ -502,9 +485,14 @@ export default async function FlowersDetailPage({
         </section>
       )}
 
-      {partnerTheme && <PartnerPartnershipFooter theme={partnerTheme} locale={locale} />}
-
+      {/* Site-wide "become a partner" CTA — generic Go Hargeisa content, not
+          specific to this partner — deliberately placed BEFORE the
+          Partnership Footer so the branded "Go Hargeisa × Lavender Flowers"
+          section stays the true final, page-specific section before the
+          site footer (see partner-partnership-footer.tsx). */}
       <PartnerAcquisitionCta locale={locale} />
+
+      {partnerTheme && <PartnerPartnershipFooter theme={partnerTheme} locale={locale} />}
 
       <MobileBookingBar
         listingType="city_service"
