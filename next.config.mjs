@@ -41,6 +41,15 @@ const nextConfig = {
       { protocol: "https", hostname: "*.cdninstagram.com" },
       { protocol: "https", hostname: "instagram.com" },
       { protocol: "https", hostname: "*.instagram.com" },
+      // Illustrative stock photography for The Village Hargeisa's menu
+      // (lib/data/village-menu-seed.ts) — openly-licensed dish photos
+      // standing in until real photography exists, sourced only from these
+      // three hosts (see that file's header and scripts/update-village-
+      // menu-images.ts). Direct hotlinks to each service's own CDN, never
+      // downloaded/re-hosted.
+      { protocol: "https", hostname: "upload.wikimedia.org" },
+      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "images.pexels.com" },
     ],
     // Every /_next/image request (every product/listing photo — all remote,
     // hosted on Supabase Storage) started failing in production with 402
@@ -86,6 +95,11 @@ const nextConfig = {
       // comment above.
       "https://*.cdninstagram.com",
       "https://*.instagram.com",
+      // Village Hargeisa menu stock photography — see the matching
+      // remotePatterns comment above.
+      "https://upload.wikimedia.org",
+      "https://images.unsplash.com",
+      "https://images.pexels.com",
     ];
     // Uploaded videos (components/shared/video-gallery.tsx) are served from
     // Supabase Storage, a cross-origin host — with no media-src directive,
