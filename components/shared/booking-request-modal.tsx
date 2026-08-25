@@ -63,7 +63,7 @@ export function BookingRequestModal({
         tabIndex={-1}
         className="relative flex h-full w-full flex-col overflow-hidden bg-white shadow-2xl dark:bg-ink sm:h-auto sm:max-h-[92vh] sm:max-w-4xl sm:rounded-3xl"
       >
-        <div className="flex items-start justify-between gap-4 border-b border-ink/8 p-5 dark:border-white/10 sm:p-6">
+        <div className="flex items-start justify-between gap-4 border-b border-ink/8 px-5 pb-5 pt-[max(1.25rem,env(safe-area-inset-top))] dark:border-white/10 sm:p-6">
           <p className="font-display text-2xl font-extrabold tracking-tight">{t("modalTitle")}</p>
           <button
             type="button"

@@ -121,7 +121,7 @@ export function ProductDetailModal({
         tabIndex={-1}
         className="relative flex h-full w-full flex-col overflow-y-auto bg-white shadow-2xl dark:bg-ink sm:h-auto sm:max-h-[85vh] sm:max-w-md sm:rounded-3xl"
       >
-        <div className="flex items-start justify-between gap-4 border-b border-ink/8 p-4 dark:border-white/10 sm:p-5">
+        <div className="flex items-start justify-between gap-4 border-b border-ink/8 px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))] dark:border-white/10 sm:p-5">
           <p className="font-display text-lg font-extrabold tracking-tight">{name}</p>
           <button
             type="button"

@@ -54,7 +54,7 @@ export function TableReservationModal({
         tabIndex={-1}
         className="relative flex h-full w-full flex-col overflow-hidden bg-white shadow-2xl dark:bg-ink sm:h-auto sm:max-h-[92vh] sm:max-w-lg sm:rounded-3xl"
       >
-        <div className="flex items-start justify-between gap-4 border-b border-ink/8 p-5 dark:border-white/10">
+        <div className="flex items-start justify-between gap-4 border-b border-ink/8 px-5 pb-5 pt-[max(1.25rem,env(safe-area-inset-top))] dark:border-white/10">
           <div>
             <p className="font-display text-xl font-extrabold tracking-tight">{t("modalTitle")}</p>
             <p className="mt-0.5 text-sm text-ink/60 dark:text-sand/60">{businessName}</p>

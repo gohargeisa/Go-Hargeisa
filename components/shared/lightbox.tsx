@@ -181,7 +181,7 @@ export function Lightbox({
       tabIndex={-1}
       className="fixed inset-0 z-lightbox flex flex-col bg-black/95 backdrop-blur-sm"
     >
-      <div className="flex items-center justify-between px-4 py-3 text-white sm:px-6">
+      <div className="flex items-center justify-between px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] text-white sm:px-6">
         <p className="text-sm text-white/70">
           {index + 1} / {slides.length}
         </p>
