@@ -95,20 +95,28 @@ function useLocalWishlist() {
  *
  * `products` is real, database-driven data (see lib/data/flormar-preview.ts)
  * reconciled against the authoritative Excel catalog — not a static mock
- * import. The listing row itself is `status: 'draft'`, which is what
+ * import. The listing row itself is `status: 'archived'`, which is what
  * actually keeps this private (RLS), independent of this route also being
  * unlinked/noindex (see page.tsx's robots/sitemap notes).
  */
-type FlormarPreviewT = ReturnType<typeof useTranslations<"flormarPreview">>;
-const CATEGORY_LABELS: Record<(typeof FLORMAR_CATEGORY_TILES)[number]["labelKey"], (t: FlormarPreviewT) => string> = {
-  makeup: (t) => t("categoryMakeup"),
-  skincare: (t) => t("categorySkincare"),
-  nails: (t) => t("categoryNails"),
-  accessories: (t) => t("categoryAccessories"),
-};
+// Category tile labels now come from productCategoryLabel() (same EN/AR/SO
+// map every other product-category picker on the site uses) rather than a
+// separate flormarPreview.categoryX translation per tile — see
+// lib/config/flormar-categories.ts's doc comment for why.
+function categoryTileLabel(category: Product["category"], locale: Locale): string {
+  return productCategoryLabel(category, locale) ?? category ?? "";
+}
 
 type SortKey = "featured" | "newest" | "priceLow" | "priceHigh";
 type DiscoveryTab = "all" | "new" | "featured" | "offers";
+
+// Case-insensitive startsWith: the real catalog's Name column isn't
+// consistently cased ("Bb Cream Bbcr", "Baked Blush-on Bbl Np") — a
+// case-sensitive match against "BB Cream"/"Baked Blush-On" silently missed
+// those rows even though the product genuinely matches that styling look.
+function nameStartsWith(name: string, prefix: string): boolean {
+  return name.toLowerCase().startsWith(prefix.toLowerCase());
+}
 
 const EDIT_LOOKS: { key: string; titleKey: "lookEveryday" | "lookSoftGlam" | "lookDefinedEyes"; descriptionKey: "lookEverydayBody" | "lookSoftGlamBody" | "lookDefinedEyesBody"; match: string[] }[] = [
   { key: "everyday-glow", titleKey: "lookEveryday", descriptionKey: "lookEverydayBody", match: ["BB Cream", "Baked Powder"] },
@@ -207,11 +215,13 @@ export function FlormarStorefront({ theme, locale, products: catalogProducts }: 
   const [discoveryQuery, setDiscoveryQuery] = useState("");
   const [discoverySort, setDiscoverySort] = useState<SortKey>("featured");
   // Collection/gender filter — "All Products" plus one pill per gender value
-  // actually present in the real catalog (today that's just "women", since
-  // every Flormar product's gender is women — see the Unisex -> Women data
-  // fix). Computed from real data, not a hardcoded list, so it degrades to
-  // "All Products" only if the catalog ever has zero gendered products, and
-  // grows automatically (no code change) if men's/kids items are ever added
+  // actually present in the real catalog. The source catalog has no gender
+  // column at all, so every product's `gender` is currently null and this
+  // pill row simply doesn't render (see the `availableGenders.length > 0`
+  // guard below) rather than showing an invented gender. Computed from real
+  // data, not a hardcoded list, so it degrades to "All Products" only if the
+  // catalog ever has zero gendered products, and grows automatically (no
+  // code change) if men's/kids items are ever added
   // — never a fake/empty pill for a gender nothing in the catalog carries.
   const [discoveryGender, setDiscoveryGender] = useState<Product["gender"] | "all">("all");
   const availableGenders = useMemo(() => {
@@ -291,8 +301,15 @@ export function FlormarStorefront({ theme, locale, products: catalogProducts }: 
             {theme.partnerLogo && <Image src={theme.partnerLogo} alt={theme.partnerName} fill sizes="96px" className="object-contain" priority />}
           </button>
 
+          {/* Compact quick-nav: the 4 highest-volume/most-shopped categories
+              only (Eyes/Face/Lips/Nail Care) — same 4-item density this row
+              has always had, now pointing at real categories instead of a
+              stale one with zero matching products. The full 8-category set
+              (FLORMAR_CATEGORY_TILES) is still fully browsable via the Shop
+              by Category grid below, so nothing is unreachable — this row
+              is a convenience shortcut, not the only way to filter. */}
           <nav aria-label={t("categoryTitle")} className="hidden shrink-0 items-center gap-1 lg:flex">
-            {FLORMAR_CATEGORY_TILES.map((cat) => (
+            {FLORMAR_CATEGORY_TILES.slice(0, 4).map((cat) => (
               <button
                 key={cat.key}
                 type="button"
@@ -305,7 +322,7 @@ export function FlormarStorefront({ theme, locale, products: catalogProducts }: 
                     : { color: "inherit" }
                 }
               >
-                {CATEGORY_LABELS[cat.labelKey](t)}
+                {categoryTileLabel(cat.category, locale)}
               </button>
             ))}
           </nav>
@@ -667,7 +684,7 @@ export function FlormarStorefront({ theme, locale, products: catalogProducts }: 
                     <div className="absolute inset-0 bg-[#FBF7F4]" aria-hidden="true" />
                     <Image
                       src={categoryImages.get(cat.key)!}
-                      alt={CATEGORY_LABELS[cat.labelKey](t)}
+                      alt={categoryTileLabel(cat.category, locale)}
                       fill
                       sizes="(max-width: 639px) 50vw, 25vw"
                       className="object-contain p-6 transition-transform duration-500 group-hover:scale-105"
@@ -677,11 +694,11 @@ export function FlormarStorefront({ theme, locale, products: catalogProducts }: 
                       aria-hidden="true"
                       className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-3 pt-10"
                     >
-                      <p className="font-display text-sm font-bold text-white">{CATEGORY_LABELS[cat.labelKey](t)}</p>
+                      <p className="font-display text-sm font-bold text-white">{categoryTileLabel(cat.category, locale)}</p>
                     </div>
                   </>
                 ) : (
-                  <PartnerProductPlaceholder name={CATEGORY_LABELS[cat.labelKey](t)} theme={theme} />
+                  <PartnerProductPlaceholder name={categoryTileLabel(cat.category, locale)} theme={theme} />
                 )}
               </button>
             ))}
@@ -714,7 +731,7 @@ export function FlormarStorefront({ theme, locale, products: catalogProducts }: 
           </Reveal>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {EDIT_LOOKS.map((look) => {
-              const matches = productsWithPricing.filter((p) => look.match.some((prefix) => p.name.startsWith(prefix)));
+              const matches = productsWithPricing.filter((p) => look.match.some((prefix) => nameStartsWith(p.name, prefix)));
               if (matches.length === 0) return null;
               const lookImage = matches.find((p) => p.image)?.image;
               return (
@@ -849,7 +866,7 @@ export function FlormarStorefront({ theme, locale, products: catalogProducts }: 
                 className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold"
                 style={{ backgroundColor: `rgba(${theme.primaryRgb}, 0.1)`, color: theme.primaryStrong }}
               >
-                {CATEGORY_LABELS[FLORMAR_CATEGORY_TILES.find((c) => c.category === discoveryCategory)?.labelKey ?? "makeup"](t)}
+                {discoveryCategory ? categoryTileLabel(discoveryCategory, locale) : ""}
                 <span aria-hidden="true">×</span>
               </button>
             </div>

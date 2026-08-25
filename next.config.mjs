@@ -33,6 +33,14 @@ const nextConfig = {
       // found for the "4 In 1 Complete Care" product photo (barcode-matched
       // against the authoritative Odoo catalog export before use).
       { protocol: "https", hostname: "flormarbh.com" },
+      // Additional official/authorized Flormar regional-storefront and
+      // retailer CDNs matched by SKU against the authoritative catalog
+      // during the 2026-08 full-catalog reimport (scripts/import-flormar-catalog.mjs)
+      // — same "official source only, never re-hosted" standard as above.
+      { protocol: "https", hostname: "flormar.sa" },
+      { protocol: "https", hostname: "flormarlebanon.com" },
+      { protocol: "https", hostname: "www.caretobeauty.com" },
+      { protocol: "https", hostname: "cdn.netmeds.tech" },
       // Instagram's own official post embed (instagram.com/p/{id}/embed) —
       // used by components/the-village/instagram-post-embed.tsx to show a
       // real, verified public post without downloading/re-hosting it

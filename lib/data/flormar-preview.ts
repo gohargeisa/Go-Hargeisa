@@ -5,7 +5,7 @@ import type { CityService, Product } from "@/types";
 /**
  * Flormar Hargeisa's private preview (app/[locale]/preview/flormar) reads a
  * REAL, database-driven `city_services` row + `products` rows — not mock
- * data — but that row is deliberately `status: 'draft'`, which the
+ * data — but that row is deliberately `status: 'archived'`, which the
  * standard RLS policies (see 20260823000002_universal_cart_orders.sql)
  * make invisible to every public/anon read path: listing grids, search,
  * sitemap, nearby-places, even the generic `/city-services/[slug]` route
