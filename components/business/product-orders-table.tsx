@@ -165,6 +165,12 @@ function OrderCard({
               <span className="text-ink/60 dark:text-sand/60">{tp("subtotalLabel")}</span>
               <span>${order.subtotal.toFixed(2)}</span>
             </div>
+            {!!order.taxAmount && (
+              <div className="flex items-center justify-between text-ink/60 dark:text-sand/60">
+                <span>{order.taxRate ? tp("taxLabel", { rate: (order.taxRate * 100).toFixed(order.taxRate * 100 % 1 === 0 ? 0 : 1) }) : tp("taxLabelZero")}</span>
+                <span>${order.taxAmount.toFixed(2)}</span>
+              </div>
+            )}
             {order.total != null && order.total !== order.subtotal && (
               <div className="flex items-center justify-between font-bold">
                 <span>{tp("totalLabel")}</span>

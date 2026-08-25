@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 import { useCart } from "@/lib/cart/cart-context";
 import { submitCartOrder } from "@/lib/actions/product-orders";
-import { lineTotal } from "@/lib/cart/types";
+import { getCartTaxPreview, type CartTaxPreview } from "@/lib/actions/tax";
+import { lineTotal, taxableLineAmount } from "@/lib/cart/types";
 import { FLOWER_SPECIALTY_CATEGORIES } from "@/lib/config/product-categories";
 
 const inputClass =
@@ -40,8 +41,38 @@ export function CheckoutForm({ locale }: { locale: string }) {
   const [notes, setNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [taxPreview, setTaxPreview] = useState<CartTaxPreview | null>(null);
 
   const deliveryEnabled = cart.cart.deliveryEnabled;
+  const baseSubtotal = cart.cart.items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0);
+  const extrasTotal = cart.subtotal - baseSubtotal;
+
+  // Preview only — a display convenience so the shopper sees the same tax
+  // figure the order will actually be charged before submitting. The RPC
+  // (submit_cart_order) independently re-resolves and re-calculates tax
+  // server-side at order time; nothing computed here is sent to or trusted
+  // by it. Re-fetches whenever the cart's taxable composition changes
+  // (items/quantities/add-ons), not on every render.
+  useEffect(() => {
+    if (!cart.cart.listingType || !cart.cart.listingId || cart.cart.items.length === 0) {
+      setTaxPreview(null);
+      return;
+    }
+    let cancelled = false;
+    getCartTaxPreview(
+      cart.cart.listingType,
+      cart.cart.listingId,
+      cart.cart.items.map((i) => ({ productId: i.productId, category: i.category, taxableLineAmount: taxableLineAmount(i) }))
+    ).then((preview) => {
+      if (!cancelled) setTaxPreview(preview);
+    });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cart.cart.listingType, cart.cart.listingId, JSON.stringify(cart.cart.items)]);
+
+  const grandTotal = cart.subtotal + (taxPreview?.totalAdjustment ?? 0);
   // Recipient/occasion/card-message only make sense for gift-oriented items
   // (flowers, cakes, gift sets, plants — the same FLOWER_SPECIALTY_CATEGORIES
   // list the addon/pricing system already uses, not a new taxonomy). A
@@ -125,9 +156,29 @@ export function CheckoutForm({ locale }: { locale: string }) {
             )}
           </div>
         ))}
-        <div className="mt-2 flex items-center justify-between border-t border-ink/8 pt-2 font-bold dark:border-white/10">
-          <span>{t("totalLabel")}</span>
-          <span>${cart.subtotal.toFixed(2)}</span>
+        <div className="mt-2 space-y-1 border-t border-ink/8 pt-2 text-sm dark:border-white/10">
+          <div className="flex items-center justify-between text-ink/70 dark:text-sand/70">
+            <span>{t("subtotalLabel")}</span>
+            <span>${baseSubtotal.toFixed(2)}</span>
+          </div>
+          {extrasTotal > 0 && (
+            <div className="flex items-center justify-between text-ink/70 dark:text-sand/70">
+              <span>{t("extrasLabel")}</span>
+              <span>${extrasTotal.toFixed(2)}</span>
+            </div>
+          )}
+          <div className="flex items-center justify-between text-ink/70 dark:text-sand/70">
+            <span>
+              {taxPreview && taxPreview.taxAmount > 0
+                ? t("taxLabel", { rate: (taxPreview.effectiveRate * 100).toFixed(taxPreview.effectiveRate * 100 % 1 === 0 ? 0 : 1) })
+                : t("taxLabelZero")}
+            </span>
+            <span>${(taxPreview?.taxAmount ?? 0).toFixed(2)}</span>
+          </div>
+          <div className="flex items-center justify-between border-t border-ink/8 pt-1.5 font-bold dark:border-white/10">
+            <span>{t("totalLabel")}</span>
+            <span>${grandTotal.toFixed(2)}</span>
+          </div>
         </div>
       </div>
 

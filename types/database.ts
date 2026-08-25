@@ -292,6 +292,8 @@ type ProductOrderRow = {
   status: "pending" | "confirmed" | "preparing" | "ready" | "out_for_delivery" | "cancelled" | "completed";
   order_reference: string; user_id: string | null;
   created_at: string; updated_at: string;
+  taxable_subtotal: number; tax_rate: number; tax_amount: number;
+  tax_is_inclusive: boolean; tax_policy_label: string | null;
 };
 
 type OrderItemRow = {
@@ -303,6 +305,7 @@ type OrderItemRow = {
   variant_id: string | null; variant_name: string | null; variant_sku: string | null;
   selected_options: Json | null;
   created_at: string;
+  is_tax_exempt: boolean;
 };
 
 type ProductRow = {
@@ -336,6 +339,23 @@ type ProductOptionRow = {
   required: boolean; price_delta: number; choices: Json;
   placeholder: string | null; placeholder_ar: string | null; placeholder_so: string | null;
   max_length: number | null; sort_order: number; created_at: string;
+};
+
+type ProductAddonRow = {
+  id: string; product_id: string;
+  name: string; name_ar: string | null; name_so: string | null;
+  price: number; is_taxable: boolean; is_active: boolean;
+  sort_order: number; created_at: string; updated_at: string;
+};
+
+type TaxPolicyScope = "global" | "category" | "business" | "product";
+
+type TaxPolicyRow = {
+  id: string; scope: TaxPolicyScope;
+  category: string | null; listing_type: string | null; listing_id: string | null; product_id: string | null;
+  rate: number; is_exempt: boolean; is_inclusive: boolean; is_enabled: boolean;
+  label: string | null; effective_from: string; effective_until: string | null;
+  created_by: string | null; created_at: string; updated_at: string;
 };
 
 type DepartmentRow = {
@@ -584,6 +604,8 @@ export type Database = {
       products: Table<ProductRow>;
       product_variants: Table<ProductVariantRow>;
       product_options: Table<ProductOptionRow>;
+      product_addons: Table<ProductAddonRow>;
+      tax_policies: Table<TaxPolicyRow>;
       departments: Table<DepartmentRow>;
       doctors: Table<DoctorRow>;
       appointments: Table<AppointmentRow>;

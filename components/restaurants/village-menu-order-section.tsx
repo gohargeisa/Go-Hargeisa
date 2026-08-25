@@ -16,7 +16,7 @@ import type { Product, ProductCategory } from "@/types";
 // resizing to shrink an off-screen image's bytes) — a smaller initial page
 // means fewer full-size photos fetched before any interaction, without
 // changing what "Load More" reveals or how many products exist.
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 6;
 
 function pillClass(active: boolean) {
   return `shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
@@ -145,7 +145,7 @@ export function VillageMenuOrderSection({
                 business={business}
                 locale={locale}
                 onOpenDetails={() => setSelected(product)}
-                variant="premium"
+                variant="compact"
               />
             ))}
           </div>

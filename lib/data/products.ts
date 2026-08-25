@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { createPublicClient } from "@/lib/supabase/public";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
-import { mapProduct, mapProductVariant, mapProductOption } from "./mappers";
+import { mapProduct, mapProductVariant, mapProductOption, mapProductAddon } from "./mappers";
 import type { Product, OrderableListingType } from "@/types";
 
 /**
@@ -107,13 +107,44 @@ async function _getProductsForListing(
     }
   }
 
+  // Same chunked pattern as variants/options above — most listings (no
+  // configured add-ons yet) pay for one small empty query per chunk. See
+  // supabase/migrations/20260906000001_tax_system_and_product_addons.sql —
+  // genuinely per-product, unlike the older cafes.flower_addons vocabulary
+  // (lib/cart/product-addons.ts merges both).
+  const addonsByProduct = new Map<string, Product["addons"]>();
+  for (const ids of idChunks) {
+    const { data: addonRows, error: addonError } = await supabase
+      .from("product_addons")
+      .select("*")
+      .in("product_id", ids)
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true });
+
+    if (addonError) {
+      // Missing table (migration not applied yet in this environment) or
+      // any other read failure degrades to "no add-ons" for this chunk
+      // rather than failing the whole product list.
+      if (process.env.NODE_ENV === "development") console.error("getProductsForListing (addons):", addonError.message);
+      continue;
+    }
+    for (const row of addonRows ?? []) {
+      const addon = mapProductAddon(row);
+      const list = addonsByProduct.get(addon.productId!) ?? [];
+      list.push(addon);
+      addonsByProduct.set(addon.productId!, list);
+    }
+  }
+
   return products.map((p) => {
     const variants = variantsByProduct.get(p.id);
     const options = optionsByProduct.get(p.id);
+    const addons = addonsByProduct.get(p.id);
     return {
       ...p,
       ...(variants && variants.length > 0 ? { variants } : null),
       ...(options && options.length > 0 ? { options } : null),
+      ...(addons && addons.length > 0 ? { addons } : null),
     };
   });
 }

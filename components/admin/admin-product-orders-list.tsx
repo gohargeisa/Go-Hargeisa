@@ -289,6 +289,12 @@ export function AdminProductOrdersList({ orders }: { orders: AdminProductOrder[]
                               <span className="text-ink/60 dark:text-sand/60">{tp("subtotalLabel")}</span>
                               <span>${o.subtotal.toFixed(2)}</span>
                             </div>
+                            {!!o.taxAmount && (
+                              <div className="flex items-center justify-between text-ink/60 dark:text-sand/60">
+                                <span>{o.taxRate ? tp("taxLabel", { rate: (o.taxRate * 100).toFixed(o.taxRate * 100 % 1 === 0 ? 0 : 1) }) : tp("taxLabelZero")}</span>
+                                <span>${o.taxAmount.toFixed(2)}</span>
+                              </div>
+                            )}
                             {/* No delivery-fee column exists on product_orders today — subtotal
                                 and total are currently always equal. Both are still shown as
                                 distinct rows (rather than collapsing one into the other) so this

@@ -44,8 +44,13 @@ export function ProductCard({
    * (nothing cropped), sale-price/discount-badge support driven by
    * `getProductPricing`, and an optional wishlist heart. Built for
    * Flormar's catalog but generic (no Flormar-specific markup), so any
-   * future partner that wants this presentation can opt in the same way. */
-  variant?: "default" | "premium";
+   * future partner that wants this presentation can opt in the same way.
+   * "compact" is opt-in — a shorter 4:3 cover-crop tile (not the tall
+   * aspect-square + padded-canvas "premium" look) with a single-line name
+   * and no separate category line, built for a dense, scannable food-menu
+   * grid (The Village). Same quick-add/addon-routing/pricing logic as every
+   * other variant — only the layout differs. */
+  variant?: "default" | "premium" | "compact";
   /** premium variant only. Omit both to hide the wishlist heart entirely —
    * every caller that doesn't pass them keeps the exact same card it has
    * today. */
@@ -174,6 +179,69 @@ export function ProductCard({
                 className="inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-[#25D366] py-2 text-xs font-bold text-white transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-[#1FB855] active:scale-95"
               >
                 <WhatsAppIcon size={14} aria-hidden="true" /> {t("askForPrice")}
+              </a>
+            ) : null}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (variant === "compact") {
+    return (
+      <div className="group flex h-full flex-col overflow-hidden rounded-xl border border-ink/8 bg-white transition-shadow duration-200 hover:shadow-soft dark:border-white/10 dark:bg-white/[0.03]">
+        <button
+          type="button"
+          onClick={onOpenDetails}
+          aria-label={`${name} — ${t("viewDetails")}`}
+          className="relative block aspect-[4/3] w-full shrink-0 overflow-hidden text-start focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        >
+          <ProductImage
+            src={product.image}
+            alt={name}
+            sizes="(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 20vw"
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            fallback={imageFallback}
+          />
+          {!product.isAvailable && (
+            <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-black/60 py-0.5 text-center text-[11px] font-bold text-white">
+              {t("unavailable")}
+            </span>
+          )}
+        </button>
+
+        <div className="flex flex-1 flex-col p-2.5">
+          <button type="button" onClick={onOpenDetails} className="block flex-1 text-start">
+            <p className="truncate text-[13px] font-semibold leading-snug">{name}</p>
+            <p className="mt-0.5 text-[13px] font-bold text-ink dark:text-white">
+              {product.price != null ? `${product.price.toFixed(2)} ${product.currency}` : t("priceOnRequest")}
+            </p>
+          </button>
+
+          <div className="mt-2">
+            {canQuickAdd ? (
+              <AddToCartButton
+                business={business}
+                product={{ productId: product.id, name: product.name, nameAr: product.nameAr, nameSo: product.nameSo, image: product.image, unitPrice: product.price!, category: product.category }}
+                className="inline-flex w-full items-center justify-center gap-1 rounded-full bg-primary-700 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-primary-800 active:scale-95"
+              />
+            ) : product.isAvailable && product.price != null ? (
+              <button
+                type="button"
+                onClick={onOpenDetails}
+                className="inline-flex w-full items-center justify-center gap-1 rounded-full border border-primary/30 py-1.5 text-[11px] font-semibold text-primary-700 transition-colors hover:bg-primary/8 dark:text-primary-300"
+              >
+                <ShoppingCart size={11} aria-hidden="true" /> {t("viewDetails")}
+              </button>
+            ) : askForPriceHref ? (
+              <a
+                href={askForPriceHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex w-full items-center justify-center gap-1 rounded-full bg-[#25D366] py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-[#1FB855] active:scale-95"
+              >
+                <WhatsAppIcon size={11} aria-hidden="true" /> {t("askForPrice")}
               </a>
             ) : null}
           </div>

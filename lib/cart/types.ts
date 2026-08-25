@@ -87,6 +87,19 @@ export function lineTotal(item: CartItem): number {
   return item.unitPrice * item.quantity + addonsTotal + optionsTotal;
 }
 
+/** Same shape as lineTotal, but add-ons explicitly marked non-taxable
+ * (ProductAddon.isTaxable === false) are excluded — this is the taxable
+ * BASE a policy's rate applies to, matching taxable_subtotal in
+ * submit_cart_order() (see supabase/migrations/
+ * 20260906000001_tax_system_and_product_addons.sql). Selected options are
+ * always taxable (they're product-price adjustments, not separate items —
+ * no per-option exemption exists). */
+export function taxableLineAmount(item: CartItem): number {
+  const taxableAddonsTotal = item.addons.filter((a) => a.isTaxable !== false).reduce((sum, a) => sum + a.price, 0);
+  const optionsTotal = (item.selectedOptions ?? []).reduce((sum, o) => sum + o.priceDelta, 0);
+  return item.unitPrice * item.quantity + taxableAddonsTotal + optionsTotal;
+}
+
 export function cartSubtotal(items: CartItem[]): number {
   return items.reduce((sum, item) => sum + lineTotal(item), 0);
 }

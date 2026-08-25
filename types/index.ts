@@ -211,6 +211,14 @@ export interface Product {
    * same as every product before this system existed. See ProductOption
    * below and supabase/migrations/20260829000001_product_options.sql. */
   options?: ProductOption[];
+  /** Genuine per-product add-ons (Cheese, Olives, Oil, ...) — owned by
+   * exactly one product, same "absent/empty means nothing to configure"
+   * contract as `variants`/`options`. See ProductAddon below and
+   * supabase/migrations/20260906000001_tax_system_and_product_addons.sql.
+   * Distinct from the older `AddToCartBusiness.addons` (cafes.flower_addons,
+   * a business-wide vocabulary still used for Lavender's flower line) —
+   * lib/cart/product-addons.ts merges both into one list a caller reads. */
+  addons?: ProductAddon[];
 }
 
 /** One purchasable variant of a Product (a specific shade/finish/size).
@@ -977,15 +985,68 @@ export interface Cafe {
 }
 
 /** An order-time modifier a customer can add to a product order (e.g.
- * "Extra Gypsophila +$3", "Message Card" at $0). Lives on the parent
- * listing (currently only cafes.flower_addons), resolved server-side by id
- * in submit_product_order — the client never sends a price. */
+ * "Extra Gypsophila +$3", "Cheese +$2", "Message Card" at $0). Two sources
+ * populate this same shape: the newer, genuinely per-product
+ * `product_addons` table (`productId` set) and the older business-wide
+ * `cafes.flower_addons` vocabulary (`productId` absent — see Cafe.
+ * flowerAddons). Resolved server-side by id in submit_cart_order — the
+ * client never sends a price. */
 export interface ProductAddon {
   id: string;
   name: string;
   nameAr?: string;
   nameSo?: string;
   price: number;
+  /** Set only for a product_addons-sourced row — absent for the legacy
+   * cafes.flower_addons ones, which aren't tied to one product. */
+  productId?: string;
+  /** Whether this add-on's price is included in the order's taxable base —
+   * defaults to true (the common case) when a source doesn't set it (the
+   * legacy flower_addons vocabulary has no concept of this and is always
+   * taxable). See lib/tax/. */
+  isTaxable?: boolean;
+}
+
+/** One configured tax rule (supabase/migrations/
+ * 20260906000001_tax_system_and_product_addons.sql's `tax_policies` table).
+ * See lib/tax/resolve.ts for how a set of these resolves to one effective
+ * rate for a given order line — this type is the raw row shape, not the
+ * resolved result (see EffectiveTaxPolicy for that). */
+export interface TaxPolicy {
+  id: string;
+  scope: "global" | "category" | "business" | "product";
+  /** Set only when scope = 'category' — either a categories.slug (city_
+   * service/service verticals) or a literal listing_type ('restaurant',
+   * 'cafe') for the two types with no categories table of their own. */
+  category?: string;
+  /** Set only when scope = 'business'. */
+  listingType?: OrderableListingType;
+  listingId?: string;
+  /** Set only when scope = 'product'. */
+  productId?: string;
+  /** Fraction, e.g. 0.05 = 5%. Ignored when isExempt is true. */
+  rate: number;
+  isExempt: boolean;
+  isInclusive: boolean;
+  isEnabled: boolean;
+  label?: string;
+  effectiveFrom: string;
+  effectiveUntil?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** The single resolved outcome of applying the tax hierarchy to one order
+ * line — what resolve_tax_policy() returns in SQL and what
+ * lib/tax/resolve.ts mirrors in TypeScript for client-side preview. Never
+ * itself the source of truth for a placed order (submit_cart_order's own
+ * SQL-side resolution is) — see lib/tax/README's note on keeping the two
+ * in sync. */
+export interface EffectiveTaxPolicy {
+  rate: number;
+  isExempt: boolean;
+  isInclusive: boolean;
+  label?: string;
 }
 
 /** One reservation request for a restaurant or cafe table — same
@@ -1028,6 +1089,9 @@ export interface OrderItem {
   addons: ProductAddon[];
   addonsTotal: number;
   lineTotal: number;
+  /** Snapshotted at order time — whether this specific line's tax policy
+   * resolved to an explicit exemption. See lib/tax/. */
+  isTaxExempt?: boolean;
   /** Present only when this line was a specific shade/finish/size — see
    * ProductVariant. Was previously captured client-side but silently
    * dropped when read back (mapOrderItem never read these columns) — now
@@ -1059,6 +1123,23 @@ export interface ProductOrder {
   customerPhone: string;
   subtotal: number;
   total?: number;
+  /** Everything below is a one-time snapshot written by submit_cart_order
+   * at order time — a later tax_policies change never retroactively
+   * touches an existing order. See lib/tax/ and
+   * supabase/migrations/20260906000001_tax_system_and_product_addons.sql. */
+  /** Sum of taxable line amounts (base price × qty + taxable add-ons only)
+   * — excludes exempt lines and non-taxable add-ons. */
+  taxableSubtotal?: number;
+  /** Effective/blended rate actually applied, as a fraction (0.05 = 5%) —
+   * display only; the authoritative number is `taxAmount`. */
+  taxRate?: number;
+  taxAmount?: number;
+  /** true when the resolved policy was tax-inclusive — `taxAmount` is then
+   * the portion already inside `total`/`subtotal`, not an addition to it. */
+  taxIsInclusive?: boolean;
+  /** The applicable policy's own admin-facing label at order time, if any
+   * (e.g. "Somaliland VAT"). Null when no policy applied (0% order). */
+  taxPolicyLabel?: string;
   fulfillmentType: "delivery" | "pickup";
   deliveryAddress?: string;
   preferredDate?: string;

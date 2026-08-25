@@ -6,7 +6,7 @@ import {
   Inbox, LayoutGrid, Building2, Users, Star, Flag, BarChart3, Settings,
   Hotel, UtensilsCrossed, Coffee, Landmark, CalendarDays, Newspaper,
   CalendarCheck, Handshake, Megaphone, Tag, Bell, Stethoscope, ShoppingBag,
-  ShieldCheck,
+  ShieldCheck, Percent,
 } from "lucide-react";
 import type { SidebarNavItem } from "@/components/shared/sidebar-nav";
 import type { Locale } from "@/lib/i18n/config";
@@ -48,6 +48,7 @@ export function useAdminNavItems(locale: Locale): { primaryItems: SidebarNavItem
     { key: "reports", label: t("reportsNav"), icon: Flag, href: `/${locale}/admin/claims`, isActive: isActive("/admin/claims") },
     { key: "analytics", label: t("analyticsNav"), icon: BarChart3, href: `/${locale}/admin`, isActive: isActive("/admin", true) },
     { key: "settings", label: t("settingsNav"), icon: Settings, href: `/${locale}/admin/settings`, isActive: isActive("/admin/settings") },
+    { key: "taxPolicy", label: t("taxPolicyNav"), icon: Percent, href: `/${locale}/admin/tax-policy`, isActive: isActive("/admin/tax-policy") },
   ];
 
   const moreItems: SidebarNavItem[] = [

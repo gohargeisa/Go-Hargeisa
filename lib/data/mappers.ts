@@ -1,5 +1,5 @@
 import type { Database } from "@/types/database";
-import type { Hotel, HotelRoom, Restaurant, Cafe, Service, Attraction, EventItem, CityService, Article, GalleryImage, Review, BusinessOffer, MediaVideo, Notification, NotificationCategory, NotificationSeverity, Category, Product, ProductVariant, ProductOption, Department, Doctor, Appointment, OpeningHoursGroup, RestaurantMenuItem, TableReservation, ProductOrder, OrderItem, BusinessAccessGrant, BusinessPermissions, TeamPlatformPermissionsGrant, PlatformPermissions, HonoraryMember } from "@/types";
+import type { Hotel, HotelRoom, Restaurant, Cafe, Service, Attraction, EventItem, CityService, Article, GalleryImage, Review, BusinessOffer, MediaVideo, Notification, NotificationCategory, NotificationSeverity, Category, Product, ProductVariant, ProductOption, ProductAddon, TaxPolicy, Department, Doctor, Appointment, OpeningHoursGroup, RestaurantMenuItem, TableReservation, ProductOrder, OrderItem, BusinessAccessGrant, BusinessPermissions, TeamPlatformPermissionsGrant, PlatformPermissions, HonoraryMember, OrderableListingType } from "@/types";
 
 type HotelRow = Database["public"]["Tables"]["hotels"]["Row"];
 type HotelRoomRow = Database["public"]["Tables"]["hotel_rooms"]["Row"];
@@ -15,6 +15,8 @@ type CategoryRow = Database["public"]["Tables"]["categories"]["Row"];
 type ProductRow = Database["public"]["Tables"]["products"]["Row"];
 type ProductVariantRow = Database["public"]["Tables"]["product_variants"]["Row"];
 type ProductOptionRow = Database["public"]["Tables"]["product_options"]["Row"];
+type ProductAddonRow = Database["public"]["Tables"]["product_addons"]["Row"];
+type TaxPolicyRow = Database["public"]["Tables"]["tax_policies"]["Row"];
 type DepartmentRow = Database["public"]["Tables"]["departments"]["Row"];
 type DoctorRow = Database["public"]["Tables"]["doctors"]["Row"];
 type AppointmentRow = Database["public"]["Tables"]["appointments"]["Row"];
@@ -316,6 +318,7 @@ export function mapOrderItem(row: OrderItemRow): OrderItem {
     selectedOptions: Array.isArray(row.selected_options)
       ? (row.selected_options as unknown as OrderItem["selectedOptions"])
       : undefined,
+    isTaxExempt: row.is_tax_exempt,
   };
 }
 
@@ -344,6 +347,11 @@ export function mapProductOrder(row: ProductOrderRow & { order_items?: OrderItem
     orderReference: row.order_reference,
     userId: row.user_id ?? undefined,
     createdAt: row.created_at,
+    taxableSubtotal: row.taxable_subtotal != null ? Number(row.taxable_subtotal) : undefined,
+    taxRate: row.tax_rate != null ? Number(row.tax_rate) : undefined,
+    taxAmount: row.tax_amount != null ? Number(row.tax_amount) : undefined,
+    taxIsInclusive: row.tax_is_inclusive ?? undefined,
+    taxPolicyLabel: row.tax_policy_label ?? undefined,
   };
 }
 
@@ -790,6 +798,38 @@ export function mapProductOption(row: ProductOptionRow): ProductOption {
     placeholderSo: row.placeholder_so ?? undefined,
     maxLength: row.max_length ?? undefined,
     sortOrder: row.sort_order,
+  };
+}
+
+export function mapProductAddon(row: ProductAddonRow): ProductAddon {
+  return {
+    id: row.id,
+    productId: row.product_id,
+    name: row.name,
+    nameAr: row.name_ar ?? undefined,
+    nameSo: row.name_so ?? undefined,
+    price: Number(row.price),
+    isTaxable: row.is_taxable,
+  };
+}
+
+export function mapTaxPolicy(row: TaxPolicyRow): TaxPolicy {
+  return {
+    id: row.id,
+    scope: row.scope,
+    category: row.category ?? undefined,
+    listingType: (row.listing_type as OrderableListingType | null) ?? undefined,
+    listingId: row.listing_id ?? undefined,
+    productId: row.product_id ?? undefined,
+    rate: Number(row.rate),
+    isExempt: row.is_exempt,
+    isInclusive: row.is_inclusive,
+    isEnabled: row.is_enabled,
+    label: row.label ?? undefined,
+    effectiveFrom: row.effective_from,
+    effectiveUntil: row.effective_until ?? undefined,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
   };
 }
 
