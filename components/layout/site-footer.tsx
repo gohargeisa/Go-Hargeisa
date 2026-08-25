@@ -77,7 +77,7 @@ export function SiteFooter({
       <div className="container-px mx-auto grid grid-cols-2 gap-x-8 gap-y-12 py-16 md:grid-cols-5 md:gap-x-10 lg:gap-x-12 lg:py-20">
         <div className="col-span-2">
           <Image
-            src={logoUrl || "/images/logo.png"}
+            src={logoUrl || "/images/logo-web.png"}
             alt="Go Hargeisa"
             width={165}
             height={110}

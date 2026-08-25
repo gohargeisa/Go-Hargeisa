@@ -169,10 +169,10 @@ export function SiteHeader({
         <div className="flex shrink-0 items-center">
           <Link href={`/${locale}`}>
             <Image
-              src={logoUrl || "/images/logo.png"}
+              src={logoUrl || "/images/logo-web.png"}
               alt="Go Hargeisa"
-              width={1536}
-              height={1024}
+              width={700}
+              height={467}
               priority
               className="h-12 sm:h-20 md:h-24 w-auto object-contain"
             />

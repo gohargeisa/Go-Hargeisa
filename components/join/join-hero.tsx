@@ -39,10 +39,10 @@ export async function JoinHero({ locale }: { locale: Locale }) {
       <div className="container-px relative mx-auto max-w-4xl text-center">
         <Reveal>
           <Image
-            src="/images/logo.png"
+            src="/images/logo-web.png"
             alt="Go Hargeisa"
-            width={1536}
-            height={1024}
+            width={700}
+            height={467}
             className="mx-auto h-16 w-auto object-contain sm:h-20 md:h-24"
           />
         </Reveal>

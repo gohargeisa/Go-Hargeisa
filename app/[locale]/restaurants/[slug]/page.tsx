@@ -21,6 +21,7 @@ import { BusinessPhotoGallery } from "@/components/shared/business-photo-gallery
 import { RestaurantMenuSection } from "@/components/shared/restaurant-menu-section";
 import { getProductsForListing } from "@/lib/data/products";
 import { ProductsSection } from "@/components/shared/products-section";
+import { VillageMenuOrderSection } from "@/components/restaurants/village-menu-order-section";
 import { RESTAURANT_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import { RestaurantBookingCard } from "@/components/shared/restaurant-booking-card";
 import { TableReservationButton } from "@/components/shared/table-reservation-button";
@@ -114,12 +115,27 @@ export default async function RestaurantDetailPage({
   const hasStructuredHours = restaurant.openingHoursStructured && restaurant.openingHoursStructured.length > 0;
   const hasHoursInfo = hasStructuredHours || restaurant.is24Hours || restaurant.temporarilyClosed || restaurant.permanentlyClosed;
 
+  // The Village Hargeisa only: verified directly against the live DB that
+  // `restaurant.menuHighlights` (the legacy `restaurants.menu` JSON) and
+  // `restaurantProducts` (the real, cart-integrated `products` table) are
+  // literal duplicates here — same 60 dishes, same names/images/prices.
+  // Collapses the two separate sections/tabs into one "Menu & Order
+  // Online" reading only the real products table — see
+  // components/restaurants/village-menu-order-section.tsx's own header for
+  // the full reasoning. Every other restaurant keeps rendering both
+  // sections exactly as before; this changes nothing for them.
+  const isVillageHargeisa = restaurant.slug === VILLAGE_HARGEISA_SLUG;
+  const showUnifiedVillageMenu = isVillageHargeisa && showProducts;
+  const showLegacyMenuSection = !showUnifiedVillageMenu && (restaurant.menuHighlights.length > 0 || restaurant.menuPdfUrl);
+  const showLegacyShopSection = !showUnifiedVillageMenu && showProducts;
+
   const navTabs: HotelNavTab[] = [
     { id: "overview", label: td("overview") },
     ...(offers.length > 0 ? [{ id: "offers", label: td("offersTabLabel") }] : []),
     ...(hasHoursInfo ? [{ id: "hours", label: td("openingHoursByDay") }] : []),
-    ...(restaurant.menuHighlights.length > 0 || restaurant.menuPdfUrl ? [{ id: "menu", label: td("menuHighlights") }] : []),
-    ...(showProducts ? [{ id: "shop", label: td("orderOnline") }] : []),
+    ...(showUnifiedVillageMenu ? [{ id: "menu", label: td("menuAndOrderOnline") }] : []),
+    ...(showLegacyMenuSection ? [{ id: "menu", label: td("menuHighlights") }] : []),
+    ...(showLegacyShopSection ? [{ id: "shop", label: td("orderOnline") }] : []),
     ...(restaurant.reservable ? [{ id: "reservation", label: t("reserveTable") }] : []),
     ...(restaurant.gallery.length > 0 || restaurant.slug === VILLAGE_HARGEISA_SLUG ? [{ id: "gallery", label: t("gallery") }] : []),
     ...(restaurant.videos && restaurant.videos.length > 0 ? [{ id: "videos", label: td("videoGallery") }] : []),
@@ -285,32 +301,57 @@ export default async function RestaurantDetailPage({
             </Reveal>
           )}
 
-          <Reveal>
-            <section id="menu" aria-labelledby="menu-heading" className="scroll-mt-36">
-              <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-                <h2 id="menu-heading" className="font-display text-2xl font-semibold">
-                  {td("menuHighlights")}
+          {showUnifiedVillageMenu && (
+            <Reveal>
+              <section id="menu" aria-labelledby="menu-heading" className="scroll-mt-36">
+                <h2 id="menu-heading" className="mb-5 font-display text-2xl font-semibold">
+                  {td("menuAndOrderOnline")}
                 </h2>
-                {restaurant.menuPdfUrl && (
-                  <SecondaryButton href={restaurant.menuPdfUrl} external size="sm">
-                    <FileText size={14} aria-hidden="true" />
-                    {td("downloadMenuPdf")}
-                  </SecondaryButton>
-                )}
-              </div>
-              {restaurant.menuHighlights.length > 0 ? (
-                <RestaurantMenuSection
-                  items={restaurant.menuHighlights}
-                  allCategoriesLabel={td("menuAllCategoriesLabel")}
-                  featuredLabel={td("menuFeaturedLabel")}
+                <VillageMenuOrderSection
+                  products={restaurantProducts}
+                  storeName={restaurant.name}
+                  business={{
+                    listingType: "restaurant",
+                    listingId: restaurant.id,
+                    businessName: restaurant.name,
+                    deliveryEnabled: Boolean(restaurant.productsDeliveryEnabled),
+                    addons: [],
+                    whatsapp: restaurant.whatsapp,
+                  }}
+                  locale={locale}
                 />
-              ) : !restaurant.menuPdfUrl ? (
-                <EmptyState icon={UtensilsCrossed} title={td("menuComingSoonTitle")} description={td("menuComingSoonBody")} />
-              ) : null}
-            </section>
-          </Reveal>
+              </section>
+            </Reveal>
+          )}
 
-          {showProducts && (
+          {showLegacyMenuSection && (
+            <Reveal>
+              <section id="menu" aria-labelledby="menu-heading" className="scroll-mt-36">
+                <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+                  <h2 id="menu-heading" className="font-display text-2xl font-semibold">
+                    {td("menuHighlights")}
+                  </h2>
+                  {restaurant.menuPdfUrl && (
+                    <SecondaryButton href={restaurant.menuPdfUrl} external size="sm">
+                      <FileText size={14} aria-hidden="true" />
+                      {td("downloadMenuPdf")}
+                    </SecondaryButton>
+                  )}
+                </div>
+                {restaurant.menuHighlights.length > 0 ? (
+                  <RestaurantMenuSection
+                    items={restaurant.menuHighlights}
+                    allCategoriesLabel={td("menuAllCategoriesLabel")}
+                    featuredLabel={td("menuFeaturedLabel")}
+                  />
+                ) : !restaurant.menuPdfUrl ? (
+                  <EmptyState icon={UtensilsCrossed} title={td("menuComingSoonTitle")} description={td("menuComingSoonBody")} />
+                ) : null}
+              </section>
+            </Reveal>
+          )}
+
+          {showLegacyShopSection && (
             <Reveal>
               <section id="shop" aria-labelledby="shop-heading" className="scroll-mt-36">
                 <h2 id="shop-heading" className="mb-5 font-display text-2xl font-semibold">

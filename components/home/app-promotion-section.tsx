@@ -151,7 +151,7 @@ export async function AppPromotionSection({ locale, previewHotel }: { locale: Lo
                       <div className="relative overflow-hidden rounded-[2.1rem] bg-sand">
                         <div className="flex flex-col gap-3 px-3.5 pb-4 pt-6">
                           <div className="flex items-center gap-1.5">
-                            <Image src="/images/logo.png" alt="" width={64} height={42} className="h-5 w-auto object-contain" />
+                            <Image src="/images/logo-web.png" alt="" width={64} height={42} className="h-5 w-auto object-contain" />
                           </div>
 
                           <div className="flex items-center gap-2 rounded-full bg-white px-3 py-2 shadow-sm">
