@@ -8,7 +8,7 @@ import { WhatsAppIcon } from "@/components/shared/brand-icons";
 import type { GalleryImage } from "@/types";
 
 function pillClass(active: boolean) {
-  return `rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+  return `shrink-0 snap-start whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
     active
       ? "bg-primary text-white"
       : "border border-ink/12 text-ink/70 hover:border-primary hover:text-primary dark:border-white/15 dark:text-sand/70"
@@ -67,7 +67,7 @@ export function BusinessPhotoGallery({
   return (
     <div>
       {categoriesPresent.length > 1 && (
-        <div className="mb-5 flex flex-wrap gap-2">
+        <div className="mb-5 flex snap-x snap-proximity gap-2 overflow-x-auto pb-1 scrollbar-none sm:flex-wrap sm:overflow-visible sm:pb-0">
           <button type="button" onClick={() => setActive("all")} className={pillClass(active === "all")}>
             All ({images.length})
           </button>

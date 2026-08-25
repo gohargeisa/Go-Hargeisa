@@ -7,7 +7,7 @@ import { Lightbox, type LightboxSlide } from "./lightbox";
 import type { RestaurantMenuItem } from "@/types";
 
 function pillClass(active: boolean): string {
-  return `rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
+  return `shrink-0 snap-start whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
     active
       ? "bg-primary text-white"
       : "border border-ink/12 text-ink/60 hover:border-primary/40 hover:text-primary dark:border-white/15 dark:text-sand/60"
@@ -79,7 +79,7 @@ export function RestaurantMenuSection({
 
   return (
     <div>
-      <div className="mb-5 flex flex-wrap gap-2">
+      <div className="mb-5 flex snap-x snap-proximity gap-2 overflow-x-auto pb-1 scrollbar-none sm:flex-wrap sm:overflow-visible sm:pb-0">
         <button type="button" onClick={() => setActiveCategory("all")} className={pillClass(activeCategory === "all")}>
           {allCategoriesLabel}
         </button>

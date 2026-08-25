@@ -73,20 +73,18 @@ const config: CapacitorConfig = {
     },
     StatusBar: {
       // Edge-to-edge like every modern native app; the web layer pads for
-      // it with env(safe-area-inset-*) (see app/globals.css).
-      overlay: true,
+      // it with env(safe-area-inset-*) (see app/globals.css). Property is
+      // overlaysWebView, not overlay — the old key silently no-opped
+      // against the plugin's actual config shape (caught by tsc).
+      overlaysWebView: true,
       // Capacitor's Style.Dark ("DARK") means light/white icon+text color
       // — the name refers to the background it's designed for (dark), not
       // the icon color itself. Set to DARK because the very first thing a
       // cold launch shows is the dark navy splash + Hero photo, where white
-      // icons are the only readable choice. Known limitation: this is a
-      // single static value applied once at launch, so it stays LIGHT even
-      // after the user scrolls past the Hero into a page's solid white/
-      // cream header (see components/layout/site-header.tsx's scroll-
-      // triggered background swap) — white-on-white icons there are a real,
-      // pre-existing contrast gap, not something this splash pass fixes.
-      // Correctly resolving it needs a dynamic per-scroll StatusBar.setStyle
-      // call, not a config change (a single static value can't serve both).
+      // icons are the only readable choice. This is just the launch value:
+      // components/shared/capacitor-bootstrap.tsx calls StatusBar.setStyle
+      // dynamically once the user scrolls past the Hero into a page's solid
+      // white/cream header, so icons stay readable at every scroll position.
       style: 'DARK',
       backgroundColor: '#00000000',
     },

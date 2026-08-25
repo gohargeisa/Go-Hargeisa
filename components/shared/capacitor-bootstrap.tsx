@@ -31,7 +31,11 @@ export function CapacitorBootstrap() {
       const { Capacitor } = await import("@capacitor/core");
       if (!Capacitor.isNativePlatform() || cancelled) return;
 
-      const [{ App }, { SplashScreen }] = await Promise.all([import("@capacitor/app"), import("@capacitor/splash-screen")]);
+      const [{ App }, { SplashScreen }, { StatusBar, Style }] = await Promise.all([
+        import("@capacitor/app"),
+        import("@capacitor/splash-screen"),
+        import("@capacitor/status-bar"),
+      ]);
 
       if (Capacitor.getPlatform() === "android") {
         // Android: show the native splash for exactly 3000ms, then hide —
@@ -74,6 +78,24 @@ export function CapacitorBootstrap() {
         }
       });
       cleanups.push(() => void urlOpenListener.remove());
+
+      // capacitor.config.ts sets a static StatusBar style (white icons, for
+      // the dark/transparent hero at the top of every page). SiteHeader
+      // (components/layout/site-header.tsx) switches its own background to
+      // bg-white/95 once window.scrollY > 12 — same threshold mirrored here
+      // — so past that point white icons sit on a white bar and disappear.
+      // Flip the native status bar to dark icons once scrolled, back to
+      // light icons at the top, on every route (not just the homepage).
+      let lastOverWhiteHeader: boolean | null = null;
+      const applyStatusBarStyle = () => {
+        const overWhiteHeader = window.scrollY > 12;
+        if (overWhiteHeader === lastOverWhiteHeader) return;
+        lastOverWhiteHeader = overWhiteHeader;
+        void StatusBar.setStyle({ style: overWhiteHeader ? Style.Light : Style.Dark });
+      };
+      applyStatusBarStyle();
+      window.addEventListener("scroll", applyStatusBarStyle, { passive: true });
+      cleanups.push(() => window.removeEventListener("scroll", applyStatusBarStyle));
     }
 
     init();

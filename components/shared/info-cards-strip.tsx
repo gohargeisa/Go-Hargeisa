@@ -30,7 +30,9 @@ export function InfoCardsStrip({ cards }: { cards: InfoCard[] }) {
                 <p className="truncate text-[10px] font-semibold uppercase tracking-wide text-ink/70 dark:text-sand/70">
                   {c.label}
                 </p>
-                <p className="truncate text-[13px] font-bold leading-tight text-ink dark:text-white">{c.value}</p>
+                <p className="text-[13px] font-bold leading-tight text-ink dark:text-white [overflow-wrap:anywhere] line-clamp-2">
+                  {c.value}
+                </p>
               </span>
             </div>
           ))}
