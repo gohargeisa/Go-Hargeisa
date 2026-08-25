@@ -32,6 +32,10 @@ export const PRODUCT_CATEGORY_LABELS: Record<ProductCategory, { en: string; ar: 
   plant: { en: "Plant", ar: "نبات", so: "Geed" },
   cake: { en: "Cake", ar: "كعكة", so: "Keega" },
   kids_clothing: { en: "Kids Clothing", ar: "ملابس الأطفال", so: "Dharka Carruurta" },
+  eyes: { en: "Eyes", ar: "العيون", so: "Indhaha" },
+  lips: { en: "Lips", ar: "الشفاه", so: "Bushimaha" },
+  face: { en: "Face", ar: "الوجه", so: "Wejiga" },
+  other: { en: "Other", ar: "أخرى", so: "Kale" },
 };
 
 export const PRODUCT_CATEGORY_ORDER: ProductCategory[] = [
@@ -41,6 +45,19 @@ export const PRODUCT_CATEGORY_ORDER: ProductCategory[] = [
   "nail_care", "beauty_tools_accessories", "womens_personal_care",
   "spare_parts",
   "bouquet", "floral_arrangement", "occasion_gift", "plant", "cake",
+  "eyes", "lips", "face", "other",
+];
+
+/** The subset of ProductCategory specific to a full-line cosmetics catalog
+ * like Flormar's — where "Makeup" alone is too coarse (Eyes/Lips/Face are
+ * genuinely distinct browsing categories the source catalog itself uses),
+ * unlike COSMETICS_SPECIALTY_CATEGORIES above (skincare/nails/tools — a
+ * cosmetics SHOP's declared specialties, not a single brand's own product
+ * taxonomy). "other" is the catalog's own "needs categorization" bucket —
+ * kept separate from "cosmetics" so those rows stay easy to find and
+ * re-categorize later instead of blending into a real category. */
+export const COSMETICS_CATALOG_CATEGORIES: ProductCategory[] = [
+  "eyes", "lips", "face", "nail_care", "skincare_creams", "beauty_tools_accessories", "body_care", "other",
 ];
 
 /** The subset of ProductCategory specific to Flower Shops — same reuse

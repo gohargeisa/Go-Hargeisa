@@ -1,12 +1,13 @@
 import { getTranslations } from "next-intl/server";
-import { FileEdit, ClipboardCheck, Rocket } from "lucide-react";
+import { FileEdit, ClipboardCheck, LayoutDashboard, Rocket } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { Reveal } from "@/components/home/reveal";
 
 const steps = [
   { icon: FileEdit, key: 1 },
   { icon: ClipboardCheck, key: 2 },
-  { icon: Rocket, key: 3 },
+  { icon: LayoutDashboard, key: 3 },
+  { icon: Rocket, key: 4 },
 ] as const;
 
 export async function HowItWorksSection({ locale }: { locale: Locale }) {
@@ -19,9 +20,9 @@ export async function HowItWorksSection({ locale }: { locale: Locale }) {
           <h2 className="text-balance text-center font-display text-3xl font-bold sm:text-4xl">{t("howItWorksTitle")}</h2>
         </Reveal>
 
-        <div className="relative mt-16 grid gap-10 sm:grid-cols-3 sm:gap-6">
+        <div className="relative mt-16 grid gap-10 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
           {/* Connecting line, desktop only */}
-          <div className="pointer-events-none absolute inset-x-0 top-8 hidden h-px bg-gradient-to-r from-transparent via-ink/15 to-transparent dark:via-white/15 sm:block" aria-hidden="true" />
+          <div className="pointer-events-none absolute inset-x-0 top-8 hidden h-px bg-gradient-to-r from-transparent via-ink/15 to-transparent dark:via-white/15 lg:block" aria-hidden="true" />
 
           {steps.map(({ icon: Icon, key }, i) => (
             <Reveal key={key} delay={i * 0.12} className="relative text-center">

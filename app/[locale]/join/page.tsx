@@ -6,10 +6,14 @@ import { getCityServiceCategories, getCategories } from "@/lib/data/categories";
 import { JoinRequestForm } from "@/components/shared/join-request-form";
 import { JoinHero } from "@/components/join/join-hero";
 import { WhyJoinSection } from "@/components/join/why-join-section";
+import { NotJustListingSection } from "@/components/join/not-just-listing-section";
 import { HowItWorksSection } from "@/components/join/how-it-works-section";
+import { WhoCanJoinSection } from "@/components/join/who-can-join-section";
 import { TrustSection } from "@/components/join/trust-section";
 import { JoinFaq } from "@/components/join/join-faq";
 import { JoinFinalCta } from "@/components/join/join-final-cta";
+import { PartnerGridSection } from "@/components/shared/partner/partner-grid-section";
+import { PremiumPartnershipCta } from "@/components/shared/partner/premium-partnership-cta";
 import { Reveal } from "@/components/home/reveal";
 
 export async function generateMetadata({
@@ -18,8 +22,8 @@ export async function generateMetadata({
   params: { locale: string };
 }): Promise<Metadata> {
   return {
-    title: "List Your Business — Go Hargeisa",
-    description: "Apply to list your business on Go Hargeisa — hotels, restaurants, cafés, healthcare, beauty, automotive and more.",
+    title: "Partner With Go Hargeisa — List Your Business",
+    description: "Your business deserves to be discovered. Apply to become an official Go Hargeisa partner — hotels, restaurants, cafés, healthcare, beauty, automotive and more.",
     alternates: localeAlternates(locale as Locale, "/join"),
   };
 }
@@ -47,12 +51,15 @@ export default async function JoinPage({ params: { locale } }: { params: { local
   ]);
   const serviceCategories = cityServiceCategories;
   const coreCategories = [...hotelCategories, ...restaurantCategories, ...cafeCategories];
+  const allJoinableCategories = [...coreCategories, ...serviceCategories];
 
   return (
     <>
       <JoinHero locale={locale} />
       <WhyJoinSection locale={locale} />
+      <NotJustListingSection locale={locale} />
       <HowItWorksSection locale={locale} />
+      <WhoCanJoinSection locale={locale} categories={allJoinableCategories} />
 
       <section id="registration-form" className="container-px mx-auto max-w-2xl scroll-mt-20 py-20 sm:py-24">
         <Reveal>
@@ -69,7 +76,15 @@ export default async function JoinPage({ params: { locale } }: { params: { local
         </Reveal>
       </section>
 
+      <PremiumPartnershipCta locale={locale} />
       <TrustSection locale={locale} />
+      <PartnerGridSection
+        locale={locale}
+        eyebrow={t("allPartnersEyebrow")}
+        title={t("allPartnersTitle")}
+        subtitle={t("allPartnersSubtitle")}
+        ctaLabel={t("allPartnersCta")}
+      />
       <JoinFaq />
       <JoinFinalCta locale={locale} />
     </>

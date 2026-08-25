@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { m, useReducedMotion } from "framer-motion";
-import { ChevronDown, Compass, Mail } from "lucide-react";
+import { ChevronDown, Compass, Handshake } from "lucide-react";
 import { PrimaryButton, SecondaryButton } from "@/components/shared/buttons";
 import type { Locale } from "@/lib/i18n/config";
 
@@ -27,18 +27,26 @@ export function AboutHero({
   locale,
   eyebrow,
   title,
+  tagline,
   subtitle,
   exploreLabel,
   contactLabel,
   scrollHint,
+  localityLabel,
 }: {
   locale: Locale;
   eyebrow: string;
   title: string;
+  /** Short supporting line rendered between the headline and the
+   * description paragraph — e.g. "Discover. Connect. Book." */
+  tagline?: string;
   subtitle: string;
   exploreLabel: string;
   contactLabel: string;
   scrollHint: string;
+  /** "Hargeisa, Somaliland" — paired with the Somaliland flag, never the
+   * Somalia flag, to keep the platform's local identity explicit. */
+  localityLabel?: string;
 }) {
   const reduceMotion = useReducedMotion();
   const initial = reduceMotion ? "show" : "hidden";
@@ -80,6 +88,18 @@ export function AboutHero({
           {title}
         </m.h1>
 
+        {tagline && (
+          <m.p
+            custom={1.5}
+            initial={initial}
+            animate="show"
+            variants={fadeUp}
+            className="mt-4 text-balance font-display text-lg font-semibold tracking-wide text-primary-300 sm:text-xl"
+          >
+            {tagline}
+          </m.p>
+        )}
+
         <m.p
           custom={2}
           initial={initial}
@@ -89,6 +109,19 @@ export function AboutHero({
         >
           {subtitle}
         </m.p>
+
+        {localityLabel && (
+          <m.div
+            custom={2.5}
+            initial={initial}
+            animate="show"
+            variants={fadeUp}
+            className="mt-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 backdrop-blur-md"
+          >
+            <Image src="/flags/somaliland.png" alt="" width={20} height={13} className="h-3.5 w-auto rounded-[2px] object-cover" />
+            <span className="text-xs font-semibold text-white/85">{localityLabel}</span>
+          </m.div>
+        )}
 
         <m.div
           custom={3}
@@ -102,11 +135,11 @@ export function AboutHero({
             {exploreLabel}
           </PrimaryButton>
           <SecondaryButton
-            href={`/${locale}/contact`}
+            href={`/${locale}/join`}
             size="lg"
             className="border-white/40 bg-white/10 text-white backdrop-blur-md hover:border-white hover:bg-white/20 hover:text-white"
           >
-            <Mail size={18} aria-hidden="true" />
+            <Handshake size={18} aria-hidden="true" />
             {contactLabel}
           </SecondaryButton>
         </m.div>
