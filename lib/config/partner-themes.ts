@@ -406,14 +406,15 @@ const GRAND_HAADI_THEME: PartnerTheme = {
  * gradient + the real logo instead, same fallback treatment
  * FlormarStorefront's own "no heroImage" branch already renders.
  *
- * phone is the listing's own real, verified Hargeisa number (`city_services
- * .phone`) — NOT anything from pinnacleperfumes.com's Contact page, which
- * is Tanzania-branch information (different phone, different address) for
- * the same corporate brand. No dedicated `whatsapp` number was found on
- * their real site or in this listing's DB row (`whatsapp: null`); the
- * storefront falls back to this same verified phone number for WhatsApp
- * deep links, the same `phone`-as-WhatsApp-fallback pattern already used by
- * components/shared/mobile-booking-bar.tsx.
+ * phone/whatsapp are the listing's own real, verified Hargeisa number
+ * (matches `city_services.phone`/`.whatsapp`, +252637555410) — NOT anything
+ * from pinnacleperfumes.com's Contact page, which is Tanzania-branch
+ * information (different phone, different address) for the same corporate
+ * brand. This literal previously drifted out of sync with a stale number
+ * (+252637653947); since this file's value is what PinnacleStorefront's
+ * call/WhatsApp buttons actually render (not a live read of the DB row),
+ * keep it matching city_services.phone/.whatsapp if that record is ever
+ * corrected again.
  */
 const PINNACLE_THEME: PartnerTheme = {
   slug: "pinnacle-perfumes-and-cosmatics",
@@ -431,8 +432,8 @@ const PINNACLE_THEME: PartnerTheme = {
   accentRgb: "176 141 79",
   accentStrong: "#8C6F3E",
   accentSoft: "#E4D3B0",
-  phone: "+252637653947",
-  whatsapp: "+252637653947",
+  phone: "+252637555410",
+  whatsapp: "+252637555410",
 };
 
 const PARTNER_THEMES: Partial<Record<BusinessListingType, Record<string, PartnerTheme>>> = {
