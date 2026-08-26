@@ -36,6 +36,7 @@ export function BusinessPhotoGallery({
   whatsappHref,
   whatsappPromptText,
   whatsappButtonLabel,
+  tileAspectClassName = "aspect-square",
 }: {
   images: GalleryImage[];
   alt: string;
@@ -53,6 +54,13 @@ export function BusinessPhotoGallery({
   /** Required alongside `whatsappHref` — the already-translated button label
    * (e.g. "WhatsApp"). */
   whatsappButtonLabel?: string;
+  /** Opt-in grid-tile aspect ratio (Tailwind class). Defaults to
+   * "aspect-square", so every caller that omits this renders byte-identical
+   * to before. A gallery whose real photos are mostly tall/portrait
+   * (posters, product shots) can pass a taller ratio (e.g. "aspect-[3/4]")
+   * so less of each image's content gets cropped away, while every tile
+   * still shares one uniform ratio. */
+  tileAspectClassName?: string;
 }) {
   const th = useTranslations("hotelDetail");
 
@@ -105,7 +113,7 @@ export function BusinessPhotoGallery({
             type="button"
             onClick={() => setOpenAt(i)}
             aria-label={isLastWithMore ? th("viewAllPhotos") : th("goToPhoto", { number: i + 1 })}
-            className="group relative aspect-square overflow-hidden rounded-xl2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            className={`group relative ${tileAspectClassName} overflow-hidden rounded-xl2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary`}
           >
             {isLastWithMore && (
               <div className="absolute inset-0 z-10 flex items-center justify-center bg-ink/55 text-lg font-bold text-white">
