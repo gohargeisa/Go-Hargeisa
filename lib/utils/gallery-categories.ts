@@ -70,6 +70,14 @@ export const EVENT_GALLERY_CATEGORIES: GalleryCategoryOption[] = [
   { value: "other", label: "Other" },
 ];
 
+export const EMAANKOO_GALLERY_CATEGORIES: GalleryCategoryOption[] = [
+  { value: "office", label: "Office & Team" },
+  { value: "activities", label: "Events & Activities" },
+  { value: "products", label: "Products & Shipments" },
+  { value: "promotions", label: "Promotions" },
+  { value: "other", label: "Other" },
+];
+
 export function galleryCategoryLabel(categories: GalleryCategoryOption[], category?: string): string {
   return categories.find((c) => c.value === category)?.label ?? "Other";
 }

@@ -425,6 +425,10 @@ export interface Category {
   supportsProducts: boolean;
   /** Phase 4 — whether this category's city_services listings get the Medical Appointment Engine (Book a Doctor/Dentist, currently hospital/clinic/dental-clinic). */
   supportsAppointments: boolean;
+  /** Whether this category's city_services listings get the purchase-request (buy-for-me + manual quote) system — see purchase_requests table, lib/actions/purchase-requests.ts. */
+  supportsPurchaseRequests: boolean;
+  /** Whether this category's city_services listings get the event-request (event planning + proposal) system — see event_requests table, lib/actions/event-requests.ts. */
+  supportsEventRequests: boolean;
   /** Computed, never stored — `targetTable !== "city_services"`. True for every category with its own reachable page
    * (hotels/restaurants/cafes/attractions/events/services); false only for City Services' internal groupings, which
    * exist solely to be grouped inside the City Services hub and must never also appear as a standalone page. Deriving
@@ -1070,6 +1074,97 @@ export interface TableReservation {
   status: "pending" | "confirmed" | "cancelled" | "completed";
   reservationReference: string;
   userId?: string;
+  createdAt: string;
+}
+
+export type PurchaseRequestStatus =
+  | "pending" | "reviewing" | "quote_ready" | "approved" | "declined"
+  | "ordered" | "shipped" | "in_transit" | "ready_for_delivery" | "completed"
+  | "cancelled" | "rejected";
+
+/** One "buy this for me" request — customer submits a product link/photo,
+ * the business manually reviews and returns a priced quote (never
+ * auto-calculated: product/shipping/customs cost vary too much to guess),
+ * the customer explicitly approves it, then the request is tracked through
+ * fulfillment. Polymorphic listingType/listingId like every other
+ * business-owned table (reviews, table reservations) — not hardcoded to
+ * one partner. */
+export interface PurchaseRequest {
+  id: string;
+  listingType: "city_service";
+  listingId: string;
+  userId: string;
+  customerName: string;
+  customerPhone: string;
+  productName: string;
+  productUrl?: string;
+  platform: "shein" | "amazon" | "noon" | "iherb" | "alibaba" | "other";
+  quantity: number;
+  size?: string;
+  color?: string;
+  variant?: string;
+  deliveryLocation: string;
+  notes?: string;
+  imageUrl?: string;
+  status: PurchaseRequestStatus;
+  quotedProductCost?: number;
+  quotedShippingCost?: number;
+  quotedCustomsFee?: number;
+  quotedServiceFee?: number;
+  quotedTotal?: number;
+  quoteExpiresAt?: string;
+  /** Shown to the customer. */
+  partnerNotesCustomer?: string;
+  /** Never exposed to the customer — dashboard-only. */
+  partnerNotesInternal?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PurchaseRequestStatusHistoryEntry {
+  id: string;
+  requestId: string;
+  oldStatus?: PurchaseRequestStatus;
+  newStatus: PurchaseRequestStatus;
+  changedBy?: string;
+  note?: string;
+  createdAt: string;
+}
+
+export type EventRequestStatus = "new" | "reviewing" | "proposal_sent" | "approved" | "declined" | "planning" | "completed" | "cancelled";
+
+/** One event-planning request — same request/proposal/approval shape as
+ * PurchaseRequest, kept as a separate table (not a variant of it) since the
+ * fields and status vocabulary genuinely differ (spec section 12). */
+export interface EventRequest {
+  id: string;
+  listingType: "city_service";
+  listingId: string;
+  userId: string;
+  customerName: string;
+  customerPhone: string;
+  eventType: "family" | "school" | "festival" | "entertainment" | "social" | "other";
+  eventDate?: string;
+  eventLocation?: string;
+  guestCount?: number;
+  budgetRange?: string;
+  servicesRequired?: string;
+  notes?: string;
+  imageUrl?: string;
+  status: EventRequestStatus;
+  proposalDetails?: string;
+  proposalCost?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface EventRequestStatusHistoryEntry {
+  id: string;
+  requestId: string;
+  oldStatus?: EventRequestStatus;
+  newStatus: EventRequestStatus;
+  changedBy?: string;
+  note?: string;
   createdAt: string;
 }
 
