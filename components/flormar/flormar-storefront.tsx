@@ -14,6 +14,8 @@ import { SocialLinks } from "@/components/shared/social-links";
 import { PartnerVideoShowcase } from "@/components/shared/partner/partner-video-showcase";
 import { Reveal } from "@/components/home/reveal";
 import { productLocalizedName } from "@/lib/utils/product-i18n";
+import { cleanFlormarProductName } from "@/lib/utils/flormar-product-names";
+import { FLORMAR_CATEGORY_OVERRIDES } from "@/lib/config/flormar-category-overrides";
 import { productCategoryLabel, productGenderLabel } from "@/lib/config/product-categories";
 import { getProductPricing } from "@/lib/utils/product-pricing";
 import { useCart } from "@/lib/cart/cart-context";
@@ -162,7 +164,29 @@ export function FlormarStorefront({
   // any real sale prices yet, so the "Offers" tab below legitimately shows
   // its empty state until real discount data exists; a fabricated
   // strikethrough price is not an acceptable stand-in for that.
-  const productsWithPricing = catalogProducts;
+  //
+  // Display name is cleaned here, once, upstream of every consumer (card,
+  // detail modal, cart, search, The Edit's prefix matching) — see
+  // cleanFlormarProductName's own doc comment for exactly what it does and
+  // doesn't change. ProductCard/ProductDetailModal/useCart are the same
+  // shared components every other partner uses and need no changes: they
+  // just read whatever `name` is already on the product object, which by
+  // the time it reaches them here is already the clean one. This is a
+  // display-time transform only — the underlying DB row's raw name/sku are
+  // never modified.
+  const productsWithPricing = useMemo(
+    () =>
+      catalogProducts.map((p) => {
+        const base8 = (p.sku ?? "").split("-")[0]?.slice(0, 8) ?? "";
+        const categoryOverride = (p.sku && FLORMAR_CATEGORY_OVERRIDES[p.sku]) || FLORMAR_CATEGORY_OVERRIDES[base8];
+        return {
+          ...p,
+          name: cleanFlormarProductName(p.name, p.sku),
+          ...(categoryOverride ? { category: categoryOverride } : null),
+        };
+      }),
+    [catalogProducts]
+  );
   const featured = productsWithPricing.filter((p) => p.isFeatured);
 
   // Real city_services.id (shared by every row in catalogProducts — they're
@@ -267,7 +291,11 @@ export function FlormarStorefront({
     if (discoveryTab === "offers") list = list.filter((p) => getProductPricing(p).hasDiscount);
 
     const needle = discoveryQuery.trim().toLowerCase();
-    if (needle) list = list.filter((p) => productLocalizedName(p, locale).toLowerCase().includes(needle));
+    if (needle) {
+      list = list.filter(
+        (p) => productLocalizedName(p, locale).toLowerCase().includes(needle) || (p.sku?.toLowerCase().includes(needle) ?? false)
+      );
+    }
 
     const sorted = [...list];
     if (discoverySort === "newest") sorted.sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
@@ -1054,7 +1082,17 @@ export function FlormarStorefront({
               className="mt-5 justify-center"
             />
 
-            <p className="mx-auto mt-6 max-w-sm text-sm leading-relaxed text-ink/50 dark:text-sand/50">{t("storeInfoPending")}</p>
+            {/* "Confirmed details coming soon" only when EVERY contact
+             * channel is still genuinely empty — the row now has a real
+             * phone/WhatsApp/Instagram/TikTok, so showing this
+             * unconditionally (the previous behavior) told visitors real,
+             * working contact buttons above were still placeholders. Each
+             * individual button already hides itself when its own field is
+             * empty (unchanged); this line only covers the case where none
+             * of them do. */}
+            {!service.phone && !service.whatsapp && !service.socialInstagram && !service.socialFacebook && !service.socialTiktok && (
+              <p className="mx-auto mt-6 max-w-sm text-sm leading-relaxed text-ink/50 dark:text-sand/50">{t("storeInfoPending")}</p>
+            )}
           </Reveal>
         </div>
       </section>

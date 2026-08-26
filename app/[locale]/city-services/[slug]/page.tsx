@@ -152,6 +152,21 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const service = await getCityServiceBySlug(slug, locale);
   if (!service) return {};
+  if (service.slug === FLORMAR_SLUG) {
+    // Own title/description rather than falling through to the generic
+    // "{name} — Hargeisa City Services" + service.description below — the
+    // DB row's own description field still reads "private catalog preview
+    // pending partner confirmation" from before this listing was published,
+    // and neither string reflects the premium storefront this slug actually
+    // renders. Never asserts an official Flormar-corporate relationship —
+    // "listed on Go Hargeisa", not "Flormar's official/authorized partner".
+    return {
+      title: "Flormar Hargeisa | Beauty & Cosmetics | Go Hargeisa",
+      description: "Flormar cosmetics and skincare in Hargeisa, Somaliland — browse the collection and order through Go Hargeisa.",
+      openGraph: service.image ? { images: [service.image] } : undefined,
+      alternates: localeAlternates(locale, `/city-services/${service.slug}`),
+    };
+  }
   return {
     title: `${service.name} — Hargeisa City Services`,
     description: service.description ?? undefined,
@@ -277,7 +292,11 @@ export default async function CityServiceDetailPage({
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     name: service.name,
-    description: service.description ?? undefined,
+    // Same stale-description reasoning as generateMetadata above — the raw
+    // DB field predates this listing's publication for every other
+    // city_service too, so it's still the right general-case source, just
+    // not for Flormar specifically.
+    description: service.slug === FLORMAR_SLUG ? "Flormar cosmetics and skincare in Hargeisa, Somaliland." : (service.description ?? undefined),
     image: service.image ?? undefined,
     telephone: service.phone ?? undefined,
     ...(featureEligible && service.reviewCount > 0

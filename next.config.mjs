@@ -134,6 +134,19 @@ const nextConfig = {
       "https://www.dkny.com",
       "https://fragrancemarket.com",
       "https://cdn11.bigcommerce.com",
+      // Remaining Flormar product-photography sources (official regional
+      // storefronts + authorized retailers, docs/flormar-product-
+      // reconciliation.md) — all already present in images.remotePatterns
+      // above, but missing here left every image from these 5 hosts
+      // silently CSP-blocked (confirmed broken in the browser — real
+      // interactive testing of the full 225-product catalog via "Load
+      // More"/category filters surfaced these; loading only the first page
+      // of products, as an earlier pass did, missed all but one of them).
+      "https://www.caretobeauty.com",
+      "https://flormar.sa",
+      "https://flormarbh.com",
+      "https://flormarlebanon.com",
+      "https://cdn.netmeds.tech",
     ];
     // Uploaded videos (components/shared/video-gallery.tsx) are served from
     // Supabase Storage, a cross-origin host — with no media-src directive,
