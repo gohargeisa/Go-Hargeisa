@@ -379,6 +379,8 @@ export function mapCategory(row: CategoryRow): Category {
     schemaOrgType: row.schema_org_type ?? undefined,
     supportsProducts: row.supports_products ?? false,
     supportsAppointments: row.supports_appointments ?? false,
+    supportsPurchaseRequests: row.supports_purchase_requests ?? false,
+    supportsEventRequests: row.supports_event_requests ?? false,
     isStandaloneSection: row.target_table !== "city_services",
     createdAt: row.created_at,
     updatedAt: row.updated_at,

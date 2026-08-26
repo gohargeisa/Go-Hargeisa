@@ -248,6 +248,7 @@ type CategoryRow = {
   custom_fields_schema: Json;
   supports_gallery: boolean; supports_new_features: boolean; schema_org_type: string | null;
   supports_products: boolean; supports_appointments: boolean;
+  supports_purchase_requests: boolean; supports_event_requests: boolean;
   image_url: string | null;
   created_at: string; updated_at: string;
 };
