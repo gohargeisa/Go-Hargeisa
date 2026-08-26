@@ -417,7 +417,7 @@ export default async function RestaurantDetailPage({
                   {th("photoGallery")}
                 </h2>
                 <div className="grid gap-6 sm:grid-cols-[1.1fr_0.9fr]">
-                  <InstagramPostEmbed url={VILLAGE_FEATURED_INSTAGRAM_POST} />
+                  <InstagramPostEmbed url={VILLAGE_FEATURED_INSTAGRAM_POST} caption={td("instagramRealPost")} />
                   <div className="flex flex-col gap-3">
                     {[
                       ...(restaurant.socialInstagram ? [{ handle: `@${new URL(restaurant.socialInstagram).pathname.replaceAll("/", "")}`, url: restaurant.socialInstagram }] : []),

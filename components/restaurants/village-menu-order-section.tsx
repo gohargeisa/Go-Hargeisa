@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { Search, ShoppingBag } from "lucide-react";
 import { ProductCard } from "@/components/shared/product-card";
@@ -172,24 +173,35 @@ export function VillageMenuOrderSection({
           the always-visible header cart icon + item badge); positioned to
           clear MobileBookingBar's own fixed bottom bar rather than overlap
           it. Reuses the existing global cart state (useCart) — no new cart
-          logic, just a small always-in-view summary while browsing. */}
-      {cart.itemCount > 0 && (
-        <div
-          className="fixed inset-x-4 z-chrome lg:hidden"
-          style={{ bottom: "calc(4.75rem + 1.1rem + max(0.75rem, env(safe-area-inset-bottom)))" }}
-        >
-          <button
-            type="button"
-            onClick={cart.openCart}
-            className="mx-auto flex w-full max-w-sm items-center justify-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-bold text-white shadow-premium-lg transition-transform active:scale-[0.98] dark:bg-primary-700"
+          logic, just a small always-in-view summary while browsing.
+          Portaled to document.body: this section renders inside a <Reveal>
+          (framer-motion) wrapper, and framer-motion leaves a `transform` on
+          its element even at rest — a `transform` on any ancestor makes a
+          `position: fixed` descendant fix itself to THAT ancestor's box
+          instead of the viewport (CSS spec behavior, not a framer-motion
+          bug). Without the portal this indicator was pinned to a spot
+          partway down the document instead of the screen, landing on top of
+          whichever product cards happened to scroll to that position. */}
+      {cart.itemCount > 0 &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            className="fixed inset-x-4 z-chrome lg:hidden"
+            style={{ bottom: "calc(4.75rem + 1.1rem + max(0.75rem, env(safe-area-inset-bottom)))" }}
           >
-            <ShoppingBag size={16} aria-hidden="true" />
-            <span>
-              {tc("viewCart")} • {tc("itemsCount", { count: cart.itemCount })} • {cart.subtotal.toFixed(2)} USD
-            </span>
-          </button>
-        </div>
-      )}
+            <button
+              type="button"
+              onClick={cart.openCart}
+              className="mx-auto flex w-full max-w-sm items-center justify-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-bold text-white shadow-premium-lg transition-transform active:scale-[0.98] dark:bg-primary-700"
+            >
+              <ShoppingBag size={16} aria-hidden="true" />
+              <span>
+                {tc("viewCart")} • {tc("itemsCount", { count: cart.itemCount })} • {cart.subtotal.toFixed(2)} USD
+              </span>
+            </button>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

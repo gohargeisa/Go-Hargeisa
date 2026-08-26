@@ -37,6 +37,22 @@ body {
     text-wrap: balance;
   }
 
+  /* Hides the scrollbar on an `overflow-x-auto` row (filter pills, nav
+     tabs, horizontal card scrollers, ...) while keeping native touch/drag
+     scrolling fully intact — only the OS/browser scrollbar chrome is
+     hidden, nothing about scroll behavior changes. Used across ~16 files
+     already; was referenced everywhere as a Tailwind utility but never
+     actually defined (no plugin, no CSS rule), so every one of those rows
+     has been rendering a visible scrollbar this whole time despite the
+     class being applied — defining it once here fixes all of them. */
+  .scrollbar-none {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and legacy Edge */
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+
   .container-px {
     @apply px-5 md:px-8 lg:px-12;
   }
