@@ -8,6 +8,7 @@ import { AddPartnerPanel, type UnclaimedListing } from "@/components/admin/add-p
 import { getUserDisplayInfo } from "@/lib/actions/claims";
 import type { SubscriptionPlanId } from "@/lib/config/subscription-plans";
 import type { SubscriptionStatus } from "@/types";
+import { validatePartnerListing, qualityStatusFor } from "@/lib/validation/partner-quality";
 
 export const metadata: Metadata = { title: "Partners — Admin" };
 
@@ -42,6 +43,12 @@ interface RawRow {
   featured: boolean;
   is_pinned: boolean;
   is_suspended: boolean;
+  description: string | null;
+  phone: string | null;
+  cover_image: string | null;
+  gallery: unknown;
+  lat: number | null;
+  lng: number | null;
 }
 
 export default async function AdminPartnersPage({ params: { locale } }: { params: { locale: Locale } }) {
@@ -50,7 +57,13 @@ export default async function AdminPartnersPage({ params: { locale } }: { params
 
   const supabase = await createClient();
 
-  const SELECT = "id, name, owner_id, partner_status, status, trial_expires_at, featured, is_pinned, is_suspended";
+  const SELECT_COMMON = "id, name, owner_id, partner_status, status, trial_expires_at, featured, is_pinned, is_suspended, description, phone, gallery, lat, lng";
+  // city_services is the one table of the five whose cover-image column is
+  // named `image`, not `cover_image` (see lib/data/mappers.ts's
+  // mapCityService) — aliased here so RawRow/validatePartnerListing never
+  // need to know about that difference.
+  const selectFor = (table: PartnerTable) =>
+    table === "city_services" ? `${SELECT_COMMON}, cover_image:image` : `${SELECT_COMMON}, cover_image`;
 
   const [byTable, subsResult] = await Promise.all([
     // Owner assignment is NOT a prerequisite for appearing here — a listing
@@ -58,7 +71,7 @@ export default async function AdminPartnersPage({ params: { locale } }: { params
     // promoted it to Official via "Add Partner"/"Make Official". Same query
     // shape for every table — nothing hotel/restaurant/cafe-specific.
     Promise.all(
-      PARTNER_TABLES.map(({ table }) => supabase.from(table).select(SELECT).or("owner_id.not.is.null,partner_status.eq.official"))
+      PARTNER_TABLES.map(({ table }) => supabase.from(table).select(selectFor(table)).or("owner_id.not.is.null,partner_status.eq.official"))
     ),
     supabase.from("business_subscriptions").select("id, listing_type, listing_id, plan_tier, status, renews_at, custom_price_usd"),
   ]);
@@ -107,6 +120,18 @@ export default async function AdminPartnersPage({ params: { locale } }: { params
   const toRow = (table: PartnerTable, listingType: string, entry: RawRow): PartnerRow => {
     const sub = subFor(listingType, entry.id);
     const ownerInfo = entry.owner_id ? ownerById.get(entry.owner_id) : null;
+    // Internal-only signal (Partner Production Quality System — see
+    // lib/validation/partner-quality.ts) — never rendered anywhere a
+    // customer can see it, only this admin list.
+    const quality = validatePartnerListing({
+      name: entry.name,
+      description: entry.description,
+      phone: entry.phone,
+      cover_image: entry.cover_image,
+      gallery: entry.gallery,
+      lat: entry.lat,
+      lng: entry.lng,
+    });
     return {
       id: entry.id,
       table,
@@ -123,6 +148,8 @@ export default async function AdminPartnersPage({ params: { locale } }: { params
       renewsAt: sub?.renews_at ?? null,
       customPriceUsd: sub?.custom_price_usd ?? null,
       notes: notesFor(sub?.id),
+      qualityStatus: qualityStatusFor(quality),
+      qualityIssues: [...quality.errors, ...quality.warnings].map((i) => i.message),
     };
   };
 

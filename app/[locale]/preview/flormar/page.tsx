@@ -38,7 +38,7 @@ export default async function FlormarPreviewPage({ params: { locale } }: { param
   return (
     <>
       <PartnerThemeScope theme={theme}>
-        <FlormarStorefront theme={theme} locale={locale} products={data.products} />
+        <FlormarStorefront theme={theme} service={data.service} locale={locale} products={data.products} />
         <PartnerPartnershipFooter theme={theme} locale={locale} />
       </PartnerThemeScope>
 

@@ -9,6 +9,7 @@ import { isConvertibleCategory } from "@/lib/utils/partner-categories";
 import { getCategoryById } from "@/lib/data/categories";
 import { weeklyHoursToGroups } from "@/lib/utils/weekly-hours";
 import { CUISINE_LABELS, type CuisineCode } from "@/lib/config/restaurant-attributes";
+import { validatePartnerListing } from "@/lib/validation/partner-quality";
 import type { JoinRequestCategory, BusinessRequestStatus, GalleryImage, MediaVideo, BusinessDocument, WeeklyHoursDay } from "@/types";
 
 async function assertOwner() {
@@ -731,6 +732,28 @@ export async function convertJoinRequest(
     request.description.length > 160
       ? `${request.description.slice(0, 157)}...`
       : request.description;
+
+  // Pre-publish quality gate (Partner Production Quality System — see
+  // lib/validation/partner-quality.ts). Every branch below inserts a new
+  // listing straight to `status: 'published'` (see this function's own
+  // header comment) — this is the one place all of them build the listing
+  // from, so it's the one place that catches an empty/placeholder business
+  // name or missing contact info before anything goes live, regardless of
+  // which target table the request converts into.
+  {
+    const { errors } = validatePartnerListing({
+      name: request.business_name,
+      description: request.description,
+      phone: request.phone,
+      cover_image: coverImage,
+      gallery,
+      lat: completion.lat,
+      lng: completion.lng,
+    });
+    if (errors.length > 0) {
+      return { ok: false, error: `Can't convert yet: ${errors.map((e) => e.message).join(" ")}` };
+    }
+  }
 
   // ---------------------------------------------------------------------------
   // DYNAMIC "OTHER" CATEGORIES

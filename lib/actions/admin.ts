@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { logActivity } from "./activity";
 import { upgradeToBusinessOwner } from "./claims";
 import { hasAnyBusinessGrantPermission } from "@/lib/data/access-control";
+import { validatePartnerListing } from "@/lib/validation/partner-quality";
 
 const ALLOWED_TABLES = ["hotels", "restaurants", "cafes", "services", "attractions", "events", "articles"] as const;
 export type AllowedTable = (typeof ALLOWED_TABLES)[number];
@@ -48,6 +49,15 @@ function localeFromRevalidatePaths(revalidatePaths: string[]): string | null {
 // scoped to rows where owner_id = auth.uid(). Attractions/events/articles
 // and every table's create/delete stay owner-only.
 const BUSINESS_OWNER_TABLES = new Set<AllowedTable>(["hotels", "restaurants", "cafes", "services"]);
+
+// Only the three tables toggleListingVisibility's switch below actually
+// writes to (services has no case there — a pre-existing gap, not touched
+// here) — gated with the Partner Production Quality System's pre-publish
+// check (lib/validation/partner-quality.ts) so a listing can't flip to
+// 'published' with an empty name, no contact info, or obviously fake
+// placeholder text. Draft/archived transitions are never gated — this only
+// stops NEW problems from going live, never touches what's already published.
+const QUALITY_GATED_TABLES = new Set<AllowedTable>(["hotels", "restaurants", "cafes"]);
 
 async function assertOwner() {
   const supabase = await createClient();
@@ -178,6 +188,20 @@ export async function toggleListingVisibility(
   }
 
   const supabase = await assertOwner();
+
+  if (nextStatus === "published" && QUALITY_GATED_TABLES.has(table)) {
+    const { data: row } = await supabase
+      .from(table)
+      .select("name, description, phone, cover_image, gallery, lat, lng")
+      .eq("id", id)
+      .single();
+    if (row) {
+      const { errors } = validatePartnerListing(row as never);
+      if (errors.length > 0) {
+        return { ok: false, error: `Can't publish yet: ${errors.map((e) => e.message).join(" ")}` };
+      }
+    }
+  }
 
   let error = null;
   let data: { id: string } | null = null;

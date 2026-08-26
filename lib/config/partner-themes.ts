@@ -98,23 +98,17 @@ export interface PartnerTheme {
   heroImageWidth?: number;
   heroImageHeight?: number;
 
-  /** Contact/social — same shape and same resolver (SocialLinks,
-   * toWhatsAppHref) every hotel/restaurant/cafe/city_service detail page
-   * already uses; nothing new invented for partner pages. All optional —
-   * SocialLinks itself already renders nothing when a value is absent, so
-   * omitting any of these here just hides that one icon, not a broken
-   * button. Values may be real business data (once a real listing row
-   * exists for a partner) or an explicitly-labeled placeholder pending
-   * real data — see each partner's own config comment for which. */
-  phone?: string;
-  whatsapp?: string;
-  instagram?: string;
-  facebook?: string;
-  tiktok?: string;
-
   /**
-   * Deliberately NOT part of this config yet (kept out to avoid dead,
-   * unused fields until a real partner needs them):
+   * Deliberately NOT part of this config:
+   * - phone/whatsapp/instagram/facebook/tiktok. These used to be duplicated
+   *   here, independent of the real listing row, and that duplication is
+   *   exactly what let Pinnacle's number go stale (a DB correction this
+   *   file never picked up, fixed in commit 616c827). Every partner
+   *   storefront now reads contact/social straight off its own listing row
+   *   (`service.phone`, `.whatsapp`, `.socialInstagram`, `.socialFacebook`,
+   *   `.socialTiktok`) via the same SocialLinks/toWhatsAppHref resolver
+   *   every non-partner-themed page already uses — there is exactly one
+   *   place contact info can live now.
    * - secondary / background / text color: every partner so far keeps
    *   backgrounds neutral (Go Hargeisa's existing sand/ink tokens) per the
    *   "don't make the whole page purple" brief — primary/primaryMid already
@@ -278,21 +272,13 @@ const FLORMAR_THEME: PartnerTheme = {
   accentSoft: "#E9D48C",
   heroImage: "/images/partners/flormar/hero.png",
   heroImageFit: "cover",
-  // Placeholder contact/social (2026-08-19) — Flormar Hargeisa has no real
-  // business listing row yet (see this file's own header comment), so
-  // there is no real phone/social data to read from anywhere in the
-  // project. These are explicitly NOT the business's real details —
-  // plausible-format placeholders only, so the Contact section's buttons
-  // are genuinely clickable/functional (tel:, wa.me, real platform URL
-  // shapes) instead of dead links, while the storefront's own "private
-  // preview" framing keeps them from ever being presented as verified.
-  // Replace with the real values the moment the business supplies them —
-  // every consumer (SocialLinks) already handles that with no other change.
-  phone: "+252634000000",
-  whatsapp: "+252634000000",
-  instagram: "https://instagram.com/flormar.hargeisa",
-  facebook: "https://facebook.com/flormarhargeisa",
-  tiktok: "https://tiktok.com/@flormar.hargeisa",
+  // No hardcoded contact/social here anymore (2026-08-26) — Flormar's
+  // `city_services` row has no real phone/social data filled in yet, so
+  // FlormarStorefront now reads `service.phone`/`.whatsapp`/`.socialInstagram`
+  // /`.socialFacebook`/`.socialTiktok` directly and simply renders nothing
+  // for whichever fields are still empty, instead of a plausible-looking
+  // placeholder standing in for unverified real data. Fills in automatically
+  // the moment the business's real contact info is entered on the listing row.
 };
 
 /**
@@ -382,7 +368,6 @@ const GRAND_HAADI_THEME: PartnerTheme = {
   heroImage: "https://pvzuibidhfuizmaleznx.supabase.co/storage/v1/object/public/listing-images/hotels/gallery/b059c5b5-7bd5-414f-98a9-e0be5f2c9604.jpg",
   heroImageFit: "cover",
   heroImagePosition: "object-[50%_35%]",
-  phone: "+252634622117",
 };
 
 /**
@@ -406,15 +391,14 @@ const GRAND_HAADI_THEME: PartnerTheme = {
  * gradient + the real logo instead, same fallback treatment
  * FlormarStorefront's own "no heroImage" branch already renders.
  *
- * phone/whatsapp are the listing's own real, verified Hargeisa number
- * (matches `city_services.phone`/`.whatsapp`, +252637555410) — NOT anything
- * from pinnacleperfumes.com's Contact page, which is Tanzania-branch
- * information (different phone, different address) for the same corporate
- * brand. This literal previously drifted out of sync with a stale number
- * (+252637653947); since this file's value is what PinnacleStorefront's
- * call/WhatsApp buttons actually render (not a live read of the DB row),
- * keep it matching city_services.phone/.whatsapp if that record is ever
- * corrected again.
+ * phone/whatsapp are NOT configured here anymore (2026-08-26) — this exact
+ * duplication (a hardcoded number independent of the DB row) is what let
+ * this file's old value drift out of sync with a corrected number
+ * (+252637653947 → +252637555410, fixed in commit 616c827).
+ * PinnacleStorefront now reads `service.phone`/`.whatsapp` straight off the
+ * listing row instead, matching pinnacleperfumes.com's Tanzania-branch
+ * Contact page never being used as a source (Hargeisa's own verified number
+ * only comes from `city_services.phone`/`.whatsapp`).
  */
 const PINNACLE_THEME: PartnerTheme = {
   slug: "pinnacle-perfumes-and-cosmatics",
@@ -432,8 +416,6 @@ const PINNACLE_THEME: PartnerTheme = {
   accentRgb: "176 141 79",
   accentStrong: "#8C6F3E",
   accentSoft: "#E4D3B0",
-  phone: "+252637555410",
-  whatsapp: "+252637555410",
 };
 
 const PARTNER_THEMES: Partial<Record<BusinessListingType, Record<string, PartnerTheme>>> = {

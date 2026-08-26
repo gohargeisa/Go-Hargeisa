@@ -307,7 +307,7 @@ export default async function CityServiceDetailPage({
           listingId={service.id}
           name={service.name}
           phone={service.phone ?? undefined}
-          whatsappFallback={partnerTheme.whatsapp}
+          whatsappFallback={service.whatsapp ?? undefined}
           locale={locale}
           initiallyFavorited={isFavorited}
         />
@@ -319,14 +319,14 @@ export default async function CityServiceDetailPage({
     return (
       <PartnerThemeScope theme={partnerTheme}>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
-        <FlormarStorefront theme={partnerTheme} locale={locale} products={products} />
+        <FlormarStorefront theme={partnerTheme} service={service} locale={locale} products={products} />
         <PartnerPartnershipFooter theme={partnerTheme} locale={locale} />
         <MobileBookingBar
           listingType="city_service"
           listingId={service.id}
           name={service.name}
           phone={service.phone ?? undefined}
-          whatsappFallback={partnerTheme.whatsapp}
+          whatsappFallback={service.whatsapp ?? undefined}
           locale={locale}
           initiallyFavorited={isFavorited}
         />

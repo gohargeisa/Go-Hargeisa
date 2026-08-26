@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { hasBusinessGrantPermission } from "@/lib/data/access-control";
+import { validateProductListing, qualityStatusFor, type QualityStatus } from "@/lib/validation/partner-quality";
 import type { ProductCategory, ProductGender, GalleryImage, OrderableListingType } from "@/types";
 
 export interface ProductInput {
@@ -92,19 +93,56 @@ function toPayload(input: ProductInput, listingId: string, listingType: ProductL
   };
 }
 
+export interface ProductSaveResult {
+  ok: boolean;
+  error?: string;
+  /** Non-blocking status from validateProductListing (Partner Production
+   * Quality System — lib/validation/partner-quality.ts), set on every save,
+   * hidden or visible — informational only, never used on its own to stop
+   * a draft from saving. A `blocked` status DOES stop the write when it
+   * accompanies a save that would make the product visible; see
+   * productQualityGate below for the one place that rule lives. */
+  qualityStatus?: QualityStatus;
+  qualityIssues?: string[];
+}
+
+/**
+ * The one place "draft always saves, publishing blocks on hard errors
+ * only, warnings never block" is decided — both createProduct and
+ * updateProduct call this instead of duplicating the rule. Saving hidden
+ * (isHidden: true) never blocks regardless of errors, which is what lets
+ * an incomplete product exist as a draft; isHidden: false is the one save
+ * a hard error can block.
+ */
+function productQualityGate(
+  input: ProductInput
+): { blocked: false; qualityStatus: QualityStatus; qualityIssues: string[] } | { blocked: true; error: string; qualityStatus: QualityStatus; qualityIssues: string[] } {
+  const quality = validateProductListing({ name: input.name, price: input.price ?? null });
+  const qualityIssues = [...quality.errors, ...quality.warnings].map((issue) => issue.message);
+  const qualityStatus = qualityStatusFor(quality);
+
+  if (!input.isHidden && quality.errors.length > 0) {
+    return { blocked: true, error: `Can't publish yet: ${quality.errors.map((e) => e.message).join(" ")}`, qualityStatus, qualityIssues };
+  }
+  return { blocked: false, qualityStatus, qualityIssues };
+}
+
 export async function createProduct(
   listingId: string,
   input: ProductInput,
   revalidatePaths: string[],
   listingType: ProductListingType = "city_service"
-): Promise<{ ok: boolean; error?: string }> {
+): Promise<ProductSaveResult> {
   const supabase = await assertCanManageProduct(listingId, listingType);
+
+  const gate = productQualityGate(input);
+  if (gate.blocked) return { ok: false, error: gate.error, qualityStatus: gate.qualityStatus, qualityIssues: gate.qualityIssues };
 
   const { error } = await supabase.from("products").insert(toPayload(input, listingId, listingType) as never);
   if (error) return { ok: false, error: error.message };
 
   for (const path of revalidatePaths) revalidatePath(path);
-  return { ok: true };
+  return { ok: true, qualityStatus: gate.qualityStatus, qualityIssues: gate.qualityIssues };
 }
 
 export async function updateProduct(
@@ -113,8 +151,11 @@ export async function updateProduct(
   input: ProductInput,
   revalidatePaths: string[],
   listingType: ProductListingType = "city_service"
-): Promise<{ ok: boolean; error?: string }> {
+): Promise<ProductSaveResult> {
   const supabase = await assertCanManageProduct(listingId, listingType);
+
+  const gate = productQualityGate(input);
+  if (gate.blocked) return { ok: false, error: gate.error, qualityStatus: gate.qualityStatus, qualityIssues: gate.qualityIssues };
 
   const { error } = await supabase
     .from("products")
@@ -123,7 +164,7 @@ export async function updateProduct(
   if (error) return { ok: false, error: error.message };
 
   for (const path of revalidatePaths) revalidatePath(path);
-  return { ok: true };
+  return { ok: true, qualityStatus: gate.qualityStatus, qualityIssues: gate.qualityIssues };
 }
 
 export async function deleteProduct(

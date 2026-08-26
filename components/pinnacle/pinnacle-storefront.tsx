@@ -26,7 +26,7 @@ import type { CityService, Product } from "@/types";
  * Contact page is Tanzania-branch information, not Hargeisa's), so it's
  * used here ONLY as a product/brand source, never for contact details —
  * phone/WhatsApp/location below all come from this listing's own verified
- * `city_services` row instead (via `theme.phone`/`service.mapsUrl`).
+ * `city_services` row instead (via `service.phone`/`.whatsapp`/`.mapsUrl`).
  *
  * No price is ever rendered anywhere on this page — Hargeisa-specific
  * pricing isn't published anywhere verified, and the business explicitly
@@ -52,7 +52,7 @@ export async function PinnacleStorefront({
   // getDirections" to customers instead of translated text.
   const tl = await getTranslations({ locale, namespace: "listings" });
 
-  const whatsappNumber = theme.whatsapp ?? theme.phone;
+  const whatsappNumber = service.whatsapp ?? service.phone ?? undefined;
   const productWhatsappHref = (productName: string) =>
     whatsappNumber ? toWhatsAppHref(whatsappNumber, t("whatsappProductMessage", { product: productName })) : undefined;
   const generalWhatsappHref = whatsappNumber ? toWhatsAppHref(whatsappNumber, t("whatsappGeneralMessage")) : undefined;
@@ -306,8 +306,8 @@ export async function PinnacleStorefront({
             </span>
             <h2 className="mt-3 font-display text-2xl font-bold">{t("visitTitle")}</h2>
             <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
-              {theme.phone && (
-                <PrimaryButton href={`tel:${theme.phone}`} size="md">
+              {service.phone && (
+                <PrimaryButton href={`tel:${service.phone}`} size="md">
                   {th("call")}
                 </PrimaryButton>
               )}

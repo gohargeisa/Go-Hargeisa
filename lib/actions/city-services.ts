@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { logActivity } from "./activity";
 import { upgradeToBusinessOwner } from "./claims";
 import { hasBusinessGrantPermission } from "@/lib/data/access-control";
+import { validatePartnerListing } from "@/lib/validation/partner-quality";
 import type { GalleryImage, MediaVideo, OpeningHoursGroup } from "@/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -482,6 +483,25 @@ export async function toggleCityServiceVisibility(
   nextStatus: "published" | "archived"
 ): Promise<{ ok: boolean; error?: string }> {
   const supabase = await assertOwner();
+
+  // Pre-publish quality gate (Partner Production Quality System — see
+  // lib/validation/partner-quality.ts) — same additive, publish-only check
+  // toggleListingVisibility runs for hotels/restaurants/cafes. city_services
+  // is the table most current partners (Pinnacle, Mama Baby Care, Lavender
+  // Flowers, ...) actually live in, so this is the one that matters most.
+  if (nextStatus === "published") {
+    const { data: row } = await supabase
+      .from("city_services")
+      .select("name, description, phone, cover_image:image, gallery, lat, lng")
+      .eq("id", id)
+      .single();
+    if (row) {
+      const { errors } = validatePartnerListing(row as never);
+      if (errors.length > 0) {
+        return { ok: false, error: `Can't publish yet: ${errors.map((e) => e.message).join(" ")}` };
+      }
+    }
+  }
 
   const { error } = await supabase.from("city_services").update({ status: nextStatus } as never).eq("id", id);
   if (error) return { ok: false, error: error.message };

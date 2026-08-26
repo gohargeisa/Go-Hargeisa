@@ -22,7 +22,7 @@ import { FLORMAR_CATEGORY_TILES } from "@/lib/config/flormar-categories";
 import type { PartnerTheme } from "@/lib/config/partner-themes";
 import type { Locale } from "@/lib/i18n/config";
 import type { AddToCartBusiness } from "@/lib/cart/cart-context";
-import type { Product } from "@/types";
+import type { CityService, Product } from "@/types";
 
 const WISHLIST_STORAGE_KEY = "flormar-preview-wishlist";
 
@@ -124,7 +124,17 @@ const EDIT_LOOKS: { key: string; titleKey: "lookEveryday" | "lookSoftGlam" | "lo
   { key: "defined-eyes", titleKey: "lookDefinedEyes", descriptionKey: "lookDefinedEyesBody", match: ["Baked Eyeshadow", "Angled Brow Pencil"] },
 ];
 
-export function FlormarStorefront({ theme, locale, products: catalogProducts }: { theme: PartnerTheme; locale: Locale; products: Product[] }) {
+export function FlormarStorefront({
+  theme,
+  service,
+  locale,
+  products: catalogProducts,
+}: {
+  theme: PartnerTheme;
+  service: CityService;
+  locale: Locale;
+  products: Product[];
+}) {
   const t = useTranslations("flormarPreview");
   const tp = useTranslations("products");
   const tc = useTranslations("cart");
@@ -985,18 +995,16 @@ export function FlormarStorefront({ theme, locale, products: catalogProducts }: 
       </section>
 
       {/* 11 — Store information + Contact/Follow. Physical location is
-          still genuinely unconfirmed (storeInfoLocation stays as-is), but
-          phone/WhatsApp/Instagram/Facebook/TikTok now render as real,
-          working links — sourced from theme.phone/whatsapp/instagram/
-          facebook/tiktok (lib/config/partner-themes.ts), the same
-          centralized per-partner config every other Flormar visual asset
-          already lives in, via the exact same SocialLinks component every
-          hotel/restaurant/cafe/city_service detail page already uses for
-          this — no new/duplicate contact system. Those config values are
-          explicitly placeholders pending the business's real details (see
-          that file's own comment) — storeInfoPending stays visible right
-          below the buttons as an honest label, not deleted just because
-          the buttons now work. */}
+          still genuinely unconfirmed (storeInfoLocation stays as-is).
+          Phone/WhatsApp/Instagram/Facebook/TikTok read straight off this
+          listing's own `city_services` row (service.phone/.whatsapp/
+          .socialInstagram/.socialFacebook/.socialTiktok) via the exact same
+          SocialLinks component every hotel/restaurant/cafe/city_service
+          detail page already uses — no new/duplicate contact system, and no
+          hardcoded per-partner config to drift out of sync. None of those
+          fields are filled in on the row yet, so every button below simply
+          doesn't render — storeInfoPending stays visible as an honest label
+          for that, not deleted just because the buttons could work. */}
       <section className="bg-white py-16 dark:bg-white/[0.03] sm:py-24">
         <div className="container-px mx-auto max-w-xl text-center">
           <Reveal>
@@ -1012,18 +1020,18 @@ export function FlormarStorefront({ theme, locale, products: catalogProducts }: 
             </p>
 
             <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
-              {theme.phone && (
+              {service.phone && (
                 <a
-                  href={`tel:${theme.phone}`}
+                  href={`tel:${service.phone}`}
                   className="rounded-full px-6 py-3 text-sm font-bold text-white shadow-lg transition-all duration-300 hover:-translate-y-0.5"
                   style={{ backgroundColor: theme.accentStrong }}
                 >
                   {th("call")}
                 </a>
               )}
-              {theme.whatsapp && (
+              {service.whatsapp && (
                 <a
-                  href={toWhatsAppHref(theme.whatsapp)}
+                  href={toWhatsAppHref(service.whatsapp)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="rounded-full border px-6 py-3 text-sm font-bold transition-all duration-300 hover:-translate-y-0.5"
@@ -1035,9 +1043,9 @@ export function FlormarStorefront({ theme, locale, products: catalogProducts }: 
             </div>
 
             <SocialLinks
-              instagram={theme.instagram}
-              facebook={theme.facebook}
-              tiktok={theme.tiktok}
+              instagram={service.socialInstagram}
+              facebook={service.socialFacebook}
+              tiktok={service.socialTiktok}
               labels={{
                 instagram: td("followInstagram"),
                 facebook: td("followFacebook"),

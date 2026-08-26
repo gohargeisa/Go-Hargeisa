@@ -21,6 +21,7 @@ import { PinListingButton } from "@/components/shared/pin-listing-button";
 import { DeleteListingButton } from "@/components/shared/delete-listing-button";
 import { AssignedOwnerField, type AssignedOwner } from "@/components/admin/assigned-owner-field";
 import { SUBSCRIPTION_PLAN_ORDER, SUBSCRIPTION_PLANS, type SubscriptionPlanId } from "@/lib/config/subscription-plans";
+import type { QualityStatus } from "@/lib/validation/partner-quality";
 import type { Locale } from "@/lib/i18n/config";
 import type { OwnableListingType, SubscriptionStatus } from "@/types";
 
@@ -93,12 +94,29 @@ export interface PartnerRow {
   /** Overrides the plan tier's default price (lib/config/subscription-plans.ts) for this one partner. null = use the plan's standard price. */
   customPriceUsd: number | null;
   notes: PartnerNote[];
+  /** Partner Production Quality System (lib/validation/partner-quality.ts) —
+   * internal-only, never shown to customers, see the badge below. */
+  qualityStatus: QualityStatus;
+  qualityIssues: string[];
 }
 
 const STATUS_STYLE: Record<SubscriptionStatus, string> = {
   active: "bg-secondary/10 text-secondary-700 dark:text-sand/70",
   paused: "bg-amber-500/10 text-amber-700 dark:text-amber-400",
   cancelled: "bg-ink/10 text-ink/60 dark:bg-white/10 dark:text-sand/60",
+};
+
+// Partner Production Quality System (lib/validation/partner-quality.ts) —
+// internal-only signal, never rendered anywhere a customer can reach.
+const QUALITY_STYLE: Record<QualityStatus, string> = {
+  ready: "bg-secondary/10 text-secondary-700 dark:text-sand/70",
+  needsReview: "bg-amber-500/10 text-amber-700 dark:text-amber-400",
+  blocked: "bg-red-100 text-red-700 dark:bg-red-400/15 dark:text-red-300",
+};
+const QUALITY_LABEL_KEY: Record<QualityStatus, "qualityReady" | "qualityNeedsReview" | "qualityBlocked"> = {
+  ready: "qualityReady",
+  needsReview: "qualityNeedsReview",
+  blocked: "qualityBlocked",
 };
 
 function todayIso(): string {
@@ -291,6 +309,12 @@ export function PartnersList({ locale, rows }: { locale: Locale; rows: PartnerRo
                   }`}
                 >
                   {row.partnerStatus === "official" ? t("partnerStatusOfficial") : t("partnerStatusTrial")}
+                </span>
+                <span
+                  className={`rounded-full px-2.5 py-1 text-xs font-semibold ${QUALITY_STYLE[row.qualityStatus]}`}
+                  title={row.qualityIssues.length > 0 ? row.qualityIssues.join(" ") : undefined}
+                >
+                  {t(QUALITY_LABEL_KEY[row.qualityStatus])}
                 </span>
                 {row.isSuspended && (
                   <span className="rounded-full bg-red-100 px-2.5 py-1 text-xs font-bold text-red-700 dark:bg-red-400/15 dark:text-red-300">
