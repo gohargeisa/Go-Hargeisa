@@ -141,6 +141,8 @@ export function applyCityServiceCategoryGroups(categories: Category[]): Category
       supportsNewFeatures: false,
       supportsProducts: false,
       supportsAppointments: false,
+      supportsPurchaseRequests: false,
+      supportsEventRequests: false,
       isStandaloneSection: false,
       businessCount,
       createdAt: now,
