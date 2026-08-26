@@ -71,7 +71,7 @@ export async function LocationMapSection({
         </h2>
         <div className="overflow-hidden rounded-xl3 border border-ink/8 bg-white dark:border-white/10 dark:bg-white/[0.03]">
           {embedSrc && (
-            <div className="relative aspect-[16/9] w-full sm:aspect-[21/9]">
+            <div className="relative h-[380px] w-full sm:h-auto sm:aspect-[21/9]">
               <iframe
                 src={embedSrc}
                 title={`${name} — ${td("location")}`}

@@ -40,7 +40,14 @@ export function GroupedProductsSection({
           <h3 className="mb-4 font-display text-lg font-bold text-ink dark:text-sand">{group.label}</h3>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {group.items.map((product) => (
-              <ProductCard key={product.id} product={product} business={business} locale={locale} onOpenDetails={() => setSelected(product)} />
+              <ProductCard
+                key={product.id}
+                product={product}
+                business={business}
+                locale={locale}
+                onOpenDetails={() => setSelected(product)}
+                variant="compact"
+              />
             ))}
           </div>
         </div>

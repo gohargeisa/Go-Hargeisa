@@ -344,7 +344,7 @@ export default async function CafeDetailPage({
       </div>
 
       <div className="container-px mx-auto grid gap-10 pb-28 pt-10 lg:grid-cols-3 lg:gap-12 lg:pb-10">
-        <div className="space-y-14 lg:col-span-2">
+        <div className="min-w-0 space-y-14 lg:col-span-2">
           <Reveal>
             {partnerTheme ? (
               <PremiumPartnerStory

@@ -245,7 +245,7 @@ export default async function RestaurantDetailPage({
       </div>
 
       <div className="container-px mx-auto grid gap-10 pb-28 pt-10 lg:grid-cols-3 lg:gap-12 lg:pb-10">
-        <div className="space-y-14 lg:col-span-2">
+        <div className="min-w-0 space-y-14 lg:col-span-2">
           <Reveal>
             <section id="overview" aria-labelledby="overview-heading" className="scroll-mt-36">
               <h2 id="overview-heading" className="mb-5 font-display text-2xl font-semibold">
@@ -380,7 +380,7 @@ export default async function RestaurantDetailPage({
                 <h2 id="reservation-heading" className="mb-5 font-display text-2xl font-semibold">
                   {t("reserveTable")}
                 </h2>
-                <div className="rounded-xl3 border border-ink/8 bg-white p-6 dark:border-white/10 dark:bg-white/[0.03] sm:p-8">
+                <div className="rounded-xl3 border border-ink/8 bg-white p-5 dark:border-white/10 dark:bg-white/[0.03] sm:p-8">
                   <p className="mb-5 max-w-lg text-sm leading-relaxed text-ink/65 dark:text-sand/65">
                     {td("reservationSectionBody")}
                   </p>

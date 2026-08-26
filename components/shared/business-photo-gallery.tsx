@@ -2,10 +2,18 @@
 
 import { useMemo, useState } from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import type { GalleryCategoryOption } from "@/lib/utils/gallery-categories";
 import { Lightbox, type LightboxSlide } from "@/components/shared/lightbox";
 import { WhatsAppIcon } from "@/components/shared/brand-icons";
 import type { GalleryImage } from "@/types";
+
+/** Inline grid stays scannable instead of growing the page by thousands of
+ * pixels on a business with a large photo library — the full set is still
+ * one tap away via the existing Lightbox (already fed the complete
+ * `slides` array below), not truncated data, just truncated inline
+ * rendering. */
+const GRID_CAP = 8;
 
 function pillClass(active: boolean) {
   return `shrink-0 snap-start whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
@@ -46,6 +54,8 @@ export function BusinessPhotoGallery({
    * (e.g. "WhatsApp"). */
   whatsappButtonLabel?: string;
 }) {
+  const th = useTranslations("hotelDetail");
+
   const categoriesPresent = useMemo(() => {
     const present = new Set<string>();
     for (const img of images) present.add(img.category ?? "other");
@@ -63,13 +73,15 @@ export function BusinessPhotoGallery({
     alt: img.alt || `${alt} — photo ${i + 1}`,
     caption: img.caption,
   }));
+  const visible = filtered.slice(0, GRID_CAP);
+  const remainingCount = filtered.length - visible.length;
 
   return (
     <div>
       {categoriesPresent.length > 1 && (
         <div className="mb-5 flex snap-x snap-proximity gap-2 overflow-x-auto pb-1 scrollbar-none sm:flex-wrap sm:overflow-visible sm:pb-0">
           <button type="button" onClick={() => setActive("all")} className={pillClass(active === "all")}>
-            All ({images.length})
+            {th("all")} ({images.length})
           </button>
           {categoriesPresent.map((c) => (
             <button
@@ -85,14 +97,21 @@ export function BusinessPhotoGallery({
       )}
 
       <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4">
-        {filtered.map((img, i) => (
+        {visible.map((img, i) => {
+          const isLastWithMore = remainingCount > 0 && i === visible.length - 1;
+          return (
           <button
             key={`${img.url}-${i}`}
             type="button"
             onClick={() => setOpenAt(i)}
-            aria-label={`View photo ${i + 1}`}
+            aria-label={isLastWithMore ? th("viewAllPhotos") : th("goToPhoto", { number: i + 1 })}
             className="group relative aspect-square overflow-hidden rounded-xl2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           >
+            {isLastWithMore && (
+              <div className="absolute inset-0 z-10 flex items-center justify-center bg-ink/55 text-lg font-bold text-white">
+                +{remainingCount}
+              </div>
+            )}
             <Image
               src={img.url}
               alt={img.alt || `${alt} — photo ${i + 1}`}
@@ -101,7 +120,8 @@ export function BusinessPhotoGallery({
               className="object-cover transition-transform duration-500 group-hover:scale-105"
             />
           </button>
-        ))}
+          );
+        })}
       </div>
 
       {whatsappHref && whatsappPromptText && whatsappButtonLabel && (

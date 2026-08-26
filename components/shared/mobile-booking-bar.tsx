@@ -54,9 +54,7 @@ export function MobileBookingBar({
   const [copied, setCopied] = useState(false);
 
   const whatsappNumber = phone || whatsappFallback;
-  const whatsappHref = whatsappNumber
-    ? toWhatsAppHref(whatsappNumber, `Hi, I'd like to know more about ${name}.`)
-    : undefined;
+  const whatsappHref = whatsappNumber ? toWhatsAppHref(whatsappNumber, t("whatsappGenericInquiry", { name })) : undefined;
 
   async function onShare() {
     const url = typeof window !== "undefined" ? window.location.href : "";

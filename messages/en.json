@@ -2715,6 +2715,7 @@
     "whatsapp": "WhatsApp",
     "share": "Share",
     "save": "Save",
+    "whatsappGenericInquiry": "Hi, I'd like to know more about {name}.",
     "guests": "Guests",
     "contactForPricing": "Contact for pricing",
     "perNight": "/night",
