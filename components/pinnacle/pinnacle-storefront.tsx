@@ -35,10 +35,23 @@ import type { CityService, Product } from "@/types";
  * everything else) for admin/future-commerce use only; every card's sole
  * CTA routes straight to WhatsApp instead. See PinnacleProductGrid, which
  * also owns search/brand/gender filtering and progressive "Load More"
- * pagination for the ~198-item public catalog (a handful of the 213 total
- * rows are hidden — is_hidden = true, never deleted — where no verified
- * real product photo could be found; see
- * supabase/migrations/20260907000008_pinnacle_image_audit_and_no_public_pricing.sql).
+ * pagination for the ~190-item public catalog (23 of the 213 total rows
+ * are hidden — is_hidden = true, never deleted, still available for admin
+ * review/correction) — see
+ * supabase/migrations/20260907000008_pinnacle_image_audit_and_no_public_pricing.sql
+ * and .../20260907000010_pinnacle_visual_image_audit.sql.
+ *
+ * IMPORTANT for any future product import from pinnacleperfumes.com (or a
+ * similar third-party source): an HTTP-200 + non-placeholder-byte-size
+ * check on an image URL is NECESSARY but NOT SUFFICIENT — that source's
+ * own Odoo catalog was found to serve a real, normal-looking, but WRONG
+ * photo for at least one product (a "VCA Orchidée Vanille" listing was
+ * pointing at a genuine Chanel Coco Mademoiselle photo — confirmed by
+ * downloading and viewing the exact live image). Only an actual visual
+ * comparison (download + view + read the bottle/box label against
+ * brand + fragrance line + concentration + size) catches this class of
+ * bug; see the 000010 migration's own header comment for the full audit
+ * methodology and results.
  */
 export async function PinnacleStorefront({
   theme,
