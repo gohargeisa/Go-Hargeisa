@@ -44,6 +44,12 @@ export interface OwnedListing {
    * business-sidebar.tsx. */
   supportsProducts: boolean;
   supportsAppointments: boolean;
+  /** Same category-capability-flag pattern as supportsProducts — gates the
+   * "Requests"/"Event Requests" nav items in business-sidebar.tsx. Always
+   * false for hotel/restaurant/cafe, which have no purchase/event-request
+   * capability flags of their own. */
+  supportsPurchaseRequests: boolean;
+  supportsEventRequests: boolean;
   /** city_service listings only — see lib/utils/appointment-domain.ts,
    * which uses this to decide whether the shared doctors/appointments
    * engine's dashboard copy should read as medical (Hospital/Clinic) or
@@ -79,6 +85,7 @@ function hotelRowToListing(h: HotelQueryRow, access: ListingAccess): OwnedListin
     serviceTags: h.amenities ?? [], hasDescription: Boolean(h.description?.trim()),
     galleryCount: galleryLength(h.gallery), partnerStatus: h.partner_status,
     isSuspended: h.is_suspended ?? false, supportsProducts: false, supportsAppointments: false,
+    supportsPurchaseRequests: false, supportsEventRequests: false,
     ...access,
   };
 }
@@ -92,6 +99,7 @@ function restaurantRowToListing(r: RestaurantQueryRow, access: ListingAccess): O
     serviceTags: r.cuisine ?? [], hasDescription: Boolean(r.description?.trim()),
     galleryCount: galleryLength(r.gallery), partnerStatus: r.partner_status,
     isSuspended: r.is_suspended ?? false, supportsProducts: r.ordering_enabled ?? false, supportsAppointments: false,
+    supportsPurchaseRequests: false, supportsEventRequests: false,
     ...access,
   };
 }
@@ -105,6 +113,7 @@ function cafeRowToListing(c: CafeQueryRow, access: ListingAccess): OwnedListing 
     serviceTags: c.special_drinks ?? [], hasDescription: Boolean(c.description?.trim()),
     galleryCount: galleryLength(c.gallery), partnerStatus: c.partner_status,
     isSuspended: c.is_suspended ?? false, supportsProducts: c.ordering_enabled ?? false, supportsAppointments: false,
+    supportsPurchaseRequests: false, supportsEventRequests: false,
     ...access,
   };
 }
@@ -127,6 +136,7 @@ function serviceRowToListing(s: ServiceQueryRow, access: ListingAccess): OwnedLi
     galleryCount: galleryLength(s.gallery), partnerStatus: "official",
     isSuspended: s.is_suspended ?? false,
     supportsProducts: category?.supports_products ?? false, supportsAppointments: category?.supports_appointments ?? false,
+    supportsPurchaseRequests: category?.supports_purchase_requests ?? false, supportsEventRequests: category?.supports_event_requests ?? false,
     categorySlug: category?.slug,
     ...access,
   };
@@ -148,12 +158,17 @@ function cityServiceRowToListing(cs: CityServiceQueryRow, access: ListingAccess)
     galleryCount: galleryLength(cs.gallery), partnerStatus: "official",
     isSuspended: cs.is_suspended ?? false,
     supportsProducts: category?.supports_products ?? false, supportsAppointments: category?.supports_appointments ?? false,
+    supportsPurchaseRequests: category?.supports_purchase_requests ?? false, supportsEventRequests: category?.supports_event_requests ?? false,
     categorySlug: category?.slug,
     ...access,
   };
 }
 
-type CategoryJoin = { supports_products: boolean; supports_appointments: boolean; slug: string } | null;
+type CategoryJoin = {
+  supports_products: boolean; supports_appointments: boolean;
+  supports_purchase_requests: boolean; supports_event_requests: boolean;
+  slug: string;
+} | null;
 type HotelQueryRow = Database["public"]["Tables"]["hotels"]["Row"];
 type RestaurantQueryRow = Database["public"]["Tables"]["restaurants"]["Row"];
 type CafeQueryRow = Database["public"]["Tables"]["cafes"]["Row"];
@@ -176,10 +191,10 @@ async function _getOwnedListings(userId: string): Promise<OwnedListing[]> {
     supabase.from("hotels").select("*").eq("owner_id", userId),
     supabase.from("restaurants").select("*").eq("owner_id", userId),
     supabase.from("cafes").select("*").eq("owner_id", userId),
-    supabase.from("services").select("*, categories(supports_products, supports_appointments, slug)").eq("owner_id", userId),
+    supabase.from("services").select("*, categories(supports_products, supports_appointments, supports_purchase_requests, supports_event_requests, slug)").eq("owner_id", userId),
     supabase
       .from("city_services")
-      .select("*, categories(supports_products, supports_appointments, slug)")
+      .select("*, categories(supports_products, supports_appointments, supports_purchase_requests, supports_event_requests, slug)")
       .eq("owner_id", userId),
   ]);
 
@@ -227,10 +242,10 @@ async function _getGrantedListings(userId: string): Promise<OwnedListing[]> {
     idsByType.restaurant.length ? supabase.from("restaurants").select("*").in("id", idsByType.restaurant) : Promise.resolve({ data: [] as RestaurantQueryRow[] }),
     idsByType.cafe.length ? supabase.from("cafes").select("*").in("id", idsByType.cafe) : Promise.resolve({ data: [] as CafeQueryRow[] }),
     idsByType.service.length
-      ? supabase.from("services").select("*, categories(supports_products, supports_appointments, slug)").in("id", idsByType.service)
+      ? supabase.from("services").select("*, categories(supports_products, supports_appointments, supports_purchase_requests, supports_event_requests, slug)").in("id", idsByType.service)
       : Promise.resolve({ data: [] as ServiceQueryRow[] }),
     idsByType.city_service.length
-      ? supabase.from("city_services").select("*, categories(supports_products, supports_appointments, slug)").in("id", idsByType.city_service)
+      ? supabase.from("city_services").select("*, categories(supports_products, supports_appointments, supports_purchase_requests, supports_event_requests, slug)").in("id", idsByType.city_service)
       : Promise.resolve({ data: [] as CityServiceQueryRow[] }),
   ]);
 

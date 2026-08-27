@@ -1,5 +1,5 @@
 import type { Database } from "@/types/database";
-import type { Hotel, HotelRoom, Restaurant, Cafe, Service, Attraction, EventItem, CityService, Article, GalleryImage, Review, BusinessOffer, MediaVideo, Notification, NotificationCategory, NotificationSeverity, Category, Product, ProductVariant, ProductOption, ProductAddon, TaxPolicy, Department, Doctor, Appointment, OpeningHoursGroup, RestaurantMenuItem, TableReservation, ProductOrder, OrderItem, BusinessAccessGrant, BusinessPermissions, TeamPlatformPermissionsGrant, PlatformPermissions, HonoraryMember, OrderableListingType } from "@/types";
+import type { Hotel, HotelRoom, Restaurant, Cafe, Service, Attraction, EventItem, CityService, Article, GalleryImage, Review, BusinessOffer, MediaVideo, Notification, NotificationCategory, NotificationSeverity, Category, Product, ProductVariant, ProductOption, ProductAddon, TaxPolicy, Department, Doctor, Appointment, OpeningHoursGroup, RestaurantMenuItem, TableReservation, ProductOrder, OrderItem, BusinessAccessGrant, BusinessPermissions, TeamPlatformPermissionsGrant, PlatformPermissions, HonoraryMember, OrderableListingType, PurchaseRequest, PurchaseRequestStatusHistoryEntry, EventRequest, EventRequestStatusHistoryEntry } from "@/types";
 
 type HotelRow = Database["public"]["Tables"]["hotels"]["Row"];
 type HotelRoomRow = Database["public"]["Tables"]["hotel_rooms"]["Row"];
@@ -21,6 +21,14 @@ type DepartmentRow = Database["public"]["Tables"]["departments"]["Row"];
 type DoctorRow = Database["public"]["Tables"]["doctors"]["Row"];
 type AppointmentRow = Database["public"]["Tables"]["appointments"]["Row"];
 type TableReservationRow = Database["public"]["Tables"]["table_reservations"]["Row"];
+type PurchaseRequestRow = Database["public"]["Tables"]["purchase_requests"]["Row"];
+/** Shape returned by the customer-facing queries in lib/data/purchase-requests.ts,
+ * which explicitly select every column except partner_notes_internal — see
+ * mapPurchaseRequestForCustomer below. */
+export type PurchaseRequestCustomerRow = Omit<PurchaseRequestRow, "partner_notes_internal">;
+type PurchaseRequestStatusHistoryRow = Database["public"]["Tables"]["purchase_request_status_history"]["Row"];
+type EventRequestRow = Database["public"]["Tables"]["event_requests"]["Row"];
+type EventRequestStatusHistoryRow = Database["public"]["Tables"]["event_request_status_history"]["Row"];
 type ProductOrderRow = Database["public"]["Tables"]["product_orders"]["Row"];
 type OrderItemRow = Database["public"]["Tables"]["order_items"]["Row"];
 type BusinessAccessGrantRow = Database["public"]["Tables"]["business_access_grants"]["Row"];
@@ -291,6 +299,128 @@ export function mapTableReservation(row: TableReservationRow): TableReservation 
     status: row.status,
     reservationReference: row.reservation_reference,
     userId: row.user_id ?? undefined,
+    createdAt: row.created_at,
+  };
+}
+
+export function mapPurchaseRequest(row: PurchaseRequestRow): PurchaseRequest {
+  return {
+    id: row.id,
+    listingType: row.listing_type as PurchaseRequest["listingType"],
+    listingId: row.listing_id,
+    userId: row.user_id,
+    customerName: row.customer_name,
+    customerPhone: row.customer_phone,
+    productName: row.product_name,
+    productUrl: row.product_url ?? undefined,
+    platform: row.platform,
+    quantity: row.quantity,
+    size: row.size ?? undefined,
+    color: row.color ?? undefined,
+    variant: row.variant ?? undefined,
+    deliveryLocation: row.delivery_location,
+    notes: row.notes ?? undefined,
+    imageUrl: row.image_url ?? undefined,
+    status: row.status,
+    quotedProductCost: row.quoted_product_cost ?? undefined,
+    quotedShippingCost: row.quoted_shipping_cost ?? undefined,
+    quotedCustomsFee: row.quoted_customs_fee ?? undefined,
+    quotedServiceFee: row.quoted_service_fee ?? undefined,
+    quotedTotal: row.quoted_total ?? undefined,
+    quoteExpiresAt: row.quote_expires_at ?? undefined,
+    partnerNotesCustomer: row.partner_notes_customer ?? undefined,
+    partnerNotesInternal: row.partner_notes_internal ?? undefined,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+/**
+ * Customer-facing variant of mapPurchaseRequest — takes a row shape that
+ * structurally omits partner_notes_internal (the business's private note on
+ * a request, never meant to reach the customer) rather than accepting the
+ * full row and dropping the field afterward, so there's nothing to
+ * accidentally forget to strip: the input type itself has no
+ * partner_notes_internal to read. Pairs with the explicit
+ * (not `select("*")`) column lists in lib/data/purchase-requests.ts's
+ * getMyPurchaseRequestById/getMyPurchaseRequests.
+ */
+export function mapPurchaseRequestForCustomer(row: PurchaseRequestCustomerRow): PurchaseRequest {
+  return {
+    id: row.id,
+    listingType: row.listing_type as PurchaseRequest["listingType"],
+    listingId: row.listing_id,
+    userId: row.user_id,
+    customerName: row.customer_name,
+    customerPhone: row.customer_phone,
+    productName: row.product_name,
+    productUrl: row.product_url ?? undefined,
+    platform: row.platform,
+    quantity: row.quantity,
+    size: row.size ?? undefined,
+    color: row.color ?? undefined,
+    variant: row.variant ?? undefined,
+    deliveryLocation: row.delivery_location,
+    notes: row.notes ?? undefined,
+    imageUrl: row.image_url ?? undefined,
+    status: row.status,
+    quotedProductCost: row.quoted_product_cost ?? undefined,
+    quotedShippingCost: row.quoted_shipping_cost ?? undefined,
+    quotedCustomsFee: row.quoted_customs_fee ?? undefined,
+    quotedServiceFee: row.quoted_service_fee ?? undefined,
+    quotedTotal: row.quoted_total ?? undefined,
+    quoteExpiresAt: row.quote_expires_at ?? undefined,
+    partnerNotesCustomer: row.partner_notes_customer ?? undefined,
+    partnerNotesInternal: undefined,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+export function mapPurchaseRequestStatusHistory(row: PurchaseRequestStatusHistoryRow): PurchaseRequestStatusHistoryEntry {
+  return {
+    id: row.id,
+    requestId: row.request_id,
+    oldStatus: row.old_status ?? undefined,
+    newStatus: row.new_status,
+    changedBy: row.changed_by ?? undefined,
+    note: row.note ?? undefined,
+    createdAt: row.created_at,
+  };
+}
+
+export function mapEventRequest(row: EventRequestRow): EventRequest {
+  return {
+    id: row.id,
+    listingType: row.listing_type as EventRequest["listingType"],
+    listingId: row.listing_id,
+    userId: row.user_id,
+    customerName: row.customer_name,
+    customerPhone: row.customer_phone,
+    eventType: row.event_type,
+    eventDate: row.event_date ?? undefined,
+    eventLocation: row.event_location ?? undefined,
+    guestCount: row.guest_count ?? undefined,
+    budgetRange: row.budget_range ?? undefined,
+    servicesRequired: row.services_required ?? undefined,
+    notes: row.notes ?? undefined,
+    imageUrl: row.image_url ?? undefined,
+    status: row.status,
+    proposalDetails: row.proposal_details ?? undefined,
+    proposalCost: row.proposal_cost ?? undefined,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+export function mapEventRequestStatusHistory(row: EventRequestStatusHistoryRow): EventRequestStatusHistoryEntry {
+  return {
+    id: row.id,
+    requestId: row.request_id,
+    oldStatus: row.old_status ?? undefined,
+    newStatus: row.new_status,
+    changedBy: row.changed_by ?? undefined,
+    note: row.note ?? undefined,
     createdAt: row.created_at,
   };
 }

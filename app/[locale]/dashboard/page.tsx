@@ -10,6 +10,8 @@ import { getSavedTripsForUser } from "@/lib/data/saved-trips";
 import { getReviewsForUser } from "@/lib/data/reviews";
 import { getMyBookings, getMyAppointments, getOwnedListings, getMyRecentMessages } from "@/lib/data/business";
 import { getUserNotifications, getUnreadNotificationCount } from "@/lib/actions/notifications";
+import { getMyPurchaseRequests } from "@/lib/data/purchase-requests";
+import { getMyEventRequests } from "@/lib/data/event-requests";
 import { DashboardTabs } from "@/components/dashboard/dashboard-tabs";
 import { SupportCard } from "@/components/business/support-card";
 
@@ -40,7 +42,7 @@ export default async function DashboardPage({
         : (data as unknown as Database["public"]["Tables"]["profiles"]["Row"]);
   }
 
-  const [favorites, trips, reviews, bookings, appointments, notifications, unreadNotifications, ownedListings] = user
+  const [favorites, trips, reviews, bookings, appointments, notifications, unreadNotifications, ownedListings, purchaseRequests, eventRequests] = user
     ? await Promise.all([
         getFavoritesForUser(user.id),
         getSavedTripsForUser(user.id),
@@ -50,8 +52,10 @@ export default async function DashboardPage({
         getUserNotifications(20),
         getUnreadNotificationCount(),
         getOwnedListings(user.id),
+        getMyPurchaseRequests(),
+        getMyEventRequests(),
       ])
-    : [[], [], [], [], [], [], 0, []];
+    : [[], [], [], [], [], [], 0, [], [], []];
 
   // Only fetch messages once we know whether there's anything to fetch them
   // for — an unconditional getMyRecentMessages() would otherwise still run
@@ -112,6 +116,8 @@ export default async function DashboardPage({
         ownedListings={ownedListings}
         messages={messages}
         unreadMessages={unreadMessages}
+        purchaseRequests={purchaseRequests}
+        eventRequests={eventRequests}
         supportSlot={<SupportCard ownerName={userName} ownerEmail={user?.email ?? ""} />}
       />
     </section>

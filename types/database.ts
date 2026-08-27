@@ -281,6 +281,51 @@ type TableReservationRow = {
   created_at: string; updated_at: string;
 };
 
+type PurchaseRequestStatus =
+  | "pending" | "reviewing" | "quote_ready" | "approved" | "declined"
+  | "ordered" | "shipped" | "in_transit" | "ready_for_delivery" | "completed"
+  | "cancelled" | "rejected";
+
+type PurchaseRequestRow = {
+  id: string; listing_type: string; listing_id: string; user_id: string;
+  customer_name: string; customer_phone: string;
+  product_name: string; product_url: string | null;
+  platform: "shein" | "amazon" | "noon" | "iherb" | "alibaba" | "other";
+  quantity: number; size: string | null; color: string | null; variant: string | null;
+  delivery_location: string; notes: string | null; image_url: string | null;
+  status: PurchaseRequestStatus;
+  quoted_product_cost: number | null; quoted_shipping_cost: number | null;
+  quoted_customs_fee: number | null; quoted_service_fee: number | null;
+  quoted_total: number | null; quote_expires_at: string | null;
+  partner_notes_customer: string | null; partner_notes_internal: string | null;
+  created_at: string; updated_at: string;
+};
+
+type PurchaseRequestStatusHistoryRow = {
+  id: string; request_id: string;
+  old_status: PurchaseRequestStatus | null; new_status: PurchaseRequestStatus;
+  changed_by: string | null; note: string | null; created_at: string;
+};
+
+type EventRequestStatus = "new" | "reviewing" | "proposal_sent" | "approved" | "declined" | "planning" | "completed" | "cancelled";
+
+type EventRequestRow = {
+  id: string; listing_type: string; listing_id: string; user_id: string;
+  customer_name: string; customer_phone: string;
+  event_type: "family" | "school" | "festival" | "entertainment" | "social" | "other";
+  event_date: string | null; event_location: string | null; guest_count: number | null;
+  budget_range: string | null; services_required: string | null; notes: string | null; image_url: string | null;
+  status: EventRequestStatus;
+  proposal_details: string | null; proposal_cost: number | null;
+  created_at: string; updated_at: string;
+};
+
+type EventRequestStatusHistoryRow = {
+  id: string; request_id: string;
+  old_status: EventRequestStatus | null; new_status: EventRequestStatus;
+  changed_by: string | null; note: string | null; created_at: string;
+};
+
 type ProductOrderRow = {
   id: string; listing_type: "city_service" | "service" | "cafe" | "restaurant"; listing_id: string;
   customer_name: string; customer_phone: string;
@@ -579,6 +624,10 @@ export type Database = {
       bookings: Table<BookingRow>;
       booking_status_history: Table<BookingStatusHistoryRow>;
       table_reservations: Table<TableReservationRow>;
+      purchase_requests: Table<PurchaseRequestRow>;
+      purchase_request_status_history: Table<PurchaseRequestStatusHistoryRow>;
+      event_requests: Table<EventRequestRow>;
+      event_request_status_history: Table<EventRequestStatusHistoryRow>;
       product_orders: Table<ProductOrderRow>;
       order_items: Table<OrderItemRow>;
       business_metric_events: Table<BusinessMetricEventRow>;

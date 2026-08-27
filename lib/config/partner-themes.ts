@@ -418,6 +418,52 @@ const PINNACLE_THEME: PartnerTheme = {
   accentSoft: "#E4D3B0",
 };
 
+/**
+ * Emaankoo Group (`city-services/emaankoo-group`) — a real, live, published
+ * listing. Colors intentionally do NOT retint the site's own primary/CTA
+ * palette: primary/primaryMid/primaryStrong/primaryDeep/primarySoft here
+ * are Go Hargeisa's own default amber tokens (tailwind.config.ts's
+ * `primary` scale) verbatim, not a partner brand color — the brief was
+ * explicit that Emaankoo's magenta is an accent only and must never
+ * override the global design system, unlike Lavender/Flormar/Pinnacle's
+ * full color takeover. `EmaankooStorefront` also never wraps itself in
+ * `PartnerThemeScope` (see that component's own header comment) — this
+ * object exists only so the theme-lookup/branch-detection pattern
+ * `city-services/[slug]/page.tsx` already uses for every custom storefront
+ * still works, and so `theme.accent*` is available for the handful of
+ * genuinely decorative magenta touches (a badge, an icon) the storefront
+ * applies directly via inline style, never through the CSS-custom-property
+ * retint mechanism.
+ *
+ * accent magenta (#D6006B) matches the brand's own supplied color
+ * direction (no sampled logo asset exists yet — none was supplied).
+ *
+ * No heroImage/partnerLogo: no real photography or logo file was supplied
+ * for this partner. partnerLogo is only a required field on PartnerTheme
+ * because every other theme object happens to have a real one — left as an
+ * empty string, deliberately never read anywhere in EmaankooStorefront
+ * (which sources the listing's own real `logo_url` column via
+ * PartnerStatusSection instead, same "no image yet" honesty as every other
+ * partner without supplied assets — see MAMA_BABY_CARE_THEME's comment).
+ */
+const EMAANKOO_THEME: PartnerTheme = {
+  slug: "emaankoo-group",
+  enabled: true,
+  partnerName: "Emaankoo Group",
+  partnerLogo: "",
+  primary: "#F59E0B",
+  primaryRgb: "245 158 11",
+  primaryMid: "#D97706",
+  primaryMidRgb: "217 119 6",
+  primaryStrong: "#B45309",
+  primaryDeep: "#92400E",
+  primarySoft: "#FBD38D",
+  accent: "#D6006B",
+  accentRgb: "214 0 107",
+  accentStrong: "#A80054",
+  accentSoft: "#F2B8D6",
+};
+
 const PARTNER_THEMES: Partial<Record<BusinessListingType, Record<string, PartnerTheme>>> = {
   cafe: {
     lavender: LAVENDER_THEME,
@@ -430,6 +476,7 @@ const PARTNER_THEMES: Partial<Record<BusinessListingType, Record<string, Partner
     "flormar-hargeisa": FLORMAR_THEME,
     "mama-baby-care": MAMA_BABY_CARE_THEME,
     "pinnacle-perfumes-and-cosmatics": PINNACLE_THEME,
+    "emaankoo-group": EMAANKOO_THEME,
   },
   hotel: {
     "grand-haadi-hotel": GRAND_HAADI_THEME,

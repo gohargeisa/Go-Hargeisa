@@ -57,6 +57,7 @@ import { PinnacleStorefront } from "@/components/pinnacle/pinnacle-storefront";
 import { MobileBookingBar } from "@/components/shared/mobile-booking-bar";
 import { FlormarStorefront } from "@/components/flormar/flormar-storefront";
 import { PartnerPartnershipFooter } from "@/components/shared/partner/partner-partnership-footer";
+import { EmaankooStorefront } from "@/components/emaankoo/emaankoo-storefront";
 import type { CityService } from "@/types";
 
 // Pinnacle Perfumes & Cosmetics only — a real, published listing whose page
@@ -79,6 +80,15 @@ const PINNACLE_SLUG = "pinnacle-perfumes-and-cosmatics";
 // the code path exists. Scoped by exact slug match; every other
 // city_service listing is unaffected.
 const FLORMAR_SLUG = "flormar-hargeisa";
+
+// Emaankoo Group only — a bespoke storefront like Pinnacle/Flormar (the
+// generic template has no "Request an Order"/"Request an Event" concept).
+// Deliberately renders WITHOUT PartnerThemeScope — see EmaankooStorefront's
+// own header comment: the brief requires the partner's magenta to stay an
+// accent only, never retinting the site's own primary/CTA colors the way
+// Lavender/Flormar/Pinnacle's themes do. Scoped by exact slug match; every
+// other city_service listing is unaffected.
+const EMAANKOO_SLUG = "emaankoo-group";
 
 export const revalidate = 3600;
 
@@ -152,6 +162,15 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const service = await getCityServiceBySlug(slug, locale);
   if (!service) return {};
+  if (service.slug === EMAANKOO_SLUG) {
+    return {
+      title: "Emaankoo Group | Global Shopping, E-Commerce & Events | Go Hargeisa",
+      description:
+        "Discover Emaankoo Group in Hargeisa — international online shopping, global product sourcing, shipping, logistics, and event services.",
+      openGraph: service.image ? { images: [service.image] } : undefined,
+      alternates: localeAlternates(locale, `/city-services/${service.slug}`),
+    };
+  }
   if (service.slug === FLORMAR_SLUG) {
     // Own title/description rather than falling through to the generic
     // "{name} — Hargeisa City Services" + service.description below — the
@@ -350,6 +369,30 @@ export default async function CityServiceDetailPage({
           initiallyFavorited={isFavorited}
         />
       </PartnerThemeScope>
+    );
+  }
+
+  if (service.slug === EMAANKOO_SLUG && partnerTheme) {
+    return (
+      <>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
+        <Breadcrumbs
+          items={[
+            { label: tNav("cityServices"), href: `/${locale}/city-services` },
+            { label: service.name, href: `/${locale}/city-services/${service.slug}` },
+          ]}
+        />
+        <EmaankooStorefront theme={partnerTheme} service={service} locale={locale} />
+        <MobileBookingBar
+          listingType="city_service"
+          listingId={service.id}
+          name={service.name}
+          phone={service.phone ?? undefined}
+          whatsappFallback={service.whatsapp ?? undefined}
+          locale={locale}
+          initiallyFavorited={isFavorited}
+        />
+      </>
     );
   }
 

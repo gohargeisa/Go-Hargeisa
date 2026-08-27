@@ -31,6 +31,8 @@ import {
   UserCog,
   CalendarCheck,
   ShoppingBag,
+  PackageSearch,
+  PartyPopper,
 } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { SignOutButton } from "@/components/shared/sign-out-button";
@@ -69,6 +71,15 @@ const PRODUCTS_NAV_ITEM = { href: "/products", icon: Package, key: "navProducts"
  * supports_products gate as PRODUCTS_NAV_ITEM, since a listing can only
  * receive orders once it has a real product catalog. */
 const ORDERS_NAV_ITEM = { href: "/orders", icon: ShoppingBag, key: "navOrders" } as const;
+/** Purchase-request ("buy this for me" + manual quote) and event-request
+ * dashboards — gated on categories.supports_purchase_requests/
+ * supports_event_requests (see lib/data/business.ts's OwnedListing), same
+ * capability-flag pattern as PRODUCTS_NAV_ITEM, not hardcoded to one
+ * partner. Reuses the orders_view/orders_manage permission keys for team
+ * members rather than adding new ones — this is functionally a request/
+ * order inbox too. */
+const REQUESTS_NAV_ITEM = { href: "/requests", icon: PackageSearch, key: "navPurchaseRequests" } as const;
+const EVENT_REQUESTS_NAV_ITEM = { href: "/events", icon: PartyPopper, key: "navEventRequests" } as const;
 
 /** Which business_access_grants permission unlocks each nav item, for a
  * Team Member (listing.accessKind === "granted") — items with no entry
@@ -92,6 +103,8 @@ const NAV_PERMISSION: Partial<Record<string, BusinessPermissionKey>> = {
   navBookings: "bookings_view",
   navReservations: "bookings_view",
   navOrders: "orders_view",
+  navPurchaseRequests: "orders_view",
+  navEventRequests: "orders_view",
   navProducts: "businesses_edit",
   navDepartments: "appointments_view",
   navDoctors: "appointments_view",
@@ -115,6 +128,8 @@ function getNavItems(listing: OwnedListing) {
   const afterMyBusiness = [
     ...(listing.supportsProducts ? [PRODUCTS_NAV_ITEM, ORDERS_NAV_ITEM] : []),
     ...(listing.supportsAppointments ? appointmentsNavItems : []),
+    ...(listing.supportsPurchaseRequests ? [REQUESTS_NAV_ITEM] : []),
+    ...(listing.supportsEventRequests ? [EVENT_REQUESTS_NAV_ITEM] : []),
   ];
   if (afterMyBusiness.length > 0) items.splice(myBusinessIndex + 1, 0, ...afterMyBusiness);
 
