@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { Sparkles, MapPin, Search, ShoppingBag, Heart, User } from "lucide-react";
+import { MapPin, Search, ShoppingBag, Heart, User } from "lucide-react";
 import { isPlaceholderImage } from "@/lib/utils/is-placeholder-image";
 import { SHIMMER_BLUR_DATA_URL } from "@/lib/utils/shimmer";
 import { ProductCard } from "@/components/shared/product-card";
@@ -314,21 +314,10 @@ export function FlormarStorefront({
          convention. Cart reuses the site's real `useCart()` (same hook
          CartButton uses in the global header — opens the same drawer);
          wishlist is the small local-only toggle above (see
-         useLocalWishlist's doc comment). The old plain "PRIVATE PREVIEW"
-         strip is kept as the header's own top hairline rather than removed
-         — same real information, now inside a functioning store header
-         instead of floating alone. */}
+         useLocalWishlist's doc comment). */}
       <div
         className="sticky top-20 z-40 border-b border-black/5 bg-white/95 backdrop-blur-xl dark:border-white/10 dark:bg-ink/95"
       >
-        <div
-          className="flex items-center justify-center gap-2 py-1.5 text-center text-[11px] font-bold uppercase tracking-wide text-white"
-          style={{ backgroundColor: theme.primaryDeep }}
-        >
-          <Sparkles size={12} aria-hidden="true" />
-          {t("previewBadge")}
-        </div>
-
         <div className="container-px mx-auto flex h-16 items-center gap-3 sm:gap-5">
           <button
             type="button"
