@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { MapPin, MessageCircle, ShieldCheck, Sparkles, Gem } from "lucide-react";
 import { Reveal } from "@/components/home/reveal";
 import { PrimaryButton, SecondaryButton } from "@/components/shared/buttons";
-import { productLocalizedName } from "@/lib/utils/product-i18n";
+import { PinnacleProductGrid } from "@/components/pinnacle/pinnacle-product-grid";
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
 import type { PartnerTheme } from "@/lib/config/partner-themes";
 import type { Locale } from "@/lib/i18n/config";
@@ -18,21 +18,24 @@ import type { CityService, Product } from "@/types";
  * city_service listing keeps the generic page byte-for-byte unchanged.
  *
  * Every product row here (`products`) was individually verified against
- * the business's own real corporate catalog site, pinnacleperfumes.com
- * (name, brand, size — baked into `name` exactly as the site lists it —
- * and image, each confirmed to actually load) — see the population script
- * used to insert them for the full source-by-source trail. That site is
- * shared corporate infrastructure for a multi-country retailer (its own
- * Contact page is Tanzania-branch information, not Hargeisa's), so it's
- * used here ONLY as a product/brand source, never for contact details —
+ * the business's own real corporate catalog site, pinnacleperfumes.com —
+ * name, brand, size (baked into `name` exactly as the site lists it),
+ * image, and (as of the 2026-09-07 catalog pass) price, each cross-checked
+ * against a specific numbered product listing on that site, never guessed
+ * — see supabase/migrations/20260907000007_pinnacle_premium_catalog.sql's
+ * own header comment for the full source trail. That site is shared
+ * corporate infrastructure for a multi-country retailer (its own Contact
+ * page is Tanzania-branch information, not Hargeisa's), so it's used here
+ * ONLY as a product/brand/price source, never for contact details —
  * phone/WhatsApp/location below all come from this listing's own verified
  * `city_services` row instead (via `service.phone`/`.whatsapp`/`.mapsUrl`).
  *
- * No price is ever rendered anywhere on this page — Hargeisa-specific
- * pricing isn't published anywhere verified, and the business explicitly
- * wants inquiries routed through WhatsApp instead. Every product's only
- * call to action is a pre-filled WhatsApp message asking for current price
- * and availability.
+ * Price is shown per-product whenever the source site itself publishes one
+ * (true for most of the catalog now); the small remainder with no
+ * published price fall back to a "contact for price" WhatsApp CTA instead
+ * of a fabricated number — see PinnacleProductGrid, which also owns
+ * search/brand/gender filtering and progressive "Load More" pagination for
+ * a 200+-item catalog.
  */
 export async function PinnacleStorefront({
   theme,
@@ -53,17 +56,15 @@ export async function PinnacleStorefront({
   const tl = await getTranslations({ locale, namespace: "listings" });
 
   const whatsappNumber = service.whatsapp ?? service.phone ?? undefined;
-  const productWhatsappHref = (productName: string) =>
-    whatsappNumber ? toWhatsAppHref(whatsappNumber, t("whatsappProductMessage", { product: productName })) : undefined;
   const generalWhatsappHref = whatsappNumber ? toWhatsAppHref(whatsappNumber, t("whatsappGeneralMessage")) : undefined;
 
   // Real category facets Pinnacle's own catalog actually exposes (the
   // sidebar filter list on pinnacleperfumes.com/shop includes "Men
-  // Perfumes", "Women Perfumes", "Unisex" alongside ~46 brand names) — shown
-  // as WhatsApp-inquiry prompts rather than filtered product grids, since
-  // the verified product sample below doesn't carry an explicit gender tag
-  // for every item (see the population script's own comment: gender is only
-  // set where the source listing said so explicitly, never guessed).
+  // Perfumes", "Women Perfumes", "Unisex" alongside dozens of brand names).
+  // These cards stay WhatsApp-inquiry shortcuts (simple, no shared state
+  // with the catalog grid below); the catalog itself now also has its own
+  // working gender dropdown (see PinnacleProductGrid) now that gender is
+  // populated for the large majority of the verified catalog.
   const CATEGORIES: { key: string; icon: typeof Sparkles; titleKey: "categoryMenTitle" | "categoryWomenTitle" | "categoryUnisexTitle" }[] = [
     { key: "men", icon: Sparkles, titleKey: "categoryMenTitle" },
     { key: "women", icon: Gem, titleKey: "categoryWomenTitle" },
@@ -207,9 +208,9 @@ export async function PinnacleStorefront({
       </section>
 
       {/* Product Catalog — every product verified against the business's own
-          real catalog site (see this component's own header comment). No
-          price anywhere; each card's only action is a pre-filled WhatsApp
-          message asking for current price and availability. */}
+          real catalog site (see this component's own header comment).
+          Search/filter/pagination + per-product pricing (with an honest
+          "contact for price" fallback) live in PinnacleProductGrid. */}
       {products.length > 0 && (
         <section id="catalog" className="py-16 sm:py-24">
           <div className="container-px mx-auto">
@@ -224,35 +225,7 @@ export async function PinnacleStorefront({
                 <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">{t("catalogTitle")}</h2>
               </div>
             </Reveal>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-              {products.map((product) => {
-                const name = productLocalizedName(product, locale);
-                const href = productWhatsappHref(name);
-                return (
-                  <div key={product.id} className="overflow-hidden rounded-xl3 border border-ink/8 shadow-soft dark:border-white/10">
-                    <div className="relative aspect-square w-full bg-[#F7F5F2]">
-                      {product.image && <Image src={product.image} alt={name} fill sizes="(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 25vw" className="object-contain p-4" />}
-                    </div>
-                    <div className="p-3.5">
-                      {product.brand && <p className="text-[11px] font-bold uppercase tracking-wide" style={{ color: theme.accentStrong }}>{product.brand}</p>}
-                      <p className="mt-0.5 line-clamp-2 text-sm font-semibold leading-snug">{name}</p>
-                      {href && (
-                        <a
-                          href={href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-full px-3 py-2 text-[11px] font-bold text-white transition-all duration-300 hover:-translate-y-0.5"
-                          style={{ backgroundColor: "#25D366" }}
-                        >
-                          <MessageCircle size={13} aria-hidden="true" />
-                          {t("checkPriceCta")}
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <PinnacleProductGrid theme={theme} products={products} whatsappNumber={whatsappNumber} locale={locale} />
           </div>
         </section>
       )}

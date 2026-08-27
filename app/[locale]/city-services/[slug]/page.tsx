@@ -171,6 +171,21 @@ export async function generateMetadata({
       alternates: localeAlternates(locale, `/city-services/${service.slug}`),
     };
   }
+  if (service.slug === PINNACLE_SLUG) {
+    // Own SEO title/description — the generic "{name} — Hargeisa City
+    // Services" fallback below doesn't carry any of the real search terms
+    // customers actually use for this business (perfumes/cosmetics/beauty,
+    // Hargeisa/Somaliland). Never claims "official"/"authorized distributor"
+    // — only that the real, verified catalog (see PinnacleStorefront's own
+    // header comment) is listed and orderable through Go Hargeisa.
+    return {
+      title: "Pinnacle Perfumes & Cosmetics | Luxury Perfumes & Beauty in Hargeisa, Somaliland",
+      description:
+        "Shop authentic designer and niche perfumes, fragrances, and beauty products at Pinnacle Perfumes & Cosmetics in Hargeisa, Somaliland — Dior, Tom Ford, Yves Saint Laurent, Giorgio Armani, and more, orderable through Go Hargeisa.",
+      openGraph: service.image ? { images: [service.image] } : undefined,
+      alternates: localeAlternates(locale, `/city-services/${service.slug}`),
+    };
+  }
   if (service.slug === FLORMAR_SLUG) {
     // Own title/description rather than falling through to the generic
     // "{name} — Hargeisa City Services" + service.description below — the
