@@ -30,12 +30,15 @@ import type { CityService, Product } from "@/types";
  * phone/WhatsApp/location below all come from this listing's own verified
  * `city_services` row instead (via `service.phone`/`.whatsapp`/`.mapsUrl`).
  *
- * Price is shown per-product whenever the source site itself publishes one
- * (true for most of the catalog now); the small remainder with no
- * published price fall back to a "contact for price" WhatsApp CTA instead
- * of a fabricated number — see PinnacleProductGrid, which also owns
- * search/brand/gender filtering and progressive "Load More" pagination for
- * a 200+-item catalog.
+ * No price is ever shown on the public storefront, by explicit request —
+ * `products.price` stays populated in the database (verified alongside
+ * everything else) for admin/future-commerce use only; every card's sole
+ * CTA routes straight to WhatsApp instead. See PinnacleProductGrid, which
+ * also owns search/brand/gender filtering and progressive "Load More"
+ * pagination for the ~198-item public catalog (a handful of the 213 total
+ * rows are hidden — is_hidden = true, never deleted — where no verified
+ * real product photo could be found; see
+ * supabase/migrations/20260907000008_pinnacle_image_audit_and_no_public_pricing.sql).
  */
 export async function PinnacleStorefront({
   theme,
@@ -208,9 +211,9 @@ export async function PinnacleStorefront({
       </section>
 
       {/* Product Catalog — every product verified against the business's own
-          real catalog site (see this component's own header comment).
-          Search/filter/pagination + per-product pricing (with an honest
-          "contact for price" fallback) live in PinnacleProductGrid. */}
+          real catalog site (see this component's own header comment). No
+          pricing anywhere; search/filter/pagination live in
+          PinnacleProductGrid. */}
       {products.length > 0 && (
         <section id="catalog" className="py-16 sm:py-24">
           <div className="container-px mx-auto">

@@ -72,6 +72,10 @@ const nextConfig = {
       // brand + visible size text on the pack shot itself — never re-hosted.
       { protocol: "https", hostname: "www.dkny.com" },
       { protocol: "https", hostname: "fragrancemarket.com" },
+      // DKNY's own official site no longer sells the discontinued "Be 100%
+      // Delicious" line, so this specific verified retailer photo (name +
+      // size cross-checked against the product page) is the source instead.
+      { protocol: "https", hostname: "perfumeonline.com" },
       // Multi-tenant e-commerce CDN (theperfumespot.com's own storefront
       // platform) — allowlisted the same way *.cdninstagram.com already is
       // below for the same reason: it's the real CDN serving the one
@@ -133,6 +137,7 @@ const nextConfig = {
       "https://www.pinnacleperfumes.com",
       "https://www.dkny.com",
       "https://fragrancemarket.com",
+      "https://perfumeonline.com",
       "https://cdn11.bigcommerce.com",
       // Remaining Flormar product-photography sources (official regional
       // storefronts + authorized retailers, docs/flormar-product-

@@ -14,15 +14,17 @@ const PAGE_SIZE = 24;
 
 /**
  * Client-side search/filter/pagination for Pinnacle's real, verified
- * 213-product catalog. Split out from PinnacleStorefront (a server
+ * product catalog (`products` here is already the publicly-visible subset
+ * — a handful of rows with no verified image are excluded server-side via
+ * is_hidden, never shown as a placeholder). Split out from PinnacleStorefront (a server
  * component) because filtering/search genuinely needs client interactivity
  * — everything else on that page stays server-rendered.
  *
- * Price: shown as a plain "$X" whenever `product.price` is set (now true
- * for the large majority of the catalog — see the population migration's
- * own header comment for the verified source). For the handful of products
- * where the source site itself shows no price, the card falls back to
- * `orderOnWhatsappCta` instead of a fabricated number — never guessed.
+ * No price anywhere on this card, by explicit request: `product.price` is
+ * still populated in the database (see the population migration) for
+ * admin/future-commerce use, but deliberately never read here — the public
+ * storefront routes every inquiry through WhatsApp instead of showing a
+ * number. Every product's only CTA is `orderOnWhatsappCta`.
  */
 export function PinnacleProductGrid({
   theme,
@@ -165,10 +167,10 @@ export function PinnacleProductGrid({
                       </p>
                     )}
                     <p className="mt-0.5 line-clamp-2 text-sm font-semibold leading-snug">{name}</p>
-                    {product.price != null ? (
-                      <p className="mt-1.5 text-sm font-bold">${product.price.toFixed(2)}</p>
-                    ) : (
-                      <p className="mt-1.5 text-xs font-semibold text-ink/45 dark:text-sand/45">{t("contactForPrice")}</p>
+                    {(product.size || product.gender) && (
+                      <p className="mt-1 text-xs text-ink/45 dark:text-sand/45">
+                        {[product.size, product.gender ? t(`genderLabel_${product.gender}`) : null].filter(Boolean).join(" · ")}
+                      </p>
                     )}
                     {href && (
                       <a
