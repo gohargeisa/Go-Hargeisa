@@ -4,6 +4,8 @@ import type { Notification } from "@/types";
 type Translator = (key: string, values?: Record<string, string | number>) => string;
 
 const BOOKING_STATUSES = new Set(["pending", "confirmed", "cancelled", "completed"]);
+const PURCHASE_REQUEST_STATUSES = new Set(["ordered", "shipped", "in_transit", "ready_for_delivery", "completed", "cancelled", "rejected"]);
+const EVENT_REQUEST_STATUSES = new Set(["planning", "completed", "cancelled"]);
 
 /**
  * Resolves a notification's `category` + `data` into a localized
@@ -67,6 +69,34 @@ export function getNotificationText(
       return { title: t("accountVerifiedTitle"), body: t("accountVerifiedBody", { listing: str(d.listingName) }), href };
     case "system_announcement":
       return { title: str(d.announcementTitle) || n.title, body: str(d.announcementMessage) || n.message, href };
+    case "purchase_request_new":
+      return { title: t("purchaseRequestNewTitle"), body: t("purchaseRequestNewBody", { customer: str(d.customerName), product: str(d.productName) }), href };
+    case "purchase_request_quote_ready":
+      return { title: t("purchaseRequestQuoteReadyTitle"), body: t("purchaseRequestQuoteReadyBody", { listing: str(d.listingName), product: str(d.productName) }), href };
+    case "purchase_request_status": {
+      const status = typeof d.status === "string" && PURCHASE_REQUEST_STATUSES.has(d.status) ? d.status : "ordered";
+      return { title: t("purchaseRequestStatusTitle"), body: t(`purchaseRequestStatusBody_${status}`, { product: str(d.productName) }), href };
+    }
+    case "purchase_request_customer_response":
+      return {
+        title: d.status === "approved" ? t("purchaseRequestApprovedTitle") : t("purchaseRequestDeclinedTitle"),
+        body: t("purchaseRequestResponseBody", { customer: str(d.customerName), product: str(d.productName) }),
+        href,
+      };
+    case "event_request_new":
+      return { title: t("eventRequestNewTitle"), body: t("eventRequestNewBody", { customer: str(d.customerName) }), href };
+    case "event_request_proposal_sent":
+      return { title: t("eventRequestProposalSentTitle"), body: t("eventRequestProposalSentBody", { listing: str(d.listingName) }), href };
+    case "event_request_status": {
+      const status = typeof d.status === "string" && EVENT_REQUEST_STATUSES.has(d.status) ? d.status : "planning";
+      return { title: t("eventRequestStatusTitle"), body: t(`eventRequestStatusBody_${status}`), href };
+    }
+    case "event_request_customer_response":
+      return {
+        title: d.status === "approved" ? t("eventRequestApprovedTitle") : t("eventRequestDeclinedTitle"),
+        body: t("eventRequestResponseBody", { customer: str(d.customerName) }),
+        href,
+      };
     default:
       return { title: n.title, body: n.message, href };
   }

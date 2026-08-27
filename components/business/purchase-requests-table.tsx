@@ -29,7 +29,7 @@ const STATUS_STYLES: Record<PurchaseRequestStatus, string> = {
  * request forward through fulfillment — never back into "reviewing", and
  * never straight to "quote_ready" again (submitQuote owns that transition,
  * see the form below). */
-const FULFILLMENT_STATUSES: PurchaseRequestStatus[] = ["ordered", "shipped", "in_transit", "ready_for_delivery", "completed"];
+const FULFILLMENT_STATUSES: PurchaseRequestStatus[] = ["ordered", "shipped", "in_transit", "ready_for_delivery", "completed", "cancelled"];
 
 function formatDate(iso: string, locale: string): string {
   const date = new Date(iso);
@@ -194,6 +194,17 @@ function RequestDetailModal({ request, listingId, onClose }: { request: Purchase
         <div className="mt-4">
           <QuoteForm request={request} listingId={listingId} onDone={onClose} />
         </div>
+      )}
+
+      {showQuoteForm && (
+        <button
+          type="button"
+          onClick={() => onAdvance("rejected")}
+          disabled={isPending}
+          className="mt-3 w-full rounded-full border border-red-200 py-2 text-sm font-semibold text-red-700 dark:border-red-400/25 dark:text-red-300"
+        >
+          {t("rejectRequest")}
+        </button>
       )}
 
       {FULFILLMENT_STATUSES.includes(request.status) || request.status === "approved" ? (

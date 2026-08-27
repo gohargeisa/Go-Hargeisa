@@ -544,7 +544,15 @@ export type NotificationCategory =
   | "promotion_new"
   | "event_published"
   | "account_verified"
-  | "system_announcement";
+  | "system_announcement"
+  | "purchase_request_new"
+  | "purchase_request_quote_ready"
+  | "purchase_request_status"
+  | "purchase_request_customer_response"
+  | "event_request_new"
+  | "event_request_proposal_sent"
+  | "event_request_status"
+  | "event_request_customer_response";
 
 export type NotificationSeverity = "success" | "error" | "warning" | "info";
 

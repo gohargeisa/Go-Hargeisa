@@ -136,6 +136,17 @@ function EventDetailModal({ request, listingId, onClose }: { request: EventReque
         </div>
       )}
 
+      {showProposalForm && (
+        <button
+          type="button"
+          onClick={() => onAdvance("cancelled")}
+          disabled={isPending}
+          className="mt-3 w-full rounded-full border border-red-200 py-2 text-sm font-semibold text-red-700 dark:border-red-400/25 dark:text-red-300"
+        >
+          {t("cancelRequest")}
+        </button>
+      )}
+
       {request.status === "approved" && (
         <div className="mt-4">
           <label className="block text-xs font-bold uppercase tracking-wide text-ink/50 dark:text-sand/50">{t("updateStatus")}</label>
