@@ -22,7 +22,7 @@ import { RestaurantMenuSection } from "@/components/shared/restaurant-menu-secti
 import { getProductsForListing } from "@/lib/data/products";
 import { ProductsSection } from "@/components/shared/products-section";
 import { GroupedProductsSection } from "@/components/shared/grouped-products-section";
-import { LAVENDER_MENU_SECTIONS, LAVENDER_MENU_SORT_ORDER_BASE, groupProductsIntoSections } from "@/lib/config/lavender-menu-sections";
+import { LAVENDER_MENU_CATEGORY_ORDER, groupProductsByCategory } from "@/lib/config/lavender-menu-sections";
 import { CAFE_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import { AmenitiesSection, hasAmenities } from "@/components/shared/amenities-section";
 import { SocialLinks } from "@/components/shared/social-links";
@@ -134,34 +134,30 @@ export default async function CafeDetailPage({
     getNearbyListings({ lat: cafe.location.lat, lng: cafe.location.lng, excludeType: "cafe", excludeId: cafe.id }),
     cafeOrderingEnabled ? getProductsForListing(cafe.id, "cafe") : Promise.resolve([]),
   ]);
-  // Lavender-only, temporary: most of its 106 café-menu products don't have
-  // a genuine individual photo yet (only a positional/generic menu-page
-  // scan would be available, which the product-image cleanup task
-  // explicitly ruled out using) — showing those as bare gray placeholder
-  // cards next to the ones that do have real photos reads as broken/
-  // unprofessional. Hides them from this customer-facing page only; the
-  // underlying rows are untouched (still is_available/is_hidden=false in
-  // the DB) and reappear automatically the moment a real image is attached
-  // to products.image. Every other cafe/listing type is unaffected — this
-  // never runs for them, since `cafe.slug === "lavender"` guards it.
-  const visibleCafeProducts =
-    cafe.slug === "lavender" ? cafeProducts.filter((p) => typeof p.image === "string" && p.image.trim().length > 0) : cafeProducts;
+  // Every Lavender café product now carries a real `category` (backfilled by
+  // 20260907000014_lavender_cafe_category_backfill_and_content_fix.sql) —
+  // products with no photo yet render the standard "no photo" placeholder
+  // (ProductImage) instead of being hidden, same as every other listing on
+  // the site. A prior version of this page hid any Lavender product with no
+  // image before grouping, which silently dropped 19 real menu items
+  // (all 12 Mojito Mocktails, Iced Blueberry Matcha, and 6 others) from the
+  // live page entirely, and also corrupted the old positional section
+  // grouping for everything after the first gap. Neither problem applies
+  // anymore: category-based grouping doesn't depend on array position.
+  const visibleCafeProducts = cafeProducts;
   // One shared catalog — menu items and flowers alike — through the
   // universal cart. ProductsSection's own category filter (derived from
   // whatever categories are present) is what lets a shopper narrow down to
   // "Flowers & Bouquets" specifically; no separate flowers-only section.
   const showProducts = Boolean(cafeOrderingEnabled) && visibleCafeProducts.length > 0;
-  // Lavender-only: its 106 café-menu products carry no real category (the
-  // live products.category CHECK constraint doesn't allow café vocabulary —
-  // see lib/config/lavender-menu-sections.ts), so they're grouped into
-  // labeled sections positionally instead of via ProductsSection's normal
-  // category-pill filtering. Every other cafe keeps the generic flat view.
-  // Flower products no longer live on this listing at all (moved to the
-  // separate Lavender Flowers listing — see /flowers/[slug]) — the "start
-  // of café sections" cutoff (LAVENDER_MENU_SORT_ORDER_BASE) is kept only
-  // because it's still what separates one café section from the next.
-  const lavenderMenuGroups =
-    cafe.slug === "lavender" ? groupProductsIntoSections(visibleCafeProducts, LAVENDER_MENU_SORT_ORDER_BASE, LAVENDER_MENU_SECTIONS) : null;
+  // Lavender-only: its ~112 café-menu products are grouped into labeled
+  // sections (Hot Drinks, Tea, Hot Coffee, ...) by their real category
+  // instead of via ProductsSection's normal flat category-pill filtering —
+  // the catalog is large enough that visible section headers read better
+  // than a filter bar. Every other cafe keeps the generic flat view. Flower
+  // products no longer live on this listing at all (moved to the separate
+  // Lavender Flowers listing — see /flowers/[slug]).
+  const lavenderMenuGroups = cafe.slug === "lavender" ? groupProductsByCategory(visibleCafeProducts, LAVENDER_MENU_CATEGORY_ORDER) : null;
   const whatsappFallback = (siteSettings as { whatsapp_number?: string } | null)?.whatsapp_number ?? undefined;
   // Everything partner-specific (hero image, fit mode, brand colors) lives
   // in lib/config/partner-themes.ts — this page stays generic for any
@@ -314,7 +310,18 @@ export default async function CafeDetailPage({
                     listingId: cafe.id,
                     businessName: cafe.name,
                     deliveryEnabled: Boolean(cafe.productsDeliveryEnabled),
-                    addons: cafe.flowerAddons ?? [],
+                    // `cafe.flowerAddons` (Extra Gypsophila, Premium Wrapping,
+                    // Message Card) is Lavender Flowers' bouquet add-on list —
+                    // the Flowers page reads this exact same `cafes.flower_addons`
+                    // column via `sisterCafe.flowerAddons` (see
+                    // app/[locale]/flowers/[slug]/page.tsx), a leftover from
+                    // before the two businesses were split into separate
+                    // listings. Offering it here would put bouquet add-ons on a
+                    // Hot Chocolate order — the café menu has no add-ons of its
+                    // own today, so this stays empty rather than reusing the
+                    // flower-shop field. Do not clear `flower_addons` itself;
+                    // Lavender Flowers still needs it.
+                    addons: [],
                   }}
                   locale={locale}
                 />

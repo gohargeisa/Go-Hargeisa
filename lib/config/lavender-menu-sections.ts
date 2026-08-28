@@ -1,26 +1,25 @@
 /**
- * Temporary, Lavender-specific menu grouping — a stand-in for
- * `products.category` until 20260823000002_universal_cart_orders.sql (which
- * drops products.category's fixed CHECK constraint) is reviewed and applied.
- * That constraint's vocabulary is Perfume/Cosmetics/Flower-only (see
- * 20260818000002_universal_video_pdf_products_bookings.sql) — it rejects any
- * café-menu category text ("Hot Coffee", "Brunch & Bites", ...), so those
- * ~106 real menu items are inserted with category = null and grouped here
- * instead, purely in application code. No schema change.
+ * Lavender-specific menu section list and display order.
  *
- * The grouping is positional, not stored per-row: `scripts/add-lavender-
- * menu-items.ts` inserts every item with a contiguous sort_order starting at
- * LAVENDER_MENU_SORT_ORDER_BASE, in exactly the order these sections list —
- * groupProductsIntoSections() below re-sorts the fetched rows by sort_order
- * and slices them by these counts. The counts here MUST match each source
- * array's length in the insert script (HOT_DRINKS.length, TEA.length, ...) —
- * they're duplicated by hand because the script is a one-off tool, not
- * something app code should import at runtime.
+ * History: this file originally existed because `products.category` had to
+ * be NULL for every café-menu row — the live CHECK constraint only allowed
+ * Perfume/Cosmetics/Flower vocabulary — so items were grouped purely
+ * positionally (by sort_order, sliced by hand-counted section sizes). That
+ * constraint has since been dropped and every Lavender café product's
+ * `category` column has been backfilled (see migration
+ * 20260907000014_lavender_cafe_category_backfill_and_content_fix.sql) with
+ * the real values below — which is what groupProductsByCategory() actually
+ * groups by now. This is immune to the positional-drift bug the old
+ * approach had: adding a product, or a product losing/gaining an image, can
+ * never shift another product into the wrong section, because grouping no
+ * longer depends on array position at all.
  *
- * Once the pending migration lands, the real fix is to backfill
- * products.category from this same list (by sort_order) and delete this
- * file — ProductsSection's existing free-text category filter already
- * handles arbitrary category strings with no further code changes needed.
+ * `LAVENDER_MENU_SECTIONS`' `count` field is kept only because
+ * `scripts/add-lavender-menu-items.ts` (a one-off insert script, already
+ * run, idempotent but not part of the live runtime) still imports it for a
+ * defensive self-check against its own source arrays — it's historical
+ * documentation of the original PDF section sizes, not consulted by
+ * anything that renders the live page anymore.
  */
 
 export interface LavenderMenuSection {
@@ -55,29 +54,74 @@ export const LAVENDER_MENU_SECTIONS: LavenderMenuSection[] = [
   { label: "Full Cakes", count: 6 },
   { label: "Wedding Cakes", count: 4 },
   { label: "Mini Cakes", count: 3 },
+  // 2026-09-07 Excel reconciliation: 6 products added after the original 106
+  // (sort_order 206-211, contiguous immediately after this list's positional
+  // range), too small a batch to justify renumbering the whole positional
+  // scheme — one trailing catch-all section instead of interleaving them
+  // into their "natural" section (Hot Coffee/Smoothies/Milkshakes/Brunch)
+  // without risking a database sort_order rewrite mid-phase. Should be
+  // folded into its proper section (or replaced entirely by a real
+  // products.category backfill — the CHECK constraint blocking that is
+  // already gone) next time this file is touched.
+  { label: "Newly Added", count: 6 },
 ];
 
 export const LAVENDER_MENU_SORT_ORDER_BASE = 100;
 
+/** Display order for the real, backfilled `products.category` values —
+ * matches the source PDF's own section order. A handful of later-added rows
+ * (Espresso, Hazelnut Latte, Pineapple Smoothie, Caramel/Pistachio
+ * Milkshake, Hungry Burger) were folded into their closest matching
+ * category here by name rather than by a second PDF pass — see the backfill
+ * migration's header comment. */
+export const LAVENDER_MENU_CATEGORY_ORDER: string[] = [
+  "Hot Drinks",
+  "Tea",
+  "Hot Coffee",
+  "Hot Matcha",
+  "Iced Matcha",
+  "Iced Coffee",
+  "Smoothies",
+  "Milkshakes",
+  "Mojito Mocktails",
+  "Frappuccino",
+  "Brunch & Bites",
+  "Wraps",
+  "Desserts",
+  "Cakes (Slices)",
+  "Full Cakes",
+  "Wedding Cakes",
+  "Mini Cakes",
+];
+
 /**
- * Groups an already-fetched product list into labeled sections by
- * sort_order, starting at `base` and consuming `sections` in order. Products
- * with sort_order < base are ignored (they belong to an earlier block, e.g.
- * flowers). Sections with zero matched items are omitted so a partial
- * insert never renders empty headings.
+ * Groups an already-fetched product list by its real `category` field, in
+ * `order`. A product whose category isn't in `order` (shouldn't happen post-
+ * backfill, but not assumed) is appended in a trailing "Other" group rather
+ * than silently dropped. Empty groups are omitted so a category with no
+ * remaining visible items never renders an empty heading. Items within a
+ * group keep their sort_order.
  */
-export function groupProductsIntoSections<T extends { sortOrder: number }>(
+export function groupProductsByCategory<T extends { category?: string | null; sortOrder: number }>(
   products: T[],
-  base: number,
-  sections: LavenderMenuSection[]
+  order: string[]
 ): { label: string; items: T[] }[] {
-  const sorted = products.filter((p) => p.sortOrder >= base).sort((a, b) => a.sortOrder - b.sortOrder);
-  const groups: { label: string; items: T[] }[] = [];
-  let cursor = 0;
-  for (const section of sections) {
-    const items = sorted.slice(cursor, cursor + section.count);
-    if (items.length > 0) groups.push({ label: section.label, items });
-    cursor += section.count;
+  const byCategory = new Map<string, T[]>();
+  const other: T[] = [];
+  for (const p of products) {
+    if (p.category && order.includes(p.category)) {
+      const list = byCategory.get(p.category) ?? [];
+      list.push(p);
+      byCategory.set(p.category, list);
+    } else {
+      other.push(p);
+    }
   }
+  const groups: { label: string; items: T[] }[] = [];
+  for (const label of order) {
+    const items = (byCategory.get(label) ?? []).sort((a, b) => a.sortOrder - b.sortOrder);
+    if (items.length > 0) groups.push({ label, items });
+  }
+  if (other.length > 0) groups.push({ label: "Other", items: other.sort((a, b) => a.sortOrder - b.sortOrder) });
   return groups;
 }
