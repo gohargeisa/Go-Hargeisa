@@ -73,15 +73,18 @@
     "featuredPartnersSubtitle": "أعمال محلية موثوقة وهي جزء رسمي من Go Hargeisa.",
 
     "appPromoEyebrow": "تطبيق Go Hargeisa",
-    "appPromoTitle": "هرجيسا في جيبك، أينما كنت.",
+    "appPromoTitle": "هرجيسا في جيبك.",
     "appCardBookingConfirmed": "تم تأكيد الحجز",
     "appCardNewPlace": "تم اكتشاف مكان جديد",
-    "appPromoDescription": "استكشف هرجيسا، اكتشف الأعمال المحلية، احجز واطلب وتواصل — أينما كنت.",
-    "appHighlightExplore": "استكشف الفنادق والمطاعم والمقاهي والمعالم السياحية",
-    "appHighlightOrder": "احجز واطلب مباشرة من هاتفك",
+    "appPromoDescription": "اكتشف الفنادق والمطاعم والمقاهي والمعالم والخدمات المحلية والمزيد في هرجيسا — كل ذلك في مكان واحد.",
+    "appHighlightExplore": "استكشف — اكتشف أفضل الأماكن",
+    "appHighlightOrder": "اطلب — استمتع بخدماتك المفضلة",
+    "appHighlightBook": "احجز — تواصل واحجز بسهولة",
     "appHighlightNotify": "احصل على تحديثات حجوزاتك وطلباتك",
     "appPromoComingSoon": "قريبًا على Google Play",
     "appPromoGetItOnGooglePlay": "احصل عليه من Google Play",
+    "appPromoDownloadCta": "حمّل التطبيق من Google Play",
+    "appPromoAvailableNow": "متوفر الآن على أجهزة Android",
 
     "featuredPartnerPromo_hotel": "إقامة مريحة وضيافة لا تُنسى في هرجيسا.",
     "featuredPartnerPromo_restaurant": "اكتشف نكهات محلية شهية وتجربة طعام لا تُنسى.",
@@ -324,14 +327,14 @@
     "visitTitle": "تفضلوا بزيارتنا في هرجيسا"
   },
   "flormarComingSoonBanner": {
-    "eyebrow": "قريبًا جدًا في Go Hargeisa",
-    "tagline": "تجربة جمال جديدة قادمة إلى <hargeisa>هرجيسا</hargeisa>.",
+    "eyebrow": "متوفر الآن على Go Hargeisa",
+    "tagline": "فلورمار متوفر الآن على Go Hargeisa — <hargeisa>استكشف المنتجات واطلب الآن</hargeisa>.",
     "featurePremium": "مستحضرات تجميل فاخرة",
     "featureCollection": "مجموعة جديدة",
     "featureBeauty": "جمال من أجلك",
     "featureQuality": "جودة تثق بها",
-    "ctaTitle": "ترقبونا",
-    "ctaSubtitle": "شيء جميل في الطريق"
+    "ctaTitle": "تسوّق الآن",
+    "ctaSubtitle": "استكشف المجموعة الكاملة"
   },
   "flormarPromoBanner": {
     "badge": "جديد على Go Hargeisa",

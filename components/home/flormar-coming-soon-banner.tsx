@@ -1,8 +1,11 @@
 import Image from "next/image";
+import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { Gem, Sparkles, Heart, Leaf, Bell } from "lucide-react";
+import { Gem, Sparkles, Heart, Leaf, ShoppingBag } from "lucide-react";
 import { Reveal } from "@/components/home/reveal";
 import type { Locale } from "@/lib/i18n/config";
+
+const FLORMAR_SLUG = "flormar-hargeisa";
 
 const FEATURES = [
   { icon: Gem, key: "featurePremium" as const },
@@ -38,14 +41,18 @@ const FEATURES = [
  * region) sits on top and the real text block sits below it in a plain
  * color-matched panel instead of overlaid.
  *
- * Deliberately NOT a link: Flormar Hargeisa's real listing is still
- * `status: 'draft'` (see lib/config/partner-themes.ts's FLORMAR_THEME
- * comment) — there is no approved public destination to send a homepage
- * visitor to yet, so this stays a plain, non-interactive teaser rather than
- * implying the storefront is already live.
+ * Now a real link: Flormar Hargeisa's `city_services` row is `status:
+ * 'published'` with `is_partner: true` and its full real product catalog
+ * already connected (see app/[locale]/city-services/[slug]/page.tsx's
+ * FLORMAR_SLUG branch) — the whole card links straight to that live store
+ * page (`/${locale}/city-services/flormar-hargeisa`), same as every other
+ * Featured Partner card on the homepage. The component/file name is dated
+ * (kept as-is to avoid an unrelated rename) but the content and behavior
+ * below reflect the current, live state, not "coming soon."
  */
 export async function FlormarComingSoonBanner({ locale }: { locale: Locale }) {
   const t = await getTranslations({ locale, namespace: "flormarComingSoonBanner" });
+  const href = `/${locale}/city-services/${FLORMAR_SLUG}`;
 
   const textBlock = (
     <>
@@ -66,8 +73,8 @@ export async function FlormarComingSoonBanner({ locale }: { locale: Locale }) {
         ))}
       </ul>
 
-      <div className="mt-6 inline-flex items-center gap-2.5 rounded-full bg-[#C0447A] px-5 py-2.5 text-white shadow-[0_10px_24px_rgba(192,68,122,0.35)]">
-        <Bell size={16} className="shrink-0" aria-hidden="true" />
+      <div className="mt-6 inline-flex items-center gap-2.5 rounded-full bg-[#C0447A] px-5 py-2.5 text-white shadow-[0_10px_24px_rgba(192,68,122,0.35)] transition-all duration-300 ease-premium group-hover:-translate-y-0.5 group-hover:shadow-[0_14px_30px_rgba(192,68,122,0.45)]">
+        <ShoppingBag size={16} className="shrink-0" aria-hidden="true" />
         <span className="text-start leading-tight">
           <span className="block text-sm font-bold">{t("ctaTitle")}</span>
           <span className="block text-[11px] font-medium text-white/85">{t("ctaSubtitle")}</span>
@@ -79,7 +86,10 @@ export async function FlormarComingSoonBanner({ locale }: { locale: Locale }) {
   return (
     <section className="container-px mx-auto pb-6 pt-6 sm:pt-8">
       <Reveal>
-        <div className="overflow-hidden rounded-xl3 shadow-card">
+        <Link
+          href={href}
+          className="group block overflow-hidden rounded-xl3 shadow-card transition-shadow duration-300 ease-premium hover:shadow-premium-lg"
+        >
           {/* Mobile (<sm): product photo (cropped to the right, text-free
               region of the source image) stacked above a real, readable
               text panel — the overlay approach below is illegible this
@@ -133,7 +143,7 @@ export async function FlormarComingSoonBanner({ locale }: { locale: Locale }) {
               {textBlock}
             </div>
           </div>
-        </div>
+        </Link>
       </Reveal>
     </section>
   );

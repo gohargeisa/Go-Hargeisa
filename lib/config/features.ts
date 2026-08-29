@@ -67,12 +67,10 @@ export const ATTRACTIONS_PUBLIC_ENABLED = false;
 export const SUPERMARKET_ENABLED = true;
 
 /**
- * Official Go Hargeisa Google Play listing — not published yet. The
- * homepage app-promotion section (components/home/app-promotion-section.tsx)
- * shows a plain, non-clickable "Coming Soon" status while this is null; the
- * moment a real listing exists, set this to that exact URL and the section
- * automatically switches to a live, clickable "Get it on Google Play" CTA
- * — no other code change needed. Never set this to a placeholder/guessed
+ * Official Go Hargeisa Google Play listing — live as of 2026-08-29 (Early
+ * Access). The homepage app-promotion section
+ * (components/home/app-promotion-section.tsx) links its "Download on Google
+ * Play" CTA straight to this URL. Never set this to a placeholder/guessed
  * URL — an unpublished app must never claim to be downloadable.
  */
-export const GOOGLE_PLAY_URL: string | null = null;
+export const GOOGLE_PLAY_URL = "https://play.google.com/store/apps/details?id=com.gohargeisa.app";

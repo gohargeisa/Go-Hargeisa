@@ -72,16 +72,19 @@
     "featuredPartnersTitle": "Meet Our Partners",
     "featuredPartnersSubtitle": "Trusted local businesses that are officially part of Go Hargeisa.",
 
-    "appPromoEyebrow": "Go Hargeisa Mobile App",
+    "appPromoEyebrow": "Go Hargeisa App",
     "appPromoTitle": "Your Hargeisa, In Your Pocket.",
     "appCardBookingConfirmed": "Booking Confirmed",
     "appCardNewPlace": "New Place Discovered",
-    "appPromoDescription": "Explore Hargeisa, discover local businesses, book, order and connect — wherever you are.",
-    "appHighlightExplore": "Explore hotels, restaurants, cafes and attractions",
-    "appHighlightOrder": "Book and order directly from your phone",
+    "appPromoDescription": "Discover hotels, restaurants, cafes, attractions, city services, and more across Hargeisa — all in one place.",
+    "appHighlightExplore": "Explore — Discover the best places",
+    "appHighlightOrder": "Order — Enjoy your favorite services",
+    "appHighlightBook": "Book — Connect and book with ease",
     "appHighlightNotify": "Get updates on your bookings and orders",
     "appPromoComingSoon": "Coming Soon on Google Play",
     "appPromoGetItOnGooglePlay": "Get it on Google Play",
+    "appPromoDownloadCta": "Download on Google Play",
+    "appPromoAvailableNow": "Available now on Android",
 
     "featuredPartnerPromo_hotel": "Comfortable stays and unforgettable hospitality in Hargeisa.",
     "featuredPartnerPromo_restaurant": "Discover delicious local flavors and memorable dining.",
@@ -324,14 +327,14 @@
     "visitTitle": "Come See Us in Hargeisa"
   },
   "flormarComingSoonBanner": {
-    "eyebrow": "Coming Very Soon to Go Hargeisa",
-    "tagline": "A new beauty experience is coming to <hargeisa>Hargeisa</hargeisa>.",
+    "eyebrow": "Now Available on Go Hargeisa",
+    "tagline": "Flormar is now available on Go Hargeisa — <hargeisa>explore the products and order now</hargeisa>.",
     "featurePremium": "Premium Cosmetics",
     "featureCollection": "New Collection",
     "featureBeauty": "Beauty For You",
     "featureQuality": "Quality You Trust",
-    "ctaTitle": "Stay Tuned",
-    "ctaSubtitle": "Something beautiful is on the way"
+    "ctaTitle": "Shop Now",
+    "ctaSubtitle": "Explore the full collection"
   },
   "flormarPromoBanner": {
     "badge": "New on Go Hargeisa",

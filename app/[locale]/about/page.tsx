@@ -336,8 +336,8 @@ export default async function AboutPage({ params: { locale } }: { params: { loca
         <AboutHowItWorksSection locale={locale} />
       </div>
 
-      {/* Mobile App — reuses the same honest, no-fake-screenshot promo section as the homepage */}
-      <AppPromotionSection locale={locale} previewHotel={hotels[0]} />
+      {/* Mobile App — reuses the same promo section as the homepage */}
+      <AppPromotionSection locale={locale} />
 
       {/* The Future — inspirational, no unreleased-feature promises */}
       <section className="container-px mx-auto py-16 md:py-24">

@@ -72,16 +72,19 @@
     "featuredPartnersTitle": "La Kulan Shirkeyaashayada",
     "featuredPartnersSubtitle": "Ganacsiyo maxalli ah oo la kalsoon yahay oo si rasmi ah uga tirsan Go Hargeisa.",
 
-    "appPromoEyebrow": "Abka Go Hargeisa",
-    "appPromoTitle": "Hargeysa, Jeebkaaga Ku Sii Jirta.",
+    "appPromoEyebrow": "App-ka Go Hargeisa",
+    "appPromoTitle": "Hargeysa, Jeebkaaga Ku Jira.",
     "appCardBookingConfirmed": "Buugsigii Waa La Xaqiijiyay",
     "appCardNewPlace": "Meel Cusub Ayaa La Helay",
-    "appPromoDescription": "Sahmi Hargeysa, ka daalac ganacsiyada maxalliga ah, ballan qaado, dalbo oo la xiriir — meel kastoo aad joogtaba.",
-    "appHighlightExplore": "Sahmi hudheelada, maqaayadaha, kafeyada iyo goobaha xiisaha leh",
-    "appHighlightOrder": "Ka ballan qaado oo ka dalbo si toos ah taleefankaaga",
+    "appPromoDescription": "Soo ogow hoteellada, maqaayadaha, kafateeriyada, meelaha dalxiiska, adeegyada magaalada iyo wax ka badan — dhammaantood hal meel.",
+    "appHighlightExplore": "Baadh — Soo ogow meelaha ugu fiican",
+    "appHighlightOrder": "Dalbo — Isticmaal adeegyada aad jeceshahay",
+    "appHighlightBook": "Qabso — Si fudud ula xiriir oo u qabso",
     "appHighlightNotify": "Hel wararka cusub ee ballanqaadyadaada iyo dalabaadkaaga",
     "appPromoComingSoon": "Dhawaan Google Play",
     "appPromoGetItOnGooglePlay": "Ka soo deji Google Play",
+    "appPromoDownloadCta": "Ka soo dejiso Google Play",
+    "appPromoAvailableNow": "Hadda waxaa laga heli karaa Android",
 
     "featuredPartnerPromo_hotel": "Joogitaan raaxo leh iyo martigelin aan la illaawin oo ku taal Hargeysa.",
     "featuredPartnerPromo_restaurant": "Ka daalac dhadhamo maxalli ah oo macaan iyo cunto aan la illaawin.",
@@ -324,14 +327,14 @@
     "visitTitle": "Nagu Booqo Hargeysa"
   },
   "flormarComingSoonBanner": {
-    "eyebrow": "Waxay dhawaan iman doontaa Go Hargeisa",
-    "tagline": "Waayo-aragnimo cusub oo qurux ah ayaa u socota <hargeisa>Hargeysa</hargeisa>.",
+    "eyebrow": "Hadda waxaa laga heli karaa Go Hargeisa",
+    "tagline": "Flormar hadda waxaa laga heli karaa Go Hargeisa — <hargeisa>soo ogow alaabta oo dalbo hadda</hargeisa>.",
     "featurePremium": "Alaabta Qurxinta Sare",
     "featureCollection": "Ururin Cusub",
     "featureBeauty": "Qurux Kuu Gaar Ah",
     "featureQuality": "Tayo Aad Ku Kalsoonaan Karto",
-    "ctaTitle": "Sug",
-    "ctaSubtitle": "Wax qurux badan ayaa soo socda"
+    "ctaTitle": "Iibso Hadda",
+    "ctaSubtitle": "Baadh ururinta oo dhan"
   },
   "flormarPromoBanner": {
     "badge": "Cusub Go Hargeisa",
