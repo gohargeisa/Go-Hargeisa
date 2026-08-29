@@ -388,10 +388,21 @@ type ProductOptionRow = {
 };
 
 type ProductAddonRow = {
-  id: string; product_id: string;
+  id: string; product_id: string | null; group_id: string | null;
   name: string; name_ar: string | null; name_so: string | null;
   price: number; is_taxable: boolean; is_active: boolean;
   sort_order: number; created_at: string; updated_at: string;
+};
+
+type AddonGroupRow = {
+  id: string; listing_type: string; listing_id: string;
+  name: string; name_ar: string | null; name_so: string | null;
+  min_select: number; max_select: number | null;
+  sort_order: number; created_at: string; updated_at: string;
+};
+
+type ProductAddonGroupRow = {
+  product_id: string; group_id: string; created_at: string;
 };
 
 type TaxPolicyScope = "global" | "category" | "business" | "product";
@@ -655,6 +666,8 @@ export type Database = {
       product_variants: Table<ProductVariantRow>;
       product_options: Table<ProductOptionRow>;
       product_addons: Table<ProductAddonRow>;
+      addon_groups: Table<AddonGroupRow>;
+      product_addon_groups: Table<ProductAddonGroupRow>;
       tax_policies: Table<TaxPolicyRow>;
       departments: Table<DepartmentRow>;
       doctors: Table<DoctorRow>;

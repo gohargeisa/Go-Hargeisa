@@ -936,7 +936,7 @@ export function mapProductOption(row: ProductOptionRow): ProductOption {
 export function mapProductAddon(row: ProductAddonRow): ProductAddon {
   return {
     id: row.id,
-    productId: row.product_id,
+    productId: row.product_id ?? undefined,
     name: row.name,
     nameAr: row.name_ar ?? undefined,
     nameSo: row.name_so ?? undefined,

@@ -136,6 +136,59 @@ async function _getProductsForListing(
     }
   }
 
+  // Reusable add-on GROUPS (supabase/migrations/
+  // 20260907000017_addon_groups_and_village_side_dishes.sql) — a group's
+  // own add-ons (product_addons.group_id set, product_id null) are resolved
+  // once per chunk via the product_addon_groups junction and merged into
+  // the exact same addonsByProduct map as direct per-product add-ons, so
+  // every downstream consumer (ProductCard, ProductDetailModal,
+  // getValidAddonsForProduct) sees one flat, already-merged addons array
+  // and never needs to know whether a given add-on came from a direct
+  // assignment or a shared group. A product with no group assignment pays
+  // for one small empty query per chunk, same graceful-degradation pattern
+  // as variants/options/direct add-ons above.
+  for (const ids of idChunks) {
+    const { data: assignmentRows, error: assignmentError } = await supabase
+      .from("product_addon_groups")
+      .select("product_id, group_id")
+      .in("product_id", ids);
+
+    if (assignmentError) {
+      if (process.env.NODE_ENV === "development") console.error("getProductsForListing (addon group assignments):", assignmentError.message);
+      continue;
+    }
+    if (!assignmentRows || assignmentRows.length === 0) continue;
+
+    const groupIds = Array.from(new Set(assignmentRows.map((r) => r.group_id)));
+    const { data: groupAddonRows, error: groupAddonError } = await supabase
+      .from("product_addons")
+      .select("*")
+      .in("group_id", groupIds)
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true });
+
+    if (groupAddonError) {
+      if (process.env.NODE_ENV === "development") console.error("getProductsForListing (group addons):", groupAddonError.message);
+      continue;
+    }
+
+    const addonsByGroup = new Map<string, Product["addons"]>();
+    for (const row of groupAddonRows ?? []) {
+      const addon = mapProductAddon(row);
+      const list = addonsByGroup.get(row.group_id) ?? [];
+      list.push(addon);
+      addonsByGroup.set(row.group_id, list);
+    }
+
+    for (const { product_id, group_id } of assignmentRows) {
+      const groupAddons = addonsByGroup.get(group_id);
+      if (!groupAddons || groupAddons.length === 0) continue;
+      const list = addonsByProduct.get(product_id) ?? [];
+      list.push(...groupAddons);
+      addonsByProduct.set(product_id, list);
+    }
+  }
+
   return products.map((p) => {
     const variants = variantsByProduct.get(p.id);
     const options = optionsByProduct.get(p.id);
