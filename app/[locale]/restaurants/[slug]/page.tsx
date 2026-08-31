@@ -48,6 +48,7 @@ import { PartnerStatusSection } from "@/components/shared/partner/partner-status
 import { formatDayRange, formatTime12h } from "@/lib/utils/opening-hours";
 import { InstagramPostEmbed } from "@/components/shared/instagram-post-embed";
 import { Instagram } from "lucide-react";
+import { TheVillageExperience } from "@/components/the-village/the-village-experience";
 
 // The Village Hargeisa (restaurants/the-village-hargeisa) only — a second,
 // independently-verified Instagram account for this specific business (see
@@ -79,6 +80,15 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const r = await getRestaurantBySlug(slug);
   if (!r) return {};
+  if (r.slug === VILLAGE_HARGEISA_SLUG) {
+    const tv = await getTranslations({ locale, namespace: "theVillage" });
+    return {
+      title: tv("metaTitle"),
+      description: tv("metaDescription"),
+      openGraph: { title: tv("metaTitle"), description: tv("metaDescription"), images: [r.coverImage] },
+      alternates: localeAlternates(locale as Locale, `/restaurants/${r.slug}`),
+    };
+  }
   return {
     title: `${r.name} — Restaurant in Hargeisa`,
     description: r.shortDescription,
@@ -112,6 +122,26 @@ export default async function RestaurantDetailPage({
   ]);
   const showProducts = Boolean(restaurant.catalogOrderingEnabled) && restaurantProducts.length > 0;
   const whatsappFallback = (siteSettings as { whatsapp_number?: string } | null)?.whatsapp_number ?? undefined;
+
+  // The Village Hargeisa only — a dedicated, art-directed restaurant
+  // experience (cinematic hero, editorial text-first menu with per-dish
+  // add-ons, signature-photo strip, reservation/contact/location). Every
+  // other restaurant continues to render the shared layout below,
+  // completely untouched. Reuses the same cart / ProductDetailModal /
+  // TableReservationButton / reviews / favourites / map stack.
+  if (restaurant.slug === VILLAGE_HARGEISA_SLUG) {
+    return (
+      <TheVillageExperience
+        locale={locale}
+        restaurant={restaurant}
+        products={restaurantProducts}
+        offers={offers}
+        myReview={myReview}
+        isFavorited={isFavorited}
+        whatsappFallback={whatsappFallback}
+      />
+    );
+  }
   const hasStructuredHours = restaurant.openingHoursStructured && restaurant.openingHoursStructured.length > 0;
   const hasHoursInfo = hasStructuredHours || restaurant.is24Hours || restaurant.temporarilyClosed || restaurant.permanentlyClosed;
 

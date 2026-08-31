@@ -39,11 +39,13 @@ export function CheckoutForm({ locale }: { locale: string }) {
   const [occasion, setOccasion] = useState("");
   const [messageNote, setMessageNote] = useState("");
   const [notes, setNotes] = useState("");
+  const [fulfillmentCity, setFulfillmentCity] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [taxPreview, setTaxPreview] = useState<CartTaxPreview | null>(null);
 
   const deliveryEnabled = cart.cart.deliveryEnabled;
+  const branches = cart.cart.branches ?? [];
   const baseSubtotal = cart.cart.items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0);
   const extrasTotal = cart.subtotal - baseSubtotal;
 
@@ -94,6 +96,10 @@ export function CheckoutForm({ locale }: { locale: string }) {
       setError(t("errorDeliveryAddressRequired"));
       return;
     }
+    if (branches.length > 0 && !fulfillmentCity) {
+      setError(t("errorCityRequired"));
+      return;
+    }
     if (cart.cart.items.length === 0 || !cart.cart.listingType || !cart.cart.listingId) {
       setError(t("errorCartEmpty"));
       return;
@@ -117,6 +123,7 @@ export function CheckoutForm({ locale }: { locale: string }) {
         customerPhone,
         fulfillmentType: deliveryEnabled ? fulfillmentType : "pickup",
         deliveryAddress: deliveryAddress || undefined,
+        fulfillmentCity: fulfillmentCity || undefined,
         preferredDate: preferredDate || undefined,
         preferredTime: hasGiftItem ? preferredTime || undefined : undefined,
         recipientName: recipientName || undefined,
@@ -179,6 +186,12 @@ export function CheckoutForm({ locale }: { locale: string }) {
             <span>{t("totalLabel")}</span>
             <span>${grandTotal.toFixed(2)}</span>
           </div>
+          {fulfillmentCity && (
+            <div className="flex items-center justify-between border-t border-ink/8 pt-1.5 text-ink/70 dark:border-white/10 dark:text-sand/70">
+              <span>{t("selectCityLabel")}</span>
+              <span className="font-semibold">{branches.find((b) => b.value === fulfillmentCity)?.label}</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -246,6 +259,44 @@ export function CheckoutForm({ locale }: { locale: string }) {
             onChange={(e) => setDeliveryAddress(e.target.value)}
             className={inputClass}
           />
+        </div>
+      )}
+
+      {/* City/branch step — renders ONLY when the business populated
+          AddToCartBusiness.branches (currently just Flormar Hargeisa's two
+          real branches). Every single-location business's checkout is
+          byte-for-byte unchanged. Never pre-selects one: fulfillmentCity
+          starts `null` and stays that way until the shopper actively picks
+          one, so there is no silent default. */}
+      {branches.length > 0 && (
+        <div role="radiogroup" aria-label={t("selectCityLabel")}>
+          <label className="mb-1.5 block text-sm font-semibold">{t("selectCityLabel")}</label>
+          <div className="space-y-2">
+            {branches.map((branch) => (
+              <button
+                key={branch.value}
+                type="button"
+                role="radio"
+                aria-checked={fulfillmentCity === branch.value}
+                onClick={() => setFulfillmentCity(branch.value)}
+                className={`flex w-full items-center gap-3 rounded-xl border px-3.5 py-3 text-start text-sm font-semibold transition-colors ${
+                  fulfillmentCity === branch.value
+                    ? "border-primary bg-primary/8 text-primary-800"
+                    : "border-ink/12 text-ink/70 hover:border-primary/40 dark:border-white/15 dark:text-sand/70"
+                }`}
+              >
+                <span
+                  aria-hidden="true"
+                  className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 ${
+                    fulfillmentCity === branch.value ? "border-primary" : "border-ink/25 dark:border-white/30"
+                  }`}
+                >
+                  {fulfillmentCity === branch.value && <span className="h-2 w-2 rounded-full bg-primary" />}
+                </span>
+                {branch.label}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 

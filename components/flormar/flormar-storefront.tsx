@@ -3,24 +3,25 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { MapPin, Search, ShoppingBag, Heart, User } from "lucide-react";
-import { isPlaceholderImage } from "@/lib/utils/is-placeholder-image";
-import { SHIMMER_BLUR_DATA_URL } from "@/lib/utils/shimmer";
+import { MapPin, Search, ShoppingBag, Heart, User, Menu } from "lucide-react";
 import { ProductCard } from "@/components/shared/product-card";
 import { ProductDetailModal } from "@/components/shared/product-detail-modal";
 import { PartnerProductPlaceholder } from "@/components/shared/partner/partner-product-placeholder";
 import { EmptyState } from "@/components/shared/empty-state";
 import { SocialLinks } from "@/components/shared/social-links";
-import { PartnerVideoShowcase } from "@/components/shared/partner/partner-video-showcase";
+import { FlormarHeroCarousel } from "@/components/flormar/flormar-hero-carousel";
+import { BottomSheet } from "@/components/shared/bottom-sheet";
 import { Reveal } from "@/components/home/reveal";
 import { productLocalizedName } from "@/lib/utils/product-i18n";
 import { cleanFlormarProductName } from "@/lib/utils/flormar-product-names";
+import { resolveFlormarSwatchColor } from "@/lib/utils/flormar-shade-colors";
+import { FLORMAR_BRANCHES } from "@/lib/config/flormar-branches";
 import { FLORMAR_CATEGORY_OVERRIDES } from "@/lib/config/flormar-category-overrides";
+import { FLORMAR_PRODUCT_DESCRIPTIONS, FLORMAR_SHADE_HEX } from "@/lib/config/flormar-product-details";
 import { productCategoryLabel, productGenderLabel } from "@/lib/config/product-categories";
-import { getProductPricing } from "@/lib/utils/product-pricing";
 import { useCart } from "@/lib/cart/cart-context";
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
-import { FLORMAR_CATEGORY_TILES } from "@/lib/config/flormar-categories";
+import { FLORMAR_PRIMARY_CATEGORY_GROUPS } from "@/lib/config/flormar-categories";
 import type { PartnerTheme } from "@/lib/config/partner-themes";
 import type { Locale } from "@/lib/i18n/config";
 import type { AddToCartBusiness } from "@/lib/cart/cart-context";
@@ -71,12 +72,16 @@ function useLocalWishlist() {
 }
 
 /**
- * Flormar Hargeisa — private preview storefront (client half). Structure
- * only this file owns (hero copy, section order, category tiles);
- * everything that actually renders a product (ProductCard,
- * ProductDetailModal, and inside it ProductVariantSelector) is the exact
- * same reusable component every other partner's shop tab already uses —
- * nothing product-related is duplicated or Flormar-specific.
+ * Flormar Hargeisa storefront (client half) — rebuilt to follow the
+ * official flormar.com structural/UX hierarchy (brand header + full nav,
+ * campaign-style hero, category navigation, featured products, a plain
+ * shopping grid, Hargeisa store info, partnership footer) rather than a
+ * Go-Hargeisa-editorial page with Flormar branding. Structure only this
+ * file owns (hero copy, section order, category groups); everything that
+ * actually renders a product (ProductCard, ProductDetailModal, and inside
+ * it ProductVariantSelector) is the exact same reusable component every
+ * other partner's shop tab already uses — nothing product-related is
+ * duplicated or Flormar-specific.
  *
  * `PartnerThemeScope` (the `[data-partner-theme]` CSS-var scope that
  * retints those shared components to Flormar's placeholder palette) and
@@ -95,35 +100,31 @@ function useLocalWishlist() {
  * indicator, and the variant-safe quick-add gate all still apply here
  * exactly as they do for every other partner.
  *
- * `products` is real, database-driven data (see lib/data/flormar-preview.ts)
- * reconciled against the authoritative Excel catalog — not a static mock
- * import. The listing row itself is `status: 'archived'`, which is what
- * actually keeps this private (RLS), independent of this route also being
- * unlinked/noindex (see page.tsx's robots/sitemap notes).
+ * `products` is real, database-driven data (see lib/data/flormar-preview.ts
+ * and lib/data/products.ts) reconciled against the authoritative Excel
+ * catalog — not a static mock import.
  */
-// Category tile labels now come from productCategoryLabel() (same EN/AR/SO
-// map every other product-category picker on the site uses) rather than a
-// separate flormarPreview.categoryX translation per tile — see
-// lib/config/flormar-categories.ts's doc comment for why.
-function categoryTileLabel(category: Product["category"], locale: Locale): string {
-  return productCategoryLabel(category, locale) ?? category ?? "";
-}
+type SortKey = "featured" | "newest" | "priceLow" | "priceHigh" | "name";
 
-type SortKey = "featured" | "newest" | "priceLow" | "priceHigh";
-type DiscoveryTab = "all" | "new" | "featured" | "offers";
-
-// Case-insensitive startsWith: the real catalog's Name column isn't
-// consistently cased ("Bb Cream Bbcr", "Baked Blush-on Bbl Np") — a
-// case-sensitive match against "BB Cream"/"Baked Blush-On" silently missed
-// those rows even though the product genuinely matches that styling look.
-function nameStartsWith(name: string, prefix: string): boolean {
-  return name.toLowerCase().startsWith(prefix.toLowerCase());
-}
-
-const EDIT_LOOKS: { key: string; titleKey: "lookEveryday" | "lookSoftGlam" | "lookDefinedEyes"; descriptionKey: "lookEverydayBody" | "lookSoftGlamBody" | "lookDefinedEyesBody"; match: string[] }[] = [
-  { key: "everyday-glow", titleKey: "lookEveryday", descriptionKey: "lookEverydayBody", match: ["BB Cream", "Baked Powder"] },
-  { key: "soft-glam", titleKey: "lookSoftGlam", descriptionKey: "lookSoftGlamBody", match: ["Baked Blush-On", "Baked Eyeshadow"] },
-  { key: "defined-eyes", titleKey: "lookDefinedEyes", descriptionKey: "lookDefinedEyesBody", match: ["Baked Eyeshadow", "Angled Brow Pencil"] },
+/**
+ * Real Flormar Hargeisa campaign photography for the hero carousel — 5
+ * photos hand-picked from the 14 the business owner supplied
+ * (OneDrive Desktop\Flormar\model-01.jpeg … model-14.jpeg), copied
+ * byte-for-byte (sha256-verified at copy time) into
+ * public/images/partners/flormar/campaign/. Selection criteria: a real
+ * Flormar-branded product ("flormar"/"f" logo) clearly visible in the
+ * model's hand, and no ambiguous third-party watermark in frame (one
+ * otherwise-strong candidate, model-04, was excluded for exactly that
+ * reason — an unidentified colored icon appears in its lower-left corner
+ * that isn't Flormar's own mark). Nothing here is generated, stock, or
+ * invented — every file is a verbatim copy of a supplied photo.
+ */
+const FLORMAR_HERO_CAMPAIGN_IMAGES = [
+  { src: "/images/partners/flormar/campaign/campaign-01.jpg", alt: "Flormar Hargeisa — campaign photography" },
+  { src: "/images/partners/flormar/campaign/campaign-02.jpg", alt: "Flormar Hargeisa — campaign photography" },
+  { src: "/images/partners/flormar/campaign/campaign-03.jpg", alt: "Flormar Hargeisa — campaign photography" },
+  { src: "/images/partners/flormar/campaign/campaign-04.jpg", alt: "Flormar Hargeisa — campaign photography" },
+  { src: "/images/partners/flormar/campaign/campaign-05.jpg", alt: "Flormar Hargeisa — campaign photography" },
 ];
 
 export function FlormarStorefront({
@@ -144,12 +145,13 @@ export function FlormarStorefront({
   const td = useTranslations("detail");
   const th = useTranslations("hotelDetail");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [categoryMenuOpen, setCategoryMenuOpen] = useState(false);
   const cart = useCart();
   const wishlist = useLocalWishlist();
-  // Category tiles and editorial cards below reuse real product photos
-  // (external CDN URLs from the real catalog, not this project's own
-  // assets) as their visual — unlike ProductImage/PartnerVideoShowcase,
-  // a bare next/image here has no built-in error fallback, so one tracked
+  // Category tiles below reuse real product photos (external CDN URLs from
+  // the real catalog, not this project's own assets) as their visual —
+  // unlike ProductImage, a bare next/image here has no built-in error
+  // fallback, so one tracked
   // here: a source that fails to load (dead link, transient CDN issue)
   // falls back to PartnerProductPlaceholder instead of a permanent broken-
   // image icon, keyed by category/look key so only that one tile reacts.
@@ -158,36 +160,99 @@ export function FlormarStorefront({
     setBrokenImageKeys((prev) => (prev.has(key) ? prev : new Set(prev).add(key)));
   }
 
-  // Single derived catalog every section below reads from (Featured, Shop
-  // by Category, The Edit, Product Discovery, the detail modal). No
+  // Single derived catalog every section below reads from (Featured,
+  // Category Navigation, the shopping grid, the detail modal). No
   // `originalPrice` override is applied here — Flormar Hargeisa hasn't set
-  // any real sale prices yet, so the "Offers" tab below legitimately shows
-  // its empty state until real discount data exists; a fabricated
-  // strikethrough price is not an acceptable stand-in for that.
+  // any real sale prices yet, so there is no discount/offers data to show;
+  // a fabricated strikethrough price is not an acceptable stand-in for
+  // that.
   //
   // Display name is cleaned here, once, upstream of every consumer (card,
-  // detail modal, cart, search, The Edit's prefix matching) — see
-  // cleanFlormarProductName's own doc comment for exactly what it does and
-  // doesn't change. ProductCard/ProductDetailModal/useCart are the same
-  // shared components every other partner uses and need no changes: they
-  // just read whatever `name` is already on the product object, which by
-  // the time it reaches them here is already the clean one. This is a
-  // display-time transform only — the underlying DB row's raw name/sku are
+  // detail modal, cart, search) — see cleanFlormarProductName's own doc
+  // comment for exactly what it does and doesn't change. Variant
+  // name/shadeName get the exact same treatment for the exact same reason:
+  // the real catalog's `product_variants.name`/`shade_name` columns carry
+  // the identical raw-import artifacts as product names ("Sft Beige Np",
+  // "Clsscl Brwn") — a customer picking a shade shouldn't see that any more
+  // than they should see a garbled product name. ProductCard/
+  // ProductDetailModal/ProductVariantSelector/useCart are the same shared
+  // components every other partner uses and need no changes: they just
+  // read whatever name is already on the object, which by the time it
+  // reaches them here is already the clean one. This is a display-time
+  // transform only — the underlying DB rows' raw name/shade_name/sku are
   // never modified.
   const productsWithPricing = useMemo(
     () =>
       catalogProducts.map((p) => {
         const base8 = (p.sku ?? "").split("-")[0]?.slice(0, 8) ?? "";
         const categoryOverride = (p.sku && FLORMAR_CATEGORY_OVERRIDES[p.sku]) || FLORMAR_CATEGORY_OVERRIDES[base8];
+        // Real, flormar.com-verified product copy from the earlier catalogue
+        // reconciliation (see FLORMAR_PRODUCT_DESCRIPTIONS' own header) — the
+        // raw `products.description` column is NULL on every imported row, so
+        // without this the detail modal shows no description at all. Only
+        // applied when the DB genuinely has none; a real DB value always wins.
+        //
+        // ENGLISH LOCALE ONLY: these strings are English marketing copy. There
+        // is no verified Arabic/Somali equivalent (DB `description_ar`/`_so`
+        // and every per-shade `name_ar`/`_so` are all NULL for this catalogue),
+        // and `productLocalizedDescription` would otherwise surface this
+        // English text on /ar and /so — an English paragraph inside an
+        // otherwise fully-localised, RTL modal. Gating to `en` keeps /ar and
+        // /so showing no description block (their real state) until verified
+        // translations exist, at which point the normal DB-driven
+        // localisation picks them up with no change here.
+        const verifiedDescription =
+          locale === "en" ? (p.sku && FLORMAR_PRODUCT_DESCRIPTIONS[p.sku]) || FLORMAR_PRODUCT_DESCRIPTIONS[base8] : undefined;
         return {
           ...p,
           name: cleanFlormarProductName(p.name, p.sku),
+          // Display-only — every product on this listing genuinely is a
+          // real Flormar product (that's what this whole storefront sells),
+          // so this isn't a guess or an invented claim, just surfacing a
+          // fact the raw `products.brand` column was never populated with
+          // at import time. Never written back to the database.
+          brand: "Flormar",
           ...(categoryOverride ? { category: categoryOverride } : null),
+          ...(verifiedDescription && !p.description ? { description: verifiedDescription } : null),
+          ...(p.variants
+            ? {
+                variants: p.variants.map((v) => ({
+                  ...v,
+                  name: cleanFlormarProductName(v.name, v.sku),
+                  shadeName: v.shadeName ? cleanFlormarProductName(v.shadeName, v.sku) : v.shadeName,
+                  // Verified per-shade swatch colour where the reconciliation
+                  // recorded one — takes priority over the word-match
+                  // approximation (resolveFlormarSwatchColor), which stays the
+                  // fallback for every shade not in the map.
+                  ...(v.sku && FLORMAR_SHADE_HEX[v.sku] ? { hexColor: FLORMAR_SHADE_HEX[v.sku] } : null),
+                })),
+              }
+            : null),
         };
       }),
-    [catalogProducts]
+    [catalogProducts, locale]
   );
   const featured = productsWithPricing.filter((p) => p.isFeatured);
+
+  // "Discover Your Favorites" — one real product per category group (Face/
+  // Eyes/Lips/Nails/Skin Care/Accessories), so the strip shows the actual
+  // breadth of the catalog rather than another slice of the same Featured
+  // list above. Deliberately NOT framed as personalized ("Chosen For You")
+  // — there's no browsing history or recommendation engine behind this, so
+  // that label would overclaim; "Discover Your Favorites" (the brief's own
+  // alternative wording) reads as an invitation, not a claim. Picks the
+  // first available (in-stock) product per group with a real photo,
+  // preferring featured ones, falling back to any match; a group with zero
+  // real products simply contributes nothing rather than a placeholder.
+  const discoverPicks = useMemo(() => {
+    const picks: Product[] = [];
+    for (const group of FLORMAR_PRIMARY_CATEGORY_GROUPS) {
+      const inGroup = productsWithPricing.filter((p) => p.category && group.categories.includes(p.category) && p.image && p.isAvailable);
+      const pick = inGroup.find((p) => p.isFeatured) ?? inGroup[0];
+      if (pick) picks.push(pick);
+    }
+    return picks;
+  }, [productsWithPricing]);
 
   // Real city_services.id (shared by every row in catalogProducts — they're
   // all one listing) — NOT a "mock-flormar" placeholder string. Falls back
@@ -199,53 +264,45 @@ export function FlormarStorefront({
     businessName: "Flormar Hargeisa",
     deliveryEnabled: false,
     addons: [],
+    // Real branches — Flormar operates in both Hargeisa and Mogadishu.
+    // Populating this is what makes CheckoutForm show the required
+    // city/branch step at all; every other business's checkout is
+    // unaffected since none of them set this. See flormar-branches.ts.
+    branches: FLORMAR_BRANCHES,
   };
 
-  // FLORMAR_CATEGORY_TILES carries no `image` of its own (no dedicated
-  // category-photography asset exists) — the tile previously fell straight
-  // through to the placeholder for every category, every time, which is
-  // exactly the "logo standing in for a missing photo" bug: the placeholder
-  // used to show the partner logo, so every category tile effectively
-  // displayed the logo instead of any real visual. Root-cause fix: a real,
-  // already-photographed product from that category IS real category
-  // imagery — reuse it, the same "representative product photo" pattern
-  // real e-commerce category tiles use, rather than inventing a new asset.
-  // Featured products preferred (closer to "representative"), falls back
-  // to any product in the category with a real photo.
+  // FLORMAR_PRIMARY_CATEGORY_GROUPS carries no `image` of its own (no
+  // dedicated category-photography asset exists) — reuse a real,
+  // already-photographed product from that group as its tile image, the
+  // same "representative product photo" pattern real e-commerce category
+  // tiles use, rather than inventing a new asset. Featured products
+  // preferred (closer to "representative"), falls back to any product in
+  // the group with a real photo. A group can span more than one raw
+  // `products.category` value (e.g. "Skin Care" = skincare_creams +
+  // body_care) — see that config's own doc comment for why.
   const categoryImages = useMemo(() => {
     const map = new Map<string, string>();
-    for (const cat of FLORMAR_CATEGORY_TILES) {
-      const inCategory = productsWithPricing.filter((p) => p.category === cat.category && p.image);
-      const pick = inCategory.find((p) => p.isFeatured) ?? inCategory[0];
-      if (pick?.image) map.set(cat.key, pick.image);
+    for (const group of FLORMAR_PRIMARY_CATEGORY_GROUPS) {
+      const inGroup = productsWithPricing.filter((p) => p.category && group.categories.includes(p.category) && p.image);
+      const pick = inGroup.find((p) => p.isFeatured) ?? inGroup[0];
+      if (pick?.image) map.set(group.key, pick.image);
     }
     return map;
   }, [productsWithPricing]);
 
-  // Product Discovery — tab + category + search + sort, all computed
+  // Shopping grid — category group + search + sort, all computed
   // client-side over the same productsWithPricing every other section
-  // already uses (no second product source).
-  //
-  // The four tabs read four genuinely independent real fields — none of
-  // them derive from, or duplicate, another:
-  //  - "all": no filter.
-  //  - "new": sorted by createdAt, newest 4 — real catalog timestamps.
-  //  - "featured" (labeled "Best Sellers" in the UI): the real, independent
-  //    `isFeatured` curation flag — has nothing to do with price.
-  //  - "offers": `getProductPricing(p).hasDiscount` — real, independent
-  //    price comparison (originalPrice > price). Previously this tab was
-  //    hardcoded to always render the empty state below regardless of
-  //    `discoveryResults` — never actually checked pricing data at all,
-  //    which is why products visibly showing -37%/-31%/-32% badges
-  //    elsewhere on this same page still produced "No offers right now".
-  //    Root-cause fix: "offers" is now a real filter inside
-  //    `discoveryResults`, just like every other tab; the hardcoded
-  //    always-empty branch is gone. A "Best Prices" tab is not currently
-  //    implemented in this UI (no separate ranking data exists for it, and
-  //    "cheapest first" already exists as a real, honest sort option
-  //    below) — not adding a fourth tab backed by invented analytics.
-  const [discoveryTab, setDiscoveryTab] = useState<DiscoveryTab>("all");
-  const [discoveryCategory, setDiscoveryCategory] = useState<Product["category"] | null>(null);
+  // already uses (no second product source). No tab bar: Featured Products
+  // already has its own dedicated section above, and a "New Arrivals" tab
+  // was removed because the real data doesn't support it — the catalog's
+  // `created_at` only has 2 distinct values across all 225 rows (one or two
+  // import batches), so "newest first" would just reflect which import
+  // batch a row happened to land in, not genuine product recency. Per the
+  // brief's own "if the data does not support this accurately, do not
+  // fabricate it" rule, that's not real "new arrivals" data — sorting by
+  // `createdAt` is still offered as an honest, real (if coarse) sort option
+  // below, just not framed as a curated "New" section.
+  const [discoveryCategory, setDiscoveryCategory] = useState<string | null>(null);
   const [discoveryQuery, setDiscoveryQuery] = useState("");
   const [discoverySort, setDiscoverySort] = useState<SortKey>("featured");
   // Collection/gender filter — "All Products" plus one pill per gender value
@@ -274,21 +331,20 @@ export function FlormarStorefront({
   const [discoveryVisibleCount, setDiscoveryVisibleCount] = useState(DISCOVERY_PAGE_SIZE);
   useEffect(() => {
     setDiscoveryVisibleCount(DISCOVERY_PAGE_SIZE);
-  }, [discoveryTab, discoveryCategory, discoveryQuery, discoverySort, discoveryGender]);
+  }, [discoveryCategory, discoveryQuery, discoverySort, discoveryGender]);
 
-  function goToCategory(category: Product["category"]) {
-    setDiscoveryCategory(category);
-    setDiscoveryTab("all");
-    document.getElementById("product-discovery")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  function goToCategory(groupKey: string) {
+    setDiscoveryCategory(groupKey);
+    document.getElementById("shop-all")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   const discoveryResults = useMemo(() => {
     let list = productsWithPricing;
     if (discoveryGender !== "all") list = list.filter((p) => p.gender === discoveryGender);
-    if (discoveryCategory) list = list.filter((p) => p.category === discoveryCategory);
-    if (discoveryTab === "new") list = [...list].sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt)).slice(0, 4);
-    if (discoveryTab === "featured") list = list.filter((p) => p.isFeatured);
-    if (discoveryTab === "offers") list = list.filter((p) => getProductPricing(p).hasDiscount);
+    if (discoveryCategory) {
+      const group = FLORMAR_PRIMARY_CATEGORY_GROUPS.find((g) => g.key === discoveryCategory);
+      if (group) list = list.filter((p) => p.category && group.categories.includes(p.category));
+    }
 
     const needle = discoveryQuery.trim().toLowerCase();
     if (needle) {
@@ -301,9 +357,10 @@ export function FlormarStorefront({
     if (discoverySort === "newest") sorted.sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
     else if (discoverySort === "priceLow") sorted.sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
     else if (discoverySort === "priceHigh") sorted.sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
+    else if (discoverySort === "name") sorted.sort((a, b) => productLocalizedName(a, locale).localeCompare(productLocalizedName(b, locale)));
     else sorted.sort((a, b) => Number(b.isFeatured) - Number(a.isFeatured) || a.sortOrder - b.sortOrder);
     return sorted;
-  }, [productsWithPricing, discoveryGender, discoveryCategory, discoveryTab, discoveryQuery, discoverySort, locale]);
+  }, [productsWithPricing, discoveryGender, discoveryCategory, discoveryQuery, discoverySort, locale]);
 
   return (
     <>
@@ -319,6 +376,22 @@ export function FlormarStorefront({
         className="sticky top-20 z-40 border-b border-black/5 bg-white/95 backdrop-blur-xl dark:border-white/10 dark:bg-ink/95"
       >
         <div className="container-px mx-auto flex h-16 items-center gap-3 sm:gap-5">
+          {/* Mobile/tablet category menu — the quick-nav <nav> below this is
+              `hidden` until `lg:`, which left every screen narrower than
+              that with NO way to jump to a category from the header at all
+              (only by scrolling down to the Shop by Category section).
+              Opens the same real 6 category groups the desktop quick-nav
+              and Shop by Category grid already use — no second category
+              list to keep in sync. */}
+          <button
+            type="button"
+            onClick={() => setCategoryMenuOpen(true)}
+            aria-label={t("categoriesMenuLabel")}
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-ink/70 transition-colors hover:bg-ink/5 dark:text-sand/70 dark:hover:bg-white/10 lg:hidden"
+          >
+            <Menu size={19} aria-hidden="true" />
+          </button>
+
           <button
             type="button"
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
@@ -328,30 +401,34 @@ export function FlormarStorefront({
             {theme.partnerLogo && <Image src={theme.partnerLogo} alt={theme.partnerName} fill sizes="96px" className="object-contain" priority />}
           </button>
 
-          {/* Compact quick-nav: the 4 highest-volume/most-shopped categories
-              only (Eyes/Face/Lips/Nail Care) — same 4-item density this row
-              has always had, now pointing at real categories instead of a
-              stale one with zero matching products. The full 8-category set
-              (FLORMAR_CATEGORY_TILES) is still fully browsable via the Shop
-              by Category grid below, so nothing is unreachable — this row
-              is a convenience shortcut, not the only way to filter. */}
+          {/* Main Flormar navigation: the same official-site category
+              philosophy (Face/Eyes/Lips/Nails/Skin Care/Accessories) as the
+              Category Navigation and Shopping sections below, plus a link
+              to the Hargeisa store-information section — one nav, reused
+              everywhere, not a separate list to keep in sync. */}
           <nav aria-label={t("categoryTitle")} className="hidden shrink-0 items-center gap-1 lg:flex">
-            {FLORMAR_CATEGORY_TILES.slice(0, 4).map((cat) => (
+            {FLORMAR_PRIMARY_CATEGORY_GROUPS.map((group) => (
               <button
-                key={cat.key}
+                key={group.key}
                 type="button"
-                onClick={() => goToCategory(cat.category)}
-                aria-pressed={discoveryCategory === cat.category}
+                onClick={() => goToCategory(group.key)}
+                aria-pressed={discoveryCategory === group.key}
                 className="rounded-full px-3 py-1.5 text-sm font-semibold transition-colors"
                 style={
-                  discoveryCategory === cat.category
+                  discoveryCategory === group.key
                     ? { backgroundColor: `rgba(${theme.primaryRgb}, 0.1)`, color: theme.primaryStrong }
                     : { color: "inherit" }
                 }
               >
-                {categoryTileLabel(cat.category, locale)}
+                {t(group.titleKey)}
               </button>
             ))}
+            <a
+              href="#hargeisa-store"
+              className="rounded-full px-3 py-1.5 text-sm font-semibold transition-colors hover:bg-ink/5 dark:hover:bg-white/10"
+            >
+              {t("hargeisaStoreNavLabel")}
+            </a>
           </nav>
 
           <div className="relative hidden max-w-xs flex-1 sm:block">
@@ -360,7 +437,7 @@ export function FlormarStorefront({
               value={discoveryQuery}
               onChange={(e) => {
                 setDiscoveryQuery(e.target.value);
-                if (e.target.value.trim()) document.getElementById("product-discovery")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                if (e.target.value.trim()) document.getElementById("shop-all")?.scrollIntoView({ behavior: "smooth", block: "start" });
               }}
               placeholder={t("searchPlaceholder")}
               aria-label={t("searchPlaceholder")}
@@ -378,7 +455,7 @@ export function FlormarStorefront({
             </a>
             <button
               type="button"
-              onClick={() => document.getElementById("product-discovery")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+              onClick={() => document.getElementById("shop-all")?.scrollIntoView({ behavior: "smooth", block: "start" })}
               aria-label={tp("wishlistLabel")}
               className="relative flex h-9 w-9 items-center justify-center rounded-full text-ink/70 transition-colors hover:bg-ink/5 dark:text-sand/70 dark:hover:bg-white/10"
             >
@@ -412,7 +489,7 @@ export function FlormarStorefront({
               value={discoveryQuery}
               onChange={(e) => {
                 setDiscoveryQuery(e.target.value);
-                if (e.target.value.trim()) document.getElementById("product-discovery")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                if (e.target.value.trim()) document.getElementById("shop-all")?.scrollIntoView({ behavior: "smooth", block: "start" });
               }}
               placeholder={t("searchPlaceholder")}
               aria-label={t("searchPlaceholder")}
@@ -422,222 +499,130 @@ export function FlormarStorefront({
         </div>
       </div>
 
-      {/* 02 — Hero. Uses the business owner's real supplied composition
-          (public/images/partners/flormar/hero.png, 1747×900) — dark
-          Burgundy negative space on the left third, the product lineup lit
-          on the right two-thirds. Two structurally different layouts, not
-          one flexible one forced to cover both:
-           - sm+ (≥640px): full-bleed cover-fit overlay hero, content
-             anchored over the image's own left negative space, products
-             left fully uncovered on the right. `dir="ltr"` locks that
-             content column to the PHYSICAL left in every locale —
-             Tailwind's logical start/end utilities flip with RTL, which
-             would move the text (and its flex row of CTAs) onto the
-             product photography in Arabic. Arabic glyphs still shape and
-             read correctly RTL inside an ltr-marked container; only the
-             block-level layout direction is pinned here.
-           - <640px: stacked, not a shrunk version of the desktop overlay —
-             the image renders at its own aspect ratio (full composition,
-             no crop) as a top band, with the text/CTAs in a solid
-             primaryDeep panel below. Avoids the two real mobile failure
-             modes at this width: cropping the product photography to fill
-             a fixed-height cover box, and overlaying text on top of a
-             narrow crop where there's no room left for both the negative
-             space and the products.
-          `isPlaceholderImage` fallback preserved for defensive robustness
-          if heroImage is ever cleared again — same left-anchored content,
-          just a plain theme-color gradient behind it instead of the photo. */}
-      <section className="relative overflow-hidden text-white">
-        {theme.heroImageFit === "cover" && theme.heroImage && !isPlaceholderImage(theme.heroImage) ? (
-          <>
-            {/* Mobile: stacked, full composition, no overlay */}
-            <div className="sm:hidden">
-              <div className="relative w-full" style={{ aspectRatio: "1747 / 900" }}>
-                <Image
-                  src={theme.heroImage}
-                  alt=""
-                  fill
-                  priority
-                  quality={90}
-                  sizes="100vw"
-                  placeholder="blur"
-                  blurDataURL={SHIMMER_BLUR_DATA_URL}
-                  className="object-cover object-[62%_50%]"
-                />
-              </div>
-              <div className="flex flex-col items-center px-6 py-10 text-center" style={{ backgroundColor: theme.primaryDeep }}>
-                {theme.partnerLogo && (
-                  <div className="relative mb-5 h-11 w-[124px]">
-                    <Image src={theme.partnerLogo} alt={theme.partnerName} fill sizes="124px" quality={90} className="object-contain" />
-                  </div>
-                )}
-                <span
-                  className="inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1 text-[11px] font-bold uppercase tracking-[0.2em]"
-                  style={{ borderColor: `rgba(${theme.accentRgb}, 0.6)`, color: theme.accentSoft }}
-                >
-                  {t("heroEyebrow")}
-                </span>
-                <h1 className="mt-4 text-balance font-display text-3xl font-bold tracking-tight">{t("heroTitle")}</h1>
-                <p className="mt-2.5 text-balance font-display text-base font-semibold text-white/90">{t("heroSubtitle")}</p>
-                <div className="mt-6 flex flex-wrap items-center justify-center gap-2.5">
-                  <a
-                    href="#featured-collection"
-                    className="rounded-full px-5 py-2.5 text-sm font-bold text-white shadow-lg transition-all duration-300 hover:-translate-y-0.5"
-                    style={{ backgroundColor: theme.accentStrong }}
-                  >
-                    {t("exploreCollection")}
-                  </a>
-                  <a
-                    href="#featured-collection"
-                    className="rounded-full border border-white/40 bg-white/10 px-5 py-2.5 text-sm font-bold text-white backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/20"
-                  >
-                    {t("orderNow")}
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            {/* sm+: full-bleed overlay hero, content over the left negative
-               space. `dir="ltr"` lives on THIS outer flex container, not
-               just the text column inside it — a flex container's own
-               `justify-content`/item placement resolves against ITS OWN
-               direction, inherited from the ambient <html dir>, regardless
-               of any dir set on a child. Marking only the inner text div
-               ltr still left the whole column flex-placed at the RTL
-               "start" edge (the right, in Arabic) directly on top of the
-               product photography — confirmed via an Arabic screenshot
-               before this fix. Pinning dir here fixes placement for the
-               image + content together. */}
-            <div dir="ltr" className="relative hidden min-h-[480px] items-center sm:flex md:min-h-[560px] lg:min-h-[620px]">
-              <Image
-                src={theme.heroImage}
-                alt=""
-                fill
-                priority
-                quality={90}
-                sizes="100vw"
-                placeholder="blur"
-                blurDataURL={SHIMMER_BLUR_DATA_URL}
-                className="object-cover object-[58%_42%] md:object-[55%_45%] lg:object-[52%_48%]"
-              />
-              {/* Left-biased scrim for text contrast — the photo's own dark
-                 Burgundy region already carries most of the contrast; this
-                 only reinforces it near the text column and fades to
-                 nothing by mid-frame so the product colors on the right
-                 stay true, not washed out. */}
-              <div
-                aria-hidden="true"
-                className="absolute inset-0"
-                style={{ background: "linear-gradient(90deg, rgba(20, 8, 14, 0.55) 0%, rgba(20, 8, 14, 0.28) 32%, transparent 58%)" }}
-              />
-              <div dir="ltr" className="relative z-10 flex max-w-md flex-col items-start px-6 text-left sm:px-10 md:max-w-lg md:px-14 lg:px-20">
-                {theme.partnerLogo && (
-                  <div className="relative mb-6 h-12 w-[168px] drop-shadow-[0_2px_10px_rgba(0,0,0,0.45)] md:h-14 md:w-[196px]">
-                    <Image src={theme.partnerLogo} alt={theme.partnerName} fill sizes="200px" quality={90} className="object-contain" />
-                  </div>
-                )}
-                <span
-                  className="inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em]"
-                  style={{ borderColor: `rgba(${theme.accentRgb}, 0.6)`, color: theme.accentSoft }}
-                >
-                  {t("heroEyebrow")}
-                </span>
-                <h1 className="mt-5 text-balance font-display text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">{t("heroTitle")}</h1>
-                <p className="mt-4 text-balance font-display text-lg font-semibold text-white/90 md:text-xl">{t("heroSubtitle")}</p>
-                <div className="mt-8 flex flex-wrap items-center gap-3">
-                  <a
-                    href="#featured-collection"
-                    className="rounded-full px-7 py-3.5 text-sm font-bold text-white shadow-lg transition-all duration-300 hover:-translate-y-0.5"
-                    style={{ backgroundColor: theme.accentStrong }}
-                  >
-                    {t("exploreCollection")}
-                  </a>
-                  <a
-                    href="#featured-collection"
-                    className="rounded-full border border-white/40 bg-white/10 px-7 py-3.5 text-sm font-bold text-white backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/20"
-                  >
-                    {t("orderNow")}
-                  </a>
-                </div>
-              </div>
-            </div>
-          </>
-        ) : (
-          <div className="relative flex min-h-[560px] items-center justify-center overflow-hidden px-5 py-24 text-center">
-            <div
-              aria-hidden="true"
-              className="absolute inset-0"
-              style={{ background: `linear-gradient(155deg, ${theme.primaryDeep} 0%, ${theme.primary} 55%, ${theme.primaryMid} 100%)` }}
-            />
-            <div
-              aria-hidden="true"
-              className="absolute inset-0 opacity-[0.07]"
-              style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1.5px)", backgroundSize: "26px 26px" }}
-            />
-            <div className="relative flex max-w-2xl flex-col items-center">
-              {theme.partnerLogo && (
-                <div className="relative mb-6 h-14 w-[196px] sm:h-16 sm:w-[224px]">
-                  <Image src={theme.partnerLogo} alt={theme.partnerName} fill sizes="240px" quality={90} className="object-contain" />
-                </div>
-              )}
-              <span
-                className="inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em]"
-                style={{ borderColor: `rgba(${theme.accentRgb}, 0.6)`, color: theme.accentSoft }}
+      {/* 02 — Large Flormar Campaign Hero, back to sitting right below the
+          storefront header (the platform owner's latest, more specific
+          ordering supersedes the previous "categories above hero" pass).
+          The dark cinematic video hero is gone entirely — replaced with a
+          real photo campaign carousel (FLORMAR_HERO_CAMPAIGN_IMAGES, 5 real
+          local Flormar Hargeisa campaign photos, copied byte-for-byte from
+          the business owner's supplied files — see that constant's own doc
+          comment). Clean white/spacious split layout: photo panel (the
+          rotating carousel) + a SEPARATE, static white text panel — see
+          FlormarHeroCarousel's own doc comment for why the headline/CTAs
+          are never overlaid on top of the photos. Stacks on mobile (photo
+          first, text below); sits side-by-side from `sm:` up.
+          `aspect-[2/3]` on the photo column at every breakpoint matches the
+          source photos' own real pixel ratio (720×1080) exactly — with no
+          browser available this session to visually confirm a tuned crop,
+          matching the container ratio to the source ratio is the only way
+          to GUARANTEE zero cropping and zero stretching by construction,
+          rather than by a min-height guess. `object-cover` on a
+          ratio-matched container behaves identically to `object-contain`
+          (nothing left to crop), so the full composition — face and
+          product both — is always visible. */}
+      <section className="overflow-hidden bg-white dark:bg-ink">
+        <div className="flex flex-col sm:flex-row sm:items-stretch">
+          <div className="relative aspect-[2/3] w-full sm:w-[46%] sm:flex-none md:w-[42%]">
+            <FlormarHeroCarousel images={FLORMAR_HERO_CAMPAIGN_IMAGES} />
+          </div>
+          <div className="flex flex-1 flex-col items-center justify-center px-6 py-14 text-center sm:items-start sm:px-10 sm:py-10 sm:text-start md:px-16 lg:px-20">
+            <span
+              className="text-xs font-bold uppercase tracking-[0.2em]"
+              style={{ color: theme.primaryStrong }}
+            >
+              {t("heroEyebrow")}
+            </span>
+            <h1 className="mt-3 text-balance font-display text-4xl font-bold tracking-tight text-ink dark:text-sand sm:text-5xl lg:text-6xl">
+              {t("heroTitle")}
+            </h1>
+            <p className="mt-4 max-w-sm text-balance font-display text-lg font-semibold text-ink/70 dark:text-sand/70 sm:text-xl">
+              {t("heroSubtitle")}
+            </p>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3 sm:justify-start">
+              <a
+                href="#shop-all"
+                className="rounded-full px-7 py-3.5 text-sm font-bold text-white shadow-lg transition-all duration-300 hover:-translate-y-0.5"
+                style={{ backgroundColor: theme.accentStrong }}
               >
-                {t("heroEyebrow")}
-              </span>
-              <h1 className="mt-6 text-balance font-display text-5xl font-bold tracking-tight sm:text-6xl md:text-7xl">{t("heroTitle")}</h1>
-              <p className="mt-4 text-balance font-display text-xl font-semibold text-white/90 sm:text-2xl">{t("heroSubtitle")}</p>
-              <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-                <a
-                  href="#featured-collection"
-                  className="rounded-full px-7 py-3.5 text-sm font-bold text-white shadow-lg transition-all duration-300 hover:-translate-y-0.5"
-                  style={{ backgroundColor: theme.accentStrong }}
-                >
-                  {t("exploreCollection")}
-                </a>
-                <a
-                  href="#featured-collection"
-                  className="rounded-full border border-white/40 bg-white/10 px-7 py-3.5 text-sm font-bold text-white backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/20"
-                >
-                  {t("orderNow")}
-                </a>
-              </div>
+                {t("exploreCollection")}
+              </a>
+              <a
+                href="#featured-collection"
+                className="rounded-full border px-7 py-3.5 text-sm font-bold transition-all duration-300 hover:-translate-y-0.5"
+                style={{ borderColor: `rgba(${theme.primaryRgb}, 0.3)`, color: theme.primaryStrong }}
+              >
+                {t("orderNow")}
+              </a>
             </div>
           </div>
-        )}
-      </section>
-
-      {/* 03 — Brand / editorial intro */}
-      <section className="py-16 sm:py-24">
-        <div className="container-px mx-auto max-w-2xl text-center">
-          <Reveal>
-            <span
-              className="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.2em]"
-              style={{ backgroundColor: `rgba(${theme.primaryRgb}, 0.1)`, color: theme.primaryStrong }}
-            >
-              {t("introEyebrow")}
-            </span>
-            <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">{t("introTitle")}</h2>
-            <p className="mt-4 leading-relaxed text-ink/70 dark:text-sand/70">{t("introBody")}</p>
-          </Reveal>
         </div>
       </section>
 
-      {/* 04 — Featured Collection — real reusable ProductCard/modal, real
-          variant selector (the lipstick has 5 shades). */}
+      {/* 03 — Category Navigation / Product Discovery, following the
+          official-site category philosophy (Face/Eyes/Lips/Nails/Skin
+          Care/Accessories) mapped onto the real, verified product
+          categories — see FLORMAR_PRIMARY_CATEGORY_GROUPS's own doc
+          comment. No eyebrow badge — plain heading, matching a real brand
+          site's category rail rather than a Go-Hargeisa-editorial tag. */}
+      <section id="category-nav" className="py-16 sm:py-24">
+        <div className="container-px mx-auto">
+          <Reveal>
+            <h2 className="mx-auto mb-10 max-w-2xl text-balance text-center font-display text-3xl font-extrabold tracking-tight md:mb-14 md:text-4xl">
+              {t("categoryTitle")}
+            </h2>
+          </Reveal>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+            {FLORMAR_PRIMARY_CATEGORY_GROUPS.map((group) => (
+              <button
+                key={group.key}
+                type="button"
+                onClick={() => goToCategory(group.key)}
+                className="group relative aspect-square overflow-hidden rounded-xl3 text-start shadow-soft transition-transform duration-300 hover:-translate-y-1"
+              >
+                {categoryImages.get(group.key) && !brokenImageKeys.has(`cat-${group.key}`) ? (
+                  <>
+                    {/* `object-contain` on a light canvas, not `cover` — the
+                       source is real catalog product photography (plain
+                       background, product-only), not lifestyle imagery, so
+                       cropping it to fill a square via `cover` would zoom
+                       into a fragment of packaging rather than show the
+                       product. Same contain+light-canvas treatment the
+                       product cards themselves already use for this exact
+                       photography, just reused here for consistency. */}
+                    <div className="absolute inset-0 bg-[#FBF7F4]" aria-hidden="true" />
+                    <Image
+                      src={categoryImages.get(group.key)!}
+                      alt={t(group.titleKey)}
+                      fill
+                      sizes="(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 16vw"
+                      className="object-contain p-6 transition-transform duration-500 group-hover:scale-105"
+                      onError={() => markImageBroken(`cat-${group.key}`)}
+                    />
+                    <div
+                      aria-hidden="true"
+                      className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-3 pt-10"
+                    >
+                      <p className="font-display text-sm font-bold text-white">{t(group.titleKey)}</p>
+                    </div>
+                  </>
+                ) : (
+                  <PartnerProductPlaceholder name={t(group.titleKey)} theme={theme} />
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 05 — Featured Products — real reusable ProductCard/modal, real
+          variant selector (the lipstick has 5 shades). No eyebrow badge,
+          matching the plain "Featured" headings real brand storefronts use. */}
       <section id="featured-collection" className="bg-white py-16 dark:bg-white/[0.03] sm:py-24">
         <div className="container-px mx-auto">
           <Reveal>
-            <div className="mx-auto mb-10 max-w-2xl text-center md:mb-14">
-              <span
-                className="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.2em]"
-                style={{ backgroundColor: `rgba(${theme.primaryRgb}, 0.1)`, color: theme.primaryStrong }}
-              >
-                {t("featuredEyebrow")}
-              </span>
-              <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">{t("featuredTitle")}</h2>
-            </div>
+            <h2 className="mx-auto mb-10 max-w-2xl text-balance text-center font-display text-3xl font-extrabold tracking-tight md:mb-14 md:text-4xl">
+              {t("featuredTitle")}
+            </h2>
           </Reveal>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {featured.map((product) => (
@@ -651,174 +636,57 @@ export function FlormarStorefront({
                 variant="premium"
                 isWishlisted={wishlist.ids.has(product.id)}
                 onToggleWishlist={() => wishlist.toggle(product.id)}
+                    resolveSwatchColor={(v) => resolveFlormarSwatchColor(v.shadeName ?? v.name)}
               />
             ))}
           </div>
         </div>
       </section>
 
-      {/* 04b — Cinematic Product Showcase. Real footage
-          (public/images/partners/flormar/video.mp4, source 9:16 vertical) —
-          PartnerVideoShowcase's own responsive `aspect-[4/5] sm:aspect-[4/3]`
-          + `object-cover` does the crop this needs: full width, never
-          stretched, never letterboxed, and (after tuning that component's
-          own aspect ratios for exactly this vertical-source case) not
-          over-zoomed either — see its own doc comment for the math. */}
-      <PartnerVideoShowcase
-        theme={theme}
-        videoUrl="/images/partners/flormar/video.mp4"
-        alt={t("showcaseTitle")}
-        eyebrow={t("showcaseEyebrow")}
-        title={t("showcaseTitle")}
-        description={t("showcaseDescription")}
-      />
-
-      {/* 05 — Shop by Category */}
-      <section className="py-16 sm:py-24">
-        <div className="container-px mx-auto">
-          <Reveal>
-            <div className="mx-auto mb-10 max-w-2xl text-center md:mb-14">
-              <span
-                className="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.2em]"
-                style={{ backgroundColor: `rgba(${theme.primaryRgb}, 0.1)`, color: theme.primaryStrong }}
-              >
-                {t("categoryEyebrow")}
-              </span>
-              <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">{t("categoryTitle")}</h2>
-            </div>
-          </Reveal>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            {FLORMAR_CATEGORY_TILES.map((cat) => (
-              <button
-                key={cat.key}
-                type="button"
-                onClick={() => {
-                  const first = productsWithPricing.find((p) => p.category === cat.category);
-                  if (first) setSelectedProduct(first);
-                }}
-                className="group relative aspect-square overflow-hidden rounded-xl3 text-start shadow-soft transition-transform duration-300 hover:-translate-y-1"
-              >
-                {categoryImages.get(cat.key) && !brokenImageKeys.has(`cat-${cat.key}`) ? (
-                  <>
-                    {/* `object-contain` on a light canvas, not `cover` — the
-                       source is real catalog product photography (plain
-                       background, product-only), not lifestyle imagery, so
-                       cropping it to fill a square via `cover` would zoom
-                       into a fragment of packaging rather than show the
-                       product. Same contain+light-canvas treatment the
-                       product cards themselves already use for this exact
-                       photography, just reused here for consistency. */}
-                    <div className="absolute inset-0 bg-[#FBF7F4]" aria-hidden="true" />
-                    <Image
-                      src={categoryImages.get(cat.key)!}
-                      alt={categoryTileLabel(cat.category, locale)}
-                      fill
-                      sizes="(max-width: 639px) 50vw, 25vw"
-                      className="object-contain p-6 transition-transform duration-500 group-hover:scale-105"
-                      onError={() => markImageBroken(`cat-${cat.key}`)}
-                    />
-                    <div
-                      aria-hidden="true"
-                      className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-3 pt-10"
-                    >
-                      <p className="font-display text-sm font-bold text-white">{categoryTileLabel(cat.category, locale)}</p>
-                    </div>
-                  </>
-                ) : (
-                  <PartnerProductPlaceholder name={categoryTileLabel(cat.category, locale)} theme={theme} />
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 06 — The Flormar Edit — editorial styling groupings computed live
-          from the real database-backed catalog (name-prefix match against
-          the actual product lines, not a hardcoded product-id list) — so
-          this section can never reference a product that's been removed
-          from the catalog. Titles/descriptions are generic styling concepts
-          (translated, see editSubtitle), explicitly not presented as an
-          official Flormar campaign. Only groupings with at least one real
-          match render — e.g. no lipstick line exists in this catalog, so
-          no "bold lips" card is shown rather than one pointing at nothing. */}
-      <section className="bg-white py-16 dark:bg-white/[0.03] sm:py-24">
-        <div className="container-px mx-auto">
-          <Reveal>
-            <div className="mx-auto mb-3 max-w-2xl text-center">
-              <span
-                className="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.2em]"
-                style={{ backgroundColor: `rgba(${theme.primaryRgb}, 0.1)`, color: theme.primaryStrong }}
-              >
-                {t("editEyebrow")}
-              </span>
-              <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">{t("editTitle")}</h2>
-            </div>
-            <p className="mx-auto mb-10 max-w-md text-center text-xs text-ink/45 dark:text-sand/45 md:mb-14">{t("editSubtitle")}</p>
-          </Reveal>
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {EDIT_LOOKS.map((look) => {
-              const matches = productsWithPricing.filter((p) => look.match.some((prefix) => nameStartsWith(p.name, prefix)));
-              if (matches.length === 0) return null;
-              const lookImage = matches.find((p) => p.image)?.image;
-              return (
-                <div key={look.key} className="overflow-hidden rounded-xl3 border border-ink/8 shadow-soft dark:border-white/10">
-                  <button
-                    type="button"
-                    onClick={() => matches[0] && setSelectedProduct(matches[0])}
-                    className="relative block aspect-[4/3] w-full"
-                  >
-                    {lookImage && !brokenImageKeys.has(`look-${look.key}`) ? (
-                      <>
-                        <div className="absolute inset-0 bg-[#FBF7F4]" aria-hidden="true" />
-                        <Image
-                          src={lookImage}
-                          alt={t(look.titleKey)}
-                          fill
-                          sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 25vw"
-                          className="object-contain p-6"
-                          onError={() => markImageBroken(`look-${look.key}`)}
-                        />
-                      </>
-                    ) : (
-                      <PartnerProductPlaceholder name={t(look.titleKey)} theme={theme} />
-                    )}
-                  </button>
-                  <div className="p-4">
-                    <p className="font-display text-base font-bold">{t(look.titleKey)}</p>
-                    <p className="mt-1 text-xs leading-relaxed text-ink/60 dark:text-sand/60">{t(look.descriptionKey)}</p>
-                    <button
-                      type="button"
-                      onClick={() => matches[0] && setSelectedProduct(matches[0])}
-                      className="mt-3 text-xs font-bold uppercase tracking-wide"
-                      style={{ color: theme.primaryStrong }}
-                    >
-                      {t("shopThisLook")} →
-                    </button>
-                  </div>
+      {/* 06 — Discover Your Favorites: one real product per category group,
+          horizontally scrollable (native swipe on mobile, scrollbar/drag on
+          desktop) rather than a second full grid — see discoverPicks' own
+          doc comment for the selection rule. Only rendered when there's
+          something real to show. */}
+      {discoverPicks.length > 0 && (
+        <section className="py-16 sm:py-24">
+          <div className="container-px mx-auto">
+            <Reveal>
+              <h2 className="mx-auto mb-10 max-w-2xl text-balance text-center font-display text-3xl font-extrabold tracking-tight md:mb-14 md:text-4xl">
+                {t("discoverTitle")}
+              </h2>
+            </Reveal>
+            <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
+              {discoverPicks.map((product) => (
+                <div key={product.id} className="w-[46%] shrink-0 snap-start sm:w-[26%] lg:w-[19%]">
+                  <ProductCard
+                    product={product}
+                    business={business}
+                    locale={locale}
+                    onOpenDetails={() => setSelectedProduct(product)}
+                    imageFallback={<PartnerProductPlaceholder name={productLocalizedName(product, locale)} category={product.category ? productCategoryLabel(product.category, locale) : undefined} theme={theme} />}
+                    variant="premium"
+                    isWishlisted={wishlist.ids.has(product.id)}
+                    onToggleWishlist={() => wishlist.toggle(product.id)}
+                    resolveSwatchColor={(v) => resolveFlormarSwatchColor(v.shadeName ?? v.name)}
+                  />
                 </div>
-              );
-            })}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      {/* 07 — Product Discovery: search + tabs (All / New Arrivals / Best
-          Sellers / Offers) + sort, all computed over the same real mock
-          product list — reuses the same ProductCard/ProductDetailModal every
-          other partner's shop tab uses, nothing product-related duplicated. */}
-      <section id="product-discovery" className="py-16 sm:py-24">
+      {/* 07 — Shopping Experience: search + category chip + sort, all
+          computed over the same real database-driven product list —
+          reuses the same ProductCard/ProductDetailModal every other
+          partner's shop tab uses, nothing product-related duplicated. */}
+      <section id="shop-all" className="py-16 sm:py-24">
         <div className="container-px mx-auto">
           <Reveal>
-            <div className="mx-auto mb-10 max-w-2xl text-center md:mb-14">
-              <span
-                className="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.2em]"
-                style={{ backgroundColor: `rgba(${theme.primaryRgb}, 0.1)`, color: theme.primaryStrong }}
-              >
-                {t("discoveryEyebrow")}
-              </span>
-              <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">{t("discoveryTitle")}</h2>
-            </div>
+            <h2 className="mx-auto mb-10 max-w-2xl text-balance text-center font-display text-3xl font-extrabold tracking-tight md:mb-14 md:text-4xl">
+              {t("discoveryTitle")}
+            </h2>
           </Reveal>
 
           {/* Collection filter — "All Products" plus one pill per gender the
@@ -862,29 +730,6 @@ export function FlormarStorefront({
             </div>
           )}
 
-          <div className="mb-6 flex flex-wrap items-center justify-center gap-2">
-            {(["all", "new", "featured", "offers"] as DiscoveryTab[]).map((tab) => {
-              const active = discoveryTab === tab;
-              const label = tab === "all" ? t("tabAll") : tab === "new" ? t("tabNew") : tab === "featured" ? t("tabFeatured") : t("tabOffers");
-              return (
-                <button
-                  key={tab}
-                  type="button"
-                  onClick={() => setDiscoveryTab(tab)}
-                  aria-pressed={active}
-                  className="rounded-full px-4 py-2 text-sm font-semibold transition-colors"
-                  style={
-                    active
-                      ? { backgroundColor: theme.primaryStrong, color: "#fff" }
-                      : { border: `1px solid rgba(${theme.primaryRgb}, 0.25)`, color: theme.primaryStrong }
-                  }
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </div>
-
           {discoveryCategory && (
             <div className="mb-6 flex justify-center">
               <button
@@ -893,19 +738,15 @@ export function FlormarStorefront({
                 className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold"
                 style={{ backgroundColor: `rgba(${theme.primaryRgb}, 0.1)`, color: theme.primaryStrong }}
               >
-                {discoveryCategory ? categoryTileLabel(discoveryCategory, locale) : ""}
+                {(() => {
+                  const group = FLORMAR_PRIMARY_CATEGORY_GROUPS.find((g) => g.key === discoveryCategory);
+                  return group ? t(group.titleKey) : "";
+                })()}
                 <span aria-hidden="true">×</span>
               </button>
             </div>
           )}
 
-          {/* Search + sort now apply on every tab, including Offers —
-             previously hidden whenever discoveryTab === "offers" because
-             that tab was hardcoded to always be empty (see below), so
-             showing search/sort controls over a permanently-empty state
-             would have been pointless. Now that Offers is a real filter
-             over real results, hiding them there would be the actual bug:
-             Task 11 requires search and sort to keep working on every tab. */}
           <div className="mb-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="relative flex-1 sm:max-w-xs">
               <Search size={15} className="pointer-events-none absolute start-3.5 top-1/2 -translate-y-1/2 text-ink/40" aria-hidden="true" />
@@ -927,35 +768,15 @@ export function FlormarStorefront({
                 <option value="newest">{t("sortNewest")}</option>
                 <option value="priceLow">{t("sortPriceLow")}</option>
                 <option value="priceHigh">{t("sortPriceHigh")}</option>
+                <option value="name">{t("sortName")}</option>
               </select>
             </label>
           </div>
 
           {/* Real empty state, reached only when discoveryResults is
-             genuinely empty after filtering — not hardcoded to fire for
-             the "offers" tab regardless of data, which was the actual bug
-             (products showing real -37%/-31%/-32% badges elsewhere on this
-             page still produced "No offers right now" every time). Offers
-             specifically empty still gets its own honest copy; any other
-             empty result (e.g. a search query with no matches) gets the
-             generic one. */}
-          {discoveryTab === "offers" && discoveryResults.length === 0 ? (
-            <EmptyState
-              icon={ShoppingBag}
-              title={t("noOffersTitle")}
-              description={t("noOffersBody")}
-              action={
-                <button
-                  type="button"
-                  onClick={() => setDiscoveryTab("all")}
-                  className="rounded-full px-4 py-2 text-sm font-bold text-white transition-transform hover:-translate-y-0.5"
-                  style={{ backgroundColor: theme.primaryStrong }}
-                >
-                  {t("viewAllProducts")}
-                </button>
-              }
-            />
-          ) : discoveryResults.length === 0 ? (
+             genuinely empty after filtering (e.g. a search query with no
+             matches). */}
+          {discoveryResults.length === 0 ? (
             <EmptyState
               icon={Search}
               title={t("noResultsTitle")}
@@ -988,6 +809,7 @@ export function FlormarStorefront({
                     variant="premium"
                     isWishlisted={wishlist.ids.has(product.id)}
                     onToggleWishlist={() => wishlist.toggle(product.id)}
+                    resolveSwatchColor={(v) => resolveFlormarSwatchColor(v.shadeName ?? v.name)}
                   />
                 ))}
               </div>
@@ -1022,17 +844,12 @@ export function FlormarStorefront({
           fields are filled in on the row yet, so every button below simply
           doesn't render — storeInfoPending stays visible as an honest label
           for that, not deleted just because the buttons could work. */}
-      <section className="bg-white py-16 dark:bg-white/[0.03] sm:py-24">
+      <section id="hargeisa-store" className="bg-white py-16 dark:bg-white/[0.03] sm:py-24">
         <div className="container-px mx-auto max-w-xl text-center">
           <Reveal>
-            <span
-              className="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.2em]"
-              style={{ backgroundColor: `rgba(${theme.primaryRgb}, 0.1)`, color: theme.primaryStrong }}
-            >
-              {t("storeInfoEyebrow")}
-            </span>
-            <h2 className="mt-3 font-display text-2xl font-bold">{t("storeInfoTitle")}</h2>
-            <p className="mt-1.5 flex items-center justify-center gap-1.5 text-sm text-ink/60 dark:text-sand/60">
+            <h2 className="font-display text-2xl font-bold">{t("storeInfoTitle")}</h2>
+            <p className="mt-2 text-sm leading-relaxed text-ink/70 dark:text-sand/70">{t("storeInfoTagline")}</p>
+            <p className="mt-3 flex items-center justify-center gap-1.5 text-sm text-ink/60 dark:text-sand/60">
               <MapPin size={14} aria-hidden="true" /> {t("storeInfoLocation")}
             </p>
 
@@ -1093,8 +910,64 @@ export function FlormarStorefront({
           business={business}
           locale={locale}
           onClose={() => setSelectedProduct(null)}
+          hideSku
+          variantLabel={tp("shadeSelectorLabel")}
+          resolveSwatchColor={(v) => resolveFlormarSwatchColor(v.shadeName ?? v.name)}
+          resolveFallbackLabel={(v) => v.shadeName ?? v.name}
+          preferVariantImage
+          layout="spacious"
+          isWishlisted={wishlist.ids.has(selectedProduct.id)}
+          onToggleWishlist={() => wishlist.toggle(selectedProduct.id)}
         />
       )}
+
+      {/* Mobile/tablet menu — same BottomSheet every other mobile drawer on
+          the site already uses (booking bars, favorites), not a new sheet
+          implementation. Lists the same 6 category groups (plus "All
+          Products" and a Hargeisa Store link) as the desktop nav — one
+          category list, reused everywhere. */}
+      <BottomSheet open={categoryMenuOpen} onClose={() => setCategoryMenuOpen(false)} title={t("categoryTitle")}>
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              setDiscoveryCategory(null);
+              setCategoryMenuOpen(false);
+              document.getElementById("shop-all")?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+            className="rounded-xl2 border border-ink/10 px-4 py-3 text-start text-sm font-semibold transition-colors dark:border-white/10"
+            style={!discoveryCategory ? { borderColor: theme.primaryStrong, color: theme.primaryStrong, backgroundColor: `rgba(${theme.primaryRgb}, 0.06)` } : undefined}
+          >
+            {t("tabAll")}
+          </button>
+          {FLORMAR_PRIMARY_CATEGORY_GROUPS.map((group) => (
+            <button
+              key={group.key}
+              type="button"
+              onClick={() => {
+                goToCategory(group.key);
+                setCategoryMenuOpen(false);
+              }}
+              aria-pressed={discoveryCategory === group.key}
+              className="rounded-xl2 border border-ink/10 px-4 py-3 text-start text-sm font-semibold transition-colors dark:border-white/10"
+              style={
+                discoveryCategory === group.key
+                  ? { borderColor: theme.primaryStrong, color: theme.primaryStrong, backgroundColor: `rgba(${theme.primaryRgb}, 0.06)` }
+                  : undefined
+              }
+            >
+              {t(group.titleKey)}
+            </button>
+          ))}
+        </div>
+        <a
+          href="#hargeisa-store"
+          onClick={() => setCategoryMenuOpen(false)}
+          className="mt-3 block rounded-xl2 border border-ink/10 px-4 py-3 text-center text-sm font-semibold transition-colors dark:border-white/10"
+        >
+          {t("hargeisaStoreNavLabel")}
+        </a>
+      </BottomSheet>
     </>
   );
 }

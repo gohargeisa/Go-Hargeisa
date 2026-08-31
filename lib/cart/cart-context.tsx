@@ -44,6 +44,15 @@ export interface AddToCartBusiness {
    * WhatsApp number, in which case those components fall back to their
    * existing plain "ask about price" text with no button. */
   whatsapp?: string;
+  /** Real, named fulfillment branches for a multi-location business (e.g.
+   * Flormar Hargeisa + Flormar Mogadishu) — `value` is the raw key stored
+   * on the order (`fulfillmentCity`), `label` is the exact display string
+   * (e.g. "Hargeisa, Somaliland"). Omitted entirely (undefined/empty) for
+   * every single-location business, in which case CheckoutForm shows no
+   * city/branch step at all — the exact same behavior every partner has
+   * today. Not hardcoded to Flormar: any future multi-branch partner
+   * supplies its own list here. */
+  branches?: { value: string; label: string }[];
 }
 
 export interface AddToCartProduct {
@@ -159,6 +168,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           businessName: business.businessName,
           deliveryEnabled: business.deliveryEnabled,
           addons: business.addons,
+          branches: business.branches,
           items,
           // Preserved, not reset — adding another line to a cart already
           // mid-checkout must not silently issue a new idempotency key out
@@ -180,6 +190,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         businessName: business.businessName,
         deliveryEnabled: business.deliveryEnabled,
         addons: business.addons,
+        branches: business.branches,
         // Explicitly fresh — this replaces a whole different cart (the
         // conflict-confirmation path), so any pending attempt id for the
         // abandoned cart must not carry over.

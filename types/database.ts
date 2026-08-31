@@ -340,6 +340,7 @@ type ProductOrderRow = {
   created_at: string; updated_at: string;
   taxable_subtotal: number; tax_rate: number; tax_amount: number;
   tax_is_inclusive: boolean; tax_policy_label: string | null;
+  fulfillment_city: string | null;
 };
 
 type OrderItemRow = {

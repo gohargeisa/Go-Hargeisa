@@ -8,6 +8,7 @@ import { WhatsAppIcon } from "@/components/shared/brand-icons";
 import { OrderItemThumb } from "@/components/shared/order-item-thumb";
 import { updateProductOrderStatus, deleteOldProductOrders, deleteProductOrder } from "@/lib/actions/product-orders";
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
+import { fulfillmentCityLabel } from "@/lib/config/flormar-branches";
 import type { ProductOrder, OrderableListingType } from "@/types";
 
 const STATUS_STYLES: Record<ProductOrder["status"], string> = {
@@ -184,6 +185,7 @@ function OrderCard({
               {tp("fulfillmentLabel")}: {order.fulfillmentType === "delivery" ? tp("fulfillmentDelivery") : tp("fulfillmentPickup")}
             </p>
             {order.deliveryAddress && <p className="col-span-2">{tp("deliveryAddressLabel")}: {order.deliveryAddress}</p>}
+            {order.fulfillmentCity && <p className="col-span-2 font-semibold">{tp("fulfillmentCityLabel")}: {fulfillmentCityLabel(order.fulfillmentCity)}</p>}
             {formatDate(order.preferredDate) && <p>{tp("preferredDateLabel")}: {formatDate(order.preferredDate)}</p>}
             {order.preferredTime && <p>{tp("preferredTimeLabel")}: {order.preferredTime}</p>}
             {order.recipientName && <p>{tp("recipientNameLabel")}: {order.recipientName}</p>}

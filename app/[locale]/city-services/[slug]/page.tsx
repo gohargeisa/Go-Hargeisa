@@ -163,11 +163,24 @@ export async function generateMetadata({
   const service = await getCityServiceBySlug(slug, locale);
   if (!service) return {};
   if (service.slug === EMAANKOO_SLUG) {
+    // Localized, and deliberately scoped to Emaankoo's GLOBAL SHOPPING &
+    // LOGISTICS business only — no "Events" (that is a separate future page).
+    // Title has NO "| Go Hargeisa" suffix: the root layout's
+    // metadata.title.template already appends it (siteMetadata.titleTemplate).
+    const te = await getTranslations({ locale, namespace: "emaankooStorefront" });
     return {
-      title: "Emaankoo Group | Global Shopping, E-Commerce & Events | Go Hargeisa",
-      description:
-        "Discover Emaankoo Group in Hargeisa — international online shopping, global product sourcing, shipping, logistics, and event services.",
-      openGraph: service.image ? { images: [service.image] } : undefined,
+      title: te("metaTitle"),
+      description: te("metaDescription"),
+      keywords: [
+        "Emaankoo", "Emaankoo Group", "global shopping Hargeisa", "international shopping Somaliland",
+        "shipping Hargeisa", "logistics Somaliland", "product sourcing", "online shopping Somaliland",
+        "SHEIN Hargeisa", "iHerb Somaliland", "noon Somaliland", "delivery Hargeisa", "Hargeisa", "Somaliland",
+      ],
+      openGraph: {
+        title: te("metaTitle"),
+        description: te("metaDescription"),
+        images: service.logoUrl ? [service.logoUrl] : service.image ? [service.image] : undefined,
+      },
       alternates: localeAlternates(locale, `/city-services/${service.slug}`),
     };
   }
@@ -194,8 +207,13 @@ export async function generateMetadata({
     // and neither string reflects the premium storefront this slug actually
     // renders. Never asserts an official Flormar-corporate relationship —
     // "listed on Go Hargeisa", not "Flormar's official/authorized partner".
+    // Title deliberately does NOT end in "| Go Hargeisa" — the root layout's
+    // own metadata.title.template ("%s | Go Hargeisa", messages/*.json's
+    // common.titleTemplate) already appends that suffix to every page title,
+    // so including it here doubled it to "...| Go Hargeisa | Go Hargeisa" in
+    // production (confirmed via curl against the live page).
     return {
-      title: "Flormar Hargeisa | Beauty & Cosmetics | Go Hargeisa",
+      title: "Flormar Hargeisa | Beauty & Cosmetics",
       description: "Flormar cosmetics and skincare in Hargeisa, Somaliland — browse the collection and order through Go Hargeisa.",
       openGraph: service.image ? { images: [service.image] } : undefined,
       alternates: localeAlternates(locale, `/city-services/${service.slug}`),
@@ -335,6 +353,22 @@ export default async function CityServiceDetailPage({
     telephone: service.phone ?? undefined,
     ...(featureEligible && service.reviewCount > 0
       ? { aggregateRating: { "@type": "AggregateRating", ratingValue: service.rating, reviewCount: service.reviewCount } }
+      : {}),
+    // Emaankoo Group's verified address, kept as the exact English string in
+    // structured data too (never translated/transliterated). Decomposed only
+    // into the parts the given address string actually contains — nothing
+    // (e.g. an addressRegion) is invented.
+    ...(service.slug === EMAANKOO_SLUG
+      ? {
+          email: service.email ?? undefined,
+          areaServed: "Somaliland",
+          address: {
+            "@type": "PostalAddress",
+            streetAddress: "Alloore Mall, Star Area",
+            addressLocality: "Hargeisa",
+            addressCountry: "Somaliland",
+          },
+        }
       : {}),
   };
 

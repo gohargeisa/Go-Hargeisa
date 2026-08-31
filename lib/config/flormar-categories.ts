@@ -28,3 +28,28 @@ export const FLORMAR_CATEGORY_TILES: { key: string; category: Product["category"
   { key: "body_care", category: "body_care" },
   { key: "other", category: "other" },
 ];
+
+/**
+ * Flormar's official-site category philosophy (Face / Eyes / Lips / Nails /
+ * Skin Care / Accessories) mapped onto our existing, real, verified
+ * `products.category` values — a UI-level regrouping only, no schema change
+ * and no per-product recategorization. "skincare" folds in both
+ * `skincare_creams` and `body_care` (2 products) per that same official
+ * philosophy (Skin Care = face care + body care + perfume on flormar.com).
+ *
+ * `other` (58 of 225 products, the source spreadsheet's own "Other / Review"
+ * flag) is deliberately NOT assigned to any group here — none of these 6
+ * buckets is a confidently-known home for all of them, and guessing one
+ * would be exactly the "assign categories automatically" this file's
+ * products explicitly must not get. Those products stay fully visible in
+ * the unfiltered "All Products" grid; they're just not reachable via a named
+ * category chip until a real review assigns each one individually.
+ */
+export const FLORMAR_PRIMARY_CATEGORY_GROUPS: { key: string; titleKey: "groupFace" | "groupEyes" | "groupLips" | "groupNails" | "groupSkincare" | "groupAccessories"; categories: Product["category"][] }[] = [
+  { key: "face", titleKey: "groupFace", categories: ["face"] },
+  { key: "eyes", titleKey: "groupEyes", categories: ["eyes"] },
+  { key: "lips", titleKey: "groupLips", categories: ["lips"] },
+  { key: "nails", titleKey: "groupNails", categories: ["nail_care"] },
+  { key: "skincare", titleKey: "groupSkincare", categories: ["skincare_creams", "body_care"] },
+  { key: "accessories", titleKey: "groupAccessories", categories: ["beauty_tools_accessories"] },
+];

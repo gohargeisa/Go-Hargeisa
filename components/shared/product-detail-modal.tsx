@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { X, Images as ImagesIcon, Minus, Plus } from "lucide-react";
+import { X, Images as ImagesIcon, Minus, Plus, Heart } from "lucide-react";
 import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
 import { useImageLoaded } from "@/lib/hooks/use-image-loaded";
@@ -37,6 +37,14 @@ export function ProductDetailModal({
   business,
   locale,
   onClose,
+  hideSku,
+  variantLabel,
+  resolveSwatchColor,
+  resolveFallbackLabel,
+  preferVariantImage,
+  isWishlisted,
+  onToggleWishlist,
+  layout = "compact",
 }: {
   product: Product;
   storeName: string;
@@ -46,6 +54,35 @@ export function ProductDetailModal({
   business: AddToCartBusiness;
   locale: string;
   onClose: () => void;
+  /** Optional, opt-in only (every existing caller is unaffected): hides
+   * the "SKU ..." line next to the price. Added for Flormar, where
+   * customers should never see internal SKU/inventory identifiers. */
+  hideSku?: boolean;
+  /** Optional, opt-in only: passed to ProductVariantSelector as its `label`
+   * — a domain noun for the swatch row ("Shade" for cosmetics) instead of
+   * the generic "Choose an option". */
+  variantLabel?: string;
+  /** Passed straight through to ProductVariantSelector — see that
+   * component's own doc comments for what each does. */
+  resolveSwatchColor?: (variant: ProductVariant) => string | null;
+  resolveFallbackLabel?: (variant: ProductVariant) => string;
+  preferVariantImage?: boolean;
+  /** Optional, opt-in only (every existing caller is unaffected): renders a
+   * wishlist heart next to the title, same on/off semantics as
+   * ProductCard's identically-named props — omit both to keep today's
+   * modal with no wishlist control at all. */
+  isWishlisted?: boolean;
+  onToggleWishlist?: () => void;
+  /** "compact" (every existing caller, unchanged) is today's single-column,
+   * max-w-md dialog. "spacious" is opt-in — a wider, two-column desktop
+   * layout (large image gallery left, details right; the header still
+   * spans the full width above both) that stacks back to one column on
+   * mobile. The whole dialog stays the single scroll container in both
+   * modes (no independent inner scroll areas), so the bottom of the
+   * content — including the Add to Cart button — is always reachable by
+   * scrolling, never clipped. Added for Flormar's premium product detail
+   * experience. */
+  layout?: "compact" | "spacious";
 }) {
   const t = useTranslations("products");
   const tp = useTranslations("productOrder");
@@ -61,7 +98,18 @@ export function ProductDetailModal({
   // products (no `variants`), in which case everything below falls back to
   // the product's own image/price/name exactly as before variants existed.
   const hasVariants = (product.variants?.length ?? 0) > 0;
-  const [selectedVariantId, setSelectedVariantId] = useState<string | undefined>(product.variants?.[0]?.id);
+  // Default to the first IN-STOCK shade, not just the first by sort_order —
+  // otherwise a product with real available shades opens looking
+  // unorderable ("Out of stock", no Add to Cart) whenever its lowest-sorted
+  // variant happens to be the one that's sold out. Confirmed against the
+  // real Flormar catalog: 47 of 100 in-stock products with variants had
+  // this exact mismatch (e.g. "Flormar Fne"'s default shade, "Tender Salmon
+  // New", is out of stock while 15 other real shades are in stock). Falls
+  // back to variants[0] only when every single shade is genuinely
+  // unavailable, in which case "Out of stock" is the correct, honest state.
+  const [selectedVariantId, setSelectedVariantId] = useState<string | undefined>(
+    (product.variants?.find((v) => v.isAvailable) ?? product.variants?.[0])?.id
+  );
   const activeVariant: ProductVariant | undefined = hasVariants
     ? (product.variants!.find((v) => v.id === selectedVariantId) ?? product.variants![0])
     : undefined;
@@ -110,50 +158,52 @@ export function ProductDetailModal({
     ? toWhatsAppHref(business.whatsapp!, t("askForPriceMessage", { store: storeName, product: name }))
     : undefined;
 
-  return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center p-0 sm:p-4">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />
-      <div
-        ref={dialogRef}
-        role="dialog"
-        aria-modal="true"
-        aria-label={name}
-        tabIndex={-1}
-        className="relative flex h-full w-full flex-col overflow-y-auto bg-white shadow-2xl dark:bg-ink sm:h-auto sm:max-h-[85vh] sm:max-w-md sm:rounded-3xl"
-      >
-        <div className="flex items-start justify-between gap-4 border-b border-ink/8 px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))] dark:border-white/10 sm:p-5">
-          <p className="font-display text-lg font-extrabold tracking-tight">{name}</p>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label={t("close")}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink/5 transition-colors hover:bg-ink/10 dark:bg-white/10 dark:hover:bg-white/15"
-          >
-            <X size={16} aria-hidden="true" />
-          </button>
-        </div>
+  const spacious = layout === "spacious";
 
-        <div className="space-y-3.5 p-4 sm:p-5">
-          {photos.length > 0 ? (
-            <button
-              type="button"
-              onClick={() => setLightboxIndex(0)}
-              className="group relative block h-52 w-full overflow-hidden rounded-xl2 bg-ink/5 dark:bg-white/5 sm:h-60"
-              aria-label={t("viewGallery")}
-            >
-              <CrossfadeImage key={photos[0].url} src={photos[0].url} alt={name} />
-              {photos.length > 1 && (
-                <span className="absolute bottom-2.5 end-2.5 inline-flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1.5 text-xs font-semibold text-white">
-                  <ImagesIcon size={13} aria-hidden="true" /> {photos.length}
-                </span>
-              )}
-            </button>
-          ) : (
-            <div className="relative h-52 w-full overflow-hidden rounded-xl2 bg-ink/5 dark:bg-white/5 sm:h-60">
-              <ProductImage alt={name} sizes="(max-width: 639px) 100vw, 448px" />
-            </div>
+  const imageBlock = (
+    <>
+      {photos.length > 0 ? (
+        <button
+          type="button"
+          onClick={() => setLightboxIndex(0)}
+          className={`group relative block w-full overflow-hidden rounded-xl2 bg-ink/5 dark:bg-white/5 ${spacious ? "aspect-square" : "h-52 sm:h-60"}`}
+          aria-label={t("viewGallery")}
+        >
+          <CrossfadeImage key={photos[0].url} src={photos[0].url} alt={name} />
+          {photos.length > 1 && (
+            <span className="absolute bottom-2.5 end-2.5 inline-flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1.5 text-xs font-semibold text-white">
+              <ImagesIcon size={13} aria-hidden="true" /> {photos.length}
+            </span>
           )}
+        </button>
+      ) : (
+        <div className={`relative w-full overflow-hidden rounded-xl2 bg-ink/5 dark:bg-white/5 ${spacious ? "aspect-square" : "h-52 sm:h-60"}`}>
+          <ProductImage alt={name} sizes={spacious ? "(max-width: 639px) 100vw, 50vw" : "(max-width: 639px) 100vw, 448px"} />
+        </div>
+      )}
+      {/* Thumbnail strip — spacious layout only, and only when there's more
+          than the one hero photo already shown above. Compact layout keeps
+          today's "tap for lightbox" behavior with no separate strip. */}
+      {spacious && photos.length > 1 && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {photos.map((photo, i) => (
+            <button
+              key={photo.url}
+              type="button"
+              onClick={() => setLightboxIndex(i)}
+              aria-label={t("viewGallery")}
+              className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-ink/10 dark:border-white/15"
+            >
+              <Image src={photo.url} alt={photo.alt} fill sizes="56px" className="object-cover" />
+            </button>
+          ))}
+        </div>
+      )}
+    </>
+  );
 
+  const detailsBlock = (
+    <div className="space-y-3.5">
           <div className="flex flex-wrap gap-2">
             {product.category && (
               <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary-700 dark:bg-primary/15 dark:text-primary-300">
@@ -181,8 +231,28 @@ export function ProductDetailModal({
                 {product.originalPrice!.toFixed(2)} {product.currency}
               </span>
             )}
-            {activeVariant?.sku && <span className="ms-2 text-xs font-medium text-ink/40 dark:text-sand/40">SKU {activeVariant.sku}</span>}
+            {!hideSku && activeVariant?.sku && <span className="ms-2 text-xs font-medium text-ink/40 dark:text-sand/40">SKU {activeVariant.sku}</span>}
           </p>
+
+          {/* Real stock signal — opt-in to the "spacious" layout only, so
+              every existing compact caller (café/restaurant/village menus)
+              is byte-for-byte unchanged. For a product WITH shades the
+              per-shade breakdown already sits in the variant selector's
+              header, so this line only speaks for a simple, single-SKU
+              product: an honest "In stock" / "Only N left" driven straight
+              off `is_available` + `stock_quantity`. The negative case is
+              already covered by the "Out of stock" badge above. */}
+          {spacious && !hasVariants && isOrderable && (
+            (() => {
+              const low = product.stockQuantity != null && product.stockQuantity > 0 && product.stockQuantity <= 5;
+              return (
+                <p className={`flex items-center gap-1.5 text-sm font-semibold ${low ? "text-amber-700 dark:text-amber-400" : "text-emerald-700 dark:text-emerald-400"}`}>
+                  <span className={`h-2 w-2 shrink-0 rounded-full ${low ? "bg-amber-500" : "bg-emerald-500"}`} aria-hidden="true" />
+                  {low ? t("lowStockLeft", { count: product.stockQuantity! }) : t("inStock")}
+                </p>
+              );
+            })()
+          )}
 
           {hasVariants && (
             <ProductVariantSelector
@@ -190,10 +260,19 @@ export function ProductDetailModal({
               selectedId={activeVariant!.id}
               onSelect={(v) => setSelectedVariantId(v.id)}
               locale={locale}
+              label={variantLabel}
+              resolveSwatchColor={resolveSwatchColor}
+              resolveFallbackLabel={resolveFallbackLabel}
+              preferVariantImage={preferVariantImage}
             />
           )}
 
-          {description && <p className="text-sm leading-relaxed text-ink/75 dark:text-sand/75">{description}</p>}
+          {description && (
+            <div>
+              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-sand/50">{t("descriptionLabel")}</p>
+              <p className="text-sm leading-relaxed text-ink/75 dark:text-sand/75">{description}</p>
+            </div>
+          )}
 
           {isOrderable ? (
             <div className="space-y-3.5 border-t border-ink/8 pt-3.5 dark:border-white/10">
@@ -287,7 +366,66 @@ export function ProductDetailModal({
           ) : (
             <p className="text-xs text-ink/45 dark:text-sand/45">{t("askAboutProduct", { store: storeName })}</p>
           )}
+    </div>
+  );
+
+  return (
+    <div className="fixed inset-0 z-modal flex items-center justify-center p-0 sm:p-4">
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={name}
+        tabIndex={-1}
+        className={`relative flex h-full w-full flex-col overflow-y-auto bg-white shadow-2xl dark:bg-ink sm:h-auto sm:rounded-3xl ${
+          spacious ? "sm:max-h-[90vh] sm:max-w-3xl" : "sm:max-h-[85vh] sm:max-w-md"
+        }`}
+      >
+        {/* Header spans the full dialog width in both layouts — close
+            button stays reachable at a fixed, predictable spot regardless
+            of how tall the two-column content below gets. */}
+        <div className="flex items-start justify-between gap-4 border-b border-ink/8 px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))] dark:border-white/10 sm:p-5">
+          <p className="font-display text-lg font-extrabold tracking-tight">{name}</p>
+          <div className="flex shrink-0 items-center gap-2">
+            {onToggleWishlist && (
+              <button
+                type="button"
+                onClick={onToggleWishlist}
+                aria-label={isWishlisted ? t("removeFromWishlist") : t("addToWishlist")}
+                aria-pressed={isWishlisted}
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-ink/5 text-ink/60 transition-colors hover:bg-ink/10 dark:bg-white/10 dark:text-sand/60 dark:hover:bg-white/15"
+              >
+                <Heart size={16} aria-hidden="true" fill={isWishlisted ? "currentColor" : "none"} className={isWishlisted ? "text-primary-700" : undefined} />
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label={t("close")}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-ink/5 transition-colors hover:bg-ink/10 dark:bg-white/10 dark:hover:bg-white/15"
+            >
+              <X size={16} aria-hidden="true" />
+            </button>
+          </div>
         </div>
+
+        {/* Single scroll container either way (this outer dialog) — the
+            two-column "spacious" layout never introduces a second,
+            independently-scrolling area, so the Add to Cart button at the
+            bottom of `detailsBlock` is always reachable by scrolling the
+            whole dialog, never clipped inside a fixed-height column. */}
+        {spacious ? (
+          <div className="grid gap-6 p-4 sm:grid-cols-2 sm:p-6">
+            <div>{imageBlock}</div>
+            {detailsBlock}
+          </div>
+        ) : (
+          <div className="space-y-3.5 p-4 sm:p-5">
+            {imageBlock}
+            {detailsBlock}
+          </div>
+        )}
       </div>
 
       {lightboxIndex !== null && (

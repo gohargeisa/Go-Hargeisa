@@ -39,6 +39,10 @@ export interface CartOrderInput {
   customerPhone: string;
   fulfillmentType: "delivery" | "pickup";
   deliveryAddress?: string;
+  /** Raw branch key (e.g. "hargeisa"/"mogadishu") for a multi-branch
+   * business — see AddToCartBusiness.branches. Omit entirely for a
+   * single-location business; the RPC parameter defaults to null. */
+  fulfillmentCity?: string;
   preferredDate?: string;
   /** Free-form time/window (e.g. "14:00") — only ever collected/sent for
    * gift-oriented categories (checkout-form.tsx gates the field itself);
@@ -113,6 +117,7 @@ export async function submitCartOrder(input: CartOrderInput): Promise<CartOrderR
       })),
       p_idempotency_key: input.idempotencyKey ?? null,
       p_preferred_time: input.preferredTime?.trim() || null,
+      p_fulfillment_city: input.fulfillmentCity?.trim() || null,
     });
 
     if (error) return { ok: false, error: error.message };

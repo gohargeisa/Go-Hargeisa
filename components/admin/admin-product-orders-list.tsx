@@ -6,6 +6,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { ChevronDown, Download, Loader2, Search, Trash2 } from "lucide-react";
 import { OrderItemThumb } from "@/components/shared/order-item-thumb";
 import { updateProductOrderStatus, deleteProductOrder } from "@/lib/actions/product-orders";
+import { fulfillmentCityLabel } from "@/lib/config/flormar-branches";
 import type { AdminProductOrder } from "@/lib/data/product-orders";
 import type { ProductOrder } from "@/types";
 
@@ -309,6 +310,7 @@ export function AdminProductOrdersList({ orders }: { orders: AdminProductOrder[]
                             <p>{t("productOrdersCreatedAtLabel")}: {formatDateTime(o.createdAt, locale)}</p>
                             <p>{tp("fulfillmentLabel")}: {o.fulfillmentType === "delivery" ? tp("fulfillmentDelivery") : tp("fulfillmentPickup")}</p>
                             {o.deliveryAddress && <p>{tp("deliveryAddressLabel")}: {o.deliveryAddress}</p>}
+                            {o.fulfillmentCity && <p className="font-semibold">{tp("fulfillmentCityLabel")}: {fulfillmentCityLabel(o.fulfillmentCity)}</p>}
                             {formatDate(o.preferredDate) && <p>{tp("preferredDateLabel")}: {formatDate(o.preferredDate)}</p>}
                             {o.preferredTime && <p>{tp("preferredTimeLabel")}: {o.preferredTime}</p>}
                           </div>

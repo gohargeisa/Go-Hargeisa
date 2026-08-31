@@ -466,6 +466,7 @@ export function mapProductOrder(row: ProductOrderRow & { order_items?: OrderItem
     total: row.total != null ? Number(row.total) : undefined,
     fulfillmentType: row.fulfillment_type,
     deliveryAddress: row.delivery_address ?? undefined,
+    fulfillmentCity: row.fulfillment_city ?? undefined,
     preferredDate: row.preferred_date ?? undefined,
     preferredTime: row.preferred_time ?? undefined,
     recipientName: row.recipient_name ?? undefined,

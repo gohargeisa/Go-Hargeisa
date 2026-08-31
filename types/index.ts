@@ -1245,6 +1245,13 @@ export interface ProductOrder {
   taxPolicyLabel?: string;
   fulfillmentType: "delivery" | "pickup";
   deliveryAddress?: string;
+  /** Optional order-level branch/city selection for a multi-branch partner
+   * (e.g. Flormar Hargeisa vs. Flormar Mogadishu) — a raw key like
+   * "hargeisa"/"mogadishu", NOT a display label (the storefront/checkout
+   * owns the label, e.g. "Hargeisa, Somaliland"). Absent for every order
+   * from a single-location business. See
+   * 20260907000018_product_order_fulfillment_city.sql. */
+  fulfillmentCity?: string;
   preferredDate?: string;
   /** Free-form time/window (e.g. "14:00" or "Afternoon (2-5 PM)") — only
    * ever collected for gift-oriented orders (flowers, cakes, ...); absent

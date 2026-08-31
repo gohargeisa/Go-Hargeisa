@@ -5,9 +5,12 @@ import { Minus, Plus } from "lucide-react";
 import type { Product, ProductOption } from "@/types";
 import { localizedOptionLabel, localizedChoiceLabel, type ProductOptionValues } from "@/lib/cart/product-options";
 
-/** "Free" for a genuinely $0 option/choice, never a bare "$0.00" — the price
- * badge is always shown for these 4 priced types (never blank), so a
- * shopper sees every option has a definite cost, free or not. */
+/** "Free" for a genuinely $0 opt-in extra (multiselect / boolean / number),
+ * never a bare "$0.00" — a shopper sees every ADD-ON has a definite cost,
+ * free or not. NOT used for `select` choices: a required single-choice
+ * select (pizza size, pasta protein, …) isn't an extra you add — it's
+ * which version of the dish you get, already covered by the base price, so
+ * a "$0" choice shows just its label (see the select branch below). */
 function PriceBadge({ priceDelta, suffix, className }: { priceDelta: number; suffix?: string; className?: string }) {
   const t = useTranslations("productOrder");
   return (
@@ -74,6 +77,7 @@ function ProductOptionField({
           {option.choices.map((c) => {
             const choiceLabel = localizedChoiceLabel(c, locale);
             const selected = value === c.value;
+            const delta = c.priceDelta ?? 0;
             return (
               <button
                 key={c.value}
@@ -86,7 +90,12 @@ function ProductOptionField({
                     : "border-ink/15 text-ink/70 hover:border-primary dark:border-white/20 dark:text-sand/70"
                 }`}
               >
-                {choiceLabel} <PriceBadge priceDelta={c.priceDelta ?? 0} className="text-xs opacity-75" />
+                {choiceLabel}
+                {/* Only surface a price when the choice actually changes the
+                    price (e.g. a larger pizza). A $0 choice — Chicken / Meat /
+                    Fish, "Small", a side that's included — shows nothing, so it
+                    never reads as a "Free"/promotional label. */}
+                {delta !== 0 && <PriceBadge priceDelta={delta} className="ms-1 text-xs opacity-75" />}
               </button>
             );
           })}

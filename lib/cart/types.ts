@@ -41,6 +41,11 @@ export interface CartState {
   businessName: string | null;
   deliveryEnabled: boolean;
   addons: ProductAddon[];
+  /** See AddToCartBusiness.branches — carried into cart state (same reason
+   * `deliveryEnabled` is) so CheckoutForm can render the city/branch step
+   * without a second business lookup. Empty/absent for every single-branch
+   * business. */
+  branches?: { value: string; label: string }[];
   items: CartItem[];
   /** Idempotency key for the current checkout attempt — generated once
    * (see CartContext.getOrderAttemptId) and cleared only when the cart is,

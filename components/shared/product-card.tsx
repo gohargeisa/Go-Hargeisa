@@ -12,7 +12,7 @@ import { productLocalizedName } from "@/lib/utils/product-i18n";
 import { getProductPricing } from "@/lib/utils/product-pricing";
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
 import type { AddToCartBusiness } from "@/lib/cart/cart-context";
-import type { Product } from "@/types";
+import type { Product, ProductVariant } from "@/types";
 
 /**
  * Universal product tile — Restaurant dishes, Café menu items, Flower Shop
@@ -30,6 +30,7 @@ export function ProductCard({
   variant = "default",
   isWishlisted,
   onToggleWishlist,
+  resolveSwatchColor,
 }: {
   product: Product;
   business: AddToCartBusiness;
@@ -56,6 +57,14 @@ export function ProductCard({
    * today. */
   isWishlisted?: boolean;
   onToggleWishlist?: () => void;
+  /** premium variant only, opt-in (every existing caller is unaffected):
+   * when the product has variants, approximates a swatch color for ones
+   * with no `hexColor` of its own — see ProductVariantSelector's identical
+   * prop for why this exists (Flormar's real catalog has shade names but
+   * no verified hex values). A variant that resolves to neither `hexColor`
+   * nor this is simply skipped from the dot row rather than shown as a
+   * blank/guessed color. */
+  resolveSwatchColor?: (variant: ProductVariant) => string | null;
 }) {
   const t = useTranslations("products");
   const name = productLocalizedName(product, locale);
@@ -136,6 +145,28 @@ export function ProductCard({
             <p className="mt-0.5 text-xs text-ink/45 dark:text-sand/45">
               {product.category ? productCategoryLabel(product.category, locale) : ""}
             </p>
+            {hasVariants &&
+              (() => {
+                const swatchVariants = product
+                  .variants!.map((v) => ({ v, color: v.hexColor ?? resolveSwatchColor?.(v) ?? null }))
+                  .filter((x) => x.color);
+                if (swatchVariants.length === 0) return null;
+                const shown = swatchVariants.slice(0, 4);
+                const remaining = product.variants!.length - shown.length;
+                return (
+                  <div className="mt-1.5 flex items-center gap-1.5" aria-hidden="true">
+                    <div className="flex items-center gap-1">
+                      {shown.map(({ v, color }) => (
+                        <span key={v.id} className="h-3.5 w-3.5 shrink-0 rounded-full ring-1 ring-inset ring-black/10 dark:ring-white/20" style={{ backgroundColor: color! }} />
+                      ))}
+                    </div>
+                    {/* A tasteful invitation, never a raw count ("+16") as
+                       the primary shade UI — the parent button already
+                       opens the full shade list via onOpenDetails. */}
+                    {remaining > 0 && <span className="text-[11px] font-semibold text-ink/45 dark:text-sand/45">{t("viewShadesLabel")}</span>}
+                  </div>
+                );
+              })()}
           </button>
 
           <div className="mt-2 flex items-baseline gap-1.5">
