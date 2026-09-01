@@ -38,7 +38,7 @@ export function HotelRoomCard({
 
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-3xl border border-ink/8 bg-white shadow-[0_6px_20px_rgba(20,30,45,0.06)] transition-all duration-300 ease-premium hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(20,30,45,0.1)] dark:border-white/10 dark:bg-white/[0.04]">
-      <div className={`relative shrink-0 overflow-hidden ${size === "large" ? "h-64" : "h-48"}`}>
+      <div className={`relative shrink-0 overflow-hidden ${size === "large" ? "h-52 sm:h-64" : "h-44 sm:h-48"}`}>
         {hasImage ? (
           <Image src={room.image!} alt={room.name} fill sizes="(max-width: 767px) 90vw, 420px" className="object-cover" />
         ) : (

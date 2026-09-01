@@ -22,10 +22,10 @@ export async function ServiceTagsSection({ tags }: { tags: string[] | null | und
         return (
           <li
             key={code}
-            className="flex min-w-0 items-center gap-3 rounded-xl2 border border-ink/8 bg-white px-4 py-3.5 text-sm font-medium text-ink transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-soft dark:border-white/10 dark:bg-white/[0.03] dark:text-sand"
+            className="flex min-w-0 items-center gap-2.5 rounded-xl2 border border-ink/8 bg-white px-3.5 py-3 text-[13px] font-medium text-ink transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-soft dark:border-white/10 dark:bg-white/[0.03] dark:text-sand sm:gap-3 sm:px-4 sm:py-3.5 sm:text-sm"
           >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
-              <Icon size={17} className="text-primary" aria-hidden="true" />
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 sm:h-9 sm:w-9">
+              <Icon size={16} className="text-primary" aria-hidden="true" />
             </span>
             <span className="min-w-0 truncate">{t(code)}</span>
           </li>

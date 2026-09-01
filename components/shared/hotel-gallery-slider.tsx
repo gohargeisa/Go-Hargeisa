@@ -110,7 +110,10 @@ export function HotelGallerySlider({
             {slides.map((s, i) => (
               <div
                 key={i}
-                className="relative h-[50vh] max-h-[520px] min-h-[300px] w-full shrink-0 grow-0 basis-full sm:h-[54vh]"
+                /* Mobile trimmed (44vh / 248–440px) so the hero photo stays a
+                   header, not the whole first screen, in the Android WebView;
+                   `sm:` restores the original desktop sizing unchanged. */
+                className="relative h-[44vh] max-h-[440px] min-h-[248px] w-full shrink-0 grow-0 basis-full sm:h-[54vh] sm:max-h-[520px] sm:min-h-[300px]"
               >
                 {isSinglePlaceholder ? (
                   <BrandedPlaceholder name={alt} className="absolute inset-0" />

@@ -71,7 +71,11 @@ export async function LocationMapSection({
         </h2>
         <div className="overflow-hidden rounded-xl3 border border-ink/8 bg-white dark:border-white/10 dark:bg-white/[0.03]">
           {embedSrc && (
-            <div className="relative h-[380px] w-full sm:h-auto sm:aspect-[21/9]">
+            // Mobile: a fixed, restrained height so the map stays proportional
+            // to the surrounding content instead of dominating the page in the
+            // Android WebView. From `sm:` up it goes back to the wide 21:9
+            // banner ratio for desktop.
+            <div className="relative h-[240px] w-full sm:h-auto sm:aspect-[21/9]">
               <iframe
                 src={embedSrc}
                 title={`${name} — ${td("location")}`}
