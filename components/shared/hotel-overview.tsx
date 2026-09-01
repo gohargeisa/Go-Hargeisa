@@ -38,7 +38,11 @@ export function HotelOverview({
 
   return (
     <div>
-      <p className="leading-relaxed text-ink/75 dark:text-sand/75">{description}</p>
+      {/* `dir="auto"` so the paragraph follows its own content's direction —
+          an Arabic description reads RTL even on the English page, and an
+          English description (or a fallback) reads LTR even inside the
+          Arabic RTL page, instead of inheriting a mismatched page direction. */}
+      <p dir="auto" className="leading-relaxed text-ink/75 dark:text-sand/75">{description}</p>
 
       {highlights.length > 0 && (
         <ul className="mt-5 flex flex-wrap gap-2.5">

@@ -7,6 +7,7 @@ import { WhatsAppIcon } from "@/components/shared/brand-icons";
 import type { Locale } from "@/lib/i18n/config";
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
 import { FavoriteButton } from "@/components/shared/favorite-button";
+import { useRegisterMobileActionBar } from "@/components/shared/mobile-action-bar-provider";
 import type { BusinessListingType } from "@/types";
 
 const ICON_BUTTON_CLASS =
@@ -52,6 +53,9 @@ export function MobileBookingBar({
 }) {
   const t = useTranslations("hotelDetail");
   const [copied, setCopied] = useState(false);
+  // While this fixed bottom bar is on screen the global floating BottomNav
+  // hides itself — the two share the exact same fixed position.
+  useRegisterMobileActionBar();
 
   const whatsappNumber = phone || whatsappFallback;
   const whatsappHref = whatsappNumber ? toWhatsAppHref(whatsappNumber, t("whatsappGenericInquiry", { name })) : undefined;
@@ -87,6 +91,7 @@ export function MobileBookingBar({
        * flush against the bar. */}
       <div aria-hidden="true" className="lg:hidden" style={{ height: "calc(4.75rem + max(0.75rem, env(safe-area-inset-bottom)))" }} />
       <div
+        data-mobile-action-bar
         className="animate-fadeUp glass fixed inset-x-3 z-chrome flex items-center justify-around rounded-[1.75rem] px-2 py-2 shadow-premium lg:hidden"
         style={{ bottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
       >

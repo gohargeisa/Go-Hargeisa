@@ -24,12 +24,12 @@ export async function AmenitiesSection({ amenities }: { amenities: string[] | nu
         return (
           <li
             key={code}
-            className="flex items-center gap-3 rounded-xl2 border border-ink/8 bg-white px-4 py-3.5 text-sm font-medium text-ink transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-soft dark:border-white/10 dark:bg-white/[0.03] dark:text-sand"
+            className="flex min-w-0 items-center gap-3 rounded-xl2 border border-ink/8 bg-white px-4 py-3.5 text-sm font-medium text-ink transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-soft dark:border-white/10 dark:bg-white/[0.03] dark:text-sand"
           >
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
               <Icon size={17} className="text-primary" aria-hidden="true" />
             </span>
-            <span className="truncate">{t(code)}</span>
+            <span className="min-w-0 truncate">{t(code)}</span>
           </li>
         );
       })}

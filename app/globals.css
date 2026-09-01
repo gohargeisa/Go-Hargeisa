@@ -78,6 +78,19 @@ body {
   }
 }
 
+/* A page that renders its own fixed bottom action bar
+   (components/shared/mobile-booking-bar.tsx, used by the hotel/restaurant/
+   cafe detail pages and the Flormar/Pinnacle/Emaankoo storefronts) shares
+   the exact same fixed slot as the global floating BottomNav. BottomNav also
+   hides itself in React (see MobileActionBarProvider), but that only takes
+   effect after hydration; this rule hides it (and its in-flow spacer) from
+   the very first paint of the SSR HTML, so the two bars never flash stacked.
+   `:has()` is supported by every browser this app targets, Capacitor's
+   Android WebView included. */
+body:has([data-mobile-action-bar]) [data-global-bottom-nav] {
+  display: none;
+}
+
 /* Accessible focus ring across the app */
 :focus-visible {
   outline: 2px solid #0b5ed7;

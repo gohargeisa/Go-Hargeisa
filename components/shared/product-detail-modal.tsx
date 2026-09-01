@@ -165,7 +165,9 @@ export function ProductDetailModal({
         <button
           type="button"
           onClick={() => setLightboxIndex(0)}
-          className={`group relative block w-full overflow-hidden rounded-xl2 bg-ink/5 dark:bg-white/5 ${spacious ? "aspect-square" : "h-52 sm:h-60"}`}
+          className={`group relative block w-full overflow-hidden rounded-xl2 bg-ink/5 dark:bg-white/5 ${
+            spacious ? "h-[42vh] max-h-[420px] sm:h-auto sm:max-h-none sm:aspect-square" : "h-52 sm:h-60"
+          }`}
           aria-label={t("viewGallery")}
         >
           <CrossfadeImage key={photos[0].url} src={photos[0].url} alt={name} />
@@ -176,7 +178,7 @@ export function ProductDetailModal({
           )}
         </button>
       ) : (
-        <div className={`relative w-full overflow-hidden rounded-xl2 bg-ink/5 dark:bg-white/5 ${spacious ? "aspect-square" : "h-52 sm:h-60"}`}>
+        <div className={`relative w-full overflow-hidden rounded-xl2 bg-ink/5 dark:bg-white/5 ${spacious ? "h-[42vh] max-h-[420px] sm:h-auto sm:max-h-none sm:aspect-square" : "h-52 sm:h-60"}`}>
           <ProductImage alt={name} sizes={spacious ? "(max-width: 639px) 100vw, 50vw" : "(max-width: 639px) 100vw, 448px"} />
         </div>
       )}
@@ -221,16 +223,24 @@ export function ProductDetailModal({
             )}
           </div>
 
-          {product.brand && <p className="text-sm font-semibold text-ink/70 dark:text-sand/70">{product.brand}</p>}
+          {product.brand && <p dir="auto" className="text-sm font-semibold text-ink/70 dark:text-sand/70">{product.brand}</p>}
 
-          <p className="flex flex-wrap items-baseline gap-2 font-display text-xl font-bold transition-all duration-200">
-            {displayPrice != null ? `${displayPrice} ${product.currency}` : t("priceOnRequest")}
+          {/* Currency + amount are pinned LTR (`dir="ltr"` on each numeric
+              span) so "7 USD" never visually reverses to "USD 7" on an
+              Arabic RTL page; the localized "price on request" fallback keeps
+              the ambient direction. */}
+          <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 font-display text-xl font-bold transition-all duration-200">
+            {displayPrice != null ? (
+              <span dir="ltr">{`${displayPrice} ${product.currency}`}</span>
+            ) : (
+              <span>{t("priceOnRequest")}</span>
+            )}
             {pricing.hasDiscount && (
-              <span className="font-body text-sm font-medium text-ink/40 line-through dark:text-sand/40">
+              <span dir="ltr" className="font-body text-sm font-medium text-ink/40 line-through dark:text-sand/40">
                 {product.originalPrice!.toFixed(2)} {product.currency}
               </span>
             )}
-            {!hideSku && activeVariant?.sku && <span className="ms-2 text-xs font-medium text-ink/40 dark:text-sand/40">SKU {activeVariant.sku}</span>}
+            {!hideSku && activeVariant?.sku && <span dir="ltr" className="ms-2 text-xs font-medium text-ink/40 dark:text-sand/40">SKU {activeVariant.sku}</span>}
           </p>
 
           {/* Real stock signal — opt-in to the "spacious" layout only, so
@@ -384,8 +394,15 @@ export function ProductDetailModal({
         {/* Header spans the full dialog width in both layouts — close
             button stays reachable at a fixed, predictable spot regardless
             of how tall the two-column content below gets. */}
-        <div className="flex items-start justify-between gap-4 border-b border-ink/8 px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))] dark:border-white/10 sm:p-5">
-          <p className="font-display text-lg font-extrabold tracking-tight">{name}</p>
+        <div className="flex items-start justify-between gap-3 border-b border-ink/8 px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))] dark:border-white/10 sm:p-5">
+          {/* `dir="auto"` keeps an English product name left-to-right even
+              inside an Arabic RTL modal; `text-balance` + `break-words`
+              give long titles ("Lightweight Lip Powder Lipstick") even,
+              natural line breaks instead of one orphaned word. min-w-0 lets
+              it wrap rather than shove the action buttons off the edge. */}
+          <p dir="auto" className="min-w-0 flex-1 text-balance break-words font-display text-lg font-extrabold leading-snug tracking-tight">
+            {name}
+          </p>
           <div className="flex shrink-0 items-center gap-2">
             {onToggleWishlist && (
               <button
@@ -393,7 +410,7 @@ export function ProductDetailModal({
                 onClick={onToggleWishlist}
                 aria-label={isWishlisted ? t("removeFromWishlist") : t("addToWishlist")}
                 aria-pressed={isWishlisted}
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-ink/5 text-ink/60 transition-colors hover:bg-ink/10 dark:bg-white/10 dark:text-sand/60 dark:hover:bg-white/15"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-ink/5 text-ink/60 transition-colors hover:bg-ink/10 dark:bg-white/10 dark:text-sand/60 dark:hover:bg-white/15"
               >
                 <Heart size={16} aria-hidden="true" fill={isWishlisted ? "currentColor" : "none"} className={isWishlisted ? "text-primary-700" : undefined} />
               </button>
@@ -402,7 +419,7 @@ export function ProductDetailModal({
               type="button"
               onClick={onClose}
               aria-label={t("close")}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-ink/5 transition-colors hover:bg-ink/10 dark:bg-white/10 dark:hover:bg-white/15"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-ink/5 transition-colors hover:bg-ink/10 dark:bg-white/10 dark:hover:bg-white/15"
             >
               <X size={16} aria-hidden="true" />
             </button>
@@ -414,13 +431,17 @@ export function ProductDetailModal({
             independently-scrolling area, so the Add to Cart button at the
             bottom of `detailsBlock` is always reachable by scrolling the
             whole dialog, never clipped inside a fixed-height column. */}
+        {/* Bottom padding resolves the Android gesture bar / iOS home
+            indicator via env(safe-area-inset-bottom) so the Add to Cart
+            button at the end of `detailsBlock` is never tucked under system
+            navigation when the dialog is scrolled to the bottom. */}
         {spacious ? (
-          <div className="grid gap-6 p-4 sm:grid-cols-2 sm:p-6">
+          <div className="grid gap-6 p-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:grid-cols-2 sm:p-6 sm:pb-6">
             <div>{imageBlock}</div>
             {detailsBlock}
           </div>
         ) : (
-          <div className="space-y-3.5 p-4 sm:p-5">
+          <div className="space-y-3.5 p-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:p-5 sm:pb-5">
             {imageBlock}
             {detailsBlock}
           </div>

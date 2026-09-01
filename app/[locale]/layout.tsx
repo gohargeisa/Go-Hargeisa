@@ -13,7 +13,8 @@ import { CapacitorBootstrap } from "@/components/shared/capacitor-bootstrap";
 import { OfflineBanner } from "@/components/shared/offline-banner";
 import { NetworkSyncController } from "@/components/shared/network-sync-controller";
 import { PageTransition } from "@/components/shared/page-transition";
-import { BottomNav } from "@/components/layout/bottom-nav";
+import { BottomNav, BottomNavSpacer } from "@/components/layout/bottom-nav";
+import { MobileActionBarProvider } from "@/components/shared/mobile-action-bar-provider";
 import { SearchOverlayProvider } from "@/components/shared/search-overlay-provider";
 import { NativeSplashGateProvider } from "@/components/shared/native-splash-gate";
 import { OfflineFavoritesProvider } from "@/components/shared/offline-favorites-provider";
@@ -206,6 +207,7 @@ export default async function LocaleLayout({
               <SearchOverlayProvider>
                 <OfflineFavoritesProvider>
                 <CartProvider>
+                  <MobileActionBarProvider>
                   <SiteHeader
                     locale={currentLocale}
                     initialUser={initialUser}
@@ -233,10 +235,11 @@ export default async function LocaleLayout({
                       so the fixed BottomNav — which floats above everything
                       and takes no flow space of its own — never permanently
                       strands the last footer links/buttons underneath it.
-                      Same lg:hidden breakpoint and safe-area handling as
-                      BottomNav itself; global here so every route gets it
-                      automatically without per-page changes. */}
-                  <div aria-hidden="true" className="h-[calc(5.5rem+env(safe-area-inset-bottom))] lg:hidden" />
+                      BottomNavSpacer mirrors BottomNav's own visibility
+                      (hidden on detail routes with their own fixed bottom bar,
+                      and while any page-level MobileActionBar is mounted) so
+                      the two bottom-clearance systems never stack. */}
+                  <BottomNavSpacer />
                   <ServiceWorkerRegister />
                   <CapacitorBootstrap />
                   <OfflineBanner />
@@ -246,6 +249,7 @@ export default async function LocaleLayout({
                   <OfflineFavoritesSheet />
                   <BottomNav locale={currentLocale} />
                   <CartDrawer locale={currentLocale} />
+                  </MobileActionBarProvider>
                 </CartProvider>
                 </OfflineFavoritesProvider>
               </SearchOverlayProvider>

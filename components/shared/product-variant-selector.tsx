@@ -65,18 +65,23 @@ export function ProductVariantSelector({
   return (
     <div>
       <div className="mb-2 flex items-baseline justify-between gap-2">
-        <span className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-sand/50">
+        <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-sand/50">
           {heading}
           <span className="ms-1.5 font-normal normal-case text-ink/40 dark:text-sand/40">
             {t("shadeIndexOfTotal", { index: selectedIndex + 1, total: variants.length })}
           </span>
         </span>
         {/* The one place a shade name is shown — the current selection,
-            recomputed from `selected` every render so it never goes stale. */}
-        <span className="truncate text-sm font-bold text-ink dark:text-white">{labelOf(selected)}</span>
+            recomputed from `selected` every render so it never goes stale.
+            `dir="auto"` keeps an English shade name ("Love Everyday 001")
+            left-to-right even on an Arabic RTL page. */}
+        <span dir="auto" className="min-w-0 truncate text-sm font-bold text-ink dark:text-white">{labelOf(selected)}</span>
       </div>
 
-      <div className="flex flex-wrap gap-2.5" role="radiogroup" aria-label={heading}>
+      {/* `p-1` (with the cancelling `-m-1`) reserves room for the selected
+          swatch's `ring-offset-2` ring so it is never clipped by the modal's
+          own `overflow-y-auto` scroll container at the grid's edges. */}
+      <div className="-m-1 flex flex-wrap gap-2.5 p-1" role="radiogroup" aria-label={heading}>
         {variants.map((variant) => {
           const active = variant.id === selected.id;
           const itemLabel = labelOf(variant);

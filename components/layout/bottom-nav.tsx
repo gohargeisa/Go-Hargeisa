@@ -8,6 +8,7 @@ import { Home, Compass, Heart, Bell, User } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { useSearchOverlay } from "@/components/shared/search-overlay-provider";
 import { useOfflineFavoritesSheet } from "@/components/shared/offline-favorites-provider";
+import { useMobileActionBarPresent } from "@/components/shared/mobile-action-bar-provider";
 import { useNetworkStatus } from "@/lib/hooks/use-network-status";
 
 /**
@@ -31,6 +32,17 @@ import { useNetworkStatus } from "@/lib/hooks/use-network-status";
  */
 const HIDE_ON = /^\/[a-z]{2}\/(hotels|restaurants|cafes)\/.+/;
 
+/** In-flow clearance below the page so the floating BottomNav never strands
+ * the last content underneath it. Mirrors BottomNav's own visibility: nothing
+ * on detail routes that carry their own fixed bottom bar, and nothing while a
+ * page-level MobileActionBar is mounted (that bar renders its own spacer). */
+export function BottomNavSpacer() {
+  const pathname = usePathname();
+  const actionBarPresent = useMobileActionBarPresent();
+  if (HIDE_ON.test(pathname) || actionBarPresent) return null;
+  return <div aria-hidden="true" data-global-bottom-nav className="h-[calc(5.5rem+env(safe-area-inset-bottom))] lg:hidden" />;
+}
+
 export function BottomNav({ locale }: { locale: Locale }) {
   const t = useTranslations("bottomNav");
   const pathname = usePathname();
@@ -39,8 +51,13 @@ export function BottomNav({ locale }: { locale: Locale }) {
   const { open: openOfflineFavorites } = useOfflineFavoritesSheet();
   const { isOnline } = useNetworkStatus();
   const reduceMotion = useReducedMotion();
+  const actionBarPresent = useMobileActionBarPresent();
 
-  if (HIDE_ON.test(pathname)) return null;
+  // Hidden on detail routes that own a fixed bottom bar via the path regex,
+  // and whenever a page-level MobileActionBar (MobileBookingBar on the
+  // partner-storefront routes) is mounted — both live at the exact same
+  // fixed position, so only one may ever render.
+  if (HIDE_ON.test(pathname) || actionBarPresent) return null;
 
   const activeTab = searchParams.get("tab");
   const onDashboard = pathname === `/${locale}/dashboard`;
@@ -78,6 +95,7 @@ export function BottomNav({ locale }: { locale: Locale }) {
   return (
     <nav
       aria-label={t("navAriaLabel")}
+      data-global-bottom-nav
       className="glass fixed inset-x-3 z-chrome flex items-center justify-around rounded-xl3 px-1 py-1.5 shadow-premium lg:hidden"
       style={{ bottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
     >

@@ -385,7 +385,14 @@ export function FlormarStorefront({
          wishlist is the small local-only toggle above (see
          useLocalWishlist's doc comment). */}
       <div
-        className="sticky top-20 z-40 border-b border-black/5 bg-white/95 backdrop-blur-xl dark:border-white/10 dark:bg-ink/95"
+        className="sticky z-40 border-b border-black/5 bg-white/95 backdrop-blur-xl dark:border-white/10 dark:bg-ink/95"
+        /* Sits directly under the global fixed site header, whose real height
+           is h-20 (5rem) PLUS env(safe-area-inset-top) on notched devices
+           (it carries `pt-[env(safe-area-inset-top)]`). A bare `top-20`
+           ignored that inset, so on a notched phone this bar — and the
+           Flormar logo in it — slid up underneath the site header and was
+           clipped along the status-bar edge. */
+        style={{ top: "calc(5rem + env(safe-area-inset-top))" }}
       >
         <div className="container-px mx-auto flex h-16 items-center gap-3 sm:gap-5">
           {/* Mobile/tablet category menu — the quick-nav <nav> below this is

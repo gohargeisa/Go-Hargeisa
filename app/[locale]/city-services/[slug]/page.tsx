@@ -715,7 +715,7 @@ export default async function CityServiceDetailPage({
                 <h2 id="overview-heading" className="mb-5 font-display text-2xl font-semibold">
                   {td("overview")}
                 </h2>
-                <p className="leading-relaxed text-ink/75 dark:text-sand/75">{service.description}</p>
+                <p dir="auto" className="leading-relaxed text-ink/75 dark:text-sand/75">{service.description}</p>
               </section>
             </Reveal>
           )}
