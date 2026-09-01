@@ -350,7 +350,14 @@ export default async function HotelDetailPage({
       </div>
 
       <div className="container-px mx-auto grid gap-10 pb-28 pt-10 lg:grid-cols-3 lg:gap-12 lg:pb-10">
-        <div className="space-y-14 lg:col-span-2">
+        {/* min-w-0: on mobile this grid has no column template (only
+            `lg:grid-cols-3`), so its single implicit column is `auto`-sized
+            and a grid item defaults to `min-width: auto` — any wide
+            descendant (map iframe, a long review word, a gallery) would then
+            stretch this column past the viewport and horizontally overflow
+            the whole page in the Android WebView. Matches restaurants/cafes/
+            city-services, which already carry this. */}
+        <div className="min-w-0 space-y-14 lg:col-span-2">
           <Reveal>
             <section id="overview" aria-labelledby="overview-heading" className="scroll-mt-36">
               <h2 id="overview-heading" className="mb-5 font-display text-2xl font-semibold">

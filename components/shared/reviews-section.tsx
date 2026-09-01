@@ -165,8 +165,8 @@ function ReviewCard({
         <span className="flex h-9 w-9 items-center justify-center rounded-full bg-ink/5 dark:bg-white/10">
           <User size={16} />
         </span>
-        <div>
-          <p className="text-sm font-semibold">{r.authorName}</p>
+        <div className="min-w-0">
+          <p className="break-words text-sm font-semibold">{r.authorName}</p>
           <div className="flex gap-0.5 text-accent">
             {Array.from({ length: 5 }).map((_, i) => (
               <Star key={i} size={11} fill={i < r.rating ? "currentColor" : "none"} strokeWidth={1.5} />
@@ -175,8 +175,8 @@ function ReviewCard({
         </div>
       </div>
 
-      {r.title && <p className="mt-3 text-sm font-semibold">{r.title}</p>}
-      <p className="mt-1.5 text-sm text-ink/70 dark:text-sand/70">{r.comment}</p>
+      {r.title && <p dir="auto" className="mt-3 break-words text-sm font-semibold">{r.title}</p>}
+      <p dir="auto" className="mt-1.5 break-words text-sm text-ink/70 dark:text-sand/70">{r.comment}</p>
       {r.visitDate && (
         <p className="mt-1.5 text-xs text-ink/45 dark:text-sand/45">{t("visitedOn", { date: r.visitDate })}</p>
       )}
@@ -200,7 +200,7 @@ function ReviewCard({
       {r.ownerReply && (
         <div className="mt-3 rounded-xl border border-primary/15 bg-primary/5 p-3">
           <p className="text-xs font-bold uppercase tracking-wide text-primary-700">{t("ownerReplyLabel")}</p>
-          <p className="mt-1 text-sm text-ink/75 dark:text-sand/75">{r.ownerReply}</p>
+          <p dir="auto" className="mt-1 break-words text-sm text-ink/75 dark:text-sand/75">{r.ownerReply}</p>
         </div>
       )}
 

@@ -272,7 +272,9 @@ export default async function SupermarketDetailPage({
       </Reveal>
 
       <div className="container-px mx-auto grid gap-10 py-10 lg:grid-cols-3 lg:gap-12">
-        <div className="lg:col-span-2 space-y-14">
+        {/* min-w-0 so a wide descendant can't stretch this mobile grid
+            column past the viewport (see hotels/[slug] for the full note). */}
+        <div className="min-w-0 lg:col-span-2 space-y-14">
           {service.description && (
             <Reveal>
               <section id="overview" aria-labelledby="overview-heading" className="scroll-mt-36">

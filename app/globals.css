@@ -18,6 +18,16 @@ html {
      affects overscroll physics at the scroll boundary, not normal
      scrolling or any existing layout. */
   overscroll-behavior-y: contain;
+  /* Universal horizontal-overflow guard. `<html>` is the document's scroll
+     container, so clipping horizontal here can never turn an inner element
+     into a scroll container (which is what would break `position: sticky`).
+     `hidden` (not `clip`) so it works on every Android WebView version —
+     the body-level `clip` below is the extra layer where `clip` is
+     supported. This is a safety net: the real fixes are per-component
+     (e.g. `min-w-0` on the detail-page content columns). Vertical scroll is
+     unaffected (a single non-visible axis makes the other compute to
+     `auto`, and the viewport already scrolls vertically). */
+  overflow-x: hidden;
 }
 
 body {
