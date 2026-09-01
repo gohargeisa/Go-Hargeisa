@@ -30,7 +30,7 @@ function formatDate(iso: string | undefined, locale: string): string {
   return date.toLocaleDateString(locale, { month: "short", day: "numeric", year: "numeric" });
 }
 
-function ProposalForm({ request, listingId, onDone }: { request: EventRequest; listingId: string; onDone: () => void }) {
+function ProposalForm({ request, listingId, revalidatePath, onDone }: { request: EventRequest; listingId: string; revalidatePath: string; onDone: () => void }) {
   const t = useTranslations("eventRequest");
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -40,7 +40,7 @@ function ProposalForm({ request, listingId, onDone }: { request: EventRequest; l
   function onSubmit() {
     if (!details.trim()) return;
     startTransition(async () => {
-      const result = await sendProposal(request.id, listingId, { proposalDetails: details, proposalCost: cost ? Number(cost) : undefined }, ["/business/events"]);
+      const result = await sendProposal(request.id, listingId, { proposalDetails: details, proposalCost: cost ? Number(cost) : undefined }, [revalidatePath]);
       if (result.ok) {
         router.refresh();
         onDone();
@@ -73,7 +73,7 @@ function ProposalForm({ request, listingId, onDone }: { request: EventRequest; l
   );
 }
 
-function EventDetailModal({ request, listingId, onClose }: { request: EventRequest; listingId: string; onClose: () => void }) {
+function EventDetailModal({ request, listingId, revalidatePath, onClose }: { request: EventRequest; listingId: string; revalidatePath: string; onClose: () => void }) {
   const t = useTranslations("eventRequest");
   const tb = useTranslations("businessDashboard");
   const locale = useLocale();
@@ -84,7 +84,7 @@ function EventDetailModal({ request, listingId, onClose }: { request: EventReque
 
   function onAdvance(status: EventRequestStatus) {
     startTransition(async () => {
-      const result = await updateEventRequestStatus(request.id, listingId, status, ["/business/events"]);
+      const result = await updateEventRequestStatus(request.id, listingId, status, [revalidatePath]);
       if (result.ok) router.refresh();
       else alert(result.error ?? t("somethingWentWrong"));
     });
@@ -132,7 +132,7 @@ function EventDetailModal({ request, listingId, onClose }: { request: EventReque
 
       {showProposalForm && (
         <div className="mt-4">
-          <ProposalForm request={request} listingId={listingId} onDone={onClose} />
+          <ProposalForm request={request} listingId={listingId} revalidatePath={revalidatePath} onDone={onClose} />
         </div>
       )}
 
@@ -171,7 +171,18 @@ function EventDetailModal({ request, listingId, onClose }: { request: EventReque
   );
 }
 
-export function EventRequestsTable({ listingId, requests }: { listingId: string; requests: EventRequest[] }) {
+export function EventRequestsTable({
+  listingId,
+  requests,
+  /** Which path the proposal/status server actions should revalidate — the
+   * business dashboard by default, overridden by the platform-admin
+   * /admin/order-requests view which renders this same table. */
+  revalidatePath = "/business/events",
+}: {
+  listingId: string;
+  requests: EventRequest[];
+  revalidatePath?: string;
+}) {
   const t = useTranslations("eventRequest");
   const locale = useLocale();
   const [viewing, setViewing] = useState<EventRequest | null>(null);
@@ -202,7 +213,7 @@ export function EventRequestsTable({ listingId, requests }: { listingId: string;
           </div>
         ))}
       </div>
-      {viewing && <EventDetailModal request={viewing} listingId={listingId} onClose={() => setViewing(null)} />}
+      {viewing && <EventDetailModal request={viewing} listingId={listingId} revalidatePath={revalidatePath} onClose={() => setViewing(null)} />}
     </>
   );
 }

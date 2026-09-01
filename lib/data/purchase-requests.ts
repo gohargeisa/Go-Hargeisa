@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { mapPurchaseRequest, mapPurchaseRequestForCustomer, mapPurchaseRequestStatusHistory } from "./mappers";
 import type { PurchaseRequestCustomerRow } from "./mappers";
+import { groupRequestsByListing, type AdminRequestGroup } from "./request-groups";
 import type { PurchaseRequest, PurchaseRequestStatusHistoryEntry } from "@/types";
 
 /** Every purchase_requests column except partner_notes_internal (the
@@ -32,6 +33,24 @@ export async function getPurchaseRequestsForListing(listingId: string): Promise<
 
   if (error) return [];
   return (data ?? []).map(mapPurchaseRequest);
+}
+
+/**
+ * Every purchase request platform-wide, grouped by listing — admin-only,
+ * backed by the "Admins manage all purchase requests" RLS policy
+ * (profiles.role = 'owner'). The platform-side counterpart to
+ * getPurchaseRequestsForListing (business owner) and getMyPurchaseRequests
+ * (customer): a request never becomes invisible just because its listing
+ * has owner_id = NULL and therefore no business dashboard — the same
+ * "unclaimed listing still shows up" guarantee getAllProductOrdersForAdmin
+ * gives the universal cart. Emaankoo Group is exactly this case (published
+ * with owner_id = NULL by its onboarding migration).
+ */
+export async function getAllPurchaseRequestsForAdmin(): Promise<AdminRequestGroup<PurchaseRequest>[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("purchase_requests").select("*").order("created_at", { ascending: false });
+  if (error || !data?.length) return [];
+  return groupRequestsByListing(supabase, data.map(mapPurchaseRequest));
 }
 
 /** A signed-in customer's own purchase request — RLS backs this up

@@ -1,6 +1,22 @@
 import { createClient } from "@/lib/supabase/server";
 import { mapEventRequest, mapEventRequestStatusHistory } from "./mappers";
+import { groupRequestsByListing, type AdminRequestGroup } from "./request-groups";
 import type { EventRequest, EventRequestStatusHistoryEntry } from "@/types";
+
+/**
+ * Every event request platform-wide, grouped by listing — admin-only,
+ * backed by the "Admins manage all event requests" RLS policy
+ * (profiles.role = 'owner'). Same rationale as getAllPurchaseRequestsForAdmin:
+ * /business/events needs the listing to have a linked owner_id, which a
+ * partner like Emaankoo Group does not, so without this the requests are
+ * invisible to everyone at Go Hargeisa.
+ */
+export async function getAllEventRequestsForAdmin(): Promise<AdminRequestGroup<EventRequest>[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("event_requests").select("*").order("created_at", { ascending: false });
+  if (error || !data?.length) return [];
+  return groupRequestsByListing(supabase, data.map(mapEventRequest));
+}
 
 export async function getEventRequestsForListing(listingId: string): Promise<EventRequest[]> {
   const supabase = await createClient();

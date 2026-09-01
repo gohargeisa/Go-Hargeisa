@@ -37,7 +37,7 @@ function formatDate(iso: string, locale: string): string {
   return date.toLocaleDateString(locale, { month: "short", day: "numeric", year: "numeric" });
 }
 
-function QuoteForm({ request, listingId, onDone }: { request: PurchaseRequest; listingId: string; onDone: () => void }) {
+function QuoteForm({ request, listingId, revalidatePath, onDone }: { request: PurchaseRequest; listingId: string; revalidatePath: string; onDone: () => void }) {
   const t = useTranslations("purchaseRequest");
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -64,7 +64,7 @@ function QuoteForm({ request, listingId, onDone }: { request: PurchaseRequest; l
           quoteExpiresAt: expiresAt || undefined,
           partnerNotesCustomer: noteForCustomer || undefined,
         },
-        ["/business/requests"]
+        [revalidatePath]
       );
       if (result.ok) {
         router.refresh();
@@ -120,7 +120,7 @@ function QuoteForm({ request, listingId, onDone }: { request: PurchaseRequest; l
   );
 }
 
-function RequestDetailModal({ request, listingId, onClose }: { request: PurchaseRequest; listingId: string; onClose: () => void }) {
+function RequestDetailModal({ request, listingId, revalidatePath, onClose }: { request: PurchaseRequest; listingId: string; revalidatePath: string; onClose: () => void }) {
   const t = useTranslations("purchaseRequest");
   const tb = useTranslations("businessDashboard");
   const locale = useLocale();
@@ -131,7 +131,7 @@ function RequestDetailModal({ request, listingId, onClose }: { request: Purchase
 
   function onAdvance(status: PurchaseRequestStatus) {
     startTransition(async () => {
-      const result = await updatePurchaseRequestStatus(request.id, listingId, status, ["/business/requests"]);
+      const result = await updatePurchaseRequestStatus(request.id, listingId, status, [revalidatePath]);
       if (result.ok) router.refresh();
       else alert(result.error ?? t("somethingWentWrong"));
     });
@@ -192,7 +192,7 @@ function RequestDetailModal({ request, listingId, onClose }: { request: Purchase
 
       {showQuoteForm && (
         <div className="mt-4">
-          <QuoteForm request={request} listingId={listingId} onDone={onClose} />
+          <QuoteForm request={request} listingId={listingId} revalidatePath={revalidatePath} onDone={onClose} />
         </div>
       )}
 
@@ -231,7 +231,18 @@ function RequestDetailModal({ request, listingId, onClose }: { request: Purchase
   );
 }
 
-export function PurchaseRequestsTable({ listingId, requests }: { listingId: string; requests: PurchaseRequest[] }) {
+export function PurchaseRequestsTable({
+  listingId,
+  requests,
+  /** Which path the quote/status server actions should revalidate — the
+   * business dashboard by default, overridden by the platform-admin
+   * /admin/order-requests view which renders this same table. */
+  revalidatePath = "/business/requests",
+}: {
+  listingId: string;
+  requests: PurchaseRequest[];
+  revalidatePath?: string;
+}) {
   const t = useTranslations("purchaseRequest");
   const locale = useLocale();
   const [viewing, setViewing] = useState<PurchaseRequest | null>(null);
@@ -262,7 +273,7 @@ export function PurchaseRequestsTable({ listingId, requests }: { listingId: stri
           </div>
         ))}
       </div>
-      {viewing && <RequestDetailModal request={viewing} listingId={listingId} onClose={() => setViewing(null)} />}
+      {viewing && <RequestDetailModal request={viewing} listingId={listingId} revalidatePath={revalidatePath} onClose={() => setViewing(null)} />}
     </>
   );
 }
