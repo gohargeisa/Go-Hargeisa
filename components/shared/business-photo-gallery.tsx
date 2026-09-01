@@ -1,10 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Image from "next/image";
 import { useTranslations } from "next-intl";
 import type { GalleryCategoryOption } from "@/lib/utils/gallery-categories";
 import { Lightbox, type LightboxSlide } from "@/components/shared/lightbox";
+import { ImageWithFallback } from "@/components/shared/image-with-fallback";
 import { WhatsAppIcon } from "@/components/shared/brand-icons";
 import type { GalleryImage } from "@/types";
 
@@ -63,6 +63,14 @@ export function BusinessPhotoGallery({
   tileAspectClassName?: string;
 }) {
   const th = useTranslations("hotelDetail");
+  const tcat = useTranslations("galleryCategories");
+  // The category vocabularies (lib/utils/gallery-categories.ts) carry an
+  // English `label` for admin dropdowns; here — a customer-facing surface —
+  // the chip text comes from the translated `galleryCategories` namespace so
+  // nothing shows English on /ar or /so. Falls back to the English label if
+  // a value ever has no key yet (no worse than before).
+  const categoryLabel = (value: string, fallback: string) =>
+    tcat.has(value) ? tcat(value) : fallback;
 
   const categoriesPresent = useMemo(() => {
     const present = new Set<string>();
@@ -98,7 +106,7 @@ export function BusinessPhotoGallery({
               onClick={() => setActive(c.value)}
               className={pillClass(active === c.value)}
             >
-              {c.label} ({images.filter((img) => (img.category ?? "other") === c.value).length})
+              {categoryLabel(c.value, c.label)} ({images.filter((img) => (img.category ?? "other") === c.value).length})
             </button>
           ))}
         </div>
@@ -120,7 +128,7 @@ export function BusinessPhotoGallery({
                 +{remainingCount}
               </div>
             )}
-            <Image
+            <ImageWithFallback
               src={img.url}
               alt={img.alt || `${alt} — photo ${i + 1}`}
               fill

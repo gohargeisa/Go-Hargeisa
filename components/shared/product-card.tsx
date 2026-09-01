@@ -313,32 +313,39 @@ export function ProductCard({
           {product.category ? productCategoryLabel(product.category, locale) : ""}
           {product.price != null ? ` • ${product.price} ${product.currency}` : ` • ${t("priceOnRequest")}`}
         </p>
-        {hasVariants && (
-          <span className="mt-1 flex items-center gap-1">
-            {product.variants!.some((v) => v.hexColor) ? (
-              <>
-                {product.variants!
-                  .filter((v) => v.hexColor)
-                  .slice(0, 4)
-                  .map((v) => (
-                    <span
-                      key={v.id}
-                      aria-hidden="true"
-                      className="h-3 w-3 shrink-0 rounded-full ring-1 ring-inset ring-ink/10 dark:ring-white/20"
-                      style={{ backgroundColor: v.hexColor }}
-                    />
-                  ))}
-                {product.variants!.length > 4 && (
-                  <span className="text-[10px] font-semibold text-ink/40 dark:text-sand/40">+{product.variants!.length - 4}</span>
+        {hasVariants &&
+          (() => {
+            // Same rule as the "premium" variant: a shade preview is a row of
+            // small CIRCULAR color chips (verified hex, or an approximated
+            // colour via resolveSwatchColor), never a photo thumbnail. When
+            // no colour resolves for any shade, fall back to a plain count.
+            const swatches = product
+              .variants!.map((v) => ({ v, color: v.hexColor ?? resolveSwatchColor?.(v) ?? null }))
+              .filter((x) => x.color);
+            return (
+              <span className="mt-1 flex items-center gap-1">
+                {swatches.length > 0 ? (
+                  <>
+                    {swatches.slice(0, 4).map(({ v, color }) => (
+                      <span
+                        key={v.id}
+                        aria-hidden="true"
+                        className="h-3 w-3 shrink-0 rounded-full ring-1 ring-inset ring-ink/10 dark:ring-white/20"
+                        style={{ backgroundColor: color! }}
+                      />
+                    ))}
+                    {product.variants!.length > swatches.slice(0, 4).length && (
+                      <span className="text-[10px] font-semibold text-ink/45 dark:text-sand/45">{t("viewShadesLabel")}</span>
+                    )}
+                  </>
+                ) : (
+                  <span className="text-[10px] font-semibold text-ink/40 dark:text-sand/40">
+                    {t("optionsAvailable", { count: product.variants!.length })}
+                  </span>
                 )}
-              </>
-            ) : (
-              <span className="text-[10px] font-semibold text-ink/40 dark:text-sand/40">
-                {t("optionsAvailable", { count: product.variants!.length })}
               </span>
-            )}
-          </span>
-        )}
+            );
+          })()}
       </button>
       {canQuickAdd ? (
         <AddToCartButton

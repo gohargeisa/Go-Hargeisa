@@ -16,32 +16,55 @@ function todayIso(): string {
  * platform sanity limit, not a per-business setting (none exists yet). */
 const MAX_GUESTS = 50;
 
-function GuestStepper({ value, onChange, label }: { value: number; onChange: (next: number) => void; label: string }) {
+function GuestStepper({
+  value,
+  onChange,
+  label,
+  locale,
+  decreaseLabel,
+  increaseLabel,
+}: {
+  value: number;
+  onChange: (next: number) => void;
+  label: string;
+  locale: string;
+  decreaseLabel: string;
+  increaseLabel: string;
+}) {
   return (
-    <div className="flex items-center justify-between rounded-xl border border-ink/12 px-4 py-3 dark:border-white/15">
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-ink/12 px-4 py-3 dark:border-white/15">
       <span className="flex items-center gap-2 text-sm font-medium">
         <Users size={15} className="text-ink/45 dark:text-sand/45" aria-hidden="true" />
         {label}
       </span>
-      <div className="flex items-center gap-3">
+      {/* +/- are bound to explicit decrement/increment regardless of visual
+          order, so RTL never inverts their meaning. The count sits in a
+          fixed-width, high-contrast, tabular-nums slot so a two-digit party
+          size (up to 50) stays centred and fully legible in every language. */}
+      <div className="flex items-center gap-2.5">
         <button
           type="button"
           onClick={() => onChange(Math.max(1, value - 1))}
           disabled={value <= 1}
-          aria-label="-"
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-ink/15 text-ink/60 transition-colors hover:border-primary hover:text-primary disabled:opacity-30 dark:border-white/20 dark:text-sand/60"
+          aria-label={decreaseLabel}
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-ink/15 text-ink/70 transition-colors hover:border-primary hover:text-primary disabled:opacity-30 dark:border-white/20 dark:text-sand/70"
         >
-          <Minus size={13} aria-hidden="true" />
+          <Minus size={14} aria-hidden="true" />
         </button>
-        <span className="w-5 text-center text-sm font-bold">{value}</span>
+        <span
+          aria-live="polite"
+          className="min-w-[2.5rem] text-center text-lg font-bold tabular-nums text-ink dark:text-white"
+        >
+          {value.toLocaleString(locale)}
+        </span>
         <button
           type="button"
           onClick={() => onChange(Math.min(MAX_GUESTS, value + 1))}
           disabled={value >= MAX_GUESTS}
-          aria-label="+"
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-ink/15 text-ink/60 transition-colors hover:border-primary hover:text-primary disabled:opacity-30 dark:border-white/20 dark:text-sand/60"
+          aria-label={increaseLabel}
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-ink/15 text-ink/70 transition-colors hover:border-primary hover:text-primary disabled:opacity-30 dark:border-white/20 dark:text-sand/70"
         >
-          <Plus size={13} aria-hidden="true" />
+          <Plus size={14} aria-hidden="true" />
         </button>
       </div>
     </div>
@@ -144,7 +167,7 @@ export function TableReservationForm({
   return (
     <form onSubmit={onSubmit} className="space-y-4 p-1">
       <div>
-        <label htmlFor="reservation-name" className="sr-only">
+        <label htmlFor="reservation-name" className="mb-1 block text-xs font-semibold text-ink/50 dark:text-sand/50">
           {t("nameLabel")}
         </label>
         <input
@@ -158,17 +181,19 @@ export function TableReservationForm({
       </div>
 
       <div>
-        <label htmlFor="reservation-phone" className="sr-only">
+        <label htmlFor="reservation-phone" className="mb-1 block text-xs font-semibold text-ink/50 dark:text-sand/50">
           {t("phoneLabel")}
         </label>
         <input
           id="reservation-phone"
           required
           type="tel"
+          inputMode="tel"
+          dir="ltr"
           placeholder={t("phoneLabel")}
           value={customerPhone}
           onChange={(e) => setCustomerPhone(e.target.value)}
-          className={inputClass}
+          className={`${inputClass} text-start`}
         />
       </div>
 
@@ -196,10 +221,17 @@ export function TableReservationForm({
         </div>
       </div>
 
-      <GuestStepper label={t("guestsLabel")} value={guestsCount} onChange={setGuestsCount} />
+      <GuestStepper
+        label={t("guestsLabel")}
+        value={guestsCount}
+        onChange={setGuestsCount}
+        locale={locale}
+        decreaseLabel={t("decreaseGuests")}
+        increaseLabel={t("increaseGuests")}
+      />
 
       <div>
-        <label htmlFor="reservation-notes" className="sr-only">
+        <label htmlFor="reservation-notes" className="mb-1 block text-xs font-semibold text-ink/50 dark:text-sand/50">
           {t("notesLabel")}
         </label>
         <textarea

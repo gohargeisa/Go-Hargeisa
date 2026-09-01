@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Lightbox, type LightboxSlide } from "@/components/shared/lightbox";
+import { ImageWithFallback } from "@/components/shared/image-with-fallback";
 import type { GalleryImage } from "@/types";
 
 /**
@@ -38,7 +38,7 @@ export function EmaankooGallery({ images }: { images: GalleryImage[] }) {
             aria-label={t("galleryPhotoLabel", { number: i + 1 })}
             className="group relative aspect-square overflow-hidden rounded-lg border border-ink/10 bg-ink/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:border-white/10 dark:bg-white/5"
           >
-            <Image
+            <ImageWithFallback
               src={img.url}
               alt={img.alt || t("galleryPhotoLabel", { number: i + 1 })}
               fill

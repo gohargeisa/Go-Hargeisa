@@ -13,7 +13,7 @@ import { FlormarHeroCarousel } from "@/components/flormar/flormar-hero-carousel"
 import { BottomSheet } from "@/components/shared/bottom-sheet";
 import { Reveal } from "@/components/home/reveal";
 import { productLocalizedName } from "@/lib/utils/product-i18n";
-import { cleanFlormarProductName } from "@/lib/utils/flormar-product-names";
+import { cleanFlormarProductName, cleanFlormarShadeName } from "@/lib/utils/flormar-product-names";
 import { resolveFlormarSwatchColor } from "@/lib/utils/flormar-shade-colors";
 import { FLORMAR_BRANCHES } from "@/lib/config/flormar-branches";
 import { FLORMAR_CATEGORY_OVERRIDES } from "@/lib/config/flormar-category-overrides";
@@ -174,18 +174,19 @@ export function FlormarStorefront({
   //
   // Display name is cleaned here, once, upstream of every consumer (card,
   // detail modal, cart, search) — see cleanFlormarProductName's own doc
-  // comment for exactly what it does and doesn't change. Variant
-  // name/shadeName get the exact same treatment for the exact same reason:
-  // the real catalog's `product_variants.name`/`shade_name` columns carry
-  // the identical raw-import artifacts as product names ("Sft Beige Np",
-  // "Clsscl Brwn") — a customer picking a shade shouldn't see that any more
-  // than they should see a garbled product name. ProductCard/
-  // ProductDetailModal/ProductVariantSelector/useCart are the same shared
-  // components every other partner uses and need no changes: they just
-  // read whatever name is already on the object, which by the time it
-  // reaches them here is already the clean one. This is a display-time
-  // transform only — the underlying DB rows' raw name/shade_name/sku are
-  // never modified.
+  // comment for exactly what it does and doesn't change.
+  //
+  // SHADES: a variant must show its own shade identity, never the parent
+  // product's name. The raw `product_variants.name`/`shade_name` columns
+  // already carry the real shade ("Wet Lps", "Vibrant Red", "Almond"), so
+  // they only need the light spreadsheet-artifact cleanup —
+  // cleanFlormarShadeName, NOT cleanFlormarProductName (whose SKU-keyed
+  // verified-name lookup keys on the shared product SKU family and would
+  // collapse every shade to the one parent product name — the exact bug
+  // being fixed here). The customer-facing variant `name` is composed as
+  // "<code> <shade>" (e.g. "009 Vibrant Red") so the shade number is always
+  // visible and every shade of a product is distinct in the picker and the
+  // cart line. Display-time only — raw DB rows are never modified.
   const productsWithPricing = useMemo(
     () =>
       catalogProducts.map((p) => {
@@ -221,16 +222,22 @@ export function FlormarStorefront({
           ...(verifiedDescription && !p.description ? { description: verifiedDescription } : null),
           ...(p.variants
             ? {
-                variants: p.variants.map((v) => ({
-                  ...v,
-                  name: cleanFlormarProductName(v.name, v.sku),
-                  shadeName: v.shadeName ? cleanFlormarProductName(v.shadeName, v.sku) : v.shadeName,
-                  // Verified per-shade swatch colour where the reconciliation
-                  // recorded one — takes priority over the word-match
-                  // approximation (resolveFlormarSwatchColor), which stays the
-                  // fallback for every shade not in the map.
-                  ...(v.sku && FLORMAR_SHADE_HEX[v.sku] ? { hexColor: FLORMAR_SHADE_HEX[v.sku] } : null),
-                })),
+                variants: p.variants.map((v) => {
+                  const shade = cleanFlormarShadeName(v.shadeName || v.name);
+                  const code = v.shadeCode?.trim();
+                  return {
+                    ...v,
+                    // Real per-shade identity, code-prefixed so the shade
+                    // number is always visible (picker header + cart line).
+                    name: code && !shade.startsWith(code) ? `${code} ${shade}` : shade,
+                    shadeName: shade,
+                    // Verified per-shade swatch colour where the reconciliation
+                    // recorded one — takes priority over the word-match
+                    // approximation (resolveFlormarSwatchColor), which stays the
+                    // fallback for every shade not in the map.
+                    ...(v.sku && FLORMAR_SHADE_HEX[v.sku] ? { hexColor: FLORMAR_SHADE_HEX[v.sku] } : null),
+                  };
+                }),
               }
             : null),
         };
@@ -926,8 +933,7 @@ export function FlormarStorefront({
           hideSku
           variantLabel={tp("shadeSelectorLabel")}
           resolveSwatchColor={(v) => resolveFlormarSwatchColor(v.shadeName ?? v.name)}
-          resolveFallbackLabel={(v) => v.shadeName ?? v.name}
-          preferVariantImage
+          resolveFallbackLabel={(v) => v.name}
           layout="spacious"
           isWishlisted={wishlist.ids.has(selectedProduct.id)}
           onToggleWishlist={() => wishlist.toggle(selectedProduct.id)}

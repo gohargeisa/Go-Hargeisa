@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { ImageWithFallback } from "@/components/shared/image-with-fallback";
 import type { GalleryImage } from "@/types";
 
 export function Gallery({
@@ -15,7 +15,7 @@ export function Gallery({
   return (
     <div className="grid grid-cols-4 grid-rows-2 gap-2 h-[320px] md:h-[440px] rounded-xl3 overflow-hidden">
       <div className="relative col-span-4 row-span-2 md:col-span-2">
-        <Image
+        <ImageWithFallback
           src={cover}
           alt={alt}
           fill
@@ -30,7 +30,7 @@ export function Gallery({
           key={i}
           className="relative hidden md:block col-span-1 row-span-1"
         >
-          <Image
+          <ImageWithFallback
             src={img.url}
             alt={img.alt ?? ""}
             fill

@@ -56,6 +56,33 @@ function fixInternalCapitalization(word: string): string {
   return word.replace(/(^|[-&])([a-z])/g, (_m, sep: string, ch: string) => sep + ch.toUpperCase());
 }
 
+/**
+ * Cleans a raw Flormar SHADE name for display (e.g. "clsscl brwn" ->
+ * "Clsscl Brwn").
+ *
+ * Deliberately does NOT do the SKU-keyed verified-name lookup that
+ * cleanFlormarProductName() does: a variant's SKU is the parent product's
+ * SKU family (every shade of "33000155" is "33000155-001", "-002", ...), so
+ * that lookup would collapse every shade of a product to the single parent
+ * PRODUCT name — exactly the bug this function exists to avoid. It also does
+ * NOT run the product-type token dictionary (MAS/FDT/SLS/…) or drop
+ * NP/NEW — those are product-name artifacts; a word like "New" in "New Day"
+ * is a real part of a shade's identity. The per-shade `shade_name` column is
+ * already the real shade; here we only normalise whitespace and fix
+ * capitalization after word boundaries. No letters are added, removed, or
+ * changed — only their case — and nothing is invented.
+ */
+export function cleanFlormarShadeName(rawName: string): string {
+  if (!rawName) return rawName;
+  if (rawName.includes("//")) return rawName;
+  return rawName
+    .split(/\s+/)
+    .map(fixInternalCapitalization)
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim() || rawName;
+}
+
 export function cleanFlormarProductName(rawName: string, sku?: string | null): string {
   if (!rawName) return rawName;
 

@@ -10,6 +10,7 @@ import { useImageLoaded } from "@/lib/hooks/use-image-loaded";
 import { Lightbox, type LightboxSlide } from "@/components/shared/lightbox";
 import { AddToCartButton } from "@/components/shared/add-to-cart-button";
 import { ProductImage } from "@/components/shared/product-image";
+import { ImageWithFallback } from "@/components/shared/image-with-fallback";
 import { WhatsAppIcon } from "@/components/shared/brand-icons";
 import { ProductVariantSelector } from "@/components/shared/product-variant-selector";
 import { ProductOptionsForm } from "@/components/shared/product-options-form";
@@ -41,7 +42,6 @@ export function ProductDetailModal({
   variantLabel,
   resolveSwatchColor,
   resolveFallbackLabel,
-  preferVariantImage,
   isWishlisted,
   onToggleWishlist,
   layout = "compact",
@@ -66,7 +66,6 @@ export function ProductDetailModal({
    * component's own doc comments for what each does. */
   resolveSwatchColor?: (variant: ProductVariant) => string | null;
   resolveFallbackLabel?: (variant: ProductVariant) => string;
-  preferVariantImage?: boolean;
   /** Optional, opt-in only (every existing caller is unaffected): renders a
    * wishlist heart next to the title, same on/off semantics as
    * ProductCard's identically-named props — omit both to keep today's
@@ -194,7 +193,7 @@ export function ProductDetailModal({
               aria-label={t("viewGallery")}
               className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-ink/10 dark:border-white/15"
             >
-              <Image src={photo.url} alt={photo.alt} fill sizes="56px" className="object-cover" />
+              <ImageWithFallback src={photo.url} alt={photo.alt} fill sizes="56px" className="object-cover" />
             </button>
           ))}
         </div>
@@ -263,7 +262,6 @@ export function ProductDetailModal({
               label={variantLabel}
               resolveSwatchColor={resolveSwatchColor}
               resolveFallbackLabel={resolveFallbackLabel}
-              preferVariantImage={preferVariantImage}
             />
           )}
 
@@ -351,6 +349,7 @@ export function ProductDetailModal({
                 quantity={quantity}
                 selectedAddons={selectedAddons}
                 disabled={missingRequiredOptions}
+                onAdded={onClose}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary-700 py-3 text-sm font-bold text-white transition-colors hover:bg-primary-800"
               />
             </div>
@@ -441,6 +440,15 @@ export function ProductDetailModal({
  * clean fade-in instead of jump-cutting to a different picture. */
 function CrossfadeImage({ src, alt }: { src: string; alt: string }) {
   const { loaded, imgRef, onLoad } = useImageLoaded();
+  const [errored, setErrored] = useState(false);
+
+  if (errored) {
+    // A dead product/gallery URL falls back to the same clean placeholder as
+    // a missing photo — never the browser's broken-image glyph, and the
+    // skeleton never gets stranded forever waiting for a load that fails.
+    return <ProductImage alt={alt} sizes="(max-width: 639px) 100vw, 448px" />;
+  }
+
   return (
     <>
       {!loaded && <div className="skeleton absolute inset-0" aria-hidden="true" />}
@@ -451,6 +459,7 @@ function CrossfadeImage({ src, alt }: { src: string; alt: string }) {
         fill
         sizes="(max-width: 639px) 100vw, 448px"
         onLoad={onLoad}
+        onError={() => setErrored(true)}
         className={`object-cover transition-opacity duration-300 ease-premium group-hover:scale-105 ${loaded ? "opacity-100" : "opacity-0"}`}
       />
     </>
