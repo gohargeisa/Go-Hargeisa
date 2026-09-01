@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { ArrowLeft, CheckCircle2, ShoppingCart, Trash2, X } from "lucide-react";
 import { useCart } from "@/lib/cart/cart-context";
@@ -86,17 +87,26 @@ export function CartDrawer({ locale }: { locale: Locale }) {
               </div>
               <p className="max-w-md text-sm leading-relaxed text-ink/60 dark:text-sand/60">{tp("successBody")}</p>
               {cart.lastOrderReference && (
-                <p className="rounded-full bg-ink/5 px-4 py-1.5 text-xs font-bold tracking-wide dark:bg-white/10">
+                <p className="rounded-full bg-ink/5 px-4 py-1.5 text-xs font-bold tracking-wide dark:bg-white/10" dir="ltr">
                   {cart.lastOrderReference}
                 </p>
               )}
-              <button
-                type="button"
-                onClick={cart.closeCart}
-                className="mt-2 inline-flex items-center justify-center rounded-full border border-ink/15 px-5 py-3 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
-              >
-                {t("continueShopping")}
-              </button>
+              <div className="mt-2 flex flex-wrap items-center justify-center gap-2.5">
+                <Link
+                  href={`/${locale}/dashboard?tab=orders`}
+                  onClick={cart.closeCart}
+                  className="inline-flex items-center justify-center rounded-full bg-primary-700 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-800"
+                >
+                  {tp("trackInDashboard")}
+                </Link>
+                <button
+                  type="button"
+                  onClick={cart.closeCart}
+                  className="inline-flex items-center justify-center rounded-full border border-ink/15 px-5 py-3 text-sm font-semibold text-ink transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white"
+                >
+                  {t("continueShopping")}
+                </button>
+              </div>
             </div>
           ) : cart.view === "checkout" ? (
             <CheckoutForm locale={locale} />

@@ -12,6 +12,8 @@ import { getMyBookings, getMyAppointments, getOwnedListings, getMyRecentMessages
 import { getUserNotifications, getUnreadNotificationCount } from "@/lib/actions/notifications";
 import { getMyPurchaseRequests } from "@/lib/data/purchase-requests";
 import { getMyEventRequests } from "@/lib/data/event-requests";
+import { getMyProductOrders } from "@/lib/data/product-orders";
+import { getMyTableReservations } from "@/lib/data/reservations";
 import { DashboardTabs } from "@/components/dashboard/dashboard-tabs";
 import { SupportCard } from "@/components/business/support-card";
 import { getMyLoyaltyMemberships } from "@/lib/data/loyalty";
@@ -45,7 +47,7 @@ export default async function DashboardPage({
         : (data as unknown as Database["public"]["Tables"]["profiles"]["Row"]);
   }
 
-  const [favorites, trips, reviews, bookings, appointments, notifications, unreadNotifications, ownedListings, purchaseRequests, eventRequests, loyaltyMemberships] = user
+  const [favorites, trips, reviews, bookings, appointments, notifications, unreadNotifications, ownedListings, purchaseRequests, eventRequests, productOrders, tableReservations, loyaltyMemberships] = user
     ? await Promise.all([
         getFavoritesForUser(user.id),
         getSavedTripsForUser(user.id),
@@ -57,9 +59,11 @@ export default async function DashboardPage({
         getOwnedListings(user.id),
         getMyPurchaseRequests(),
         getMyEventRequests(),
+        getMyProductOrders(),
+        getMyTableReservations(),
         getMyLoyaltyMemberships(),
       ])
-    : [[], [], [], [], [], [], 0, [], [], [], []];
+    : [[], [], [], [], [], [], 0, [], [], [], [], [], []];
 
   // Only fetch messages once we know whether there's anything to fetch them
   // for — an unconditional getMyRecentMessages() would otherwise still run
@@ -140,6 +144,8 @@ export default async function DashboardPage({
         unreadMessages={unreadMessages}
         purchaseRequests={purchaseRequests}
         eventRequests={eventRequests}
+        productOrders={productOrders}
+        tableReservations={tableReservations}
         supportSlot={<SupportCard ownerName={userName} ownerEmail={user?.email ?? ""} />}
       />
     </section>

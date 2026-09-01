@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { AnimatePresence, m } from "framer-motion";
 import {
   Bell, BedDouble, Building2, Compass, Heart, LayoutDashboard, MapIcon,
-  MessageSquare, Settings as SettingsIcon, ShieldCheck, LifeBuoy, Star, Stethoscope, User, PackageSearch,
+  MessageSquare, Settings as SettingsIcon, ShieldCheck, LifeBuoy, Star, Stethoscope, User, PackageSearch, ShoppingBag,
 } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { syncFavorites } from "@/lib/offline/favorites-store";
@@ -22,6 +22,7 @@ import { ReviewsPanel } from "@/components/dashboard/reviews-panel";
 import { BookingsPanel } from "@/components/dashboard/bookings-panel";
 import { AppointmentsPanel } from "@/components/dashboard/appointments-panel";
 import { MyRequestsPanel } from "@/components/dashboard/my-requests-panel";
+import { MyOrdersPanel } from "@/components/dashboard/my-orders-panel";
 import { ProfilePanel } from "@/components/dashboard/profile-panel";
 import { SettingsPanel } from "@/components/dashboard/settings-panel";
 import { SecurityPanel } from "@/components/dashboard/security-panel";
@@ -31,6 +32,8 @@ import type { MyReview } from "@/lib/data/reviews";
 import type { OwnedListing, OwnedListingMessage, MyAppointment } from "@/lib/data/business";
 import { serviceHref } from "@/lib/utils/service-categories";
 import type { Booking, Notification, PurchaseRequest, EventRequest } from "@/types";
+import type { CustomerProductOrder } from "@/lib/data/product-orders";
+import type { CustomerTableReservation } from "@/lib/data/reservations";
 
 export type FavoriteEntry = { kind: "hotel" | "restaurant" | "cafe" | "attraction" | "service"; item: { id: string; slug: string; name: string; address: string; coverImage: string; rating: number; reviewCount: number; categorySlug?: string } };
 const hrefKind: Partial<Record<FavoriteEntry["kind"], string>> = { hotel: "hotels", restaurant: "restaurants", cafe: "cafes", attraction: "attractions" };
@@ -50,6 +53,7 @@ const tabs = [
   { key: "trips", icon: MapIcon },
   { key: "bookings", icon: BedDouble },
   { key: "appointments", icon: Stethoscope },
+  { key: "orders", icon: ShoppingBag },
   { key: "requests", icon: PackageSearch },
   { key: "reviews", icon: Star },
   { key: "messages", icon: MessageSquare },
@@ -68,7 +72,7 @@ function isTabKey(value: string | null): value is TabKey {
 export function DashboardTabs({
   locale, userId, email, favorites, trips, bookings, appointments, reviews, notifications, unreadNotifications, userName, avatarUrl,
   phone, bio, hasPassword, memberSince, notifyActivity, notifyMarketing, notifyInApp, notifyCategories,
-  ownedListings, messages, unreadMessages, purchaseRequests, eventRequests, supportSlot,
+  ownedListings, messages, unreadMessages, purchaseRequests, eventRequests, productOrders, tableReservations, supportSlot,
 }: {
   locale: Locale; userId: string; email: string; favorites: FavoriteEntry[]; trips: SavedTrip[];
   bookings: Booking[]; appointments: MyAppointment[]; reviews: MyReview[]; notifications: Notification[]; unreadNotifications: number;
@@ -77,6 +81,7 @@ export function DashboardTabs({
   notifyActivity: boolean; notifyMarketing: boolean; notifyInApp: boolean; notifyCategories: Record<string, boolean>;
   ownedListings: OwnedListing[]; messages: OwnedListingMessage[]; unreadMessages: number;
   purchaseRequests: PurchaseRequest[]; eventRequests: EventRequest[];
+  productOrders: CustomerProductOrder[]; tableReservations: CustomerTableReservation[];
   /** SupportCard is a Server Component (reads next-intl/server + owner
    * profile) — rendered once in the server page and passed down here rather
    * than reimplemented as a client-safe duplicate. */
@@ -114,6 +119,7 @@ export function DashboardTabs({
     trips: t("tabTrips"),
     bookings: t("tabBookings"),
     appointments: t("tabAppointments"),
+    orders: t("tabOrders"),
     requests: t("tabRequests"),
     reviews: t("tabReviews"),
     messages: t("navMessages"),
@@ -141,6 +147,7 @@ export function DashboardTabs({
     { key: "favorites", label: t("statsSavedPlaces"), value: favorites.length, icon: Heart, tone: "text-rose-500 bg-rose-500/10", onClick: () => selectTab("favorites") },
     { key: "trips", label: t("statsPlannedTrips"), value: trips.length, icon: MapIcon, tone: "text-primary bg-primary/10", onClick: () => selectTab("trips") },
     { key: "bookings", label: t("tabBookings"), value: bookings.length, icon: BedDouble, tone: "text-accent-700 bg-accent/10", onClick: () => selectTab("bookings") },
+    { key: "orders", label: t("tabOrders"), value: productOrders.length + tableReservations.length, icon: ShoppingBag, tone: "text-primary bg-primary/10", onClick: () => selectTab("orders") },
     { key: "reviews", label: t("statsLocalReviews"), value: reviews.length, icon: Star, tone: "text-secondary-700 bg-secondary/15", onClick: () => selectTab("reviews") },
   ];
 
@@ -158,6 +165,7 @@ export function DashboardTabs({
           {active === "trips" && <SavedTripsPanel locale={locale} trips={trips} />}
           {active === "bookings" && <BookingsPanel locale={locale} bookings={bookings} />}
           {active === "appointments" && <AppointmentsPanel locale={locale} appointments={appointments} />}
+          {active === "orders" && <MyOrdersPanel locale={locale} orders={productOrders} reservations={tableReservations} />}
           {active === "requests" && <MyRequestsPanel locale={locale} purchaseRequests={purchaseRequests} eventRequests={eventRequests} />}
           {active === "reviews" && <ReviewsPanel locale={locale} reviews={reviews} />}
           {active === "messages" && <MessagesPanel locale={locale} messages={messages} hasBusinesses={ownedListings.length > 0} />}
