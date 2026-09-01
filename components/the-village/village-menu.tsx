@@ -141,7 +141,11 @@ export function VillageMenu({
       {/* Sticky category navigation */}
       <nav
         aria-label={t("menuJumpTo")}
-        className="sticky top-16 z-30 -mx-5 border-y border-ink/8 bg-sand/95 px-5 py-2.5 backdrop-blur dark:border-white/10 dark:bg-ink/95 sm:top-[4.25rem]"
+        /* Sticks directly below the global fixed site header (h-20 = 5rem, plus
+           env(safe-area-inset-top) on notched devices) — the same offset
+           hotel-nav-tabs / attractions-toolbar use. A bare `top-16` let this
+           bar slide under the header. */
+        className="sticky top-[calc(5rem+env(safe-area-inset-top))] z-30 -mx-5 border-y border-ink/8 bg-sand/95 px-5 py-2.5 backdrop-blur dark:border-white/10 dark:bg-ink/95"
       >
         <div className="flex gap-2 overflow-x-auto scrollbar-none">
           {grouped.map(({ category }) => {

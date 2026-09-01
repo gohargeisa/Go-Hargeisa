@@ -23,8 +23,8 @@ export function CartItemRow({ item, locale }: { item: CartItem; locale: Locale }
         {item.image && <Image src={item.image} alt={name} fill sizes="64px" className="object-cover" />}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold">{name}</p>
-        {item.variantName && <p className="truncate text-xs text-ink/60 dark:text-sand/60">{item.variantName}</p>}
+        <p dir="auto" className="truncate text-sm font-semibold">{name}</p>
+        {item.variantName && <p dir="auto" className="truncate text-xs text-ink/60 dark:text-sand/60">{item.variantName}</p>}
         {(item.addons.length > 0 || (item.selectedOptions?.length ?? 0) > 0) && (
           <p className="truncate text-xs text-ink/50 dark:text-sand/50">
             {[...item.addons.map((a) => a.name), ...(item.selectedOptions ?? []).map((o) => o.valueLabel)].join(" • ")}

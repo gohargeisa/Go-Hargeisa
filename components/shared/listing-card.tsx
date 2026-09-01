@@ -25,7 +25,7 @@ export function ListingCard({
   const { loaded, imgRef, onLoad } = useImageLoaded();
 
   return (
-    <AnimatedCard lift={6} className="group h-full w-full min-w-[272px]">
+    <AnimatedCard lift={6} className="group h-full w-full">
       <Link
         href={href}
         className="flex h-full flex-col overflow-hidden rounded-xl3 border border-ink/8 bg-white shadow-soft transition-shadow duration-300 ease-premium hover:border-primary/25 hover:shadow-card dark:border-white/10 dark:bg-white/[0.04]"
@@ -67,7 +67,7 @@ export function ListingCard({
         <div className="flex flex-1 flex-col p-5">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <h3 className="truncate font-display text-xl font-bold text-ink transition-colors group-hover:text-primary dark:text-white">{title}</h3>
+              <h3 dir="auto" className="truncate font-display text-xl font-bold text-ink transition-colors group-hover:text-primary dark:text-white">{title}</h3>
               <p className="mt-2 flex items-center gap-1.5 text-sm text-ink/55 dark:text-sand/60">
                 <MapPin size={15} className="shrink-0 text-primary" />
                 <span className="line-clamp-1">{subtitle}</span>

@@ -243,9 +243,13 @@ export function ProductCard({
 
         <div className="flex flex-1 flex-col p-2.5">
           <button type="button" onClick={onOpenDetails} className="block flex-1 text-start">
-            <p className="truncate text-[13px] font-semibold leading-snug">{name}</p>
+            <p dir="auto" className="truncate text-[13px] font-semibold leading-snug">{name}</p>
             <p className="mt-0.5 text-[13px] font-bold text-ink dark:text-white">
-              {product.price != null ? `${product.price.toFixed(2)} ${product.currency}` : t("priceOnRequest")}
+              {product.price != null ? (
+                <span dir="ltr">{`${product.price.toFixed(2)} ${product.currency}`}</span>
+              ) : (
+                t("priceOnRequest")
+              )}
             </p>
           </button>
 
@@ -308,10 +312,14 @@ export function ProductCard({
         )}
       </button>
       <button type="button" onClick={onOpenDetails} className="mt-2 block w-full text-start">
-        <p className="truncate text-sm font-semibold">{name}</p>
+        <p dir="auto" className="truncate text-sm font-semibold">{name}</p>
         <p className="text-xs text-ink/50 dark:text-sand/50">
           {product.category ? productCategoryLabel(product.category, locale) : ""}
-          {product.price != null ? ` • ${product.price} ${product.currency}` : ` • ${t("priceOnRequest")}`}
+          {product.price != null ? (
+            <>{" • "}<span dir="ltr">{`${product.price} ${product.currency}`}</span></>
+          ) : (
+            ` • ${t("priceOnRequest")}`
+          )}
         </p>
         {hasVariants &&
           (() => {

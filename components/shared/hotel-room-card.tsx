@@ -95,8 +95,8 @@ export function HotelRoomCard({
           <div>
             {room.pricePerNight ? (
               <p className="font-display text-xl font-bold text-primary-700">
-                ${room.pricePerNight}
-                <span className="ms-1 text-xs font-medium text-ink/50 dark:text-sand/50">/night</span>
+                <span dir="ltr">${room.pricePerNight}</span>
+                <span className="ms-1 text-xs font-medium text-ink/50 dark:text-sand/50">{th("perNight")}</span>
               </p>
             ) : (
               <p className="text-sm font-semibold text-ink/40 dark:text-sand/40">{th("contactForPricing")}</p>

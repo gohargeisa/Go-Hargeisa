@@ -99,6 +99,7 @@ function Stepper({ label, value, min, onChange }: { label: string; value: number
 
 function RoomOptionCard({ room, locale, selected, onSelect }: { room: HotelRoom; locale: Locale; selected: boolean; onSelect: () => void }) {
   const t = useTranslations("bookingRequest");
+  const th = useTranslations("hotelDetail");
   const visibleFeatures = room.features.slice(0, 3);
   const extraCount = room.features.length - visibleFeatures.length;
 
@@ -172,13 +173,13 @@ function RoomOptionCard({ room, locale, selected, onSelect }: { room: HotelRoom;
             <p className="text-sm font-bold text-primary-700">
               {room.discountPrice ? (
                 <>
-                  {money(room.discountPrice)}
-                  <span className="ms-1.5 text-xs font-medium text-ink/40 line-through dark:text-sand/40">{money(room.pricePerNight)}</span>
+                  <span dir="ltr">{money(room.discountPrice)}</span>
+                  <span dir="ltr" className="ms-1.5 text-xs font-medium text-ink/40 line-through dark:text-sand/40">{money(room.pricePerNight)}</span>
                 </>
               ) : (
-                money(room.pricePerNight)
+                <span dir="ltr">{money(room.pricePerNight)}</span>
               )}
-              <span className="ms-1 text-xs font-medium text-ink/45 dark:text-sand/45">/night</span>
+              <span className="ms-1 text-xs font-medium text-ink/45 dark:text-sand/45">{th("perNight")}</span>
             </p>
           ) : (
             <p className="text-xs font-semibold text-ink/40 dark:text-sand/40">{t("contactForPricing")}</p>
