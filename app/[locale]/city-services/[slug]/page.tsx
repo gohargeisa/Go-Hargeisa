@@ -56,6 +56,9 @@ import { PartnerHeroBanner } from "@/components/shared/partner/partner-hero-bann
 import { PinnacleStorefront } from "@/components/pinnacle/pinnacle-storefront";
 import { MobileBookingBar } from "@/components/shared/mobile-booking-bar";
 import { FlormarStorefront } from "@/components/flormar/flormar-storefront";
+import { getEnabledLoyaltyProgramForListing } from "@/lib/data/loyalty";
+import { programName as loyaltyProgramName } from "@/lib/loyalty/helpers";
+import { LoyaltyEntryCard } from "@/components/loyalty/loyalty-entry-card";
 import { PartnerPartnershipFooter } from "@/components/shared/partner/partner-partnership-footer";
 import { EmaankooStorefront } from "@/components/emaankoo/emaankoo-storefront";
 import type { CityService } from "@/types";
@@ -403,10 +406,31 @@ export default async function CityServiceDetailPage({
   }
 
   if (service.slug === FLORMAR_SLUG && partnerTheme) {
+    // Loyalty entry — rendered only when Flormar's program is enabled (it is;
+    // every other partner returns null here). Public client, no per-user
+    // read, so this stays cacheable with the rest of the page.
+    const loyaltyProgram = await getEnabledLoyaltyProgramForListing("city_service", service.id);
     return (
       <PartnerThemeScope theme={partnerTheme}>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
-        <FlormarStorefront theme={partnerTheme} service={service} locale={locale} products={products} />
+        <FlormarStorefront
+          theme={partnerTheme}
+          service={service}
+          locale={locale}
+          products={products}
+          loyaltySlot={
+            loyaltyProgram ? (
+              <LoyaltyEntryCard
+                href={`/${locale}/rewards/${service.slug}`}
+                partnerName={service.name}
+                programName={loyaltyProgramName(loyaltyProgram, locale)}
+                mode="promo"
+                partnerLogo={partnerTheme.partnerLogo}
+                accentColor={partnerTheme.accentStrong}
+              />
+            ) : null
+          }
+        />
         <PartnerPartnershipFooter theme={partnerTheme} locale={locale} />
         <MobileBookingBar
           listingType="city_service"
