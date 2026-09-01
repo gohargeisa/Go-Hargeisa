@@ -14,6 +14,9 @@ import { getMyPurchaseRequests } from "@/lib/data/purchase-requests";
 import { getMyEventRequests } from "@/lib/data/event-requests";
 import { DashboardTabs } from "@/components/dashboard/dashboard-tabs";
 import { SupportCard } from "@/components/business/support-card";
+import { getMyLoyaltyMemberships } from "@/lib/data/loyalty";
+import { programName as loyaltyProgramName, tierName as loyaltyTierName } from "@/lib/loyalty/helpers";
+import { LoyaltyEntryCard } from "@/components/loyalty/loyalty-entry-card";
 
 export const metadata: Metadata = { title: "My Dashboard — Go Hargeisa", robots: { index: false } };
 
@@ -42,7 +45,7 @@ export default async function DashboardPage({
         : (data as unknown as Database["public"]["Tables"]["profiles"]["Row"]);
   }
 
-  const [favorites, trips, reviews, bookings, appointments, notifications, unreadNotifications, ownedListings, purchaseRequests, eventRequests] = user
+  const [favorites, trips, reviews, bookings, appointments, notifications, unreadNotifications, ownedListings, purchaseRequests, eventRequests, loyaltyMemberships] = user
     ? await Promise.all([
         getFavoritesForUser(user.id),
         getSavedTripsForUser(user.id),
@@ -54,8 +57,9 @@ export default async function DashboardPage({
         getOwnedListings(user.id),
         getMyPurchaseRequests(),
         getMyEventRequests(),
+        getMyLoyaltyMemberships(),
       ])
-    : [[], [], [], [], [], [], 0, [], [], []];
+    : [[], [], [], [], [], [], 0, [], [], [], []];
 
   // Only fetch messages once we know whether there's anything to fetch them
   // for — an unconditional getMyRecentMessages() would otherwise still run
@@ -91,6 +95,24 @@ export default async function DashboardPage({
           {t("subtitle")}
         </p>
       </div>
+
+      {loyaltyMemberships.length > 0 && (
+        <div className="mt-6 grid gap-3 sm:grid-cols-2">
+          {loyaltyMemberships.map(({ member, program, listing, currentTier }) => (
+            <LoyaltyEntryCard
+              locale={locale}
+              key={member.id}
+              href={`/${locale}/rewards/${listing.slug}`}
+              partnerName={listing.name}
+              programName={loyaltyProgramName(program, locale)}
+              mode="member"
+              partnerLogo={listing.logoUrl}
+              points={member.currentPoints}
+              tierLabel={currentTier ? loyaltyTierName(currentTier, locale) : null}
+            />
+          ))}
+        </div>
+      )}
 
       <DashboardTabs
         locale={locale}

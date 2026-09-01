@@ -217,9 +217,15 @@ const nextConfig = {
           // geolocation=(self): the City Services "X km away" distance
           // (lib/hooks/use-visitor-location.ts) calls navigator.geolocation
           // directly — an empty allowlist here would silently block that
-          // permission prompt from ever firing. Camera/microphone stay
-          // disabled; neither is used anywhere in the app.
-          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(self), interest-cohort=()" },
+          // permission prompt from ever firing.
+          // camera=(self): the loyalty STAFF QR scanner
+          // (components/loyalty/staff/qr-scanner.tsx) calls
+          // navigator.mediaDevices.getUserMedia({ video }) to read a
+          // customer's membership QR — same-origin only, no third party. It
+          // is only ever mounted on /[locale]/rewards/staff/[slug], a route
+          // gated to authorised loyalty staff; every other page still never
+          // touches the camera. microphone stays fully disabled.
+          { key: "Permissions-Policy", value: "camera=(self), microphone=(), geolocation=(self), interest-cohort=()" },
           { key: "Content-Security-Policy", value: csp },
         ],
       },

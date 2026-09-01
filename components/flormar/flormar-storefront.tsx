@@ -132,11 +132,16 @@ export function FlormarStorefront({
   service,
   locale,
   products: catalogProducts,
+  loyaltySlot,
 }: {
   theme: PartnerTheme;
   service: CityService;
   locale: Locale;
   products: Product[];
+  /** Optional Flormar Rewards entry card, rendered by the server page only
+   * when this partner's loyalty program is enabled. Nothing about the
+   * storefront changes when it's absent. */
+  loyaltySlot?: React.ReactNode;
 }) {
   const t = useTranslations("flormarPreview");
   const tp = useTranslations("products");
@@ -557,6 +562,14 @@ export function FlormarStorefront({
           </div>
         </div>
       </section>
+
+      {/* Flormar Rewards entry — only rendered when the server page passes it
+          (i.e. this partner's loyalty program is enabled). Placed right below
+          the hero so members/prospects see it immediately, without displacing
+          any existing shopping section. */}
+      {loyaltySlot && (
+        <section className="container-px mx-auto -mb-4 mt-4 max-w-3xl sm:mt-8">{loyaltySlot}</section>
+      )}
 
       {/* 03 — Category Navigation / Product Discovery, following the
           official-site category philosophy (Face/Eyes/Lips/Nails/Skin

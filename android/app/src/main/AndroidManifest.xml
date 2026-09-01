@@ -76,10 +76,28 @@
          WebView — without a manifest declaration, Android denies the
          WebView's geolocation permission prompt outright instead of asking
          the user, so the feature silently never works natively even though
-         it works fine on the web. -->
+         it works fine on the web.
+
+         CAMERA (declared not-required below) — same story as geolocation,
+         for the loyalty STAFF QR scanner
+         (components/loyalty/staff/qr-scanner.tsx). It calls
+         navigator.mediaDevices.getUserMedia({ video }) in the WebView;
+         Capacitor's BridgeWebChromeClient maps that to a runtime CAMERA
+         prompt, which Android only shows if this permission is declared.
+         Without it, the scanner's camera path silently fails and staff use
+         the manual membership-number fallback instead. NO camera plugin is
+         added — this is one manifest line, mirroring the geolocation
+         precedent. Customers never hit this; only the staff console does. -->
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- The app must stay installable on the (rare) camera-less device —
+         only the staff QR scanner uses the camera, and it degrades to
+         manual entry. -->
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
 </manifest>
