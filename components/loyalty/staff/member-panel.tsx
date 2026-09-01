@@ -173,7 +173,7 @@ export function MemberPanel({
         <div className="mt-4 flex items-end justify-between gap-3">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-wide text-white/60">{t("pointsLabel")}</p>
-            <p className="font-display text-3xl font-bold tabular-nums">{m.current_points.toLocaleString()}</p>
+            <p className="font-display text-3xl font-bold tabular-nums">{m.current_points.toLocaleString(locale)}</p>
           </div>
           <div className="text-end text-xs">
             {m.tier && (
@@ -188,7 +188,7 @@ export function MemberPanel({
               </span>
             )}
             <p className="mt-1 text-white/55">
-              {t("lifetimePoints", { points: m.lifetime_points.toLocaleString() })}
+              {t("lifetimePoints", { points: m.lifetime_points.toLocaleString(locale) })}
             </p>
             <p className="text-white/45">{t("memberSince", { date: dateFmt.format(new Date(m.joined_at)) })}</p>
           </div>
@@ -246,7 +246,7 @@ export function MemberPanel({
           />
           {estPoints > 0 && (
             <p className="text-xs text-ink/55 dark:text-sand/55">
-              {t("willEarn", { points: estPoints.toLocaleString() })}
+              {t("willEarn", { points: estPoints.toLocaleString(locale) })}
               {currencyFmt && Number(amount) > 0 ? ` · ${currencyFmt.format(Number(amount))}` : ""}
             </p>
           )}
@@ -268,7 +268,7 @@ export function MemberPanel({
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold">{localName(r, locale)}</p>
                   <p className="text-xs text-ink/50 dark:text-sand/50">
-                    {t("pointsAmount", { points: r.points_required.toLocaleString() })}
+                    {t("pointsAmount", { points: r.points_required.toLocaleString(locale) })}
                   </p>
                 </div>
                 <button
@@ -423,7 +423,7 @@ export function MemberPanel({
                   </div>
                   <span className={`shrink-0 text-sm font-bold tabular-nums ${positive ? "text-emerald-600 dark:text-emerald-400" : "text-ink/60"}`}>
                     {positive ? "+" : ""}
-                    {tx.points.toLocaleString()}
+                    {tx.points.toLocaleString(locale)}
                   </span>
                 </li>
               );

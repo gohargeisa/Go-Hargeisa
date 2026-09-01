@@ -59,6 +59,7 @@ export function LoyaltyExperience({
 
       <section aria-label={t("cardLabel")}>
         <LoyaltyCard
+          locale={locale}
           size="compact"
           partnerName={listing.name}
           partnerLogo={partnerLogo}

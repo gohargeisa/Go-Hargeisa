@@ -421,6 +421,7 @@ export default async function CityServiceDetailPage({
           loyaltySlot={
             loyaltyProgram ? (
               <LoyaltyEntryCard
+              locale={locale}
                 href={`/${locale}/rewards/${service.slug}`}
                 partnerName={service.name}
                 programName={loyaltyProgramName(loyaltyProgram, locale)}

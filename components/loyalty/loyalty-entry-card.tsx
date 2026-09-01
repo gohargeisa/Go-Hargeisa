@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { ChevronRight, Sparkles } from "lucide-react";
+import type { Locale } from "@/lib/i18n/config";
 
 /**
  * Reusable entry point into a partner's Rewards experience. Rendered on the
@@ -10,6 +11,7 @@ import { ChevronRight, Sparkles } from "lucide-react";
  * that have already confirmed the partner's loyalty program is enabled.
  */
 export function LoyaltyEntryCard({
+  locale,
   href,
   partnerName,
   programName,
@@ -19,6 +21,7 @@ export function LoyaltyEntryCard({
   tierLabel,
   accentColor,
 }: {
+  locale: Locale;
   href: string;
   partnerName: string;
   programName: string;
@@ -53,7 +56,7 @@ export function LoyaltyEntryCard({
         {mode === "member" ? (
           <span className="mt-0.5 flex items-baseline gap-2">
             <span className="font-display text-lg font-bold tabular-nums">
-              {t("pointsAmount", { points: (points ?? 0).toLocaleString() })}
+              {t("pointsAmount", { points: (points ?? 0).toLocaleString(locale) })}
             </span>
             {tierLabel && <span className="text-xs font-semibold text-white/70">· {tierLabel}</span>}
           </span>

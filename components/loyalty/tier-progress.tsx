@@ -57,7 +57,7 @@ export function TierProgress({
           </div>
           <p className="mt-2 text-xs font-medium text-ink/55 dark:text-sand/55">
             {t("pointsToTier", {
-              points: pointsToNext.toLocaleString(),
+              points: pointsToNext.toLocaleString(locale),
               tier: tierName(nextTier, locale),
             })}
           </p>

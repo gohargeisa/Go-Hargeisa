@@ -100,6 +100,7 @@ export default async function DashboardPage({
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
           {loyaltyMemberships.map(({ member, program, listing, currentTier }) => (
             <LoyaltyEntryCard
+              locale={locale}
               key={member.id}
               href={`/${locale}/rewards/${listing.slug}`}
               partnerName={listing.name}

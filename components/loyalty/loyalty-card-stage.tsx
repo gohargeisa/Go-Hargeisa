@@ -13,6 +13,7 @@ import { LoyaltyQr } from "./loyalty-qr";
  * enlarged and the QR front-and-centre for a staff scan.
  */
 export function LoyaltyCardStage({
+  locale,
   backHref,
   partnerName,
   partnerLogo,
@@ -62,6 +63,7 @@ export function LoyaltyCardStage({
 
         <div className="mt-6">
           <LoyaltyCard
+          locale={locale}
             size="large"
             partnerName={partnerName}
             partnerLogo={partnerLogo}

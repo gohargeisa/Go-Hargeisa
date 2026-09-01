@@ -142,7 +142,7 @@ export function RewardsGrid({
                 </span>
                 <span className="mt-auto flex items-center gap-1.5 pt-1.5">
                   <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-bold text-primary-700 dark:text-primary-300">
-                    {t("pointsAmount", { points: reward.pointsRequired.toLocaleString() })}
+                    {t("pointsAmount", { points: reward.pointsRequired.toLocaleString(locale) })}
                   </span>
                   {locked && avail.reason === "tier" && requiredTier && (
                     <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-ink/45 dark:text-sand/45">
@@ -154,7 +154,7 @@ export function RewardsGrid({
                     <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-ink/45 dark:text-sand/45">
                       <Lock size={11} aria-hidden="true" />
                       {t("needMorePoints", {
-                        points: (reward.pointsRequired - currentPoints).toLocaleString(),
+                        points: (reward.pointsRequired - currentPoints).toLocaleString(locale),
                       })}
                     </span>
                   )}
@@ -226,13 +226,13 @@ export function RewardsGrid({
                   <div className="flex justify-between">
                     <dt className="text-ink/55 dark:text-sand/55">{t("costLabel")}</dt>
                     <dd className="font-semibold">
-                      {t("pointsAmount", { points: active.pointsRequired.toLocaleString() })}
+                      {t("pointsAmount", { points: active.pointsRequired.toLocaleString(locale) })}
                     </dd>
                   </div>
                   <div className="flex justify-between">
                     <dt className="text-ink/55 dark:text-sand/55">{t("balanceAfter")}</dt>
                     <dd className="font-semibold tabular-nums">
-                      {Math.max(0, currentPoints - active.pointsRequired).toLocaleString()}
+                      {Math.max(0, currentPoints - active.pointsRequired).toLocaleString(locale)}
                     </dd>
                   </div>
                 </dl>

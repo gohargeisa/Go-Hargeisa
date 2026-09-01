@@ -108,7 +108,7 @@ export function LoyaltyJoinGate({
           {welcomeBonus > 0 && (
             <p className="mt-5 flex items-center justify-center gap-2 rounded-2xl bg-primary/8 px-4 py-3 text-sm font-semibold text-primary-700 dark:text-primary-300">
               <Gift size={16} aria-hidden="true" />
-              {t("welcomeBonus", { points: welcomeBonus.toLocaleString() })}
+              {t("welcomeBonus", { points: welcomeBonus.toLocaleString(locale) })}
             </p>
           )}
 
@@ -129,7 +129,7 @@ export function LoyaltyJoinGate({
                   >
                     {tier.name}
                     <span className="text-ink/40 dark:text-sand/40">
-                      {tier.minPoints === 0 ? t("tierStart") : `${tier.minPoints.toLocaleString()}+`}
+                      {tier.minPoints === 0 ? t("tierStart") : `${tier.minPoints.toLocaleString(locale)}+`}
                     </span>
                   </span>
                 ))}

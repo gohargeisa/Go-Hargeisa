@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { useTranslations } from "next-intl";
+import type { Locale } from "@/lib/i18n/config";
 import type { LoyaltyMemberStatus } from "@/lib/loyalty/types";
 
 /**
@@ -10,6 +11,7 @@ import type { LoyaltyMemberStatus } from "@/lib/loyalty/types";
  * retint automatically), the logo + name are passed in.
  */
 export function LoyaltyCard({
+  locale,
   partnerName,
   partnerLogo,
   programName,
@@ -23,6 +25,7 @@ export function LoyaltyCard({
   qrSlot,
   size = "compact",
 }: {
+  locale: Locale;
   partnerName: string;
   partnerLogo: string | null;
   programName: string;
@@ -76,7 +79,7 @@ export function LoyaltyCard({
             {t("pointsLabel")}
           </p>
           <p className="mt-0.5 font-display text-3xl font-bold leading-none tabular-nums sm:text-4xl">
-            {points.toLocaleString()}
+            {points.toLocaleString(locale)}
           </p>
         </div>
         {tierLabel && (

@@ -131,7 +131,7 @@ function ProgramCard({
           {stats.map((s) => (
             <div key={s.label} className="rounded-2xl bg-ink/[0.03] p-3 dark:bg-white/[0.04]">
               <dt className="text-[11px] font-semibold uppercase tracking-wide text-ink/45 dark:text-sand/45">{s.label}</dt>
-              <dd className="mt-0.5 font-display text-xl font-bold tabular-nums">{s.value.toLocaleString()}</dd>
+              <dd className="mt-0.5 font-display text-xl font-bold tabular-nums">{s.value.toLocaleString(locale)}</dd>
             </div>
           ))}
         </dl>
@@ -146,7 +146,7 @@ function ProgramCard({
                 <li key={mem.membership_number} className="flex justify-between gap-3">
                   <span className="truncate">{mem.name ?? mem.membership_number}</span>
                   <span className="shrink-0 tabular-nums text-ink/55 dark:text-sand/55">
-                    {mem.lifetime_points.toLocaleString()}
+                    {mem.lifetime_points.toLocaleString(locale)}
                   </span>
                 </li>
               ))}

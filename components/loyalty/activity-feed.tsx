@@ -79,7 +79,7 @@ export function ActivityFeed({
                 }`}
               >
                 {positive ? "+" : ""}
-                {tx.points.toLocaleString()}
+                {tx.points.toLocaleString(locale)}
               </span>
             </li>
           );

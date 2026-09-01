@@ -20,6 +20,11 @@
 -- Idempotent & safe to re-run: the program + tiers upsert in place on their
 -- unique keys; the starter rewards/offers seed ONLY when the program has
 -- none yet, so a re-run never disturbs admin edits or redemption history.
+--
+-- Fail-safe: if the Flormar `city_services` listing doesn't exist yet, this
+-- migration logs a NOTICE and returns cleanly instead of raising — the
+-- migration chain is never blocked. Re-run the file once the listing is in
+-- place (through the admin UI) to activate.
 -- ============================================================================
 
 do $$
@@ -33,10 +38,16 @@ declare
 begin
   -- ------------------------------------------------------------------------
   -- 0. Locate Flormar's existing, already-published city_services row.
+  --    Fail-safe: if the listing isn't present yet (e.g. a fresh
+  --    environment where the Flormar row hasn't been created — it's entered
+  --    through the admin UI, not a migration), skip the Flormar-specific
+  --    activation and let the rest of the migration chain continue. Re-run
+  --    this migration file (it's fully idempotent) once the listing exists.
   -- ------------------------------------------------------------------------
   select id into v_listing_id from city_services where slug = 'flormar-hargeisa';
   if v_listing_id is null then
-    raise exception 'flormar-hargeisa city_services row not found — nothing to activate';
+    raise notice 'loyalty: flormar-hargeisa city_services row not found — skipping Flormar activation (re-run this migration once the listing exists)';
+    return;
   end if;
 
   -- ------------------------------------------------------------------------
