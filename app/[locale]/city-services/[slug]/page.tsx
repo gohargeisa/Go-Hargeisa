@@ -860,7 +860,11 @@ export default async function CityServiceDetailPage({
             </Reveal>
           )}
 
-          <LocationMapSection locale={locale} address={categoryLabel} coords={service.coords} mapsHref={googleMapsHref} name={service.name} />
+          {/* city_services has no address column; every listing is in
+              Hargeisa, so show that rather than the category name. The map
+              itself still only renders with verified coordinates (the
+              Hargeisa-centre fallback is filtered inside LocationMapSection). */}
+          <LocationMapSection locale={locale} address={td("locality")} coords={service.coords} mapsHref={googleMapsHref} name={service.name} />
 
           {featureEligible && (
             <Reveal>

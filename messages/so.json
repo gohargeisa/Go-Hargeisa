@@ -374,6 +374,7 @@
     "heroEyebrow": "Cadar & Alaabta Qurxinta · Hargeysa, Somaliland",
     "heroTagline": "Ka daalac cadarrada asal ahaan ah ee sare ee ka yimaada astaamaha ugu qaalisan ee adduunka.",
     "exploreCollectionCta": "Baadh Ururinta",
+    "loadMoreCta": "Muuji wax dheeraad ah",
     "storyEyebrow": "Sheekadeenna",
     "storyTitle": "Ku Saabsan Pinnacle",
     "valueAuthenticityTitle": "Asalnimo",
@@ -2770,7 +2771,8 @@
     "offerCouponCodeLabel": "Koodhka",
     "offerValidUntil": "Waa ansax ilaa {date}",
     "offerSave": "Kaydso ${amount}",
-    "offerPercentOff": "{pct}% dhimis"
+    "offerPercentOff": "{pct}% dhimis",
+    "locality": "Hargeysa, Somaliland"
   },
   "hijamaEducation": {
     "navTab": "Macluumaadka Xijaamada",

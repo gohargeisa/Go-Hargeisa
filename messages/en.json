@@ -374,6 +374,7 @@
     "heroEyebrow": "Fragrance & Cosmetics · Hargeisa, Somaliland",
     "heroTagline": "Discover authentic designer and niche perfumes from the world's most luxurious brands.",
     "exploreCollectionCta": "Explore Collection",
+    "loadMoreCta": "Load more",
     "storyEyebrow": "Our Story",
     "storyTitle": "About Pinnacle",
     "valueAuthenticityTitle": "Authenticity",
@@ -2770,7 +2771,8 @@
     "offerCouponCodeLabel": "Code",
     "offerValidUntil": "Valid until {date}",
     "offerSave": "Save ${amount}",
-    "offerPercentOff": "{pct}% off"
+    "offerPercentOff": "{pct}% off",
+    "locality": "Hargeisa, Somaliland"
   },
   "hijamaEducation": {
     "navTab": "Hijama Info",
