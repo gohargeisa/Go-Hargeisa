@@ -8,6 +8,9 @@ import { localeAlternates } from "@/lib/i18n/alternates";
 import { getCityServiceBySlug, getAllCityServiceSlugs, getCityServicesGroupedByCategory } from "@/lib/data/city-services";
 import { getCategoryById } from "@/lib/data/categories";
 import { getProductsForListing } from "@/lib/data/products";
+import { getPublicOffersForListing } from "@/lib/data/offers";
+import { ListingOffersSection } from "@/components/shared/listing-offers-section";
+import { HijamaEducationSection } from "@/components/shared/hijama-education-section";
 import { ProductsSection } from "@/components/shared/products-section";
 import { getDoctorsForListing, getDepartmentsForListing } from "@/lib/data/doctors";
 import { DoctorsSection } from "@/components/shared/doctors-section";
@@ -92,6 +95,7 @@ const FLORMAR_SLUG = "flormar-hargeisa";
 // Lavender/Flormar/Pinnacle's themes do. Scoped by exact slug match; every
 // other city_service listing is unaffected.
 const EMAANKOO_SLUG = "emaankoo-group";
+const AL_HIKMA_SLUG = "al-hikma-hijama-wellness-centre";
 
 export const revalidate = 3600;
 
@@ -222,6 +226,20 @@ export async function generateMetadata({
       alternates: localeAlternates(locale, `/city-services/${service.slug}`),
     };
   }
+  if (service.slug === AL_HIKMA_SLUG) {
+    // Own title/description + the brand logo as the OG image — the generic
+    // "{name} — Hargeisa City Services" fallback carries none of the search
+    // terms customers use (hijama / cupping / wellness / Hargeisa) and this
+    // listing has no `service.image`. Same pattern as Flormar/Pinnacle
+    // above; no "| Go Hargeisa" suffix (the root layout appends it).
+    return {
+      title: "Al-Hikma Hijama & Wellness Centre | Hijama & Cupping Therapy in Hargeisa, Somaliland",
+      description:
+        "Sunnah Hijama (wet and dry cupping) and massage therapy at Al-Hikma Hijama & Wellness Centre in Hargeisa, Somaliland. Book an appointment or contact the clinic through Go Hargeisa.",
+      openGraph: { images: ["/images/partners/al-hikma/logo.png"] },
+      alternates: localeAlternates(locale, `/city-services/${service.slug}`),
+    };
+  }
   return {
     title: `${service.name} — Hargeisa City Services`,
     description: service.description ?? undefined,
@@ -259,6 +277,7 @@ export default async function CityServiceDetailPage({
   const tn = await getTranslations("nearby");
   const tp = await getTranslations("products");
   const ta = await getTranslations("appointments");
+  const thj = await getTranslations("hijamaEducation");
 
   const featureEligible = category.supportsNewFeatures;
   const galleryEligible = category.supportsGallery;
@@ -269,12 +288,19 @@ export default async function CityServiceDetailPage({
   // folded into Clinics as one clinicType value — real dental listings today
   // are category.slug === "clinic" with clinicType === "dental".
   const isDental = category.slug === "dental-clinic" || (category.slug === "clinic" && service.clinicType === "dental");
-  const isMedical = isMedicalAppointmentCategory(category.slug);
+  // Every Hijama clinic (clinic_type = 'hijama') gets the shared Hijama
+  // education + "in the Sunnah" + Women's-Hijama-coming-soon sections —
+  // category-driven, not a per-partner branch.
+  const isHijamaClinic = category.slug === "clinic" && service.clinicType === "hijama";
+  // A Hijama practitioner is not a "doctor" and clients are not "patients" —
+  // opt Hijama clinics out of the medical vocabulary so the CTA reads
+  // "Book an Appointment" (spec) rather than "Book a Doctor".
+  const isMedical = isMedicalAppointmentCategory(category.slug) && !isHijamaClinic;
   const primaryActionGroup = getPrimaryActionGroup(category.slug, productsEligible);
   const documentLabelGroup = getDocumentLabelGroup({ listingType: "city_service", categorySlug: category.slug });
   const documentLabelKey = `document_${documentLabelGroup}` as const;
 
-  const [myReview, isFavorited, nearbyPlaces, allGroups, products, doctors, departments] = await Promise.all([
+  const [myReview, isFavorited, nearbyPlaces, allGroups, products, doctors, departments, offers] = await Promise.all([
     featureEligible ? getMyReviewForListing("city_service", service.id) : Promise.resolve(null),
     featureEligible ? isListingFavorited("city_service", service.id) : Promise.resolve(false),
     getNearbyListings({ lat: service.coords.lat, lng: service.coords.lng, excludeType: "city_service", excludeId: service.id }),
@@ -282,6 +308,7 @@ export default async function CityServiceDetailPage({
     productsEligible ? getProductsForListing(service.id) : Promise.resolve([]),
     appointmentsEligible ? getDoctorsForListing(service.id) : Promise.resolve([]),
     appointmentsEligible ? getDepartmentsForListing(service.id) : Promise.resolve([]),
+    getPublicOffersForListing("city_service", service.id),
   ]);
   const moreInCategory = (allGroups.find((g) => g.category.id === service.categoryId)?.items ?? [])
     .filter((s) => s.id !== service.id)
@@ -324,9 +351,11 @@ export default async function CityServiceDetailPage({
 
   const navTabs: HotelNavTab[] = [
     { id: "overview", label: td("overview") },
+    ...(offers.length > 0 ? [{ id: "offers", label: td("offersTabLabel") }] : []),
     ...(productsEligible ? [{ id: "products", label: tp("title") }] : []),
     ...(showTypedDetails ? [{ id: "details", label: td("details") }] : []),
     ...(appointmentsEligible && doctors.length > 0 ? [{ id: "doctors", label: ta(isMedical ? "doctorsTitle" : "staffLabel") }] : []),
+    ...(isHijamaClinic ? [{ id: "hijama-education", label: thj("navTab") }] : []),
     ...(galleryEligible && service.gallery.length > 0 ? [{ id: "gallery", label: t("gallery") }] : []),
     ...(featureEligible && service.videos && service.videos.length > 0 ? [{ id: "videos", label: td("videoGallery") }] : []),
     ...(hasHoursInfo ? [{ id: "hours", label: td("openingHoursByDay") }] : []),
@@ -720,6 +749,19 @@ export default async function CityServiceDetailPage({
             </Reveal>
           )}
 
+          {offers.length > 0 && (
+            <Reveal>
+              <ListingOffersSection
+                offers={offers}
+                title={td("offersTabLabel")}
+                couponLabel={td("offerCouponCodeLabel")}
+                validUntilLabel={(date) => td("offerValidUntil", { date })}
+                saveLabel={(amount) => td("offerSave", { amount })}
+                percentOffLabel={(pct) => td("offerPercentOff", { pct })}
+              />
+            </Reveal>
+          )}
+
           {showTypedDetails && (
             <Reveal>
               <section id="details" aria-labelledby="details-heading" className="scroll-mt-36">
@@ -748,6 +790,8 @@ export default async function CityServiceDetailPage({
               </section>
             </Reveal>
           )}
+
+          {isHijamaClinic && <HijamaEducationSection locale={locale} />}
 
           {galleryEligible && service.gallery.length > 0 && (
             <Reveal>
@@ -834,7 +878,11 @@ export default async function CityServiceDetailPage({
             </Reveal>
           )}
 
-          <LocationMapSection locale={locale} address={categoryLabel} coords={service.coords} mapsHref={googleMapsHref} name={service.name} />
+          {/* city_services has no address column; every listing is in
+              Hargeisa, so show that rather than the category name. The map
+              itself still only renders with verified coordinates (the
+              Hargeisa-centre fallback is filtered inside LocationMapSection). */}
+          <LocationMapSection locale={locale} address={td("locality")} coords={service.coords} mapsHref={googleMapsHref} name={service.name} />
 
           {featureEligible && (
             <Reveal>
@@ -922,7 +970,10 @@ export default async function CityServiceDetailPage({
 
       <PartnerStatusSection
         isPartner={service.isPartner}
-        logoUrl={service.logoUrl}
+        // A themed partner whose listing row has no logo_url yet (e.g.
+        // Al-Hikma) still has its official logo in the theme config — use
+        // that so the "Go Hargeisa × {partner}" lockup isn't a placeholder.
+        logoUrl={service.logoUrl || partnerTheme?.partnerLogo || null}
         businessName={service.name}
         locale={locale}
       />

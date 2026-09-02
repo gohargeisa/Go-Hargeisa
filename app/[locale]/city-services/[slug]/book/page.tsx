@@ -55,7 +55,10 @@ export default async function CityServiceBookingPage({
   // folded into Clinics as one clinicType value — real dental listings today
   // are category.slug === "clinic" with clinicType === "dental".
   const isDental = category.slug === "dental-clinic" || (category.slug === "clinic" && service.clinicType === "dental");
-  const isMedical = isMedicalAppointmentCategory(category.slug);
+  // Hijama clinics use the generic "appointment / staff" vocabulary, not the
+  // medical "doctor / patient" one — see the same guard in the detail page.
+  const isHijamaClinic = category.slug === "clinic" && service.clinicType === "hijama";
+  const isMedical = isMedicalAppointmentCategory(category.slug) && !isHijamaClinic;
   const bookLabel = isMedical ? (isDental ? t("bookADentist") : t("bookADoctor")) : t("bookAppointmentButton");
 
   return (

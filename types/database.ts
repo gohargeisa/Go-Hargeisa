@@ -107,9 +107,10 @@ type CafeRow = ListingBase & SocialExtra & {
 };
 
 type BusinessOfferRow = {
-  id: string; listing_type: "hotel" | "restaurant" | "cafe"; listing_id: string;
+  id: string; listing_type: "hotel" | "restaurant" | "cafe" | "city_service"; listing_id: string;
   title: string; description: string | null;
   discount_type: "percentage" | "fixed"; discount_value: number | null; coupon_code: string | null;
+  original_price: number | null; sale_price: number | null;
   cover_image: string | null;
   starts_at: string | null; ends_at: string | null; is_active: boolean;
   approval_status: "pending" | "approved" | "rejected"; featured: boolean;

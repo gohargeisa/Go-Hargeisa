@@ -496,18 +496,24 @@ export type OfferApprovalStatus = "pending" | "approved" | "rejected";
 export type OfferLifecycleStatus = "inactive" | "scheduled" | "active" | "expired";
 
 /** Owner-published, time-boxed promotion against their own listing —
- * "hotel"|"restaurant"|"cafe" only, matching converted_listing_type's
- * scope (services has no dashboard-driven offers concept yet). Only
- * visible publicly once approvalStatus is "approved" (see the RLS policy
- * in 20260801000004_offers_moderation.sql). */
+ * "hotel"|"restaurant"|"cafe"|"city_service" (the last added
+ * 20260909000001, so clinic/salon/gym/shop partners can run offers too).
+ * `services` still has no dashboard-driven offers concept. Only visible
+ * publicly once approvalStatus is "approved" (see the RLS policy in
+ * 20260801000004_offers_moderation.sql + the city_service branch in
+ * 20260909000001). `originalPrice`/`salePrice` are the optional
+ * before→after pricing model (both set → the card shows was/now/save/%);
+ * independent of discountType/discountValue, which still work as before. */
 export interface BusinessOffer {
   id: string;
-  listingType: "hotel" | "restaurant" | "cafe";
+  listingType: "hotel" | "restaurant" | "cafe" | "city_service";
   listingId: string;
   title: string;
   description?: string;
   discountType: OfferDiscountType;
   discountValue?: number;
+  originalPrice?: number;
+  salePrice?: number;
   couponCode?: string;
   coverImage?: string;
   startsAt?: string;

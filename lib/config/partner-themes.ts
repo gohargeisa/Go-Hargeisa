@@ -246,30 +246,35 @@ const LAVENDER_FLOWERS_THEME: PartnerTheme = {
  * the products stay fully visible, rather than centering content over the
  * whole frame the way the generic "cover" hero treatment used to.
  *
- * primary/accent below are still an unverified placeholder palette (warm
- * rose + gold, generic to premium beauty branding) — explicitly NOT
- * asserted as Flormar's real brand colors, since those haven't been
- * supplied. Unrelated to the logo/hero assets above; left unchanged this
- * revision (out of scope — this pass only replaced the two image assets).
- * Replace with real values from official brand guidelines before this is
- * ever made public.
+ * primary (2026-09-09): Flormar's real brand pink. `primary` #E6006A is
+ * sampled directly from the official logo asset
+ * (public/images/partners/flormar/logo.png — the pink "flormar" wordmark,
+ * corner-averaged over its saturated-pink pixels at #E6006A). The brief
+ * asked for a "soft / light pink" feel, so the SOFTNESS lives in the light
+ * end of the ramp — `primaryMid` #EC4899 (a lighter rose, ratings/badges),
+ * `primarySoft` #FBD0E4 (the tint used for card fills / dark-mode text) —
+ * while the CTA end stays a deep enough pink to keep white button text
+ * legible: white-on-primaryStrong (#C7005C) ≈ 5.8:1, white-on-primaryDeep
+ * (#A8004E) ≈ 7.6:1, both clearing WCAG AA. `accent` is an unchanged warm
+ * champagne-gold, borders/eyebrows only (never a CTA background), same
+ * decorative role every other partner's accent plays.
  */
 const FLORMAR_THEME: PartnerTheme = {
   slug: "flormar-hargeisa",
   enabled: true,
   partnerName: "Flormar Hargeisa",
   partnerLogo: "/images/partners/flormar/logo.png",
-  primary: "#A63A50",
-  primaryRgb: "166 58 80",
-  primaryMid: "#BD6478",
-  primaryMidRgb: "189 100 120",
-  primaryStrong: "#8A2F42",
-  primaryDeep: "#6B1F30",
-  primarySoft: "#E9C7CE",
-  accent: "#C9A227",
-  accentRgb: "201 162 39",
-  accentStrong: "#9C7D1D",
-  accentSoft: "#E9D48C",
+  primary: "#E6006A",
+  primaryRgb: "230 0 106",
+  primaryMid: "#EC4899",
+  primaryMidRgb: "236 72 153",
+  primaryStrong: "#C7005C",
+  primaryDeep: "#A8004E",
+  primarySoft: "#FBD0E4",
+  accent: "#CBA35B",
+  accentRgb: "203 163 91",
+  accentStrong: "#9A7838",
+  accentSoft: "#EAD8B4",
   heroImage: "/images/partners/flormar/hero.png",
   heroImageFit: "cover",
   // No hardcoded contact/social here anymore (2026-08-26) — Flormar's
@@ -464,6 +469,52 @@ const EMAANKOO_THEME: PartnerTheme = {
   accentSoft: "#F2B8D6",
 };
 
+/**
+ * Al-Hikma Hijama & Wellness Centre (`city-services/al-hikma-hijama-wellness-centre`)
+ * — a real Hargeisa Hijama (wet/dry cupping) + massage-therapy clinic;
+ * `city_services` row, category `clinic`, `clinic_type 'hijama'`,
+ * `is_partner: true`. Seeded by 20260909000002_al_hikma_listing.sql.
+ *
+ * Colours are Al-Hikma's own identity, sampled from the official logo
+ * (public/images/partners/al-hikma/logo.png — deep-green "Al-Hikma"
+ * wordmark, gold crescent/mandala, cupping-hands mark on a white disc):
+ * a deep organic green primary + a warm gold accent, matching the calm,
+ * faith-inspired wellness direction of the brand's own promo material
+ * ("Relax · Rejuvenate · Restore", green/cream/gold). NOT Go Hargeisa's
+ * amber. `primaryStrong`/`primaryDeep` are the CTA/solid-button greens —
+ * white-on-primaryStrong contrast ≈ 8.7:1 (WCAG AAA), white-on-primaryDeep
+ * higher still. `accent` gold is borders/icons/eyebrows only, never a CTA
+ * background, so its lower contrast is fine (same role Lavender/Flormar
+ * accents play).
+ *
+ * No `heroImage`: the only supplied photography is low-res social
+ * screenshots with third-party overlay UI / other clinics' branding — none
+ * usable as this clinic's own hero (same "don't fabricate a hero" reasoning
+ * as MAMA_BABY_CARE_THEME / PINNACLE_THEME). The storefront's hero uses the
+ * real logo on a green gradient instead.
+ *
+ * Contact/social (phone +252 63 900 5474, WhatsApp +1 613-513-9734, TikTok
+ * @alhikmahijama_somaliland) live on the listing row, not here — same
+ * single-source rule every other partner now follows.
+ */
+const AL_HIKMA_THEME: PartnerTheme = {
+  slug: "al-hikma-hijama-wellness-centre",
+  enabled: true,
+  partnerName: "Al-Hikma Hijama & Wellness Centre",
+  partnerLogo: "/images/partners/al-hikma/logo.png",
+  primary: "#146A41",
+  primaryRgb: "20 106 65",
+  primaryMid: "#3E8C64",
+  primaryMidRgb: "62 140 100",
+  primaryStrong: "#0F5231",
+  primaryDeep: "#0B3F26",
+  primarySoft: "#BFE0CF",
+  accent: "#C9A15B",
+  accentRgb: "201 161 91",
+  accentStrong: "#997638",
+  accentSoft: "#EAD8B4",
+};
+
 const PARTNER_THEMES: Partial<Record<BusinessListingType, Record<string, PartnerTheme>>> = {
   cafe: {
     lavender: LAVENDER_THEME,
@@ -477,6 +528,7 @@ const PARTNER_THEMES: Partial<Record<BusinessListingType, Record<string, Partner
     "mama-baby-care": MAMA_BABY_CARE_THEME,
     "pinnacle-perfumes-and-cosmatics": PINNACLE_THEME,
     "emaankoo-group": EMAANKOO_THEME,
+    "al-hikma-hijama-wellness-centre": AL_HIKMA_THEME,
   },
   hotel: {
     "grand-haadi-hotel": GRAND_HAADI_THEME,

@@ -292,6 +292,8 @@ export default async function RestaurantDetailPage({
                 title={td("offersTabLabel")}
                 couponLabel={td("offerCouponCodeLabel")}
                 validUntilLabel={(date) => td("offerValidUntil", { date })}
+                saveLabel={(amount) => td("offerSave", { amount })}
+                percentOffLabel={(pct) => td("offerPercentOff", { pct })}
               />
             </Reveal>
           )}

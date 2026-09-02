@@ -1040,6 +1040,8 @@ export function mapBusinessOffer(row: BusinessOfferRow): BusinessOffer {
     description: row.description ?? undefined,
     discountType: row.discount_type,
     discountValue: row.discount_value ?? undefined,
+    originalPrice: row.original_price ?? undefined,
+    salePrice: row.sale_price ?? undefined,
     couponCode: row.coupon_code ?? undefined,
     coverImage: row.cover_image ?? undefined,
     startsAt: row.starts_at ?? undefined,

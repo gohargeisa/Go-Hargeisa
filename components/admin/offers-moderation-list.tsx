@@ -23,7 +23,7 @@ const LIFECYCLE_BADGE: Record<OfferLifecycleStatus, string> = {
   active: "bg-secondary/10 text-secondary-700 dark:text-sand/70",
   expired: "bg-ink/10 text-ink/40 dark:bg-white/10 dark:text-sand/40",
 };
-const PUBLIC_SEGMENT = { hotel: "hotels", restaurant: "restaurants", cafe: "cafes" } as const;
+const PUBLIC_SEGMENT = { hotel: "hotels", restaurant: "restaurants", cafe: "cafes", city_service: "city-services" } as const;
 
 export function OffersModerationList({ locale, offers }: { locale: Locale; offers: OfferWithListing[] }) {
   const t = useTranslations("admin");

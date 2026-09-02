@@ -374,6 +374,7 @@
     "heroEyebrow": "Fragrance & Cosmetics · Hargeisa, Somaliland",
     "heroTagline": "Discover authentic designer and niche perfumes from the world's most luxurious brands.",
     "exploreCollectionCta": "Explore Collection",
+    "loadMoreCta": "Load more",
     "storyEyebrow": "Our Story",
     "storyTitle": "About Pinnacle",
     "valueAuthenticityTitle": "Authenticity",
@@ -2055,6 +2056,8 @@
     "allStatuses": "All statuses",
     "allHotels": "All hotels",
     "noBookingsMatch": "No bookings match your filters.",
+    "categoriesPageTitle": "Categories",
+    "categoriesPageSubtitle": "Create and manage the categories shown across the site.",
     "bookingsColReference": "Reference",
     "bookingsColHotel": "Hotel",
     "bookingsColGuest": "Guest",
@@ -2768,7 +2771,67 @@
     "watchOn": "Watch on {platform}",
     "offersTabLabel": "Offers",
     "offerCouponCodeLabel": "Code",
-    "offerValidUntil": "Valid until {date}"
+    "offerValidUntil": "Valid until {date}",
+    "offerSave": "Save ${amount}",
+    "offerPercentOff": "{pct}% off",
+    "locality": "Hargeisa, Somaliland"
+  },
+  "hijamaEducation": {
+    "navTab": "Hijama Info",
+    "eyebrow": "Learn about Hijama",
+    "title": "Hijama & cupping therapy, explained",
+    "intro": "Hijama (cupping) is a traditional wellness practice with deep roots in the Prophetic tradition. This is general information to help you know what to expect — it is not medical advice.",
+    "whatIs": {
+      "title": "What is Hijama?",
+      "body1": "Hijama is a form of cupping therapy in which small cups create gentle suction on the skin over specific points of the body. It is one of the oldest known wellness practices and is strongly encouraged in the Sunnah.",
+      "body2": "A typical session takes 30–45 minutes. Many people describe it as relaxing, with a feeling of lightness afterwards."
+    },
+    "wetVsDry": {
+      "title": "Wet cupping vs. dry cupping",
+      "body1": "In dry cupping, cups are placed on the skin to draw suction only — nothing else. It is often used for muscle tension and relaxation.",
+      "body2": "In wet cupping (the classical Hijama), the skin is first cupped, then very small, superficial scratches are made and the cups reapplied to draw a small amount of blood. Single-use, sterile blades and cups should always be used."
+    },
+    "commonUses": {
+      "title": "What people commonly use it for",
+      "body": "Hijama is most commonly sought for back, neck and shoulder tension, headaches and migraines, general fatigue, stress and relaxation, and overall wellbeing. Experiences vary from person to person.",
+      "note": "Hijama is a wellness practice, not a substitute for medical care. If you have a health condition, are pregnant, take blood-thinning medication, or have a bleeding disorder, speak to your doctor first."
+    },
+    "points": {
+      "title": "Common cupping points",
+      "body": "A practitioner selects points based on your goals and comfort. The nape of the neck and upper back (al-kahil) is the most well-known point and is mentioned in the Sunnah; the shoulders, mid-back and lower back are also frequently used.",
+      "caption": "Common points on the upper body (schematic)",
+      "labelNape": "Nape / al-kahil",
+      "labelShoulders": "Shoulders",
+      "labelMidBack": "Mid-back",
+      "labelLowBack": "Lower back"
+    },
+    "preparation": {
+      "title": "How to prepare",
+      "body": "Eat a light meal 2–3 hours before your session and stay hydrated. Avoid heavy exercise, caffeine and smoking beforehand. Wear comfortable, loose clothing, and let the practitioner know about any medication you take or health conditions you have."
+    },
+    "aftercare": {
+      "title": "Aftercare",
+      "body": "Rest for the remainder of the day and avoid strenuous activity, hot showers, swimming and sauna for about 24 hours. Keep the cupping area clean and covered, drink plenty of water, and eat light, nourishing food. Any marks fade on their own, usually within a few days to two weeks."
+    },
+    "hygiene": {
+      "title": "Hygiene & safety",
+      "body": "Every session should use single-use, sterile blades and cups, fresh gloves, and a clean treatment area, with proper disposal of used materials afterwards. If you are ever unsure, it is completely reasonable to ask your practitioner about their hygiene procedure before you begin."
+    },
+    "medicalDisclaimer": "This information is general and for educational purposes only. It is not medical advice and does not replace consultation with a qualified health professional. Hijama is offered here as wellness support, with no claim to treat, cure or prevent any disease.",
+    "sunnah": {
+      "title": "Hijama in the Sunnah",
+      "intro": "Hijama is one of the few remedies specifically encouraged in authentic hadith. A few of the most well-known narrations:",
+      "text1": "“Indeed the best of remedies you have is hijama (cupping).”",
+      "source1": "Sahih al-Bukhari 5696",
+      "text2": "“If there is any good in the remedies with which you treat yourselves, it is in cupping (hijama).”",
+      "source2": "Sunan Abi Dawud 3857 — graded authentic",
+      "footnote": "Hadith references are provided for the religious virtue of the practice. They are kept separate from, and are not, medical claims."
+    },
+    "womens": {
+      "title": "Women's Hijama services",
+      "comingSoon": "Coming soon",
+      "body": "Dedicated Hijama services for women, delivered by a female practitioner in a private setting, are being prepared. Details and booking will appear here once the service is available."
+    }
   },
   "weekdays": {
     "sunday": "Sun",
@@ -3187,6 +3250,15 @@
     "offerDiscountFixed": "Fixed amount",
     "offerDiscountValueLabel": "Discount value",
     "offerDiscountValueError": "Enter a valid discount amount.",
+    "offerPricingLabel": "Before / after price (optional)",
+    "offerPricingHint": "Set both to show a “was $X → now $Y, SAVE $Z” price on your listing. Leave blank to use the percentage or fixed discount above instead.",
+    "offerOriginalPriceLabel": "Original price",
+    "offerOriginalPricePlaceholder": "Original price, e.g. 35",
+    "offerSalePriceLabel": "New price",
+    "offerSalePricePlaceholder": "New price, e.g. 25",
+    "offerSaveBadge": "SAVE ${amount}",
+    "offerPercentOff": "{pct}% OFF",
+    "offerPriceError": "Enter valid prices, or leave both blank.",
     "offerCouponCodeLabel": "Coupon code",
     "offerCouponCodePlaceholder": "e.g. SUMMER20 (optional)",
     "offerStartsLabel": "Starts",
@@ -3555,7 +3627,12 @@
     "categoryCardDescription_cosmetics-beauty": "Makeup, skincare, and beauty products.",
     "perfumesCosmeticsCategoryName": "Perfumes & Cosmetics",
     "categoryCardDescription_perfumes-cosmetics": "Fragrances, oud, bakhoor, makeup, and beauty products in one place.",
-    "categoryCardDescription_flower-shops": "Fresh flowers, bouquets, arrangements, gifts, and cakes for every occasion."
+    "categoryCardDescription_flower-shops": "Fresh flowers, bouquets, arrangements, gifts, and cakes for every occasion.",
+    "categoryCardDescription_global-shopping-logistics": "Order products from global websites and get shopping, shipping, customs support, and delivery handled locally.",
+    "categoryCardDescription_supermarket": "Groceries, fresh produce, and household essentials from supermarkets across Hargeisa.",
+    "categoryCardDescription_dental-clinic": "Dental clinics for check-ups, cleaning, fillings, and other oral care.",
+    "categoryCardDescription_quran-memorization-center": "Centres for Qur'an memorization and Islamic study for children and adults.",
+    "categoryCardDescription_city-services": "Essential everyday services and local businesses across Hargeisa."
   },
   "attractionsPage": {
     "heroSubtitle": "Discover historical landmarks, cultural heritage, local markets, museums and hidden gems across Hargeisa.",
@@ -3781,6 +3858,9 @@
     "followFacebook": "Follow on Facebook"
   },
   "purchaseRequest": {
+    "size": "Size",
+    "color": "Color",
+    "variant": "Variant",
     "modalTitle": "Request an Order",
     "customerName": "Full name",
     "customerPhone": "Phone / WhatsApp",
