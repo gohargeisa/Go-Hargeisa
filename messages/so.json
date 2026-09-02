@@ -3857,6 +3857,93 @@
     "followInstagram": "Nagu Raac Instagram",
     "followFacebook": "Nagu Raac Facebook"
   },
+  "alHikmaStorefront": {
+    "heroPartnerBadge": "Shariikka Go Hargeisa",
+    "heroNewBadge": "Cusub Go Hargeisa",
+    "heroTagline": "Xarun caafimaad oo ku dhisan Sunnada, u heellan caafimaadka iyo nasashada iyada oo la adeegsanayo Xijaamada Nabawiga ah — koobabka qoyan iyo kuwa qallalan — iyo duugis.",
+    "navServices": "Adeegyada",
+    "navDetails": "Faahfaahin",
+    "trust": {
+      "sunnah": {
+        "title": "Ku salaysan Sunnada",
+        "body": "Xijaamada halkan waxaa loogu sameeyaa si xushmad iyo taxaddar leh, sida Sunnada Nabawiga ah."
+      },
+      "hygiene": {
+        "title": "Hal-mar la isticmaalo & nadiif ah",
+        "body": "Koobab iyo mindiyo nadiif ah oo hal mar la isticmaalo ayaa loo adeegsadaa xijaamo kasta oo qoyan."
+      },
+      "specialist": {
+        "title": "Takhasusle khibrad leh",
+        "body": "Fadhiyada waxaa qabta takhasusleha xijaamada ee xarunta."
+      },
+      "calm": {
+        "title": "Meel deggan oo gaar ah",
+        "body": "Meel aamusan oo raaxo leh oo lagu naso."
+      }
+    },
+    "overviewEyebrow": "Ku saabsan xarunta",
+    "overviewTitle": "Xarun caafimaad oo ku dhisan Sunnada",
+    "overviewImageAlt": "Takhasusle oo diyaarinaya koobab nadiif ah ka hor fadhi xijaamo",
+    "illustrativeNote": "Sawirradu waa kuwo tusaale ah oo muujinaya xijaamada iyo goobaha caafimaadka, ma aha sawirro xarunta lafteeda.",
+    "glance": {
+      "sunnah": "Ku salaysan Sunnada",
+      "cupping": "Xijaamo qoyan & qallalan",
+      "massage": "Duugis",
+      "appointment": "Ballan ah"
+    },
+    "visit": {
+      "eyebrow": "Ka hor booqashadaada",
+      "title": "Sida booqashadaadu u dhacayso",
+      "stepLabel": "Tallaabada {n}",
+      "step1": {
+        "title": "Ballan qabso",
+        "body": "Fariin ama wac xarunta si aad u qabsato fadhi kugu habboon."
+      },
+      "step2": {
+        "title": "Isu diyaari",
+        "body": "Cun cunto fudud ka hor, biyo badan cab, oo xidho dhar dabacsan oo raaxo leh."
+      },
+      "step3": {
+        "title": "Fadhigaaga",
+        "body": "Fadhi deggan oo aad la yeelato takhasusleha xijaamada ee xarunta — inta badan 30 ilaa 45 daqiiqo — iyadoo la adeegsanayo qalab nadiif ah oo hal mar la isticmaalo."
+      }
+    },
+    "offerEyebrow": "Dalac gaar ah",
+    "offerFinePrint": "Waxaa loogu talagalay booqdayaasha markii ugu horreysay. Xaqiiji helitaanka xarunta markaad ballan qabsanayso.",
+    "servicesEyebrow": "Adeegyadayada",
+    "servicesTitle": "Daaweynta Al-Hikma",
+    "servicesIntro": "Dooro fadhiga kugu habboon. Takhasusluhu wuxuu kula socodsiin doonaa waxa la filayo intaanad bilaabin.",
+    "servicesDisclaimer": "Xijaamada iyo duugistu waa dhaqammo caafimaad oo dhaqameed, mana beddelaan daryeelka caafimaadeed. Haddii aad uur leedahay, qaadato dawooyin dhiig-dhuuqid ah, ama xanuun caafimaad qabto, marka hore la tasho dhakhtarkaaga.",
+    "services": {
+      "hijama": {
+        "name": "Xijaamo / Daaweyn Koob",
+        "body": "Fadhiga xijaamada caadiga ah; koobabka waxaa la saaraa baro la doortay si ay u nuugaan si khafiif ah, iyadoo la raacayo Sunnada."
+      },
+      "wet": {
+        "name": "Xijaamo Qoyan",
+        "body": "Nuugid koob oo ay ku xigto xariiqyo dusha sare ah oo aad u yar si dhiig yar loo saaro, iyadoo la adeegsanayo qalab nadiif ah oo hal mar la isticmaalo."
+      },
+      "dry": {
+        "name": "Koob Qallalan",
+        "body": "Nuugid keliya oo aan xariiqyo lahayn; badanaa waxaa loo doortaa murqaha qandhoobay iyo nasasho."
+      },
+      "massage": {
+        "name": "Duugis & Caafimaad",
+        "body": "Duugis raaxo leh oo yareysa cadaadiska dhabarka, qoorta, iyo garbaha, keligeed ama la jirka xijaamada."
+      }
+    },
+    "staffEyebrow": "Takhasusluhaaga",
+    "staffTitle": "La kulan takhasusleha",
+    "staffBlurb": "Si toos ah ballan ugu qabso fadhigaaga takhasusleha xijaamada ee xarunta.",
+    "galleryEyebrow": "Sawirro",
+    "galleryTitle": "Meel deggan oo xijaamo",
+    "locationBody": "Al-Hikma waxay ku taal Hargeysa, Somaliland. Fariin ama wac xarunta si aad u hesho tilmaamaha jidka iyo si aad u xaqiijiso wakhtiga ballantaada.",
+    "reviewsTitle": "Waxa booqdayaashu yiraahdeen",
+    "sidebarNote": "Ballamaha waxaa si toos ah looga xaqiijiyaa xarunta telefoon ama WhatsApp.",
+    "ctaTitle": "Ballan qabso xijaamadaada",
+    "ctaBody": "Ballan ka qabso fadhi Al-Hikma Xarunta Xijaamada & Caafimaadka ee Hargeysa, Somaliland.",
+    "whatsappMessage": "Salaan Al-Hikma, waxaan jeclaan lahaa inaan ballan xijaamo qabsado."
+  },
   "purchaseRequest": {
     "size": "Cabbirka",
     "color": "Midabka",

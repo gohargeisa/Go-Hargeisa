@@ -2779,7 +2779,7 @@
   "hijamaEducation": {
     "navTab": "Hijama Info",
     "eyebrow": "Learn about Hijama",
-    "title": "Hijama & cupping therapy, explained",
+    "title": "Hijama & Cupping Therapy, Explained",
     "intro": "Hijama (cupping) is a traditional wellness practice with deep roots in the Prophetic tradition. This is general information to help you know what to expect — it is not medical advice.",
     "whatIs": {
       "title": "What is Hijama?",
@@ -3856,6 +3856,93 @@
     "emailLabel": "Email",
     "followInstagram": "Follow on Instagram",
     "followFacebook": "Follow on Facebook"
+  },
+  "alHikmaStorefront": {
+    "heroPartnerBadge": "Go Hargeisa Partner",
+    "heroNewBadge": "New on Go Hargeisa",
+    "heroTagline": "A faith-inspired wellness clinic dedicated to health and relaxation through Sunnah Hijama — wet and dry cupping therapy — and massage.",
+    "navServices": "Services",
+    "navDetails": "Details",
+    "trust": {
+      "sunnah": {
+        "title": "Rooted in the Sunnah",
+        "body": "Hijama is practised here as a Prophetic tradition, with care and respect."
+      },
+      "hygiene": {
+        "title": "Single-use & sterile",
+        "body": "Sterile, single-use cups and blades for every wet cupping session."
+      },
+      "specialist": {
+        "title": "Experienced specialist",
+        "body": "Sessions are carried out by the clinic's Hijama specialist."
+      },
+      "calm": {
+        "title": "Calm, private setting",
+        "body": "A quiet, comfortable space designed to help you relax."
+      }
+    },
+    "overviewEyebrow": "About the clinic",
+    "overviewTitle": "A faith-inspired wellness centre",
+    "overviewImageAlt": "A practitioner laying out sterile cups before a Hijama session",
+    "illustrativeNote": "Photos are illustrative of Hijama and wellness settings, not the clinic's own premises.",
+    "glance": {
+      "sunnah": "Rooted in the Sunnah",
+      "cupping": "Wet & dry cupping",
+      "massage": "Massage therapy",
+      "appointment": "By appointment"
+    },
+    "visit": {
+      "eyebrow": "Before you visit",
+      "title": "How your visit works",
+      "stepLabel": "Step {n}",
+      "step1": {
+        "title": "Book a time",
+        "body": "Message or call the clinic to arrange a session that suits you."
+      },
+      "step2": {
+        "title": "Come prepared",
+        "body": "Eat a light meal beforehand, stay hydrated, and wear loose, comfortable clothing."
+      },
+      "step3": {
+        "title": "Your session",
+        "body": "A calm session with the clinic's Hijama specialist — typically 30 to 45 minutes — using sterile, single-use equipment."
+      }
+    },
+    "offerEyebrow": "Featured offer",
+    "offerFinePrint": "For first-time visitors. Confirm availability with the clinic when you book.",
+    "servicesEyebrow": "Our services",
+    "servicesTitle": "Treatments at Al-Hikma",
+    "servicesIntro": "Choose the session that suits you. The specialist will talk through what to expect before starting.",
+    "servicesDisclaimer": "Hijama and massage are traditional wellness practices, not a substitute for medical care. If you are pregnant, take blood-thinning medication, or have a health condition, speak to your doctor first.",
+    "services": {
+      "hijama": {
+        "name": "Hijama / Cupping Therapy",
+        "body": "The classical Hijama session — cups are placed over selected points to draw gentle suction, following the Sunnah."
+      },
+      "wet": {
+        "name": "Wet Hijama",
+        "body": "Cupping followed by very small, superficial scratches so a little blood is drawn, using sterile single-use equipment."
+      },
+      "dry": {
+        "name": "Dry Cupping",
+        "body": "Suction only, with no scratches — often chosen for muscle tension, stiffness, and relaxation."
+      },
+      "massage": {
+        "name": "Massage & Wellness",
+        "body": "A relaxing massage to ease tension in the back, neck, and shoulders, on its own or alongside cupping."
+      }
+    },
+    "staffEyebrow": "Your practitioner",
+    "staffTitle": "Meet the specialist",
+    "staffBlurb": "Book your session directly with the clinic's Hijama specialist.",
+    "galleryEyebrow": "Gallery",
+    "galleryTitle": "A calm setting for Hijama",
+    "locationBody": "Al-Hikma is based in Hargeisa, Somaliland. Message or call the clinic for directions to the centre and to confirm your appointment time.",
+    "reviewsTitle": "What visitors say",
+    "sidebarNote": "Appointments are confirmed directly with the clinic by phone or WhatsApp.",
+    "ctaTitle": "Book your Hijama appointment",
+    "ctaBody": "Reserve a session with Al-Hikma Hijama & Wellness Centre in Hargeisa, Somaliland.",
+    "whatsappMessage": "Hi Al-Hikma, I'd like to book a Hijama appointment."
   },
   "purchaseRequest": {
     "size": "Size",

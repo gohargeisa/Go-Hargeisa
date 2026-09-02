@@ -64,6 +64,7 @@ import { programName as loyaltyProgramName } from "@/lib/loyalty/helpers";
 import { LoyaltyEntryCard } from "@/components/loyalty/loyalty-entry-card";
 import { PartnerPartnershipFooter } from "@/components/shared/partner/partner-partnership-footer";
 import { EmaankooStorefront } from "@/components/emaankoo/emaankoo-storefront";
+import { AlHikmaStorefront } from "@/components/al-hikma/al-hikma-storefront";
 import type { CityService } from "@/types";
 
 // Pinnacle Perfumes & Cosmetics only — a real, published listing whose page
@@ -496,6 +497,48 @@ export default async function CityServiceDetailPage({
           initiallyFavorited={isFavorited}
         />
       </>
+    );
+  }
+
+  if (service.slug === AL_HIKMA_SLUG && partnerTheme) {
+    // Al-Hikma Hijama & Wellness Centre — a premium, single-listing storefront
+    // (deep-emerald PartnerThemeScope retint, like Flormar/Pinnacle): full-bleed
+    // image hero + sticky section tabs + a 2-column body with the shared action
+    // sidebar, composed from the existing shared pieces (DoctorsSection, the
+    // category-driven HijamaEducationSection, LocationMapSection, ReviewsSection /
+    // ReviewForm, AddToTrip/Share/Favorite/Claim). Imagery falls back to licensed
+    // illustrative stock (lib/config/al-hikma-media.ts) until the clinic uploads
+    // its own gallery. Scoped by exact slug; every other clinic keeps the
+    // generic page below, education section included.
+    return (
+      <PartnerThemeScope theme={partnerTheme}>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
+        <Breadcrumbs
+          items={[
+            { label: tNav("cityServices"), href: `/${locale}/city-services` },
+            { label: service.name, href: `/${locale}/city-services/${service.slug}` },
+          ]}
+        />
+        <AlHikmaStorefront
+          theme={partnerTheme}
+          service={service}
+          locale={locale}
+          categoryLabel={categoryLabel}
+          doctors={doctors}
+          offers={offers}
+          myReview={myReview}
+          isFavorited={isFavorited}
+        />
+        <MobileBookingBar
+          listingType="city_service"
+          listingId={service.id}
+          name={service.name}
+          phone={service.phone ?? undefined}
+          whatsappFallback={service.whatsapp ?? undefined}
+          locale={locale}
+          initiallyFavorited={isFavorited}
+        />
+      </PartnerThemeScope>
     );
   }
 
