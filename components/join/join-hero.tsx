@@ -38,8 +38,9 @@ export async function JoinHero({ locale }: { locale: Locale }) {
 
       <div className="container-px relative mx-auto max-w-4xl text-center">
         <Reveal>
+          {/* White knockout — this hero sits on a dark navy gradient. */}
           <Image
-            src="/images/logo-web.png"
+            src="/images/logo-web-dark.png"
             alt="Go Hargeisa"
             width={700}
             height={467}

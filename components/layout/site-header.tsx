@@ -168,8 +168,13 @@ export function SiteHeader({
       <div className="container-px mx-auto flex h-20 items-center gap-3 md:gap-6 lg:gap-8">
         <div className="flex shrink-0 items-center">
           <Link href={`/${locale}`}>
+            {/* The Go Hargeisa wordmark is dark navy — invisible on the dark
+                gradient the header shows over the hero (unscrolled), so use
+                the white knockout there and the full-colour mark once the
+                header background turns solid white (scrolled). A partner
+                logoUrl override keeps its own single asset in both states. */}
             <Image
-              src={logoUrl || "/images/logo-web.png"}
+              src={logoUrl || (scrolled ? "/images/logo-web.png" : "/images/logo-web-dark.png")}
               alt="Go Hargeisa"
               width={700}
               height={467}
