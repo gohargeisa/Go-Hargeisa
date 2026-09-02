@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
+import { BRAND_OG_IMAGE } from "@/lib/config/brand";
 import { safeJsonLd } from "@/lib/utils/json-ld";
 import { DIASPORA_WEEK_START_ISO, DIASPORA_WEEK_END_ISO } from "@/lib/config/diaspora-week";
 import { HARGEISA_CENTER } from "@/lib/mock-data";
@@ -33,7 +34,7 @@ import { DiasporaWeekHero } from "@/components/diaspora-week/diaspora-week-hero"
 
 export const revalidate = 3600;
 
-const OG_IMAGE = "/images/og-image.png";
+const OG_IMAGE = BRAND_OG_IMAGE;
 
 export async function generateMetadata({
   params: { locale },

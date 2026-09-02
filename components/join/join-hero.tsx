@@ -2,6 +2,7 @@ import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { Eye, TrendingUp, BadgeCheck, LayoutDashboard, ArrowRight } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
+import { BRAND_LOGO } from "@/lib/config/brand";
 import { Reveal } from "@/components/home/reveal";
 import { SHIMMER_BLUR_DATA_URL } from "@/lib/utils/shimmer";
 
@@ -40,7 +41,7 @@ export async function JoinHero({ locale }: { locale: Locale }) {
         <Reveal>
           {/* White knockout — this hero sits on a dark navy gradient. */}
           <Image
-            src="/images/logo-web-dark.png"
+            src={BRAND_LOGO.dark}
             alt="Go Hargeisa"
             width={700}
             height={467}

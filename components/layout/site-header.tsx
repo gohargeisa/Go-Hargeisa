@@ -9,6 +9,7 @@ import { useTranslations } from "next-intl";
 import { Menu, X, ArrowRight, ShoppingCart } from "lucide-react";
 import { m, AnimatePresence, useReducedMotion } from "framer-motion";
 import type { Locale } from "@/lib/i18n/config";
+import { BRAND_LOGO } from "@/lib/config/brand";
 import { LanguageSwitcher } from "./language-switcher";
 import { UserMenu } from "./user-menu";
 import { useHeaderUser } from "./use-header-user";
@@ -78,14 +79,11 @@ const NavMegaMenu = dynamic(() => import("@/components/layout/nav-mega-menu").th
 export function SiteHeader({
   locale,
   initialUser,
-  logoUrl,
   categories,
   weather,
 }: {
   locale: Locale;
   initialUser: HeaderUser | null;
-  /** Admin-editable override from site_settings.logo_url — falls back to the built-in logo when unset. */
-  logoUrl?: string;
   /** Every active, feature-flag-visible category (lib/data/categories.ts
    * getVisibleCategories) — pinned ones render directly in the nav, the
    * rest live in the "More" mega menu. Single source of truth for both. */
@@ -171,10 +169,10 @@ export function SiteHeader({
             {/* The Go Hargeisa wordmark is dark navy — invisible on the dark
                 gradient the header shows over the hero (unscrolled), so use
                 the white knockout there and the full-colour mark once the
-                header background turns solid white (scrolled). A partner
-                logoUrl override keeps its own single asset in both states. */}
+                header background turns solid white (scrolled). Both are
+                version-controlled brand assets. */}
             <Image
-              src={logoUrl || (scrolled ? "/images/logo-web.png" : "/images/logo-web-dark.png")}
+              src={scrolled ? BRAND_LOGO.light : BRAND_LOGO.dark}
               alt="Go Hargeisa"
               width={700}
               height={467}

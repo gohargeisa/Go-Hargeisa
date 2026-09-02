@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { m, useReducedMotion } from "framer-motion";
 import { HeroBackground } from "@/components/home/hero-background";
 import { useNativeSplashGate } from "@/components/shared/native-splash-gate";
+import { BRAND_LOGO } from "@/lib/config/brand";
 
 const SESSION_KEY = "gh:splashShown";
 
@@ -108,7 +109,7 @@ export function SplashScreenOverlay() {
       >
         <div className="relative aspect-[768/418] w-[42vw] max-w-[220px]">
           <Image
-            src="/images/logo-mark.png"
+            src={BRAND_LOGO.mark}
             alt="Go Hargeisa"
             fill
             sizes="220px"

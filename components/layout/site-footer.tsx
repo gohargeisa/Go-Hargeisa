@@ -2,11 +2,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { SOCIAL_ICON } from "@/lib/config/social-links";
+import { BRAND_LOGO } from "@/lib/config/brand";
 import type { Locale } from "@/lib/i18n/config";
 
 export function SiteFooter({
   locale,
-  logoUrl,
   footerText,
   contactEmail,
   contactPhone,
@@ -18,8 +18,7 @@ export function SiteFooter({
   socialTiktok,
 }: {
   locale: Locale;
-  /** All of these are admin-editable overrides from site_settings — each falls back to the existing hardcoded default when unset, so an empty settings row changes nothing. */
-  logoUrl?: string;
+  /** All of these are admin-editable overrides from site_settings — each falls back to the existing hardcoded default when unset, so an empty settings row changes nothing. (The Go Hargeisa logo is deliberately NOT one of these — it is the version-controlled brand asset below.) */
   footerText?: string;
   contactEmail?: string;
   contactPhone?: string;
@@ -77,7 +76,7 @@ export function SiteFooter({
       <div className="container-px mx-auto grid grid-cols-2 gap-x-8 gap-y-12 py-16 md:grid-cols-5 md:gap-x-10 lg:gap-x-12 lg:py-20">
         <div className="col-span-2">
           <Image
-            src={logoUrl || "/images/logo-web.png"}
+            src={BRAND_LOGO.light}
             alt="Go Hargeisa"
             width={165}
             height={110}

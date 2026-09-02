@@ -2,6 +2,7 @@ import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { Check } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
+import { BRAND_LOGO } from "@/lib/config/brand";
 import { Reveal } from "@/components/home/reveal";
 
 const POINTS = ["notListingPoint1", "notListingPoint2", "notListingPoint3", "notListingPoint4"] as const;
@@ -46,7 +47,7 @@ export async function NotJustListingSection({ locale }: { locale: Locale }) {
             </span>
             <div className="flex items-center gap-4">
               <div className="relative h-12 w-32">
-                <Image src="/images/logo-web.png" alt="Go Hargeisa" fill sizes="128px" className="object-contain" />
+                <Image src={BRAND_LOGO.light} alt="Go Hargeisa" fill sizes="128px" className="object-contain" />
               </div>
               <span className="text-2xl font-light text-ink/30 dark:text-sand/30" aria-hidden="true">
                 ×

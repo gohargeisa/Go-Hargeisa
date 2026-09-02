@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { LazyMotion, domAnimation } from "framer-motion";
 import { locales, localeConfig, type Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
+import { BRAND_OG_IMAGE } from "@/lib/config/brand";
 import { ThemeProvider } from "@/components/layout/theme-provider";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
@@ -125,7 +126,7 @@ export async function generateMetadata({
 
       images: [
   {
-    url: "/images/og-image.png",
+    url: BRAND_OG_IMAGE,
     width: 1200,
     height: 630,
     alt: siteName,
@@ -137,7 +138,7 @@ export async function generateMetadata({
   card: "summary_large_image",
   title: siteName,
   description: t("ogDescription"),
-  images: ["/images/og-image.png"],
+  images: [BRAND_OG_IMAGE],
 },
 
     manifest: "/manifest.json",
@@ -208,10 +209,15 @@ export default async function LocaleLayout({
                 <OfflineFavoritesProvider>
                 <CartProvider>
                   <MobileActionBarProvider>
+                  {/* The Go Hargeisa brand logo is a version-controlled asset
+                      (public/images/logo-web*.png) — the header/footer use it
+                      directly. `site_settings.logo_url` is intentionally no
+                      longer read here: it held a stale, Supabase-hosted copy
+                      of the old wordmark and overrode the new branding in
+                      production. */}
                   <SiteHeader
                     locale={currentLocale}
                     initialUser={initialUser}
-                    logoUrl={siteSettings?.logo_url ?? undefined}
                     categories={categories}
                     weather={weather}
                   />
@@ -220,7 +226,6 @@ export default async function LocaleLayout({
                   </main>
                   <SiteFooter
                     locale={currentLocale}
-                    logoUrl={siteSettings?.logo_url ?? undefined}
                     footerText={siteSettings?.footer_text ?? undefined}
                     contactEmail={siteSettings?.contact_email ?? undefined}
                     contactPhone={siteSettings?.contact_phone ?? undefined}

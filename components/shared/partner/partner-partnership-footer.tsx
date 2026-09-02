@@ -2,6 +2,7 @@ import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { ImageOff } from "lucide-react";
 import type { PartnerTheme } from "@/lib/config/partner-themes";
+import { BRAND_LOGO } from "@/lib/config/brand";
 import type { Locale } from "@/lib/i18n/config";
 
 /**
@@ -41,7 +42,7 @@ export async function PartnerPartnershipFooter({ theme, locale }: { theme: Partn
 
         <div className="mt-8 flex flex-col items-center justify-center gap-6 sm:flex-row sm:gap-8">
           <div className="relative h-14 w-40 shrink-0 sm:h-16 sm:w-44">
-            <Image src="/images/logo-web.png" alt="Go Hargeisa" fill sizes="176px" className="object-contain" />
+            <Image src={BRAND_LOGO.light} alt="Go Hargeisa" fill sizes="176px" className="object-contain" />
           </div>
 
           <span
