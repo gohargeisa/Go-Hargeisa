@@ -66,7 +66,13 @@ const config: CapacitorConfig = {
       launchShowDuration: 4000,
       backgroundColor: '#051427',
       androidSplashResourceName: 'splash',
-      androidScaleType: 'CENTER_CROP',
+      // FIT_CENTER (not CENTER_CROP): the splash artwork is a full portrait
+      // scene that must never be cropped — the drawable is already composed
+      // onto a navy #051427 canvas at ~device aspect, and the plugin paints
+      // the same navy (backgroundColor below) behind it, so any letterbox
+      // edge on an odd aspect ratio is invisible rather than a lost strip
+      // of artwork.
+      androidScaleType: 'FIT_CENTER',
       splashFullScreen: true,
       splashImmersive: false,
       showSpinner: false,
