@@ -10,6 +10,7 @@ import { getCategoryById } from "@/lib/data/categories";
 import { getProductsForListing } from "@/lib/data/products";
 import { getPublicOffersForListing } from "@/lib/data/offers";
 import { ListingOffersSection } from "@/components/shared/listing-offers-section";
+import { HijamaEducationSection } from "@/components/shared/hijama-education-section";
 import { ProductsSection } from "@/components/shared/products-section";
 import { getDoctorsForListing, getDepartmentsForListing } from "@/lib/data/doctors";
 import { DoctorsSection } from "@/components/shared/doctors-section";
@@ -261,6 +262,7 @@ export default async function CityServiceDetailPage({
   const tn = await getTranslations("nearby");
   const tp = await getTranslations("products");
   const ta = await getTranslations("appointments");
+  const thj = await getTranslations("hijamaEducation");
 
   const featureEligible = category.supportsNewFeatures;
   const galleryEligible = category.supportsGallery;
@@ -272,6 +274,10 @@ export default async function CityServiceDetailPage({
   // are category.slug === "clinic" with clinicType === "dental".
   const isDental = category.slug === "dental-clinic" || (category.slug === "clinic" && service.clinicType === "dental");
   const isMedical = isMedicalAppointmentCategory(category.slug);
+  // Every Hijama clinic (clinic_type = 'hijama') gets the shared Hijama
+  // education + "in the Sunnah" + Women's-Hijama-coming-soon sections —
+  // category-driven, not a per-partner branch.
+  const isHijamaClinic = category.slug === "clinic" && service.clinicType === "hijama";
   const primaryActionGroup = getPrimaryActionGroup(category.slug, productsEligible);
   const documentLabelGroup = getDocumentLabelGroup({ listingType: "city_service", categorySlug: category.slug });
   const documentLabelKey = `document_${documentLabelGroup}` as const;
@@ -331,6 +337,7 @@ export default async function CityServiceDetailPage({
     ...(productsEligible ? [{ id: "products", label: tp("title") }] : []),
     ...(showTypedDetails ? [{ id: "details", label: td("details") }] : []),
     ...(appointmentsEligible && doctors.length > 0 ? [{ id: "doctors", label: ta(isMedical ? "doctorsTitle" : "staffLabel") }] : []),
+    ...(isHijamaClinic ? [{ id: "hijama-education", label: thj("navTab") }] : []),
     ...(galleryEligible && service.gallery.length > 0 ? [{ id: "gallery", label: t("gallery") }] : []),
     ...(featureEligible && service.videos && service.videos.length > 0 ? [{ id: "videos", label: td("videoGallery") }] : []),
     ...(hasHoursInfo ? [{ id: "hours", label: td("openingHoursByDay") }] : []),
@@ -765,6 +772,8 @@ export default async function CityServiceDetailPage({
               </section>
             </Reveal>
           )}
+
+          {isHijamaClinic && <HijamaEducationSection locale={locale} />}
 
           {galleryEligible && service.gallery.length > 0 && (
             <Reveal>

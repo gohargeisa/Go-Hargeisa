@@ -2772,6 +2772,63 @@
     "offerSave": "Kaydso ${amount}",
     "offerPercentOff": "{pct}% dhimis"
   },
+  "hijamaEducation": {
+    "navTab": "Macluumaadka Xijaamada",
+    "eyebrow": "Baro Xijaamada",
+    "title": "Xijaamada iyo daaweynta koobabka — sharraxaad",
+    "intro": "Xijaamadu waa hab caafimaad oo dhaqameed oo xididdo qoto dheer ku leh Sunnada Nabiga. Kani waa macluumaad guud oo kaa caawinaya inaad ogaato waxa la filan karo — maaha talo caafimaad.",
+    "whatIs": {
+      "title": "Waa maxay Xijaamada?",
+      "body1": "Xijaamadu waa nooc ka mid ah daaweynta koobabka, kaas oo koobab yaryar ay nuugniin khafiif ah ku sameeyaan maqaarka meelo gaar ah oo jidhka ah. Waa mid ka mid ah hababka caafimaad ee ugu da'da weyn ee la yaqaan, waana lagu dhiirigeliyay Sunnada.",
+      "body2": "Fadhi caadi ah wuxuu qaataa 30–45 daqiiqo. Dad badan waxay ku sifeeyaan mid deggan oo ay ka dib dareemaan fudayd."
+    },
+    "wetVsDry": {
+      "title": "Xijaamo qoyan iyo mid qallalan",
+      "body1": "Xijaamada qallalan, koobabka waxaa la saaraa maqaarka si ay nuugniin uun u sameeyaan — wax kale ma jiraan. Waxaa badanaa loo isticmaalaa cadaadiska muruqyada iyo nasashada.",
+      "body2": "Xijaamada qoyan (tan caadiga ah), maqaarka ayaa marka hore la nuugaa, ka dibna xoqidyo aad u yaryar oo dusha sare ah ayaa la sameeyaa, koobabkana dib ayaa loo saaraa si ay u soo saaraan dhiig yar. Had iyo jeer waa in la isticmaalo cirbado iyo koobab nadiif ah oo hal mar la isticmaalo."
+    },
+    "commonUses": {
+      "title": "Waxa dadku badanaa u isticmaalaan",
+      "body": "Xijaamada waxaa badanaa loo raadiyaa cadaadiska dhabarka, qoorta iyo garbaha, madax-xanuunka iyo shaqiiqada, daal guud, walbahaar iyo nasasho, iyo caafimaad guud. Waaya-aragnimadu way ka duwan tahay qofba qofka kale.",
+      "note": "Xijaamadu waa hab caafimaad oo nasasho, maaha beddel daryeel caafimaad. Haddii aad uur leedahay, xaalad caafimaad qabto, isticmaasho daawo dhiig-dhareeriye, ama qabto cillad dhiig-xinjirowga ah, marka hore la tasho dhakhtarkaaga."
+    },
+    "points": {
+      "title": "Meelaha xijaamada ee caadiga ah",
+      "body": "Takhasusluhu wuxuu doortaa meelaha iyadoo lagu saleeyo hadafkaaga iyo raaxadaada. Meesha ugu caansan waa kahilka (dhabarka sare iyo daba-qoorta), waana lagu sheegay Sunnada; garbaha, dhabarka dhexe iyo dhabarka hoose sidoo kale waa la isticmaalaa.",
+      "caption": "Meelo caadi ah oo jidhka sare (sawir sharraxeed)",
+      "labelNape": "Kahilka",
+      "labelShoulders": "Garbaha",
+      "labelMidBack": "Dhabarka dhexe",
+      "labelLowBack": "Dhabarka hoose"
+    },
+    "preparation": {
+      "title": "Sida loo diyaargaroobo",
+      "body": "Cun cunto fudud 2–3 saacadood ka hor fadhiga, biyona badan cab. Ka fogow jimicsi culus, kafeyn iyo sigaar ka hor. Xidho dhar raaxo leh oo dabacsan, oo takhasusluha u sheeg daawo kasta oo aad qaadato ama xaalad caafimaad oo aad qabto."
+    },
+    "aftercare": {
+      "title": "Daryeelka ka dib",
+      "body": "Nasо inta maalinta ka hartay, kana fogow hawl culus, qubays kulul, dabaal iyo sawna qiyaastii 24 saacadood. Meesha xijaamada nadiif ka dhig oona dabool, biyo badan cab, cuntona fudud oo nafaqo leh cun. Calaamadaha iyagaa iska baabba'aya, badanaa dhawr maalmood ilaa laba toddobaad gudahood."
+    },
+    "hygiene": {
+      "title": "Nadaafadda iyo badbaadada",
+      "body": "Fadhi kastaa waa inuu isticmaalo cirbado iyo koobab nadiif ah oo hal mar la isticmaalo, galoofyo cusub, iyo goob daaweyn oo nadiif ah, iyadoo si sax ah loo tuurayo qalabkii la isticmaalay. Haddaad shaki qabto, waa xaq inaad takhasusluha weydiiso habka nadaafadda ka hor intaadan bilaabin."
+    },
+    "medicalDisclaimer": "Macluumaadkani waa guud oo ujeeddo waxbarasho oo keliya. Maaha talo caafimaad, mana beddelaayo la-tashiga khabiir caafimaad oo aqoon leh. Xijaamada halkan waxaa loo bixiyaa taageero caafimaad oo nasasho ah, iyada oo aan la sheegin in lagu daaweeyo, lagu bogsiiyo ama laga hortago cudur kasta.",
+    "sunnah": {
+      "title": "Xijaamada Sunnada dhexdeeda",
+      "intro": "Xijaamadu waa mid ka mid ah daawooyinka yar ee si gaar ah loogu dhiirigeliyay xadiis sax ah. Qaar ka mid ah kuwa ugu caansan:",
+      "text1": "“Waxa ugu wanaagsan ee aad isku daaweysaan waa xijaamada.”",
+      "source1": "Saxiix al-Bukhaari 5696",
+      "text2": "“Haddii wax khayr ah ay ku jiraan waxaad isku daaweysaan, waa xijaamada.”",
+      "source2": "Sunan Abii Daawuud 3857 — sax",
+      "footnote": "Xadiisyada xijaamada waxaa loo keenay in la muujiyo fadligeeda diimeed. Waa ka gooni ah, mana aha, sheegasho caafimaad."
+    },
+    "womens": {
+      "title": "Adeegyada Xijaamada Dumarka",
+      "comingSoon": "Dhawaan",
+      "body": "Adeegyo xijaamo oo si gaar ah dumarka loogu talagalay, oo ay bixiso takhasusle dumar ah goob gaar ah, ayaa la diyaarinayaa. Faahfaahinta iyo ballansiga halkan ayay ka soo muuqan doonaan marka adeeggu diyaar noqdo."
+    }
+  },
   "weekdays": {
     "sunday": "Axad",
     "monday": "Isniin",

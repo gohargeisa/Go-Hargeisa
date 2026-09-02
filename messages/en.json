@@ -2772,6 +2772,63 @@
     "offerSave": "Save ${amount}",
     "offerPercentOff": "{pct}% off"
   },
+  "hijamaEducation": {
+    "navTab": "Hijama Info",
+    "eyebrow": "Learn about Hijama",
+    "title": "Hijama & cupping therapy, explained",
+    "intro": "Hijama (cupping) is a traditional wellness practice with deep roots in the Prophetic tradition. This is general information to help you know what to expect — it is not medical advice.",
+    "whatIs": {
+      "title": "What is Hijama?",
+      "body1": "Hijama is a form of cupping therapy in which small cups create gentle suction on the skin over specific points of the body. It is one of the oldest known wellness practices and is strongly encouraged in the Sunnah.",
+      "body2": "A typical session takes 30–45 minutes. Many people describe it as relaxing, with a feeling of lightness afterwards."
+    },
+    "wetVsDry": {
+      "title": "Wet cupping vs. dry cupping",
+      "body1": "In dry cupping, cups are placed on the skin to draw suction only — nothing else. It is often used for muscle tension and relaxation.",
+      "body2": "In wet cupping (the classical Hijama), the skin is first cupped, then very small, superficial scratches are made and the cups reapplied to draw a small amount of blood. Single-use, sterile blades and cups should always be used."
+    },
+    "commonUses": {
+      "title": "What people commonly use it for",
+      "body": "Hijama is most commonly sought for back, neck and shoulder tension, headaches and migraines, general fatigue, stress and relaxation, and overall wellbeing. Experiences vary from person to person.",
+      "note": "Hijama is a wellness practice, not a substitute for medical care. If you have a health condition, are pregnant, take blood-thinning medication, or have a bleeding disorder, speak to your doctor first."
+    },
+    "points": {
+      "title": "Common cupping points",
+      "body": "A practitioner selects points based on your goals and comfort. The nape of the neck and upper back (al-kahil) is the most well-known point and is mentioned in the Sunnah; the shoulders, mid-back and lower back are also frequently used.",
+      "caption": "Common points on the upper body (schematic)",
+      "labelNape": "Nape / al-kahil",
+      "labelShoulders": "Shoulders",
+      "labelMidBack": "Mid-back",
+      "labelLowBack": "Lower back"
+    },
+    "preparation": {
+      "title": "How to prepare",
+      "body": "Eat a light meal 2–3 hours before your session and stay hydrated. Avoid heavy exercise, caffeine and smoking beforehand. Wear comfortable, loose clothing, and let the practitioner know about any medication you take or health conditions you have."
+    },
+    "aftercare": {
+      "title": "Aftercare",
+      "body": "Rest for the remainder of the day and avoid strenuous activity, hot showers, swimming and sauna for about 24 hours. Keep the cupping area clean and covered, drink plenty of water, and eat light, nourishing food. Any marks fade on their own, usually within a few days to two weeks."
+    },
+    "hygiene": {
+      "title": "Hygiene & safety",
+      "body": "Every session should use single-use, sterile blades and cups, fresh gloves, and a clean treatment area, with proper disposal of used materials afterwards. If you are ever unsure, it is completely reasonable to ask your practitioner about their hygiene procedure before you begin."
+    },
+    "medicalDisclaimer": "This information is general and for educational purposes only. It is not medical advice and does not replace consultation with a qualified health professional. Hijama is offered here as wellness support, with no claim to treat, cure or prevent any disease.",
+    "sunnah": {
+      "title": "Hijama in the Sunnah",
+      "intro": "Hijama is one of the few remedies specifically encouraged in authentic hadith. A few of the most well-known narrations:",
+      "text1": "“Indeed the best of remedies you have is hijama (cupping).”",
+      "source1": "Sahih al-Bukhari 5696",
+      "text2": "“If there is any good in the remedies with which you treat yourselves, it is in cupping (hijama).”",
+      "source2": "Sunan Abi Dawud 3857 — graded authentic",
+      "footnote": "Hadith references are provided for the religious virtue of the practice. They are kept separate from, and are not, medical claims."
+    },
+    "womens": {
+      "title": "Women's Hijama services",
+      "comingSoon": "Coming soon",
+      "body": "Dedicated Hijama services for women, delivered by a female practitioner in a private setting, are being prepared. Details and booking will appear here once the service is available."
+    }
+  },
   "weekdays": {
     "sunday": "Sun",
     "monday": "Mon",
