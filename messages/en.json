@@ -2056,6 +2056,8 @@
     "allStatuses": "All statuses",
     "allHotels": "All hotels",
     "noBookingsMatch": "No bookings match your filters.",
+    "categoriesPageTitle": "Categories",
+    "categoriesPageSubtitle": "Create and manage the categories shown across the site.",
     "bookingsColReference": "Reference",
     "bookingsColHotel": "Hotel",
     "bookingsColGuest": "Guest",
@@ -3625,7 +3627,12 @@
     "categoryCardDescription_cosmetics-beauty": "Makeup, skincare, and beauty products.",
     "perfumesCosmeticsCategoryName": "Perfumes & Cosmetics",
     "categoryCardDescription_perfumes-cosmetics": "Fragrances, oud, bakhoor, makeup, and beauty products in one place.",
-    "categoryCardDescription_flower-shops": "Fresh flowers, bouquets, arrangements, gifts, and cakes for every occasion."
+    "categoryCardDescription_flower-shops": "Fresh flowers, bouquets, arrangements, gifts, and cakes for every occasion.",
+    "categoryCardDescription_global-shopping-logistics": "Order products from global websites and get shopping, shipping, customs support, and delivery handled locally.",
+    "categoryCardDescription_supermarket": "Groceries, fresh produce, and household essentials from supermarkets across Hargeisa.",
+    "categoryCardDescription_dental-clinic": "Dental clinics for check-ups, cleaning, fillings, and other oral care.",
+    "categoryCardDescription_quran-memorization-center": "Centres for Qur'an memorization and Islamic study for children and adults.",
+    "categoryCardDescription_city-services": "Essential everyday services and local businesses across Hargeisa."
   },
   "attractionsPage": {
     "heroSubtitle": "Discover historical landmarks, cultural heritage, local markets, museums and hidden gems across Hargeisa.",
@@ -3851,6 +3858,9 @@
     "followFacebook": "Follow on Facebook"
   },
   "purchaseRequest": {
+    "size": "Size",
+    "color": "Color",
+    "variant": "Variant",
     "modalTitle": "Request an Order",
     "customerName": "Full name",
     "customerPhone": "Phone / WhatsApp",

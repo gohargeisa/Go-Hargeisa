@@ -2056,6 +2056,8 @@
     "allStatuses": "Dhammaan Xaaladaha",
     "allHotels": "Dhammaan Huteellada",
     "noBookingsMatch": "Ballan lama helin oo la mid ah shaandhooyinkaaga.",
+    "categoriesPageTitle": "Qaybaha",
+    "categoriesPageSubtitle": "Abuur oo maamul qaybaha ka muuqda goobta oo dhan.",
     "bookingsColReference": "Tixraaca",
     "bookingsColHotel": "Huteelka",
     "bookingsColGuest": "Martida",
@@ -3625,7 +3627,12 @@
     "categoryCardDescription_cosmetics-beauty": "Alaabta qurxinta, daryeelka maqaarka, iyo alaabta qurxinta.",
     "perfumesCosmeticsCategoryName": "Cadarka iyo Alaabta Qurxinta",
     "categoryCardDescription_perfumes-cosmetics": "Cadarka, uunsiga, bakhoorka, iyo alaabta qurxinta oo dhammaantood hal meel ku yaal.",
-    "categoryCardDescription_flower-shops": "Ubax cusub, xirmooyin, qurxin, hadiyado, iyo keega munaasabad kasta."
+    "categoryCardDescription_flower-shops": "Ubax cusub, xirmooyin, qurxin, hadiyado, iyo keega munaasabad kasta.",
+    "categoryCardDescription_global-shopping-logistics": "Ka dalbo alaab websaydhyada caalamiga ah, iibsiga, raraca, caawimaada kastamka, iyo gaarsiinta oo halkan lagaa qabto.",
+    "categoryCardDescription_supermarket": "Raashin, khudaar cusub, iyo agabka guriga oo laga helo dukaamada waaweyn ee Hargeysa.",
+    "categoryCardDescription_dental-clinic": "Rugo ilkaha oo baaritaan, nadiifin, buuxin, iyo daryeel kale oo afka la sameeyo.",
+    "categoryCardDescription_quran-memorization-center": "Xarumo lagu xafido Quraanka Kariimka lana barto cilmiga Islaamka carruur iyo dad waaweynba.",
+    "categoryCardDescription_city-services": "Adeegyo maalinle ah oo lagama maarmaan ah iyo ganacsiyo maxalli ah oo ku baahsan Hargeysa."
   },
   "attractionsPage": {
     "heroSubtitle": "Baaro taallooyinka taariikhiga ah, dhaqanka hidaha, suuqyada maxalliga ah, matxafyada iyo meelaha qarsoon ee Hargeysa.",
@@ -3851,6 +3858,9 @@
     "followFacebook": "Nagu Raac Facebook"
   },
   "purchaseRequest": {
+    "size": "Cabbirka",
+    "color": "Midabka",
+    "variant": "Nooca",
     "modalTitle": "Codso Dalab",
     "customerName": "Magaca oo dhan",
     "customerPhone": "Telefoon / WhatsApp",

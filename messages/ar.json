@@ -2056,6 +2056,8 @@
     "allStatuses": "جميع الحالات",
     "allHotels": "جميع الفنادق",
     "noBookingsMatch": "لا توجد حجوزات مطابقة لعوامل التصفية.",
+    "categoriesPageTitle": "التصنيفات",
+    "categoriesPageSubtitle": "أنشئ التصنيفات المعروضة في أنحاء الموقع وأدرها.",
     "bookingsColReference": "المرجع",
     "bookingsColHotel": "الفندق",
     "bookingsColGuest": "الضيف",
@@ -3625,7 +3627,12 @@
     "categoryCardDescription_cosmetics-beauty": "مكياج ومستحضرات عناية بالبشرة ومنتجات تجميل.",
     "perfumesCosmeticsCategoryName": "العطور ومستحضرات التجميل",
     "categoryCardDescription_perfumes-cosmetics": "العطور والعود والبخور ومستحضرات التجميل والجمال في مكان واحد.",
-    "categoryCardDescription_flower-shops": "زهور طبيعية وباقات وتنسيقات وهدايا وكيك لكل مناسبة."
+    "categoryCardDescription_flower-shops": "زهور طبيعية وباقات وتنسيقات وهدايا وكيك لكل مناسبة.",
+    "categoryCardDescription_global-shopping-logistics": "اطلب المنتجات من المتاجر العالمية مع خدمات الشراء والشحن والتخليص الجمركي والتوصيل محليًا.",
+    "categoryCardDescription_supermarket": "بقالة وخضروات طازجة ومستلزمات منزلية من متاجر السوبر ماركت في أنحاء هرجيسا.",
+    "categoryCardDescription_dental-clinic": "عيادات أسنان للفحص والتنظيف والحشو وغيرها من خدمات العناية بالفم.",
+    "categoryCardDescription_quran-memorization-center": "مراكز لتحفيظ القرآن الكريم والدراسة الإسلامية للأطفال والكبار.",
+    "categoryCardDescription_city-services": "خدمات يومية أساسية وأعمال محلية في جميع أنحاء هرجيسا."
   },
   "attractionsPage": {
     "heroSubtitle": "اكتشف المعالم التاريخية والتراث الثقافي والأسواق المحلية والمتاحف والأماكن الخفية في هرجيسا.",
@@ -3851,6 +3858,9 @@
     "followFacebook": "تابعنا على فيسبوك"
   },
   "purchaseRequest": {
+    "size": "المقاس",
+    "color": "اللون",
+    "variant": "الخيار",
     "modalTitle": "اطلب عملية شراء",
     "customerName": "الاسم الكامل",
     "customerPhone": "الهاتف / واتساب",

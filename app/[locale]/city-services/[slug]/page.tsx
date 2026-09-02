@@ -95,6 +95,7 @@ const FLORMAR_SLUG = "flormar-hargeisa";
 // Lavender/Flormar/Pinnacle's themes do. Scoped by exact slug match; every
 // other city_service listing is unaffected.
 const EMAANKOO_SLUG = "emaankoo-group";
+const AL_HIKMA_SLUG = "al-hikma-hijama-wellness-centre";
 
 export const revalidate = 3600;
 
@@ -225,6 +226,20 @@ export async function generateMetadata({
       alternates: localeAlternates(locale, `/city-services/${service.slug}`),
     };
   }
+  if (service.slug === AL_HIKMA_SLUG) {
+    // Own title/description + the brand logo as the OG image — the generic
+    // "{name} — Hargeisa City Services" fallback carries none of the search
+    // terms customers use (hijama / cupping / wellness / Hargeisa) and this
+    // listing has no `service.image`. Same pattern as Flormar/Pinnacle
+    // above; no "| Go Hargeisa" suffix (the root layout appends it).
+    return {
+      title: "Al-Hikma Hijama & Wellness Centre | Hijama & Cupping Therapy in Hargeisa, Somaliland",
+      description:
+        "Sunnah Hijama (wet and dry cupping) and massage therapy at Al-Hikma Hijama & Wellness Centre in Hargeisa, Somaliland. Book an appointment or contact the clinic through Go Hargeisa.",
+      openGraph: { images: ["/images/partners/al-hikma/logo.png"] },
+      alternates: localeAlternates(locale, `/city-services/${service.slug}`),
+    };
+  }
   return {
     title: `${service.name} — Hargeisa City Services`,
     description: service.description ?? undefined,
@@ -273,11 +288,14 @@ export default async function CityServiceDetailPage({
   // folded into Clinics as one clinicType value — real dental listings today
   // are category.slug === "clinic" with clinicType === "dental".
   const isDental = category.slug === "dental-clinic" || (category.slug === "clinic" && service.clinicType === "dental");
-  const isMedical = isMedicalAppointmentCategory(category.slug);
   // Every Hijama clinic (clinic_type = 'hijama') gets the shared Hijama
   // education + "in the Sunnah" + Women's-Hijama-coming-soon sections —
   // category-driven, not a per-partner branch.
   const isHijamaClinic = category.slug === "clinic" && service.clinicType === "hijama";
+  // A Hijama practitioner is not a "doctor" and clients are not "patients" —
+  // opt Hijama clinics out of the medical vocabulary so the CTA reads
+  // "Book an Appointment" (spec) rather than "Book a Doctor".
+  const isMedical = isMedicalAppointmentCategory(category.slug) && !isHijamaClinic;
   const primaryActionGroup = getPrimaryActionGroup(category.slug, productsEligible);
   const documentLabelGroup = getDocumentLabelGroup({ listingType: "city_service", categorySlug: category.slug });
   const documentLabelKey = `document_${documentLabelGroup}` as const;
@@ -952,7 +970,10 @@ export default async function CityServiceDetailPage({
 
       <PartnerStatusSection
         isPartner={service.isPartner}
-        logoUrl={service.logoUrl}
+        // A themed partner whose listing row has no logo_url yet (e.g.
+        // Al-Hikma) still has its official logo in the theme config — use
+        // that so the "Go Hargeisa × {partner}" lockup isn't a placeholder.
+        logoUrl={service.logoUrl || partnerTheme?.partnerLogo || null}
         businessName={service.name}
         locale={locale}
       />
