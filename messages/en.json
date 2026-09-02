@@ -2768,7 +2768,9 @@
     "watchOn": "Watch on {platform}",
     "offersTabLabel": "Offers",
     "offerCouponCodeLabel": "Code",
-    "offerValidUntil": "Valid until {date}"
+    "offerValidUntil": "Valid until {date}",
+    "offerSave": "Save ${amount}",
+    "offerPercentOff": "{pct}% off"
   },
   "weekdays": {
     "sunday": "Sun",
@@ -3187,6 +3189,15 @@
     "offerDiscountFixed": "Fixed amount",
     "offerDiscountValueLabel": "Discount value",
     "offerDiscountValueError": "Enter a valid discount amount.",
+    "offerPricingLabel": "Before / after price (optional)",
+    "offerPricingHint": "Set both to show a “was $X → now $Y, SAVE $Z” price on your listing. Leave blank to use the percentage or fixed discount above instead.",
+    "offerOriginalPriceLabel": "Original price",
+    "offerOriginalPricePlaceholder": "Original price, e.g. 35",
+    "offerSalePriceLabel": "New price",
+    "offerSalePricePlaceholder": "New price, e.g. 25",
+    "offerSaveBadge": "SAVE ${amount}",
+    "offerPercentOff": "{pct}% OFF",
+    "offerPriceError": "Enter valid prices, or leave both blank.",
     "offerCouponCodeLabel": "Coupon code",
     "offerCouponCodePlaceholder": "e.g. SUMMER20 (optional)",
     "offerStartsLabel": "Starts",

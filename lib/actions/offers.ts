@@ -18,11 +18,20 @@ async function assertAdmin() {
   return supabase;
 }
 
+/** The listing types that support dashboard-managed offers. `service` is
+ * still excluded; `city_service` was added in 20260909000001. */
+export type OfferListingType = "hotel" | "restaurant" | "cafe" | "city_service";
+
 export interface OfferInput {
   title: string;
   description?: string;
   discountType: OfferDiscountType;
   discountValue?: number;
+  /** Optional before→after pricing (e.g. $35 → $25). Both or neither; the
+   * public card derives "SAVE $X / N% OFF" from these — see
+   * lib/utils/offer-status.ts `formatOfferPricing`. */
+  originalPrice?: number;
+  salePrice?: number;
   couponCode?: string;
   coverImage?: string;
   startsAt?: string;
@@ -36,6 +45,8 @@ function offerPayload(input: OfferInput) {
     description: input.description?.trim() || null,
     discount_type: input.discountType,
     discount_value: input.discountValue ?? null,
+    original_price: input.originalPrice ?? null,
+    sale_price: input.salePrice ?? null,
     coupon_code: input.couponCode?.trim() || null,
     cover_image: input.coverImage || null,
     starts_at: input.startsAt || null,
@@ -50,6 +61,14 @@ function validateOffer(input: OfferInput): string | null {
     if (!Number.isFinite(input.discountValue) || input.discountValue < 0) return "Enter a valid discount amount.";
     if (input.discountType === "percentage" && input.discountValue > 100) return "A percentage discount can't exceed 100.";
   }
+  const hasO = input.originalPrice !== undefined;
+  const hasS = input.salePrice !== undefined;
+  if (hasO || hasS) {
+    if (!hasO || !hasS) return "Enter both the original price and the new price, or leave both blank.";
+    if (!Number.isFinite(input.originalPrice) || !Number.isFinite(input.salePrice)) return "Enter valid prices.";
+    if (input.originalPrice! <= 0 || input.salePrice! < 0) return "Prices must be positive.";
+    if (input.salePrice! >= input.originalPrice!) return "The new price must be lower than the original price.";
+  }
   if (input.startsAt && input.endsAt && input.startsAt > input.endsAt) return "The end date must be after the start date.";
   return null;
 }
@@ -59,7 +78,7 @@ function validateOffer(input: OfferInput): string | null {
  * policy in 20260801000004_offers_moderation.sql, which requires
  * approval_status = 'approved' in addition to is_active). */
 export async function createOffer(
-  listingType: "hotel" | "restaurant" | "cafe",
+  listingType: OfferListingType,
   listingId: string,
   input: OfferInput,
   revalidatePaths: string[]
@@ -87,7 +106,7 @@ export async function createOffer(
  * content rather than changing it. */
 export async function updateOffer(
   offerId: string,
-  listingType: "hotel" | "restaurant" | "cafe",
+  listingType: OfferListingType,
   listingId: string,
   input: OfferInput,
   revalidatePaths: string[]
@@ -114,7 +133,7 @@ export async function updateOffer(
 
 export async function toggleOfferActive(
   offerId: string,
-  listingType: "hotel" | "restaurant" | "cafe",
+  listingType: OfferListingType,
   listingId: string,
   isActive: boolean,
   revalidatePaths: string[]
@@ -135,7 +154,7 @@ export async function toggleOfferActive(
 
 export async function deleteOffer(
   offerId: string,
-  listingType: "hotel" | "restaurant" | "cafe",
+  listingType: OfferListingType,
   listingId: string,
   revalidatePaths: string[]
 ): Promise<{ ok: boolean; error?: string }> {

@@ -10,41 +10,55 @@ export interface OfferWithListing extends BusinessOffer {
   listingImage: string;
 }
 
-const TABLE_BY_TYPE = { hotel: "hotels", restaurant: "restaurants", cafe: "cafes" } as const;
+/** hotel/restaurant/cafe store their card image in `cover_image`;
+ * city_services uses `image` — one map so hydrate can select the right one. */
+const IMAGE_COL_BY_TYPE = {
+  hotel: "cover_image",
+  restaurant: "cover_image",
+  cafe: "cover_image",
+  city_service: "image",
+} as const;
+const TABLE_BY_TYPE = { hotel: "hotels", restaurant: "restaurants", cafe: "cafes", city_service: "city_services" } as const;
+
+export type OfferListingType = keyof typeof TABLE_BY_TYPE;
 
 /** Batches the polymorphic listing_id → name/slug/image lookup by listing
- * type (3 queries total, not one per offer) — business_offers can't join
- * hotels/restaurants/cafes directly since one FK can't target three tables. */
+ * type (one query per type, not one per offer) — business_offers can't join
+ * hotels/restaurants/cafes/city_services directly since one FK can't target
+ * four tables. */
 async function hydrateWithListingInfo(
   offers: BusinessOffer[],
   supabase: ReturnType<typeof createPublicClient>
 ): Promise<OfferWithListing[]> {
-  const idsByType: Record<"hotel" | "restaurant" | "cafe", string[]> = { hotel: [], restaurant: [], cafe: [] };
+  const idsByType: Record<OfferListingType, string[]> = { hotel: [], restaurant: [], cafe: [], city_service: [] };
   for (const o of offers) idsByType[o.listingType].push(o.listingId);
 
-  const infoMap = new Map<string, { name: string; slug: string; cover_image: string }>();
+  const infoMap = new Map<string, { name: string; slug: string; image: string | null }>();
   await Promise.all(
-    (Object.keys(idsByType) as (keyof typeof idsByType)[]).map(async (type) => {
+    (Object.keys(idsByType) as OfferListingType[]).map(async (type) => {
       const ids = idsByType[type];
       if (ids.length === 0) return;
-      const { data } = await supabase.from(TABLE_BY_TYPE[type]).select("id, name, slug, cover_image").in("id", ids);
-      for (const row of data ?? []) infoMap.set(row.id, row);
+      const imageCol = IMAGE_COL_BY_TYPE[type];
+      const { data } = await supabase.from(TABLE_BY_TYPE[type]).select(`id, name, slug, ${imageCol}`).in("id", ids);
+      for (const row of (data ?? []) as Array<Record<string, string | null>>) {
+        infoMap.set(row.id as string, { name: row.name as string, slug: row.slug as string, image: row[imageCol] });
+      }
     })
   );
 
   return offers.flatMap((o) => {
     const info = infoMap.get(o.listingId);
     if (!info) return [];
-    return [{ ...o, listingName: info.name, listingSlug: info.slug, listingImage: info.cover_image }];
+    return [{ ...o, listingName: info.name, listingSlug: info.slug, listingImage: info.image ?? "" }];
   });
 }
 
 /** A specific listing's currently-live offers — for the hotel/restaurant/
- * cafe detail pages. RLS already restricts anonymous reads to
+ * cafe/city-service detail pages. RLS already restricts anonymous reads to
  * approved + is_active + a published listing; the isOfferLive filter here
  * additionally enforces the date window (auto-expire, no cron needed). */
 export async function getPublicOffersForListing(
-  listingType: "hotel" | "restaurant" | "cafe",
+  listingType: OfferListingType,
   listingId: string
 ): Promise<BusinessOffer[]> {
   const supabase = createPublicClient();

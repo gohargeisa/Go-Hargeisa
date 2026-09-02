@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { formatOfferDiscount } from "@/lib/utils/offer-status";
 import type { OfferWithListing } from "@/lib/data/offers";
 
-const PUBLIC_SEGMENT = { hotel: "hotels", restaurant: "restaurants", cafe: "cafes" } as const;
+const PUBLIC_SEGMENT = { hotel: "hotels", restaurant: "restaurants", cafe: "cafes", city_service: "city-services" } as const;
 
 export function OfferCard({ offer, locale }: { offer: OfferWithListing; locale: string }) {
   const t = useTranslations("home");

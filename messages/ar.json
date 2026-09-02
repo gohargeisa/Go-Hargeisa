@@ -2768,7 +2768,9 @@
     "watchOn": "شاهد على {platform}",
     "offersTabLabel": "العروض",
     "offerCouponCodeLabel": "الرمز",
-    "offerValidUntil": "صالح حتى {date}"
+    "offerValidUntil": "صالح حتى {date}",
+    "offerSave": "وفّر ${amount}",
+    "offerPercentOff": "خصم {pct}%"
   },
   "weekdays": {
     "sunday": "الأحد",
@@ -3187,6 +3189,15 @@
     "offerDiscountFixed": "مبلغ ثابت",
     "offerDiscountValueLabel": "قيمة الخصم",
     "offerDiscountValueError": "أدخل قيمة خصم صحيحة.",
+    "offerPricingLabel": "السعر قبل / بعد (اختياري)",
+    "offerPricingHint": "حدِّد الحقلين لعرض سعر «كان $X ← الآن $Y، وفّر $Z» على صفحتك. اتركهما فارغين لاستخدام نسبة الخصم أو المبلغ الثابت أعلاه.",
+    "offerOriginalPriceLabel": "السعر الأصلي",
+    "offerOriginalPricePlaceholder": "السعر الأصلي، مثال 35",
+    "offerSalePriceLabel": "السعر الجديد",
+    "offerSalePricePlaceholder": "السعر الجديد، مثال 25",
+    "offerSaveBadge": "وفّر ${amount}",
+    "offerPercentOff": "خصم {pct}%",
+    "offerPriceError": "أدخل أسعارًا صحيحة، أو اترك الحقلين فارغين.",
     "offerCouponCodeLabel": "رمز الكوبون",
     "offerCouponCodePlaceholder": "مثال: SUMMER20 (اختياري)",
     "offerStartsLabel": "يبدأ",

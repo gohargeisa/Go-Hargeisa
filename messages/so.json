@@ -2768,7 +2768,9 @@
     "watchOn": "Ka daawo {platform}",
     "offersTabLabel": "Dallacaadaha",
     "offerCouponCodeLabel": "Koodhka",
-    "offerValidUntil": "Waa ansax ilaa {date}"
+    "offerValidUntil": "Waa ansax ilaa {date}",
+    "offerSave": "Kaydso ${amount}",
+    "offerPercentOff": "{pct}% dhimis"
   },
   "weekdays": {
     "sunday": "Axad",
@@ -3187,6 +3189,15 @@
     "offerDiscountFixed": "Qadar Go'an",
     "offerDiscountValueLabel": "Qiimaha Dhimista",
     "offerDiscountValueError": "Geli qadar dhimis oo sax ah.",
+    "offerPricingLabel": "Qiimaha hore / kadib (ikhtiyaari)",
+    "offerPricingHint": "Labada buuxi si aad boggaaga ugu muujiso qiime «wuxuu ahaa $X → hadda $Y, kaydso $Z». U daa faaruq si aad u isticmaasho boqolkiiba ama qiimaha go'an ee kor ku xusan.",
+    "offerOriginalPriceLabel": "Qiimaha asalka ah",
+    "offerOriginalPricePlaceholder": "Qiimaha asalka ah, tusaale 35",
+    "offerSalePriceLabel": "Qiimaha cusub",
+    "offerSalePricePlaceholder": "Qiimaha cusub, tusaale 25",
+    "offerSaveBadge": "KAYDSO ${amount}",
+    "offerPercentOff": "{pct}% DHIMIS",
+    "offerPriceError": "Geli qiimayaal sax ah, ama labadaba u daa faaruq.",
     "offerCouponCodeLabel": "Koodhka Kuboonka",
     "offerCouponCodePlaceholder": "tusaale: SUMMER20 (ikhtiyaari)",
     "offerStartsLabel": "Bilaabmaysa",

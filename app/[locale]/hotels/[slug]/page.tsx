@@ -380,6 +380,8 @@ export default async function HotelDetailPage({
                 title={td("offersTabLabel")}
                 couponLabel={td("offerCouponCodeLabel")}
                 validUntilLabel={(date) => td("offerValidUntil", { date })}
+                saveLabel={(amount) => td("offerSave", { amount })}
+                percentOffLabel={(pct) => td("offerPercentOff", { pct })}
               />
             </Reveal>
           )}

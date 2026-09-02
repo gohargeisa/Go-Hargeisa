@@ -4,9 +4,9 @@ import { useState, useTransition } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Loader2, Plus, Pencil, Trash2, Tag, Ticket } from "lucide-react";
-import { createOffer, updateOffer, deleteOffer, toggleOfferActive, type OfferInput } from "@/lib/actions/offers";
+import { createOffer, updateOffer, deleteOffer, toggleOfferActive, type OfferInput, type OfferListingType } from "@/lib/actions/offers";
 import { ImageUploader } from "@/components/shared/image-uploader";
-import { getOfferLifecycleStatus, formatOfferDiscount } from "@/lib/utils/offer-status";
+import { getOfferLifecycleStatus, formatOfferDiscount, formatOfferPricing } from "@/lib/utils/offer-status";
 import type { BusinessOffer, OfferApprovalStatus, OfferLifecycleStatus } from "@/types";
 
 const EMPTY_DRAFT: OfferInput = {
@@ -14,6 +14,8 @@ const EMPTY_DRAFT: OfferInput = {
   description: "",
   discountType: "percentage",
   discountValue: undefined,
+  originalPrice: undefined,
+  salePrice: undefined,
   couponCode: "",
   coverImage: "",
   startsAt: "",
@@ -27,7 +29,7 @@ export function OffersManager({
   offers,
   revalidatePath,
 }: {
-  listingType: "hotel" | "restaurant" | "cafe";
+  listingType: OfferListingType;
   listingId: string;
   offers: BusinessOffer[];
   revalidatePath: string;
@@ -36,6 +38,8 @@ export function OffersManager({
   const [editingId, setEditingId] = useState<string | "new" | null>(null);
   const [draft, setDraft] = useState<OfferInput>(EMPTY_DRAFT);
   const [discountValueText, setDiscountValueText] = useState("");
+  const [originalPriceText, setOriginalPriceText] = useState("");
+  const [salePriceText, setSalePriceText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -55,6 +59,8 @@ export function OffersManager({
   function startCreate() {
     setDraft(EMPTY_DRAFT);
     setDiscountValueText("");
+    setOriginalPriceText("");
+    setSalePriceText("");
     setError(null);
     setEditingId("new");
   }
@@ -65,6 +71,8 @@ export function OffersManager({
       description: offer.description ?? "",
       discountType: offer.discountType,
       discountValue: offer.discountValue,
+      originalPrice: offer.originalPrice,
+      salePrice: offer.salePrice,
       couponCode: offer.couponCode ?? "",
       coverImage: offer.coverImage ?? "",
       startsAt: offer.startsAt ?? "",
@@ -72,6 +80,8 @@ export function OffersManager({
       isActive: offer.isActive,
     });
     setDiscountValueText(offer.discountValue !== undefined ? String(offer.discountValue) : "");
+    setOriginalPriceText(offer.originalPrice !== undefined ? String(offer.originalPrice) : "");
+    setSalePriceText(offer.salePrice !== undefined ? String(offer.salePrice) : "");
     setError(null);
     setEditingId(offer.id);
   }
@@ -83,7 +93,16 @@ export function OffersManager({
       setError(t("offerDiscountValueError"));
       return;
     }
-    const payload: OfferInput = { ...draft, discountValue: parsedValue };
+    const parsedOriginal = originalPriceText.trim() === "" ? undefined : Number(originalPriceText);
+    const parsedSale = salePriceText.trim() === "" ? undefined : Number(salePriceText);
+    if (
+      (originalPriceText.trim() !== "" && !Number.isFinite(parsedOriginal)) ||
+      (salePriceText.trim() !== "" && !Number.isFinite(parsedSale))
+    ) {
+      setError(t("offerPriceError"));
+      return;
+    }
+    const payload: OfferInput = { ...draft, discountValue: parsedValue, originalPrice: parsedOriginal, salePrice: parsedSale };
 
     startTransition(async () => {
       const result =
@@ -186,6 +205,54 @@ export function OffersManager({
                 placeholder={t("offerCouponCodePlaceholder")}
               />
             </div>
+          </div>
+
+          <div>
+            <label className="mb-1.5 block text-sm font-semibold">{t("offerPricingLabel")}</label>
+            <p className="mb-2 text-xs text-ink/45 dark:text-sand/45">{t("offerPricingHint")}</p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <input
+                type="number"
+                min={0}
+                step="0.01"
+                inputMode="decimal"
+                value={originalPriceText}
+                onChange={(e) => setOriginalPriceText(e.target.value)}
+                className={inputClass}
+                placeholder={t("offerOriginalPricePlaceholder")}
+                aria-label={t("offerOriginalPriceLabel")}
+              />
+              <input
+                type="number"
+                min={0}
+                step="0.01"
+                inputMode="decimal"
+                value={salePriceText}
+                onChange={(e) => setSalePriceText(e.target.value)}
+                className={inputClass}
+                placeholder={t("offerSalePricePlaceholder")}
+                aria-label={t("offerSalePriceLabel")}
+              />
+            </div>
+            {(() => {
+              const preview = formatOfferPricing({
+                originalPrice: originalPriceText.trim() === "" ? undefined : Number(originalPriceText),
+                salePrice: salePriceText.trim() === "" ? undefined : Number(salePriceText),
+              });
+              if (!preview) return null;
+              return (
+                <p className="mt-2 flex flex-wrap items-center gap-2 text-sm">
+                  <span className="text-ink/40 line-through dark:text-sand/40">${preview.original}</span>
+                  <span className="font-bold text-primary-800 dark:text-primary-300">${preview.sale}</span>
+                  <span className="rounded-full bg-primary-700 px-2 py-0.5 text-xs font-bold text-white">
+                    {t("offerSaveBadge", { amount: preview.save })}
+                  </span>
+                  <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary-800 dark:text-primary-300">
+                    {t("offerPercentOff", { pct: preview.pct })}
+                  </span>
+                </p>
+              );
+            })()}
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">

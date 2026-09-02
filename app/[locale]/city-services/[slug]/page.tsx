@@ -8,6 +8,8 @@ import { localeAlternates } from "@/lib/i18n/alternates";
 import { getCityServiceBySlug, getAllCityServiceSlugs, getCityServicesGroupedByCategory } from "@/lib/data/city-services";
 import { getCategoryById } from "@/lib/data/categories";
 import { getProductsForListing } from "@/lib/data/products";
+import { getPublicOffersForListing } from "@/lib/data/offers";
+import { ListingOffersSection } from "@/components/shared/listing-offers-section";
 import { ProductsSection } from "@/components/shared/products-section";
 import { getDoctorsForListing, getDepartmentsForListing } from "@/lib/data/doctors";
 import { DoctorsSection } from "@/components/shared/doctors-section";
@@ -274,7 +276,7 @@ export default async function CityServiceDetailPage({
   const documentLabelGroup = getDocumentLabelGroup({ listingType: "city_service", categorySlug: category.slug });
   const documentLabelKey = `document_${documentLabelGroup}` as const;
 
-  const [myReview, isFavorited, nearbyPlaces, allGroups, products, doctors, departments] = await Promise.all([
+  const [myReview, isFavorited, nearbyPlaces, allGroups, products, doctors, departments, offers] = await Promise.all([
     featureEligible ? getMyReviewForListing("city_service", service.id) : Promise.resolve(null),
     featureEligible ? isListingFavorited("city_service", service.id) : Promise.resolve(false),
     getNearbyListings({ lat: service.coords.lat, lng: service.coords.lng, excludeType: "city_service", excludeId: service.id }),
@@ -282,6 +284,7 @@ export default async function CityServiceDetailPage({
     productsEligible ? getProductsForListing(service.id) : Promise.resolve([]),
     appointmentsEligible ? getDoctorsForListing(service.id) : Promise.resolve([]),
     appointmentsEligible ? getDepartmentsForListing(service.id) : Promise.resolve([]),
+    getPublicOffersForListing("city_service", service.id),
   ]);
   const moreInCategory = (allGroups.find((g) => g.category.id === service.categoryId)?.items ?? [])
     .filter((s) => s.id !== service.id)
@@ -324,6 +327,7 @@ export default async function CityServiceDetailPage({
 
   const navTabs: HotelNavTab[] = [
     { id: "overview", label: td("overview") },
+    ...(offers.length > 0 ? [{ id: "offers", label: td("offersTabLabel") }] : []),
     ...(productsEligible ? [{ id: "products", label: tp("title") }] : []),
     ...(showTypedDetails ? [{ id: "details", label: td("details") }] : []),
     ...(appointmentsEligible && doctors.length > 0 ? [{ id: "doctors", label: ta(isMedical ? "doctorsTitle" : "staffLabel") }] : []),
@@ -717,6 +721,19 @@ export default async function CityServiceDetailPage({
                 </h2>
                 <p dir="auto" className="leading-relaxed text-ink/75 dark:text-sand/75">{service.description}</p>
               </section>
+            </Reveal>
+          )}
+
+          {offers.length > 0 && (
+            <Reveal>
+              <ListingOffersSection
+                offers={offers}
+                title={td("offersTabLabel")}
+                couponLabel={td("offerCouponCodeLabel")}
+                validUntilLabel={(date) => td("offerValidUntil", { date })}
+                saveLabel={(amount) => td("offerSave", { amount })}
+                percentOffLabel={(pct) => td("offerPercentOff", { pct })}
+              />
             </Reveal>
           )}
 

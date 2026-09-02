@@ -721,7 +721,7 @@ export async function getOrCreateSubscription(
 }
 
 export async function getOffersForListing(
-  listingType: "hotel" | "restaurant" | "cafe",
+  listingType: "hotel" | "restaurant" | "cafe" | "city_service",
   listingId: string
 ): Promise<BusinessOffer[]> {
   const supabase = await createClient();

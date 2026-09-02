@@ -14,7 +14,9 @@ export default async function OffersPage({ params: { locale } }: { params: { loc
 
   const t = await getTranslations({ locale, namespace: "businessDashboard" });
 
-  if (listing.listingType === "service" || listing.listingType === "city_service") {
+  // `service` listings still have no offers concept; `city_service` gained
+  // one in 20260909000001 (clinic/salon/gym/shop partners can run offers).
+  if (listing.listingType === "service") {
     return (
       <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-ink/15 p-12 text-center dark:border-white/15">
         <Tag size={26} className="text-ink/25" aria-hidden="true" />
