@@ -23,6 +23,7 @@ export function LoyaltyExperience({
   partnerLogo,
   accentColor,
   cardHref,
+  cardVariant = "solid",
 }: {
   locale: Locale;
   context: LoyaltyContext;
@@ -31,6 +32,7 @@ export function LoyaltyExperience({
   partnerLogo: string | null;
   accentColor: string | null;
   cardHref: string;
+  cardVariant?: "solid" | "light";
 }) {
   const t = useTranslations("loyalty");
   const { program, listing, member, currentTier, nextTier, rewards, offers, transactions, redemptions } = context;
@@ -61,6 +63,7 @@ export function LoyaltyExperience({
         <LoyaltyCard
           locale={locale}
           size="compact"
+          variant={cardVariant}
           partnerName={listing.name}
           partnerLogo={partnerLogo}
           programName={programName(program, locale)}
@@ -77,6 +80,7 @@ export function LoyaltyExperience({
               programId={program.id}
               memberId={member.id}
               caption={t("showQrAt", { partner: listing.name })}
+              variant={cardVariant === "light" ? "plain" : "onDark"}
             />
           }
         />

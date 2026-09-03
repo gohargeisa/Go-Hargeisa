@@ -75,13 +75,20 @@ export function SiteFooter({
     <footer className="mt-24 border-t border-ink/10 bg-gradient-to-b from-white to-slate-50 pb-[max(6rem,calc(4.5rem+env(safe-area-inset-bottom)))] dark:border-white/10 dark:from-[#071321] dark:to-[#020817] lg:pb-0">
       <div className="container-px mx-auto grid grid-cols-2 gap-x-8 gap-y-12 py-16 md:grid-cols-5 md:gap-x-10 lg:gap-x-12 lg:py-20">
         <div className="col-span-2">
+          {/* Pin the rendered width. The brand asset (public/images/logo-web.png)
+              is 700×467 and `images.unoptimized` is on, so next/image emits a
+              plain <img> whose `width`/`height` attributes are only
+              presentational hints — `h-auto w-auto` here let Tailwind override
+              them and the logo fell back to its full 700px intrinsic size,
+              overflowing the viewport on mobile. `w-40 h-auto` keeps the
+              intended ~160px lockup and scales the height by the real ratio. */}
           <Image
             src={BRAND_LOGO.light}
             alt="Go Hargeisa"
             width={165}
             height={110}
             loading="lazy"
-            className="mb-6 h-auto w-auto transition-transform duration-300 ease-premium hover:scale-105"
+            className="mb-6 h-auto w-40 max-w-full transition-transform duration-300 ease-premium hover:scale-105"
           />
           <p className="max-w-sm text-sm leading-7 text-ink/60 dark:text-sand/60">{footerText || t("tagline")}</p>
           <div className="mt-6 flex flex-wrap gap-2.5">

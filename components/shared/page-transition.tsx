@@ -19,12 +19,19 @@ export function PageTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const reduceMotion = useReducedMotion();
 
+  // `animate` is ALWAYS the resting state — never `undefined`. On the server
+  // `useReducedMotion()` is null, so `initial={{opacity:0}}` is rendered as
+  // an inline style; if the client then resolves `reduceMotion` to true and
+  // `animate` were `undefined`, framer would leave that inline `opacity:0`
+  // in place and the whole page would stay invisible for anyone with
+  // "reduce motion" enabled. Keeping `animate` fixed and only dropping the
+  // *entrance* (initial:false + zero-duration) fixes that.
   return (
     <m.div
       key={pathname}
-      initial={reduceMotion ? undefined : { opacity: 0, y: 12 }}
-      animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-      transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+      initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: reduceMotion ? 0 : 0.32, ease: [0.16, 1, 0.3, 1] }}
     >
       {children}
     </m.div>

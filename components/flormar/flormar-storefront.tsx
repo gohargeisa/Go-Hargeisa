@@ -9,7 +9,7 @@ import { ProductDetailModal } from "@/components/shared/product-detail-modal";
 import { PartnerProductPlaceholder } from "@/components/shared/partner/partner-product-placeholder";
 import { EmptyState } from "@/components/shared/empty-state";
 import { SocialLinks } from "@/components/shared/social-links";
-import { FlormarHeroCarousel } from "@/components/flormar/flormar-hero-carousel";
+import { FlormarCampaignHero } from "@/components/flormar/flormar-campaign-hero";
 import { BottomSheet } from "@/components/shared/bottom-sheet";
 import { Reveal } from "@/components/home/reveal";
 import { productLocalizedName } from "@/lib/utils/product-i18n";
@@ -22,6 +22,7 @@ import { productCategoryLabel, productGenderLabel } from "@/lib/config/product-c
 import { useCart } from "@/lib/cart/cart-context";
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
 import { FLORMAR_PRIMARY_CATEGORY_GROUPS } from "@/lib/config/flormar-categories";
+import { getActiveFlormarCampaigns, resolveCampaignProducts, type FlormarCampaign } from "@/lib/config/flormar-campaigns";
 import type { PartnerTheme } from "@/lib/config/partner-themes";
 import type { Locale } from "@/lib/i18n/config";
 import type { AddToCartBusiness } from "@/lib/cart/cart-context";
@@ -106,27 +107,6 @@ function useLocalWishlist() {
  */
 type SortKey = "featured" | "newest" | "priceLow" | "priceHigh" | "name";
 
-/**
- * Real Flormar Hargeisa campaign photography for the hero carousel — 5
- * photos hand-picked from the 14 the business owner supplied
- * (OneDrive Desktop\Flormar\model-01.jpeg … model-14.jpeg), copied
- * byte-for-byte (sha256-verified at copy time) into
- * public/images/partners/flormar/campaign/. Selection criteria: a real
- * Flormar-branded product ("flormar"/"f" logo) clearly visible in the
- * model's hand, and no ambiguous third-party watermark in frame (one
- * otherwise-strong candidate, model-04, was excluded for exactly that
- * reason — an unidentified colored icon appears in its lower-left corner
- * that isn't Flormar's own mark). Nothing here is generated, stock, or
- * invented — every file is a verbatim copy of a supplied photo.
- */
-const FLORMAR_HERO_CAMPAIGN_IMAGES = [
-  { src: "/images/partners/flormar/campaign/campaign-01.jpg", alt: "Flormar Hargeisa — campaign photography" },
-  { src: "/images/partners/flormar/campaign/campaign-02.jpg", alt: "Flormar Hargeisa — campaign photography" },
-  { src: "/images/partners/flormar/campaign/campaign-03.jpg", alt: "Flormar Hargeisa — campaign photography" },
-  { src: "/images/partners/flormar/campaign/campaign-04.jpg", alt: "Flormar Hargeisa — campaign photography" },
-  { src: "/images/partners/flormar/campaign/campaign-05.jpg", alt: "Flormar Hargeisa — campaign photography" },
-];
-
 export function FlormarStorefront({
   theme,
   service,
@@ -153,6 +133,12 @@ export function FlormarStorefront({
   const [categoryMenuOpen, setCategoryMenuOpen] = useState(false);
   const cart = useCart();
   const wishlist = useLocalWishlist();
+  // Campaign hero — real business-owner photos, each wired to the exact
+  // product shown (see lib/config/flormar-campaigns.ts). `activeCampaign`
+  // tracks the visible slide so the "From this campaign" strip below can
+  // follow it.
+  const activeCampaigns = useMemo(() => getActiveFlormarCampaigns(), []);
+  const [activeCampaign, setActiveCampaign] = useState<FlormarCampaign | null>(activeCampaigns[0] ?? null);
   // Category tiles below reuse real product photos (external CDN URLs from
   // the real catalog, not this project's own assets) as their visual —
   // unlike ProductImage, a bare next/image here has no built-in error
@@ -350,6 +336,24 @@ export function FlormarStorefront({
     document.getElementById("shop-all")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
+  // Products the currently visible campaign slide promotes — resolved from
+  // the same real, priced catalogue every other section reads. Empty for a
+  // category-only slide (e.g. the mascara photo, deliberately not tied to one
+  // product) or if none of the campaign's SKUs are in stock right now.
+  const campaignProducts = useMemo(
+    () => (activeCampaign ? resolveCampaignProducts(activeCampaign, productsWithPricing) : []),
+    [activeCampaign, productsWithPricing]
+  );
+
+  // Hero CTA: open the exact product's detail modal (→ shade selector → add
+  // to cart) when the campaign resolves one; otherwise fall back to its
+  // category — never a guessed product link.
+  function handleShopCampaign(campaign: FlormarCampaign) {
+    const [first] = resolveCampaignProducts(campaign, productsWithPricing);
+    if (first) setSelectedProduct(first);
+    else goToCategory(campaign.categoryFallback);
+  }
+
   const discoveryResults = useMemo(() => {
     let list = productsWithPricing;
     if (discoveryGender !== "all") list = list.filter((p) => p.gender === discoveryGender);
@@ -518,64 +522,20 @@ export function FlormarStorefront({
         </div>
       </div>
 
-      {/* 02 — Large Flormar Campaign Hero, back to sitting right below the
-          storefront header (the platform owner's latest, more specific
-          ordering supersedes the previous "categories above hero" pass).
-          The dark cinematic video hero is gone entirely — replaced with a
-          real photo campaign carousel (FLORMAR_HERO_CAMPAIGN_IMAGES, 5 real
-          local Flormar Hargeisa campaign photos, copied byte-for-byte from
-          the business owner's supplied files — see that constant's own doc
-          comment). Clean white/spacious split layout: photo panel (the
-          rotating carousel) + a SEPARATE, static white text panel — see
-          FlormarHeroCarousel's own doc comment for why the headline/CTAs
-          are never overlaid on top of the photos. Stacks on mobile (photo
-          first, text below); sits side-by-side from `sm:` up.
-          `aspect-[2/3]` on the photo column at every breakpoint matches the
-          source photos' own real pixel ratio (720×1080) exactly — with no
-          browser available this session to visually confirm a tuned crop,
-          matching the container ratio to the source ratio is the only way
-          to GUARANTEE zero cropping and zero stretching by construction,
-          rather than by a min-height guess. `object-cover` on a
-          ratio-matched container behaves identically to `object-contain`
-          (nothing left to crop), so the full composition — face and
-          product both — is always visible. */}
-      <section className="overflow-hidden bg-white dark:bg-ink">
-        <div className="flex flex-col sm:flex-row sm:items-stretch">
-          <div className="relative aspect-[2/3] w-full sm:w-[46%] sm:flex-none md:w-[42%]">
-            <FlormarHeroCarousel images={FLORMAR_HERO_CAMPAIGN_IMAGES} />
-          </div>
-          <div className="flex flex-1 flex-col items-center justify-center px-6 py-14 text-center sm:items-start sm:px-10 sm:py-10 sm:text-start md:px-16 lg:px-20">
-            <span
-              className="text-xs font-bold uppercase tracking-[0.2em]"
-              style={{ color: theme.primaryStrong }}
-            >
-              {t("heroEyebrow")}
-            </span>
-            <h1 className="mt-3 text-balance font-display text-4xl font-bold tracking-tight text-ink dark:text-sand sm:text-5xl lg:text-6xl">
-              {t("heroTitle")}
-            </h1>
-            <p className="mt-4 max-w-sm text-balance font-display text-lg font-semibold text-ink/70 dark:text-sand/70 sm:text-xl">
-              {t("heroSubtitle")}
-            </p>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3 sm:justify-start">
-              <a
-                href="#shop-all"
-                className="rounded-full px-7 py-3.5 text-sm font-bold text-white shadow-lg transition-all duration-300 hover:-translate-y-0.5"
-                style={{ backgroundColor: theme.accentStrong }}
-              >
-                {t("exploreCollection")}
-              </a>
-              <a
-                href="#featured-collection"
-                className="rounded-full border px-7 py-3.5 text-sm font-bold transition-all duration-300 hover:-translate-y-0.5"
-                style={{ borderColor: `rgba(${theme.primaryRgb}, 0.3)`, color: theme.primaryStrong }}
-              >
-                {t("orderNow")}
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* 02 — Full-bleed Flormar campaign hero. Each slide is one real
+          business-owner campaign photo tied to the exact product the model
+          holds; the primary CTA opens that product's detail modal (shade
+          selector → add to cart) via handleShopCampaign, which falls back to
+          the campaign's category when no product resolves. See
+          FlormarCampaignHero + lib/config/flormar-campaigns.ts. */}
+      {activeCampaigns.length > 0 && (
+        <FlormarCampaignHero
+          campaigns={activeCampaigns}
+          theme={theme}
+          onShopCampaign={handleShopCampaign}
+          onActiveCampaignChange={setActiveCampaign}
+        />
+      )}
 
       {/* Flormar Rewards entry — only rendered when the server page passes it
           (i.e. this partner's loyalty program is enabled). Placed right below
@@ -640,6 +600,52 @@ export function FlormarStorefront({
           </div>
         </div>
       </section>
+
+      {/* 04 — "From this campaign": the exact product(s) featured in the
+          hero slide currently on screen, so SEE MODEL + PRODUCT flows
+          straight into SHOP THIS PRODUCT. Follows the hero via
+          onActiveCampaignChange. Hidden for a category-only slide or when
+          none of the campaign's SKUs are in stock (campaignProducts is []),
+          so it never shows a mismatched or empty grid. Reuses the exact same
+          ProductCard/modal as every other section. */}
+      {activeCampaign && campaignProducts.length > 0 && (
+        <section id="campaign-collection" className="bg-white py-16 dark:bg-white/[0.03] sm:py-24">
+          <div className="container-px mx-auto">
+            <Reveal>
+              <h2 className="mx-auto mb-3 max-w-2xl text-balance text-center font-display text-3xl font-extrabold tracking-tight md:text-4xl">
+                {t("campaignStripTitle")}
+              </h2>
+              <p className="mx-auto mb-10 max-w-xl text-balance text-center text-sm text-ink/60 dark:text-sand/60 md:mb-14">
+                {t(activeCampaign.subtitleKey)}
+              </p>
+            </Reveal>
+            <div
+              className={`mx-auto grid gap-4 ${
+                campaignProducts.length === 1
+                  ? "max-w-xs grid-cols-1"
+                  : campaignProducts.length === 2
+                    ? "max-w-xl grid-cols-2"
+                    : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
+              }`}
+            >
+              {campaignProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  business={business}
+                  locale={locale}
+                  onOpenDetails={() => setSelectedProduct(product)}
+                  imageFallback={<PartnerProductPlaceholder name={productLocalizedName(product, locale)} category={product.category ? productCategoryLabel(product.category, locale) : undefined} theme={theme} />}
+                  variant="premium"
+                  isWishlisted={wishlist.ids.has(product.id)}
+                  onToggleWishlist={() => wishlist.toggle(product.id)}
+                  resolveSwatchColor={(v) => resolveFlormarSwatchColor(v.shadeName ?? v.name)}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* 05 — Featured Products — real reusable ProductCard/modal, real
           variant selector (the lipstick has 5 shades). No eyebrow badge,

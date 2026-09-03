@@ -28,6 +28,7 @@ export function LoyaltyCardStage({
   accentColor,
   programId,
   memberId,
+  cardVariant = "solid",
 }: {
   locale: Locale;
   backHref: string;
@@ -44,6 +45,7 @@ export function LoyaltyCardStage({
   accentColor: string | null;
   programId: string;
   memberId: string;
+  cardVariant?: "solid" | "light";
 }) {
   const t = useTranslations("loyalty");
 
@@ -65,6 +67,7 @@ export function LoyaltyCardStage({
           <LoyaltyCard
           locale={locale}
             size="large"
+            variant={cardVariant}
             partnerName={partnerName}
             partnerLogo={partnerLogo}
             programName={programName}
@@ -81,6 +84,7 @@ export function LoyaltyCardStage({
                 programId={programId}
                 memberId={memberId}
                 caption={t("showQrAt", { partner: partnerName })}
+                variant={cardVariant === "light" ? "plain" : "onDark"}
               />
             }
           />

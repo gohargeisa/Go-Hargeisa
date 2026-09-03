@@ -456,7 +456,7 @@ export default async function CityServiceDetailPage({
                 partnerName={service.name}
                 programName={loyaltyProgramName(loyaltyProgram, locale)}
                 mode="promo"
-                partnerLogo={partnerTheme.partnerLogo}
+                partnerLogo={partnerTheme.partnerLogoLight ?? partnerTheme.partnerLogo}
                 accentColor={partnerTheme.accentStrong}
               />
             ) : null

@@ -258,7 +258,43 @@
     "clearSearch": "مسح البحث",
     "viewAllProducts": "عرض جميع المنتجات",
     "loadMore": "عرض المزيد من المنتجات",
-    "loadMoreCount": "عرض {shown} من أصل {total}"
+    "loadMoreCount": "عرض {shown} من أصل {total}",
+
+    "heroCarouselLabel": "أبرز حملات فلورمار",
+    "heroPrevSlide": "الحملة السابقة",
+    "heroNextSlide": "الحملة التالية",
+    "heroGoToSlide": "الانتقال إلى الحملة {n}",
+    "campaignStripTitle": "منتجات هذه الحملة",
+
+    "campaign_silkMatteRedLip_eyebrow": "مجموعة الشفاه",
+    "campaign_silkMatteRedLip_title": "أحمر شفاه سائل سيلك مات",
+    "campaign_silkMatteRedLip_subtitle": "أحمر مخملي مطفأ يدوم طويلاً.",
+    "campaign_silkMatteRedLip_description": "لون سائل حريري يدوم طويلاً مع زيوت مغذية تحافظ على راحة الشفاه — لمسة نهائية مطفأة غنية بدرجات من كلاريت ريد إلى ريد كيس.",
+    "campaign_silkMatteRedLip_cta": "تسوّقي سيلك مات",
+
+    "campaign_perfectCoverageFoundation_eyebrow": "مجموعة البشرة",
+    "campaign_perfectCoverageFoundation_title": "كريم أساس بيرفكت كفريج",
+    "campaign_perfectCoverageFoundation_subtitle": "لمسة نهائية متجانسة ونضرة حتى 12 ساعة.",
+    "campaign_perfectCoverageFoundation_description": "تركيبة ناعمة وغنية بخلاصة زيت اللوز والزيتون وحماية SPF 15 — تغطية قابلة للبناء تبقى نضرة طوال اليوم، لكل درجات البشرة.",
+    "campaign_perfectCoverageFoundation_cta": "تسوّقي كريم الأساس",
+
+    "campaign_perfectCoverageConcealer_eyebrow": "مجموعة البشرة",
+    "campaign_perfectCoverageConcealer_title": "كونسيلر سائل بيرفكت كفريج",
+    "campaign_perfectCoverageConcealer_subtitle": "إشراقة وتغطية متجانسة طوال اليوم.",
+    "campaign_perfectCoverageConcealer_description": "كونسيلر سائل بخلاصة زيت البندق والورد البري يغطي الهالات السوداء والعيوب — ويصلح كقاعدة لمكياج العيون.",
+    "campaign_perfectCoverageConcealer_cta": "تسوّقي الكونسيلر السائل",
+
+    "campaign_eyeDefineMascara_eyebrow": "مجموعة العيون",
+    "campaign_eyeDefineMascara_title": "حدّدي كل رمشة",
+    "campaign_eyeDefineMascara_subtitle": "تجعيد جريء وكثافة تُضاهي الرموش الصناعية، مع ماسكارا بريشوس كيرل.",
+    "campaign_eyeDefineMascara_description": "تركيبة تُكثّف وتُجعّد بزيت اللوز الحلو وفرشاة ألياف منحنية — تصبّغ عالٍ جدًا بدرجة كاربون بلاك لرموش جريئة ومفتوحة.",
+    "campaign_eyeDefineMascara_cta": "تسوّقي ماسكارا بريشوس كيرل",
+
+    "campaign_bronzingPowderGlow_eyebrow": "مجموعة الإشراقة",
+    "campaign_bronzingPowderGlow_title": "بودرة برونزينج",
+    "campaign_bronzingPowderGlow_subtitle": "دفء طبيعي بلمسة شمسية.",
+    "campaign_bronzingPowderGlow_description": "بودرة برونزينج مضغوطة حريرية بجزيئات لمعان ناعمة لإشراقة طبيعية — تغطية متوسطة إلى عالية تناسب كل أنواع البشرة.",
+    "campaign_bronzingPowderGlow_cta": "تسوّقي بودرة البرونزينج"
   },
   "theVillage": {
     "metaTitle": "ذا فيليدج هرجيسا — إفطار طوال اليوم، مشويات، بيتزا وشاورما",

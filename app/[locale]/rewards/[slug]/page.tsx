@@ -72,7 +72,7 @@ export default async function RewardsPage({
           locale={locale}
           slug={ctx.listing.slug}
           partnerName={ctx.listing.name}
-          partnerLogo={ctx.listing.logoUrl ?? theme?.partnerLogo ?? null}
+          partnerLogo={theme?.partnerLogoLight ?? ctx.listing.logoUrl ?? theme?.partnerLogo ?? null}
           programId={ctx.program.id}
           programName={programName(ctx.program, locale)}
           programDescription={programDescription(ctx.program, locale)}
@@ -104,7 +104,14 @@ export default async function RewardsPage({
         context={ctx}
         qrSvg={qrSvg}
         holderName={holderName}
-        partnerLogo={ctx.listing.logoUrl ?? theme?.partnerLogo ?? null}
+        // White membership card ⇒ its normal brand-colour logo; the solid
+        // (dark) card would want the white knockout instead.
+        partnerLogo={
+          theme?.lightRewardsCard
+            ? (ctx.listing.logoUrl ?? theme?.partnerLogo ?? null)
+            : (theme?.partnerLogoLight ?? ctx.listing.logoUrl ?? theme?.partnerLogo ?? null)
+        }
+        cardVariant={theme?.lightRewardsCard ? "light" : "solid"}
         accentColor={theme?.accentStrong ?? null}
         cardHref={`/${locale}/rewards/${ctx.listing.slug}/card`}
       />

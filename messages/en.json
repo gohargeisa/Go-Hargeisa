@@ -258,7 +258,43 @@
     "clearSearch": "Clear search",
     "viewAllProducts": "View all products",
     "loadMore": "Load more products",
-    "loadMoreCount": "Showing {shown} of {total}"
+    "loadMoreCount": "Showing {shown} of {total}",
+
+    "heroCarouselLabel": "Flormar campaign highlights",
+    "heroPrevSlide": "Previous campaign",
+    "heroNextSlide": "Next campaign",
+    "heroGoToSlide": "Go to campaign {n}",
+    "campaignStripTitle": "Featured in This Campaign",
+
+    "campaign_silkMatteRedLip_eyebrow": "The Lip Edit",
+    "campaign_silkMatteRedLip_title": "Silk Matte Liquid Lipstick",
+    "campaign_silkMatteRedLip_subtitle": "A velvet-matte red that lasts.",
+    "campaign_silkMatteRedLip_description": "Silky, long-wearing liquid colour with nourishing oils that keep lips comfortable — an intense matte finish in shades from Claret Red to Red Kiss.",
+    "campaign_silkMatteRedLip_cta": "Shop the Silk Matte Lipstick",
+
+    "campaign_perfectCoverageFoundation_eyebrow": "The Complexion Edit",
+    "campaign_perfectCoverageFoundation_title": "Perfect Coverage Foundation",
+    "campaign_perfectCoverageFoundation_subtitle": "A fresh, even finish for up to 12 hours.",
+    "campaign_perfectCoverageFoundation_description": "A soft, rich formula with almond and olive oil extracts and SPF 15 — buildable coverage that stays fresh through the day, for every skin tone.",
+    "campaign_perfectCoverageFoundation_cta": "Shop Perfect Coverage Foundation",
+
+    "campaign_perfectCoverageConcealer_eyebrow": "The Complexion Edit",
+    "campaign_perfectCoverageConcealer_title": "Perfect Coverage Liquid Concealer",
+    "campaign_perfectCoverageConcealer_subtitle": "Bright, seamless, all-day cover.",
+    "campaign_perfectCoverageConcealer_description": "A liquid concealer with hazelnut oil and rosehip extract that covers dark circles and blemishes — and doubles as an eye-makeup base.",
+    "campaign_perfectCoverageConcealer_cta": "Shop the Liquid Concealer",
+
+    "campaign_eyeDefineMascara_eyebrow": "The Eye Edit",
+    "campaign_eyeDefineMascara_title": "Define Every Lash",
+    "campaign_eyeDefineMascara_subtitle": "Dramatic curl and false-lash volume, with Precious Curl Mascara.",
+    "campaign_eyeDefineMascara_description": "A volumizing, curling formula with sweet almond oil and a curved fibre brush — extra-high-pigment Carbon Black for a bold, wide-awake lash.",
+    "campaign_eyeDefineMascara_cta": "Shop the Precious Curl Mascara",
+
+    "campaign_bronzingPowderGlow_eyebrow": "The Glow Edit",
+    "campaign_bronzingPowderGlow_title": "Bronzing Powder",
+    "campaign_bronzingPowderGlow_subtitle": "A natural, sun-kissed warmth.",
+    "campaign_bronzingPowderGlow_description": "A silky compressed bronzing powder with fine shimmer pigments for a believable glow — medium-to-high coverage that suits every skin type.",
+    "campaign_bronzingPowderGlow_cta": "Shop the Bronzing Powder"
   },
   "theVillage": {
     "metaTitle": "The Village Hargeisa — All-Day Dining, Grills, Pizza & Shawarma",

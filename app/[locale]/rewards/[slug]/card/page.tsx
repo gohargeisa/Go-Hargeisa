@@ -49,7 +49,13 @@ export default async function LoyaltyCardPage({
         locale={locale}
         backHref={`/${locale}/rewards/${ctx.listing.slug}`}
         partnerName={ctx.listing.name}
-        partnerLogo={ctx.listing.logoUrl ?? theme?.partnerLogo ?? null}
+        // White membership card ⇒ its normal brand-colour logo.
+        partnerLogo={
+          theme?.lightRewardsCard
+            ? (ctx.listing.logoUrl ?? theme?.partnerLogo ?? null)
+            : (theme?.partnerLogoLight ?? ctx.listing.logoUrl ?? theme?.partnerLogo ?? null)
+        }
+        cardVariant={theme?.lightRewardsCard ? "light" : "solid"}
         programName={programName(ctx.program, locale)}
         membershipNumber={ctx.member.membershipNumber}
         holderName={user.user_metadata?.full_name || user.email?.split("@")[0] || t("member")}

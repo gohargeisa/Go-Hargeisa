@@ -41,6 +41,21 @@ export interface PartnerTheme {
    * supplied. A static `/public` path (once a real file exists) or an
    * absolute URL both work. Used only by the Partnership Footer. */
   partnerLogo: string;
+  /** Optional light/white knockout of `partnerLogo`, for surfaces where the
+   * brand-colour logo has near-zero contrast — the loyalty join gate and the
+   * "join our rewards" promo card, which sit on `primary-800` (the partner's
+   * deepest brand shade). NOT a recolour of the identity: it's the same mark
+   * with its fill flipped to white and the original alpha kept (see
+   * scripts/generate-flormar-white-logo.mjs). The storefront, nav, Partnership
+   * Footer and the WHITE membership card (see `lightRewardsCard`) all use the
+   * normal `partnerLogo`. */
+  partnerLogoLight?: string;
+  /** Render the digital membership card (LoyaltyCard) in its premium WHITE
+   * variant — brand-colour headings/accents on white, hairline dividers,
+   * brand-tinted MEMBER / ACTIVE badges, black-on-white QR — instead of the
+   * default solid brand-shade card. Same structure/hierarchy; surface only.
+   * The card then uses the normal (brand-colour) `partnerLogo`. */
+  lightRewardsCard?: boolean;
 
   /** Deep brand color — replaces the site's amber "primary" token wherever
    * it appears inside the themed scope (buttons, active tabs, icons, borders). */
@@ -264,6 +279,12 @@ const FLORMAR_THEME: PartnerTheme = {
   enabled: true,
   partnerName: "Flormar Hargeisa",
   partnerLogo: "/images/partners/flormar/logo.png",
+  // White knockout — used only on the dark-magenta loyalty join gate / promo
+  // card, where the pink wordmark above would be near-invisible.
+  partnerLogoLight: "/images/partners/flormar/logo-white.png",
+  // The membership card is the premium white variant (brand-pink typography
+  // on white); it uses the normal pink `partnerLogo`.
+  lightRewardsCard: true,
   primary: "#E6006A",
   primaryRgb: "230 0 106",
   primaryMid: "#EC4899",

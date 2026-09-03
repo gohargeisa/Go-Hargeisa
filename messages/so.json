@@ -258,7 +258,43 @@
     "clearSearch": "Tirtir raadinta",
     "viewAllProducts": "Arag dhammaan alaabta",
     "loadMore": "Soo bandhig alaab dheeraad ah",
-    "loadMoreCount": "Waxaa la muujinayaa {shown} oo ka mid ah {total}"
+    "loadMoreCount": "Waxaa la muujinayaa {shown} oo ka mid ah {total}",
+
+    "heroCarouselLabel": "Ololayaasha Flormar ee la soo bandhigay",
+    "heroPrevSlide": "Ololihii hore",
+    "heroNextSlide": "Ololaha xiga",
+    "heroGoToSlide": "U gudub ololaha {n}",
+    "campaignStripTitle": "Alaabta Ololahan",
+
+    "campaign_silkMatteRedLip_eyebrow": "Xulashada Bushimaha",
+    "campaign_silkMatteRedLip_title": "Silk Matte Liquid Lipstick",
+    "campaign_silkMatteRedLip_subtitle": "Casaan silig u eg oo daba dheeraada.",
+    "campaign_silkMatteRedLip_description": "Midab dareere ah oo silig u eg, wakhti dheer jira, oo leh saliidyo nafaqo leh oo bushimaha raaxo siiya — dhammaad matte xoog leh oo midabbo kala duwan leh.",
+    "campaign_silkMatteRedLip_cta": "Iibso Silk Matte",
+
+    "campaign_perfectCoverageFoundation_eyebrow": "Xulashada Maqaarka",
+    "campaign_perfectCoverageFoundation_title": "Perfect Coverage Foundation",
+    "campaign_perfectCoverageFoundation_subtitle": "Muuqaal siman oo cusboonaada ilaa 12 saacadood.",
+    "campaign_perfectCoverageFoundation_description": "Qaab jilicsan oo hodan ah oo leh saliidda yicibta iyo saytuunka iyo SPF 15 — daboolid la kordhin karo oo maalinta oo dhan cusboonaanaysa, dhammaan midabbada maqaarka.",
+    "campaign_perfectCoverageFoundation_cta": "Iibso Foundation-ka",
+
+    "campaign_perfectCoverageConcealer_eyebrow": "Xulashada Maqaarka",
+    "campaign_perfectCoverageConcealer_title": "Perfect Coverage Liquid Concealer",
+    "campaign_perfectCoverageConcealer_subtitle": "Iftiin iyo daboolid siman oo maalinta oo dhan jirta.",
+    "campaign_perfectCoverageConcealer_description": "Concealer dareere ah oo leh saliidda hazelnut iyo rosehip oo daboola wareegyada madow iyo cilladaha — waxaana loo isticmaali karaa saldhig isha.",
+    "campaign_perfectCoverageConcealer_cta": "Iibso Concealer-ka",
+
+    "campaign_eyeDefineMascara_eyebrow": "Xulashada Indhaha",
+    "campaign_eyeDefineMascara_title": "Muujii Baalasha Oo Dhan",
+    "campaign_eyeDefineMascara_subtitle": "Qalooc geesinimo leh iyo buux u eg baalal macmal ah, oo leh Precious Curl Mascara.",
+    "campaign_eyeDefineMascara_description": "Qaab kobciya oo qalloociya oo leh saliidda yicibta macaan iyo faytoo fiber ah oo qalloocan — midab aad u qaro weyn oo Carbon Black ah si baalasha u noqdaan kuwo geesi ah oo furan.",
+    "campaign_eyeDefineMascara_cta": "Iibso Precious Curl Mascara",
+
+    "campaign_bronzingPowderGlow_eyebrow": "Xulashada Dhalaalka",
+    "campaign_bronzingPowderGlow_title": "Bronzing Powder",
+    "campaign_bronzingPowderGlow_subtitle": "Kulayl dabiici ah oo qorrax leh.",
+    "campaign_bronzingPowderGlow_description": "Budo bronzing ah oo cufan oo silig u eg oo leh xabbado dhalaal yaryar si loo helo dhalaal dabiici ah — daboolid dhexdhexaad ilaa sare oo ku habboon dhammaan noocyada maqaarka.",
+    "campaign_bronzingPowderGlow_cta": "Iibso Bronzing Powder-ka"
   },
   "theVillage": {
     "metaTitle": "The Village Hargeisa — Quraac Maalinta oo dhan, Duban, Pizza & Shawarma",
