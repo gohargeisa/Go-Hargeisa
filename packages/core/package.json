@@ -1,0 +1,9 @@
+{
+  "name": "@gohargeisa/core",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Isomorphic pure logic shared by web + native mobile: URL builders, opening-hours status, geo distance, price/rating formatting, search sanitisation, post-login routing. Consumed via tsconfig path alias; never npm-installed at the repo root.",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "sideEffects": false
+}

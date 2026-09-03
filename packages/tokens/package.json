@@ -1,0 +1,9 @@
+{
+  "name": "@gohargeisa/tokens",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Design tokens (colours, radii, shadows, z-index, spacing) shared by the web Tailwind config and the native NativeWind theme. Plain JS objects — consumed via tsconfig path alias; never npm-installed at the repo root.",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "sideEffects": false
+}

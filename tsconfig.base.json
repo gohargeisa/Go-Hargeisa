@@ -1,0 +1,33 @@
+{
+  // Shared TypeScript path aliases for the monorepo.
+  //
+  // The existing web app's tsconfig.json is DELIBERATELY not modified — it
+  // keeps its own `@/*` alias and is unaffected by this file. This base is
+  // extended only by apps/mobile/tsconfig.json (and, from P1c, referenced by
+  // the website's /api/v1 layer) so the native app and the API handlers can
+  // import the shared source in packages/*.
+  //
+  // Mechanism: TS path-alias shared source, NOT npm workspaces — so a Vercel
+  // `npm install` for the website never pulls React Native / MapLibre native
+  // packages. See packages/README.md.
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@gohargeisa/types": ["packages/types/src/index.ts"],
+      "@gohargeisa/types/*": ["packages/types/src/*"],
+      "@gohargeisa/core": ["packages/core/src/index.ts"],
+      "@gohargeisa/core/*": ["packages/core/src/*"],
+      "@gohargeisa/i18n": ["packages/i18n/src/index.ts"],
+      "@gohargeisa/i18n/*": ["packages/i18n/src/*"],
+      "@gohargeisa/tokens": ["packages/tokens/src/index.ts"],
+      "@gohargeisa/tokens/*": ["packages/tokens/src/*"],
+      "@gohargeisa/api": ["packages/api/src/index.ts"],
+      "@gohargeisa/api/*": ["packages/api/src/*"],
+      // The shared re-exports in packages/core/* pull type-only symbols from
+      // the web app's `@/types`; this mapping lets non-web consumers resolve
+      // them. Types are erased at build — no web runtime code is pulled in
+      // (enforced by the no-restricted-imports rule in each package).
+      "@/*": ["./*"]
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "@gohargeisa/types",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Shared domain + Supabase Database types (web + native mobile). Consumed via tsconfig path alias; never npm-installed at the repo root.",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "sideEffects": false
+}
