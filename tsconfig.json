@@ -18,7 +18,20 @@
     
 
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      // Shared isomorphic source for the native app + the /api/v1 layer
+      // (see tsconfig.base.json / packages/README.md). Only the API Route
+      // Handlers under app/api/v1/* import these on the web side.
+      "@gohargeisa/api": ["./packages/api/src/index.ts"],
+      "@gohargeisa/api/*": ["./packages/api/src/*"],
+      "@gohargeisa/types": ["./packages/types/src/index.ts"],
+      "@gohargeisa/types/*": ["./packages/types/src/*"],
+      "@gohargeisa/core": ["./packages/core/src/index.ts"],
+      "@gohargeisa/core/*": ["./packages/core/src/*"],
+      "@gohargeisa/i18n": ["./packages/i18n/src/index.ts"],
+      "@gohargeisa/i18n/*": ["./packages/i18n/src/*"],
+      "@gohargeisa/tokens": ["./packages/tokens/src/index.ts"],
+      "@gohargeisa/tokens/*": ["./packages/tokens/src/*"]
     }
   },
   "include": [
