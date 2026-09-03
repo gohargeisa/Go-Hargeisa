@@ -1,0 +1,90 @@
+{
+  "nav": {
+    "home": "الرئيسية",
+    "explore": "استكشف",
+    "saved": "المحفوظات",
+    "alerts": "التنبيهات",
+    "profile": "الملف الشخصي"
+  },
+  "common": {
+    "offline": "أنت غير متصل بالإنترنت",
+    "retry": "إعادة المحاولة"
+  },
+  "home": {
+    "eyebrow": "غو هرجيسا",
+    "title": "اكتشف هرجيسا",
+    "welcomeBack": "مرحبًا بعودتك",
+    "categories": "تصفح حسب الفئة",
+    "categoriesError": "تعذّر تحميل الفئات",
+    "featured": "شركاء مميّزون",
+    "featuredError": "تعذّر تحميل القوائم",
+    "placesCount": "{count} أماكن",
+    "seeAll": "عرض كل الأعمال",
+    "emptyTitle": "لا يوجد شيء هنا بعد",
+    "emptyBody": "تتم إضافة أعمال جديدة — تحقق قريبًا."
+  },
+  "explore": {
+    "all": "الكل",
+    "searchPlaceholder": "ابحث عن الأعمال…",
+    "resultCount": "{count} نتيجة",
+    "error": "تعذّر تحميل النتائج",
+    "noResultsTitle": "لا توجد نتائج",
+    "noResultsBody": "جرّب بحثًا أو فئة مختلفة."
+  },
+  "partner": {
+    "badge": "شريك",
+    "about": "نبذة",
+    "amenities": "المرافق",
+    "hours": "ساعات العمل",
+    "gallery": "الصور",
+    "reviews": "المراجعات",
+    "call": "اتصال",
+    "whatsapp": "واتساب",
+    "directions": "الاتجاهات",
+    "map": "الخريطة",
+    "website": "الموقع الإلكتروني",
+    "openNow": "مفتوح الآن",
+    "closed": "مغلق",
+    "tempClosed": "مغلق مؤقتًا",
+    "permClosed": "مغلق نهائيًا",
+    "save": "حفظ",
+    "saved": "محفوظ",
+    "signInToSave": "سجّل الدخول للحفظ",
+    "loadError": "تعذّر تحميل هذا العمل"
+  },
+  "saved": {
+    "emptyTitle": "لا شيء محفوظ بعد",
+    "emptyBody": "اضغط حفظ على أي عمل ليظهر هنا.",
+    "error": "تعذّر تحميل الأماكن المحفوظة"
+  },
+  "alerts": {
+    "emptyTitle": "لا توجد تحديثات",
+    "emptyBody": "ستظهر هنا تأكيدات الحجوزات وتحديثات الطلبات."
+  },
+  "auth": {
+    "signIn": "تسجيل الدخول",
+    "signOut": "تسجيل الخروج",
+    "signUp": "إنشاء حساب",
+    "signInTitle": "تسجيل الدخول",
+    "signUpTitle": "إنشاء حساب",
+    "subtitle": "لحجز الأماكن والطلب منها وحفظها في هرجيسا.",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "switchToSignUp": "إنشاء حساب بدلاً من ذلك",
+    "switchToSignIn": "لديّ حساب بالفعل",
+    "signedOutTitle": "أنت تتصفح كضيف",
+    "signInRequiredTitle": "سجّل الدخول للمتابعة",
+    "signInRequiredBody": "أنشئ حسابًا أو سجّل الدخول للحجز والطلب وحفظ الأماكن."
+  },
+  "profile": {
+    "language": "اللغة",
+    "theme": "المظهر",
+    "theme_system": "النظام",
+    "theme_light": "فاتح",
+    "theme_dark": "داكن"
+  },
+  "notFound": {
+    "title": "الصفحة غير موجودة",
+    "goHome": "الذهاب إلى الرئيسية"
+  }
+}

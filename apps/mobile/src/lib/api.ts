@@ -11,6 +11,12 @@
  * The typed per-resource wrappers live in `@gohargeisa/api` (P1c) and call
  * `apiFetch` under the hood.
  */
+import {
+  createGoHargeisaApi,
+  type ApiTransport,
+  type TransportInit,
+} from "@gohargeisa/api";
+
 import { supabase } from "@/lib/supabase";
 import { env } from "@/env";
 import { getActiveLocale } from "@/i18n";
@@ -91,3 +97,19 @@ function safeParse(text: string): unknown {
     return text;
   }
 }
+
+/** Adapts `apiFetch` to the `@gohargeisa/api` transport contract (JSON-encodes
+ *  the body, threads the abort signal). */
+const transport: ApiTransport = <T>(path: string, init?: TransportInit) =>
+  apiFetch<T>(path, {
+    method: init?.method,
+    body: init?.body !== undefined ? JSON.stringify(init.body) : undefined,
+    signal: init?.signal,
+    headers:
+      init?.body !== undefined
+        ? { "Content-Type": "application/json" }
+        : undefined,
+  });
+
+/** The typed `/api/v1` client — `api.categories.list()`, `api.cityServices.get(slug)`, … */
+export const api = createGoHargeisaApi(transport);

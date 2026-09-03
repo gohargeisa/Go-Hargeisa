@@ -1,0 +1,96 @@
+{
+  "nav": {
+    "home": "Home",
+    "explore": "Explore",
+    "saved": "Saved",
+    "alerts": "Alerts",
+    "profile": "Profile"
+  },
+  "common": {
+    "offline": "You're offline",
+    "retry": "Retry"
+  },
+  "home": {
+    "eyebrow": "Go Hargeisa",
+    "title": "Discover Hargeisa",
+    "welcomeBack": "Welcome back",
+    "categories": "Browse by category",
+    "categoriesError": "Couldn't load categories",
+    "featured": "Featured partners",
+    "featuredError": "Couldn't load listings",
+    "placesCount": "{count} places",
+    "seeAll": "See all businesses",
+    "emptyTitle": "Nothing here yet",
+    "emptyBody": "New businesses are being added — check back soon."
+  },
+  "explore": {
+    "all": "All",
+    "searchPlaceholder": "Search businesses…",
+    "resultCount": "{count} results",
+    "error": "Couldn't load results",
+    "noResultsTitle": "No matches",
+    "noResultsBody": "Try a different search or category."
+  },
+  "partner": {
+    "badge": "Partner",
+    "about": "About",
+    "amenities": "Amenities",
+    "hours": "Opening hours",
+    "gallery": "Photos",
+    "reviews": "Reviews",
+    "call": "Call",
+    "whatsapp": "WhatsApp",
+    "directions": "Directions",
+    "map": "Map",
+    "website": "Website",
+    "openNow": "Open now",
+    "closed": "Closed",
+    "tempClosed": "Temporarily closed",
+    "permClosed": "Permanently closed",
+    "save": "Save",
+    "saved": "Saved",
+    "signInToSave": "Sign in to save",
+    "loadError": "Couldn't load this business"
+  },
+  "saved": {
+    "emptyTitle": "Nothing saved yet",
+    "emptyBody": "Tap Save on a business to keep it here.",
+    "error": "Couldn't load your saved places"
+  },
+  "alerts": {
+    "emptyTitle": "No updates",
+    "emptyBody": "Booking confirmations and order updates will show up here."
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "signUp": "Create account",
+    "signInTitle": "Sign in",
+    "signUpTitle": "Create account",
+    "subtitle": "To book, order and save places across Hargeisa.",
+    "email": "Email",
+    "password": "Password",
+    "switchToSignUp": "Create an account instead",
+    "switchToSignIn": "I already have an account",
+    "checkEmail": "Check your email to confirm your account.",
+    "invalidInput": "Enter a valid email and a password of at least 6 characters.",
+    "notConfigured": "Sign-in isn't available in this build.",
+    "genericError": "Something went wrong.",
+    "oauthComing": "Continue with Google — coming in the next update.",
+    "signedOutTitle": "You're browsing as a guest",
+    "signInRequiredTitle": "Sign in to continue",
+    "signInRequiredBody": "Create an account or sign in to book, order and save places."
+  },
+  "profile": {
+    "language": "Language",
+    "theme": "Appearance",
+    "theme_system": "System",
+    "theme_light": "Light",
+    "theme_dark": "Dark"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "body": "That link doesn't lead anywhere in the app yet.",
+    "goHome": "Go home"
+  }
+}

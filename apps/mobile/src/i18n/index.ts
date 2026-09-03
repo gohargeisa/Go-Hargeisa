@@ -26,6 +26,15 @@ import {
   type Locale,
 } from "@gohargeisa/i18n";
 
+// Native-app-only strings (app chrome, screens that have no web equivalent).
+// Kept OUT of the shared web `messages/*` so the production website's i18n
+// files are never touched. Partial ar/so — missing keys fall back to en.
+import appEn from "./strings/en.json";
+import appAr from "./strings/ar.json";
+import appSo from "./strings/so.json";
+
+const appResources = { en: appEn, ar: appAr, so: appSo } as const;
+
 let activeLocale: Locale = defaultLocale;
 
 export function getActiveLocale(): Locale {
@@ -38,12 +47,18 @@ export async function initI18n(initialLocale: Locale): Promise<typeof i18n> {
   if (!i18n.isInitialized) {
     await i18n.use(initReactI18next).init({
       resources: Object.fromEntries(
-        locales.map((l) => [l, { translation: messageResources[l] }]),
+        locales.map((l) => [
+          l,
+          { app: appResources[l], translation: messageResources[l] },
+        ]),
       ),
       lng: activeLocale,
       fallbackLng: defaultLocale,
       supportedLngs: [...locales],
-      defaultNS: "translation",
+      // Look up native keys first, then fall through to the shared web
+      // catalogue (categories, common actions, weekdays, …).
+      defaultNS: ["app", "translation"],
+      fallbackNS: "translation",
       // next-intl nests namespaces with "." — keep the dotted path as one key.
       keySeparator: ".",
       nsSeparator: false,

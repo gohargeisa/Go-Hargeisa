@@ -1,0 +1,90 @@
+{
+  "nav": {
+    "home": "Guriga",
+    "explore": "Sahamin",
+    "saved": "La kaydiyay",
+    "alerts": "Digniinaha",
+    "profile": "Profile-ka"
+  },
+  "common": {
+    "offline": "Internet ma haysatid",
+    "retry": "Isku day mar kale"
+  },
+  "home": {
+    "eyebrow": "Go Hargeisa",
+    "title": "Sahami Hargeysa",
+    "welcomeBack": "Ku soo dhawoow",
+    "categories": "Ka raadi qaybaha",
+    "categoriesError": "Qaybaha lama soo gelin karin",
+    "featured": "Shuraakada la doortay",
+    "featuredError": "Liiska lama soo gelin karin",
+    "placesCount": "{count} goobood",
+    "seeAll": "Arag dhammaan ganacsiyada",
+    "emptyTitle": "Weli waxba halkan ma jiraan",
+    "emptyBody": "Ganacsiyo cusub ayaa la darayaa — mar dhow soo eeg."
+  },
+  "explore": {
+    "all": "Dhammaan",
+    "searchPlaceholder": "Raadi ganacsiyada…",
+    "resultCount": "{count} natiijo",
+    "error": "Natiijooyinka lama soo gelin karin",
+    "noResultsTitle": "Wax lama helin",
+    "noResultsBody": "Isku day raadin ama qayb kale."
+  },
+  "partner": {
+    "badge": "Shariik",
+    "about": "Ku saabsan",
+    "amenities": "Adeegyada",
+    "hours": "Saacadaha shaqada",
+    "gallery": "Sawirrada",
+    "reviews": "Faallooyinka",
+    "call": "Wac",
+    "whatsapp": "WhatsApp",
+    "directions": "Jihooyinka",
+    "map": "Khariidad",
+    "website": "Websaydka",
+    "openNow": "Hadda furan",
+    "closed": "Xidhan",
+    "tempClosed": "Si ku meel gaadh ah ayaa loo xidhay",
+    "permClosed": "Si joogto ah ayaa loo xidhay",
+    "save": "Kaydi",
+    "saved": "La kaydiyay",
+    "signInToSave": "Gal si aad u kaydiso",
+    "loadError": "Ganacsigan lama soo gelin karin"
+  },
+  "saved": {
+    "emptyTitle": "Weli waxba lama kaydin",
+    "emptyBody": "Taabo Kaydi ganacsi si aad halkan ugu haysato.",
+    "error": "Goobaha la kaydiyay lama soo gelin karin"
+  },
+  "alerts": {
+    "emptyTitle": "Wax cusboonaysiin ah ma jiraan",
+    "emptyBody": "Xaqiijinta buugista iyo cusboonaysiinta dalabka ayaa halkan ka muuqan doona."
+  },
+  "auth": {
+    "signIn": "Gal",
+    "signOut": "Ka bax",
+    "signUp": "Abuur akoon",
+    "signInTitle": "Gal",
+    "signUpTitle": "Abuur akoon",
+    "subtitle": "Si aad u buugto, u dalbato oo aad u kaydiso goobaha Hargeysa.",
+    "email": "Iimaylka",
+    "password": "Furaha sirta ah",
+    "switchToSignUp": "Halkii, abuur akoon",
+    "switchToSignIn": "Horey ayaan u lahaa akoon",
+    "signedOutTitle": "Waxaad u fiirinaysaa marti ahaan",
+    "signInRequiredTitle": "Gal si aad u sii wadato",
+    "signInRequiredBody": "Abuur akoon ama gal si aad u buugto, u dalbato oo aad u kaydiso goobaha."
+  },
+  "profile": {
+    "language": "Luqadda",
+    "theme": "Muuqaalka",
+    "theme_system": "Nidaamka",
+    "theme_light": "Iftiin",
+    "theme_dark": "Madow"
+  },
+  "notFound": {
+    "title": "Bogga lama helin",
+    "goHome": "Aad guriga"
+  }
+}
