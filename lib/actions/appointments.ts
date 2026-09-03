@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getAvailableSlots as computeAvailableSlots } from "@/lib/utils/doctor-availability";
+import { getAvailableSlots as computeAvailableSlots, getSlotStatuses as computeSlotStatuses, type SlotStatus } from "@/lib/utils/doctor-availability";
 import { hasBusinessGrantPermission } from "@/lib/data/access-control";
 import type { AppointmentStatus, OpeningHoursGroup, BusinessPermissionKey } from "@/types";
 import type { Locale } from "@/lib/i18n/config";
@@ -101,6 +101,36 @@ export async function getAvailableSlots(doctorId: string, date: string): Promise
   const bookedTimes = ((booked ?? []) as { appointment_time: string }[]).map((r) => r.appointment_time);
 
   return computeAvailableSlots(workingHours, date, doctor.appointment_duration_minutes, bookedTimes);
+}
+
+/**
+ * Like getAvailableSlots, but returns EVERY working-hour slot with an
+ * `available` flag — so the booking form can show taken slots as a disabled
+ * "— Booked" option instead of hiding them. Same privacy handling: the admin
+ * client reads only `appointment_time` (never patient name/phone/notes).
+ */
+export async function getSlotAvailability(doctorId: string, date: string): Promise<SlotStatus[]> {
+  const supabase = await createClient();
+  const { data: doctorRow } = await supabase
+    .from("doctors")
+    .select("working_hours, appointment_duration_minutes, is_active")
+    .eq("id", doctorId)
+    .single();
+  const doctor = doctorRow as { working_hours: unknown; appointment_duration_minutes: number; is_active: boolean } | null;
+  if (!doctor || !doctor.is_active) return [];
+
+  const workingHours = Array.isArray(doctor.working_hours) ? (doctor.working_hours as unknown as OpeningHoursGroup[]) : [];
+
+  const admin = createAdminClient();
+  const { data: booked } = await admin
+    .from("appointments")
+    .select("appointment_time")
+    .eq("doctor_id", doctorId)
+    .eq("appointment_date", date)
+    .in("status", ["pending", "confirmed"]);
+  const bookedTimes = ((booked ?? []) as { appointment_time: string }[]).map((r) => r.appointment_time);
+
+  return computeSlotStatuses(workingHours, date, doctor.appointment_duration_minutes, bookedTimes);
 }
 
 /** Same ownership shape as lib/actions/doctors.ts's assertCanManageDoctor,

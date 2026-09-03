@@ -8,6 +8,7 @@ import { getCategories } from "@/lib/data/categories";
 import { mapCityService } from "@/lib/data/mappers";
 import { RESTAURANTS_PUBLIC_ENABLED, CAFES_PUBLIC_ENABLED } from "@/lib/config/features";
 import { categoryDisplayName } from "@/lib/utils/category-href";
+import { getFeaturedPartnerCardMedia } from "@/lib/config/featured-partner-card-media";
 import {
   getFeaturedPartnerCtaForHotel,
   getFeaturedPartnerCtaForRestaurant,
@@ -33,6 +34,10 @@ export interface FeaturedPartnerShowcaseItem {
   promoText: string;
   ctaLabel: string;
   ctaHref: string;
+  /** The brand logo is already composited into `image` — the card should
+   * NOT also render its own circular logo badge (see
+   * lib/config/featured-partner-card-media.ts). */
+  logoBaked?: boolean;
 }
 
 interface FeaturedPartnerContentOverrideRow {
@@ -209,12 +214,17 @@ export async function getFeaturedPartnerShowcase(locale: Locale, limit = 10): Pr
     const { cta, template } = getFeaturedPartnerTemplateForCategory(category);
     const href = `/${locale}/city-services/${cs.slug}`;
     const resolved = applyOverride("city_service", cs.id, { promoText: promoLabel(template), ctaLabel: ctaLabel(cta), ctaHref: href });
+    // Purpose-composed card art (real brand logo already integrated) takes
+    // precedence over the DB image/logo fallback for the few partners that
+    // have it — see lib/config/featured-partner-card-media.ts.
+    const cardMedia = getFeaturedPartnerCardMedia(cs.slug);
     items.push({
       id: cs.id,
       listingType: "city_service",
       name: cs.name,
       logo: cs.logoUrl ?? null,
-      image: cs.image ?? cs.logoUrl ?? "",
+      image: cardMedia?.image ?? cs.image ?? cs.logoUrl ?? "",
+      logoBaked: cardMedia?.logoBaked ?? false,
       href,
       categoryLabel: category ? categoryDisplayName(category, locale) : "",
       ...resolved,

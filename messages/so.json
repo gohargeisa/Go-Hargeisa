@@ -3573,6 +3573,7 @@
     "loadingSlots": "Waqtiyada la heli karo ayaa la soo raadinayaa…",
     "noSlotsAvailable": "Waqti la heli karo kuma jiro taariikhdan",
     "selectTimePlaceholder": "Dooro waqti",
+    "slotBooked": "La qabsaday",
     "appointmentDurationNote": "Ballamaadu waxay socdaan {minutes} daqiiqo.",
     "patientNameLabel": "Magacaaga",
     "patientPhoneLabel": "Lambarka Taleefanka",

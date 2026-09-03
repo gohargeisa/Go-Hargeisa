@@ -89,8 +89,8 @@ export async function getReviewsForUser(userId: string): Promise<MyReview[]> {
     const found = lookup.get(r.listing_id);
     const href = !found
       ? "#"
-      : listingType === "service" && found.categorySlug
-        ? serviceHref(found.categorySlug, found.slug)
+      : listingType === "service"
+        ? serviceHref(found.categorySlug ?? "", found.slug)
         : `/${HREF_SEGMENT[listingType]}/${found.slug}`;
     return {
       id: r.id,
@@ -154,8 +154,8 @@ export async function getReportedReviewsForModeration(): Promise<ReportedReview[
     const found = lookup.get(r.listing_id);
     const href = !found
       ? "#"
-      : listingType === "service" && found.categorySlug
-        ? serviceHref(found.categorySlug, found.slug)
+      : listingType === "service"
+        ? serviceHref(found.categorySlug ?? "", found.slug)
         : `/${HREF_SEGMENT[listingType]}/${found.slug}`;
     return {
       ...mapReview(r, (r as { profiles?: { full_name?: string } }).profiles?.full_name ?? "Guest"),

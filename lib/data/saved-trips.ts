@@ -101,8 +101,8 @@ export async function getSavedTripsForUser(userId: string): Promise<SavedTrip[]>
         const found = lookup.get(item.listing_id);
         const href = !found
           ? "#"
-          : listingType === "service" && found.categorySlug
-            ? serviceHref(found.categorySlug, found.slug)
+          : listingType === "service"
+            ? serviceHref(found.categorySlug ?? "", found.slug)
             : `/${HREF_SEGMENT[listingType]}/${found.slug}`;
         return {
           id: item.id,

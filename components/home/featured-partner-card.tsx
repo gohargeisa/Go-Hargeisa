@@ -45,21 +45,25 @@ export function FeaturedPartnerCard({ partner }: { partner: FeaturedPartnerShowc
           )}
         </Link>
 
-        <div className="relative flex flex-1 flex-col p-5 pt-9">
+        <div className={`relative flex flex-1 flex-col p-5 ${partner.logoBaked ? "" : "pt-9"}`}>
           {/* Logo badge — straddles the image/body seam like a business's
               own brand mark on a storefront card, prominent per the spec
               ("Partner logo prominently"). Falls back to the first letter
               of the name so a partner without a logo still gets a clean
-              identity mark instead of a broken/missing image. */}
-          <div className="absolute -top-8 start-5 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border-4 border-white bg-white shadow-md dark:border-ink dark:bg-ink">
-            {partner.logo ? (
-              <Image src={partner.logo} alt="" width={64} height={64} className="h-full w-full object-cover" />
-            ) : (
-              <span className="font-display text-xl font-bold text-primary" aria-hidden="true">
-                {partner.name.charAt(0)}
-              </span>
-            )}
-          </div>
+              identity mark instead of a broken/missing image. Skipped when
+              the card art already has the brand logo composited in
+              (partner.logoBaked) — otherwise the logo would appear twice. */}
+          {!partner.logoBaked && (
+            <div className="absolute -top-8 start-5 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border-4 border-white bg-white shadow-md dark:border-ink dark:bg-ink">
+              {partner.logo ? (
+                <Image src={partner.logo} alt="" width={64} height={64} className="h-full w-full object-cover" />
+              ) : (
+                <span className="font-display text-xl font-bold text-primary" aria-hidden="true">
+                  {partner.name.charAt(0)}
+                </span>
+              )}
+            </div>
+          )}
 
           <h3 className="truncate font-display text-lg font-bold text-ink dark:text-white">{partner.name}</h3>
 

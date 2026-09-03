@@ -46,3 +46,44 @@ export function getAvailableSlots(
   }
   return slots;
 }
+
+export interface SlotStatus {
+  time: string;
+  /** false ⇒ already taken by a pending/confirmed appointment for this
+   * exact doctor + date. The UI shows it disabled and labelled "Booked". */
+  available: boolean;
+}
+
+/**
+ * Same slot grid as getAvailableSlots, but every working-hour slot is
+ * returned with an `available` flag instead of the booked ones being
+ * dropped — so the booking form can render "3:00 PM · 4:00 PM — Booked ·
+ * 5:00 PM" and stop the user selecting a taken slot, rather than silently
+ * hiding it. De-duplicated + sorted (overlapping working-hour groups can
+ * emit the same slot time twice).
+ */
+export function getSlotStatuses(
+  workingHours: OpeningHoursGroup[],
+  date: string,
+  durationMinutes: number,
+  bookedTimes: string[]
+): SlotStatus[] {
+  const dayIndex = new Date(`${date}T00:00:00`).getDay();
+  const day = WEEK_ORDER[dayIndex];
+  const groups = (workingHours ?? []).filter((g) => g.days?.includes(day));
+  const booked = new Set(bookedTimes.map((t) => t.slice(0, 5)));
+
+  const byTime = new Map<string, boolean>();
+  for (const group of groups) {
+    let start = toMinutes(group.open);
+    const end = toMinutes(group.close);
+    while (start + durationMinutes <= end) {
+      const slot = toHHMM(start);
+      if (!byTime.has(slot)) byTime.set(slot, !booked.has(slot));
+      start += durationMinutes;
+    }
+  }
+  return [...byTime.entries()]
+    .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+    .map(([time, available]) => ({ time, available }));
+}

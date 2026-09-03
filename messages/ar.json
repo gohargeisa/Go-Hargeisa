@@ -3573,6 +3573,7 @@
     "loadingSlots": "جارٍ تحميل الأوقات المتاحة…",
     "noSlotsAvailable": "لا توجد أوقات متاحة في هذا التاريخ",
     "selectTimePlaceholder": "اختر وقتًا",
+    "slotBooked": "محجوز",
     "appointmentDurationNote": "مدة كل موعد {minutes} دقيقة.",
     "patientNameLabel": "اسمك",
     "patientPhoneLabel": "رقم الهاتف",

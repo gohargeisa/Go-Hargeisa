@@ -3,8 +3,9 @@
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { CheckCircle2, Loader2 } from "lucide-react";
-import { submitAppointmentRequest, getAvailableSlots } from "@/lib/actions/appointments";
+import { submitAppointmentRequest, getSlotAvailability } from "@/lib/actions/appointments";
 import { formatTime12h } from "@/lib/utils/opening-hours";
+import type { SlotStatus } from "@/lib/utils/doctor-availability";
 import type { Doctor, Department } from "@/types";
 
 function doctorLocalizedField(value: string | undefined, valueAr: string | undefined, valueSo: string | undefined, locale: string): string | undefined {
@@ -49,7 +50,7 @@ export function AppointmentBookingForm({
   const [doctorId, setDoctorId] = useState(preselectedDoctorId ?? "");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
-  const [slots, setSlots] = useState<string[]>([]);
+  const [slots, setSlots] = useState<SlotStatus[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [patientName, setPatientName] = useState("");
   const [patientPhone, setPatientPhone] = useState("");
@@ -73,7 +74,7 @@ export function AppointmentBookingForm({
     }
     let cancelled = false;
     setLoadingSlots(true);
-    getAvailableSlots(doctorId, date)
+    getSlotAvailability(doctorId, date)
       .then((result) => {
         if (!cancelled) setSlots(result);
       })
@@ -189,11 +190,16 @@ export function AppointmentBookingForm({
           <label className="mb-1.5 block text-sm font-semibold">{t("appointmentTime")}</label>
           <select value={time} onChange={(e) => setTime(e.target.value)} className={inputClass} disabled={!date || loadingSlots}>
             <option value="">
-              {loadingSlots ? t("loadingSlots") : slots.length === 0 && date ? t("noSlotsAvailable") : t("selectTimePlaceholder")}
+              {loadingSlots
+                ? t("loadingSlots")
+                : date && !slots.some((s) => s.available)
+                  ? t("noSlotsAvailable")
+                  : t("selectTimePlaceholder")}
             </option>
             {slots.map((s) => (
-              <option key={s} value={s}>
-                {formatTime12h(s)}
+              <option key={s.time} value={s.time} disabled={!s.available}>
+                {formatTime12h(s.time)}
+                {s.available ? "" : ` — ${t("slotBooked")}`}
               </option>
             ))}
           </select>

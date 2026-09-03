@@ -42,7 +42,7 @@ const hrefKind: Partial<Record<FavoriteEntry["kind"], string>> = { hotel: "hotel
  * backed) favorites list — hence the narrower structural parameter type
  * instead of the full FavoriteEntry["item"] shape. */
 export function favoriteHref(locale: Locale, kind: FavoriteEntry["kind"], item: { slug: string; categorySlug?: string }): string {
-  if (kind === "service" && item.categorySlug) return `/${locale}${serviceHref(item.categorySlug, item.slug)}`;
+  if (kind === "service") return `/${locale}${serviceHref(item.categorySlug ?? "", item.slug)}`;
   return `/${locale}/${hrefKind[kind]}/${item.slug}`;
 }
 

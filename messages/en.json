@@ -3573,6 +3573,7 @@
     "loadingSlots": "Loading available times…",
     "noSlotsAvailable": "No available times on this date",
     "selectTimePlaceholder": "Select a time",
+    "slotBooked": "Booked",
     "appointmentDurationNote": "Appointments are {minutes} minutes long.",
     "patientNameLabel": "Your name",
     "patientPhoneLabel": "Phone number",
