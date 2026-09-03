@@ -1,0 +1,32 @@
+{
+  "cli": {
+    "version": ">= 12.0.0",
+    "appVersionSource": "local"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "channel": "development",
+      "env": { "APP_VARIANT": "development" },
+      "android": { "buildType": "apk", "gradleCommand": ":app:assembleDebug" }
+    },
+    "preview": {
+      "distribution": "internal",
+      "channel": "preview",
+      "env": { "APP_VARIANT": "development" },
+      "android": { "buildType": "apk" }
+    },
+    "production": {
+      "channel": "production",
+      "autoIncrement": true,
+      "env": { "APP_VARIANT": "production" },
+      "android": { "buildType": "app-bundle" }
+    }
+  },
+  "submit": {
+    "production": {
+      "//": "Deliberately empty. The native app is NOT submitted to Google Play until it reaches feature parity with the Capacitor app and the signing/upload-key + versionCode are verified in Play Console (see MOBILE_DEPLOYMENT.md / the native migration plan). Do not `eas submit` from here."
+    }
+  }
+}

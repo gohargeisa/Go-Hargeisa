@@ -1,0 +1,39 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    // TS 6 deprecates `baseUrl`; `paths` below resolve relative to this file.
+    "paths": {
+      // The mobile app's own source.
+      "@/*": ["./src/*"],
+      "@/assets/*": ["./assets/*"],
+
+      // Exact-match override so the shared re-exports in packages/core
+      // (which pull type-only symbols from the website's `@/types`) resolve
+      // to the repo-root types, NOT apps/mobile/src/types. TS prefers an
+      // exact key over the `@/*` wildcard above.
+      "@/types": ["../../types/index.ts"],
+      "@/types/*": ["../../types/*"],
+
+      // Shared TS path-alias source (see ../../packages/README.md).
+      "@gohargeisa/types": ["../../packages/types/src/index.ts"],
+      "@gohargeisa/types/*": ["../../packages/types/src/*"],
+      "@gohargeisa/core": ["../../packages/core/src/index.ts"],
+      "@gohargeisa/core/*": ["../../packages/core/src/*"],
+      "@gohargeisa/i18n": ["../../packages/i18n/src/index.ts"],
+      "@gohargeisa/i18n/*": ["../../packages/i18n/src/*"],
+      "@gohargeisa/tokens": ["../../packages/tokens/src/index.ts"],
+      "@gohargeisa/tokens/*": ["../../packages/tokens/src/*"],
+      "@gohargeisa/api": ["../../packages/api/src/index.ts"],
+      "@gohargeisa/api/*": ["../../packages/api/src/*"]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "nativewind-env.d.ts",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts"
+  ],
+  "exclude": ["node_modules", "dist", ".expo"]
+}
