@@ -8,6 +8,7 @@ import { useTranslations } from "next-intl";
 import { AnimatePresence, m, useReducedMotion } from "framer-motion";
 import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
+import { useAndroidBackHandler } from "@/lib/hooks/use-android-back-handler";
 import {
   Home,
   Building2,
@@ -179,6 +180,7 @@ export function BusinessSidebar({ locale, listing }: { locale: Locale; listing: 
   const mobileNavRef = useRef<HTMLDivElement>(null);
   useFocusTrap(mobileNavRef, mobileOpen);
   useScrollLock(mobileOpen);
+  useAndroidBackHandler(mobileOpen, () => setMobileOpen(false));
   const reduceMotion = useReducedMotion();
   const isRtl = locale === "ar";
   const base = `/${locale}/business`;

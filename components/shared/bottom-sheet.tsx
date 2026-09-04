@@ -6,6 +6,7 @@ import { AnimatePresence, m, useReducedMotion } from "framer-motion";
 import { X } from "lucide-react";
 import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
+import { useAndroidBackHandler } from "@/lib/hooks/use-android-back-handler";
 import type { ReactNode } from "react";
 
 /**
@@ -29,6 +30,8 @@ export function BottomSheet({
   const sheetRef = useRef<HTMLDivElement>(null);
   useFocusTrap(sheetRef, open);
   useScrollLock(open);
+  // Android hardware Back closes the sheet (same as Escape / backdrop tap).
+  useAndroidBackHandler(open, onClose);
 
   useEffect(() => {
     if (!open) return;

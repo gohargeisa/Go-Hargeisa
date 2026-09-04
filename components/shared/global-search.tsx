@@ -15,6 +15,7 @@ import { getRecentSearches, addRecentSearch, clearRecentSearches } from "@/lib/m
 import { useSearchOverlay } from "@/components/shared/search-overlay-provider";
 import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
+import { useAndroidBackHandler } from "@/lib/hooks/use-android-back-handler";
 
 const TYPE_ICON = { hotel: Hotel, restaurant: UtensilsCrossed, cafe: Coffee, attraction: Landmark } as const;
 
@@ -91,6 +92,9 @@ export function GlobalSearch({ locale, scrolled }: { locale: Locale; scrolled: b
     return () => document.removeEventListener("keydown", onKeyDown);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
+
+  // Android hardware Back closes the full-screen search takeover.
+  useAndroidBackHandler(open, () => close());
 
   function close() {
     closeOverlay();

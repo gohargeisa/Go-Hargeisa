@@ -7,6 +7,7 @@ import { Globe, Check } from "lucide-react";
 import { locales, localeConfig, type Locale } from "@/lib/i18n/config";
 import { FlagIcon } from "@/components/shared/flag-icon";
 import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
+import { useAndroidBackHandler } from "@/lib/hooks/use-android-back-handler";
 
 export function LanguageSwitcher({ locale }: { locale: Locale }) {
   const t = useTranslations("nav");
@@ -15,6 +16,7 @@ export function LanguageSwitcher({ locale }: { locale: Locale }) {
   const pathname = usePathname();
   const router = useRouter();
   useScrollLock(open);
+  useAndroidBackHandler(open, () => setOpen(false));
 
   useEffect(() => {
     function onClick(e: MouseEvent) {

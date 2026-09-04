@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { X, Images as ImagesIcon, Minus, Plus, Heart } from "lucide-react";
 import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
+import { useAndroidBackHandler } from "@/lib/hooks/use-android-back-handler";
 import { useImageLoaded } from "@/lib/hooks/use-image-loaded";
 import { Lightbox, type LightboxSlide } from "@/components/shared/lightbox";
 import { AddToCartButton } from "@/components/shared/add-to-cart-button";
@@ -132,6 +133,13 @@ export function ProductDetailModal({
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose, lightboxIndex]);
+
+  // Android hardware Back closes the modal — but not while its own photo
+  // lightbox is open (the Lightbox registers its own handler on top of the
+  // stack and closes first), mirroring the Escape guard above.
+  useAndroidBackHandler(true, () => {
+    if (lightboxIndex === null) onClose();
+  });
 
   const name = productLocalizedName(product, locale);
   const description = productLocalizedDescription(product, locale);

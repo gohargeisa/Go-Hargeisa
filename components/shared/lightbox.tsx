@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut } from "lucide-react";
 import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
+import { useAndroidBackHandler } from "@/lib/hooks/use-android-back-handler";
 
 export interface LightboxSlide {
   url: string;
@@ -66,6 +67,9 @@ export function Lightbox({
   const dialogRef = useRef<HTMLDivElement>(null);
   useFocusTrap(dialogRef);
   useScrollLock(true);
+  // Only mounted while a photo is open — Android Back closes the viewer
+  // (LIFO, so it closes before a modal that opened it).
+  useAndroidBackHandler(true, onClose);
 
   // Zoom is per-slide — moving to a different photo always starts unzoomed.
   useEffect(() => {

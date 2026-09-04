@@ -1,12 +1,15 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useAndroidBackHandler } from "@/lib/hooks/use-android-back-handler";
 
 /** "Your cart has items from another business" confirmation — ONE CART = ONE
  * BUSINESS is enforced in lib/cart/cart-context.tsx's addItem(); this is the
  * UI half, shown whenever addItem() returns "conflict". */
 export function CartConflictDialog({ onConfirm, onCancel }: { onConfirm: () => void; onCancel: () => void }) {
   const t = useTranslations("cart");
+  // Android hardware Back dismisses the prompt without clearing the cart.
+  useAndroidBackHandler(true, onCancel);
 
   return (
     <div className="fixed inset-0 z-modal flex items-center justify-center p-4">

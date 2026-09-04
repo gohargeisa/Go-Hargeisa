@@ -8,6 +8,7 @@ import { LayoutDashboard, ShieldCheck, ChevronDown } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import { SignOutButton } from "@/components/shared/sign-out-button";
 import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
+import { useAndroidBackHandler } from "@/lib/hooks/use-android-back-handler";
 
 export function UserMenu({
   locale,
@@ -24,6 +25,7 @@ export function UserMenu({
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   useScrollLock(open);
+  useAndroidBackHandler(open, () => setOpen(false));
 
   useEffect(() => {
     function onClick(e: MouseEvent) {

@@ -5,20 +5,23 @@ import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
+import { useAndroidBackHandler } from "@/lib/hooks/use-android-back-handler";
 
 /**
  * Accessible modal shell (focus trap, scroll lock, Escape-to-close,
- * backdrop click) — originally local to components/business/bookings-table
- * .tsx's BookingDetailModal, extracted here so reservations/appointments
- * detail modals (and any future transaction type) reuse the exact same
- * shell instead of each defining their own. No behavior change from the
- * original.
+ * Android Back-to-close, backdrop click) — originally local to
+ * components/business/bookings-table.tsx's BookingDetailModal, extracted
+ * here so reservations/appointments detail modals (and any future
+ * transaction type) reuse the exact same shell instead of each defining
+ * their own. No behavior change from the original.
  */
 export function ModalShell({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
   const t = useTranslations("common");
   const dialogRef = useRef<HTMLDivElement>(null);
   useFocusTrap(dialogRef);
   useScrollLock(true);
+  // Only mounted while open — the Android Back button closes it like Escape.
+  useAndroidBackHandler(true, onClose);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {

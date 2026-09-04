@@ -13,6 +13,7 @@ import { useBrowserNotificationPermission } from "@/lib/hooks/use-browser-notifi
 import { playNotificationSound } from "@/lib/utils/notification-sound";
 import { getNotificationText } from "@/lib/utils/notification-text";
 import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
+import { useAndroidBackHandler } from "@/lib/hooks/use-android-back-handler";
 import type { Notification } from "@/types";
 
 /**
@@ -39,6 +40,7 @@ export function NotificationBell({
   const [open, setOpen] = useState(false);
   const [seed, setSeed] = useState<{ items: Notification[]; unread: number }>({ items: [], unread: 0 });
   useScrollLock(open);
+  useAndroidBackHandler(open, () => setOpen(false));
 
   useEffect(() => {
     if (!open) return;

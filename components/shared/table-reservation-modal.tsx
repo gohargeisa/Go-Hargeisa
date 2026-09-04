@@ -6,10 +6,12 @@ import { X } from "lucide-react";
 import { TableReservationForm } from "@/components/shared/table-reservation-form";
 import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
+import { useAndroidBackHandler } from "@/lib/hooks/use-android-back-handler";
 
 /**
  * Same fixed-overlay chrome as BookingRequestModal (focus trap, scroll
- * lock, Escape-to-close, full-screen on mobile / centered card on desktop)
+ * lock, Escape-to-close, Android Back-to-close, full-screen on mobile /
+ * centered card on desktop)
  * wrapped around TableReservationForm — kept as its own component (rather
  * than generalizing BookingRequestModal itself) so the hotel booking flow
  * stays untouched while reservations get an identical, proven UX shell.
@@ -34,6 +36,7 @@ export function TableReservationModal({
   const dialogRef = useRef<HTMLDivElement>(null);
   useFocusTrap(dialogRef);
   useScrollLock(true);
+  useAndroidBackHandler(true, onClose);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {

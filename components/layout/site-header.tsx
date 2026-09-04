@@ -22,6 +22,7 @@ import { MegaMenuGrid } from "@/components/layout/nav-mega-menu";
 import { categoryHref, categoryDisplayName } from "@/lib/utils/category-href";
 import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
+import { useAndroidBackHandler } from "@/lib/hooks/use-android-back-handler";
 import { useAdminNavItems } from "@/lib/hooks/use-admin-nav-items";
 import { SUPERMARKET_ENABLED } from "@/lib/config/features";
 import { WeatherIndicator } from "@/components/shared/weather-indicator";
@@ -106,6 +107,8 @@ export function SiteHeader({
   const mobileNavRef = useRef<HTMLElement>(null);
   useFocusTrap(mobileNavRef, open);
   useScrollLock(open);
+  // Android hardware Back closes the mobile menu drawer before navigating.
+  useAndroidBackHandler(open, () => setOpen(false));
   const reduceMotion = useReducedMotion();
 
   // On any /admin/* page the desktop layout shows the full AdminSidebar in

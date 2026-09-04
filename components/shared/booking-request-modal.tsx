@@ -6,6 +6,7 @@ import { X } from "lucide-react";
 import { BookingForm } from "@/components/shared/booking-form";
 import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
+import { useAndroidBackHandler } from "@/lib/hooks/use-android-back-handler";
 import type { Locale } from "@/lib/i18n/config";
 import type { HotelRoom } from "@/types";
 
@@ -43,6 +44,7 @@ export function BookingRequestModal({
   const dialogRef = useRef<HTMLDivElement>(null);
   useFocusTrap(dialogRef);
   useScrollLock(true);
+  useAndroidBackHandler(true, onClose);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {

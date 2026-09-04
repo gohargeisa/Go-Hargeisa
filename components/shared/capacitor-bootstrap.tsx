@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useNativeSplashGate } from "@/components/shared/native-splash-gate";
+import { initAndroidBackButton } from "@/lib/mobile/android-back";
 
 /**
  * Wires up native-shell behavior when this same web app is running inside
@@ -53,13 +54,14 @@ export function CapacitorBootstrap() {
       }
       await SplashScreen.hide();
 
-      // Hardware back button (Android): go back in-app history if there is
-      // any, otherwise exit rather than getting stuck on a dead end.
-      const backListener = await App.addListener("backButton", ({ canGoBack }) => {
-        if (canGoBack) window.history.back();
-        else App.exitApp();
-      });
-      cleanups.push(() => void backListener.remove());
+      // Hardware back button (Android): a single session-lifetime listener
+      // owned by lib/mobile/android-back.ts. It closes the topmost open
+      // overlay first (modals/sheets/menus register via
+      // useAndroidBackHandler), then falls back to in-app history, then
+      // exits — instead of a bare history.back()/exitApp() that ignored
+      // open overlays. Idempotent; installs its own listener, nothing to
+      // clean up here.
+      initAndroidBackButton();
 
       // Deep links / universal links (android:autoVerify intent-filter +
       // iOS associated domains, see android/.../AndroidManifest.xml and

@@ -8,6 +8,7 @@ import { m, AnimatePresence, useReducedMotion } from "framer-motion";
 import { DynamicIcon } from "@/lib/utils/dynamic-icon";
 import { categoryHref, categoryDisplayName } from "@/lib/utils/category-href";
 import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
+import { useAndroidBackHandler } from "@/lib/hooks/use-android-back-handler";
 import type { Locale } from "@/lib/i18n/config";
 import type { Category } from "@/types";
 
@@ -122,6 +123,8 @@ export function NavMegaMenu({
   const triggerRef = useRef<HTMLButtonElement>(null);
   const reduceMotion = useReducedMotion();
   useFocusTrap(panelRef, open);
+  // Android hardware Back closes the mega-menu dropdown.
+  useAndroidBackHandler(open, () => close());
 
   function close() {
     setOpen(false);

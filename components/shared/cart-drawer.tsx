@@ -7,6 +7,7 @@ import { ArrowLeft, CheckCircle2, ShoppingCart, Trash2, X } from "lucide-react";
 import { useCart } from "@/lib/cart/cart-context";
 import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
+import { useAndroidBackHandler } from "@/lib/hooks/use-android-back-handler";
 import { CartItemRow } from "@/components/shared/cart-item-row";
 import { CheckoutForm } from "@/components/shared/checkout-form";
 import type { Locale } from "@/lib/i18n/config";
@@ -34,6 +35,13 @@ export function CartDrawer({ locale }: { locale: Locale }) {
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [cart]);
+
+  // Android hardware Back: from the checkout step go back to the cart list
+  // (mirrors the in-drawer back arrow); otherwise close the drawer.
+  useAndroidBackHandler(cart.isOpen, () => {
+    if (cart.view === "checkout") cart.backToCart();
+    else cart.closeCart();
+  });
 
   if (!cart.isOpen) return null;
 
