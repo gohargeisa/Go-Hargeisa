@@ -24,21 +24,43 @@ import type { HotelRoom } from "@/types";
 const inputClass =
   "w-full rounded-xl border border-ink/12 bg-transparent px-3.5 py-2.5 text-sm outline-none focus:border-primary dark:border-white/15";
 
+/** Today's calendar date where the guest actually is — local
+ * year/month/day, no UTC conversion. (`new Date().toISOString()` would give
+ * UTC's current date instead, which is a different calendar day from
+ * roughly 6pm to midnight local time for anyone east of UTC — e.g.
+ * Hargeisa, UTC+3 — silently letting the date picker's `min` drift a day
+ * off from the guest's own "today.") Same local-component pattern already
+ * used by isoDate() in components/business/booking-calendar.tsx. */
 function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+/** Parses a plain "YYYY-MM-DD" calendar date as a UTC midnight timestamp.
+ * These strings (check-in/check-out) carry no timezone of their own — they
+ * name a calendar day, not a moment — so every date computed from them must
+ * stay in one fixed, browser-timezone-independent frame (UTC) from parse to
+ * output. Do not swap this for `new Date(iso + "T00:00:00")`: that parses as
+ * LOCAL midnight, and later re-serializing via `.toISOString()` (UTC) shifts
+ * the calendar day for any positive UTC offset (again: Hargeisa is UTC+3) —
+ * which is exactly what made addDaysIso() below return its OWN input
+ * unchanged for a UTC+3 visitor, turning computeSubtotal()'s `while (cursor
+ * < checkOut)` loop into an infinite loop the instant a check-out date was
+ * picked (cursor never advanced, so it never reached checkOut) — the
+ * reported "page freezes on Check-out" bug. */
+function parseIsoDateUTC(iso: string): number {
+  const [y, m, d] = iso.split("-").map(Number);
+  return Date.UTC(y, m - 1, d);
 }
 
 function addDaysIso(iso: string, days: number): string {
-  const d = new Date(`${iso}T00:00:00`);
-  d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d + days)).toISOString().slice(0, 10);
 }
 
 function nightsBetween(checkIn: string, checkOut: string): number {
   if (!checkIn || !checkOut) return 0;
-  const a = new Date(`${checkIn}T00:00:00`);
-  const b = new Date(`${checkOut}T00:00:00`);
-  const diff = Math.round((b.getTime() - a.getTime()) / 86_400_000);
+  const diff = Math.round((parseIsoDateUTC(checkOut) - parseIsoDateUTC(checkIn)) / 86_400_000);
   return diff > 0 ? diff : 0;
 }
 
@@ -57,13 +79,21 @@ function nightlyRate(room: HotelRoom | undefined, date: string): number {
   return room.pricePerNight ?? 0;
 }
 
+// A stay this long is never legitimate (no real booking spans over a
+// year) — this bound exists purely as a second line of defense: if a
+// future change ever regresses addDaysIso() into not advancing `cursor`
+// again, this turns that back into "wrong total" instead of a frozen tab.
+const MAX_STAY_NIGHTS = 366;
+
 function computeSubtotal(room: HotelRoom | undefined, checkIn: string, checkOut: string, roomsCount: number): number {
   if (!room || !checkIn || !checkOut) return 0;
   let total = 0;
   let cursor = checkIn;
-  while (cursor < checkOut) {
+  let guard = 0;
+  while (cursor < checkOut && guard < MAX_STAY_NIGHTS) {
     total += nightlyRate(room, cursor);
     cursor = addDaysIso(cursor, 1);
+    guard += 1;
   }
   return total * roomsCount;
 }
