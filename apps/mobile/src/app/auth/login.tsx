@@ -7,12 +7,14 @@
  * `returnTo` (set by `AuthGate`) or falls back to the shared post-login path.
  */
 import { useState } from "react";
-import { KeyboardAvoidingView, Platform, View } from "react-native";
+import { KeyboardAvoidingView, Platform, Pressable, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { isSupabaseConfigured } from "@/env";
 import { supabase } from "@/lib/supabase";
+import { useTheme } from "@/providers/theme-provider";
 import { spacing } from "@/theme";
 import { AppText, Button, Screen } from "@/ui";
 import { Input } from "@/ui/input";
@@ -21,6 +23,7 @@ type Mode = "signIn" | "signUp";
 
 export default function LoginScreen() {
   const { t } = useTranslation();
+  const { theme } = useTheme();
   const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
   const [mode, setMode] = useState<Mode>("signIn");
   const [email, setEmail] = useState("");
@@ -33,6 +36,25 @@ export default function LoginScreen() {
     if (router.canDismiss()) router.dismiss();
     const target = returnTo && returnTo.startsWith("/") ? returnTo : "/";
     router.replace(target as never);
+  };
+
+  const forgotPassword = async () => {
+    setError(null);
+    setNotice(null);
+    if (!email.includes("@")) {
+      setError(t("auth.enterEmailFirst", "Enter your email above first."));
+      return;
+    }
+    setBusy(true);
+    try {
+      const { error: e } = await supabase.auth.resetPasswordForEmail(email);
+      if (e) throw e;
+      setNotice(t("auth.resetSent", "Password reset link sent — check your email."));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : t("auth.genericError", "Something went wrong."));
+    } finally {
+      setBusy(false);
+    }
   };
 
   const submit = async () => {
@@ -71,7 +93,15 @@ export default function LoginScreen() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={{ flex: 1 }}
       >
-        <View style={{ gap: 6, marginTop: spacing.section, marginBottom: spacing.section }}>
+        <Pressable
+          onPress={() => (router.canDismiss() ? router.dismiss() : router.replace("/"))}
+          hitSlop={10}
+          style={{ alignSelf: "flex-end", marginTop: 4, padding: 4 }}
+        >
+          <Ionicons name="close" size={24} color={theme.colors.textMuted} />
+        </Pressable>
+
+        <View style={{ gap: 6, marginTop: 8, marginBottom: spacing.section }}>
           <AppText variant="display">
             {mode === "signIn"
               ? t("auth.signInTitle", "Sign in")
@@ -132,6 +162,14 @@ export default function LoginScreen() {
             }}
             variant="ghost"
           />
+
+          {mode === "signIn" ? (
+            <Pressable onPress={() => void forgotPassword()} style={{ alignSelf: "center", padding: 6 }}>
+              <AppText variant="label" color="muted">
+                {t("auth.forgotPassword", "Forgot password?")}
+              </AppText>
+            </Pressable>
+          ) : null}
         </View>
 
         <AppText variant="label" color="muted" style={{ marginTop: spacing.section }}>

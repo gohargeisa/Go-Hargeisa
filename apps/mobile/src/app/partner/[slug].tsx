@@ -22,6 +22,7 @@ import { useTheme } from "@/providers/theme-provider";
 import { radii, spacing } from "@/theme";
 import { AppText, Button, Card, Screen, Skeleton } from "@/ui";
 import { ErrorState } from "@/ui/states";
+import { PartnerMap } from "@/components/partner-map";
 
 const HERO_HEIGHT = 280;
 
@@ -218,6 +219,17 @@ export default function PartnerDetailScreen() {
               <AppText variant="body" color="muted">
                 {data.openingHours}
               </AppText>
+            </View>
+          ) : null}
+
+          {data.coords ? (
+            <View style={{ marginTop: 12, gap: 8 }}>
+              <AppText variant="heading">{t("partner.location", "Location")}</AppText>
+              <PartnerMap
+                lat={data.coords.lat}
+                lng={data.coords.lng}
+                label={data.name}
+              />
             </View>
           ) : null}
 

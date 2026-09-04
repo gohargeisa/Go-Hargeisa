@@ -7,14 +7,13 @@ import { useMemo } from "react";
 import { View } from "react-native";
 import { useTranslation } from "react-i18next";
 
-import { AuthGate } from "@/components/auth-gate";
 import { PartnerCard } from "@/components/partner-card";
 import { useConfirmExitOnBack } from "@/lib/back-handler";
 import { useSavedCityServices } from "@/lib/favorites";
 import { useCityServices } from "@/lib/queries";
 import { spacing } from "@/theme";
 import { AppText, Screen, Skeleton } from "@/ui";
-import { EmptyState, ErrorState } from "@/ui/states";
+import { EmptyState, ErrorState, OfflineBanner } from "@/ui/states";
 
 function SavedList() {
   const { t } = useTranslation();
@@ -74,9 +73,8 @@ export default function SavedScreen() {
       <AppText variant="display" style={{ marginBottom: spacing.section }}>
         {t("nav.saved", "Saved")}
       </AppText>
-      <AuthGate>
-        <SavedList />
-      </AuthGate>
+      <OfflineBanner label={t("common.offline", "You're offline")} />
+      <SavedList />
     </Screen>
   );
 }

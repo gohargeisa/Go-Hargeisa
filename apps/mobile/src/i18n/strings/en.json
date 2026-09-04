@@ -8,7 +8,10 @@
   },
   "common": {
     "offline": "You're offline",
-    "retry": "Retry"
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "save": "Save",
+    "edit": "Edit"
   },
   "home": {
     "eyebrow": "Go Hargeisa",
@@ -31,11 +34,18 @@
     "noResultsTitle": "No matches",
     "noResultsBody": "Try a different search or category."
   },
+  "category": {
+    "error": "Couldn't load this category",
+    "emptyTitle": "Nothing here yet",
+    "emptyBody": "No published businesses in this category right now."
+  },
   "partner": {
     "badge": "Partner",
     "about": "About",
     "amenities": "Amenities",
     "hours": "Opening hours",
+    "location": "Location",
+    "viewOnMap": "View on map",
     "gallery": "Photos",
     "reviews": "Reviews",
     "call": "Call",
@@ -72,6 +82,9 @@
     "password": "Password",
     "switchToSignUp": "Create an account instead",
     "switchToSignIn": "I already have an account",
+    "forgotPassword": "Forgot password?",
+    "enterEmailFirst": "Enter your email above first.",
+    "resetSent": "Password reset link sent — check your email.",
     "checkEmail": "Check your email to confirm your account.",
     "invalidInput": "Enter a valid email and a password of at least 6 characters.",
     "notConfigured": "Sign-in isn't available in this build.",
@@ -86,7 +99,15 @@
     "theme": "Appearance",
     "theme_system": "System",
     "theme_light": "Light",
-    "theme_dark": "Dark"
+    "theme_dark": "Dark",
+    "name": "Name",
+    "noName": "Add your name",
+    "memberSince": "Member since {year}",
+    "signOutConfirm": "You'll need to sign in again to book and save.",
+    "guestBody": "Sign in to sync bookings and manage your account.",
+    "about": "About",
+    "visitWebsite": "Visit gohargeisa.com",
+    "version": "Version {v}"
   },
   "notFound": {
     "title": "Page not found",

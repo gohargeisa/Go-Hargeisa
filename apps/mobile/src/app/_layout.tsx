@@ -34,6 +34,7 @@ function ThemedRoot() {
         }}
       >
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="category/[slug]" />
         <Stack.Screen name="partner/[slug]" />
         <Stack.Screen
           name="auth"

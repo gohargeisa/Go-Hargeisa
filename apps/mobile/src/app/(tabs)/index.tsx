@@ -72,9 +72,7 @@ export default function HomeScreen() {
           {categories.data.map((c) => (
             <Pressable
               key={c.id}
-              onPress={() =>
-                router.push({ pathname: "/explore", params: { category: c.slug } })
-              }
+              onPress={() => router.push(`/category/${c.slug}`)}
               style={{
                 paddingHorizontal: 16,
                 paddingVertical: 10,

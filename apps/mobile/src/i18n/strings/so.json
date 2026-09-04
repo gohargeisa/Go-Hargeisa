@@ -8,7 +8,15 @@
   },
   "common": {
     "offline": "Internet ma haysatid",
-    "retry": "Isku day mar kale"
+    "retry": "Isku day mar kale",
+    "cancel": "Jooji",
+    "save": "Kaydi",
+    "edit": "Wax ka beddel"
+  },
+  "category": {
+    "error": "Qaybtan lama soo gelin karin",
+    "emptyTitle": "Weli waxba halkan ma jiraan",
+    "emptyBody": "Hadda qaybtan kuma jiraan ganacsi la daabacay."
   },
   "home": {
     "eyebrow": "Go Hargeisa",
@@ -36,6 +44,8 @@
     "about": "Ku saabsan",
     "amenities": "Adeegyada",
     "hours": "Saacadaha shaqada",
+    "location": "Goobta",
+    "viewOnMap": "Ku arag khariidada",
     "gallery": "Sawirrada",
     "reviews": "Faallooyinka",
     "call": "Wac",
@@ -72,6 +82,9 @@
     "password": "Furaha sirta ah",
     "switchToSignUp": "Halkii, abuur akoon",
     "switchToSignIn": "Horey ayaan u lahaa akoon",
+    "forgotPassword": "Furaha ma illowday?",
+    "enterEmailFirst": "Marka hore geli iimaylkaaga kore.",
+    "resetSent": "Link dib-u-dejin ayaa la diray — eeg iimaylkaaga.",
     "signedOutTitle": "Waxaad u fiirinaysaa marti ahaan",
     "signInRequiredTitle": "Gal si aad u sii wadato",
     "signInRequiredBody": "Abuur akoon ama gal si aad u buugto, u dalbato oo aad u kaydiso goobaha."
@@ -81,7 +94,14 @@
     "theme": "Muuqaalka",
     "theme_system": "Nidaamka",
     "theme_light": "Iftiin",
-    "theme_dark": "Madow"
+    "theme_dark": "Madow",
+    "name": "Magaca",
+    "noName": "Ku dar magacaaga",
+    "signOutConfirm": "Waxaad u baahan doontaa inaad mar kale gasho si aad u buugto oo aad u kaydiso.",
+    "guestBody": "Gal si aad u midaysid buugista oo aad u maamusho akoonkaaga.",
+    "about": "Ku saabsan",
+    "visitWebsite": "Booqo gohargeisa.com",
+    "version": "Nooca {v}"
   },
   "notFound": {
     "title": "Bogga lama helin",

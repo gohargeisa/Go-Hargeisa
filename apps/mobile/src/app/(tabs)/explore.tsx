@@ -14,7 +14,7 @@ import { useTheme } from "@/providers/theme-provider";
 import { useDebouncedValue } from "@/lib/use-debounced-value";
 import { radii, spacing } from "@/theme";
 import { AppText, Input, Screen, Skeleton } from "@/ui";
-import { EmptyState, ErrorState } from "@/ui/states";
+import { EmptyState, ErrorState, OfflineBanner } from "@/ui/states";
 import { PartnerCard } from "@/components/partner-card";
 
 export default function ExploreScreen() {
@@ -50,6 +50,8 @@ export default function ExploreScreen() {
           autoCorrect={false}
         />
       </View>
+
+      <OfflineBanner label={t("common.offline", "You're offline")} />
 
       <ScrollView
         horizontal

@@ -8,7 +8,15 @@
   },
   "common": {
     "offline": "أنت غير متصل بالإنترنت",
-    "retry": "إعادة المحاولة"
+    "retry": "إعادة المحاولة",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "edit": "تعديل"
+  },
+  "category": {
+    "error": "تعذّر تحميل هذه الفئة",
+    "emptyTitle": "لا يوجد شيء هنا بعد",
+    "emptyBody": "لا توجد أعمال منشورة في هذه الفئة حاليًا."
   },
   "home": {
     "eyebrow": "غو هرجيسا",
@@ -36,6 +44,8 @@
     "about": "نبذة",
     "amenities": "المرافق",
     "hours": "ساعات العمل",
+    "location": "الموقع",
+    "viewOnMap": "عرض على الخريطة",
     "gallery": "الصور",
     "reviews": "المراجعات",
     "call": "اتصال",
@@ -72,6 +82,9 @@
     "password": "كلمة المرور",
     "switchToSignUp": "إنشاء حساب بدلاً من ذلك",
     "switchToSignIn": "لديّ حساب بالفعل",
+    "forgotPassword": "نسيت كلمة المرور؟",
+    "enterEmailFirst": "أدخل بريدك الإلكتروني أعلاه أولاً.",
+    "resetSent": "تم إرسال رابط إعادة تعيين كلمة المرور — تحقق من بريدك.",
     "signedOutTitle": "أنت تتصفح كضيف",
     "signInRequiredTitle": "سجّل الدخول للمتابعة",
     "signInRequiredBody": "أنشئ حسابًا أو سجّل الدخول للحجز والطلب وحفظ الأماكن."
@@ -81,7 +94,15 @@
     "theme": "المظهر",
     "theme_system": "النظام",
     "theme_light": "فاتح",
-    "theme_dark": "داكن"
+    "theme_dark": "داكن",
+    "name": "الاسم",
+    "noName": "أضف اسمك",
+    "memberSince": "عضو منذ {year}",
+    "signOutConfirm": "ستحتاج إلى تسجيل الدخول مرة أخرى للحجز والحفظ.",
+    "guestBody": "سجّل الدخول لمزامنة الحجوزات وإدارة حسابك.",
+    "about": "حول",
+    "visitWebsite": "زيارة gohargeisa.com",
+    "version": "الإصدار {v}"
   },
   "notFound": {
     "title": "الصفحة غير موجودة",
