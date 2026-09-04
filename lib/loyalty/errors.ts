@@ -11,6 +11,7 @@ export function localiseLoyaltyRpcError(message: string, t: (key: string) => str
   if (m.includes("not authorized") || m.includes("not authorised")) return t("errNotAuthorized");
   if (m.includes("not available") || m.includes("not currently active")) return t("errProgramUnavailable");
   if (m.includes("member not found")) return t("errMemberNotFound");
+  if (m.includes("already a member") || m.includes("already joined")) return t("errAlreadyMember");
   if (m.includes("not a member")) return t("errNotMember");
   if (m.includes("membership is not active")) return t("errMembershipInactive");
   if (m.includes("not enough points")) return t("errInsufficientPoints");

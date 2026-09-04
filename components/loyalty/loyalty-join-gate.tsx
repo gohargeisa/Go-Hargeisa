@@ -5,10 +5,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Gift, Sparkles, TrendingUp, Star, Loader2 } from "lucide-react";
+import { Gift, Sparkles, TrendingUp, Star, Loader2, Check } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import type { LoyaltyListingType } from "@/lib/loyalty/types";
 import { joinLoyaltyProgramAction, recordLoyaltyEventAction } from "@/lib/actions/loyalty";
+import { useToast, ToastViewport } from "@/components/shared/toast";
 
 export function LoyaltyJoinGate({
   locale,
@@ -43,6 +44,8 @@ export function LoyaltyJoinGate({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [joined, setJoined] = useState(false);
+  const { toast, showToast, dismiss } = useToast();
   const logged = useRef(false);
 
   useEffect(() => {
@@ -59,11 +62,28 @@ export function LoyaltyJoinGate({
   ];
 
   function join() {
+    // Belt-and-suspenders against a double-click racing ahead of the
+    // `disabled={pending}` re-render: startTransition itself is async, so a
+    // second click in the same tick could otherwise slip through before
+    // React ever marks the button disabled.
+    if (pending || joined) return;
     setError(null);
     startTransition(async () => {
       const res = await joinLoyaltyProgramAction(listingType, listingId, locale, `/${locale}/rewards/${slug}`);
-      if (res.ok) router.refresh();
-      else setError(res.error);
+      if (res.ok) {
+        setJoined(true);
+        showToast(
+          "success",
+          welcomeBonus > 0 ? t("joinSuccessToast", { points: welcomeBonus.toLocaleString(locale) }) : t("youAreAMember")
+        );
+        // Brief "You're a member" success state before the page swaps to the
+        // full membership dashboard (ctx.member becomes non-null), so the
+        // success toast/state is actually visible rather than instantly
+        // replaced by router.refresh().
+        setTimeout(() => router.refresh(), 1100);
+      } else {
+        setError(res.error);
+      }
     });
   }
 
@@ -143,11 +163,22 @@ export function LoyaltyJoinGate({
                 <button
                   type="button"
                   onClick={join}
-                  disabled={pending}
+                  disabled={pending || joined}
                   className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary-700 px-6 py-3.5 text-sm font-bold text-white shadow-soft transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-primary-800 active:scale-95 disabled:pointer-events-none disabled:opacity-70"
                 >
-                  {pending && <Loader2 size={16} className="animate-spin" aria-hidden="true" />}
-                  {t("joinNow")}
+                  {joined ? (
+                    <>
+                      <Check size={16} aria-hidden="true" />
+                      {t("youAreAMember")}
+                    </>
+                  ) : pending ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" aria-hidden="true" />
+                      {t("joiningNow")}
+                    </>
+                  ) : (
+                    t("joinNow")
+                  )}
                 </button>
                 {error && <p className="mt-3 text-center text-sm font-medium text-red-600 dark:text-red-400">{error}</p>}
               </>
@@ -163,6 +194,7 @@ export function LoyaltyJoinGate({
           </div>
         </div>
       </div>
+      <ToastViewport toast={toast} onDismiss={dismiss} />
     </section>
   );
 }
