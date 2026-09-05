@@ -11,33 +11,41 @@ import type { PartnerTheme } from "@/lib/config/partner-themes";
 const AUTOPLAY_MS = 6500;
 const SWIPE_THRESHOLD_PX = 44;
 
+/** "1052 / 942" -> 1.1167. Used to derive a split-layout slide's overall
+ * container ratio from its image column's own crop ratio. */
+function parseAspectRatio(value: string): number {
+  const [w, h] = value.split("/").map((part) => parseFloat(part.trim()));
+  return w / h;
+}
+
 /**
- * Flormar Hargeisa — art-directed campaign hero (single integrated composition).
+ * Flormar Hargeisa — campaign hero.
  *
- * NOT a two-column "photo beside text" layout. The whole section is ONE
- * designed scene: a shared blush/mauve canvas (gradient + soft light blooms
- * + a fine grain) runs edge to edge; the model photo is laid over it and
- * dissolved into it on every side by a radial blush vignette plus a warm
- * soft-light tint that pulls the studio grey of the source shot into the
- * Flormar palette. There is no rectangle, no card, no visible seam between
- * "text area" and "model area" — the editorial copy sits in the open blush
- * space the vignette clears, and the model reads as part of the artwork.
+ * A full-bleed banner — no outer side padding, no rounded card, no white
+ * background anywhere — matching the business owner's own reference design
+ * (a flat-colour hero banner, image edge-to-edge, text straight on top of
+ * it). Each slide is ONE campaign photo (lib/config/flormar-campaigns.ts).
+ * The photo is never cropped — its container is sized to the image's own
+ * aspect ratio, so `object-fit: cover` has no overflow to trim.
  *
- * Responsive is a re-composition, not a shrink:
- *  - lg+  : model occupies the trailing ~64% of the frame at full height,
- *           vignetted so its leading edge melts into the copy; copy is
- *           vertically centred in the cleared blush space.
- *  - < lg : model is full-bleed behind the scene, vignetted toward the
- *           bottom so it dissolves into a blush field where the copy sits.
+ * The product name/description/CTA sits directly on the photo (no card
+ * behind it) at `current.overlayPosition` — a spot on that specific photo
+ * measured (colour-variance scan + the zone's actual average pixel colour)
+ * to be genuinely quiet background AND to tell whether dark or light text
+ * actually reads there (`current.overlayTextColor` — not the same colour on
+ * every slide). A text-shadow, not a card, is what keeps it legible against
+ * whatever's directly behind it. Because the position is a fixed physical
+ * spot on the photo, it does NOT mirror in RTL (the photo's own composition
+ * doesn't mirror either) — only the text's own alignment follows the
+ * locale. `current.overlayVerticalCenter` (the 3 current active slides, all
+ * shot with a clean empty background running the photo's full height)
+ * centres the text vertically instead of anchoring it to one measured band.
  *
- * RTL: the vignette focus and copy side mirror via Tailwind's `rtl:` variant
- * (the layout root carries `dir="rtl"` for Arabic).
- *
- * Every slide is tied to the EXACT product the model holds
- * (lib/config/flormar-campaigns.ts): the primary CTA opens that product
- * (parent's `onShopCampaign` — modal → shade → cart), the secondary CTA
- * drops into the shop grid. Carousel state (index / autoplay / swipe /
- * AnimatePresence cross-fade) is unchanged from the previous version.
+ * One slide (`current.splitLayout`, currently only the retired
+ * perfect-coverage-foundation — see its own config comment) is a deliberate
+ * exception: the photo is cropped ON SCREEN to its left portion and the rest
+ * of the hero becomes a solid colour-matched panel holding the text,
+ * model-and-her-product on the left / text on the right.
  */
 export function FlormarCampaignHero({
   campaigns,
@@ -98,254 +106,196 @@ export function FlormarCampaignHero({
 
   if (!current) return null;
 
-  // Longer product line — English-only content is acceptable (see the
-  // config's own note). On a locale without its own translation we drop the
-  // line rather than repeat the subtitle.
   const subtitle = t(current.subtitleKey);
-  const description = t.has(current.descriptionKey) ? t(current.descriptionKey) : null;
+  const isLight = current.overlayTextColor === "light";
+  // Split-layout slides (currently just perfect-coverage-foundation — see
+  // its own config comment) get their own container aspect ratio: the left
+  // (image) column's crop ratio, widened out to account for the right
+  // (text panel) column's share of the total width.
+  const containerAspectRatio = current.splitLayout
+    ? parseAspectRatio(current.splitLayout.imageAspectRatio) / current.splitLayout.imageWidthFraction
+    : current.imageAspectRatio;
 
   return (
     <section
       aria-label={t("heroCarouselLabel")}
       aria-roledescription="carousel"
-      className="group relative isolate w-full overflow-hidden"
+      /* No `container-px` — this is a full-bleed banner, flush with the
+         sticky Flormar sub-header directly above it, matching the reference
+         design exactly (that banner runs edge to edge with no page gutter
+         of its own). Zero top padding — the hero starts immediately below
+         the sub-nav; only a small bottom gap remains before the Rewards
+         banner. */
+      className="group relative w-full pb-1 sm:pb-2"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocusCapture={() => setPaused(true)}
       onBlurCapture={() => setPaused(false)}
-      onTouchStart={onTouchStart}
-      onTouchEnd={onTouchEnd}
     >
-      {/* ── Shared campaign canvas (identical on every slide) ─────────── */}
       <div
-        aria-hidden="true"
-        className="absolute inset-0 -z-10 bg-gradient-to-br from-[#FCEEF4] via-[#F5DEEA] to-[#E7C7DA] dark:from-[#1b1016] dark:via-[#1b1016] dark:to-[#251120]"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -end-24 -top-32 -z-10 h-[34rem] w-[34rem] rounded-full bg-[#F7B9D4]/50 blur-[120px] dark:bg-[#7a2a52]/40"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -start-40 bottom-[-14rem] -z-10 h-[36rem] w-[36rem] rounded-full bg-[#E7C9A8]/40 blur-[130px] dark:bg-[#5c3a48]/40"
-      />
-      {/* fine grain to marry the photo grade into the flat canvas */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10 opacity-[0.35] mix-blend-soft-light"
-        style={{
-          backgroundImage:
-            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E\")",
-          backgroundSize: "140px 140px",
-        }}
-      />
-
-      <div className="relative h-[84svh] min-h-[600px] w-full sm:h-[86svh] lg:h-[calc(100svh-9rem)] lg:max-h-[820px] lg:min-h-[620px]">
-        {/* ── Model, dissolved into the canvas. Concurrent cross-fade (no
-             `mode="wait"`): the model layer is absolutely positioned so the
-             outgoing and incoming photos can overlap for a true dissolve
-             without any layout effect, and there is never an empty frame. ── */}
-        <AnimatePresence initial={false}>
+        className="relative w-full overflow-hidden"
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+      >
+        <AnimatePresence initial={false} mode="wait">
           <m.div
-            key={`model-${current.id}`}
-            initial={reduceMotion ? undefined : { opacity: 0, scale: 1.03 }}
-            animate={{ opacity: 1, scale: 1 }}
+            key={`slide-${current.id}`}
+            initial={reduceMotion ? undefined : { opacity: 0 }}
+            animate={{ opacity: 1 }}
             exit={reduceMotion ? undefined : { opacity: 0 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            /* The soft-edged mask is what removes any rectangular image
-               boundary: the photo's own alpha feathers to nothing on every
-               side, so the real campaign canvas behind (gradient + light
-               blooms + grain) shows straight through — there is no overlay
-               colour to mismatch and no hard edge anywhere. The model's
-               centre stays 100% opaque and sharp. Focus sits over her on
-               each breakpoint (mirrored in RTL). */
-            style={
-              {
-                // The model is masked to a soft figure that dissolves on
-                // every side into the campaign canvas — no rectangle. The
-                // opaque core is generous enough that her face, hands and the
-                // product stay 100% sharp; the feather is long so the
-                // transition is atmospheric, not an edge. The copy-facing
-                // side dissolves hardest.
-                "--mask-mobile":
-                  "radial-gradient(130% 100% at 50% 34%, #000000 42%, #00000000 92%)",
-                "--mask-desktop":
-                  "radial-gradient(74% 116% at 66% 40%, #000000 44%, #00000000 85%)",
-                "--mask-desktop-rtl":
-                  "radial-gradient(74% 116% at 34% 40%, #000000 44%, #00000000 85%)",
-              } as React.CSSProperties
-            }
-            className="absolute inset-x-0 top-0 h-[56%] [-webkit-mask-image:var(--mask-mobile)] [-webkit-mask-repeat:no-repeat] [-webkit-mask-size:100%_100%] [mask-image:var(--mask-mobile)] [mask-repeat:no-repeat] [mask-size:100%_100%] sm:h-[64%] lg:inset-0 lg:h-full lg:start-auto lg:end-0 lg:w-[66%] lg:[-webkit-mask-image:var(--mask-desktop)] lg:[mask-image:var(--mask-desktop)] lg:rtl:[-webkit-mask-image:var(--mask-desktop-rtl)] lg:rtl:[mask-image:var(--mask-desktop-rtl)] xl:w-[62%]"
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="relative flex w-full"
+            style={{ aspectRatio: containerAspectRatio }}
           >
-            {/* Blurred, dimmed copy of the same shot sitting behind the sharp
-                one — it turns the model's outline into a soft halo of her own
-                colours before that fades to canvas, so the transition reads
-                as atmosphere, not an edge. */}
-            <Image
-              src={current.image}
-              alt=""
-              aria-hidden="true"
-              fill
-              priority
-              quality={35}
-              sizes="70vw"
-              className="object-cover opacity-70 blur-2xl"
-              style={{ objectPosition: current.focalPoint ?? "50% 18%" }}
-            />
-            {/* Two crops of the same file (one network request under
-                `images.unoptimized`): the mobile full-bleed frame and the
-                desktop trailing-column frame want different focal points. */}
-            <Image
-              src={current.mobileImage ?? current.image}
-              alt={t(current.titleKey)}
-              fill
-              priority
-              quality={92}
-              sizes="100vw"
-              className="object-cover lg:hidden"
-              style={{ objectPosition: current.mobileFocalPoint ?? current.focalPoint ?? "50% 12%" }}
-            />
-            <Image
-              src={current.image}
-              alt=""
-              aria-hidden="true"
-              fill
-              priority
-              quality={92}
-              sizes="64vw"
-              className="hidden object-cover lg:block"
-              style={{ objectPosition: current.focalPoint ?? "50% 18%" }}
-            />
-            {/* Grey studio backdrop → Flormar blush, but weighted to the
-                EDGES: each wash is a radial that's transparent over the
-                model's face/hands and only turns opaque out where the plain
-                background is (mirrored in RTL). So the neutral backdrop fully
-                becomes pink and melts into the canvas, while her face keeps
-                its natural tone and detail — no wash-out. */}
-            <div
-              aria-hidden="true"
-              className="absolute inset-0 bg-[radial-gradient(118%_104%_at_50%_34%,transparent_32%,#ECCBDB_80%)] lg:bg-[radial-gradient(80%_120%_at_64%_40%,transparent_30%,#EBCADA_92%)] lg:rtl:bg-[radial-gradient(80%_120%_at_36%_40%,transparent_30%,#EBCADA_92%)]"
-            />
-            {/* Desktop only: the studio backdrop survives strongest in the top
-                and trailing-edge corners (right of her head, above her
-                shoulder), where the radial above can't reach without touching
-                her cheek. These edge-anchored linear washes turn just those
-                bands fully blush, leaving the face untouched (mirrored RTL). */}
-            <div
-              aria-hidden="true"
-              className="absolute inset-0 hidden lg:block bg-[linear-gradient(to_left,#EBCADA_0%,#EBCADA_9%,transparent_34%),linear-gradient(to_bottom,#E9C8D9_0%,transparent_18%)] rtl:bg-[linear-gradient(to_right,#EBCADA_0%,#EBCADA_9%,transparent_34%),linear-gradient(to_bottom,#E9C8D9_0%,transparent_18%)]"
-            />
-            {/* Mobile only: same idea for the full-bleed frame — dissolve just
-                the outer side bands + the very top, where the plain backdrop
-                shows past the model. Face sits well inside the clear middle. */}
-            <div
-              aria-hidden="true"
-              className="absolute inset-0 lg:hidden bg-[linear-gradient(to_right,#ECCBDB_0%,transparent_15%),linear-gradient(to_left,#ECCBDB_0%,transparent_15%),linear-gradient(to_bottom,#E9C8D9_0%,transparent_13%)]"
-            />
-            <div
-              aria-hidden="true"
-              className="absolute inset-0 mix-blend-soft-light bg-gradient-to-br from-[#F5BAD3]/38 via-[#E6AAC6]/24 to-[#D49FC0]/44"
-            />
-            <div
-              aria-hidden="true"
-              className="absolute inset-0 mix-blend-overlay bg-[#F7CBDF]/16"
-            />
+            {current.splitLayout ? (
+              <>
+                {/* Split layout (this slide only — see its config comment):
+                    the photo is cropped ON SCREEN to its own left portion via
+                    `object-position: 0% center` inside a column narrower than
+                    the source image — a separate product cutout elsewhere in
+                    the frame simply falls outside this crop. The source file
+                    itself is never touched. */}
+                <div className="relative h-full shrink-0" style={{ width: `${current.splitLayout.imageWidthFraction * 100}%` }}>
+                  <Image
+                    src={current.image}
+                    alt={t(current.titleKey)}
+                    fill
+                    priority
+                    quality={92}
+                    sizes="60vw"
+                    className="object-cover"
+                    style={{ objectPosition: "0% 50%" }}
+                  />
+                </div>
+                {/* Text panel — solid colour sampled from the photo's own
+                    background right at the crop edge (see the config
+                    comment), so the seam reads as a continuation of the same
+                    backdrop rather than a mismatched block. Vertically
+                    centred stack: badge, title, subtitle, CTA. */}
+                <div
+                  className="flex h-full flex-1 flex-col justify-center px-4 py-4 sm:px-8 lg:px-12"
+                  style={{ backgroundColor: current.splitLayout.panelColor }}
+                >
+                  <span
+                    className="inline-flex w-fit items-center rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-[0.1em] sm:text-[10px] lg:text-[11px]"
+                    style={{ backgroundColor: "rgba(255,255,255,0.9)", color: theme.primaryStrong }}
+                  >
+                    {t(current.eyebrowKey)}
+                  </span>
+                  <h2 className="mt-2 text-balance font-display text-base font-bold leading-tight tracking-tight text-white sm:mt-3 sm:text-xl lg:text-3xl">
+                    {t(current.titleKey)}
+                  </h2>
+                  <p className="mt-1.5 text-pretty font-display text-xs font-semibold text-white/90 sm:mt-2 sm:text-sm lg:text-base">
+                    {subtitle}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => onShopCampaign(current)}
+                    className="mt-3 w-fit rounded-full px-3 py-1.5 text-[10px] font-bold text-white shadow-md transition-transform duration-300 ease-premium hover:-translate-y-0.5 active:scale-95 sm:mt-4 sm:px-5 sm:py-2 sm:text-xs lg:px-7 lg:py-2.5 lg:text-sm"
+                    style={{ backgroundColor: theme.primaryStrong }}
+                  >
+                    {t(current.ctaKey)}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* The campaign photo, uncropped and edge-to-edge — the
+                    container's aspect-ratio matches the source image's own
+                    dimensions exactly, so `cover` never has any overflow to
+                    trim, and this IS the hero's background (no page/white
+                    background sits behind or around it). */}
+                <Image
+                  src={current.image}
+                  alt={t(current.titleKey)}
+                  fill
+                  priority
+                  quality={92}
+                  sizes="100vw"
+                  className="object-cover"
+                />
+
+                {/* Product info — directly on the photo, no card. Position is
+                    a measured-quiet spot on THIS photo (see the config's own
+                    comments); text colour is per-slide because the zones are
+                    genuinely different backgrounds, not one colour reused.
+                    The drop-shadow is what keeps it legible without a card or
+                    a darkening overlay on the photo. `.campaign-overlay`
+                    (globals.css) applies real mobile vs. desktop values via a
+                    media query — see the config field's doc comment for why
+                    inline `style` / Tailwind arbitrary classes can't do that
+                    for data-driven values. */}
+                <div
+                  className={`campaign-overlay absolute max-w-[160px] sm:max-w-[240px] lg:max-w-[320px] ${
+                    current.overlayVerticalCenter ? "!top-1/2 -translate-y-1/2" : ""
+                  }`}
+                  style={
+                    {
+                      "--campaign-overlay-top-mobile": current.overlayPosition.mobile.top,
+                      "--campaign-overlay-left-mobile": current.overlayPosition.mobile.left,
+                      "--campaign-overlay-width-mobile": current.overlayPosition.mobile.width,
+                      "--campaign-overlay-top-desktop": current.overlayPosition.desktop.top,
+                      "--campaign-overlay-left-desktop": current.overlayPosition.desktop.left,
+                      "--campaign-overlay-width-desktop": current.overlayPosition.desktop.width,
+                    } as React.CSSProperties
+                  }
+                >
+                  <span
+                    className={`items-center rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-[0.1em] sm:text-[10px] lg:text-[11px] ${
+                      current.overlayCompact ? "hidden sm:inline-flex" : "inline-flex"
+                    }`}
+                    style={{ backgroundColor: isLight ? "rgba(255,255,255,0.9)" : `rgba(${theme.primaryRgb}, 0.12)`, color: theme.primaryStrong }}
+                  >
+                    {t(current.eyebrowKey)}
+                  </span>
+                  <h2
+                    className={`text-balance font-display font-bold leading-tight tracking-tight [text-shadow:0_1px_10px_rgba(0,0,0,0.18)] ${
+                      isLight ? "text-white" : "text-ink"
+                    } ${current.overlayCompact ? "mt-0 text-xs sm:mt-2 sm:text-lg lg:text-2xl" : "mt-1.5 text-base sm:mt-2 sm:text-xl lg:text-3xl"}`}
+                  >
+                    {t(current.titleKey)}
+                  </h2>
+                  {!current.overlayCompact && (
+                    <p
+                      className={`mt-1 hidden text-pretty font-display text-xs font-semibold [text-shadow:0_1px_8px_rgba(0,0,0,0.16)] sm:block sm:text-sm lg:text-base ${
+                        isLight ? "text-white/90" : "text-ink/80"
+                      }`}
+                    >
+                      {subtitle}
+                    </p>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => onShopCampaign(current)}
+                    className="mt-2 rounded-full px-3 py-1.5 text-[10px] font-bold text-white shadow-md transition-transform duration-300 ease-premium hover:-translate-y-0.5 active:scale-95 sm:mt-3 sm:px-5 sm:py-2 sm:text-xs lg:px-7 lg:py-2.5 lg:text-sm"
+                    style={{ backgroundColor: theme.primaryStrong }}
+                  >
+                    {t(current.ctaKey)}
+                  </button>
+                </div>
+              </>
+            )}
+
+            {multi && (
+              <div className="absolute inset-x-0 bottom-3 z-10 flex items-center justify-center gap-1.5 sm:bottom-5">
+                {campaigns.map((c, i) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => goTo(i)}
+                    aria-label={t("heroGoToSlide", { n: i + 1 })}
+                    aria-current={i === index}
+                    className="h-1.5 rounded-full shadow-sm transition-all duration-300"
+                    style={{
+                      width: i === index ? "22px" : "7px",
+                      backgroundColor: i === index ? theme.primaryStrong : "rgba(255,255,255,0.7)",
+                    }}
+                  />
+                ))}
+              </div>
+            )}
           </m.div>
         </AnimatePresence>
-
-        {/* mobile only: a soft blush wash over the lower half so the copy
-            always sits on a settled field even where the canvas runs light —
-            sits OUTSIDE the masked model layer so it stays solid. */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-[58%] bg-gradient-to-t from-[#F2D7E4] from-30% via-[#F2D7E4]/70 via-62% to-transparent dark:from-[#1b1016] dark:via-[#1b1016]/70 lg:hidden"
-        />
-        {/* desktop only: melts the model's lower edge into the canvas so the
-            hero has no hard horizontal cut at its foot (the left edge is
-            already dissolved by the model layer's own mask). Canvas-toned,
-            not a flat panel. */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 hidden h-32 bg-gradient-to-t from-[#EAD0DE] via-[#EAD0DE]/55 to-transparent dark:from-[#1b1016] dark:via-[#1b1016]/60 lg:block"
-        />
-
-        {/* ── Editorial copy, in the blush space below the model. The tall
-             mobile `pb` clears the floating bottom nav / mobile action bar
-             that overlays the foot of the viewport. ── */}
-        <div className="relative z-20 flex h-full flex-col justify-end px-6 pb-[7.5rem] pt-20 sm:px-10 sm:pb-16 sm:pt-24 lg:justify-center lg:px-14 lg:py-16 xl:px-20">
-          {/* soft bloom for guaranteed legibility wherever the model reaches */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute left-0 top-1/2 -z-10 h-[115%] w-[92%] -translate-x-[8%] -translate-y-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(255,255,255,0.6),transparent)] blur-2xl dark:bg-[radial-gradient(closest-side,rgba(18,9,14,0.72),transparent)] rtl:left-auto rtl:right-0 rtl:translate-x-[8%] lg:w-[78%]"
-          />
-          <AnimatePresence initial={false} mode="wait">
-            <m.div
-              key={`copy-${current.id}`}
-              initial={reduceMotion ? undefined : { opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={reduceMotion ? undefined : { opacity: 0, y: -8 }}
-              transition={{ duration: 0.4, ease: "easeOut" }}
-              className="max-w-lg"
-            >
-              <span
-                className="inline-flex items-center rounded-full bg-white/75 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em] shadow-sm backdrop-blur-sm dark:bg-white/10"
-                style={{ color: theme.primaryStrong }}
-              >
-                {t(current.eyebrowKey)}
-              </span>
-              <h1 className="mt-4 text-balance font-display text-[2.1rem] font-bold leading-[1.03] tracking-tight text-ink dark:text-sand sm:text-5xl lg:text-6xl xl:text-[4rem]">
-                {t(current.titleKey)}
-              </h1>
-              <p className="mt-3 max-w-md text-pretty font-display text-lg font-semibold text-ink/85 dark:text-sand/85 sm:mt-4 sm:text-xl">
-                {subtitle}
-              </p>
-              {description && (
-                /* Hidden on phones so the mobile copy stays compact and the
-                   model + product keep clear space above it; shown from `sm`
-                   up (tablet + the unchanged desktop composition). */
-                <p className="mt-3 hidden max-w-md text-pretty text-sm leading-relaxed text-ink/60 dark:text-sand/65 sm:block sm:text-[15px]">
-                  {description}
-                </p>
-              )}
-              <div className="mt-6 flex flex-wrap items-center gap-3 sm:mt-7">
-                <button
-                  type="button"
-                  onClick={() => onShopCampaign(current)}
-                  className="rounded-full px-7 py-3.5 text-sm font-bold text-white shadow-lg transition-transform duration-300 ease-premium hover:-translate-y-0.5 active:scale-95"
-                  style={{ backgroundColor: theme.primaryStrong }}
-                >
-                  {t(current.ctaKey)}
-                </button>
-                <a
-                  href="#shop-all"
-                  className="rounded-full border bg-white/50 px-7 py-3.5 text-sm font-bold backdrop-blur-sm transition-colors duration-300 hover:bg-white/80 dark:bg-white/10 dark:hover:bg-white/20"
-                  style={{ borderColor: `rgba(${theme.primaryRgb}, 0.35)`, color: theme.primaryStrong }}
-                >
-                  {t("exploreCollection")}
-                </a>
-              </div>
-            </m.div>
-          </AnimatePresence>
-
-          {multi && (
-            <div className="relative z-10 mt-6 flex items-center gap-1.5 lg:mt-12">
-              {campaigns.map((c, i) => (
-                <button
-                  key={c.id}
-                  type="button"
-                  onClick={() => goTo(i)}
-                  aria-label={t("heroGoToSlide", { n: i + 1 })}
-                  aria-current={i === index}
-                  className="h-1.5 rounded-full transition-all duration-300"
-                  style={{
-                    width: i === index ? "26px" : "7px",
-                    backgroundColor: i === index ? theme.primaryStrong : `rgba(${theme.primaryRgb}, 0.3)`,
-                  }}
-                />
-              ))}
-            </div>
-          )}
-        </div>
 
         {multi && (
           <>
@@ -353,7 +303,7 @@ export function FlormarCampaignHero({
               type="button"
               onClick={() => goTo(index - 1)}
               aria-label={t("heroPrevSlide")}
-              className="absolute bottom-4 end-4 z-30 flex h-10 w-10 items-center justify-center rounded-full bg-white/80 text-ink opacity-0 shadow-soft backdrop-blur-sm transition-opacity duration-300 hover:bg-white focus-visible:opacity-100 group-hover:opacity-100 lg:bottom-auto lg:end-auto lg:start-4 lg:top-1/2 lg:-translate-y-1/2"
+              className="absolute start-3 top-3 z-30 flex h-10 w-10 items-center justify-center rounded-full bg-white/80 text-ink opacity-0 shadow-soft backdrop-blur-sm transition-opacity duration-300 hover:bg-white focus-visible:opacity-100 group-hover:opacity-100"
             >
               <ChevronLeft size={20} aria-hidden="true" className="rtl:rotate-180" />
             </button>
@@ -361,7 +311,7 @@ export function FlormarCampaignHero({
               type="button"
               onClick={() => goTo(index + 1)}
               aria-label={t("heroNextSlide")}
-              className="absolute bottom-4 end-[3.75rem] z-30 flex h-10 w-10 items-center justify-center rounded-full bg-white/80 text-ink opacity-0 shadow-soft backdrop-blur-sm transition-opacity duration-300 hover:bg-white focus-visible:opacity-100 group-hover:opacity-100 lg:bottom-auto lg:end-4 lg:top-1/2 lg:-translate-y-1/2"
+              className="absolute end-3 top-3 z-30 flex h-10 w-10 items-center justify-center rounded-full bg-white/80 text-ink opacity-0 shadow-soft backdrop-blur-sm transition-opacity duration-300 hover:bg-white focus-visible:opacity-100 group-hover:opacity-100"
             >
               <ChevronRight size={20} aria-hidden="true" className="rtl:rotate-180" />
             </button>

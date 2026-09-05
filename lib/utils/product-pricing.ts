@@ -30,3 +30,12 @@ export function getProductPricing(product: Pick<Product, "price" | "originalPric
     discountPercent: hasDiscount ? Math.floor((1 - price! / originalPrice!) * 100) : undefined,
   };
 }
+
+/**
+ * `12` not `12.00`, but `12.5` and `12.99` unchanged — trims only the
+ * trailing zeros a fixed `.toFixed(2)` forces onto a whole/one-decimal
+ * price, never touching a genuinely meaningful decimal value.
+ */
+export function formatDisplayPrice(price: number): string {
+  return Number.isInteger(price) ? String(price) : String(Math.round(price * 100) / 100);
+}

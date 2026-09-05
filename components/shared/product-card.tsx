@@ -9,7 +9,7 @@ import { WhatsAppIcon } from "@/components/shared/brand-icons";
 import { getValidAddonsForProduct } from "@/lib/cart/product-addons";
 import { productCategoryLabel } from "@/lib/config/product-categories";
 import { productLocalizedName } from "@/lib/utils/product-i18n";
-import { getProductPricing } from "@/lib/utils/product-pricing";
+import { getProductPricing, formatDisplayPrice } from "@/lib/utils/product-pricing";
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
 import type { AddToCartBusiness } from "@/lib/cart/cart-context";
 import type { Product, ProductVariant } from "@/types";
@@ -173,11 +173,11 @@ export function ProductCard({
             {product.price != null ? (
               <>
                 <span className="text-base font-bold text-ink dark:text-white">
-                  {product.price.toFixed(2)} {product.currency}
+                  {formatDisplayPrice(product.price)} {product.currency}
                 </span>
                 {pricing.hasDiscount && (
                   <span className="text-xs font-medium text-ink/40 line-through dark:text-sand/40">
-                    {pricing.originalPrice!.toFixed(2)}
+                    {formatDisplayPrice(pricing.originalPrice!)}
                   </span>
                 )}
               </>
