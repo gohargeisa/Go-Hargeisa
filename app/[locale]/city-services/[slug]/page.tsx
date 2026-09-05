@@ -65,6 +65,7 @@ import { LoyaltyEntryCard } from "@/components/loyalty/loyalty-entry-card";
 import { PartnerPartnershipFooter } from "@/components/shared/partner/partner-partnership-footer";
 import { EmaankooStorefront } from "@/components/emaankoo/emaankoo-storefront";
 import { AlHikmaStorefront } from "@/components/al-hikma/al-hikma-storefront";
+import { MamaBabyCareStorefront } from "@/components/mama-baby-care/mama-baby-care-storefront";
 import type { CityService } from "@/types";
 
 // Pinnacle Perfumes & Cosmetics only — a real, published listing whose page
@@ -97,6 +98,12 @@ const FLORMAR_SLUG = "flormar-hargeisa";
 // other city_service listing is unaffected.
 const EMAANKOO_SLUG = "emaankoo-group";
 const AL_HIKMA_SLUG = "al-hikma-hijama-wellness-centre";
+
+// Mama & Baby Care only — a premium retail storefront (hero, categories,
+// no-price product catalog with WhatsApp CTAs, curated gallery), same
+// pattern as Flormar/Pinnacle. Scoped by exact slug match; every other
+// city_service listing is unaffected.
+const MAMA_BABY_CARE_SLUG = "mama-baby-care";
 
 export const revalidate = 3600;
 
@@ -238,6 +245,20 @@ export async function generateMetadata({
       description:
         "Sunnah Hijama (wet and dry cupping) and massage therapy at Al-Hikma Hijama & Wellness Centre in Hargeisa, Somaliland. Book an appointment or contact the clinic through Go Hargeisa.",
       openGraph: { images: ["/images/partners/al-hikma/logo.png"] },
+      alternates: localeAlternates(locale, `/city-services/${service.slug}`),
+    };
+  }
+  if (service.slug === MAMA_BABY_CARE_SLUG) {
+    // Own title/description — the generic fallback below carries none of the
+    // real search terms customers use (kids clothing, baby essentials,
+    // Hargeisa) and this listing's own `service.image` is a duplicate of its
+    // logo, not real storefront photography. Same pattern as Flormar/
+    // Al-Hikma; no "| Go Hargeisa" suffix (the root layout appends it).
+    return {
+      title: "Mama & Baby Care | Kids Clothing & Baby Essentials in Hargeisa, Somaliland",
+      description:
+        "Shop kids clothing, baby essentials, shoes and accessories at Mama & Baby Care in Hargeisa, Somaliland — browse the collection and contact the shop on WhatsApp through Go Hargeisa.",
+      openGraph: { images: ["/images/partners/mama-baby-care/kids-clothing/mint-seashell-print-dress.jpg"] },
       alternates: localeAlternates(locale, `/city-services/${service.slug}`),
     };
   }
@@ -529,6 +550,37 @@ export default async function CityServiceDetailPage({
           myReview={myReview}
           isFavorited={isFavorited}
         />
+        <MobileBookingBar
+          listingType="city_service"
+          listingId={service.id}
+          name={service.name}
+          phone={service.phone ?? undefined}
+          whatsappFallback={service.whatsapp ?? undefined}
+          locale={locale}
+          initiallyFavorited={isFavorited}
+        />
+      </PartnerThemeScope>
+    );
+  }
+
+  if (service.slug === MAMA_BABY_CARE_SLUG && partnerTheme) {
+    return (
+      <PartnerThemeScope theme={partnerTheme}>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
+        <Breadcrumbs
+          items={[
+            { label: tNav("cityServices"), href: `/${locale}/city-services` },
+            { label: service.name, href: `/${locale}/city-services/${service.slug}` },
+          ]}
+        />
+        <MamaBabyCareStorefront
+          theme={partnerTheme}
+          service={service}
+          locale={locale}
+          products={products}
+          myReview={myReview}
+        />
+        <PartnerPartnershipFooter theme={partnerTheme} locale={locale} />
         <MobileBookingBar
           listingType="city_service"
           listingId={service.id}
