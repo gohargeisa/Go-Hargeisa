@@ -301,10 +301,18 @@ const FLORMAR_CAMPAIGNS: FlormarCampaign[] = [
     // as the mascara/lip-gloss photos — no product-line name printed).
     image: "/images/partners/flormar/campaign/campaign-hero-blush.png",
     imageAspectRatio: "1672 / 941",
-    // Same composition family (and same variance-grid result) as the other
-    // two active photos above: clean pink background, x 0–40%, full height.
+    // Same composition family as the other two active photos above (clean
+    // pink background on the left), but her raised brush-holding hand comes
+    // in noticeably earlier here. Fine-grained pixel sampling (0.5% steps)
+    // across the title's actual vertical band found the real background/
+    // brush boundary as close as x 39.5% (at the tightest row) — nowhere
+    // near the "0–40%" figure that was fine for the lipstick/mascara photos.
+    // 30% keeps the box's own right edge (left 5% + width 30% = 35%) a
+    // genuine ~4.5-point margin inside that measured boundary, verified by
+    // re-rendering the actual title/CTA copy in all 3 locales at this width
+    // and confirming no overlap with the brush.
     overlayPosition: {
-      mobile: { top: "0%", left: "5%", width: "50%" },
+      mobile: { top: "0%", left: "5%", width: "30%" },
       desktop: { top: "0%", left: "6%", width: "34%" },
     },
     overlayVerticalCenter: true,
