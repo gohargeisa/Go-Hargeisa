@@ -246,11 +246,24 @@ const LAVENDER_FLOWERS_THEME: PartnerTheme = {
  * partnerLogo (revision 2, 2026-08-19): the business owner replaced the
  * earlier flat-background file with a new approved logo — same real
  * wordmark+icon+"hargeisa" lockup, copied verbatim (byte-identical, never
- * redrawn/recolored/regenerated) into public/images/partners/flormar/logo.png.
- * This one has a genuine alpha channel (colorType 6/RGBA, confirmed byte-
- * inspecting the PNG header) — it needs no white-card frame the way the
- * old opaque file did; every render site can place it directly over a
- * colored background.
+ * redrawn/recolored/regenerated). This one has a genuine alpha channel
+ * (colorType 6/RGBA, confirmed byte-inspecting the PNG header) — it needs
+ * no white-card frame the way the old opaque file did; every render site
+ * can place it directly over a colored background.
+ *
+ * partnerLogo/partnerLogoLight (2026-09-06, filenames only — same approved
+ * artwork, byte-identical, never redrawn): every prior revision (including
+ * the icon-cropped, wordmark-only version from earlier this same week)
+ * overwrote logo.png/logo-white.png IN PLACE at the same filename.
+ * vercel.json caches every image under /public with `immutable,
+ * max-age=31536000` — any device that had already cached an older
+ * revision's bytes at that URL keeps serving them for up to a year
+ * regardless of what's actually deployed (confirmed real: reported live as
+ * "desktop shows the new logo, mobile still shows the old one" — different
+ * devices simply had different cache state, not different code). Renamed
+ * to logo-v2.png/logo-white-v2.png so every client fetches fresh under a
+ * URL nothing could have cached before today, and deleted the old
+ * filenames so nothing can regress back into this by accident.
  *
  * heroImage (2026-08-19): the business owner's first real hero photo —
  * copied verbatim into public/images/partners/flormar/hero.png (1747×900).
@@ -278,10 +291,10 @@ const FLORMAR_THEME: PartnerTheme = {
   slug: "flormar-hargeisa",
   enabled: true,
   partnerName: "Flormar Hargeisa",
-  partnerLogo: "/images/partners/flormar/logo.png",
+  partnerLogo: "/images/partners/flormar/logo-v2.png",
   // White knockout — used only on the dark-magenta loyalty join gate / promo
   // card, where the pink wordmark above would be near-invisible.
-  partnerLogoLight: "/images/partners/flormar/logo-white.png",
+  partnerLogoLight: "/images/partners/flormar/logo-white-v2.png",
   // The membership card is the premium white variant (brand-pink typography
   // on white); it uses the normal pink `partnerLogo`.
   lightRewardsCard: true,

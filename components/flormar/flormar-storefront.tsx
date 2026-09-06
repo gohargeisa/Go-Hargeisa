@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { MapPin, Search, ShoppingBag, Heart, User, Menu } from "lucide-react";
+import { MapPin, Search, ShoppingBag, Heart, User, Menu, ImageOff } from "lucide-react";
 import { ProductCard } from "@/components/shared/product-card";
 import { ProductDetailModal } from "@/components/shared/product-detail-modal";
 import { PartnerProductPlaceholder } from "@/components/shared/partner/partner-product-placeholder";
@@ -389,7 +389,27 @@ export function FlormarStorefront({
          wishlist is the small local-only toggle above (see
          useLocalWishlist's doc comment). */}
       <div
-        className="sticky z-40 border-b border-black/5 bg-white/95 backdrop-blur-xl dark:border-white/10 dark:bg-ink/95"
+        // Mobile only (desktop unchanged): this bar is the very FIRST thing
+        // in the page (no Breadcrumbs above it, unlike Pinnacle/Emaankoo/
+        // Al-Hikma), so its static/natural position is document-y:0 — always
+        // less than its own `top` offset below. Because of that, `sticky`
+        // clamps it to render already-"stuck" at that offset from the very
+        // first paint, not just once actually scrolled. The layout box
+        // (which subsequent siblings, i.e. the campaign hero, are positioned
+        // against) never accounted for that clamp — it reserved space as if
+        // this bar sat at y:0 — so the hero's own top ~80px rendered right
+        // where this bar was ACTUALLY painted, hidden underneath it (real
+        // mobile screenshot: hero "positioned too high", cropped behind the
+        // Flormar header). `mt-[...]` gives the box the same real offset it
+        // was already being pushed down to visually, so the reserved layout
+        // space matches — the hero then starts exactly where the bar's
+        // visible bottom edge is, not underneath it. Every other
+        // sticky-right-under-the-fixed-header bar sitewide (e.g.
+        // components/attractions/attractions-toolbar.tsx) sits below a hero/
+        // title first, so its natural position is already past this same
+        // threshold before it would ever need to stick — this one is the
+        // sole "nothing above it" case.
+        className="mt-[calc(5rem+env(safe-area-inset-top))] sm:mt-0 sticky z-40 border-b border-black/5 bg-white/95 backdrop-blur-xl dark:border-white/10 dark:bg-ink/95"
         /* Sits directly under the global fixed site header, whose real height
            is h-20 (5rem) PLUS env(safe-area-inset-top) on notched devices
            (it carries `pt-[env(safe-area-inset-top)]`). A bare `top-20`
@@ -542,7 +562,7 @@ export function FlormarStorefront({
           the hero so members/prospects see it immediately, without displacing
           any existing shopping section. */}
       {loyaltySlot && (
-        <section className="container-px mx-auto -mb-4 mt-4 max-w-3xl sm:mt-8">{loyaltySlot}</section>
+        <section className="container-px mx-auto -mb-4 mt-2 max-w-3xl sm:mt-4">{loyaltySlot}</section>
       )}
 
       {/* 03 — Category Navigation / Product Discovery, following the
@@ -551,50 +571,46 @@ export function FlormarStorefront({
           categories — see FLORMAR_PRIMARY_CATEGORY_GROUPS's own doc
           comment. No eyebrow badge — plain heading, matching a real brand
           site's category rail rather than a Go-Hargeisa-editorial tag. */}
-      <section id="category-nav" className="py-16 sm:py-24">
+      <section id="category-nav" className="py-10 sm:py-14">
         <div className="container-px mx-auto">
-          <Reveal>
-            <h2 className="mx-auto mb-10 max-w-2xl text-balance text-center font-display text-3xl font-extrabold tracking-tight md:mb-14 md:text-4xl">
-              {t("categoryTitle")}
-            </h2>
-          </Reveal>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+          {/* Circular-thumbnail quick-shop row (style reference only — same
+              6 groups, names, images and onClick as before; only the
+              presentation changed from large square tiles to small round
+              avatars + a caption underneath, matching a real cosmetics
+              storefront's category rail). No heading here (the large square
+              version had a "Shop by Category" title above it) — this compact
+              row reads as navigation, not a titled content section. */}
+          <div className="flex snap-x snap-proximity justify-start gap-5 overflow-x-auto pb-1 scrollbar-none sm:justify-center sm:gap-8 sm:overflow-visible">
             {FLORMAR_PRIMARY_CATEGORY_GROUPS.map((group) => (
               <button
                 key={group.key}
                 type="button"
                 onClick={() => goToCategory(group.key)}
-                className="group relative aspect-square overflow-hidden rounded-xl3 text-start shadow-soft transition-transform duration-300 hover:-translate-y-1"
+                className="group flex shrink-0 snap-start flex-col items-center gap-2 text-center"
               >
-                {categoryImages.get(group.key) && !brokenImageKeys.has(`cat-${group.key}`) ? (
-                  <>
-                    {/* `object-contain` on a light canvas, not `cover` — the
-                       source is real catalog product photography (plain
-                       background, product-only), not lifestyle imagery, so
-                       cropping it to fill a square via `cover` would zoom
-                       into a fragment of packaging rather than show the
-                       product. Same contain+light-canvas treatment the
-                       product cards themselves already use for this exact
-                       photography, just reused here for consistency. */}
-                    <div className="absolute inset-0 bg-[#FBF7F4]" aria-hidden="true" />
-                    <Image
-                      src={categoryImages.get(group.key)!}
-                      alt={t(group.titleKey)}
-                      fill
-                      sizes="(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 16vw"
-                      className="object-contain p-6 transition-transform duration-500 group-hover:scale-105"
-                      onError={() => markImageBroken(`cat-${group.key}`)}
-                    />
-                    <div
-                      aria-hidden="true"
-                      className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-3 pt-10"
+                <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full shadow-soft ring-1 ring-black/5 transition-transform duration-300 group-hover:-translate-y-1 sm:h-20 sm:w-20 dark:ring-white/10">
+                  {categoryImages.get(group.key) && !brokenImageKeys.has(`cat-${group.key}`) ? (
+                    <>
+                      <span className="absolute inset-0 bg-[#FBF7F4]" aria-hidden="true" />
+                      <Image
+                        src={categoryImages.get(group.key)!}
+                        alt=""
+                        fill
+                        sizes="80px"
+                        className="object-contain p-2"
+                        onError={() => markImageBroken(`cat-${group.key}`)}
+                      />
+                    </>
+                  ) : (
+                    <span
+                      className="flex h-full w-full items-center justify-center"
+                      style={{ background: `linear-gradient(160deg, rgba(${theme.primaryRgb}, 0.1) 0%, #FBF7F4 60%, rgba(${theme.accentRgb}, 0.14) 130%)` }}
                     >
-                      <p className="font-display text-sm font-bold text-white">{t(group.titleKey)}</p>
-                    </div>
-                  </>
-                ) : (
-                  <PartnerProductPlaceholder name={t(group.titleKey)} theme={theme} />
-                )}
+                      <ImageOff size={18} style={{ color: theme.primaryStrong }} aria-hidden="true" />
+                    </span>
+                  )}
+                </span>
+                <p className="max-w-[5.5rem] text-xs font-semibold leading-tight sm:text-sm">{t(group.titleKey)}</p>
               </button>
             ))}
           </div>
@@ -609,7 +625,7 @@ export function FlormarStorefront({
           so it never shows a mismatched or empty grid. Reuses the exact same
           ProductCard/modal as every other section. */}
       {activeCampaign && campaignProducts.length > 0 && (
-        <section id="campaign-collection" className="bg-white py-16 dark:bg-white/[0.03] sm:py-24">
+        <section id="campaign-collection" className="bg-white py-10 dark:bg-white/[0.03] sm:py-24">
           <div className="container-px mx-auto">
             <Reveal>
               <h2 className="mx-auto mb-3 max-w-2xl text-balance text-center font-display text-3xl font-extrabold tracking-tight md:text-4xl">

@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import type { useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { Plus, Pencil, Trash2, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import {
   createAddonGroup,
@@ -52,7 +52,6 @@ export function AddonGroupsManager({
   initialGroups,
   products,
   revalidatePaths,
-  t,
 }: {
   listingType: ProductListingType;
   listingId: string;
@@ -60,8 +59,18 @@ export function AddonGroupsManager({
   /** Every product on this listing, for the per-group assignment checklist. */
   products: { id: string; name: string }[];
   revalidatePaths: string[];
-  t: T;
 }) {
+  // Called here (client-side), not passed in as a prop from the server page
+  // — a next-intl/server `getTranslations()` function can't cross the
+  // Server->Client Component boundary (React Server Components only
+  // serialize plain data as props): passing it in directly threw "Functions
+  // cannot be passed directly to Client Components" on every real request
+  // to /business/products (confirmed in production logs), since this page
+  // is fully dynamic (auth-gated, never statically prerendered) so the
+  // crash never showed up in a build. Same namespace ("products") the
+  // server page's own getTranslations call and ProductsManager's sibling
+  // useTranslations("products") call both already use.
+  const t = useTranslations("products");
   const [groups, setGroups] = useState(initialGroups);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [editingGroupId, setEditingGroupId] = useState<string | "new" | null>(null);

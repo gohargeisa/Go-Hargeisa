@@ -294,7 +294,25 @@
     "campaign_bronzingPowderGlow_title": "Bronzing Powder",
     "campaign_bronzingPowderGlow_subtitle": "Kulayl dabiici ah oo qorrax leh.",
     "campaign_bronzingPowderGlow_description": "Budo bronzing ah oo cufan oo silig u eg oo leh xabbado dhalaal yaryar si loo helo dhalaal dabiici ah — daboolid dhexdhexaad ilaa sare oo ku habboon dhammaan noocyada maqaarka.",
-    "campaign_bronzingPowderGlow_cta": "Iibso Bronzing Powder-ka"
+    "campaign_bronzingPowderGlow_cta": "Iibso Bronzing Powder-ka",
+
+    "campaign_eyesCollection_eyebrow": "Xulashada Indhaha",
+    "campaign_eyesCollection_title": "Qurxinta Indhaha",
+    "campaign_eyesCollection_subtitle": "Cabbir, qallooc, iyo qeexid muuqaal kasta.",
+    "campaign_eyesCollection_description": "Baadh dhammaan noocyada Mascara-ga iyo qurxinta indhaha ee Flormar, loogu talagalay daanyeer maalin dhan socda.",
+    "campaign_eyesCollection_cta": "Iibso Qurxinta Indhaha",
+
+    "campaign_lipsCollection_eyebrow": "Xulashada Bushimaha",
+    "campaign_lipsCollection_title": "Qurxinta Bushimaha",
+    "campaign_lipsCollection_subtitle": "Midab iyo dhalaal, qaab kasta.",
+    "campaign_lipsCollection_description": "Baadh cinwaanka bushinta, dhalaalka, iyo tinta ee Flormar — midab dheer oo u dhigma muuqaal kasta.",
+    "campaign_lipsCollection_cta": "Iibso Qurxinta Bushimaha",
+
+    "campaign_faceGlowCollection_eyebrow": "Xulashada Dhalaalka",
+    "campaign_faceGlowCollection_title": "Ururinta Dhalaalka Wejiga",
+    "campaign_faceGlowCollection_subtitle": "Midab jilicsan oo la kordhin karo oo si fudud loo isku daraa.",
+    "campaign_faceGlowCollection_description": "Baadh alaabta blush-ka iyo budada bronzing-ka ee Flormar si aad u hesho dhalaal dabiici ah.",
+    "campaign_faceGlowCollection_cta": "Iibso Qurxinta Wejiga"
   },
   "theVillage": {
     "metaTitle": "The Village Hargeisa — Quraac Maalinta oo dhan, Duban, Pizza & Shawarma",

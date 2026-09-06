@@ -78,6 +78,29 @@ body {
     @apply px-5 md:px-8 lg:px-12;
   }
 
+  /* Flormar campaign hero (components/flormar/flormar-campaign-hero.tsx):
+     the overlay card's position/size is data-driven per campaign photo (each
+     image has its own safe area), and genuinely differs between mobile and
+     desktop — not just a scaled-down copy. Tailwind's arbitrary-value
+     classes (`top-[4%]`) only work when the literal string is scannable at
+     build time, so a value coming from a data file can't use that; plain
+     inline `style` can't express "different value past a breakpoint" either.
+     CSS custom properties + one real media query sidesteps both: the
+     component sets --campaign-overlay-*-mobile/desktop per slide via inline
+     style (works for any runtime value), this class picks the right set. */
+  .campaign-overlay {
+    top: var(--campaign-overlay-top-mobile);
+    left: var(--campaign-overlay-left-mobile);
+    width: var(--campaign-overlay-width-mobile);
+  }
+  @media (min-width: 640px) {
+    .campaign-overlay {
+      top: var(--campaign-overlay-top-desktop);
+      left: var(--campaign-overlay-left-desktop);
+      width: var(--campaign-overlay-width-desktop);
+    }
+  }
+
   /* Shared loading-state shimmer for image/content placeholders — a soft
      diagonal sweep reads as more deliberate than a flat opacity pulse. */
   .skeleton {

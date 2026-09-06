@@ -294,7 +294,25 @@
     "campaign_bronzingPowderGlow_title": "بودرة برونزينج",
     "campaign_bronzingPowderGlow_subtitle": "دفء طبيعي بلمسة شمسية.",
     "campaign_bronzingPowderGlow_description": "بودرة برونزينج مضغوطة حريرية بجزيئات لمعان ناعمة لإشراقة طبيعية — تغطية متوسطة إلى عالية تناسب كل أنواع البشرة.",
-    "campaign_bronzingPowderGlow_cta": "تسوّقي بودرة البرونزينج"
+    "campaign_bronzingPowderGlow_cta": "تسوّقي بودرة البرونزينج",
+
+    "campaign_eyesCollection_eyebrow": "مجموعة العيون",
+    "campaign_eyesCollection_title": "مجموعة مكياج العيون",
+    "campaign_eyesCollection_subtitle": "حجم وتجعيد ووضوح لكل إطلالة.",
+    "campaign_eyesCollection_description": "اكتشفي تشكيلة فلورمار الكاملة من الماسكارا ومكياج العيون، لرموش تدوم طوال اليوم.",
+    "campaign_eyesCollection_cta": "تسوّقي مكياج العيون",
+
+    "campaign_lipsCollection_eyebrow": "مجموعة اللمعان",
+    "campaign_lipsCollection_title": "مجموعة مكياج الشفاه",
+    "campaign_lipsCollection_subtitle": "لون ولمعان بكل درجاته.",
+    "campaign_lipsCollection_description": "اكتشفي أحمر الشفاه واللمعان والتينت من فلورمار — لون يدوم طويلاً لكل إطلالة.",
+    "campaign_lipsCollection_cta": "تسوّقي مكياج الشفاه",
+
+    "campaign_faceGlowCollection_eyebrow": "مجموعة الإشراقة",
+    "campaign_faceGlowCollection_title": "مجموعة إشراقة البشرة",
+    "campaign_faceGlowCollection_subtitle": "لمسة لون ناعمة، قابلة للتدرج والمزج.",
+    "campaign_faceGlowCollection_description": "اكتشفي أحمر الخدود وبودرة البرونزاج من فلورمار لإشراقة طبيعية.",
+    "campaign_faceGlowCollection_cta": "تسوّقي منتجات البشرة"
   },
   "theVillage": {
     "metaTitle": "ذا فيليدج هرجيسا — إفطار طوال اليوم، مشويات، بيتزا وشاورما",
