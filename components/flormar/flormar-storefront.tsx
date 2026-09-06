@@ -389,7 +389,27 @@ export function FlormarStorefront({
          wishlist is the small local-only toggle above (see
          useLocalWishlist's doc comment). */}
       <div
-        className="sticky z-40 border-b border-black/5 bg-white/95 backdrop-blur-xl dark:border-white/10 dark:bg-ink/95"
+        // Mobile only (desktop unchanged): this bar is the very FIRST thing
+        // in the page (no Breadcrumbs above it, unlike Pinnacle/Emaankoo/
+        // Al-Hikma), so its static/natural position is document-y:0 — always
+        // less than its own `top` offset below. Because of that, `sticky`
+        // clamps it to render already-"stuck" at that offset from the very
+        // first paint, not just once actually scrolled. The layout box
+        // (which subsequent siblings, i.e. the campaign hero, are positioned
+        // against) never accounted for that clamp — it reserved space as if
+        // this bar sat at y:0 — so the hero's own top ~80px rendered right
+        // where this bar was ACTUALLY painted, hidden underneath it (real
+        // mobile screenshot: hero "positioned too high", cropped behind the
+        // Flormar header). `mt-[...]` gives the box the same real offset it
+        // was already being pushed down to visually, so the reserved layout
+        // space matches — the hero then starts exactly where the bar's
+        // visible bottom edge is, not underneath it. Every other
+        // sticky-right-under-the-fixed-header bar sitewide (e.g.
+        // components/attractions/attractions-toolbar.tsx) sits below a hero/
+        // title first, so its natural position is already past this same
+        // threshold before it would ever need to stick — this one is the
+        // sole "nothing above it" case.
+        className="mt-[calc(5rem+env(safe-area-inset-top))] sm:mt-0 sticky z-40 border-b border-black/5 bg-white/95 backdrop-blur-xl dark:border-white/10 dark:bg-ink/95"
         /* Sits directly under the global fixed site header, whose real height
            is h-20 (5rem) PLUS env(safe-area-inset-top) on notched devices
            (it carries `pt-[env(safe-area-inset-top)]`). A bare `top-20`
