@@ -146,7 +146,6 @@ export default async function ProductsPage({ params: { locale } }: { params: { l
           initialGroups={addonGroups}
           products={rows.map((r) => ({ id: r.id, name: r.name }))}
           revalidatePaths={[currentPath]}
-          t={t}
         />
       </div>
 
