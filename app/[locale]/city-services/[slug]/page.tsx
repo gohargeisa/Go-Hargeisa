@@ -484,6 +484,12 @@ export default async function CityServiceDetailPage({
           }
         />
         <PartnerPartnershipFooter theme={partnerTheme} locale={locale} />
+        {/* Extra mobile-only clearance above MobileBookingBar's own in-flow
+            spacer — reported on a real mobile screenshot as the fixed bar
+            sitting too close to the footer's own content. Purely additive
+            (the bar's own component/spacer/design are untouched); scoped to
+            this one route's Flormar branch only. */}
+        <div aria-hidden="true" className="h-6 lg:hidden" />
         <MobileBookingBar
           listingType="city_service"
           listingId={service.id}

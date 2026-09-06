@@ -39,7 +39,11 @@ function parseAspectRatio(value: string): number {
  * doesn't mirror either) — only the text's own alignment follows the
  * locale. `current.overlayVerticalCenter` (the 3 current active slides, all
  * shot with a clean empty background running the photo's full height)
- * centres the text vertically instead of anchoring it to one measured band.
+ * centres the text vertically instead of anchoring it to one measured band —
+ * but only from `sm` up. On mobile the container's fixed, image-aspect-ratio
+ * height plus `overflow-hidden` means a centred multi-line title can push its
+ * own top half above the box and get clipped, so mobile always anchors from
+ * the top instead (see the overlay div's own class comment below).
  *
  * One slide (`current.splitLayout`, currently only the retired
  * perfect-coverage-foundation — see its own config comment) is a deliberate
@@ -227,7 +231,18 @@ export function FlormarCampaignHero({
                     for data-driven values. */}
                 <div
                   className={`campaign-overlay absolute max-w-[160px] sm:max-w-[240px] lg:max-w-[320px] ${
-                    current.overlayVerticalCenter ? "!top-1/2 -translate-y-1/2" : ""
+                    // Vertical-centering only from `sm` up (desktop/tablet,
+                    // unchanged/approved). On mobile the container's height is
+                    // capped to the photo's own aspect ratio with
+                    // `overflow-hidden` — centering a 2-line title + eyebrow
+                    // there can push the stack's top half above y:0 and clip
+                    // it (confirmed bug: "Silk Matte" wrapping ate itself,
+                    // leaving only a cropped "Liquid Lipstick"). Mobile instead
+                    // anchors from `--campaign-overlay-top-mobile` (top of the
+                    // box, never negative), which only risks overflowing
+                    // downward — far more headroom given the stack's real
+                    // height on a phone-width column.
+                    current.overlayVerticalCenter ? "sm:!top-1/2 sm:-translate-y-1/2" : ""
                   }`}
                   style={
                     {

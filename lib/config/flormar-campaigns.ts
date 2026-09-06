@@ -177,9 +177,11 @@ const FLORMAR_CAMPAIGNS: FlormarCampaign[] = [
     // the frame. `overlayVerticalCenter` centres the text in that space
     // instead of anchoring it to one measured band, since (unlike the
     // retired photos below) there's no busy content anywhere on the left to
-    // dodge.
+    // dodge — desktop only (see flormar-campaign-hero.tsx's overlay class
+    // comment); mobile anchors from `top` instead, so it's a small 6%
+    // breathing-room inset rather than 0% flush against the frame edge.
     overlayPosition: {
-      mobile: { top: "0%", left: "5%", width: "50%" },
+      mobile: { top: "6%", left: "5%", width: "50%" },
       desktop: { top: "0%", left: "6%", width: "34%" },
     },
     overlayVerticalCenter: true,
@@ -245,7 +247,7 @@ const FLORMAR_CAMPAIGNS: FlormarCampaign[] = [
     // existed only to survive the OLD photo's cramped inset-photo corner,
     // which doesn't exist in this one.
     overlayPosition: {
-      mobile: { top: "0%", left: "5%", width: "50%" },
+      mobile: { top: "6%", left: "5%", width: "50%" },
       desktop: { top: "0%", left: "6%", width: "34%" },
     },
     overlayVerticalCenter: true,
@@ -312,7 +314,7 @@ const FLORMAR_CAMPAIGNS: FlormarCampaign[] = [
     // re-rendering the actual title/CTA copy in all 3 locales at this width
     // and confirming no overlap with the brush.
     overlayPosition: {
-      mobile: { top: "0%", left: "5%", width: "30%" },
+      mobile: { top: "6%", left: "5%", width: "30%" },
       desktop: { top: "0%", left: "6%", width: "34%" },
     },
     overlayVerticalCenter: true,

@@ -605,7 +605,7 @@ export function FlormarStorefront({
           so it never shows a mismatched or empty grid. Reuses the exact same
           ProductCard/modal as every other section. */}
       {activeCampaign && campaignProducts.length > 0 && (
-        <section id="campaign-collection" className="bg-white py-16 dark:bg-white/[0.03] sm:py-24">
+        <section id="campaign-collection" className="bg-white py-10 dark:bg-white/[0.03] sm:py-24">
           <div className="container-px mx-auto">
             <Reveal>
               <h2 className="mx-auto mb-3 max-w-2xl text-balance text-center font-display text-3xl font-extrabold tracking-tight md:text-4xl">
