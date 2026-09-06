@@ -10,7 +10,7 @@
  *     shadow + hairline ring — the logo art itself is never redrawn or
  *     recoloured) over one of its licensed illustrative wellness photos and
  *     a deep-green brand wash.
- *   - Flormar: its official wordmark, white knockout (logo-white.png, the
+ *   - Flormar: its official wordmark, white knockout (logo-white-v2.png, the
  *     pre-existing asset from generate-flormar-white-logo.mjs — not
  *     recoloured here), sitting directly on the magenta brand background
  *     (no box), over Flormar's EXISTING product hero photo (hero.png — the
