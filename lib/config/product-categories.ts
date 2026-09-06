@@ -32,6 +32,10 @@ export const PRODUCT_CATEGORY_LABELS: Record<ProductCategory, { en: string; ar: 
   plant: { en: "Plant", ar: "نبات", so: "Geed" },
   cake: { en: "Cake", ar: "كعكة", so: "Keega" },
   kids_clothing: { en: "Kids Clothing", ar: "ملابس الأطفال", so: "Dharka Carruurta" },
+  baby_clothing: { en: "Baby Clothing", ar: "ملابس الرضع", so: "Dharka Dhallaanka" },
+  shoes: { en: "Shoes", ar: "أحذية", so: "Kabaha" },
+  baby_essentials: { en: "Baby Essentials", ar: "مستلزمات الرضع", so: "Waxyaabaha Muhiimka ah ee Dhallaanka" },
+  gifts: { en: "Gifts", ar: "هدايا", so: "Hadyado" },
   eyes: { en: "Eyes", ar: "العيون", so: "Indhaha" },
   lips: { en: "Lips", ar: "الشفاه", so: "Bushimaha" },
   face: { en: "Face", ar: "الوجه", so: "Wejiga" },
@@ -45,6 +49,7 @@ export const PRODUCT_CATEGORY_ORDER: ProductCategory[] = [
   "nail_care", "beauty_tools_accessories", "womens_personal_care",
   "spare_parts",
   "bouquet", "floral_arrangement", "occasion_gift", "plant", "cake",
+  "baby_clothing", "shoes", "baby_essentials", "gifts",
   "eyes", "lips", "face", "other",
 ];
 
