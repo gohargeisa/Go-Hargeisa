@@ -30,47 +30,48 @@ import com.getcapacitor.BridgeActivity;
  * never falls back to its own full-image ImageView path — that path is
  * pre-12 only.
  *
- * To still show the actual artwork on 12+ (matching the pre-12 experience,
- * where the Capacitor plugin's own ImageView already renders it with
- * androidScaleType FIT_CENTER per capacitor.config.ts), this adds one plain
- * ImageView of that exact same drawable, added AFTER Capacitor's own content
- * so it draws on top of the WebView — not on top of, or competing with, the
- * OS's own transient icon view, which is a separate window-level decoration
- * the OS removes on its own. The moment the OS removes its icon view, this
- * overlay is already sitting there underneath it, so the hand-off is
- * seamless with no listener/timing hook into the OS's own splash needed
- * (avoids double-registering SplashScreen.setOnExitAnimationListener/
- * setKeepOnScreenCondition, which @capacitor/splash-screen's own plugin
- * already registers during its load() call inside super.onCreate() below —
- * a second registration from here would silently overwrite/fight it).
+ * To still show the actual artwork on 12+, this adds one plain ImageView of
+ * that exact same drawable inside this Activity's own content view. That is
+ * NOT enough on its own, though: the platform's real android.window.
+ * SplashScreenView is a full-screen view added as a separate sibling
+ * directly on the DecorView, above this Activity's entire content tree —
+ * confirmed via a live dumpsys view-hierarchy capture, which showed it
+ * listed after (and so painted over) android.R.id.content in its entirety,
+ * not just over the WebView. So this overlay, however correctly it's added,
+ * sized and painted underneath, is completely hidden for as long as that
+ * platform view exists, regardless of z-order tricks inside content.
  *
- * Repainting: Capacitor's own SplashScreen plugin holds a
- * ViewTreeObserver.OnPreDrawListener on this SAME content view
- * (android.R.id.content) that returns false ("not ready to draw yet") for
- * its own launchShowDuration window — confirmed empirically to suppress ANY
- * draw of this view tree, not just the WebView's, meaning this overlay's own
- * addView() can have its natural first-paint request swallowed the same
- * way. Once that listener clears, nothing else necessarily asks for a fresh
- * frame if the WebView itself is still stalled (slow connection), so the
- * poll loop below calls postInvalidate() every tick until the overlay
- * actually shows — verified working via a real on-device build (see
- * session notes): without this repeated nudge the overlay is added to the
- * hierarchy but never visibly painted; with it, the artwork reliably shows.
+ * That view is removed once @capacitor/splash-screen's own
+ * setKeepOnScreenCondition (registered in its load(), during super.onCreate
+ * below) flips false, which happens on its own schedule based on
+ * capacitor.config.ts's SplashScreen.launchShowDuration — a timer entirely
+ * independent of this overlay's own WebView-progress-based dismissal below.
+ * A first version of this file dismissed this overlay purely on WebView
+ * progress + a short settle delay: on a fast load, that finished well under
+ * launchShowDuration, meaning this overlay had already faded out and been
+ * removed — invisible, underneath the platform view — before that view was
+ * ever removed, so the user went straight from the icon splash to the bare
+ * WebView, never seeing this artwork at all (root-caused via on-device
+ * dumpsys + screenshot sequencing; see session notes). The fix is to poll
+ * for that platform view's actual presence (isOsSplashScreenViewPresent)
+ * and never dismiss this overlay while it's still there, rather than
+ * guessing a fixed duration — correct regardless of device speed or any
+ * future change to launchShowDuration. MAX_WAIT_MS is still an unconditional
+ * ceiling so this can never hang if that view were somehow never removed.
+ *
+ * Repainting: the same OnPreDrawListener that gates the platform view also
+ * suppresses this content view's own draw traversal while it's active, so
+ * this overlay's natural first-paint request can be swallowed the same way
+ * — confirmed empirically. The poll loop below calls postInvalidate() every
+ * tick to force a repaint attempt until it actually shows.
  *
  * Dismissal is tied to the WebView's own load progress (a plain read-only
  * WebView.getProgress() poll — doesn't touch/replace Capacitor's own
  * WebViewClient, so none of its existing behaviour changes) rather than a
- * fixed timer: a fixed timer independent of real load state would fade this
- * overlay away on its own schedule regardless of whether the real page is
- * actually ready yet, which under a slow connection means the overlay can
- * finish fading before there's anything to reveal. getProgress() reaching
- * 100 means resources finished loading but not necessarily that React has
- * hydrated/painted yet — confirmed empirically (a brief blank frame of the
- * WebView's own background colour, no content, right after fading on
- * progress alone) — so SETTLE_DELAY_MS gives hydration a short buffer
- * first. An absolute ceiling (MAX_WAIT_MS) still applies so this can never
- * hang indefinitely, and skips the settle buffer so the ceiling stays a
- * true worst-case bound.
+ * fixed timer: getProgress() reaching 100 means resources finished loading
+ * but not necessarily that React has hydrated/painted yet — confirmed
+ * empirically (a brief blank frame of the WebView's own background colour)
+ * — so SETTLE_DELAY_MS gives hydration a short buffer first.
  *
  * Gated to API 31+ only: pre-12 devices already get the real artwork from
  * the Capacitor plugin's own legacy splash view — adding this overlay there
@@ -110,23 +111,34 @@ public class MainActivity extends BridgeActivity {
         final long startedAt = System.currentTimeMillis();
         final Runnable[] poll = new Runnable[1];
         poll[0] = () -> {
-            if (overlay.getParent() == null) return; // already dismissed
+            if (overlay.getParent() == null) return;
 
             overlay.postInvalidate();
 
             WebView webView = getBridge() != null ? getBridge().getWebView() : null;
             boolean ready = webView != null && webView.getProgress() >= 100;
             boolean timedOut = System.currentTimeMillis() - startedAt >= MAX_WAIT_MS;
+            boolean osSplashGone = !isOsSplashScreenViewPresent();
 
             if (timedOut) {
                 fadeOutOverlay(root, overlay);
-            } else if (ready) {
+            } else if (ready && osSplashGone) {
                 handler.postDelayed(() -> fadeOutOverlay(root, overlay), SETTLE_DELAY_MS);
             } else {
                 handler.postDelayed(poll[0], POLL_INTERVAL_MS);
             }
         };
         handler.postDelayed(poll[0], POLL_INTERVAL_MS);
+    }
+
+    private boolean isOsSplashScreenViewPresent() {
+        View decor = getWindow().getDecorView();
+        if (!(decor instanceof ViewGroup)) return false;
+        ViewGroup decorGroup = (ViewGroup) decor;
+        for (int i = 0; i < decorGroup.getChildCount(); i++) {
+            if (decorGroup.getChildAt(i) instanceof android.window.SplashScreenView) return true;
+        }
+        return false;
     }
 
     private void fadeOutOverlay(ViewGroup root, ImageView overlay) {
