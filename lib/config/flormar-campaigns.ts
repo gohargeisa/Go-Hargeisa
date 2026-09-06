@@ -168,7 +168,14 @@ const FLORMAR_CAMPAIGNS: FlormarCampaign[] = [
     // exactly). This is the SAME product (identical red lip-lacquer tube) as
     // the previous photo, just re-shot in that cleaner style — SKU/category
     // below are unchanged.
-    image: "/images/partners/flormar/campaign/campaign-hero-lipstick-clean.png",
+    // .webp, not .png: the same photo, re-encoded (quality 82, same
+    // dimensions/crop/colours — nothing about the image itself changed) —
+    // ~1.75MB PNG down to ~96KB. `next.config.mjs` sets images.unoptimized
+    // (a separate, unrelated fix for a Vercel Image API billing error), so
+    // Next.js never runs its own AVIF/WebP re-encode on these — pre-
+    // compressing the source file is the only way to get this hero's LCP
+    // image down from ~1.7MB to a mobile-reasonable size.
+    image: "/images/partners/flormar/campaign/campaign-hero-lipstick-clean.webp",
     imageAspectRatio: "1672 / 941",
     // Measured (10x8 luminance-variance grid): columns 0–3 (x 0–40%) read
     // uniformly quiet (stdev mostly single digits) across ALL 8 rows — the
@@ -239,7 +246,8 @@ const FLORMAR_CAMPAIGNS: FlormarCampaign[] = [
     // separate product cutout. Same mascara tube design as the retired
     // photo (still just the plain "flormar" wordmark, no sub-product-line
     // name — see productSkuPrefixes note below, unchanged).
-    image: "/images/partners/flormar/campaign/campaign-hero-mascara-clean.png",
+    // .webp — see silk-matte-red-lip's comment above (same re-encode, same reason).
+    image: "/images/partners/flormar/campaign/campaign-hero-mascara-clean.webp",
     imageAspectRatio: "1672 / 941",
     // Same variance-grid measurement as silk-matte-red-lip: x 0–40% reads
     // quiet the full height of the frame (this photo shares the exact same
@@ -301,7 +309,8 @@ const FLORMAR_CAMPAIGNS: FlormarCampaign[] = [
     // applying a pressed blush/bronzing powder from a square gold compact
     // (a white circular "f" mark on the lid, same generic-branding pattern
     // as the mascara/lip-gloss photos — no product-line name printed).
-    image: "/images/partners/flormar/campaign/campaign-hero-blush.png",
+    // .webp — see silk-matte-red-lip's comment above (same re-encode, same reason).
+    image: "/images/partners/flormar/campaign/campaign-hero-blush.webp",
     imageAspectRatio: "1672 / 941",
     // Same composition family as the other two active photos above (clean
     // pink background on the left), but her raised brush-holding hand comes

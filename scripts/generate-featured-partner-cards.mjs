@@ -127,7 +127,7 @@ async function buildFlormar() {
     </svg>`
   );
 
-  const logo = await sharp(p("public/images/partners/flormar/logo-white.png"))
+  const logo = await sharp(p("public/images/partners/flormar/logo-white-v2.png"))
     .resize(384, null, { fit: "inside" })
     .toBuffer();
   const logoH = (await sharp(logo).metadata()).height ?? 0;

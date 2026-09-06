@@ -287,19 +287,26 @@ export default async function CityServiceDetailPage({
   const service = await getCityServiceBySlug(slug, locale);
   if (!service) notFound();
 
-  const category = await getCategoryById(service.categoryId);
+  // None of these 11 depend on each other (category only depends on
+  // `service`, already resolved above) — they were previously 11 separate
+  // sequential awaits, each one blocking the next before the render could
+  // even reach the (already-parallel) Promise.all below. Batching them
+  // removes 10 round-trips' worth of unnecessary serialized latency from
+  // every single page load.
+  const [category, t, tNav, td, th, tw, tl, tn, tp, ta, thj] = await Promise.all([
+    getCategoryById(service.categoryId),
+    getTranslations("common"),
+    getTranslations("nav"),
+    getTranslations("detail"),
+    getTranslations("hotelDetail"),
+    getTranslations("weekdays"),
+    getTranslations("listings"),
+    getTranslations("nearby"),
+    getTranslations("products"),
+    getTranslations("appointments"),
+    getTranslations("hijamaEducation"),
+  ]);
   if (!category) notFound();
-
-  const t = await getTranslations("common");
-  const tNav = await getTranslations("nav");
-  const td = await getTranslations("detail");
-  const th = await getTranslations("hotelDetail");
-  const tw = await getTranslations("weekdays");
-  const tl = await getTranslations("listings");
-  const tn = await getTranslations("nearby");
-  const tp = await getTranslations("products");
-  const ta = await getTranslations("appointments");
-  const thj = await getTranslations("hijamaEducation");
 
   const featureEligible = category.supportsNewFeatures;
   const galleryEligible = category.supportsGallery;
