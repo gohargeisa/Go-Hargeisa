@@ -72,6 +72,23 @@
     "emptyBody": "Taabo Kaydi ganacsi si aad halkan ugu haysato.",
     "error": "Goobaha la kaydiyay lama soo gelin karin"
   },
+  "bookings": {
+    "title": "Ballamahayga",
+    "hotelsTitle": "Ballamaha Hudheelka",
+    "tablesTitle": "Ballamaha Miisaska",
+    "appointmentsTitle": "Ballamaha",
+    "hotelsEmpty": "Weli ballamo hudheel ma jiraan.",
+    "tablesEmpty": "Weli ballamo miis ma jiraan.",
+    "appointmentsEmpty": "Weli ballamo ma jiraan.",
+    "emptyTitle": "Weli ballamo ma jiraan",
+    "emptyBody": "Ballan hudheel, miis, ama booqasho si aad halkan ugu aragto.",
+    "error": "Lama soo gelin karin tan",
+    "guests": "{count} marti",
+    "statusPending": "Sugaya",
+    "statusConfirmed": "La xaqiijiyay",
+    "statusCompleted": "La dhammeeyay",
+    "statusCancelled": "La joojiyay"
+  },
   "alerts": {
     "emptyTitle": "Wax cusboonaysiin ah ma jiraan",
     "emptyBody": "Xaqiijinta buugista iyo cusboonaysiinta dalabka ayaa halkan ka muuqan doona.",
@@ -255,6 +272,7 @@
     "signInRequiredBody": "Abuur akoon ama gal si aad u buugto, u dalbato oo aad u kaydiso goobaha."
   },
   "profile": {
+    "myBookings": "Ballamahayga",
     "language": "Luqadda",
     "theme": "Muuqaalka",
     "theme_system": "Nidaamka",

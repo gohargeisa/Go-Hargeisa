@@ -129,6 +129,19 @@ export default function HotelBookingScreen() {
   const taxes = 0;
   const total = subtotal + taxes;
 
+  // Real gating, not decorative: a specific selected room must actually be
+  // available (the room list already prevents tapping an unavailable room,
+  // this is the same real `isAvailable` flag as a defensive second check),
+  // plus the fields onSubmit already requires. "Any available room" (no
+  // roomId) has nothing to disable against.
+  const canSubmit =
+    guestName.trim().length > 0 &&
+    guestPhone.trim().length > 0 &&
+    Boolean(checkInIso) &&
+    Boolean(checkOutIso) &&
+    checkOutIso > checkInIso &&
+    (!selectedRoom || selectedRoom.isAvailable);
+
   if (hotel.isPending) {
     return (
       <Screen scroll>
@@ -244,7 +257,7 @@ export default function HotelBookingScreen() {
   }
 
   return (
-    <Screen scroll>
+    <Screen scroll edges={{ top: true, bottom: true }}>
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: spacing.section }}>
         <AppText variant="display">{t("hotels.bookNow", "Book Now")}</AppText>
         <Pressable onPress={close} hitSlop={10} style={{ padding: 4 }}>
@@ -525,7 +538,12 @@ export default function HotelBookingScreen() {
           </Card>
         ) : null}
 
-        <Button label={t("hotels.submit", "Send Booking Request")} onPress={onSubmit} loading={submit.isPending} />
+        <Button
+          label={t("hotels.submit", "Send Booking Request")}
+          onPress={onSubmit}
+          loading={submit.isPending}
+          disabled={!canSubmit}
+        />
       </View>
     </Screen>
   );

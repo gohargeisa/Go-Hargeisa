@@ -72,6 +72,23 @@
     "emptyBody": "اضغط حفظ على أي عمل ليظهر هنا.",
     "error": "تعذّر تحميل الأماكن المحفوظة"
   },
+  "bookings": {
+    "title": "حجوزاتي",
+    "hotelsTitle": "حجوزات الفنادق",
+    "tablesTitle": "حجوزات الطاولات",
+    "appointmentsTitle": "المواعيد",
+    "hotelsEmpty": "لا توجد حجوزات فنادق بعد.",
+    "tablesEmpty": "لا توجد حجوزات طاولات بعد.",
+    "appointmentsEmpty": "لا توجد مواعيد بعد.",
+    "emptyTitle": "لا توجد حجوزات بعد",
+    "emptyBody": "احجز فندقًا أو طاولة أو موعدًا لتراه هنا.",
+    "error": "تعذّر تحميل هذا",
+    "guests": "{count} ضيوف",
+    "statusPending": "قيد الانتظار",
+    "statusConfirmed": "مؤكد",
+    "statusCompleted": "مكتمل",
+    "statusCancelled": "ملغى"
+  },
   "alerts": {
     "emptyTitle": "لا توجد تحديثات",
     "emptyBody": "ستظهر هنا تأكيدات الحجوزات وتحديثات الطلبات.",
@@ -255,6 +272,7 @@
     "signInRequiredBody": "أنشئ حسابًا أو سجّل الدخول للحجز والطلب وحفظ الأماكن."
   },
   "profile": {
+    "myBookings": "حجوزاتي",
     "language": "اللغة",
     "theme": "المظهر",
     "theme_system": "النظام",

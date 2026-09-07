@@ -186,6 +186,20 @@ export default function ProfileScreen() {
         </Card>
       </Pressable>
 
+      {/* My Bookings shortcut — only relevant once signed in (bookings are
+          tied to the user's own account, RLS-scoped). */}
+      {status === "authenticated" ? (
+        <Pressable onPress={() => router.push("/bookings")}>
+          <Card style={{ marginTop: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+              <Ionicons name="calendar-outline" size={20} color={theme.colors.primary} />
+              <AppText variant="bodyStrong">{t("profile.myBookings", "My Bookings")}</AppText>
+            </View>
+            <Ionicons name={isRtl ? "chevron-back" : "chevron-forward"} size={16} color={theme.colors.textMuted} />
+          </Card>
+        </Pressable>
+      ) : null}
+
       {/* Language */}
       <Card style={{ marginTop: 16 }}>
         <AppText variant="heading" style={{ marginBottom: 12 }}>

@@ -114,6 +114,18 @@ export default function AppointmentBookingScreen() {
     disabled: !s.available,
   }));
 
+  // Real gating: the picker already prevents selecting a booked slot, this
+  // is the same real availability flag as a defensive second check (a slot
+  // can go from available to booked between fetching and submitting).
+  const selectedSlot = (slots.data ?? []).find((s) => s.time === time);
+  const canSubmit =
+    Boolean(doctorId) &&
+    Boolean(dateIso) &&
+    Boolean(time) &&
+    (selectedSlot?.available ?? true) &&
+    patientName.trim().length > 0 &&
+    patientPhone.trim().length > 0;
+
   if (submit.isSuccess) {
     return (
       <Screen>
@@ -196,7 +208,7 @@ export default function AppointmentBookingScreen() {
   }
 
   return (
-    <Screen scroll>
+    <Screen scroll edges={{ top: true, bottom: true }}>
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: spacing.section }}>
         <AppText variant="display">{t("appointments.bookAppointment", "Book an Appointment")}</AppText>
         <Pressable onPress={close} hitSlop={10} style={{ padding: 4 }}>
@@ -333,6 +345,7 @@ export default function AppointmentBookingScreen() {
           label={t("appointments.bookAppointment", "Book an Appointment")}
           onPress={onSubmit}
           loading={submit.isPending}
+          disabled={!canSubmit}
         />
       </View>
     </Screen>

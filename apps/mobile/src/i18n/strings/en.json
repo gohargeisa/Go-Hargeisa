@@ -72,6 +72,23 @@
     "emptyBody": "Tap Save on a business to keep it here.",
     "error": "Couldn't load your saved places"
   },
+  "bookings": {
+    "title": "My Bookings",
+    "hotelsTitle": "Hotel Bookings",
+    "tablesTitle": "Table Reservations",
+    "appointmentsTitle": "Appointments",
+    "hotelsEmpty": "No hotel bookings yet.",
+    "tablesEmpty": "No table reservations yet.",
+    "appointmentsEmpty": "No appointments yet.",
+    "emptyTitle": "No bookings yet",
+    "emptyBody": "Book a hotel, reserve a table, or schedule an appointment to see it here.",
+    "error": "Couldn't load this",
+    "guests": "{count} guests",
+    "statusPending": "Pending",
+    "statusConfirmed": "Confirmed",
+    "statusCompleted": "Completed",
+    "statusCancelled": "Cancelled"
+  },
   "alerts": {
     "emptyTitle": "No updates",
     "emptyBody": "Booking confirmations and order updates will show up here.",
@@ -259,6 +276,7 @@
     "signInRequiredBody": "Create an account or sign in to book, order and save places."
   },
   "profile": {
+    "myBookings": "My Bookings",
     "language": "Language",
     "theme": "Appearance",
     "theme_system": "System",

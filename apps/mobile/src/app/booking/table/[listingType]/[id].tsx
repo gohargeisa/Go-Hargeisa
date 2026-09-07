@@ -67,6 +67,12 @@ export default function TableReservationScreen() {
 
   const close = () => (router.canDismiss() ? router.dismiss() : router.replace("/"));
 
+  // No slot/availability system exists for reservations (see this file's
+  // top comment) — nothing to check availability against, matching the
+  // website exactly. This only gates on the same fields onSubmit requires.
+  const canSubmit =
+    customerName.trim().length > 0 && customerPhone.trim().length > 0 && Boolean(date) && Boolean(time);
+
   if (submit.isSuccess) {
     return (
       <Screen>
@@ -147,7 +153,7 @@ export default function TableReservationScreen() {
   }
 
   return (
-    <Screen scroll>
+    <Screen scroll edges={{ top: true, bottom: true }}>
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
         <AppText variant="display">{t("reservations.modalTitle", "Reserve a Table")}</AppText>
         <Pressable onPress={close} hitSlop={10} style={{ padding: 4 }}>
@@ -327,6 +333,7 @@ export default function TableReservationScreen() {
           label={t("reservations.submit", "Confirm Reservation")}
           onPress={onSubmit}
           loading={submit.isPending}
+          disabled={!canSubmit}
         />
       </View>
     </Screen>
