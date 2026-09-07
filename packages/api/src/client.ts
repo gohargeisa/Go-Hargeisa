@@ -9,12 +9,22 @@
  * with "/".
  */
 import type {
+  CafeDetail,
+  CafeListItem,
   CategoryDTO,
   CityServiceDetail,
   CityServiceListItem,
   CityServiceListParams,
   HealthResponse,
+  HotelDetail,
+  HotelListItem,
   Paginated,
+  RestaurantCafeListParams,
+  RestaurantDetail,
+  RestaurantListItem,
+  SlotStatusDTO,
+  SubmitAppointmentInput,
+  SubmitAppointmentResult,
 } from "./types";
 
 export interface TransportInit {
@@ -66,6 +76,66 @@ export function createGoHargeisaApi(transport: ApiTransport) {
           `/city-services/${encodeURIComponent(slug)}`,
           { signal },
         ),
+    },
+
+    restaurants: {
+      list: (params: RestaurantCafeListParams = {}, signal?: AbortSignal) =>
+        transport<Paginated<RestaurantListItem>>(
+          `/restaurants${queryString({
+            q: params.q,
+            page: params.page,
+            pageSize: params.pageSize,
+          })}`,
+          { signal },
+        ),
+
+      get: (slug: string, signal?: AbortSignal) =>
+        transport<RestaurantDetail>(`/restaurants/${encodeURIComponent(slug)}`, { signal }),
+    },
+
+    cafes: {
+      list: (params: RestaurantCafeListParams = {}, signal?: AbortSignal) =>
+        transport<Paginated<CafeListItem>>(
+          `/cafes${queryString({
+            q: params.q,
+            page: params.page,
+            pageSize: params.pageSize,
+          })}`,
+          { signal },
+        ),
+
+      get: (slug: string, signal?: AbortSignal) =>
+        transport<CafeDetail>(`/cafes/${encodeURIComponent(slug)}`, { signal }),
+    },
+
+    hotels: {
+      list: (params: RestaurantCafeListParams = {}, signal?: AbortSignal) =>
+        transport<Paginated<HotelListItem>>(
+          `/hotels${queryString({
+            q: params.q,
+            page: params.page,
+            pageSize: params.pageSize,
+          })}`,
+          { signal },
+        ),
+
+      get: (slug: string, signal?: AbortSignal) =>
+        transport<HotelDetail>(`/hotels/${encodeURIComponent(slug)}`, { signal }),
+    },
+
+    appointments: {
+      slots: (doctorId: string, date: string, signal?: AbortSignal) =>
+        transport<SlotStatusDTO[]>(
+          `/appointment-slots${queryString({ doctorId, date })}`,
+          { signal },
+        ),
+
+      submit: (input: SubmitAppointmentInput, signal?: AbortSignal) =>
+        transport<SubmitAppointmentResult>("/appointments", {
+          method: "POST",
+          body: input,
+          signal,
+        }),
     },
   };
 }

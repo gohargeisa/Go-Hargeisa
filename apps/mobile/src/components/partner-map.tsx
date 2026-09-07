@@ -15,6 +15,7 @@ import { useTranslation } from "react-i18next";
 import { MapView, Camera, MapMarker } from "@/components/maplibre";
 import { MAP_STYLE_URL, openDirections, openInMaps } from "@/lib/maps";
 import { useTheme } from "@/providers/theme-provider";
+import { useLocale } from "@/i18n/use-locale";
 import { radii } from "@/theme";
 import { AppText } from "@/ui";
 
@@ -66,6 +67,7 @@ function MapFallback({ lat, lng, label, height }: Required<PartnerMapProps>) {
 export function PartnerMap({ lat, lng, label, height = 180 }: PartnerMapProps) {
   const { theme } = useTheme();
   const { t } = useTranslation();
+  const { isRtl } = useLocale();
   const resolved = { lat, lng, label, height };
 
   if (!MapView || !Camera || !MapMarker) {
@@ -114,7 +116,7 @@ export function PartnerMap({ lat, lng, label, height = 180 }: PartnerMapProps) {
           onPress={() => openDirections({ latitude: lat, longitude: lng })}
           style={{
             position: "absolute",
-            right: 10,
+            ...(isRtl ? { left: 10 } : { right: 10 }),
             bottom: 10,
             flexDirection: "row",
             alignItems: "center",

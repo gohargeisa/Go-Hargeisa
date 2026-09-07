@@ -70,6 +70,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     "expo-localization",
     "expo-secure-store",
     "expo-web-browser",
+    "@react-native-community/datetimepicker",
     [
       "expo-splash-screen",
       {

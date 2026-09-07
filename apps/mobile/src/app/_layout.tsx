@@ -36,8 +36,39 @@ function ThemedRoot() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="category/[slug]" />
         <Stack.Screen name="partner/[slug]" />
+        <Stack.Screen name="restaurants/index" />
+        <Stack.Screen name="restaurants/[slug]" />
+        <Stack.Screen name="cafes/index" />
+        <Stack.Screen name="cafes/[slug]" />
+        <Stack.Screen name="hotels/index" />
+        <Stack.Screen name="hotels/[slug]" />
+        <Stack.Screen name="product/[listingType]/[id]" />
         <Stack.Screen
           name="auth"
+          options={{ presentation: "modal", animation: "slide_from_bottom" }}
+        />
+        <Stack.Screen
+          name="cart"
+          options={{ presentation: "modal", animation: "slide_from_bottom" }}
+        />
+        <Stack.Screen
+          name="checkout"
+          options={{ presentation: "modal", animation: "slide_from_bottom" }}
+        />
+        <Stack.Screen
+          name="review/[listingType]/[id]"
+          options={{ presentation: "modal", animation: "slide_from_bottom" }}
+        />
+        <Stack.Screen
+          name="booking/appointment/[doctorId]"
+          options={{ presentation: "modal", animation: "slide_from_bottom" }}
+        />
+        <Stack.Screen
+          name="booking/table/[listingType]/[id]"
+          options={{ presentation: "modal", animation: "slide_from_bottom" }}
+        />
+        <Stack.Screen
+          name="booking/hotel/[hotelId]"
           options={{ presentation: "modal", animation: "slide_from_bottom" }}
         />
         <Stack.Screen name="+not-found" options={{ headerShown: true, title: "" }} />
