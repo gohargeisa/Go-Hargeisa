@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 
 import { isSupabaseConfigured } from "@/env";
 import { supabase } from "@/lib/supabase";
+import { GoogleSignInError, useSignInWithGoogle } from "@/lib/google-auth";
 import { useTheme } from "@/providers/theme-provider";
 import { spacing } from "@/theme";
 import { AppText, Button, Screen } from "@/ui";
@@ -36,6 +37,21 @@ export default function LoginScreen() {
     if (router.canDismiss()) router.dismiss();
     const target = returnTo && returnTo.startsWith("/") ? returnTo : "/";
     router.replace(target as never);
+  };
+
+  const { signInWithGoogle, loading: googleLoading } = useSignInWithGoogle();
+
+  const onGoogleSignIn = async () => {
+    setError(null);
+    setNotice(null);
+    try {
+      const signedIn = await signInWithGoogle();
+      if (signedIn) done();
+    } catch (e) {
+      setError(
+        e instanceof GoogleSignInError ? e.message : t("auth.errorGoogleSignIn", "Failed to sign in with Google"),
+      );
+    }
   };
 
   const forgotPassword = async () => {
@@ -172,9 +188,23 @@ export default function LoginScreen() {
           ) : null}
         </View>
 
-        <AppText variant="label" color="muted" style={{ marginTop: spacing.section }}>
-          {t("auth.oauthComing", "Continue with Google — coming in the next update.")}
-        </AppText>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginTop: spacing.section }}>
+          <View style={{ flex: 1, height: 1, backgroundColor: theme.colors.border }} />
+          <AppText variant="label" color="muted">
+            {t("auth.or", "or")}
+          </AppText>
+          <View style={{ flex: 1, height: 1, backgroundColor: theme.colors.border }} />
+        </View>
+
+        <View style={{ marginTop: 14 }}>
+          <Button
+            label={t("auth.continueWithGoogle", "Continue with Google")}
+            onPress={() => void onGoogleSignIn()}
+            loading={googleLoading}
+            variant="secondary"
+            icon={<Ionicons name="logo-google" size={18} color={theme.colors.text} />}
+          />
+        </View>
       </KeyboardAvoidingView>
     </Screen>
   );

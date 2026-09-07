@@ -74,7 +74,11 @@
   },
   "alerts": {
     "emptyTitle": "لا توجد تحديثات",
-    "emptyBody": "ستظهر هنا تأكيدات الحجوزات وتحديثات الطلبات."
+    "emptyBody": "ستظهر هنا تأكيدات الحجوزات وتحديثات الطلبات.",
+    "error": "تعذّر تحميل التنبيهات",
+    "markAllRead": "تعليم الكل كمقروء",
+    "loadMore": "تحميل المزيد",
+    "loadingMore": "جارٍ التحميل…"
   },
   "appointments": {
     "bookAppointment": "احجز موعدًا",
@@ -243,6 +247,9 @@
     "forgotPassword": "نسيت كلمة المرور؟",
     "enterEmailFirst": "أدخل بريدك الإلكتروني أعلاه أولاً.",
     "resetSent": "تم إرسال رابط إعادة تعيين كلمة المرور — تحقق من بريدك.",
+    "or": "أو",
+    "continueWithGoogle": "المتابعة باستخدام Google",
+    "errorGoogleSignIn": "تعذّر تسجيل الدخول باستخدام Google",
     "signedOutTitle": "أنت تتصفح كضيف",
     "signInRequiredTitle": "سجّل الدخول للمتابعة",
     "signInRequiredBody": "أنشئ حسابًا أو سجّل الدخول للحجز والطلب وحفظ الأماكن."

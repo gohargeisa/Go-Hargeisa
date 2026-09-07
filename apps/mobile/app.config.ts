@@ -25,6 +25,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: NAME,
   slug: "go-hargeisa",
+  owner: "go-hargeisa",
   version: "0.1.0",
   orientation: "portrait",
   scheme: SCHEME,
@@ -107,7 +108,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   extra: {
     router: {},
-    eas: { projectId: process.env.EAS_PROJECT_ID ?? "" },
+    eas: { projectId: process.env.EAS_PROJECT_ID ?? "c10924d2-8e0d-4db3-964f-e47368aa6956" },
     // Non-secret; read via src/env.ts.
     apiBaseUrl: process.env.EXPO_PUBLIC_API_BASE_URL ?? "https://gohargeisa.com",
     appVariant: VARIANT,

@@ -73,7 +73,17 @@ export default function HomeScreen() {
           {categories.data.map((c) => (
             <Pressable
               key={c.id}
-              onPress={() => router.push(`/category/${c.slug}`)}
+              onPress={() => {
+                // Hotels/Restaurants/Cafes are separate verticals with their
+                // own route trees (see the block below) — routing them
+                // through the generic city_services category screen instead
+                // returns zero results, since their businesses don't live in
+                // city_services.
+                if (c.targetTable === "hotels") return router.push("/hotels");
+                if (c.targetTable === "restaurants") return router.push("/restaurants");
+                if (c.targetTable === "cafes") return router.push("/cafes");
+                router.push(`/category/${c.slug}`);
+              }}
               style={{
                 paddingHorizontal: 16,
                 paddingVertical: 10,

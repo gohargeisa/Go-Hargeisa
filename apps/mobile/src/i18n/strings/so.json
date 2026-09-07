@@ -74,7 +74,11 @@
   },
   "alerts": {
     "emptyTitle": "Wax cusboonaysiin ah ma jiraan",
-    "emptyBody": "Xaqiijinta buugista iyo cusboonaysiinta dalabka ayaa halkan ka muuqan doona."
+    "emptyBody": "Xaqiijinta buugista iyo cusboonaysiinta dalabka ayaa halkan ka muuqan doona.",
+    "error": "Digniinahaaga lama soo gelin karin",
+    "markAllRead": "Dhammaan calaamadee la akhriyay",
+    "loadMore": "Soo rar wax dheeraad ah",
+    "loadingMore": "Waa la soo raadinayaa…"
   },
   "appointments": {
     "bookAppointment": "Ballan Qabso",
@@ -243,6 +247,9 @@
     "forgotPassword": "Furaha ma illowday?",
     "enterEmailFirst": "Marka hore geli iimaylkaaga kore.",
     "resetSent": "Link dib-u-dejin ayaa la diray — eeg iimaylkaaga.",
+    "or": "ama",
+    "continueWithGoogle": "Ku sii soco Google",
+    "errorGoogleSignIn": "Waa la waayay in lagu galo Google",
     "signedOutTitle": "Waxaad u fiirinaysaa marti ahaan",
     "signInRequiredTitle": "Gal si aad u sii wadato",
     "signInRequiredBody": "Abuur akoon ama gal si aad u buugto, u dalbato oo aad u kaydiso goobaha."

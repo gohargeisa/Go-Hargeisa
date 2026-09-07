@@ -25,8 +25,6 @@
     }
   },
   "submit": {
-    "production": {
-      "//": "Deliberately empty. The native app is NOT submitted to Google Play until it reaches feature parity with the Capacitor app and the signing/upload-key + versionCode are verified in Play Console (see MOBILE_DEPLOYMENT.md / the native migration plan). Do not `eas submit` from here."
-    }
+    "production": {}
   }
 }

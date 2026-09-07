@@ -35,7 +35,15 @@ export default function ExploreScreen() {
   });
 
   const chips = useMemo(
-    () => [{ id: "__all", slug: undefined as string | undefined, name: t("explore.all", "All") }, ...(categories.data ?? [])],
+    () => [
+      { id: "__all", slug: undefined as string | undefined, name: t("explore.all", "All") },
+      // Hotels/Restaurants/Cafes are separate verticals (own tables, own
+      // detail routes) — they already have full-featured search screens of
+      // their own reachable from Home, and this screen's search only covers
+      // city_services, so offering them here would be a dead-end filter
+      // that always returns "No matches".
+      ...(categories.data ?? []).filter((c) => c.targetTable === "city_services"),
+    ],
     [categories.data, t],
   );
 

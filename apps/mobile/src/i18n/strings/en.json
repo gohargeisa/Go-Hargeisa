@@ -74,7 +74,11 @@
   },
   "alerts": {
     "emptyTitle": "No updates",
-    "emptyBody": "Booking confirmations and order updates will show up here."
+    "emptyBody": "Booking confirmations and order updates will show up here.",
+    "error": "Couldn't load your alerts",
+    "markAllRead": "Mark all read",
+    "loadMore": "Load more",
+    "loadingMore": "Loading…"
   },
   "appointments": {
     "bookAppointment": "Book an Appointment",
@@ -247,7 +251,9 @@
     "invalidInput": "Enter a valid email and a password of at least 6 characters.",
     "notConfigured": "Sign-in isn't available in this build.",
     "genericError": "Something went wrong.",
-    "oauthComing": "Continue with Google — coming in the next update.",
+    "or": "or",
+    "continueWithGoogle": "Continue with Google",
+    "errorGoogleSignIn": "Failed to sign in with Google",
     "signedOutTitle": "You're browsing as a guest",
     "signInRequiredTitle": "Sign in to continue",
     "signInRequiredBody": "Create an account or sign in to book, order and save places."
