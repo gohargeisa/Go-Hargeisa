@@ -434,6 +434,7 @@ export function SiteHeader({
                 <div className="mt-3 border-t border-ink/8 pt-3 dark:border-white/10">
                   <Link
                     href={`/${locale}/auth/login`}
+                    onClick={() => setOpen(false)}
                     className="block rounded-full border border-ink/15 py-2.5 text-center text-sm font-semibold transition-colors hover:border-primary hover:text-primary dark:border-white/20 dark:text-white dark:hover:border-primary"
                   >
                     {t("signIn")}
