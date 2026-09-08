@@ -46,9 +46,16 @@ export async function apiFetch<T>(
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  // Session lookup failing must not take down an otherwise-public read (most
+  // /api/v1 GETs work anonymously) — and it must still be visible when it
+  // does fail, instead of silently skipping the Authorization header with
+  // no trace of why.
+  let session: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"] = null;
+  try {
+    session = (await supabase.auth.getSession()).data.session;
+  } catch (err) {
+    console.error(`[api] ${url} -> getSession() failed, continuing unauthenticated:`, err);
+  }
 
   try {
     const res = await fetch(url, {
@@ -77,10 +84,18 @@ export async function apiFetch<T>(
 
     return json as T;
   } catch (err) {
-    if (err instanceof ApiError) throw err;
+    // Surfaced in the UI is just "couldn't load" — this is the only place
+    // the actual cause (wrong host, timeout, DNS/connection refused, etc.)
+    // is visible, so log it plainly to the Metro terminal every time.
+    if (err instanceof ApiError) {
+      console.error(`[api] ${url} ->`, err.status, err.message);
+      throw err;
+    }
     if (err instanceof Error && err.name === "AbortError") {
+      console.error(`[api] ${url} -> timed out after ${timeoutMs}ms`);
       throw new ApiError("The request timed out.", 0);
     }
+    console.error(`[api] ${url} -> network error:`, err);
     throw new ApiError(
       err instanceof Error ? err.message : "Network error",
       0,
