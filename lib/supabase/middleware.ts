@@ -17,6 +17,30 @@ import { getPublicSupabaseAnonKey } from "@/lib/supabase/is-configured";
  * that route-protection block for why it can't be left to page-level
  * `redirect()` calls alone.
  */
+// getUser() is a network call to Supabase's Auth API on every single page
+// load (this runs in middleware for effectively every route) — with no
+// timeout of its own. A hang there (Supabase-side slowness, a bad network
+// path, an oversized/malformed cookie on one particular request) previously
+// meant the whole middleware invocation hung with it, all the way to
+// Vercel's hard 300s edge-function ceiling — a site-wide 504
+// (MIDDLEWARE_INVOCATION_TIMEOUT) instead of a graceful "treat as logged
+// out" fallback. Live evidence: repeated `Task timed out after 300 seconds`
+// errors on this exact call.
+const AUTH_TIMEOUT_MS = 5000;
+
+async function getUserWithTimeout(
+  supabase: ReturnType<typeof createServerClient>
+): Promise<User | null> {
+  const timeout = new Promise<null>((resolve) => {
+    setTimeout(() => resolve(null), AUTH_TIMEOUT_MS);
+  });
+  try {
+    return await Promise.race([supabase.auth.getUser().then((r) => r.data.user), timeout]);
+  } catch {
+    return null;
+  }
+}
+
 export async function refreshSupabaseSession(
   request: NextRequest,
   response: NextResponse
@@ -41,9 +65,9 @@ export async function refreshSupabaseSession(
 
   // Touching getUser() refreshes the token if it's expired and triggers the
   // `set`/`remove` callbacks above, which now write onto `response` directly.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // A timeout here still skips the refresh for this one request (safe — it
+  // just retries next request) instead of hanging the whole site.
+  const user = await getUserWithTimeout(supabase);
 
   return { user, supabase };
 }
