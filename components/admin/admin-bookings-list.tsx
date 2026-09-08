@@ -212,7 +212,52 @@ export function AdminBookingsList({ bookings }: { bookings: Booking[] }) {
           <p className="font-semibold">{t("noBookingsMatch")}</p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl2 border border-ink/8 dark:border-white/10">
+        <>
+          {/* Mobile: card stack (< sm) — a horizontally-scrolling table is
+              workable on a phone but every control ends up too small/close
+              together to hit reliably (same rationale as AdminListTable). */}
+          <div className="flex flex-col gap-3 sm:hidden">
+            {filtered.map((b) => (
+              <div key={b.id} className="rounded-xl2 border border-ink/8 bg-white p-4 dark:border-white/10 dark:bg-white/[0.03]">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-semibold">{b.guestName}</p>
+                    <p className="truncate text-xs text-ink/50 dark:text-sand/50">{b.hotelName ?? "—"}{b.roomName ? ` · ${b.roomName}` : ""}</p>
+                    <p className="mt-0.5 font-mono text-[11px] text-ink/40 dark:text-sand/40">{b.bookingReference ?? "—"}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setViewing(b)}
+                    aria-label={t("productOrdersViewDetails")}
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-ink/15 text-ink/60 dark:border-white/20 dark:text-sand/60"
+                  >
+                    <Eye size={14} aria-hidden="true" />
+                  </button>
+                </div>
+                <p className="mt-2 text-xs text-ink/60 dark:text-sand/60">
+                  {formatDate(b.checkIn)} → {formatDate(b.checkOut)}
+                </p>
+                <div className="mt-2.5 flex items-center gap-2 border-t border-ink/8 pt-2.5 dark:border-white/10">
+                  <select
+                    value={b.status}
+                    disabled={!b.hotelId || (isPending && pendingId === b.id)}
+                    onChange={(e) => onChangeStatus(b, e.target.value as Booking["status"])}
+                    className={`w-full rounded-full border-0 px-2.5 py-1.5 text-xs font-bold capitalize outline-none disabled:opacity-60 ${STATUS_STYLES[b.status]}`}
+                  >
+                    {(["pending", "confirmed", "cancelled", "completed"] as const).map((s) => (
+                      <option key={s} value={s}>
+                        {t(`bookingStatus_${s}` as "bookingStatus_pending")}
+                      </option>
+                    ))}
+                  </select>
+                  {isPending && pendingId === b.id && <Loader2 size={14} className="shrink-0 animate-spin text-ink/40" />}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop/tablet: table (>= sm) */}
+          <div className="hidden overflow-x-auto rounded-xl2 border border-ink/8 dark:border-white/10 sm:block">
           <table className="w-full text-start text-sm">
             <thead className="border-b border-ink/8 bg-ink/[0.02] text-xs uppercase tracking-wide text-ink/50 dark:border-white/10 dark:bg-white/[0.03] dark:text-sand/50">
               <tr>
@@ -271,7 +316,8 @@ export function AdminBookingsList({ bookings }: { bookings: Booking[] }) {
               ))}
             </tbody>
           </table>
-        </div>
+          </div>
+        </>
       )}
 
       {viewing && <AdminBookingDetailModal booking={viewing} onClose={() => setViewing(null)} />}
