@@ -20,7 +20,7 @@ export default async function LoginPage({
   const t = await getTranslations({ locale, namespace: "auth" });
 
   return (
-    <section className="container-px mx-auto flex min-h-[70vh] items-center justify-center py-16">
+    <section className="container-px mx-auto flex min-h-[70vh] items-center justify-center pb-16 pt-[calc(env(safe-area-inset-top)+5.5rem)]">
       <div className="w-full max-w-sm rounded-xl3 border border-ink/8 bg-white p-8 shadow-soft dark:border-white/10 dark:bg-white/[0.03]">
         <h1 className="text-center font-display text-3xl font-bold">
           {t("welcomeTitle")}
