@@ -46,9 +46,22 @@ export function SplashScreenOverlay() {
   // entire screen the whole time, since it's only ever hidden once
   // reportReady() fires below, which itself waits on shouldShow.
   useEffect(() => {
-    const isNative = (window as typeof window & { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor
-      ?.isNativePlatform?.() === true;
+    const cap = (
+      window as typeof window & {
+        Capacitor?: { isNativePlatform?: () => boolean; getPlatform?: () => string };
+      }
+    ).Capacitor;
+    const isNative = cap?.isNativePlatform?.() === true;
     if (!isNative) return;
+    // Android already shows the real launch artwork natively (MainActivity's
+    // own SplashScreenView-aware ImageView overlay, added because Android
+    // 12+'s OS splash API can only ever show a small icon) — this web layer
+    // was the pre-that-fix workaround. Keeping both meant the user saw this
+    // overlay's Hero-photo/logo animation play a second time, underneath,
+    // right after the native artwork faded away: a visible "old splash after
+    // the new splash" duplicate. iOS has no equivalent native overlay, so it
+    // still needs this layer.
+    if (cap?.getPlatform?.() === "android") return;
     if (sessionStorage.getItem(SESSION_KEY) === "1") return;
 
     sessionStorage.setItem(SESSION_KEY, "1");

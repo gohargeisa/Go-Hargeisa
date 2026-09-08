@@ -196,7 +196,83 @@ export function AdminProductOrdersList({ orders }: { orders: AdminProductOrder[]
           <p className="font-semibold">{t("noProductOrdersMatch")}</p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl2 border border-ink/8 dark:border-white/10">
+        <>
+          {/* Mobile: card stack (< sm) — the desktop table below has 6 dense
+              columns plus an image-heavy items list, unworkable at phone
+              width even scrolled; a card per order keeps every control
+              reachable. */}
+          <div className="flex flex-col gap-3 sm:hidden">
+            {filtered.map((o) => {
+              const isExpanded = expandedId === o.id;
+              return (
+                <div key={o.id} className="rounded-xl2 border border-ink/8 bg-white p-4 dark:border-white/10 dark:bg-white/[0.03]">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-semibold">{o.customerName}</p>
+                      <p className="truncate text-xs text-ink/50 dark:text-sand/50">{o.businessName}</p>
+                      <p className="mt-0.5 font-mono text-[11px] text-ink/40 dark:text-sand/40">{o.orderReference}</p>
+                    </div>
+                    <p className="shrink-0 font-semibold">{o.total != null ? `$${o.total.toFixed(2)}` : "—"}</p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setExpandedId(isExpanded ? null : o.id)}
+                    aria-expanded={isExpanded}
+                    className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-ink/60 hover:text-primary dark:text-sand/60"
+                  >
+                    <ChevronDown size={13} aria-hidden="true" className={`shrink-0 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+                    {isExpanded ? t("productOrdersHideDetails") : t("productOrdersViewDetails")} ({o.items.length})
+                  </button>
+
+                  {isExpanded && (
+                    <div className="mt-2.5 space-y-1.5 border-t border-ink/8 pt-2.5 text-xs dark:border-white/10">
+                      {o.items.map((i) => (
+                        <div key={i.id} className="flex items-center gap-2">
+                          <OrderItemThumb src={i.productImage} alt={i.productName} size={32} />
+                          <span className="min-w-0 flex-1 text-ink/70 dark:text-sand/70">
+                            {i.productName}{i.variantName ? ` (${i.variantName})` : ""} ×{i.quantity}
+                          </span>
+                        </div>
+                      ))}
+                      <p className="text-ink/60 dark:text-sand/60">
+                        {t("productOrdersCreatedAtLabel")}: {formatDateTime(o.createdAt, locale)}
+                      </p>
+                      <p className="break-words text-ink/60 dark:text-sand/60">{o.customerPhone}</p>
+                      <button
+                        type="button"
+                        onClick={() => onDeleteOrder(o)}
+                        disabled={deletingId === o.id || (o.status !== "completed" && o.status !== "cancelled")}
+                        className="mt-1.5 inline-flex items-center gap-1.5 rounded-full border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 disabled:opacity-40 dark:border-red-400/30 dark:text-red-300"
+                      >
+                        {deletingId === o.id ? <Loader2 size={13} className="animate-spin" aria-hidden="true" /> : <Trash2 size={13} aria-hidden="true" />}
+                        {t("productOrdersDeleteAction")}
+                      </button>
+                    </div>
+                  )}
+
+                  <div className="mt-2.5 flex items-center gap-2 border-t border-ink/8 pt-2.5 dark:border-white/10">
+                    <select
+                      value={o.status}
+                      disabled={isPending && pendingId === o.id}
+                      onChange={(e) => onChangeStatus(o, e.target.value as ProductOrder["status"])}
+                      className={`w-full rounded-full border-0 px-2.5 py-1.5 text-xs font-bold capitalize outline-none disabled:opacity-60 ${STATUS_STYLES[o.status]}`}
+                    >
+                      {(["pending", "confirmed", "preparing", "ready", "out_for_delivery", "completed", "cancelled"] as const).map((s) => (
+                        <option key={s} value={s}>
+                          {t(`bookingStatus_${s}` as "bookingStatus_pending")}
+                        </option>
+                      ))}
+                    </select>
+                    {isPending && pendingId === o.id && <Loader2 size={14} className="shrink-0 animate-spin text-ink/40" />}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop/tablet: table (>= sm) */}
+          <div className="hidden overflow-x-auto rounded-xl2 border border-ink/8 dark:border-white/10 sm:block">
           <table className="w-full text-start text-sm">
             <thead className="border-b border-ink/8 bg-ink/[0.02] text-xs uppercase tracking-wide text-ink/50 dark:border-white/10 dark:bg-white/[0.03] dark:text-sand/50">
               <tr>
@@ -347,7 +423,8 @@ export function AdminProductOrdersList({ orders }: { orders: AdminProductOrder[]
               })}
             </tbody>
           </table>
-        </div>
+          </div>
+        </>
       )}
     </div>
   );
