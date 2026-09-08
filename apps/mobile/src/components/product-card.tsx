@@ -69,10 +69,10 @@ export function ProductCard({
               paddingHorizontal: 8,
               paddingVertical: 2,
               borderRadius: radii.pill,
-              backgroundColor: "#FEE2E2",
+              backgroundColor: "#DC262614",
             }}
           >
-            <AppText variant="label" style={{ color: "#B91C1C" }}>
+            <AppText variant="label" style={{ color: "#DC2626" }}>
               {t("products.unavailableBadge", "Unavailable")}
             </AppText>
           </View>

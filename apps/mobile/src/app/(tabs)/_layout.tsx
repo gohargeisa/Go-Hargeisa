@@ -49,11 +49,16 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
+        // Chrome (this bar) is a fixed brand anchor — always navy with a
+        // light tint, regardless of the light/dark content theme (see
+        // theme/index.ts's "app chrome is navy + blue" rule). Using
+        // `surface`/`textMuted` here would turn the bar white in light
+        // mode, which isn't the intended premium identity.
         tabBarActiveTintColor: theme.colors.primary,
-        tabBarInactiveTintColor: theme.colors.textMuted,
+        tabBarInactiveTintColor: theme.colors.chromeText + "99",
         tabBarStyle: {
-          backgroundColor: theme.colors.surface,
-          borderTopColor: theme.colors.border,
+          backgroundColor: theme.colors.chrome,
+          borderTopColor: "rgba(255,255,255,0.10)",
         },
         tabBarLabelStyle: {
           fontFamily: fontFamily.bodyMedium,

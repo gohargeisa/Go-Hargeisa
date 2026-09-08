@@ -25,7 +25,11 @@ function ThemedRoot() {
   const { theme } = useTheme();
   return (
     <>
-      <StatusBar style="light" />
+      {/* Light icons read on the navy chrome/splash, but most screens'
+          own background follows the light/dark content theme (sand in
+          light mode) — a hardcoded "light" bar would be near-invisible
+          against that. Match the active theme instead. */}
+      <StatusBar style={theme.name === "dark" ? "light" : "dark"} />
       <Stack
         screenOptions={{
           headerShown: false,
