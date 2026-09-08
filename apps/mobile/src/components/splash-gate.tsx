@@ -26,10 +26,20 @@ export function SplashGate({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     (async () => {
-      const locale = await resolveInitialLocale();
-      applyLayoutDirection(locale);
-      await initI18n(locale);
-      setI18nReady(true);
+      // None of these should throw (everything's bundled locally, nothing
+      // fetched over the network) — but if one ever does, it must not leave
+      // the native splash held forever with no way out: a rejected promise
+      // here isn't caught by RootErrorBoundary (it only sees render-time
+      // throws), so without this the app would hang on the splash silently.
+      try {
+        const locale = await resolveInitialLocale();
+        applyLayoutDirection(locale);
+        await initI18n(locale);
+      } catch (err) {
+        console.error("[SplashGate] startup sequence failed, continuing with defaults:", err);
+      } finally {
+        setI18nReady(true);
+      }
     })();
   }, []);
 
