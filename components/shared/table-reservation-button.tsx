@@ -28,7 +28,40 @@ import { TableReservationModal } from "@/components/shared/table-reservation-mod
  * modal (e.g. Lavender) needs to stay inside that div to inherit its `--pt-*`
  * CSS custom properties; portaling straight to `document.body` would have
  * silently reverted its buttons to the default site color.
+ *
+ * Before committing to a target, `findSafePortalTarget` below walks it and
+ * every ancestor up to (not including) `<html>`, checking for ANY property
+ * that creates a stacking context capable of trapping a `position: fixed`
+ * descendant (transform, filter, backdrop-filter, perspective, contain,
+ * will-change naming one of those, or isolation: isolate — isolate is what
+ * originally caused this exact bug via the hero section, see above). If it
+ * finds one anywhere in the chain — including on `document.body` itself,
+ * which this component cannot control or inspect ahead of time, e.g. a
+ * scroll-lock or native-shell technique that applies one of these
+ * conditionally — it escalates to `document.documentElement` (a sibling of
+ * `<body>`), the only DOM position nothing under `<body>` can trap. This
+ * doesn't assume any specific mechanism; it mechanically closes off the
+ * entire bug category the isolate fix above addressed one instance of.
  */
+const TRAPPING_PROPS_RE = /^(none|normal)$/;
+function createsStackingContext(style: CSSStyleDeclaration): boolean {
+  if (!TRAPPING_PROPS_RE.test(style.transform)) return true;
+  if (!TRAPPING_PROPS_RE.test(style.filter)) return true;
+  if (!TRAPPING_PROPS_RE.test(style.perspective)) return true;
+  if (style.backdropFilter && !TRAPPING_PROPS_RE.test(style.backdropFilter)) return true;
+  if (style.contain && /(layout|paint|strict|content)/.test(style.contain)) return true;
+  if (style.willChange && /(transform|filter|perspective)/.test(style.willChange)) return true;
+  if (style.isolation === "isolate") return true;
+  return false;
+}
+function findSafePortalTarget(candidate: Element): Element {
+  let node: Element | null = candidate;
+  while (node && node !== document.documentElement) {
+    if (createsStackingContext(getComputedStyle(node))) return document.documentElement;
+    node = node.parentElement;
+  }
+  return candidate;
+}
 export function TableReservationButton({
   listingType,
   listingId,
@@ -56,7 +89,8 @@ export function TableReservationButton({
   const portalTargetRef = useRef<Element | null>(null);
 
   function onOpen() {
-    portalTargetRef.current = buttonRef.current?.closest("[data-partner-theme]") ?? document.body;
+    const candidate = buttonRef.current?.closest("[data-partner-theme]") ?? document.body;
+    portalTargetRef.current = findSafePortalTarget(candidate);
     setOpen(true);
   }
 

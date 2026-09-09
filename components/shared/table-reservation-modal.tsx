@@ -7,6 +7,7 @@ import { TableReservationForm } from "@/components/shared/table-reservation-form
 import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
 import { useAndroidBackHandler } from "@/lib/hooks/use-android-back-handler";
+import { localeConfig, isLocale } from "@/lib/i18n/config";
 
 /**
  * Same fixed-overlay chrome as BookingRequestModal (focus trap, scroll
@@ -46,8 +47,14 @@ export function TableReservationModal({
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
 
+  // Explicit, not inherited: this modal is portalled (see
+  // TableReservationButton) and its fallback target can land outside the
+  // <div dir=...> the root layout sets inside <body> — direction must not
+  // silently revert to the browser's ltr default for Arabic in that case.
+  const dir = isLocale(locale) ? localeConfig[locale].dir : "ltr";
+
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center p-0 sm:p-4">
+    <div dir={dir} className="fixed inset-0 z-modal flex items-center justify-center p-0 font-body text-ink antialiased dark:text-sand sm:p-4">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />
       <div
         ref={dialogRef}
