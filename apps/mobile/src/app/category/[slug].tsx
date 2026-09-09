@@ -16,6 +16,7 @@ import { useTranslation } from "react-i18next";
 
 import { useConfirmExitOnBack } from "@/lib/back-handler";
 import { useCategories, useCityServices } from "@/lib/queries";
+import { useLocale } from "@/i18n/use-locale";
 import { useTheme } from "@/providers/theme-provider";
 import { spacing } from "@/theme";
 import { AppText, Screen, Skeleton } from "@/ui";
@@ -29,6 +30,7 @@ export default function CategoryScreen() {
   const insets = useSafeAreaInsets();
   const { theme } = useTheme();
   const { t } = useTranslation();
+  const { isRtl } = useLocale();
 
   const categories = useCategories();
   const category = useMemo(
@@ -51,7 +53,7 @@ export default function CategoryScreen() {
         }}
       >
         <Pressable onPress={back} hitSlop={10} style={{ width: 40, height: 32, justifyContent: "center" }}>
-          <Ionicons name="chevron-back" size={24} color={theme.colors.text} />
+          <Ionicons name={isRtl ? "chevron-forward" : "chevron-back"} size={24} color={theme.colors.text} />
         </Pressable>
         {category ? (
           <>

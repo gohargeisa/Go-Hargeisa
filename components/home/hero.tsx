@@ -120,7 +120,7 @@ export function Hero({ locale }: { locale: Locale }) {
             className="flex w-full items-center gap-2.5 rounded-full bg-white/95 px-5 py-3.5 text-start transition-transform active:scale-[0.98] dark:bg-ink/70 lg:hidden"
           >
             <Search size={19} aria-hidden="true" className="shrink-0 text-ink/50 dark:text-sand/50" />
-            <span className="truncate text-[15px] text-ink/45 dark:text-sand/45">{t("searchPlaceholder")}</span>
+            <span className="min-w-0 truncate text-[15px] text-ink/45 dark:text-sand/45">{t("searchPlaceholder")}</span>
           </button>
 
           {/* Desktop: existing category-scoped inline search stays as-is —

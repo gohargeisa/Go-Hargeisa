@@ -18,11 +18,15 @@ import type { OpeningHoursGroup } from "@gohargeisa/types";
 import { openDirections } from "@/lib/maps";
 import { useCityService } from "@/lib/queries";
 import { useFavorite } from "@/lib/favorites";
+import { useCart } from "@/lib/cart";
+import { useMyReview } from "@/lib/reviews";
 import { useTheme } from "@/providers/theme-provider";
 import { radii, spacing } from "@/theme";
 import { AppText, Button, Card, Screen, Skeleton } from "@/ui";
 import { ErrorState } from "@/ui/states";
 import { PartnerMap } from "@/components/partner-map";
+import { ProductCard } from "@/components/product-card";
+import { DetailBackButton } from "@/components/detail-back-button";
 
 const HERO_HEIGHT = 280;
 
@@ -35,6 +39,8 @@ export default function PartnerDetailScreen() {
 
   const { data, isPending, isError, refetch } = useCityService(slug);
   const fav = useFavorite("city_service", data?.id ?? "");
+  const { itemCount: cartItemCount } = useCart();
+  const myReview = useMyReview("city_service", data?.id);
 
   const back = () => (router.canGoBack() ? router.back() : router.replace("/"));
 
@@ -158,25 +164,42 @@ export default function PartnerDetailScreen() {
             ) : null}
           </View>
 
-          {/* Save (on-device) */}
-          <Button
-            label={
-              fav.isFavorited
-                ? t("partner.saved", "Saved")
-                : t("partner.save", "Save")
-            }
-            onPress={fav.toggle}
-            variant={fav.isFavorited ? "secondary" : "primary"}
-            size="sm"
-            fullWidth={false}
-            icon={
-              <Ionicons
-                name={fav.isFavorited ? "heart" : "heart-outline"}
-                size={16}
-                color={fav.isFavorited ? theme.colors.primary : theme.colors.primaryText}
+          {/* Save (on-device) + Book appointment (when this listing has doctors) */}
+          <View style={{ flexDirection: "row", gap: 10, flexWrap: "wrap" }}>
+            <Button
+              label={
+                fav.isFavorited
+                  ? t("partner.saved", "Saved")
+                  : t("partner.save", "Save")
+              }
+              onPress={fav.toggle}
+              variant={fav.isFavorited ? "secondary" : "primary"}
+              size="sm"
+              fullWidth={false}
+              icon={
+                <Ionicons
+                  name={fav.isFavorited ? "heart" : "heart-outline"}
+                  size={16}
+                  color={fav.isFavorited ? theme.colors.primary : theme.colors.primaryText}
+                />
+              }
+            />
+            {data.doctors.length > 0 ? (
+              <Button
+                label={t("appointments.bookAppointment", "Book an Appointment")}
+                onPress={() =>
+                  router.push({
+                    pathname: "/booking/appointment/[doctorId]",
+                    params: { doctorId: data.doctors[0].id, slug: data.slug },
+                  })
+                }
+                variant="secondary"
+                size="sm"
+                fullWidth={false}
+                icon={<Ionicons name="calendar-outline" size={16} color={theme.colors.primary} />}
               />
-            }
-          />
+            ) : null}
+          </View>
 
           {/* Actions */}
           {actions.length > 0 ? (
@@ -257,6 +280,45 @@ export default function PartnerDetailScreen() {
           ) : null}
         </View>
 
+        {/* Products — only when the listing's category supports products */}
+        {data.products.length > 0 ? (
+          <View style={{ marginTop: 16 }}>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+                paddingHorizontal: spacing.screenX,
+                marginBottom: 8,
+              }}
+            >
+              <AppText variant="heading">{t("products.catalogTitle", "Products")}</AppText>
+              {cartItemCount > 0 ? (
+                <Pressable onPress={() => router.push("/cart")}>
+                  <AppText variant="label" color="primary">
+                    {t("cart.viewCart", "View Cart")} ({cartItemCount})
+                  </AppText>
+                </Pressable>
+              ) : null}
+            </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingHorizontal: spacing.screenX }}
+            >
+              {data.products.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  listingType="city_service"
+                  listingId={data.id}
+                  slug={data.slug}
+                />
+              ))}
+            </ScrollView>
+          </View>
+        ) : null}
+
         {/* Gallery */}
         {data.gallery.length > 0 ? (
           <View style={{ marginTop: 16 }}>
@@ -285,9 +347,31 @@ export default function PartnerDetailScreen() {
         ) : null}
 
         {/* Reviews */}
-        {data.reviews.length > 0 ? (
-          <View style={{ marginTop: 20, paddingHorizontal: spacing.screenX, gap: 10 }}>
+        <View style={{ marginTop: 20, paddingHorizontal: spacing.screenX, gap: 10 }}>
+          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
             <AppText variant="heading">{t("partner.reviews", "Reviews")}</AppText>
+            <Pressable
+              onPress={() =>
+                router.push({
+                  pathname: "/review/[listingType]/[id]",
+                  params: { listingType: "city_service", id: data.id, slug: data.slug },
+                })
+              }
+            >
+              <AppText variant="label" color="primary">
+                {myReview.data ? t("review.editReview", "Edit review") : t("review.leaveReview", "Leave a review")}
+              </AppText>
+            </Pressable>
+          </View>
+          {data.reviews.length === 0 ? (
+            <AppText variant="caption" color="muted">
+              {t("review.beFirstReview", "Be the first to leave a review.")}
+            </AppText>
+          ) : null}
+        </View>
+
+        {data.reviews.length > 0 ? (
+          <View style={{ paddingHorizontal: spacing.screenX, gap: 10 }}>
             {data.reviews.slice(0, 10).map((r) => (
               <Card key={r.id}>
                 <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
@@ -309,23 +393,7 @@ export default function PartnerDetailScreen() {
       </ScrollView>
 
       {/* Native back affordance, over the hero */}
-      <Pressable
-        onPress={back}
-        style={{
-          position: "absolute",
-          top: insets.top + 8,
-          left: spacing.screenX,
-          width: 40,
-          height: 40,
-          borderRadius: 20,
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: "rgba(5,20,39,0.55)",
-        }}
-        hitSlop={8}
-      >
-        <Ionicons name="chevron-back" size={22} color="#fff" />
-      </Pressable>
+      <DetailBackButton onPress={back} />
     </View>
   );
 }

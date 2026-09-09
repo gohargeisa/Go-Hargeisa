@@ -1,5 +1,6 @@
 import type { CityServiceListItem, Paginated } from "@gohargeisa/api";
 import { getCityServicesGroupedByCategory } from "@/lib/data/city-services";
+import { mergedCategoryOf } from "@/lib/config/city-service-category-groups";
 import {
   corsPreflight,
   handle,
@@ -35,7 +36,20 @@ export const GET = handle(async (req, { locale }) => {
   });
 
   if (categorySlug) {
-    rows = rows.filter((r) => r.category.slug.toLowerCase() === categorySlug);
+    // `categorySlug` may be a synthetic merged-group key (e.g.
+    // "perfumes-cosmetics", from /categories' businessCount rollup) rather
+    // than a real `categories.slug` — the website never queries this way
+    // itself (it merges client-side over an unfiltered fetch, see
+    // city-service-category-groups.ts), but a server-side filter needs the
+    // same expansion so a merged category tile isn't a dead end for any
+    // caller that does filter server-side.
+    const merged = mergedCategoryOf(categorySlug);
+    if (merged) {
+      const memberSlugs = new Set(merged.memberSlugs.map((s) => s.toLowerCase()));
+      rows = rows.filter((r) => memberSlugs.has(r.category.slug.toLowerCase()));
+    } else {
+      rows = rows.filter((r) => r.category.slug.toLowerCase() === categorySlug);
+    }
   }
 
   if (q) {

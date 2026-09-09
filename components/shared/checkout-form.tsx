@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 import { useCart } from "@/lib/cart/cart-context";
 import { submitCartOrder } from "@/lib/actions/product-orders";
 import { getCartTaxPreview, type CartTaxPreview } from "@/lib/actions/tax";
-import { lineTotal, taxableLineAmount } from "@/lib/cart/types";
+import { lineTotal, taxableLineAmount, localizedItemName } from "@/lib/cart/types";
 import { FLOWER_SPECIALTY_CATEGORIES } from "@/lib/config/product-categories";
 
 const inputClass =
@@ -150,8 +150,8 @@ export function CheckoutForm({ locale }: { locale: string }) {
         {cart.cart.items.map((item) => (
           <div key={item.key} className="py-1">
             <div className="flex items-center justify-between gap-2">
-              <span className="truncate text-ink/70 dark:text-sand/70">
-                {item.name}
+              <span className="min-w-0 truncate text-ink/70 dark:text-sand/70">
+                {localizedItemName(item, locale)}
                 {item.variantName ? ` (${item.variantName})` : ""} × {item.quantity}
               </span>
               <span className="shrink-0 font-semibold">${lineTotal(item).toFixed(2)}</span>

@@ -48,7 +48,7 @@ export function OverviewPanel({
             <p className="mt-4 font-display text-2xl font-semibold">{value}</p>
             <p className="mt-1 flex items-center gap-1 text-sm text-ink/55 dark:text-sand/60">
               {label}
-              <ArrowRight size={12} className="opacity-0 transition-opacity group-hover:opacity-100" aria-hidden="true" />
+              <ArrowRight size={12} className="opacity-0 transition-opacity rtl:rotate-180 group-hover:opacity-100" aria-hidden="true" />
             </p>
           </button>
         ))}
@@ -75,7 +75,7 @@ function QuickLink({ icon: Icon, label, onClick }: { icon: LucideIcon; label: st
         <Icon size={15} />
       </span>
       {label}
-      <ArrowRight size={13} className="ms-auto opacity-60" aria-hidden="true" />
+      <ArrowRight size={13} className="ms-auto opacity-60 rtl:rotate-180" aria-hidden="true" />
     </button>
   );
 }

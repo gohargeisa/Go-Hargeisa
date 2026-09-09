@@ -34,7 +34,7 @@ export function TrialPartnersCard({ locale, trialPartners }: { locale: Locale; t
         href={`/${locale}/admin/partners`}
         className="mt-5 flex items-center justify-center gap-1.5 rounded-full border border-ink/15 py-2.5 text-sm font-semibold transition-colors hover:border-primary hover:text-primary dark:border-white/20"
       >
-        Review Partners <ArrowRight size={14} aria-hidden="true" />
+        Review Partners <ArrowRight size={14} className="rtl:rotate-180" aria-hidden="true" />
       </Link>
     </div>
   );

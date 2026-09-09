@@ -191,7 +191,7 @@ export function NavMegaMenu({
                 className="mt-3 flex items-center justify-between rounded-xl border-t border-ink/8 px-3 pt-3 text-sm font-semibold text-primary dark:border-white/10"
               >
                 {t("browseAllCategories")}
-                <ArrowRight size={14} aria-hidden="true" />
+                <ArrowRight size={14} className="rtl:rotate-180" aria-hidden="true" />
               </Link>
             </m.div>
           </>

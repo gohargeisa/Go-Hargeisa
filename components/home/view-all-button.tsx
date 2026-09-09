@@ -18,7 +18,7 @@ export function ViewAllButton({ href, label }: { href: string; label: string }) 
         <ArrowRight
           size={18}
           aria-hidden="true"
-          className="transition-transform duration-300 ease-out group-hover:translate-x-1"
+          className="transition-transform duration-300 ease-out group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1"
         />
       </Link>
     </div>

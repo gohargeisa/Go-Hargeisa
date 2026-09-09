@@ -4,6 +4,7 @@
  * native detail screen.
  */
 import { ScrollView, View, Pressable } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
@@ -67,12 +68,22 @@ export default function HomeScreen() {
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ gap: 10, paddingRight: spacing.screenX }}
+          contentContainerStyle={{ gap: 10, paddingEnd: spacing.screenX }}
         >
           {categories.data.map((c) => (
             <Pressable
               key={c.id}
-              onPress={() => router.push(`/category/${c.slug}`)}
+              onPress={() => {
+                // Hotels/Restaurants/Cafes are separate verticals with their
+                // own route trees (see the block below) — routing them
+                // through the generic city_services category screen instead
+                // returns zero results, since their businesses don't live in
+                // city_services.
+                if (c.targetTable === "hotels") return router.push("/hotels");
+                if (c.targetTable === "restaurants") return router.push("/restaurants");
+                if (c.targetTable === "cafes") return router.push("/cafes");
+                router.push(`/category/${c.slug}`);
+              }}
               style={{
                 paddingHorizontal: 16,
                 paddingVertical: 10,
@@ -92,6 +103,68 @@ export default function HomeScreen() {
       )}
 
       <View style={{ height: spacing.section }} />
+
+      {/* Hotels / Restaurants / Cafes — separate verticals from
+          city_services, own route trees (see packages/api/src/types.ts). */}
+      <View style={{ flexDirection: "row", gap: 10, marginBottom: spacing.section }}>
+        <Pressable
+          onPress={() => router.push("/hotels")}
+          style={{
+            flex: 1,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 6,
+            paddingVertical: 14,
+            paddingHorizontal: 8,
+            borderRadius: radii.lg,
+            borderWidth: 1,
+            borderColor: theme.colors.border,
+            backgroundColor: theme.colors.surface,
+          }}
+        >
+          <Ionicons name="bed-outline" size={18} color={theme.colors.primary} />
+          <AppText variant="bodyStrong">{t("home.hotels", "Hotels")}</AppText>
+        </Pressable>
+        <Pressable
+          onPress={() => router.push("/restaurants")}
+          style={{
+            flex: 1,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 6,
+            paddingVertical: 14,
+            paddingHorizontal: 8,
+            borderRadius: radii.lg,
+            borderWidth: 1,
+            borderColor: theme.colors.border,
+            backgroundColor: theme.colors.surface,
+          }}
+        >
+          <Ionicons name="restaurant-outline" size={18} color={theme.colors.primary} />
+          <AppText variant="bodyStrong">{t("home.restaurants", "Restaurants")}</AppText>
+        </Pressable>
+        <Pressable
+          onPress={() => router.push("/cafes")}
+          style={{
+            flex: 1,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 6,
+            paddingVertical: 14,
+            paddingHorizontal: 8,
+            borderRadius: radii.lg,
+            borderWidth: 1,
+            borderColor: theme.colors.border,
+            backgroundColor: theme.colors.surface,
+          }}
+        >
+          <Ionicons name="cafe-outline" size={18} color={theme.colors.primary} />
+          <AppText variant="bodyStrong">{t("home.cafes", "Cafes")}</AppText>
+        </Pressable>
+      </View>
 
       {/* Featured partners */}
       <AppText variant="heading" style={{ marginBottom: 12 }}>

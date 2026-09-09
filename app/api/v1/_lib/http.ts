@@ -22,7 +22,10 @@ export function resolveLocale(req: NextRequest): ApiLocale {
   return isLocale(first) ? (first as ApiLocale) : (defaultLocale as ApiLocale);
 }
 
-export function jsonOk<T>(data: T, init?: { cache?: boolean }): NextResponse {
+export function jsonOk<T>(
+  data: T,
+  init?: { cache?: boolean; methods?: string },
+): NextResponse {
   const res = NextResponse.json(data);
   res.headers.set(
     "Cache-Control",
@@ -30,7 +33,7 @@ export function jsonOk<T>(data: T, init?: { cache?: boolean }): NextResponse {
       ? "no-store"
       : `public, s-maxage=${CACHE_SECONDS}, stale-while-revalidate=300`,
   );
-  applyCors(res);
+  applyCors(res, init?.methods);
   return res;
 }
 
@@ -38,26 +41,36 @@ export function jsonError(
   status: number,
   message: string,
   code?: string,
+  methods?: string,
 ): NextResponse {
   const body: ApiErrorBody = code ? { error: message, code } : { error: message };
   const res = NextResponse.json(body, { status });
-  applyCors(res);
+  applyCors(res, methods);
   return res;
 }
 
-function applyCors(res: NextResponse): void {
+function applyCors(res: NextResponse, methods = "GET, OPTIONS"): void {
   // The native app has no Origin (it's not a browser context), but Expo web
-  // / a local debug tool might — and these are public reads either way.
+  // / a local debug tool might — and these are public reads (or, for a
+  // write route, an anonymous-writable/bearer-scoped RPC) either way.
   res.headers.set("Access-Control-Allow-Origin", "*");
-  res.headers.set("Access-Control-Allow-Methods", "GET, OPTIONS");
+  res.headers.set("Access-Control-Allow-Methods", methods);
   res.headers.set("Access-Control-Allow-Headers", "Authorization, Content-Type, Accept-Language");
   res.headers.set("Vary", "Accept-Language");
 }
 
-export function corsPreflight(): NextResponse {
+export function corsPreflight(methods = "GET, OPTIONS"): NextResponse {
   const res = new NextResponse(null, { status: 204 });
-  applyCors(res);
+  applyCors(res, methods);
   return res;
+}
+
+/** Extract the bearer token from `Authorization: Bearer <token>`, or `null`
+ *  when absent (an anonymous caller) — see lib/supabase/bearer.ts. */
+export function getBearerToken(req: NextRequest): string | null {
+  const header = req.headers.get("authorization");
+  if (!header?.startsWith("Bearer ")) return null;
+  return header.slice(7).trim() || null;
 }
 
 /** Wrap a handler so an unexpected throw becomes a clean 500 instead of an

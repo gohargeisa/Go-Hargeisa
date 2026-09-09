@@ -113,7 +113,7 @@ function PremiumCategoryCardBase({ category, locale }: { category: Category; loc
             {t("exploreCta")}
             <ArrowRight
               size={14}
-              className="transition-transform duration-300 ease-premium group-hover:translate-x-1"
+              className="transition-transform duration-300 ease-premium group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1"
               aria-hidden="true"
             />
           </SecondaryButton>

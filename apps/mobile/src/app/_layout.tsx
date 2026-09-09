@@ -25,7 +25,11 @@ function ThemedRoot() {
   const { theme } = useTheme();
   return (
     <>
-      <StatusBar style="light" />
+      {/* Light icons read on the navy chrome/splash, but most screens'
+          own background follows the light/dark content theme (sand in
+          light mode) — a hardcoded "light" bar would be near-invisible
+          against that. Match the active theme instead. */}
+      <StatusBar style={theme.name === "dark" ? "light" : "dark"} />
       <Stack
         screenOptions={{
           headerShown: false,
@@ -36,8 +40,39 @@ function ThemedRoot() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="category/[slug]" />
         <Stack.Screen name="partner/[slug]" />
+        <Stack.Screen name="restaurants/index" />
+        <Stack.Screen name="restaurants/[slug]" />
+        <Stack.Screen name="cafes/index" />
+        <Stack.Screen name="cafes/[slug]" />
+        <Stack.Screen name="hotels/index" />
+        <Stack.Screen name="hotels/[slug]" />
+        <Stack.Screen name="product/[listingType]/[id]" />
         <Stack.Screen
           name="auth"
+          options={{ presentation: "modal", animation: "slide_from_bottom" }}
+        />
+        <Stack.Screen
+          name="cart"
+          options={{ presentation: "modal", animation: "slide_from_bottom" }}
+        />
+        <Stack.Screen
+          name="checkout"
+          options={{ presentation: "modal", animation: "slide_from_bottom" }}
+        />
+        <Stack.Screen
+          name="review/[listingType]/[id]"
+          options={{ presentation: "modal", animation: "slide_from_bottom" }}
+        />
+        <Stack.Screen
+          name="booking/appointment/[doctorId]"
+          options={{ presentation: "modal", animation: "slide_from_bottom" }}
+        />
+        <Stack.Screen
+          name="booking/table/[listingType]/[id]"
+          options={{ presentation: "modal", animation: "slide_from_bottom" }}
+        />
+        <Stack.Screen
+          name="booking/hotel/[hotelId]"
           options={{ presentation: "modal", animation: "slide_from_bottom" }}
         />
         <Stack.Screen name="+not-found" options={{ headerShown: true, title: "" }} />

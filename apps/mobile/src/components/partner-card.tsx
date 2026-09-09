@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next";
 import type { CityServiceListItem } from "@gohargeisa/api";
 
 import { useTheme } from "@/providers/theme-provider";
+import { useLocale } from "@/i18n/use-locale";
 import { radii } from "@/theme";
 import { AppText, AppImage, Card } from "@/ui";
 
@@ -17,6 +18,7 @@ export function PartnerCard({ item }: { item: CityServiceListItem }) {
   const router = useRouter();
   const { theme } = useTheme();
   const { t } = useTranslation();
+  const { isRtl } = useLocale();
 
   return (
     <Card
@@ -36,7 +38,7 @@ export function PartnerCard({ item }: { item: CityServiceListItem }) {
             style={{
               position: "absolute",
               top: 10,
-              left: 10,
+              ...(isRtl ? { right: 10 } : { left: 10 }),
               backgroundColor: theme.colors.chrome,
               paddingHorizontal: 8,
               paddingVertical: 3,

@@ -4,6 +4,7 @@
  */
 import type { ReactNode } from "react";
 import { View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useNetInfo } from "@/lib/net-info";
 
 import { useTheme } from "@/providers/theme-provider";
@@ -17,6 +18,31 @@ interface StateProps {
   message?: string;
   actionLabel?: string;
   onAction?: () => void;
+}
+
+/** Tinted circular badge around an icon — the same visual language already
+ *  used for booking-success confirmations (e.g. hotels/appointment success
+ *  screens), reused here so every empty/error state carries a matching
+ *  visual anchor instead of being bare text, without introducing a new
+ *  pattern of its own. */
+function StateBadge({ name, tone }: { name: keyof typeof Ionicons.glyphMap; tone: "muted" | "danger" }) {
+  const { theme } = useTheme();
+  const color = tone === "danger" ? "#DC2626" : theme.colors.primary;
+  return (
+    <View
+      style={{
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: color + "1A",
+        marginBottom: 4,
+      }}
+    >
+      <Ionicons name={name} size={30} color={color} />
+    </View>
+  );
 }
 
 export function EmptyState({
@@ -36,7 +62,7 @@ export function EmptyState({
         gap: 8,
       }}
     >
-      {icon}
+      {icon ?? <StateBadge name="file-tray-outline" tone="muted" />}
       <AppText variant="heading" style={{ textAlign: "center" }}>
         {title}
       </AppText>
@@ -63,6 +89,7 @@ export function EmptyState({
 }
 
 export function ErrorState({
+  icon,
   title,
   message,
   actionLabel = "Try again",
@@ -70,6 +97,7 @@ export function ErrorState({
 }: StateProps) {
   return (
     <EmptyState
+      icon={icon ?? <StateBadge name="cloud-offline-outline" tone="danger" />}
       title={title}
       message={message}
       actionLabel={onAction ? actionLabel : undefined}

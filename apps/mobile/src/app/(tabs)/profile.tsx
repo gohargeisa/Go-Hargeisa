@@ -121,7 +121,27 @@ export default function ProfileScreen() {
   const { t } = useTranslation();
   const { status } = useAuth();
   const { theme, preference, setPreference } = useTheme();
-  const { locale, setLocale } = useLocale();
+  const { locale, isRtl, setLocale } = useLocale();
+
+  // I18nManager.forceRTL() (inside setLocale -> applyLayoutDirection) only
+  // takes effect after the app's native layout re-initializes — a JS-only
+  // reload isn't enough, and this app has no restart mechanism (adding one,
+  // e.g. expo-updates or react-native-restart, is a new native dependency
+  // requiring a rebuild — out of scope here). Previously this return value
+  // was silently discarded, so switching to/from Arabic changed the stored
+  // locale but never visibly flipped the layout direction, with no
+  // indication why. Surfacing it explicitly is the correct minimal fix
+  // without adding a package.
+  const onSelectLocale = (l: Locale) => {
+    void setLocale(l).then((needsReload) => {
+      if (needsReload) {
+        Alert.alert(
+          t("profile.restartRequiredTitle", "Restart required"),
+          t("profile.restartRequiredBody", "Close and reopen the app to apply the new language direction."),
+        );
+      }
+    });
+  };
   const saved = useSavedCityServices();
   const savedCount = saved.data?.length ?? 0;
 
@@ -161,10 +181,24 @@ export default function ProfileScreen() {
           </View>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
             <AppText variant="caption" color="muted">{savedCount}</AppText>
-            <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} />
+            <Ionicons name={isRtl ? "chevron-back" : "chevron-forward"} size={16} color={theme.colors.textMuted} />
           </View>
         </Card>
       </Pressable>
+
+      {/* My Bookings shortcut — only relevant once signed in (bookings are
+          tied to the user's own account, RLS-scoped). */}
+      {status === "authenticated" ? (
+        <Pressable onPress={() => router.push("/bookings")}>
+          <Card style={{ marginTop: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+              <Ionicons name="calendar-outline" size={20} color={theme.colors.primary} />
+              <AppText variant="bodyStrong">{t("profile.myBookings", "My Bookings")}</AppText>
+            </View>
+            <Ionicons name={isRtl ? "chevron-back" : "chevron-forward"} size={16} color={theme.colors.textMuted} />
+          </Card>
+        </Pressable>
+      ) : null}
 
       {/* Language */}
       <Card style={{ marginTop: 16 }}>
@@ -176,7 +210,7 @@ export default function ProfileScreen() {
             <Button
               key={l}
               label={localeConfig[l].label}
-              onPress={() => void setLocale(l)}
+              onPress={() => onSelectLocale(l)}
               variant={l === locale ? "primary" : "secondary"}
               size="sm"
               fullWidth={false}

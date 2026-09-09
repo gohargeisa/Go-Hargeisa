@@ -1,6 +1,8 @@
 import type { CityServiceDetail } from "@gohargeisa/api";
 import { getCityServiceBySlug } from "@/lib/data/city-services";
 import { getCategories } from "@/lib/data/categories";
+import { getDoctorsForListing, getDepartmentsForListing } from "@/lib/data/doctors";
+import { getProductsForListing } from "@/lib/data/products";
 import { corsPreflight, handle, jsonError, jsonOk } from "../../_lib/http";
 import { categoryRef, toCityServiceDetail } from "../../_lib/dto";
 
@@ -28,6 +30,17 @@ export const GET = handle<RouteCtx>(async (_req, { locale, route }) => {
   const category = (await getCategories()).find((c) => c.id === service.categoryId);
   const ref = category ? categoryRef(category, locale) : undefined;
 
-  const body: CityServiceDetail = toCityServiceDetail(service, ref);
+  const [departments, doctors] = category?.supportsAppointments
+    ? await Promise.all([
+        getDepartmentsForListing(service.id),
+        getDoctorsForListing(service.id),
+      ])
+    : [[], []];
+
+  const products = category?.supportsProducts
+    ? await getProductsForListing(service.id, "city_service")
+    : [];
+
+  const body: CityServiceDetail = toCityServiceDetail(service, ref, locale, departments, doctors, products);
   return jsonOk(body);
 });
