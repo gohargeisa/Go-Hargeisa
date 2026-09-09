@@ -915,6 +915,12 @@ export interface Restaurant {
    * call. Off by default for every restaurant. */
   catalogOrderingEnabled: boolean;
   productsDeliveryEnabled: boolean;
+  /** Opt-in menu layout for the generic (non-bespoke) restaurant page —
+   * unset/"grid" keeps the existing image-based menu unchanged;
+   * "text_first" switches to components/shared/text-first-menu-section.tsx
+   * (name/price/description/add-ons, no images). Off by default for every
+   * restaurant. */
+  menuDisplayStyle?: "grid" | "text_first";
 }
 
 /** One opening-hours row spanning one or more days, e.g. Sat–Wed vs. a
@@ -1000,6 +1006,9 @@ export interface Cafe {
    * `products` table). Off by default; backfilled true for every cafe that
    * already had sellsFlowers true (see 20260823000002_universal_cart_orders.sql). */
   orderingEnabled?: boolean;
+  /** Opt-in menu layout for the generic (non-bespoke) cafe page — same flag
+   * as Restaurant.menuDisplayStyle, see there for details. Off by default. */
+  menuDisplayStyle?: "grid" | "text_first";
 }
 
 /** An order-time modifier a customer can add to a product order (e.g.

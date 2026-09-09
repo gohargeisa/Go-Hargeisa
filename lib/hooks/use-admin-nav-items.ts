@@ -6,7 +6,7 @@ import {
   Inbox, LayoutGrid, Building2, Users, Star, Flag, BarChart3, Settings,
   Hotel, UtensilsCrossed, Coffee, Landmark, CalendarDays, Newspaper,
   CalendarCheck, Handshake, Megaphone, Tag, Bell, Stethoscope, ShoppingBag,
-  ShieldCheck, Percent, Sparkles, PackageSearch,
+  ShieldCheck, Percent, Sparkles, PackageSearch, BookOpenCheck,
 } from "lucide-react";
 import type { SidebarNavItem } from "@/components/shared/sidebar-nav";
 import type { Locale } from "@/lib/i18n/config";
@@ -53,6 +53,7 @@ export function useAdminNavItems(locale: Locale): { primaryItems: SidebarNavItem
 
   const moreItems: SidebarNavItem[] = [
     { key: "bookings", label: t("bookingsAdminTitle"), icon: CalendarCheck, href: `/${locale}/admin/bookings`, isActive: isActive("/admin/bookings") },
+    { key: "reservations", label: t("reservationsAdminTitle"), icon: BookOpenCheck, href: `/${locale}/admin/reservations`, isActive: isActive("/admin/reservations") },
     { key: "appointments", label: t("appointmentsAdminTitle"), icon: Stethoscope, href: `/${locale}/admin/appointments`, isActive: isActive("/admin/appointments") },
     { key: "productOrders", label: t("productOrdersAdminTitle"), icon: ShoppingBag, href: `/${locale}/admin/product-orders`, isActive: isActive("/admin/product-orders") },
     { key: "orderRequests", label: t("orderRequestsAdminNav"), icon: PackageSearch, href: `/${locale}/admin/order-requests`, isActive: isActive("/admin/order-requests") },

@@ -563,6 +563,7 @@ export default async function CityServiceDetailPage({
           myReview={myReview}
           isFavorited={isFavorited}
         />
+        <PartnerPartnershipFooter theme={partnerTheme} locale={locale} />
         <MobileBookingBar
           listingType="city_service"
           listingId={service.id}

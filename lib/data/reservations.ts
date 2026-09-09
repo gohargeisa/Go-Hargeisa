@@ -3,6 +3,35 @@ import { mapTableReservation } from "./mappers";
 import type { TableReservation } from "@/types";
 
 export type CustomerTableReservation = TableReservation & { businessName: string };
+export type AdminTableReservation = TableReservation & { businessName: string };
+
+/**
+ * Resolves the real business name for each reservation's polymorphic
+ * listing_id (no FK — restaurant/cafe/service are separate tables). Shared
+ * by getMyTableReservations (customer view) and getAllReservationsForAdmin
+ * (founder/admin view) so the lookup logic can't drift between the two
+ * call sites — extracted from what used to be inlined only in
+ * getMyTableReservations.
+ */
+async function resolveTableReservationBusinessNames(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  reservations: TableReservation[]
+): Promise<Map<string, string>> {
+  const idsByType: Record<TableReservation["listingType"], string[]> = { restaurant: [], cafe: [], service: [] };
+  for (const r of reservations) idsByType[r.listingType].push(r.listingId);
+
+  const [restaurantRows, cafeRows, serviceRows] = await Promise.all([
+    idsByType.restaurant.length ? supabase.from("restaurants").select("id, name").in("id", idsByType.restaurant) : { data: [] },
+    idsByType.cafe.length ? supabase.from("cafes").select("id, name").in("id", idsByType.cafe) : { data: [] },
+    idsByType.service.length ? supabase.from("services").select("id, name").in("id", idsByType.service) : { data: [] },
+  ]);
+
+  const nameLookup = new Map<string, string>();
+  for (const rows of [restaurantRows.data ?? [], cafeRows.data ?? [], serviceRows.data ?? []]) {
+    for (const row of rows as { id: string; name: string }[]) nameLookup.set(row.id, row.name);
+  }
+  return nameLookup;
+}
 
 /**
  * Every restaurant/cafe table reservation a signed-in customer has
@@ -29,20 +58,31 @@ export async function getMyTableReservations(): Promise<CustomerTableReservation
 
   if (error || !data?.length) return [];
   const reservations = data.map(mapTableReservation);
+  const nameLookup = await resolveTableReservationBusinessNames(supabase, reservations);
 
-  const idsByType: Record<TableReservation["listingType"], string[]> = { restaurant: [], cafe: [], service: [] };
-  for (const r of reservations) idsByType[r.listingType].push(r.listingId);
+  return reservations.map((r) => ({ ...r, businessName: nameLookup.get(r.listingId) ?? "Removed listing" }));
+}
 
-  const [restaurantRows, cafeRows, serviceRows] = await Promise.all([
-    idsByType.restaurant.length ? supabase.from("restaurants").select("id, name").in("id", idsByType.restaurant) : { data: [] },
-    idsByType.cafe.length ? supabase.from("cafes").select("id, name").in("id", idsByType.cafe) : { data: [] },
-    idsByType.service.length ? supabase.from("services").select("id, name").in("id", idsByType.service) : { data: [] },
-  ]);
+/**
+ * Every restaurant/cafe/service table reservation, platform-wide, newest
+ * first — the admin-panel counterpart getAllBookingsForAdmin (hotels) and
+ * getAllAppointmentsForAdmin never had: table_reservations previously had
+ * NO admin read path at all, so a founder/admin had no way to see any
+ * restaurant/cafe reservation anywhere in the app. Backed by the "Owners
+ * manage all table reservations" RLS policy (role='owner' full access) —
+ * same plain authenticated client as the other two admin data-fetchers,
+ * no service-role client needed.
+ */
+export async function getAllReservationsForAdmin(): Promise<AdminTableReservation[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("table_reservations")
+    .select("*")
+    .order("created_at", { ascending: false });
 
-  const nameLookup = new Map<string, string>();
-  for (const rows of [restaurantRows.data ?? [], cafeRows.data ?? [], serviceRows.data ?? []]) {
-    for (const row of rows as { id: string; name: string }[]) nameLookup.set(row.id, row.name);
-  }
+  if (error || !data?.length) return [];
+  const reservations = data.map(mapTableReservation);
+  const nameLookup = await resolveTableReservationBusinessNames(supabase, reservations);
 
   return reservations.map((r) => ({ ...r, businessName: nameLookup.get(r.listingId) ?? "Removed listing" }));
 }

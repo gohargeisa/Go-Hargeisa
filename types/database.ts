@@ -90,6 +90,7 @@ type RestaurantRow = ListingBase & SocialExtra & {
   online_ordering_enabled: boolean; phone_ordering_enabled: boolean;
   ordering_enabled: boolean; products_delivery_enabled: boolean;
   is_suspended: boolean;
+  menu_display_style: "grid" | "text_first" | null;
 };
 type CafeRow = ListingBase & SocialExtra & {
   description_ar: string | null; description_so: string | null;
@@ -104,6 +105,7 @@ type CafeRow = ListingBase & SocialExtra & {
   sells_flowers: boolean; flower_addons: Json; products_delivery_enabled: boolean;
   ordering_enabled: boolean;
   is_suspended: boolean;
+  menu_display_style: "grid" | "text_first" | null;
 };
 
 type BusinessOfferRow = {

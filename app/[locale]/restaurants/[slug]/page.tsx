@@ -22,6 +22,7 @@ import { RestaurantMenuSection } from "@/components/shared/restaurant-menu-secti
 import { getProductsForListing } from "@/lib/data/products";
 import { ProductsSection } from "@/components/shared/products-section";
 import { VillageMenuOrderSection } from "@/components/restaurants/village-menu-order-section";
+import { TextFirstMenuSection } from "@/components/shared/text-first-menu-section";
 import { RESTAURANT_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import { RestaurantBookingCard } from "@/components/shared/restaurant-booking-card";
 import { TableReservationButton } from "@/components/shared/table-reservation-button";
@@ -131,15 +132,24 @@ export default async function RestaurantDetailPage({
   // TableReservationButton / reviews / favourites / map stack.
   if (restaurant.slug === VILLAGE_HARGEISA_SLUG) {
     return (
-      <TheVillageExperience
-        locale={locale}
-        restaurant={restaurant}
-        products={restaurantProducts}
-        offers={offers}
-        myReview={myReview}
-        isFavorited={isFavorited}
-        whatsappFallback={whatsappFallback}
-      />
+      <>
+        <TheVillageExperience
+          locale={locale}
+          restaurant={restaurant}
+          products={restaurantProducts}
+          offers={offers}
+          myReview={myReview}
+          isFavorited={isFavorited}
+          whatsappFallback={whatsappFallback}
+        />
+        <PartnerStatusSection
+          isPartner={restaurant.isPartner}
+          partnerStatus={restaurant.partnerStatus}
+          logoUrl={restaurant.logo}
+          businessName={restaurant.name}
+          locale={locale}
+        />
+      </>
     );
   }
   const hasStructuredHours = restaurant.openingHoursStructured && restaurant.openingHoursStructured.length > 0;
@@ -339,19 +349,35 @@ export default async function RestaurantDetailPage({
                 <h2 id="menu-heading" className="mb-5 font-display text-2xl font-semibold">
                   {td("menuAndOrderOnline")}
                 </h2>
-                <VillageMenuOrderSection
-                  products={restaurantProducts}
-                  storeName={restaurant.name}
-                  business={{
-                    listingType: "restaurant",
-                    listingId: restaurant.id,
-                    businessName: restaurant.name,
-                    deliveryEnabled: Boolean(restaurant.productsDeliveryEnabled),
-                    addons: [],
-                    whatsapp: restaurant.whatsapp,
-                  }}
-                  locale={locale}
-                />
+                {restaurant.menuDisplayStyle === "text_first" ? (
+                  <TextFirstMenuSection
+                    products={restaurantProducts}
+                    storeName={restaurant.name}
+                    business={{
+                      listingType: "restaurant",
+                      listingId: restaurant.id,
+                      businessName: restaurant.name,
+                      deliveryEnabled: Boolean(restaurant.productsDeliveryEnabled),
+                      addons: [],
+                      whatsapp: restaurant.whatsapp,
+                    }}
+                    locale={locale}
+                  />
+                ) : (
+                  <VillageMenuOrderSection
+                    products={restaurantProducts}
+                    storeName={restaurant.name}
+                    business={{
+                      listingType: "restaurant",
+                      listingId: restaurant.id,
+                      businessName: restaurant.name,
+                      deliveryEnabled: Boolean(restaurant.productsDeliveryEnabled),
+                      addons: [],
+                      whatsapp: restaurant.whatsapp,
+                    }}
+                    locale={locale}
+                  />
+                )}
               </section>
             </Reveal>
           )}

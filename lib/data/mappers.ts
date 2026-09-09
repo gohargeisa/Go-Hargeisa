@@ -219,6 +219,7 @@ export function mapRestaurant(row: RestaurantRow, reviews: Review[] = []): Resta
     languages: row.languages ?? [],
     catalogOrderingEnabled: row.ordering_enabled,
     productsDeliveryEnabled: row.products_delivery_enabled,
+    menuDisplayStyle: row.menu_display_style ?? undefined,
   };
 }
 
@@ -282,6 +283,7 @@ export function mapCafe(row: CafeRow, reviews: Review[] = [], locale?: string): 
     flowerAddons: Array.isArray(row.flower_addons) ? (row.flower_addons as unknown as Cafe["flowerAddons"]) : [],
     productsDeliveryEnabled: row.products_delivery_enabled,
     orderingEnabled: row.ordering_enabled,
+    menuDisplayStyle: row.menu_display_style ?? undefined,
   };
 }
 

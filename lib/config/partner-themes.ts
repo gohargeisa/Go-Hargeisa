@@ -549,9 +549,59 @@ const AL_HIKMA_THEME: PartnerTheme = {
   accentSoft: "#EAD8B4",
 };
 
+/**
+ * Excellence Café (`restaurants/excellence-cafe`) — a real Hargeisa
+ * restaurant, seeded as `status: 'draft'` and reachable only via its private
+ * preview (`app/[locale]/preview/excellence-cafe`) until reviewed — see
+ * supabase/migrations/20260910000001_excellence_cafe_listing.sql.
+ *
+ * Colours sampled directly from the official logo
+ * (public/images/partners/excellence-cafe/logo.png, cropped from the
+ * business's own printed menu cover — a gold coffee-cup/fork-and-spoon mark
+ * with an "Excellence Café" script wordmark on a solid dark-brown field):
+ * `primary` #503930 is the average of three corner-background samples
+ * (rgb 88/60/48, 78/55/47, 74/57/49 → avg rgb 80/57/48); `accent` #DFBC69 is
+ * the average of two gold-ink samples (rgb 234/198/122 on the cup body,
+ * rgb 213/178/88 on the cup rim → avg rgb 223/188/105). `primaryMid`/
+ * `primaryStrong`/`primaryDeep`/`primarySoft` are a systematic tonal ramp
+ * derived from that one sampled brown (not independently sampled), same
+ * approach as AL_HIKMA_THEME's ramp from its single sampled green.
+ * Contrast (WCAG relative-luminance formula, computed directly): white text
+ * on primary ≈ 10.7:1, on primaryStrong ≈ 13.5:1, on primaryDeep ≈ 16.3:1 —
+ * all comfortably AAA. `accent` gold is borders/eyebrows/badges only, never
+ * a CTA background — same rule every other partner's accent follows.
+ *
+ * heroImage intentionally NOT set here: the hero photo selection lives in
+ * lib/config/excellence-cafe-photos.ts (mirroring the-village-photos.ts),
+ * not this file — same pattern The Village's own theme entry would follow
+ * if it had one; ExcellenceCafeHero reads that config directly instead of
+ * PartnerHeroBanner's generic heroImage/heroImageFit fields, since this page
+ * uses a fully bespoke hero section, not the generic banner component.
+ */
+const EXCELLENCE_CAFE_THEME: PartnerTheme = {
+  slug: "excellence-cafe",
+  enabled: true,
+  partnerName: "Excellence Café",
+  partnerLogo: "/images/partners/excellence-cafe/logo.png",
+  primary: "#503930",
+  primaryRgb: "80 57 48",
+  primaryMid: "#7E5F52",
+  primaryMidRgb: "126 95 82",
+  primaryStrong: "#3D2A23",
+  primaryDeep: "#2B1D18",
+  primarySoft: "#C4B2A8",
+  accent: "#DFBC69",
+  accentRgb: "223 188 105",
+  accentStrong: "#B2914B",
+  accentSoft: "#F0DEB2",
+};
+
 const PARTNER_THEMES: Partial<Record<BusinessListingType, Record<string, PartnerTheme>>> = {
   cafe: {
     lavender: LAVENDER_THEME,
+  },
+  restaurant: {
+    "excellence-cafe": EXCELLENCE_CAFE_THEME,
   },
   city_service: {
     // Distinct object from the cafe entry above (see LAVENDER_FLOWERS_THEME's

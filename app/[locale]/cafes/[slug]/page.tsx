@@ -22,6 +22,7 @@ import { RestaurantMenuSection } from "@/components/shared/restaurant-menu-secti
 import { getProductsForListing } from "@/lib/data/products";
 import { ProductsSection } from "@/components/shared/products-section";
 import { GroupedProductsSection } from "@/components/shared/grouped-products-section";
+import { TextFirstMenuSection } from "@/components/shared/text-first-menu-section";
 import { LAVENDER_MENU_CATEGORY_ORDER, groupProductsByCategory } from "@/lib/config/lavender-menu-sections";
 import { CAFE_GALLERY_CATEGORIES } from "@/lib/utils/gallery-categories";
 import { AmenitiesSection, hasAmenities } from "@/components/shared/amenities-section";
@@ -322,6 +323,19 @@ export default async function CafeDetailPage({
                     // flower-shop field. Do not clear `flower_addons` itself;
                     // Lavender Flowers still needs it.
                     addons: [],
+                  }}
+                  locale={locale}
+                />
+              ) : cafe.menuDisplayStyle === "text_first" ? (
+                <TextFirstMenuSection
+                  products={visibleCafeProducts}
+                  storeName={cafe.name}
+                  business={{
+                    listingType: "cafe",
+                    listingId: cafe.id,
+                    businessName: cafe.name,
+                    deliveryEnabled: Boolean(cafe.productsDeliveryEnabled),
+                    addons: cafe.flowerAddons ?? [],
                   }}
                   locale={locale}
                 />
