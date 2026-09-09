@@ -21,7 +21,7 @@ export async function JoinFinalCta({ locale }: { locale: Locale }) {
             className="relative mt-8 inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 text-sm font-semibold text-primary-700 shadow-xl transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:shadow-2xl sm:text-base"
           >
             {t("finalCtaButton")}
-            <ArrowRight size={18} aria-hidden="true" />
+            <ArrowRight size={18} className="rtl:rotate-180" aria-hidden="true" />
           </a>
 
           <p className="relative mx-auto mt-8 text-balance text-xs font-bold uppercase tracking-[0.14em] text-white/60">

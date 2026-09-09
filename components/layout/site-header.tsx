@@ -403,7 +403,7 @@ export function SiteHeader({
                     className="mt-2 flex items-center justify-between rounded-2xl px-3 py-2.5 text-sm font-semibold text-primary-700"
                   >
                     {t("browseAllCategories")}
-                    <ArrowRight size={14} aria-hidden="true" />
+                    <ArrowRight size={14} className="rtl:rotate-180" aria-hidden="true" />
                   </Link>
                 </div>
               )}

@@ -66,7 +66,7 @@ export function MyBusinessesPanel({ locale, listings }: { locale: Locale; listin
             className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-700"
           >
             {t("goToBusinessDashboard")}
-            <ArrowRight size={14} aria-hidden="true" />
+            <ArrowRight size={14} className="rtl:rotate-180" aria-hidden="true" />
           </Link>
         </>
       )}

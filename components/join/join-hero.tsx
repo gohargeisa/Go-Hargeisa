@@ -73,7 +73,7 @@ export async function JoinHero({ locale }: { locale: Locale }) {
             className="mt-9 inline-flex items-center gap-2 rounded-full bg-primary-700 px-9 py-4 text-base font-semibold text-white shadow-[0_10px_30px_rgba(245,158,11,0.4)] transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-primary-800 hover:shadow-[0_16px_44px_rgba(245,158,11,0.5)]"
           >
             {t("heroCtaButton")}
-            <ArrowRight size={19} aria-hidden="true" />
+            <ArrowRight size={19} className="rtl:rotate-180" aria-hidden="true" />
           </a>
         </Reveal>
 

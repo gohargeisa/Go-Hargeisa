@@ -215,7 +215,7 @@ export async function AlHikmaStorefront({
           style={{ backgroundColor: theme.accentStrong }}
         >
           {ta("bookAppointmentButton")}
-          <ArrowRight size={15} aria-hidden="true" />
+          <ArrowRight size={15} className="rtl:rotate-180" aria-hidden="true" />
         </Link>
         {(callHref || whatsappHref) && (
           <div className="grid grid-cols-2 gap-2.5 sm:flex sm:gap-3">
@@ -456,7 +456,7 @@ export async function AlHikmaStorefront({
               className="!mt-4 flex items-center justify-center gap-2 border-t border-ink/8 pt-4 text-xs font-semibold text-ink/60 transition-colors hover:text-primary dark:border-white/10 dark:text-sand/60"
             >
               {td("followTiktok")}
-              <ArrowRight size={12} aria-hidden="true" />
+              <ArrowRight size={12} className="rtl:rotate-180" aria-hidden="true" />
             </a>
           )}
         </aside>
@@ -516,7 +516,7 @@ export async function AlHikmaStorefront({
                       style={{ backgroundColor: theme.primaryStrong }}
                     >
                       {ta("bookAppointmentButton")}
-                      <ArrowRight size={14} aria-hidden="true" />
+                      <ArrowRight size={14} className="rtl:rotate-180" aria-hidden="true" />
                     </Link>
                     <p className="mt-3 text-[11px] leading-relaxed text-ink/45 dark:text-sand/45">{t("offerFinePrint")}</p>
                   </div>
@@ -585,7 +585,7 @@ export async function AlHikmaStorefront({
                       className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold"
                       style={{ color: theme.primaryStrong }}
                     >
-                      {ta("bookAppointmentButton")} <ArrowRight size={14} aria-hidden="true" />
+                      {ta("bookAppointmentButton")} <ArrowRight size={14} className="rtl:rotate-180" aria-hidden="true" />
                     </Link>
                   </div>
                 </div>
@@ -644,7 +644,7 @@ export async function AlHikmaStorefront({
                         style={{ backgroundColor: theme.primaryStrong }}
                       >
                         {ta("bookAppointment")}
-                        <ArrowRight size={14} aria-hidden="true" />
+                        <ArrowRight size={14} className="rtl:rotate-180" aria-hidden="true" />
                       </Link>
                     </div>
                   );

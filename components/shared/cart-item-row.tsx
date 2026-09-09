@@ -4,12 +4,8 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { useCart } from "@/lib/cart/cart-context";
-import { lineTotal, type CartItem } from "@/lib/cart/types";
+import { lineTotal, localizedItemName, type CartItem } from "@/lib/cart/types";
 import type { Locale } from "@/lib/i18n/config";
-
-function localizedItemName(item: CartItem, locale: string): string {
-  return (locale === "ar" && item.nameAr) || (locale === "so" && item.nameSo) || item.name;
-}
 
 export function CartItemRow({ item, locale }: { item: CartItem; locale: Locale }) {
   const cart = useCart();

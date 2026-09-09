@@ -196,7 +196,7 @@ export default async function OwnerDashboardPage({ params: { locale } }: { param
                   </div>
                 </div>
                 <div className="mt-3 flex items-center gap-1 text-xs font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                  {t("viewAll")} <ArrowRight size={12} />
+                  {t("viewAll")} <ArrowRight size={12} className="rtl:rotate-180" />
                 </div>
               </Link>
             ))}
@@ -256,7 +256,7 @@ export default async function OwnerDashboardPage({ params: { locale } }: { param
                         <p className="text-xs text-ink/50 dark:text-white/50">{t("hotelLabel")}</p>
                       </div>
                     </div>
-                    <ArrowRight size={16} className="text-ink/30 dark:text-white/30" />
+                    <ArrowRight size={16} className="text-ink/30 dark:text-white/30 rtl:rotate-180" />
                   </Link>
                 ))}
                 {restaurants.slice(0, 2).map((restaurant) => (
@@ -274,7 +274,7 @@ export default async function OwnerDashboardPage({ params: { locale } }: { param
                         <p className="text-xs text-ink/50 dark:text-white/50">{t("restaurantLabel")}</p>
                       </div>
                     </div>
-                    <ArrowRight size={16} className="text-ink/30 dark:text-white/30" />
+                    <ArrowRight size={16} className="text-ink/30 dark:text-white/30 rtl:rotate-180" />
                   </Link>
                 ))}
               </>

@@ -112,3 +112,11 @@ export function cartSubtotal(items: CartItem[]): number {
 export function cartItemCount(items: CartItem[]): number {
   return items.reduce((sum, item) => sum + item.quantity, 0);
 }
+
+/** The item's name in the current locale, falling back to the (always
+ * present) English `name` — shared by every place a cart line renders a
+ * product name (cart drawer, checkout form) so a themed/localized product
+ * never silently reverts to English at one step of the order flow. */
+export function localizedItemName(item: CartItem, locale: string): string {
+  return (locale === "ar" && item.nameAr) || (locale === "so" && item.nameSo) || item.name;
+}

@@ -60,7 +60,7 @@ export async function AudienceSection({ locale }: { locale: Locale }) {
                     className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-primary-700 transition-all duration-300 ease-premium hover:gap-2.5"
                   >
                     {cta}
-                    <ArrowRight size={15} aria-hidden="true" />
+                    <ArrowRight size={15} className="rtl:rotate-180" aria-hidden="true" />
                   </Link>
                 )}
               </div>
