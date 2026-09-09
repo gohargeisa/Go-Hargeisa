@@ -14,9 +14,9 @@ export const RECENTLY_VIEWED_STORE = "recentlyViewed";
 
 /** Cache Storage bucket names — must match public/sw.js exactly. */
 export const SHELL_CACHE = "gh-shell-v1";
-export const CONTENT_CACHE = "gh-content-v3";
+export const CONTENT_CACHE = "gh-content-v4";
 export const IMAGES_CACHE = "gh-images-v1";
-export const STATIC_CACHE = "gh-static-v1";
+export const STATIC_CACHE = "gh-static-v2";
 export const RUNTIME_CACHES = [CONTENT_CACHE, IMAGES_CACHE, STATIC_CACHE] as const;
 
 /** Header the SW stamps onto every cached response so age can be swept from page context without a parallel IndexedDB metadata store. */

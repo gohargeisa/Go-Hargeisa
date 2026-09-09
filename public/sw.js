@@ -2,9 +2,9 @@
 // offline app). Four cache buckets, replacing the single network-first
 // "visit-hargeisa-v2" cache this file used to have:
 //   - gh-shell-v1:   install-time precache, last-resort fallback only
-//   - gh-content-v3: navigations + Next.js RSC differential fetches — Network-First, cache is a fallback only
+//   - gh-content-v4: navigations + Next.js RSC differential fetches — Network-First, cache is a fallback only
 //   - gh-images-v1:  /_next/image + <img>/<Image> requests — Cache-First + background revalidate
-//   - gh-static-v1:  /_next/static/* hashed build assets — Cache-First
+//   - gh-static-v2:  /_next/static/* hashed build assets — Cache-First
 //
 // This file is a static asset the Next.js build never processes, so it
 // can't import lib/offline/constants.ts — the values below are kept in
@@ -32,11 +32,26 @@
 // never a source of truth while online. The version bump just clears out
 // every stale v2 entry already sitting in returning visitors' caches so
 // they don't have to wait for that entry to individually get overwritten.
+//
+// gh-content bumped v3->v4 and gh-static bumped v1->v2 together: a real-
+// device report of a stale/unresponsive UI (a specific button that opened
+// correctly for every fresh-profile/incognito test against the live URL,
+// with zero console errors or failed requests) could not be reproduced by
+// any means available in-session, and the reporting device had an existing
+// SW registration whose age/state couldn't be inspected remotely. Since
+// this file's own history is exactly two prior real incidents of "deploy is
+// correct, a returning visitor's cached entries paired with new client JS
+// misbehave until the cache version changes," bumping both here purges any
+// stale gh-content-v3/gh-static-v1 entries on next `activate` as a targeted,
+// low-risk mitigation — not a confirmed root cause fix. If the reported
+// button still doesn't work after this ships and the visitor's cache is
+// cleared, the cause is something else and this bump should be treated as
+// ruled out, not re-tried.
 
 const SHELL_CACHE = "gh-shell-v1";
-const CONTENT_CACHE = "gh-content-v3";
+const CONTENT_CACHE = "gh-content-v4";
 const IMAGES_CACHE = "gh-images-v1";
-const STATIC_CACHE = "gh-static-v1";
+const STATIC_CACHE = "gh-static-v2";
 const ALL_CACHES = [SHELL_CACHE, CONTENT_CACHE, IMAGES_CACHE, STATIC_CACHE];
 
 const OFFLINE_URLS = ["/en", "/manifest.json"];
