@@ -50,6 +50,10 @@ import { formatDayRange, formatTime12h } from "@/lib/utils/opening-hours";
 import { InstagramPostEmbed } from "@/components/shared/instagram-post-embed";
 import { Instagram } from "lucide-react";
 import { TheVillageExperience } from "@/components/the-village/the-village-experience";
+import { ExcellenceCafeExperience } from "@/components/excellence-cafe/excellence-cafe-experience";
+import { PartnerThemeScope } from "@/components/shared/partner/partner-theme-scope";
+import { PartnerPartnershipFooter } from "@/components/shared/partner/partner-partnership-footer";
+import { getPartnerTheme } from "@/lib/config/partner-themes";
 
 // The Village Hargeisa (restaurants/the-village-hargeisa) only — a second,
 // independently-verified Instagram account for this specific business (see
@@ -63,6 +67,13 @@ import { TheVillageExperience } from "@/components/the-village/the-village-exper
 const VILLAGE_HARGEISA_SLUG = "the-village-hargeisa";
 const VILLAGE_SECONDARY_INSTAGRAM = { handle: "@thevillagehargeisa", url: "https://www.instagram.com/thevillagehargeisa/" };
 const VILLAGE_FEATURED_INSTAGRAM_POST = "https://www.instagram.com/p/DI6RSkEMOaM/";
+
+// Excellence Café (restaurants/excellence-cafe) — a dedicated, art-directed
+// premium experience (cinematic hero, editorial text-first menu, buffet,
+// reservation/reviews/location), wrapped in its own curated partner theme.
+// Same slug-branch pattern as The Village Hargeisa above; every other
+// restaurant continues to render the shared layout below, untouched.
+const EXCELLENCE_CAFE_SLUG = "excellence-cafe";
 
 // Public content changes infrequently; revalidate hourly instead of
 // rendering on every request (this page no longer reads cookies, so
@@ -152,6 +163,29 @@ export default async function RestaurantDetailPage({
       </>
     );
   }
+
+  // Excellence Café — its own premium bespoke experience + curated partner
+  // theme, wired exactly like the private preview route
+  // (app/[locale]/preview/excellence-cafe). A themed partner renders the
+  // curated PartnerPartnershipFooter, never PartnerStatusSection.
+  if (restaurant.slug === EXCELLENCE_CAFE_SLUG) {
+    const excellenceCafeTheme = getPartnerTheme("restaurant", restaurant.slug);
+    return (
+      <PartnerThemeScope theme={excellenceCafeTheme}>
+        <ExcellenceCafeExperience
+          locale={locale}
+          restaurant={restaurant}
+          products={restaurantProducts}
+          offers={offers}
+          myReview={myReview}
+          isFavorited={isFavorited}
+          whatsappFallback={whatsappFallback}
+        />
+        {excellenceCafeTheme && <PartnerPartnershipFooter theme={excellenceCafeTheme} locale={locale} />}
+      </PartnerThemeScope>
+    );
+  }
+
   const hasStructuredHours = restaurant.openingHoursStructured && restaurant.openingHoursStructured.length > 0;
   const hasHoursInfo = hasStructuredHours || restaurant.is24Hours || restaurant.temporarilyClosed || restaurant.permanentlyClosed;
 
@@ -415,19 +449,43 @@ export default async function RestaurantDetailPage({
                 <h2 id="shop-heading" className="mb-5 font-display text-2xl font-semibold">
                   {td("orderOnline")}
                 </h2>
-                <ProductsSection
-                  products={restaurantProducts}
-                  storeName={restaurant.name}
-                  business={{
-                    listingType: "restaurant",
-                    listingId: restaurant.id,
-                    businessName: restaurant.name,
-                    deliveryEnabled: Boolean(restaurant.productsDeliveryEnabled),
-                    addons: [],
-                    whatsapp: restaurant.whatsapp,
-                  }}
-                  locale={locale}
-                />
+                {/* Opt-in text-first menu (menu_display_style column) — same
+                    switch the cafes/[slug] page already applies to any cafe,
+                    now honored for any restaurant too (previously wired only
+                    inside the Village-only unified-menu block above). A
+                    restaurant whose catalog is name/price/description with no
+                    photography reads far better as an editorial, category-
+                    navigated list than a grid; the image grid stays the
+                    default for every restaurant that hasn't opted in. */}
+                {restaurant.menuDisplayStyle === "text_first" ? (
+                  <TextFirstMenuSection
+                    products={restaurantProducts}
+                    storeName={restaurant.name}
+                    business={{
+                      listingType: "restaurant",
+                      listingId: restaurant.id,
+                      businessName: restaurant.name,
+                      deliveryEnabled: Boolean(restaurant.productsDeliveryEnabled),
+                      addons: [],
+                      whatsapp: restaurant.whatsapp,
+                    }}
+                    locale={locale}
+                  />
+                ) : (
+                  <ProductsSection
+                    products={restaurantProducts}
+                    storeName={restaurant.name}
+                    business={{
+                      listingType: "restaurant",
+                      listingId: restaurant.id,
+                      businessName: restaurant.name,
+                      deliveryEnabled: Boolean(restaurant.productsDeliveryEnabled),
+                      addons: [],
+                      whatsapp: restaurant.whatsapp,
+                    }}
+                    locale={locale}
+                  />
+                )}
               </section>
             </Reveal>
           )}

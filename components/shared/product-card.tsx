@@ -8,7 +8,8 @@ import { ProductImage } from "@/components/shared/product-image";
 import { WhatsAppIcon } from "@/components/shared/brand-icons";
 import { getValidAddonsForProduct } from "@/lib/cart/product-addons";
 import { productCategoryLabel } from "@/lib/config/product-categories";
-import { productLocalizedName } from "@/lib/utils/product-i18n";
+import { productLocalizedName, productLocalizedDescription } from "@/lib/utils/product-i18n";
+import { productHasImage } from "@/lib/utils/product-media";
 import { getProductPricing, formatDisplayPrice } from "@/lib/utils/product-pricing";
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
 import type { AddToCartBusiness } from "@/lib/cart/cart-context";
@@ -87,6 +88,98 @@ export function ProductCard({
   const askForPriceHref = showAskForPrice
     ? toWhatsAppHref(business.whatsapp!, t("askForPriceMessage", { store: business.businessName, product: name }))
     : undefined;
+
+  // No usable photo → a clean, intentional text-first card (name, price,
+  // description, options/add-ons hint, the same action). No empty image
+  // frame, no placeholder, no reserved image space — the type simply fills
+  // the card. One layout for every `variant`, since the variants differ
+  // almost entirely in how they treat the image that isn't here. See
+  // productHasImage() for the exact rule.
+  if (!productHasImage(product)) {
+    const description = productLocalizedDescription(product, locale);
+    const pricing = variant === "premium" ? getProductPricing(product) : { hasDiscount: false as boolean, originalPrice: undefined as number | undefined };
+    // Same quick-add / view-details / ask-for-price semantics as the three
+    // image-card variants below.
+    const actionControl = canQuickAdd ? (
+      <AddToCartButton
+        business={business}
+        product={{ productId: product.id, name: product.name, nameAr: product.nameAr, nameSo: product.nameSo, image: product.image, unitPrice: product.price!, category: product.category }}
+        className="inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-primary-700 py-2 text-xs font-bold text-white transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-primary-800 active:scale-95"
+      />
+    ) : product.isAvailable && product.price != null ? (
+      <button
+        type="button"
+        onClick={onOpenDetails}
+        className="inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-primary/30 py-2 text-xs font-semibold text-primary-700 transition-colors hover:bg-primary/8 dark:text-primary-300"
+      >
+        <ShoppingCart size={13} aria-hidden="true" /> {t("viewDetails")}
+      </button>
+    ) : askForPriceHref ? (
+      <a
+        href={askForPriceHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={(e) => e.stopPropagation()}
+        className="inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-[#25D366] py-2 text-xs font-bold text-white transition-all duration-300 ease-premium hover:-translate-y-0.5 hover:bg-[#1FB855] active:scale-95"
+      >
+        <WhatsAppIcon size={14} aria-hidden="true" /> {t("askForPrice")}
+      </a>
+    ) : null;
+    return (
+      <div className="group flex h-full flex-col justify-center rounded-xl2 border border-ink/10 bg-white p-4 shadow-soft transition-all duration-300 ease-premium hover:-translate-y-1 hover:border-primary/25 hover:shadow-card dark:border-white/10 dark:bg-white/[0.03]">
+        <button type="button" onClick={onOpenDetails} className="block text-start">
+          <div className="flex items-start justify-between gap-3">
+            <p dir="auto" className="min-w-0 font-display text-[15px] font-semibold leading-snug text-ink transition-colors group-hover:text-primary-700 dark:text-sand dark:group-hover:text-primary-300">
+              {name}
+            </p>
+            {product.price != null && (
+              <span dir="ltr" className="shrink-0 whitespace-nowrap pt-0.5 text-sm font-bold tabular-nums text-ink dark:text-white">
+                {formatDisplayPrice(product.price)} {product.currency}
+              </span>
+            )}
+          </div>
+
+          {(product.price == null || (pricing.hasDiscount && pricing.originalPrice != null)) && (
+            <p className="mt-0.5 flex items-baseline gap-1.5">
+              {product.price == null ? (
+                <span className="text-xs font-semibold text-ink/50 dark:text-sand/50">{t("priceOnRequest")}</span>
+              ) : (
+                <span dir="ltr" className="text-xs font-medium text-ink/40 line-through dark:text-sand/40">
+                  {formatDisplayPrice(pricing.originalPrice!)}
+                </span>
+              )}
+            </p>
+          )}
+
+          {product.category && (
+            <p className="mt-1 text-xs text-ink/45 dark:text-sand/45">{productCategoryLabel(product.category, locale)}</p>
+          )}
+
+          {description && (
+            <p dir="auto" className="mt-2 line-clamp-3 text-[13px] leading-relaxed text-ink/60 dark:text-sand/60">
+              {description}
+            </p>
+          )}
+
+          {hasVariants ? (
+            <p className="mt-2 text-xs font-semibold text-primary-700 dark:text-primary-300">
+              {t("optionsAvailable", { count: product.variants!.length })}
+            </p>
+          ) : (validAddons.length > 0 || hasOptions) ? (
+            <p className="mt-2 text-xs font-semibold text-primary-700 dark:text-primary-300">{t("viewDetails")}</p>
+          ) : null}
+
+          {!product.isAvailable && (
+            <p className="mt-2 inline-block rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-bold text-red-700 dark:bg-red-400/15 dark:text-red-300">
+              {t("unavailable")}
+            </p>
+          )}
+        </button>
+
+        {actionControl && <div className="mt-3">{actionControl}</div>}
+      </div>
+    );
+  }
 
   if (variant === "premium") {
     const pricing = getProductPricing(product);

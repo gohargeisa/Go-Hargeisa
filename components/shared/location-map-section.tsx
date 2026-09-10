@@ -48,12 +48,18 @@ export async function LocationMapSection({
   coords,
   mapsHref,
   name,
+  hideHeading = false,
 }: {
   locale: Locale;
   address?: string | null;
   coords?: Coordinates | null;
   mapsHref?: string;
   name: string;
+  /** Opt-in (default `false` — every existing caller keeps its own
+   * "Location" `<h2>`). A page that already renders its own consistent
+   * section header above this block passes `true` to avoid a second
+   * heading; the `id="location"` anchor + map card are unchanged. */
+  hideHeading?: boolean;
 }) {
   const hasCoords = !!coords && Number.isFinite(coords.lat) && Number.isFinite(coords.lng) && !isGenericFallbackCoords(coords);
   if (!address && !hasCoords && !mapsHref) return null;
@@ -65,10 +71,17 @@ export async function LocationMapSection({
 
   return (
     <Reveal>
-      <section id="location" aria-labelledby="location-heading" className="scroll-mt-36">
-        <h2 id="location-heading" className="mb-5 font-display text-2xl font-semibold">
-          {td("location")}
-        </h2>
+      <section
+        id="location"
+        aria-labelledby={hideHeading ? undefined : "location-heading"}
+        aria-label={hideHeading ? td("location") : undefined}
+        className="scroll-mt-36"
+      >
+        {!hideHeading && (
+          <h2 id="location-heading" className="mb-5 font-display text-2xl font-semibold">
+            {td("location")}
+          </h2>
+        )}
         <div className="overflow-hidden rounded-xl3 border border-ink/8 bg-white dark:border-white/10 dark:bg-white/[0.03]">
           {embedSrc && (
             // Mobile: a fixed, restrained height so the map stays proportional

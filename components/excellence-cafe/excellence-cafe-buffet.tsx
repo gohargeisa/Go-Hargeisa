@@ -14,8 +14,8 @@ export async function ExcellenceCafeBuffet({ locale }: { locale: Locale }) {
   const t = await getTranslations({ locale, namespace: "excellenceCafe" });
 
   return (
-    <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl2 border border-ink/10 dark:border-white/10">
+    <div className="grid items-center gap-9 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
+      <div className="relative aspect-[5/4] w-full overflow-hidden rounded-2xl border border-ink/8 shadow-card dark:border-white/10">
         <Image
           src="/images/partners/excellence-cafe/atmosphere/lunch-buffet-spread-banner.jpg"
           alt={t("buffetPhotoAlt")}
@@ -24,13 +24,15 @@ export async function ExcellenceCafeBuffet({ locale }: { locale: Locale }) {
           className="object-cover"
         />
       </div>
-      <div>
-        <span className="mb-2 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-primary-700 dark:text-primary-300">
+      <div className="lg:max-w-md">
+        <span className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-primary-700 dark:text-primary-300">
           <UtensilsCrossed size={14} aria-hidden="true" />
           {t("buffetEyebrow")}
         </span>
-        <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">{t("buffetHeading")}</h2>
-        <p className="mt-5 leading-relaxed text-ink/75 dark:text-sand/75">{t("buffetBody")}</p>
+        <h2 className="mt-3 font-display text-[1.7rem] font-semibold leading-tight tracking-tight sm:text-[2.05rem]">
+          {t("buffetHeading")}
+        </h2>
+        <p className="mt-4 text-[15px] leading-[1.75] text-ink/70 dark:text-sand/70">{t("buffetBody")}</p>
       </div>
     </div>
   );

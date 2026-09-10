@@ -153,6 +153,12 @@ export function ProductDetailModal({
     ...product.gallery.filter((g) => g.url !== heroImage).map((g) => ({ url: g.url, alt: g.alt || name })),
   ];
   const slides: LightboxSlide[] = photos.map((p) => ({ url: p.url, alt: p.alt }));
+  // No photo anywhere (no product image, no variant image, no gallery) →
+  // the modal renders NO image area at all: no placeholder, no reserved
+  // space. Name / price / options / add-ons / actions move straight to the
+  // top. A "spacious" caller collapses to the single-column compact shape
+  // in that case (an empty left column would defeat the point).
+  const hasPhotos = photos.length > 0;
   const displayPrice = activeVariant?.price ?? product.price;
   const isOrderable = (activeVariant ? activeVariant.isAvailable : product.isAvailable) && displayPrice != null;
   // Sale pricing only applies to the base product's own price — a variant
@@ -166,30 +172,27 @@ export function ProductDetailModal({
     : undefined;
 
   const spacious = layout === "spacious";
+  // The two-column desktop layout only makes sense when there's actually a
+  // photo to sit in the second column.
+  const twoColumn = spacious && hasPhotos;
 
-  const imageBlock = (
+  const imageBlock = hasPhotos ? (
     <>
-      {photos.length > 0 ? (
-        <button
-          type="button"
-          onClick={() => setLightboxIndex(0)}
-          className={`group relative block w-full overflow-hidden rounded-xl2 bg-ink/5 dark:bg-white/5 ${
-            spacious ? "h-[42vh] max-h-[420px] sm:h-auto sm:max-h-none sm:aspect-square" : "h-52 sm:h-60"
-          }`}
-          aria-label={t("viewGallery")}
-        >
-          <CrossfadeImage key={photos[0].url} src={photos[0].url} alt={name} />
-          {photos.length > 1 && (
-            <span className="absolute bottom-2.5 end-2.5 inline-flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1.5 text-xs font-semibold text-white">
-              <ImagesIcon size={13} aria-hidden="true" /> {photos.length}
-            </span>
-          )}
-        </button>
-      ) : (
-        <div className={`relative w-full overflow-hidden rounded-xl2 bg-ink/5 dark:bg-white/5 ${spacious ? "h-[42vh] max-h-[420px] sm:h-auto sm:max-h-none sm:aspect-square" : "h-52 sm:h-60"}`}>
-          <ProductImage alt={name} sizes={spacious ? "(max-width: 639px) 100vw, 50vw" : "(max-width: 639px) 100vw, 448px"} />
-        </div>
-      )}
+      <button
+        type="button"
+        onClick={() => setLightboxIndex(0)}
+        className={`group relative block w-full overflow-hidden rounded-xl2 bg-ink/5 dark:bg-white/5 ${
+          spacious ? "h-[42vh] max-h-[420px] sm:h-auto sm:max-h-none sm:aspect-square" : "h-52 sm:h-60"
+        }`}
+        aria-label={t("viewGallery")}
+      >
+        <CrossfadeImage key={photos[0].url} src={photos[0].url} alt={name} />
+        {photos.length > 1 && (
+          <span className="absolute bottom-2.5 end-2.5 inline-flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1.5 text-xs font-semibold text-white">
+            <ImagesIcon size={13} aria-hidden="true" /> {photos.length}
+          </span>
+        )}
+      </button>
       {/* Thumbnail strip — spacious layout only, and only when there's more
           than the one hero photo already shown above. Compact layout keeps
           today's "tap for lightbox" behavior with no separate strip. */}
@@ -209,7 +212,7 @@ export function ProductDetailModal({
         </div>
       )}
     </>
-  );
+  ) : null;
 
   const detailsBlock = (
     <div className="space-y-3.5">
@@ -396,7 +399,7 @@ export function ProductDetailModal({
         aria-label={name}
         tabIndex={-1}
         className={`relative flex h-full w-full flex-col overflow-y-auto bg-white shadow-2xl dark:bg-ink sm:h-auto sm:rounded-3xl ${
-          spacious ? "sm:max-h-[90vh] sm:max-w-3xl" : "sm:max-h-[85vh] sm:max-w-md"
+          twoColumn ? "sm:max-h-[90vh] sm:max-w-3xl" : "sm:max-h-[85vh] sm:max-w-md"
         }`}
       >
         {/* Header spans the full dialog width in both layouts — close
@@ -443,7 +446,7 @@ export function ProductDetailModal({
             indicator via env(safe-area-inset-bottom) so the Add to Cart
             button at the end of `detailsBlock` is never tucked under system
             navigation when the dialog is scrolled to the bottom. */}
-        {spacious ? (
+        {twoColumn ? (
           <div className="grid gap-6 p-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:grid-cols-2 sm:p-6 sm:pb-6">
             <div>{imageBlock}</div>
             {detailsBlock}

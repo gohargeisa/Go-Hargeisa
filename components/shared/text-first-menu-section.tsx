@@ -34,15 +34,23 @@ export function TextFirstMenuSection({
   locale,
   storeName,
   categoryOrder,
+  stickyTopPx,
 }: {
   products: Product[];
   business: AddToCartBusiness;
   locale: string;
   storeName: string;
   categoryOrder?: string[];
+  /** Pixel offset for the sticky category nav's `top`. Omit (the default)
+   * to keep the header-relative `top-[calc(5rem+env(safe-area-inset-top))]`
+   * every existing caller uses. A page that stacks its own sticky section
+   * nav above this menu (Excellence Café) passes the combined height so the
+   * category rail tucks directly under it instead of colliding. */
+  stickyTopPx?: number;
 }) {
   const t = useTranslations("products");
   const reduceMotion = useReducedMotion();
+  const scrollOffset = stickyTopPx == null ? STICKY_SCROLL_OFFSET : stickyTopPx + 52;
 
   const [selected, setSelected] = useState<Product | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -77,11 +85,11 @@ export function TextFirstMenuSection({
           .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
         if (visible[0]) setActiveCategory((visible[0].target as HTMLElement).dataset.category ?? null);
       },
-      { rootMargin: `-${STICKY_SCROLL_OFFSET}px 0px -55% 0px`, threshold: 0 }
+      { rootMargin: `-${scrollOffset}px 0px -55% 0px`, threshold: 0 }
     );
     for (const el of sectionRefs.current.values()) observer.observe(el);
     return () => observer.disconnect();
-  }, [grouped]);
+  }, [grouped, scrollOffset]);
 
   function jumpTo(category: string) {
     const el = sectionRefs.current.get(category);
@@ -99,10 +107,14 @@ export function TextFirstMenuSection({
         aria-label={t("menuJumpTo")}
         /* Sticks directly below the global fixed site header (h-20 = 5rem, plus
            env(safe-area-inset-top) on notched devices) — same offset as
-           VillageMenu's identical nav. */
-        className="sticky top-[calc(5rem+env(safe-area-inset-top))] z-30 -mx-5 border-y border-ink/8 bg-sand/95 px-5 py-2.5 backdrop-blur dark:border-white/10 dark:bg-ink/95"
+           VillageMenu's identical nav. A caller with its own sticky section
+           nav above the menu passes `stickyTopPx` to stack below it. */
+        className={`sticky z-30 -mx-5 border-y border-ink/8 bg-sand/95 px-5 py-2.5 backdrop-blur dark:border-white/10 dark:bg-ink/95 ${
+          stickyTopPx == null ? "top-[calc(5rem+env(safe-area-inset-top))]" : ""
+        }`}
+        style={stickyTopPx == null ? undefined : { top: stickyTopPx }}
       >
-        <div className="flex gap-2 overflow-x-auto scrollbar-none">
+        <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
           {grouped.map(({ category }) => {
             const active = activeCategory === category;
             return (
@@ -111,10 +123,10 @@ export function TextFirstMenuSection({
                 type="button"
                 onClick={() => jumpTo(category)}
                 aria-current={active ? "true" : undefined}
-                className={`shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-[13px] font-semibold tracking-tight transition-colors ${
+                className={`shrink-0 whitespace-nowrap rounded-full px-4 py-1.5 text-[13px] font-semibold tracking-tight transition-colors ${
                   active
-                    ? "bg-ink text-white dark:bg-white dark:text-ink"
-                    : "text-ink/55 hover:text-ink dark:text-sand/55 dark:hover:text-sand"
+                    ? "bg-primary text-white shadow-sm"
+                    : "text-ink/50 hover:bg-ink/[0.05] hover:text-ink dark:text-sand/50 dark:hover:bg-white/[0.06] dark:hover:text-sand"
                 }`}
               >
                 {category}
@@ -124,7 +136,7 @@ export function TextFirstMenuSection({
         </div>
       </nav>
 
-      <div className="mt-12 space-y-16">
+      <div className="mt-9 space-y-12">
         {grouped.map(({ category, items }) => (
           <section
             key={category}
@@ -135,17 +147,19 @@ export function TextFirstMenuSection({
               else sectionRefs.current.delete(category);
             }}
             aria-labelledby={`${anchorId(category)}-h`}
-            style={{ scrollMarginTop: STICKY_SCROLL_OFFSET }}
+            style={{ scrollMarginTop: scrollOffset }}
           >
-            <h3
-              id={`${anchorId(category)}-h`}
-              className="font-display text-[1.35rem] font-semibold tracking-tight sm:text-2xl"
-            >
-              {category}
-            </h3>
-            <div className="mt-1 h-px w-full bg-ink/10 dark:bg-white/10" />
+            <div className="flex items-baseline gap-4">
+              <h3
+                id={`${anchorId(category)}-h`}
+                className="shrink-0 font-display text-xl font-semibold tracking-tight sm:text-[1.4rem]"
+              >
+                {category}
+              </h3>
+              <span className="h-px flex-1 translate-y-[-0.15em] bg-ink/12 dark:bg-white/12" aria-hidden="true" />
+            </div>
 
-            <ul className="mt-2 divide-y divide-ink/[0.07] dark:divide-white/[0.07]">
+            <ul className="mt-3 divide-y divide-ink/[0.08] dark:divide-white/[0.08]">
               {items.map((product) => {
                 const name = productLocalizedName(product, locale);
                 const description = productLocalizedDescription(product, locale);
@@ -166,14 +180,14 @@ export function TextFirstMenuSection({
                     : t("priceOnRequest");
 
                 return (
-                  <li key={product.id} className="py-4">
+                  <li key={product.id} className="-mx-3 rounded-xl px-3 py-3.5 transition-colors hover:bg-ink/[0.03] dark:hover:bg-white/[0.035]">
                     <button
                       type="button"
                       onClick={() => setSelected(product)}
-                      className="group flex w-full items-start justify-between gap-4 text-start"
+                      className="group flex w-full items-baseline justify-between gap-4 text-start"
                     >
                       <span className="min-w-0">
-                        <span className="font-medium text-ink transition-colors group-hover:text-primary-700 dark:text-sand dark:group-hover:text-primary-300">
+                        <span className="text-[15px] font-semibold text-ink transition-colors group-hover:text-primary-700 dark:text-sand dark:group-hover:text-primary-300">
                           {name}
                         </span>
                         {description && (
@@ -192,7 +206,7 @@ export function TextFirstMenuSection({
                           </span>
                         )}
                       </span>
-                      <span className="shrink-0 whitespace-nowrap pt-0.5 text-sm font-semibold tabular-nums text-ink/80 dark:text-sand/80">
+                      <span className="shrink-0 whitespace-nowrap text-[15px] font-semibold tabular-nums text-ink dark:text-white">
                         {priceCluster}
                       </span>
                     </button>
