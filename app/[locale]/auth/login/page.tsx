@@ -7,7 +7,7 @@ import { OAuth } from "@/components/shared/oauth";
 import { AuthForm } from "@/components/shared/auth-form";
 
 export const metadata: Metadata = {
-  title: "Sign In — Go Hargeisa",
+  title: { absolute: "Sign In — Go Hargeisa" },
 };
 
 export default async function LoginPage({

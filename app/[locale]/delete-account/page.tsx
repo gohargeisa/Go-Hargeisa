@@ -15,7 +15,7 @@ export async function generateMetadata({
   params: { locale: string };
 }): Promise<Metadata> {
   return {
-    title: "Delete Account | Go Hargeisa",
+    title: { absolute: "Delete Account | Go Hargeisa" },
     description: "Delete your Go Hargeisa account permanently.",
     alternates: localeAlternates(locale as Locale, "/delete-account"),
   };

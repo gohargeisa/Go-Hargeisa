@@ -6,7 +6,7 @@ import { requireUser } from "@/lib/supabase/guards";
 import { getMyBookingById } from "@/lib/data/business";
 import { BookingConfirmationView } from "@/components/dashboard/booking-confirmation-view";
 
-export const metadata: Metadata = { title: "Booking Confirmation — Go Hargeisa", robots: { index: false } };
+export const metadata: Metadata = { title: { absolute: "Booking Confirmation — Go Hargeisa" }, robots: { index: false } };
 
 export default async function BookingConfirmationPage({
   params: { locale, id },

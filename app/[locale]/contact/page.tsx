@@ -16,7 +16,7 @@ export async function generateMetadata({
   params: { locale: string };
 }): Promise<Metadata> {
   return {
-    title: "Contact Go Hargeisa",
+    title: { absolute: "Contact Go Hargeisa" },
   description: "Get in touch with the Go Hargeisa team.",
     alternates: localeAlternates(locale as Locale, "/contact"),
   };

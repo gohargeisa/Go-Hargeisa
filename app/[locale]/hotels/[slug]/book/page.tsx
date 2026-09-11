@@ -15,7 +15,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const hotel = await getHotelBySlug(slug, locale);
   if (!hotel) return {};
-  return { title: `Book ${hotel.name} — Go Hargeisa`, robots: { index: false } };
+  return { title: { absolute: `Book ${hotel.name} — Go Hargeisa` }, robots: { index: false } };
 }
 
 export default async function HotelBookingPage({

@@ -16,7 +16,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const service = await getCityServiceBySlug(slug, locale);
   if (!service) return {};
-  return { title: `Book an Appointment — ${service.name} — Go Hargeisa`, robots: { index: false } };
+  return { title: { absolute: `Book an Appointment — ${service.name} — Go Hargeisa` }, robots: { index: false } };
 }
 
 export default async function CityServiceBookingPage({

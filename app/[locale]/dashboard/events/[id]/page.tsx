@@ -5,7 +5,7 @@ import { requireUser } from "@/lib/supabase/guards";
 import { getMyEventRequestById } from "@/lib/data/event-requests";
 import { EventRequestTrackingView } from "@/components/dashboard/event-request-tracking-view";
 
-export const metadata: Metadata = { title: "Event Request — Go Hargeisa", robots: { index: false } };
+export const metadata: Metadata = { title: { absolute: "Event Request — Go Hargeisa" }, robots: { index: false } };
 
 export default async function EventRequestTrackingPage({ params: { locale, id } }: { params: { locale: Locale; id: string } }) {
   await requireUser(locale, `/${locale}/dashboard/events/${id}`);

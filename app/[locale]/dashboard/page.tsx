@@ -20,7 +20,7 @@ import { getMyLoyaltyMemberships } from "@/lib/data/loyalty";
 import { programName as loyaltyProgramName, tierName as loyaltyTierName } from "@/lib/loyalty/helpers";
 import { LoyaltyEntryCard } from "@/components/loyalty/loyalty-entry-card";
 
-export const metadata: Metadata = { title: "My Dashboard — Go Hargeisa", robots: { index: false } };
+export const metadata: Metadata = { title: { absolute: "My Dashboard — Go Hargeisa" }, robots: { index: false } };
 
 export default async function DashboardPage({
   params: { locale },

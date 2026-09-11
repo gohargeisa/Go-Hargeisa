@@ -7,7 +7,7 @@ import { getAccessibleListings, getMessagesForListing, getOwnerProfile, selectAc
 import { BusinessSidebar } from "@/components/business/business-sidebar";
 import { BusinessHeader } from "@/components/business/business-header";
 
-export const metadata: Metadata = { title: "Business Dashboard — Go Hargeisa", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: { absolute: "Business Dashboard — Go Hargeisa" }, robots: { index: false, follow: false } };
 
 /**
  * Shell for every /business/* page — sidebar (desktop persistent / mobile

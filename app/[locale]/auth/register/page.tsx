@@ -7,7 +7,7 @@ import { OAuth } from "@/components/shared/oauth";
 import { AuthForm } from "@/components/shared/auth-form";
 
 export const metadata: Metadata = {
-  title: "Create an Account — Go Hargeisa",
+  title: { absolute: "Create an Account — Go Hargeisa" },
 };
 
 export default async function RegisterPage({

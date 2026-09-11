@@ -29,7 +29,7 @@ import { SubscriptionBreakdown } from "@/components/admin/control-center/subscri
 import { PartnerHealthMonitor } from "@/components/admin/control-center/partner-health-monitor";
 import { ActivityTimeline } from "@/components/admin/control-center/activity-timeline";
 
-export const metadata: Metadata = { title: "Owner Control Center — Go Hargeisa", robots: { index: false } };
+export const metadata: Metadata = { title: { absolute: "Owner Control Center — Go Hargeisa" }, robots: { index: false } };
 
 export default async function OwnerDashboardPage({ params: { locale } }: { params: { locale: Locale } }) {
   await requireOwner(locale, `/${locale}/admin`);

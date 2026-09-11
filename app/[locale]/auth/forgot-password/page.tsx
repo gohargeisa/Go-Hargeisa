@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { ForgotPasswordForm } from "@/components/shared/forgot-password-form";
 import type { Locale } from "@/lib/i18n/config";
 
-export const metadata: Metadata = { title: "Reset Password — Go Hargeisa" };
+export const metadata: Metadata = { title: { absolute: "Reset Password — Go Hargeisa" } };
 
 export default async function ForgotPasswordPage({ params: { locale } }: { params: { locale: Locale } }) {
   const t = await getTranslations({ locale, namespace: "auth" });
