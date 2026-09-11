@@ -104,7 +104,9 @@ export async function generateMetadata({
   if (r.slug === EXCELLENCE_CAFE_SLUG) {
     const te = await getTranslations({ locale, namespace: "excellenceCafe" });
     return {
-      title: te("metaTitle"),
+      // metaTitle already ends in "| Go Hargeisa" per spec — `absolute` skips
+      // the root layout's title.template so it doesn't get appended twice.
+      title: { absolute: te("metaTitle") },
       description: te("metaDescription"),
       keywords: [
         "Excellence Café Hargeisa",
