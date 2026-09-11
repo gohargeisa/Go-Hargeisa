@@ -13,7 +13,7 @@ import { safeJsonLd } from "@/lib/utils/json-ld";
 export const revalidate = 3600;
 
 /** Reuses the shared hero photo — same swap-in-place pattern as attractions-hero.tsx / about-hero.tsx. */
-const CITY_SERVICES_HERO_IMAGE = "/images/hero-bg.png";
+const CITY_SERVICES_HERO_IMAGE = "/images/hero-bg.webp";
 
 export async function generateMetadata({
   params: { locale },

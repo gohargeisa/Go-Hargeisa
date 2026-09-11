@@ -7,7 +7,7 @@ import { PremiumPageHero } from "@/components/shared/premium-page-hero";
 import { CityMapExperience } from "@/components/city-map/city-map-experience";
 
 /** Reuses the shared hero photo — same swap-in-place pattern as attractions-hero.tsx / about-hero.tsx. */
-const CITY_MAP_HERO_IMAGE = "/images/hero-bg.png";
+const CITY_MAP_HERO_IMAGE = "/images/hero-bg.webp";
 
 // Public content changes infrequently; revalidate hourly instead of
 // rendering on every request (this page no longer reads cookies, so

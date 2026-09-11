@@ -11,12 +11,14 @@ export async function getCafes(options?: {
   featuredOnly?: boolean;
   limit?: number;
   locale?: string;
+  partnerOnly?: boolean;
 }): Promise<Cafe[]> {
-  const { q, featuredOnly, limit, locale } = options ?? {};
+  const { q, featuredOnly, limit, locale, partnerOnly } = options ?? {};
 
   if (!isSupabaseConfigured()) {
     let results = mockCafes;
     if (featuredOnly) results = results.filter((c) => c.featured);
+    if (partnerOnly) results = results.filter((c) => c.isPartner);
     if (q) {
       const needle = q.toLowerCase();
       results = results.filter(
@@ -38,6 +40,7 @@ export async function getCafes(options?: {
     .order("is_pinned", { ascending: false })
     .order("featured", { ascending: false });
   if (featuredOnly) query = query.eq("featured", true);
+  if (partnerOnly) query = query.eq("is_partner", true);
   if (q) {
     const safeQ = sanitizeSearchQuery(q);
     if (safeQ) query = query.or(`name.ilike.%${safeQ}%,short_description.ilike.%${safeQ}%,address.ilike.%${safeQ}%`);

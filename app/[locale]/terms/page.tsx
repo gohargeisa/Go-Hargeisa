@@ -7,7 +7,7 @@ import { PremiumPageHero } from "@/components/shared/premium-page-hero";
 import { Reveal } from "@/components/home/reveal";
 
 /** Reuses the shared hero photo — same swap-in-place pattern as attractions-hero.tsx / about-hero.tsx. */
-const TERMS_HERO_IMAGE = "/images/hero-bg.png";
+const TERMS_HERO_IMAGE = "/images/hero-bg.webp";
 
 export async function generateMetadata({
   params: { locale },

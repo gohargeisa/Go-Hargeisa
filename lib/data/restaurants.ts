@@ -6,12 +6,13 @@ import { restaurants as mockRestaurants } from "@/lib/mock-data";
 import { sanitizeSearchQuery } from "@/lib/utils/sanitize-search-query";
 import type { Restaurant } from "@/types";
 
-export async function getRestaurants(options?: { q?: string; featuredOnly?: boolean; limit?: number }): Promise<Restaurant[]> {
-  const { q, featuredOnly, limit } = options ?? {};
+export async function getRestaurants(options?: { q?: string; featuredOnly?: boolean; limit?: number; partnerOnly?: boolean }): Promise<Restaurant[]> {
+  const { q, featuredOnly, limit, partnerOnly } = options ?? {};
 
   if (!isSupabaseConfigured()) {
     let results = mockRestaurants;
     if (featuredOnly) results = results.filter((r) => r.featured);
+    if (partnerOnly) results = results.filter((r) => r.isPartner);
     if (q) {
       const needle = q.toLowerCase();
       results = results.filter(
@@ -32,6 +33,7 @@ export async function getRestaurants(options?: { q?: string; featuredOnly?: bool
     .order("is_pinned", { ascending: false })
     .order("featured", { ascending: false });
   if (featuredOnly) query = query.eq("featured", true);
+  if (partnerOnly) query = query.eq("is_partner", true);
   if (q) {
     const safeQ = sanitizeSearchQuery(q);
     if (safeQ) query = query.or(`name.ilike.%${safeQ}%,short_description.ilike.%${safeQ}%,address.ilike.%${safeQ}%`);

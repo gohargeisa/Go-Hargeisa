@@ -7,7 +7,7 @@ import { PremiumPageHero } from "@/components/shared/premium-page-hero";
 import { Reveal } from "@/components/home/reveal";
 
 /** Reuses the shared hero photo — same swap-in-place pattern as privacy/page.tsx and terms/page.tsx. */
-const DELETE_ACCOUNT_HERO_IMAGE = "/images/hero-bg.png";
+const DELETE_ACCOUNT_HERO_IMAGE = "/images/hero-bg.webp";
 
 export async function generateMetadata({
   params: { locale },

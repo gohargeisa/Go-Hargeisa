@@ -10,7 +10,7 @@ import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
 
 /** Reuses the shared hero photo — same swap-in-place pattern as attractions-hero.tsx / about-hero.tsx. */
-const SHOPPING_HERO_IMAGE = "/images/hero-bg.png";
+const SHOPPING_HERO_IMAGE = "/images/hero-bg.webp";
 
 // Public content changes infrequently; revalidate hourly instead of
 // rendering on every request (this page no longer reads cookies, so

@@ -75,7 +75,7 @@ export function DiasporaWeekHero({ locale }: { locale: Locale }) {
     >
       <m.div className="absolute inset-0" style={reduceMotion ? undefined : { y: parallaxY }}>
         <Image
-          src="/images/hero-bg.png"
+          src="/images/hero-bg.webp"
           alt={t("heroImageAlt")}
           fill
           priority

@@ -13,7 +13,7 @@ import { FeatureGrid } from "@/components/shared/feature-grid";
 import { Reveal } from "@/components/home/reveal";
 
 /** Reuses the shared hero photo — same swap-in-place pattern as attractions-hero.tsx / about-hero.tsx. */
-const TRAVEL_GUIDE_HERO_IMAGE = "/images/hero-bg.png";
+const TRAVEL_GUIDE_HERO_IMAGE = "/images/hero-bg.webp";
 
 export async function generateMetadata({
   params: { locale },

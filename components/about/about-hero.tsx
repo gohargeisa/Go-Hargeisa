@@ -12,7 +12,7 @@ import type { Locale } from "@/lib/i18n/config";
  * homepage's own panoramic Hargeisa photo since no dedicated About-page
  * photo exists yet; swap this one constant for a dedicated shot later.
  */
-const ABOUT_HERO_IMAGE = "/images/hero-bg.png";
+const ABOUT_HERO_IMAGE = "/images/hero-bg.webp";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 22 },

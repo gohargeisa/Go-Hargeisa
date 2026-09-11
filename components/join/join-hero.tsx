@@ -21,7 +21,7 @@ export async function JoinHero({ locale }: { locale: Locale }) {
       {/* Real photo background, dark navy overlay — no flat color fill */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
         <Image
-          src="/images/hero-bg.png"
+          src="/images/hero-bg.webp"
           alt=""
           fill
           priority

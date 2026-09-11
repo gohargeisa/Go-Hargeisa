@@ -11,7 +11,7 @@ import { PrimaryButton } from "@/components/shared/buttons";
  * without touching any layout/markup below. Reuses the homepage's own
  * panoramic Hargeisa photo in the meantime instead of a placeholder.
  */
-const ATTRACTIONS_HERO_IMAGE = "/images/hero-bg.png";
+const ATTRACTIONS_HERO_IMAGE = "/images/hero-bg.webp";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 22 },

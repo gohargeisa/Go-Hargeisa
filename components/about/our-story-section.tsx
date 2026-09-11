@@ -5,7 +5,7 @@ import { Timeline } from "@/components/shared/timeline";
 import type { TimelineStep } from "@/components/shared/timeline";
 
 /** Reuses the shared hero photo (see about-hero.tsx) — no dedicated "our story" photo exists yet. */
-const STORY_IMAGE = "/images/hero-bg.png";
+const STORY_IMAGE = "/images/hero-bg.webp";
 
 // Server Component (no "use client") — uses next-intl's async getTranslations
 // rather than the client useTranslations hook, matching every other

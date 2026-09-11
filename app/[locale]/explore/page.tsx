@@ -11,7 +11,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { Reveal } from "@/components/home/reveal";
 
 /** Reuses the shared hero photo — same swap-in-place pattern as attractions-hero.tsx / about-hero.tsx. */
-const EXPLORE_HERO_IMAGE = "/images/hero-bg.png";
+const EXPLORE_HERO_IMAGE = "/images/hero-bg.webp";
 
 // Public content changes infrequently; revalidate hourly instead of
 // rendering on every request (this page no longer reads cookies, so

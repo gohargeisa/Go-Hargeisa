@@ -30,7 +30,7 @@ export function HeroBackground({
     <>
       <div className="absolute inset-0 overflow-hidden">
         <Image
-          src="/images/hero-bg.png"
+          src="/images/hero-bg.webp"
           alt="Panoramic view of Hargeisa at golden hour"
           fill
           priority={priority}

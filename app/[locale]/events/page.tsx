@@ -12,7 +12,7 @@ import { localeAlternates } from "@/lib/i18n/alternates";
 export const revalidate = 3600;
 
 /** Reuses the shared hero photo — same swap-in-place pattern as city-services/page.tsx. */
-const EVENTS_HERO_IMAGE = "/images/hero-bg.png";
+const EVENTS_HERO_IMAGE = "/images/hero-bg.webp";
 
 export async function generateMetadata({
   params: { locale },

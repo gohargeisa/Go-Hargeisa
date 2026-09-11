@@ -120,10 +120,14 @@ export async function getFeaturedPartnerShowcase(locale: Locale, limit = 10): Pr
     getCategories(),
   ]);
 
+  // Filtered server-side (is_partner=true) instead of fetching every
+  // published row in each table and discarding the non-partners in JS —
+  // this section only ever shows a handful of manually-flagged partners,
+  // so there's no reason its query cost should scale with the whole catalog.
   const [hotels, restaurants, cafes, cityServices] = await Promise.all([
-    getHotels(),
-    RESTAURANTS_PUBLIC_ENABLED ? getRestaurants() : Promise.resolve([]),
-    CAFES_PUBLIC_ENABLED ? getCafes({ locale }) : Promise.resolve([]),
+    getHotels({ partnerOnly: true }),
+    RESTAURANTS_PUBLIC_ENABLED ? getRestaurants({ partnerOnly: true }) : Promise.resolve([]),
+    CAFES_PUBLIC_ENABLED ? getCafes({ locale, partnerOnly: true }) : Promise.resolve([]),
     getFeaturedCityServices(),
   ]);
 
@@ -156,7 +160,6 @@ export async function getFeaturedPartnerShowcase(locale: Locale, limit = 10): Pr
   const items: FeaturedPartnerShowcaseItem[] = [];
 
   for (const h of hotels) {
-    if (!h.isPartner) continue;
     const href = `/${locale}/hotels/${h.slug}`;
     const cta = getFeaturedPartnerCtaForHotel();
     const template = getFeaturedPartnerTemplateForType("hotel")!;
@@ -174,7 +177,6 @@ export async function getFeaturedPartnerShowcase(locale: Locale, limit = 10): Pr
   }
 
   for (const r of restaurants) {
-    if (!r.isPartner) continue;
     const href = `/${locale}/restaurants/${r.slug}`;
     const cta = getFeaturedPartnerCtaForRestaurant(r);
     const template = getFeaturedPartnerTemplateForType("restaurant")!;
@@ -192,7 +194,6 @@ export async function getFeaturedPartnerShowcase(locale: Locale, limit = 10): Pr
   }
 
   for (const c of cafes) {
-    if (!c.isPartner) continue;
     const href = `/${locale}/cafes/${c.slug}`;
     const cta = getFeaturedPartnerCtaForCafe(c);
     const template = getFeaturedPartnerTemplateForType("cafe")!;
