@@ -101,6 +101,35 @@ export async function generateMetadata({
       alternates: localeAlternates(locale as Locale, `/restaurants/${r.slug}`),
     };
   }
+  if (r.slug === EXCELLENCE_CAFE_SLUG) {
+    const te = await getTranslations({ locale, namespace: "excellenceCafe" });
+    return {
+      title: te("metaTitle"),
+      description: te("metaDescription"),
+      keywords: [
+        "Excellence Café Hargeisa",
+        "Excellence Cafe Hargeisa",
+        "restaurant Hargeisa",
+        "café Hargeisa",
+        "coffee Hargeisa",
+        "lunch buffet Hargeisa",
+        "pizza Hargeisa",
+        "Lebanese food Hargeisa",
+        "Mediterranean restaurant Hargeisa",
+        "Somali restaurant Hargeisa",
+        "Jig-Jiga Yar",
+        "reserve a table Hargeisa",
+      ],
+      openGraph: {
+        type: "website",
+        title: te("metaTitle"),
+        description: te("metaDescription"),
+        images: [{ url: r.coverImage, alt: r.name }],
+      },
+      twitter: { card: "summary_large_image", title: te("metaTitle"), description: te("metaDescription"), images: [r.coverImage] },
+      alternates: localeAlternates(locale as Locale, `/restaurants/${r.slug}`),
+    };
+  }
   return {
     title: `${r.name} — Restaurant in Hargeisa`,
     description: r.shortDescription,

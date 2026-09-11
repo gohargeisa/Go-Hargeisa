@@ -4,11 +4,11 @@ import { UtensilsCrossed } from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 
 /**
- * Daily Lunch Buffet — verified text only ("Available daily. Affordable
- * daily lunch buffet. Customers can eat according to their preference.",
- * from the business owner's own supplied information.txt). No hours or
- * price are invented; the official buffet signage photo stands in for the
- * missing numbers rather than a guessed figure.
+ * Daily Lunch Buffet — verified text only (from the business owner's own
+ * supplied information.txt: an affordable daily lunch buffet, priced per
+ * person, self-serve). No hours or price figure are invented. The photo is
+ * a real owner shot of the buffet spread; the official "Daily Lunch Buffet"
+ * banner is shown in the visual-story section above.
  */
 export async function ExcellenceCafeBuffet({ locale }: { locale: Locale }) {
   const t = await getTranslations({ locale, namespace: "excellenceCafe" });
@@ -17,7 +17,7 @@ export async function ExcellenceCafeBuffet({ locale }: { locale: Locale }) {
     <div className="grid items-center gap-9 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
       <div className="relative aspect-[5/4] w-full overflow-hidden rounded-2xl border border-ink/8 shadow-card dark:border-white/10">
         <Image
-          src="/images/partners/excellence-cafe/atmosphere/lunch-buffet-spread-banner.jpg"
+          src="/images/partners/excellence-cafe/atmosphere/buffet-spread-closeup.jpg"
           alt={t("buffetPhotoAlt")}
           fill
           sizes="(max-width: 1023px) 90vw, 45vw"

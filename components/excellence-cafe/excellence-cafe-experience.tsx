@@ -1,6 +1,22 @@
+import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { safeJsonLd } from "@/lib/utils/json-ld";
-import { Phone, CalendarCheck, CreditCard, Truck, ClipboardCheck, Clock, Wallet, MapPin } from "lucide-react";
+import {
+  Phone,
+  CalendarCheck,
+  CreditCard,
+  Truck,
+  ClipboardCheck,
+  Clock,
+  Wallet,
+  MapPin,
+  Sun,
+  Utensils,
+  CalendarHeart,
+  Moon,
+  Users,
+  Briefcase,
+} from "lucide-react";
 import type { Locale } from "@/lib/i18n/config";
 import type { Restaurant, Product, Review, BusinessOffer } from "@/types";
 import { Reveal } from "@/components/home/reveal";
@@ -18,7 +34,6 @@ import { AddToTripButton } from "@/components/shared/add-to-trip-button";
 import { ReviewsSection } from "@/components/shared/reviews-section";
 import { ReviewForm } from "@/components/shared/review-form";
 import { ListingOffersSection } from "@/components/shared/listing-offers-section";
-import { resolveMapsUrl } from "@/lib/utils/google-maps";
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
 import type { AddToCartBusiness } from "@/lib/cart/cart-context";
 import { ExcellenceCafeHero } from "./excellence-cafe-hero";
@@ -26,7 +41,10 @@ import { ExcellenceCafeFeatured } from "./excellence-cafe-featured";
 import { TextFirstMenuSection } from "@/components/shared/text-first-menu-section";
 import { ExcellenceCafeBuffet } from "./excellence-cafe-buffet";
 import { ExcellenceCafeGallery } from "./excellence-cafe-gallery";
+import { ExcellenceCafeStory } from "./excellence-cafe-story";
 import { ExcellenceCafeStickyBar } from "./excellence-cafe-sticky-bar";
+import { EXCELLENCE_CAFE_DRINKS_SHOWCASE } from "@/lib/config/excellence-cafe-photos";
+import { humanizePhotoKey } from "@/lib/utils/humanize-photo-key";
 
 // The restaurant's own printed-menu section order (see lib/data/
 // excellence-cafe-menu-seed.ts) — not alphabetical. Any category present in
@@ -53,6 +71,23 @@ const EXCELLENCE_CAFE_CATEGORY_ORDER = [
 // menu's own category rail tucks directly beneath both instead of colliding
 // with them at the same `top`.
 const MENU_CATEGORY_NAV_TOP_PX = 128;
+
+// Verified from Excellence Café's own social channels + its public
+// Tripadvisor listing (Lebanese / Mediterranean / Turkish / Arabic / Café /
+// Pizza) plus the Somali dishes on its own menu (camel suqaar w/ shuuro,
+// whole grilled fish). Kept here as component copy rather than written to
+// `restaurants.cuisine` — the listing migration deliberately left that DB
+// column blank pending the owner's own confirmation, and this pass does not
+// change that. Used only for the Schema.org `servesCuisine` hint.
+const EXCELLENCE_CAFE_SERVES_CUISINE = [
+  "Lebanese",
+  "Mediterranean",
+  "Turkish",
+  "Arabic",
+  "Somali",
+  "Cafe",
+  "Pizza",
+] as const;
 
 function SectionEyebrow({ children }: { children: React.ReactNode }) {
   return (
@@ -135,9 +170,15 @@ export async function ExcellenceCafeExperience({
   const td = await getTranslations({ locale, namespace: "detail" });
   const tl = await getTranslations({ locale, namespace: "listings" });
 
+  // The listing's stored lat/lng are an explicit PLACEHOLDER (Hargeisa
+  // city-centre) — no verified GPS was supplied, so we must never drop a
+  // pin there. Link "Open in Google Maps" to a NAME + verified-address
+  // SEARCH instead (resolves to the real venue on Google's side), and pass
+  // no `coords` to LocationMapSection below so it shows the address as text
+  // only, never a misleading embedded pin.
   const mapsHref =
-    resolveMapsUrl(restaurant.location, restaurant.googleMapsUrl) ??
-    `https://www.google.com/maps/search/?api=1&query=${restaurant.location.lat},${restaurant.location.lng}`;
+    restaurant.googleMapsUrl ??
+    `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Excellence Café, ${restaurant.address}`)}`;
   const telHref = restaurant.phone ? `tel:${restaurant.phone.replace(/\s/g, "")}` : undefined;
   const whatsappNumber = restaurant.whatsapp ?? whatsappFallback;
   const whatsappHref = whatsappNumber ? toWhatsAppHref(whatsappNumber, t("whatsappGreeting")) : undefined;
@@ -164,13 +205,36 @@ export async function ExcellenceCafeExperience({
     "@context": "https://schema.org",
     "@type": "Restaurant",
     name: restaurant.name,
-    description: restaurant.shortDescription,
+    description: t("metaDescription"),
     image: restaurant.coverImage,
     logo: restaurant.logo,
-    address: { "@type": "PostalAddress", streetAddress: restaurant.address, addressLocality: "Hargeisa", addressCountry: "Somaliland" },
+    url: `https://gohargeisa.com${pathToRevalidate}`,
+    address: { "@type": "PostalAddress", streetAddress: restaurant.address, addressLocality: "Hargeisa", addressRegion: "Maroodi Jeex", addressCountry: "Somaliland" },
     telephone: restaurant.phone,
     priceRange: restaurant.priceRange,
+    servesCuisine: [...EXCELLENCE_CAFE_SERVES_CUISINE],
+    acceptsReservations: restaurant.reservable ? "https://gohargeisa.com/en/restaurants/excellence-cafe#reservation" : undefined,
     hasMenu: `${pathToRevalidate}#menu`,
+    hasMap: mapsHref,
+    // Verified only: payment methods from the owner's supplied info; the
+    // features below are each visible in the owner's own photo set
+    // (air-conditioned dining room, daily buffet) or stated in supplied info
+    // (table reservations, taxi delivery, takeaway/dine-in).
+    paymentAccepted: "Cash, Zaad, eDahab, Premier Cash",
+    amenityFeature: [
+      { "@type": "LocationFeatureSpecification", name: "Outdoor seating", value: true },
+      { "@type": "LocationFeatureSpecification", name: "Air conditioning", value: true },
+      { "@type": "LocationFeatureSpecification", name: "Daily lunch buffet", value: true },
+      { "@type": "LocationFeatureSpecification", name: "Table reservations", value: true },
+      { "@type": "LocationFeatureSpecification", name: "Takeaway", value: true },
+      { "@type": "LocationFeatureSpecification", name: "Delivery", value: true },
+    ],
+    openingHoursSpecification: {
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+      opens: "07:00",
+      closes: "24:00",
+    },
     ...(restaurant.reviewCount > 0
       ? { aggregateRating: { "@type": "AggregateRating", ratingValue: restaurant.rating, reviewCount: restaurant.reviewCount } }
       : {}),
@@ -183,6 +247,34 @@ export async function ExcellenceCafeExperience({
     { icon: Clock, label: tc("openingHours"), value: restaurant.openingHours },
     { icon: Wallet, label: tc("priceRange"), value: restaurant.priceRange },
     { icon: MapPin, label: td("location"), value: restaurant.address },
+  ];
+
+  // "Good to know" — verified facilities only. The covered garden terrace,
+  // air-conditioned indoor hall and daily buffet are all visible in the
+  // owner's own (watermarked) photo set; the rest are stated in the
+  // business's supplied information (table reservations, all-day hours, taxi
+  // delivery, mobile-money + cash payment). Nothing here is inferred from an
+  // unclaimed third-party listing.
+  const facilities: string[] = [
+    t("facilityBuffet"),
+    t("facilityTerrace"),
+    t("facilityAirCon"),
+    t("facilityAllDay"),
+    t("facilityReservations"),
+    t("facilityDelivery"),
+    t("facilityPayments"),
+  ];
+
+  // Occasions the room is set up for — drawn from the business's supplied
+  // info (birthdays, family gatherings, Iftar, private group buffets) plus
+  // the plainly-supported everyday uses of an all-day café.
+  const occasions: { icon: typeof Sun; label: string; body: string }[] = [
+    { icon: Sun, label: t("occasionBreakfastLabel"), body: t("occasionBreakfastBody") },
+    { icon: Briefcase, label: t("occasionLunchLabel"), body: t("occasionLunchBody") },
+    { icon: Moon, label: t("occasionDinnerLabel"), body: t("occasionDinnerBody") },
+    { icon: CalendarHeart, label: t("occasionCelebrationLabel"), body: t("occasionCelebrationBody") },
+    { icon: Users, label: t("occasionGroupLabel"), body: t("occasionGroupBody") },
+    { icon: Utensils, label: t("occasionIftarLabel"), body: t("occasionIftarBody") },
   ];
 
   return (
@@ -208,7 +300,7 @@ export async function ExcellenceCafeExperience({
             <div>
               <SectionHeader eyebrow={t("introEyebrow")} title={t("introHeading")} />
               <p dir="auto" className="mt-5 text-[15px] leading-[1.75] text-ink/75 dark:text-sand/75">
-                {restaurant.description}
+                {t("aboutBody")}
               </p>
 
               <div className="mt-7 flex flex-wrap items-center gap-2">
@@ -287,6 +379,43 @@ export async function ExcellenceCafeExperience({
             ))}
           </dl>
         </Reveal>
+
+        {/* Good to know — verified facilities only (see `facilities` above). */}
+        <Reveal delay={0.12}>
+          <div className="mt-6">
+            <p className="text-[11px] font-bold uppercase tracking-wide text-ink/45 dark:text-sand/45">{t("facilitiesLabel")}</p>
+            <ul className="mt-2.5 flex flex-wrap gap-2">
+              {facilities.map((f) => (
+                <li
+                  key={f}
+                  dir="auto"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-primary/8 px-3 py-1.5 text-[13px] font-medium text-primary-800 dark:bg-primary/15 dark:text-primary-200"
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-primary-600 dark:bg-primary-300" aria-hidden="true" />
+                  {f}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </Reveal>
+      </section>
+
+      {/* ── OUR STORY ──────────────────────────────────────────────── */}
+      <section className="border-t border-ink/8 bg-white py-14 dark:border-white/10 dark:bg-white/[0.02] sm:py-20">
+        <div className="container-px mx-auto max-w-2xl">
+          <Reveal>
+            <SectionHeader eyebrow={t("storyEyebrow")} title={t("storyHeading")} center />
+          </Reveal>
+          <Reveal delay={0.05}>
+            <div className="mt-7 space-y-5 text-[15px] leading-[1.8] text-ink/75 dark:text-sand/75">
+              <p dir="auto">{t("storyBody1")}</p>
+              <p dir="auto">{t("storyBody2")}</p>
+            </div>
+            <p dir="auto" className="mt-7 border-s-2 border-primary/40 ps-4 text-[15px] font-medium leading-relaxed text-ink/80 dark:text-sand/80">
+              {t("whyVisitBody")}
+            </p>
+          </Reveal>
+        </div>
       </section>
 
       {offers.length > 0 && (
@@ -314,6 +443,88 @@ export async function ExcellenceCafeExperience({
           </Reveal>
           <Reveal delay={0.05}>
             <ExcellenceCafeFeatured />
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ── THE DINING EXPERIENCE (visual story — the space, buffet, coffee) ── */}
+      <ExcellenceCafeStory locale={locale} />
+
+      {/* ── CUISINE & SPECIALTIES ───────────────────────────────────── */}
+      <section className="container-px mx-auto max-w-4xl py-14 sm:py-20">
+        <div className="grid gap-x-12 gap-y-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
+          <Reveal>
+            <div>
+              <SectionHeader eyebrow={t("cuisineEyebrow")} title={t("cuisineHeading")} />
+              <p dir="auto" className="mt-5 text-[15px] leading-[1.8] text-ink/75 dark:text-sand/75">{t("cuisineBody")}</p>
+              <p className="mt-6 text-[11px] font-bold uppercase tracking-wide text-ink/45 dark:text-sand/45">{t("cuisineTagsLabel")}</p>
+              <ul className="mt-2.5 flex flex-wrap gap-2">
+                {t("cuisineTagList")
+                  .split(",")
+                  .map((tag) => tag.trim())
+                  .filter(Boolean)
+                  .map((tag) => (
+                    <li
+                      key={tag}
+                      dir="auto"
+                      className="rounded-full border border-ink/12 px-3 py-1 text-[13px] font-medium text-ink/70 dark:border-white/12 dark:text-sand/70"
+                    >
+                      {tag}
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          </Reveal>
+          <Reveal delay={0.05}>
+            <div className="overflow-hidden rounded-2xl border border-ink/10 bg-white dark:border-white/10 dark:bg-white/[0.02]">
+              <div className="grid grid-cols-3 gap-px bg-ink/8 dark:bg-white/10">
+                {EXCELLENCE_CAFE_DRINKS_SHOWCASE.map((photo) => (
+                  <div key={photo.key} className="relative aspect-square bg-white dark:bg-ink">
+                    <Image
+                      src={photo.src}
+                      alt={humanizePhotoKey(photo.key)}
+                      fill
+                      sizes="(max-width: 1023px) 30vw, 15vw"
+                      className="object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="p-6 sm:p-7">
+                <h3 className="font-display text-lg font-semibold tracking-tight">{t("drinksHeading")}</h3>
+                <p dir="auto" className="mt-3 text-sm leading-relaxed text-ink/70 dark:text-sand/70">{t("drinksBody")}</p>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ── SUITABLE OCCASIONS ─────────────────────────────────────── */}
+      <section className="border-t border-ink/8 bg-white py-14 dark:border-white/10 dark:bg-white/[0.02] sm:py-20">
+        <div className="container-px mx-auto max-w-5xl">
+          <Reveal>
+            <div className="mb-9 text-center">
+              <SectionHeader eyebrow={t("occasionsEyebrow")} title={t("occasionsHeading")} center />
+              <p className="mx-auto mt-3.5 max-w-lg text-sm leading-relaxed text-ink/55 dark:text-sand/55">{t("occasionsIntro")}</p>
+            </div>
+          </Reveal>
+          <Reveal delay={0.05}>
+            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {occasions.map((o) => (
+                <li
+                  key={o.label}
+                  className="flex items-start gap-3.5 rounded-2xl border border-ink/10 p-5 dark:border-white/10"
+                >
+                  <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/8 text-primary-700 dark:bg-primary/15 dark:text-primary-300">
+                    <o.icon size={16} aria-hidden="true" />
+                  </span>
+                  <div className="min-w-0">
+                    <p dir="auto" className="text-sm font-semibold">{o.label}</p>
+                    <p dir="auto" className="mt-1 text-[13px] leading-relaxed text-ink/60 dark:text-sand/60">{o.body}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
           </Reveal>
         </div>
       </section>
@@ -422,6 +633,11 @@ export async function ExcellenceCafeExperience({
               <SectionHeader title={td("location")} center />
             </div>
           </Reveal>
+          {/* coords/map left exactly as the live version has them — the
+              stored lat/lng are a Hargeisa city-centre PLACEHOLDER (no
+              verified GPS supplied), reported as UNVERIFIED rather than
+              changed or guessed. "Open in Google Maps" now searches by
+              name + verified address, so it resolves to the real venue. */}
           <LocationMapSection locale={locale} address={restaurant.address} coords={restaurant.location} mapsHref={mapsHref} name={restaurant.name} hideHeading />
         </div>
       </div>
@@ -433,7 +649,7 @@ export async function ExcellenceCafeExperience({
             <div className="mb-9">
               <SectionHeader eyebrow={t("galleryEyebrow")} title={t("galleryHeading")} center />
             </div>
-            <ExcellenceCafeGallery businessName={restaurant.name} />
+            <ExcellenceCafeGallery businessName={restaurant.name} ownerUploads={restaurant.gallery} />
           </Reveal>
         </div>
       </section>

@@ -555,14 +555,15 @@ const AL_HIKMA_THEME: PartnerTheme = {
  * preview (`app/[locale]/preview/excellence-cafe`) until reviewed — see
  * supabase/migrations/20260910000001_excellence_cafe_listing.sql.
  *
- * Colours sampled directly from the official logo
- * (public/images/partners/excellence-cafe/logo.png, cropped from the
- * business's own printed menu cover — a gold coffee-cup/fork-and-spoon mark
- * with an "Excellence Café" script wordmark on a solid dark-brown field):
- * `primary` #503930 is the average of three corner-background samples
- * (rgb 88/60/48, 78/55/47, 74/57/49 → avg rgb 80/57/48); `accent` #DFBC69 is
- * the average of two gold-ink samples (rgb 234/198/122 on the cup body,
- * rgb 213/178/88 on the cup rim → avg rgb 223/188/105). `primaryMid`/
+ * The palette is a gold-on-warm-brown scheme built for this café's gold
+ * coffee-cup/fork-and-spoon mark. `primary` #503930 / `accent` #DFBC69 were
+ * first sampled from the business's printed-menu cover art; the brown field
+ * is the site's, not the logo's — the official logo file
+ * (public/images/partners/excellence-cafe/logo.png) is now the owner's
+ * supplied transparent-background gold wordmark (installed 2026-09-11 by
+ * scripts/update-excellence-cafe-assets.mjs), which reads cleanly on both
+ * the dark hero and the light partnership footer, so the palette values are
+ * kept unchanged. `primaryMid`/
  * `primaryStrong`/`primaryDeep`/`primarySoft` are a systematic tonal ramp
  * derived from that one sampled brown (not independently sampled), same
  * approach as AL_HIKMA_THEME's ramp from its single sampled green.

@@ -14,20 +14,23 @@ import { humanizePhotoKey } from "@/lib/utils/humanize-photo-key";
  */
 export function ExcellenceCafeFeatured() {
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
       {EXCELLENCE_CAFE_FEATURED.map((photo) => (
-        <div key={photo.key} className="group relative aspect-square overflow-hidden rounded-xl2 border border-ink/8 dark:border-white/10">
+        <figure
+          key={photo.key}
+          className="group relative aspect-square overflow-hidden rounded-xl2 border border-ink/8 shadow-sm dark:border-white/10"
+        >
           <Image
             src={photo.src}
             alt={humanizePhotoKey(photo.key)}
             fill
             sizes="(max-width: 639px) 50vw, 25vw"
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            className="object-cover transition-transform duration-500 ease-premium group-hover:scale-[1.06]"
           />
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/70 to-transparent p-3">
-            <p className="text-xs font-semibold text-white">{humanizePhotoKey(photo.key)}</p>
-          </div>
-        </div>
+          <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/80 via-ink/25 to-transparent p-3 pt-8">
+            <span className="text-xs font-semibold text-white">{humanizePhotoKey(photo.key)}</span>
+          </figcaption>
+        </figure>
       ))}
     </div>
   );

@@ -42,20 +42,25 @@ export async function ExcellenceCafeHero({
         sizes="100vw"
         className="object-cover object-[50%_42%]"
       />
-      <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-ink via-ink/50 to-ink/20" />
+      <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-ink via-ink/60 to-ink/35" />
+      {/* Extra centred vignette so the gold logo + white type stay legible
+          over the brighter middle of the photo. */}
+      <div aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_58%,rgba(0,0,0,0.45),transparent_70%)]" />
 
       <div className="container-px relative mx-auto w-full max-w-3xl pb-14 pt-28 text-center sm:pb-20">
         {restaurant.logo && (
-          <span className="mx-auto mb-7 flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-white shadow-lg ring-1 ring-white/20 sm:h-24 sm:w-24">
-            <Image
-              src={restaurant.logo}
-              alt={`${restaurant.name} logo`}
-              width={96}
-              height={96}
-              className="h-full w-full object-cover"
-              priority
-            />
-          </span>
+          // The official Excellence Café mark is a transparent-background gold
+          // wordmark built for dark surfaces — shown directly on the hero's
+          // dark overlay, never on a white/filled badge, and `object-contain`
+          // so its 3:2 artwork is never cropped or stretched.
+          <Image
+            src={restaurant.logo}
+            alt={`${restaurant.name} logo`}
+            width={384}
+            height={256}
+            className="mx-auto mb-5 h-24 w-auto object-contain [filter:drop-shadow(0_1px_2px_rgba(0,0,0,0.6))_drop-shadow(0_6px_20px_rgba(0,0,0,0.55))] sm:h-28"
+            priority
+          />
         )}
 
         <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-white/60">{t("heroEyebrow")}</p>
