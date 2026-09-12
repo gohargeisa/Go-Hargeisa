@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Search, MessageCircle, X } from "lucide-react";
+import { ProductImage } from "@/components/shared/product-image";
 import { productLocalizedName } from "@/lib/utils/product-i18n";
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
 import { usePaginatedProducts } from "@/lib/hooks/use-paginated-products";
@@ -149,16 +149,12 @@ export function PinnacleProductGrid({
               return (
                 <div key={product.id} className="overflow-hidden rounded-xl3 border border-ink/8 shadow-soft dark:border-white/10">
                   <div className="relative aspect-square w-full bg-[#F7F5F2]">
-                    {product.image && (
-                      <Image
-                        src={product.image}
-                        alt={name}
-                        fill
-                        loading="lazy"
-                        sizes="(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 25vw"
-                        className="object-contain p-4"
-                      />
-                    )}
+                    <ProductImage
+                      src={product.image}
+                      alt={name}
+                      sizes="(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 25vw"
+                      className="object-contain p-4"
+                    />
                   </div>
                   <div className="p-3.5">
                     {product.brand && (
