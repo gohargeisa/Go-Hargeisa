@@ -7,7 +7,7 @@ import { PinnacleProductGrid } from "@/components/pinnacle/pinnacle-product-grid
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
 import type { PartnerTheme } from "@/lib/config/partner-themes";
 import type { Locale } from "@/lib/i18n/config";
-import type { CityService, Product } from "@/types";
+import type { CityService, Product, ProductGender } from "@/types";
 
 /**
  * Pinnacle Perfumes & Cosmetics — premium storefront for one specific,
@@ -56,12 +56,19 @@ import type { CityService, Product } from "@/types";
 export async function PinnacleStorefront({
   theme,
   service,
-  products,
+  initialProducts,
+  productsTotal,
+  productFacets,
   locale,
 }: {
   theme: PartnerTheme;
   service: CityService;
-  products: Product[];
+  /** Page 1 of the catalog only — see getProductsForListing +
+   * deriveInitialProductsPage in lib/data/products.ts. PinnacleProductGrid
+   * below fetches subsequent pages itself via "Load More"/filter changes. */
+  initialProducts: Product[];
+  productsTotal: number;
+  productFacets: { brands: string[]; genders: ProductGender[] };
   locale: Locale;
 }) {
   const t = await getTranslations({ locale, namespace: "pinnacleStorefront" });
@@ -227,7 +234,7 @@ export async function PinnacleStorefront({
           real catalog site (see this component's own header comment). No
           pricing anywhere; search/filter/pagination live in
           PinnacleProductGrid. */}
-      {products.length > 0 && (
+      {productsTotal > 0 && (
         <section id="catalog" className="py-16 sm:py-24">
           <div className="container-px mx-auto">
             <Reveal>
@@ -241,7 +248,16 @@ export async function PinnacleStorefront({
                 <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight md:text-4xl">{t("catalogTitle")}</h2>
               </div>
             </Reveal>
-            <PinnacleProductGrid theme={theme} products={products} whatsappNumber={whatsappNumber} locale={locale} />
+            <PinnacleProductGrid
+              theme={theme}
+              listingId={service.id}
+              listingType="city_service"
+              initialProducts={initialProducts}
+              initialTotal={productsTotal}
+              facets={productFacets}
+              whatsappNumber={whatsappNumber}
+              locale={locale}
+            />
           </div>
         </section>
       )}

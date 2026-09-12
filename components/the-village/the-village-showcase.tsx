@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { PrimaryButton, SecondaryButton } from "@/components/shared/buttons";
 import { PartnerAcquisitionCta } from "@/components/shared/partner-acquisition-cta";
 import { ProductsSection } from "@/components/shared/products-section";
+import { deriveInitialProductsPage } from "@/lib/data/products";
 import { ImageOnlyProductGrid } from "@/components/shared/image-only-product-grid";
 import { InstagramPostEmbed } from "@/components/shared/instagram-post-embed";
 import { LocationMapSection } from "@/components/shared/location-map-section";
@@ -54,6 +55,7 @@ const FEATURED_INSTAGRAM_POST_URL = "https://www.instagram.com/p/DI6RSkEMOaM/";
  */
 export async function TheVillageShowcase({ locale, restaurant, products }: { locale: Locale; restaurant: Restaurant; products: Product[] }) {
   const t = await getTranslations({ locale, namespace: "theVillagePreview" });
+  const { initialProducts, initialTotal, facets } = deriveInitialProductsPage(products, 48);
   const googleMapsUrl = restaurant.googleMapsUrl ?? `https://www.google.com/maps/search/?api=1&query=${restaurant.location.lat},${restaurant.location.lng}`;
   const whatsappHref = restaurant.whatsapp
     ? toWhatsAppHref(restaurant.whatsapp, "Hello The Village Hargeisa \u{1F44B} I found you on Go Hargeisa and would like to ask about today's menu and availability.")
@@ -157,7 +159,9 @@ export async function TheVillageShowcase({ locale, restaurant, products }: { loc
             </div>
             {products.length > 0 ? (
               <ProductsSection
-                products={products}
+                initialProducts={initialProducts}
+                initialTotal={initialTotal}
+                facets={facets}
                 storeName={restaurant.name}
                 business={{
                   listingType: "restaurant",

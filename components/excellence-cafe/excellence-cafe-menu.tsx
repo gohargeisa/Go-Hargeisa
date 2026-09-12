@@ -1,13 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { Search, ShoppingBag } from "lucide-react";
 import { ProductCard } from "@/components/shared/product-card";
 import { ProductDetailModal } from "@/components/shared/product-detail-modal";
 import { useCart } from "@/lib/cart/cart-context";
-import { productLocalizedName } from "@/lib/utils/product-i18n";
+import { usePaginatedProducts } from "@/lib/hooks/use-paginated-products";
 import { productCategoryLabel } from "@/lib/config/product-categories";
 import type { AddToCartBusiness } from "@/lib/cart/cart-context";
 import type { Product, ProductCategory } from "@/types";
@@ -34,14 +34,27 @@ function pillClass(active: boolean) {
  * (ProductCard, ProductDetailModal, the shared cart context) rather than a
  * cross-partner import, so touching one restaurant's menu UI can never
  * affect the other's.
+ *
+ * `initialProducts`/`initialTotal` are page 1 only (see
+ * getProductsPageForListing) — this menu's ~190 rows previously shipped in
+ * full on every page load (measured live: ~780KB of HTML for this one
+ * page) even though only 6 cards ever showed before "Load More". Category/
+ * search changes and "Load More" now re-query /api/products for exactly
+ * the rows needed. `facets.categories` (the full category list across the
+ * whole menu) comes from a separate, much lighter query so the category
+ * pills still include categories that haven't loaded yet.
  */
 export function ExcellenceCafeMenu({
-  products,
+  initialProducts,
+  initialTotal,
+  facets,
   storeName,
   business,
   locale,
 }: {
-  products: Product[];
+  initialProducts: Product[];
+  initialTotal: number;
+  facets: { categories: ProductCategory[] };
   storeName: string;
   business: AddToCartBusiness;
   locale: string;
@@ -51,45 +64,42 @@ export function ExcellenceCafeMenu({
   const cart = useCart();
 
   const [categoryFilter, setCategoryFilter] = useState<ProductCategory | "all">("all");
+  const [queryInput, setQueryInput] = useState("");
   const [query, setQuery] = useState("");
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [selected, setSelected] = useState<Product | null>(null);
 
-  const visible = useMemo(() => products.filter((p) => !p.isHidden), [products]);
+  // Debounced — a fetch on every keystroke would be a real "repeated
+  // Supabase requests" problem; 350ms after the visitor stops typing is
+  // enough to feel instant without querying per character.
+  useEffect(() => {
+    const id = setTimeout(() => setQuery(queryInput.trim()), 350);
+    return () => clearTimeout(id);
+  }, [queryInput]);
 
-  const categoriesPresent = useMemo(() => {
-    const seen: ProductCategory[] = [];
-    for (const p of visible) if (p.category && !seen.includes(p.category)) seen.push(p.category);
-    return seen;
-  }, [visible]);
-
-  const filtered = useMemo(() => {
-    const needle = query.trim().toLowerCase();
-    return visible
-      .filter((p) => categoryFilter === "all" || p.category === categoryFilter)
-      .filter((p) => !needle || productLocalizedName(p, locale).toLowerCase().includes(needle))
-      .sort((a, b) => Number(b.isFeatured) - Number(a.isFeatured) || a.sortOrder - b.sortOrder);
-  }, [visible, categoryFilter, query, locale]);
-
-  const paged = filtered.slice(0, visibleCount);
-  const hasMore = filtered.length > paged.length;
+  const { items: paged, loading, hasMore, loadMore } = usePaginatedProducts({
+    listingId: business.listingId,
+    listingType: business.listingType,
+    initialItems: initialProducts,
+    initialTotal,
+    pageSize: PAGE_SIZE,
+    filters: { category: categoryFilter === "all" ? undefined : categoryFilter, nameQuery: query },
+  });
 
   function selectCategory(c: ProductCategory | "all") {
     setCategoryFilter(c);
-    setVisibleCount(PAGE_SIZE);
   }
 
-  if (visible.length === 0) return null;
+  if (initialTotal === 0) return null;
 
   return (
     <div className="relative">
       <div className="mb-5 space-y-3">
-        {categoriesPresent.length > 1 && (
+        {facets.categories.length > 1 && (
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
             <button type="button" onClick={() => selectCategory("all")} className={pillClass(categoryFilter === "all")}>
               {t("allCategories")}
             </button>
-            {categoriesPresent.map((c) => (
+            {facets.categories.map((c) => (
               <button key={c} type="button" onClick={() => selectCategory(c)} className={pillClass(categoryFilter === c)}>
                 {productCategoryLabel(c, locale)}
               </button>
@@ -100,18 +110,15 @@ export function ExcellenceCafeMenu({
         <div className="relative max-w-xs">
           <Search size={14} className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-ink/40" aria-hidden="true" />
           <input
-            value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              setVisibleCount(PAGE_SIZE);
-            }}
+            value={queryInput}
+            onChange={(e) => setQueryInput(e.target.value)}
             placeholder={t("searchMenuPlaceholder")}
             className="w-full rounded-full border border-ink/12 bg-transparent py-2 ps-9 pe-4 text-sm outline-none focus:border-primary dark:border-white/15"
           />
         </div>
       </div>
 
-      {filtered.length === 0 ? (
+      {paged.length === 0 && !loading ? (
         <p className="text-sm text-ink/50 dark:text-sand/50">{t("noProductsMatchFilters")}</p>
       ) : (
         <>
@@ -132,10 +139,11 @@ export function ExcellenceCafeMenu({
             <div className="mt-8 flex justify-center">
               <button
                 type="button"
-                onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
-                className="rounded-full border border-ink/15 px-6 py-2.5 text-sm font-semibold text-ink/75 transition-colors hover:border-primary hover:text-primary dark:border-white/15 dark:text-sand/75"
+                onClick={loadMore}
+                disabled={loading}
+                className="rounded-full border border-ink/15 px-6 py-2.5 text-sm font-semibold text-ink/75 transition-colors hover:border-primary hover:text-primary disabled:opacity-60 dark:border-white/15 dark:text-sand/75"
               >
-                {t("loadMoreProducts")}
+                {loading ? t("loadingMore") : t("loadMoreProducts")}
               </button>
             </div>
           )}

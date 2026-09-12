@@ -6,6 +6,7 @@ import { getFlormarPreviewData } from "@/lib/data/flormar-preview";
 import { PartnerThemeScope } from "@/components/shared/partner/partner-theme-scope";
 import { PartnerPartnershipFooter } from "@/components/shared/partner/partner-partnership-footer";
 import { FlormarStorefront } from "@/components/flormar/flormar-storefront";
+import { computeFlormarBoundedViews } from "@/lib/utils/flormar-discovery";
 import { FlormarPromoBanner } from "@/components/home/flormar-promo-banner";
 
 // Private/unlisted by construction: `robots: { index: false, follow: false }`
@@ -35,10 +36,23 @@ export default async function FlormarPreviewPage({ params: { locale } }: { param
   const data = await getFlormarPreviewData();
   if (!data) notFound();
 
+  const flormarViews = computeFlormarBoundedViews(data.products, locale);
+
   return (
     <>
       <PartnerThemeScope theme={theme}>
-        <FlormarStorefront theme={theme} service={data.service} locale={locale} products={data.products} />
+        <FlormarStorefront
+          theme={theme}
+          service={data.service}
+          locale={locale}
+          featuredProducts={flormarViews.featuredProducts}
+          discoverPicksProducts={flormarViews.discoverPicksProducts}
+          categoryImageByGroup={flormarViews.categoryImageByGroup}
+          availableGenders={flormarViews.availableGenders}
+          campaignProductsByCampaignId={flormarViews.campaignProductsByCampaignId}
+          initialDiscoveryProducts={flormarViews.initialDiscoveryProducts}
+          discoveryTotal={flormarViews.discoveryTotal}
+        />
         <PartnerPartnershipFooter theme={theme} locale={locale} />
       </PartnerThemeScope>
 

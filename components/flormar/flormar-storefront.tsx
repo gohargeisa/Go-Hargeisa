@@ -13,20 +13,19 @@ import { FlormarCampaignHero } from "@/components/flormar/flormar-campaign-hero"
 import { BottomSheet } from "@/components/shared/bottom-sheet";
 import { Reveal } from "@/components/home/reveal";
 import { productLocalizedName } from "@/lib/utils/product-i18n";
-import { cleanFlormarProductName, cleanFlormarShadeName } from "@/lib/utils/flormar-product-names";
+import { enrichFlormarProduct } from "@/lib/utils/flormar-product-enrichment";
 import { resolveFlormarSwatchColor } from "@/lib/utils/flormar-shade-colors";
 import { FLORMAR_BRANCHES } from "@/lib/config/flormar-branches";
-import { FLORMAR_CATEGORY_OVERRIDES } from "@/lib/config/flormar-category-overrides";
-import { FLORMAR_PRODUCT_DESCRIPTIONS, FLORMAR_SHADE_HEX } from "@/lib/config/flormar-product-details";
 import { productCategoryLabel, productGenderLabel } from "@/lib/config/product-categories";
 import { useCart } from "@/lib/cart/cart-context";
+import { usePaginatedProducts } from "@/lib/hooks/use-paginated-products";
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
 import { FLORMAR_PRIMARY_CATEGORY_GROUPS } from "@/lib/config/flormar-categories";
-import { getActiveFlormarCampaigns, resolveCampaignProducts, type FlormarCampaign } from "@/lib/config/flormar-campaigns";
+import { getActiveFlormarCampaigns, type FlormarCampaign } from "@/lib/config/flormar-campaigns";
 import type { PartnerTheme } from "@/lib/config/partner-themes";
 import type { Locale } from "@/lib/i18n/config";
 import type { AddToCartBusiness } from "@/lib/cart/cart-context";
-import type { CityService, Product } from "@/types";
+import type { CityService, Product, ProductGender } from "@/types";
 
 const WISHLIST_STORAGE_KEY = "flormar-preview-wishlist";
 
@@ -111,13 +110,31 @@ export function FlormarStorefront({
   theme,
   service,
   locale,
-  products: catalogProducts,
+  featuredProducts,
+  discoverPicksProducts,
+  categoryImageByGroup,
+  availableGenders,
+  campaignProductsByCampaignId,
+  initialDiscoveryProducts,
+  discoveryTotal,
   loyaltySlot,
 }: {
   theme: PartnerTheme;
   service: CityService;
   locale: Locale;
-  products: Product[];
+  /** Every whole-catalog-derived view below (see
+   * lib/utils/flormar-discovery.ts's computeFlormarBoundedViews, called by
+   * the server page from the SAME full fetch it already does) — small,
+   * bounded, and already enriched (enrichFlormarProduct). Only the
+   * "Shopping"/discovery grid ever needs more than this, and it fetches its
+   * own subsequent pages via usePaginatedProducts + /api/products. */
+  featuredProducts: Product[];
+  discoverPicksProducts: Product[];
+  categoryImageByGroup: Record<string, string>;
+  availableGenders: ProductGender[];
+  campaignProductsByCampaignId: Record<string, Product[]>;
+  initialDiscoveryProducts: Product[];
+  discoveryTotal: number;
   /** Optional Flormar Rewards entry card, rendered by the server page only
    * when this partner's loyalty program is enabled. Nothing about the
    * storefront changes when it's absent. */
@@ -151,114 +168,10 @@ export function FlormarStorefront({
     setBrokenImageKeys((prev) => (prev.has(key) ? prev : new Set(prev).add(key)));
   }
 
-  // Single derived catalog every section below reads from (Featured,
-  // Category Navigation, the shopping grid, the detail modal). No
-  // `originalPrice` override is applied here — Flormar Hargeisa hasn't set
-  // any real sale prices yet, so there is no discount/offers data to show;
-  // a fabricated strikethrough price is not an acceptable stand-in for
-  // that.
-  //
-  // Display name is cleaned here, once, upstream of every consumer (card,
-  // detail modal, cart, search) — see cleanFlormarProductName's own doc
-  // comment for exactly what it does and doesn't change.
-  //
-  // SHADES: a variant must show its own shade identity, never the parent
-  // product's name. The raw `product_variants.name`/`shade_name` columns
-  // already carry the real shade ("Wet Lps", "Vibrant Red", "Almond"), so
-  // they only need the light spreadsheet-artifact cleanup —
-  // cleanFlormarShadeName, NOT cleanFlormarProductName (whose SKU-keyed
-  // verified-name lookup keys on the shared product SKU family and would
-  // collapse every shade to the one parent product name — the exact bug
-  // being fixed here). The customer-facing variant `name` is composed as
-  // "<code> <shade>" (e.g. "009 Vibrant Red") so the shade number is always
-  // visible and every shade of a product is distinct in the picker and the
-  // cart line. Display-time only — raw DB rows are never modified.
-  const productsWithPricing = useMemo(
-    () =>
-      catalogProducts.map((p) => {
-        const base8 = (p.sku ?? "").split("-")[0]?.slice(0, 8) ?? "";
-        const categoryOverride = (p.sku && FLORMAR_CATEGORY_OVERRIDES[p.sku]) || FLORMAR_CATEGORY_OVERRIDES[base8];
-        // Real, flormar.com-verified product copy from the earlier catalogue
-        // reconciliation (see FLORMAR_PRODUCT_DESCRIPTIONS' own header) — the
-        // raw `products.description` column is NULL on every imported row, so
-        // without this the detail modal shows no description at all. Only
-        // applied when the DB genuinely has none; a real DB value always wins.
-        //
-        // ENGLISH LOCALE ONLY: these strings are English marketing copy. There
-        // is no verified Arabic/Somali equivalent (DB `description_ar`/`_so`
-        // and every per-shade `name_ar`/`_so` are all NULL for this catalogue),
-        // and `productLocalizedDescription` would otherwise surface this
-        // English text on /ar and /so — an English paragraph inside an
-        // otherwise fully-localised, RTL modal. Gating to `en` keeps /ar and
-        // /so showing no description block (their real state) until verified
-        // translations exist, at which point the normal DB-driven
-        // localisation picks them up with no change here.
-        const verifiedDescription =
-          locale === "en" ? (p.sku && FLORMAR_PRODUCT_DESCRIPTIONS[p.sku]) || FLORMAR_PRODUCT_DESCRIPTIONS[base8] : undefined;
-        return {
-          ...p,
-          name: cleanFlormarProductName(p.name, p.sku),
-          // Display-only — every product on this listing genuinely is a
-          // real Flormar product (that's what this whole storefront sells),
-          // so this isn't a guess or an invented claim, just surfacing a
-          // fact the raw `products.brand` column was never populated with
-          // at import time. Never written back to the database.
-          brand: "Flormar",
-          ...(categoryOverride ? { category: categoryOverride } : null),
-          ...(verifiedDescription && !p.description ? { description: verifiedDescription } : null),
-          ...(p.variants
-            ? {
-                variants: p.variants.map((v) => {
-                  const shade = cleanFlormarShadeName(v.shadeName || v.name);
-                  const code = v.shadeCode?.trim();
-                  return {
-                    ...v,
-                    // Real per-shade identity, code-prefixed so the shade
-                    // number is always visible (picker header + cart line).
-                    name: code && !shade.startsWith(code) ? `${code} ${shade}` : shade,
-                    shadeName: shade,
-                    // Verified per-shade swatch colour where the reconciliation
-                    // recorded one — takes priority over the word-match
-                    // approximation (resolveFlormarSwatchColor), which stays the
-                    // fallback for every shade not in the map.
-                    ...(v.sku && FLORMAR_SHADE_HEX[v.sku] ? { hexColor: FLORMAR_SHADE_HEX[v.sku] } : null),
-                  };
-                }),
-              }
-            : null),
-        };
-      }),
-    [catalogProducts, locale]
-  );
-  const featured = productsWithPricing.filter((p) => p.isFeatured);
-
-  // "Discover Your Favorites" — one real product per category group (Face/
-  // Eyes/Lips/Nails/Skin Care/Accessories), so the strip shows the actual
-  // breadth of the catalog rather than another slice of the same Featured
-  // list above. Deliberately NOT framed as personalized ("Chosen For You")
-  // — there's no browsing history or recommendation engine behind this, so
-  // that label would overclaim; "Discover Your Favorites" (the brief's own
-  // alternative wording) reads as an invitation, not a claim. Picks the
-  // first available (in-stock) product per group with a real photo,
-  // preferring featured ones, falling back to any match; a group with zero
-  // real products simply contributes nothing rather than a placeholder.
-  const discoverPicks = useMemo(() => {
-    const picks: Product[] = [];
-    for (const group of FLORMAR_PRIMARY_CATEGORY_GROUPS) {
-      const inGroup = productsWithPricing.filter((p) => p.category && group.categories.includes(p.category) && p.image && p.isAvailable);
-      const pick = inGroup.find((p) => p.isFeatured) ?? inGroup[0];
-      if (pick) picks.push(pick);
-    }
-    return picks;
-  }, [productsWithPricing]);
-
-  // Real city_services.id (shared by every row in catalogProducts — they're
-  // all one listing) — NOT a "mock-flormar" placeholder string. Falls back
-  // to the placeholder only in the impossible case of an empty catalog, so
-  // AddToCartBusiness always has a syntactically valid listingId.
+  // Real city_services.id — every product on this listing shares it.
   const business: AddToCartBusiness = {
     listingType: "city_service",
-    listingId: catalogProducts[0]?.listingId ?? "mock-flormar",
+    listingId: service.id,
     businessName: "Flormar Hargeisa",
     deliveryEnabled: false,
     addons: [],
@@ -269,28 +182,15 @@ export function FlormarStorefront({
     branches: FLORMAR_BRANCHES,
   };
 
-  // FLORMAR_PRIMARY_CATEGORY_GROUPS carries no `image` of its own (no
-  // dedicated category-photography asset exists) — reuse a real,
-  // already-photographed product from that group as its tile image, the
-  // same "representative product photo" pattern real e-commerce category
-  // tiles use, rather than inventing a new asset. Featured products
-  // preferred (closer to "representative"), falls back to any product in
-  // the group with a real photo. A group can span more than one raw
-  // `products.category` value (e.g. "Skin Care" = skincare_creams +
-  // body_care) — see that config's own doc comment for why.
-  const categoryImages = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const group of FLORMAR_PRIMARY_CATEGORY_GROUPS) {
-      const inGroup = productsWithPricing.filter((p) => p.category && group.categories.includes(p.category) && p.image);
-      const pick = inGroup.find((p) => p.isFeatured) ?? inGroup[0];
-      if (pick?.image) map.set(group.key, pick.image);
-    }
-    return map;
-  }, [productsWithPricing]);
+  const featured = featuredProducts;
+  const discoverPicks = discoverPicksProducts;
 
-  // Shopping grid — category group + search + sort, all computed
-  // client-side over the same productsWithPricing every other section
-  // already uses (no second product source). No tab bar: Featured Products
+  // Shopping grid — category group + search + sort. Unlike every section
+  // above (all precomputed server-side from the full catalog the page
+  // already fetched), this is the one place that genuinely needs to see
+  // "the rest" of a 200+ product catalog — so it's the one section backed
+  // by real server-side pagination (usePaginatedProducts → /api/products),
+  // not an in-memory filter over everything. No tab bar: Featured Products
   // already has its own dedicated section above, and a "New Arrivals" tab
   // was removed because the real data doesn't support it — the catalog's
   // `created_at` only has 2 distinct values across all 225 rows (one or two
@@ -301,82 +201,71 @@ export function FlormarStorefront({
   // `createdAt` is still offered as an honest, real (if coarse) sort option
   // below, just not framed as a curated "New" section.
   const [discoveryCategory, setDiscoveryCategory] = useState<string | null>(null);
+  const [discoveryQueryInput, setDiscoveryQueryInput] = useState("");
   const [discoveryQuery, setDiscoveryQuery] = useState("");
   const [discoverySort, setDiscoverySort] = useState<SortKey>("featured");
   // Collection/gender filter — "All Products" plus one pill per gender value
-  // actually present in the real catalog. The source catalog has no gender
-  // column at all, so every product's `gender` is currently null and this
-  // pill row simply doesn't render (see the `availableGenders.length > 0`
-  // guard below) rather than showing an invented gender. Computed from real
-  // data, not a hardcoded list, so it degrades to "All Products" only if the
-  // catalog ever has zero gendered products, and grows automatically (no
-  // code change) if men's/kids items are ever added
-  // — never a fake/empty pill for a gender nothing in the catalog carries.
-  const [discoveryGender, setDiscoveryGender] = useState<Product["gender"] | "all">("all");
-  const availableGenders = useMemo(() => {
-    const present = new Set<NonNullable<Product["gender"]>>();
-    for (const p of productsWithPricing) if (p.gender) present.add(p.gender);
-    return Array.from(present);
-  }, [productsWithPricing]);
+  // actually present in the real catalog (see availableGenders' own doc
+  // comment, server-side in lib/utils/flormar-discovery.ts) — never a fake/
+  // empty pill for a gender nothing in the catalog carries.
+  const [discoveryGender, setDiscoveryGender] = useState<ProductGender | "all">("all");
 
-  // Catalogs this size (1000+ products for Flormar) can't reasonably mount
-  // every ProductCard/Image at once — that's a real DOM/network cost, not
-  // just a long scroll. Render only the first PAGE_SIZE matches, "Load
-  // More" grows it in the same fixed steps. Resets to one page whenever the
-  // active filter/search/sort actually changes the result set, so switching
-  // tabs never silently keeps 500 stale rendered cards around.
-  const DISCOVERY_PAGE_SIZE = 48;
-  const [discoveryVisibleCount, setDiscoveryVisibleCount] = useState(DISCOVERY_PAGE_SIZE);
+  // Debounced — a fetch on every keystroke would be a real "repeated
+  // Supabase requests" problem; 350ms after the visitor stops typing is
+  // enough to feel instant without querying per character.
   useEffect(() => {
-    setDiscoveryVisibleCount(DISCOVERY_PAGE_SIZE);
-  }, [discoveryCategory, discoveryQuery, discoverySort, discoveryGender]);
+    const id = setTimeout(() => setDiscoveryQuery(discoveryQueryInput.trim()), 350);
+    return () => clearTimeout(id);
+  }, [discoveryQueryInput]);
 
   function goToCategory(groupKey: string) {
     setDiscoveryCategory(groupKey);
     document.getElementById("shop-all")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
-  // Products the currently visible campaign slide promotes — resolved from
-  // the same real, priced catalogue every other section reads. Empty for a
-  // category-only slide (e.g. the mascara photo, deliberately not tied to one
-  // product) or if none of the campaign's SKUs are in stock right now.
-  const campaignProducts = useMemo(
-    () => (activeCampaign ? resolveCampaignProducts(activeCampaign, productsWithPricing) : []),
-    [activeCampaign, productsWithPricing]
-  );
+  const DISCOVERY_PAGE_SIZE = 48;
+  const activeCategoryGroup = discoveryCategory ? FLORMAR_PRIMARY_CATEGORY_GROUPS.find((g) => g.key === discoveryCategory) : undefined;
+
+  const {
+    items: discoveryItemsRaw,
+    total: discoveryResultsTotal,
+    loading: discoveryLoading,
+    hasMore: discoveryHasMore,
+    loadMore: loadMoreDiscovery,
+  } = usePaginatedProducts({
+    listingId: service.id,
+    listingType: "city_service",
+    initialItems: initialDiscoveryProducts,
+    initialTotal: discoveryTotal,
+    pageSize: DISCOVERY_PAGE_SIZE,
+    filters: {
+      category: activeCategoryGroup?.categories.filter((c): c is string => !!c),
+      gender: discoveryGender,
+      nameQuery: discoveryQuery,
+      sort: discoverySort,
+    },
+  });
+  // /api/products returns raw rows — the same display-time enrichment every
+  // other section already received server-side (see
+  // computeFlormarBoundedViews) applies here too, just per-page instead of
+  // once for the whole catalog.
+  const discoveryResults = useMemo(() => discoveryItemsRaw.map((p) => enrichFlormarProduct(p, locale)), [discoveryItemsRaw, locale]);
+
+  // Products the currently visible campaign slide promotes — precomputed
+  // server-side for every active campaign (see
+  // campaignProductsByCampaignId's own doc comment). Empty for a
+  // category-only slide (e.g. the mascara photo, deliberately not tied to
+  // one product) or if none of the campaign's SKUs are in stock right now.
+  const campaignProducts = activeCampaign ? campaignProductsByCampaignId[activeCampaign.id] ?? [] : [];
 
   // Hero CTA: open the exact product's detail modal (→ shade selector → add
   // to cart) when the campaign resolves one; otherwise fall back to its
   // category — never a guessed product link.
   function handleShopCampaign(campaign: FlormarCampaign) {
-    const [first] = resolveCampaignProducts(campaign, productsWithPricing);
+    const [first] = campaignProductsByCampaignId[campaign.id] ?? [];
     if (first) setSelectedProduct(first);
     else goToCategory(campaign.categoryFallback);
   }
-
-  const discoveryResults = useMemo(() => {
-    let list = productsWithPricing;
-    if (discoveryGender !== "all") list = list.filter((p) => p.gender === discoveryGender);
-    if (discoveryCategory) {
-      const group = FLORMAR_PRIMARY_CATEGORY_GROUPS.find((g) => g.key === discoveryCategory);
-      if (group) list = list.filter((p) => p.category && group.categories.includes(p.category));
-    }
-
-    const needle = discoveryQuery.trim().toLowerCase();
-    if (needle) {
-      list = list.filter(
-        (p) => productLocalizedName(p, locale).toLowerCase().includes(needle) || (p.sku?.toLowerCase().includes(needle) ?? false)
-      );
-    }
-
-    const sorted = [...list];
-    if (discoverySort === "newest") sorted.sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
-    else if (discoverySort === "priceLow") sorted.sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
-    else if (discoverySort === "priceHigh") sorted.sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
-    else if (discoverySort === "name") sorted.sort((a, b) => productLocalizedName(a, locale).localeCompare(productLocalizedName(b, locale)));
-    else sorted.sort((a, b) => Number(b.isFeatured) - Number(a.isFeatured) || a.sortOrder - b.sortOrder);
-    return sorted;
-  }, [productsWithPricing, discoveryGender, discoveryCategory, discoveryQuery, discoverySort, locale]);
 
   return (
     <>
@@ -477,9 +366,9 @@ export function FlormarStorefront({
           <div className="relative hidden max-w-xs flex-1 sm:block">
             <Search size={15} className="pointer-events-none absolute start-3.5 top-1/2 -translate-y-1/2 text-ink/40" aria-hidden="true" />
             <input
-              value={discoveryQuery}
+              value={discoveryQueryInput}
               onChange={(e) => {
-                setDiscoveryQuery(e.target.value);
+                setDiscoveryQueryInput(e.target.value);
                 if (e.target.value.trim()) document.getElementById("shop-all")?.scrollIntoView({ behavior: "smooth", block: "start" });
               }}
               placeholder={t("searchPlaceholder")}
@@ -529,9 +418,9 @@ export function FlormarStorefront({
           <div className="relative">
             <Search size={15} className="pointer-events-none absolute start-3.5 top-1/2 -translate-y-1/2 text-ink/40" aria-hidden="true" />
             <input
-              value={discoveryQuery}
+              value={discoveryQueryInput}
               onChange={(e) => {
-                setDiscoveryQuery(e.target.value);
+                setDiscoveryQueryInput(e.target.value);
                 if (e.target.value.trim()) document.getElementById("shop-all")?.scrollIntoView({ behavior: "smooth", block: "start" });
               }}
               placeholder={t("searchPlaceholder")}
@@ -589,11 +478,11 @@ export function FlormarStorefront({
                 className="group flex shrink-0 snap-start flex-col items-center gap-2 text-center"
               >
                 <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full shadow-soft ring-1 ring-black/5 transition-transform duration-300 group-hover:-translate-y-1 sm:h-20 sm:w-20 dark:ring-white/10">
-                  {categoryImages.get(group.key) && !brokenImageKeys.has(`cat-${group.key}`) ? (
+                  {categoryImageByGroup[group.key] && !brokenImageKeys.has(`cat-${group.key}`) ? (
                     <>
                       <span className="absolute inset-0 bg-[#FBF7F4]" aria-hidden="true" />
                       <Image
-                        src={categoryImages.get(group.key)!}
+                        src={categoryImageByGroup[group.key]}
                         alt=""
                         fill
                         sizes="80px"
@@ -800,8 +689,8 @@ export function FlormarStorefront({
             <div className="relative flex-1 sm:max-w-xs">
               <Search size={15} className="pointer-events-none absolute start-3.5 top-1/2 -translate-y-1/2 text-ink/40" aria-hidden="true" />
               <input
-                value={discoveryQuery}
-                onChange={(e) => setDiscoveryQuery(e.target.value)}
+                value={discoveryQueryInput}
+                onChange={(e) => setDiscoveryQueryInput(e.target.value)}
                 placeholder={t("searchPlaceholder")}
                 className="w-full rounded-full border border-ink/12 bg-transparent py-2.5 ps-9 pe-4 text-sm outline-none focus:border-primary dark:border-white/15"
               />
@@ -825,16 +714,19 @@ export function FlormarStorefront({
           {/* Real empty state, reached only when discoveryResults is
              genuinely empty after filtering (e.g. a search query with no
              matches). */}
-          {discoveryResults.length === 0 ? (
+          {discoveryResults.length === 0 && !discoveryLoading ? (
             <EmptyState
               icon={Search}
               title={t("noResultsTitle")}
               description={t("resultsCount", { count: 0 })}
               action={
-                discoveryQuery.trim() ? (
+                discoveryQueryInput.trim() ? (
                   <button
                     type="button"
-                    onClick={() => setDiscoveryQuery("")}
+                    onClick={() => {
+                      setDiscoveryQueryInput("");
+                      setDiscoveryQuery("");
+                    }}
                     className="rounded-full border px-4 py-2 text-sm font-bold transition-colors"
                     style={{ borderColor: `rgba(${theme.primaryRgb}, 0.3)`, color: theme.primaryStrong }}
                   >
@@ -845,9 +737,9 @@ export function FlormarStorefront({
             />
           ) : (
             <>
-              <p className="mb-4 text-sm text-ink/50 dark:text-sand/50">{t("resultsCount", { count: discoveryResults.length })}</p>
+              <p className="mb-4 text-sm text-ink/50 dark:text-sand/50">{t("resultsCount", { count: discoveryResultsTotal })}</p>
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-                {discoveryResults.slice(0, discoveryVisibleCount).map((product) => (
+                {discoveryResults.map((product) => (
                   <ProductCard
                     key={product.id}
                     product={product}
@@ -862,18 +754,19 @@ export function FlormarStorefront({
                   />
                 ))}
               </div>
-              {discoveryVisibleCount < discoveryResults.length && (
+              {discoveryHasMore && (
                 <div className="mt-8 flex flex-col items-center gap-2">
                   <p className="text-xs text-ink/45 dark:text-sand/45">
-                    {t("loadMoreCount", { shown: Math.min(discoveryVisibleCount, discoveryResults.length), total: discoveryResults.length })}
+                    {t("loadMoreCount", { shown: discoveryResults.length, total: discoveryResultsTotal })}
                   </p>
                   <button
                     type="button"
-                    onClick={() => setDiscoveryVisibleCount((n) => n + DISCOVERY_PAGE_SIZE)}
-                    className="rounded-full px-6 py-2.5 text-sm font-bold text-white transition-all duration-300 ease-premium hover:-translate-y-0.5"
+                    onClick={loadMoreDiscovery}
+                    disabled={discoveryLoading}
+                    className="rounded-full px-6 py-2.5 text-sm font-bold text-white transition-all duration-300 ease-premium hover:-translate-y-0.5 disabled:opacity-60"
                     style={{ backgroundColor: theme.primaryStrong }}
                   >
-                    {t("loadMore")}
+                    {discoveryLoading ? t("loadingMore") : t("loadMore")}
                   </button>
                 </div>
               )}

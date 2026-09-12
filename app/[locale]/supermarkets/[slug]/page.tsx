@@ -6,7 +6,7 @@ import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
 import { getCityServiceBySlug, getCityServicesGroupedByCategory } from "@/lib/data/city-services";
 import { getCategoryById } from "@/lib/data/categories";
-import { getProductsForListing } from "@/lib/data/products";
+import { getProductsForListing, deriveInitialProductsPage } from "@/lib/data/products";
 import { ProductsSection } from "@/components/shared/products-section";
 import { getMyReviewForListing } from "@/lib/data/reviews";
 import { isListingFavorited } from "@/lib/data/favorites";
@@ -118,6 +118,7 @@ export default async function SupermarketDetailPage({
   const categoryLabel = categoryDisplayName(category, locale);
   const googleMapsHref = resolveMapsUrl(service.coords, service.mapsUrl);
   const showProducts = products.length > 0;
+  const { initialProducts, initialTotal, facets } = deriveInitialProductsPage(products, 48);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -218,7 +219,9 @@ export default async function SupermarketDetailPage({
             </div>
             {showProducts ? (
               <ProductsSection
-                products={products}
+                initialProducts={initialProducts}
+                initialTotal={initialTotal}
+                facets={facets}
                 storeName={service.name}
                 business={{
                   listingType: "city_service",

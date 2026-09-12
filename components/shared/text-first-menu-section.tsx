@@ -4,9 +4,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useReducedMotion } from "framer-motion";
 import { ProductDetailModal } from "@/components/shared/product-detail-modal";
+import { SecondaryButton } from "@/components/shared/buttons";
+import { usePaginatedProducts } from "@/lib/hooks/use-paginated-products";
 import type { AddToCartBusiness } from "@/lib/cart/cart-context";
 import { productLocalizedName, productLocalizedDescription } from "@/lib/utils/product-i18n";
 import type { Product } from "@/types";
+
+const PAGE_SIZE = 48;
 
 /**
  * Universal text-first menu — the reusable counterpart to ProductsSection's
@@ -27,16 +31,28 @@ import type { Product } from "@/types";
  * sibling — a caller picks whichever presentation fits, and both can coexist
  * (ProductsSection/ProductCard's image grid stays the default everywhere it
  * already renders; nothing switches automatically).
+ *
+ * `initialProducts`/`initialTotal` are the FIRST page only (see
+ * getProductsPageForListing / deriveInitialProductsPage) — a large
+ * text-first menu (Excellence Café's, ~190 items) previously shipped every
+ * row on every page load with no pagination at all. "Load More" fetches
+ * the next page from /api/products and appends it to what's grouped below;
+ * a category with no items loaded yet simply doesn't have a section (or a
+ * nav pill) until enough pages have loaded to reach it — the same trade-off
+ * as any other "Load More" list, and the whole reason this no longer ships
+ * the entire menu upfront.
  */
 export function TextFirstMenuSection({
-  products,
+  initialProducts,
+  initialTotal,
   business,
   locale,
   storeName,
   categoryOrder,
   stickyTopPx,
 }: {
-  products: Product[];
+  initialProducts: Product[];
+  initialTotal: number;
   business: AddToCartBusiness;
   locale: string;
   storeName: string;
@@ -55,6 +71,15 @@ export function TextFirstMenuSection({
   const [selected, setSelected] = useState<Product | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const sectionRefs = useRef<Map<string, HTMLElement>>(new Map());
+
+  const { items: products, loading, hasMore, loadMore } = usePaginatedProducts({
+    listingId: business.listingId,
+    listingType: business.listingType,
+    initialItems: initialProducts,
+    initialTotal,
+    pageSize: PAGE_SIZE,
+    filters: {},
+  });
 
   const grouped = useMemo(() => {
     const map = new Map<string, Product[]>();
@@ -231,6 +256,14 @@ export function TextFirstMenuSection({
           </section>
         ))}
       </div>
+
+      {hasMore && (
+        <div className="mt-8 flex justify-center">
+          <SecondaryButton onClick={loadMore} disabled={loading}>
+            {loading ? t("loadingMore") : t("loadMore")}
+          </SecondaryButton>
+        </div>
+      )}
 
       {selected && (
         <ProductDetailModal

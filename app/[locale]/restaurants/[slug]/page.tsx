@@ -19,7 +19,7 @@ import { HotelGallerySlider } from "@/components/shared/hotel-gallery-slider";
 import { HotelNavTabs, type HotelNavTab } from "@/components/shared/hotel-nav-tabs";
 import { BusinessPhotoGallery } from "@/components/shared/business-photo-gallery";
 import { RestaurantMenuSection } from "@/components/shared/restaurant-menu-section";
-import { getProductsForListing } from "@/lib/data/products";
+import { getProductsForListing, deriveInitialProductsPage } from "@/lib/data/products";
 import { ProductsSection } from "@/components/shared/products-section";
 import { VillageMenuOrderSection } from "@/components/restaurants/village-menu-order-section";
 import { TextFirstMenuSection } from "@/components/shared/text-first-menu-section";
@@ -201,12 +201,17 @@ export default async function RestaurantDetailPage({
   // curated PartnerPartnershipFooter, never PartnerStatusSection.
   if (restaurant.slug === EXCELLENCE_CAFE_SLUG) {
     const excellenceCafeTheme = getPartnerTheme("restaurant", restaurant.slug);
+    const { initialProducts: excellenceCafeInitialProducts, initialTotal: excellenceCafeProductsTotal } = deriveInitialProductsPage(
+      restaurantProducts,
+      48
+    );
     return (
       <PartnerThemeScope theme={excellenceCafeTheme}>
         <ExcellenceCafeExperience
           locale={locale}
           restaurant={restaurant}
-          products={restaurantProducts}
+          initialProducts={excellenceCafeInitialProducts}
+          productsTotal={excellenceCafeProductsTotal}
           offers={offers}
           myReview={myReview}
           isFavorited={isFavorited}
@@ -233,6 +238,13 @@ export default async function RestaurantDetailPage({
   const showUnifiedVillageMenu = isVillageHargeisa && showProducts;
   const showLegacyMenuSection = !showUnifiedVillageMenu && (restaurant.menuHighlights.length > 0 || restaurant.menuPdfUrl);
   const showLegacyShopSection = !showUnifiedVillageMenu && showProducts;
+  // First page only, for whichever of TextFirstMenuSection/ProductsSection/
+  // VillageMenuOrderSection actually renders below — see
+  // deriveInitialProductsPage's own doc comment.
+  const { initialProducts: menuInitialProducts, initialTotal: menuInitialTotal, facets: menuFacets } = deriveInitialProductsPage(
+    restaurantProducts,
+    48
+  );
 
   const navTabs: HotelNavTab[] = [
     { id: "overview", label: td("overview") },
@@ -416,7 +428,8 @@ export default async function RestaurantDetailPage({
                 </h2>
                 {restaurant.menuDisplayStyle === "text_first" ? (
                   <TextFirstMenuSection
-                    products={restaurantProducts}
+                    initialProducts={menuInitialProducts}
+                    initialTotal={menuInitialTotal}
                     storeName={restaurant.name}
                     business={{
                       listingType: "restaurant",
@@ -430,7 +443,9 @@ export default async function RestaurantDetailPage({
                   />
                 ) : (
                   <VillageMenuOrderSection
-                    products={restaurantProducts}
+                    initialProducts={menuInitialProducts}
+                    initialTotal={menuInitialTotal}
+                    facets={menuFacets}
                     storeName={restaurant.name}
                     business={{
                       listingType: "restaurant",
@@ -490,7 +505,8 @@ export default async function RestaurantDetailPage({
                     default for every restaurant that hasn't opted in. */}
                 {restaurant.menuDisplayStyle === "text_first" ? (
                   <TextFirstMenuSection
-                    products={restaurantProducts}
+                    initialProducts={menuInitialProducts}
+                    initialTotal={menuInitialTotal}
                     storeName={restaurant.name}
                     business={{
                       listingType: "restaurant",
@@ -504,7 +520,9 @@ export default async function RestaurantDetailPage({
                   />
                 ) : (
                   <ProductsSection
-                    products={restaurantProducts}
+                    initialProducts={menuInitialProducts}
+                    initialTotal={menuInitialTotal}
+                    facets={menuFacets}
                     storeName={restaurant.name}
                     business={{
                       listingType: "restaurant",

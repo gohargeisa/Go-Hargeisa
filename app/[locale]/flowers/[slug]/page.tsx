@@ -7,7 +7,7 @@ import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
 import { getCityServiceBySlug } from "@/lib/data/city-services";
 import { getCafeBySlug } from "@/lib/data/cafes";
-import { getProductsForListing } from "@/lib/data/products";
+import { getProductsForListing, deriveInitialProductsPage } from "@/lib/data/products";
 import { ProductsSection } from "@/components/shared/products-section";
 import { getMyReviewForListing } from "@/lib/data/reviews";
 import { isListingFavorited } from "@/lib/data/favorites";
@@ -137,6 +137,7 @@ export default async function FlowersDetailPage({
   ]);
 
   const showProducts = products.length > 0;
+  const { initialProducts, initialTotal, facets } = deriveInitialProductsPage(products, 48);
   const hasStructuredHours = !!service.openingHoursStructured && service.openingHoursStructured.length > 0;
   const hasHoursInfo = hasStructuredHours || service.is24Hours || service.temporarilyClosed || service.permanentlyClosed;
   // Real, already-verified amenity tags on this listing (wifi, parking,
@@ -299,7 +300,9 @@ export default async function FlowersDetailPage({
                 <p className="mt-3 text-sm text-ink/60 dark:text-sand/60 sm:text-base">{td("roseCollectionSubtitle")}</p>
               </div>
               <ProductsSection
-                products={products}
+                initialProducts={initialProducts}
+                initialTotal={initialTotal}
+                facets={facets}
                 storeName={FLOWERS_DISPLAY_NAME}
                 business={{
                   listingType: "city_service",

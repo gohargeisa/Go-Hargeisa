@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { Locale } from "@/lib/i18n/config";
 import { getExcellenceCafePreviewData } from "@/lib/data/excellence-cafe-preview";
+import { deriveInitialProductsPage } from "@/lib/data/products";
 import { ExcellenceCafeExperience } from "@/components/excellence-cafe/excellence-cafe-experience";
 import { PartnerThemeScope } from "@/components/shared/partner/partner-theme-scope";
 import { PartnerPartnershipFooter } from "@/components/shared/partner/partner-partnership-footer";
@@ -29,9 +30,16 @@ export default async function ExcellenceCafePreviewPage({ params: { locale } }: 
   const theme = getPartnerTheme("restaurant", data.restaurant.slug);
   if (!theme) notFound();
 
+  const { initialProducts, initialTotal } = deriveInitialProductsPage(data.products, 48);
+
   return (
     <PartnerThemeScope theme={theme}>
-      <ExcellenceCafeExperience locale={locale} restaurant={data.restaurant} products={data.products} />
+      <ExcellenceCafeExperience
+        locale={locale}
+        restaurant={data.restaurant}
+        initialProducts={initialProducts}
+        productsTotal={initialTotal}
+      />
       <PartnerPartnershipFooter theme={theme} locale={locale} />
     </PartnerThemeScope>
   );

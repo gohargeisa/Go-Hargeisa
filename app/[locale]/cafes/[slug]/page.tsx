@@ -19,7 +19,7 @@ import { HotelGallerySlider } from "@/components/shared/hotel-gallery-slider";
 import { HotelNavTabs, type HotelNavTab } from "@/components/shared/hotel-nav-tabs";
 import { BusinessPhotoGallery } from "@/components/shared/business-photo-gallery";
 import { RestaurantMenuSection } from "@/components/shared/restaurant-menu-section";
-import { getProductsForListing } from "@/lib/data/products";
+import { getProductsForListing, deriveInitialProductsPage } from "@/lib/data/products";
 import { ProductsSection } from "@/components/shared/products-section";
 import { GroupedProductsSection } from "@/components/shared/grouped-products-section";
 import { TextFirstMenuSection } from "@/components/shared/text-first-menu-section";
@@ -159,6 +159,11 @@ export default async function CafeDetailPage({
   // products no longer live on this listing at all (moved to the separate
   // Lavender Flowers listing — see /flowers/[slug]).
   const lavenderMenuGroups = cafe.slug === "lavender" ? groupProductsByCategory(visibleCafeProducts, LAVENDER_MENU_CATEGORY_ORDER) : null;
+  // First page only, for whichever of TextFirstMenuSection/ProductsSection
+  // renders below (Lavender uses lavenderMenuGroups instead, unaffected) —
+  // see deriveInitialProductsPage's own doc comment.
+  const { initialProducts: cafeMenuInitialProducts, initialTotal: cafeMenuInitialTotal, facets: cafeMenuFacets } =
+    deriveInitialProductsPage(visibleCafeProducts, 48);
   const whatsappFallback = (siteSettings as { whatsapp_number?: string } | null)?.whatsapp_number ?? undefined;
   // Everything partner-specific (hero image, fit mode, brand colors) lives
   // in lib/config/partner-themes.ts — this page stays generic for any
@@ -328,7 +333,8 @@ export default async function CafeDetailPage({
                 />
               ) : cafe.menuDisplayStyle === "text_first" ? (
                 <TextFirstMenuSection
-                  products={visibleCafeProducts}
+                  initialProducts={cafeMenuInitialProducts}
+                  initialTotal={cafeMenuInitialTotal}
                   storeName={cafe.name}
                   business={{
                     listingType: "cafe",
@@ -341,7 +347,9 @@ export default async function CafeDetailPage({
                 />
               ) : (
                 <ProductsSection
-                  products={visibleCafeProducts}
+                  initialProducts={cafeMenuInitialProducts}
+                  initialTotal={cafeMenuInitialTotal}
+                  facets={cafeMenuFacets}
                   storeName={cafe.name}
                   business={{
                     listingType: "cafe",

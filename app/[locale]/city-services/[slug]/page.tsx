@@ -7,7 +7,7 @@ import type { Locale } from "@/lib/i18n/config";
 import { localeAlternates } from "@/lib/i18n/alternates";
 import { getCityServiceBySlug, getAllCityServiceSlugs, getCityServicesGroupedByCategory } from "@/lib/data/city-services";
 import { getCategoryById } from "@/lib/data/categories";
-import { getProductsForListing } from "@/lib/data/products";
+import { getProductsForListing, deriveInitialProductsPage } from "@/lib/data/products";
 import { getPublicOffersForListing } from "@/lib/data/offers";
 import { ListingOffersSection } from "@/components/shared/listing-offers-section";
 import { HijamaEducationSection } from "@/components/shared/hijama-education-section";
@@ -59,6 +59,7 @@ import { PartnerHeroBanner } from "@/components/shared/partner/partner-hero-bann
 import { PinnacleStorefront } from "@/components/pinnacle/pinnacle-storefront";
 import { MobileBookingBar } from "@/components/shared/mobile-booking-bar";
 import { FlormarStorefront } from "@/components/flormar/flormar-storefront";
+import { computeFlormarBoundedViews } from "@/lib/utils/flormar-discovery";
 import { getEnabledLoyaltyProgramForListing } from "@/lib/data/loyalty";
 import { programName as loyaltyProgramName } from "@/lib/loyalty/helpers";
 import { LoyaltyEntryCard } from "@/components/loyalty/loyalty-entry-card";
@@ -350,6 +351,11 @@ export default async function CityServiceDetailPage({
   // entry, so this changes nothing for any city_service other than the ones
   // explicitly configured there.
   const curatedProductImages = getCuratedProductImages("city_service", service.slug);
+  // First page only, for the generic ProductsSection branch below — the
+  // bespoke partner storefronts (Pinnacle/Flormar/Emaankoo/Al-Hikma/Mama &
+  // Baby Care) still read `products` directly, unaffected. See
+  // deriveInitialProductsPage's own doc comment.
+  const { initialProducts, initialTotal, facets } = deriveInitialProductsPage(products, 48);
 
   const showTypedDetails = hasTypedDetails(service, category.slug);
   const hasStructuredHours = !!service.openingHoursStructured && service.openingHoursStructured.length > 0;
@@ -443,7 +449,14 @@ export default async function CityServiceDetailPage({
             { label: service.name, href: `/${locale}/city-services/${service.slug}` },
           ]}
         />
-        <PinnacleStorefront theme={partnerTheme} service={service} products={products} locale={locale} />
+        <PinnacleStorefront
+          theme={partnerTheme}
+          service={service}
+          initialProducts={initialProducts}
+          productsTotal={initialTotal}
+          productFacets={facets}
+          locale={locale}
+        />
         <PartnerStatusSection
           isPartner={service.isPartner}
           logoUrl={partnerTheme.partnerLogo}
@@ -468,6 +481,11 @@ export default async function CityServiceDetailPage({
     // every other partner returns null here). Public client, no per-user
     // read, so this stays cacheable with the rest of the page.
     const loyaltyProgram = await getEnabledLoyaltyProgramForListing("city_service", service.id);
+    // Every whole-catalog-derived view FlormarStorefront needs, computed
+    // here from the SAME full `products` fetch above — no second Supabase
+    // query. See computeFlormarBoundedViews' own doc comment for why this
+    // is what actually fixes the page's measured ~1.2MB payload.
+    const flormarViews = computeFlormarBoundedViews(products, locale);
     return (
       <PartnerThemeScope theme={partnerTheme}>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
@@ -475,7 +493,13 @@ export default async function CityServiceDetailPage({
           theme={partnerTheme}
           service={service}
           locale={locale}
-          products={products}
+          featuredProducts={flormarViews.featuredProducts}
+          discoverPicksProducts={flormarViews.discoverPicksProducts}
+          categoryImageByGroup={flormarViews.categoryImageByGroup}
+          availableGenders={flormarViews.availableGenders}
+          campaignProductsByCampaignId={flormarViews.campaignProductsByCampaignId}
+          initialDiscoveryProducts={flormarViews.initialDiscoveryProducts}
+          discoveryTotal={flormarViews.discoveryTotal}
           loyaltySlot={
             loyaltyProgram ? (
               <LoyaltyEntryCard
@@ -767,7 +791,9 @@ export default async function CityServiceDetailPage({
                 <div>
                   {products.length > 0 && (
                     <ProductsSection
-                      products={products}
+                      initialProducts={initialProducts}
+                      initialTotal={initialTotal}
+                      facets={facets}
                       storeName={service.name}
                       business={{
                         listingType: "city_service",

@@ -1,13 +1,17 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Search } from "lucide-react";
 import { ProductDetailModal } from "@/components/shared/product-detail-modal";
 import { ProductCard } from "@/components/shared/product-card";
+import { SecondaryButton } from "@/components/shared/buttons";
+import { usePaginatedProducts } from "@/lib/hooks/use-paginated-products";
 import { PRODUCT_GENDER_ORDER, PRODUCT_GENDER_LABELS, productCategoryLabel } from "@/lib/config/product-categories";
 import type { AddToCartBusiness } from "@/lib/cart/cart-context";
 import type { Product, ProductCategory, ProductGender } from "@/types";
+
+const PAGE_SIZE = 48;
 
 function pillClass(active: boolean) {
   return `shrink-0 snap-start whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
@@ -20,19 +24,31 @@ function pillClass(active: boolean) {
 /**
  * Universal products grid + filters — Restaurant menus, Café menus, Flower
  * Shop bouquets, Perfume Shop bottles, any future vertical, only rendered
- * when the listing is orderable. Client-side filtering (category/gender/
- * brand) is plenty for the product volume a single business carries; no new
- * search infra needed. Detail view is a modal (ProductDetailModal), not a
- * new route. `business` carries the shared add-on vocabulary and cart
- * identity every ProductCard/ProductDetailModal's Add to Cart button needs.
+ * when the listing is orderable. Detail view is a modal
+ * (ProductDetailModal), not a new route.
+ *
+ * `initialProducts`/`initialTotal` are the FIRST page only (see
+ * getProductsPageForListing) — a listing whose catalog outgrew "a single
+ * business's product volume" (Excellence Café's menu, at ~780KB of shipped
+ * HTML, was a measured real example) no longer ships its whole catalog on
+ * every page load. Category/gender/brand-search changes and "Load More"
+ * re-query the server for exactly the rows needed (usePaginatedProducts →
+ * /api/products) instead of re-filtering an in-memory copy of everything.
+ * `facets` (the full set of category/gender/brand values across the WHOLE
+ * catalog) comes from a separate, much lighter query so the filter pills
+ * still reflect items that haven't loaded yet.
  */
 export function ProductsSection({
-  products,
+  initialProducts,
+  initialTotal,
+  facets,
   storeName,
   business,
   locale,
 }: {
-  products: Product[];
+  initialProducts: Product[];
+  initialTotal: number;
+  facets: { categories: ProductCategory[]; genders: ProductGender[]; brands: string[] };
   storeName: string;
   business: AddToCartBusiness;
   locale: string;
@@ -40,52 +56,44 @@ export function ProductsSection({
   const t = useTranslations("products");
   const [categoryFilter, setCategoryFilter] = useState<ProductCategory | "all">("all");
   const [genderFilter, setGenderFilter] = useState<ProductGender | "all">("all");
+  const [brandInput, setBrandInput] = useState("");
   const [brandQuery, setBrandQuery] = useState("");
   const [selected, setSelected] = useState<Product | null>(null);
 
-  const visible = useMemo(() => products.filter((p) => !p.isHidden), [products]);
+  // Debounced brand search — a fetch on every keystroke would be a real
+  // "repeated Supabase requests" problem; 350ms after the visitor stops
+  // typing is enough to feel instant without querying per character.
+  useEffect(() => {
+    const id = setTimeout(() => setBrandQuery(brandInput.trim()), 350);
+    return () => clearTimeout(id);
+  }, [brandInput]);
 
-  // Category vocabulary is free text (any business can use its own) — the
-  // filter pills are whatever categories this product list actually has,
-  // in first-appearance order, not a fixed enum.
-  const categoriesPresent = useMemo(() => {
-    const seen: ProductCategory[] = [];
-    for (const p of visible) {
-      if (p.category && !seen.includes(p.category)) seen.push(p.category);
-    }
-    return seen;
-  }, [visible]);
+  const { items, loading, hasMore, loadMore } = usePaginatedProducts({
+    listingId: business.listingId,
+    listingType: business.listingType,
+    initialItems: initialProducts,
+    initialTotal,
+    pageSize: PAGE_SIZE,
+    filters: {
+      category: categoryFilter === "all" ? undefined : categoryFilter,
+      gender: genderFilter,
+      brandQuery,
+    },
+  });
 
-  const gendersPresent = useMemo(() => {
-    const present = new Set(visible.map((p) => p.gender).filter((g): g is ProductGender => !!g));
-    return PRODUCT_GENDER_ORDER.filter((g) => present.has(g));
-  }, [visible]);
+  const gendersPresent = useMemo(() => PRODUCT_GENDER_ORDER.filter((g) => facets.genders.includes(g)), [facets.genders]);
 
-  const brandsPresent = useMemo(() => {
-    const present = new Set(visible.map((p) => p.brand).filter((b): b is string => !!b));
-    return Array.from(present).sort();
-  }, [visible]);
-
-  const filtered = useMemo(() => {
-    const needle = brandQuery.trim().toLowerCase();
-    return visible
-      .filter((p) => categoryFilter === "all" || p.category === categoryFilter)
-      .filter((p) => genderFilter === "all" || p.gender === genderFilter)
-      .filter((p) => !needle || (p.brand ?? "").toLowerCase().includes(needle))
-      .sort((a, b) => Number(b.isFeatured) - Number(a.isFeatured) || a.sortOrder - b.sortOrder);
-  }, [visible, categoryFilter, genderFilter, brandQuery]);
-
-  if (visible.length === 0) return null;
+  if (initialTotal === 0) return null;
 
   return (
     <div>
       <div className="mb-5 space-y-3">
-        {categoriesPresent.length > 1 && (
+        {facets.categories.length > 1 && (
           <div className="flex snap-x snap-proximity gap-2 overflow-x-auto pb-1 scrollbar-none sm:flex-wrap sm:overflow-visible sm:pb-0">
             <button type="button" onClick={() => setCategoryFilter("all")} className={pillClass(categoryFilter === "all")}>
               {t("allCategories")}
             </button>
-            {categoriesPresent.map((c) => (
+            {facets.categories.map((c) => (
               <button key={c} type="button" onClick={() => setCategoryFilter(c)} className={pillClass(categoryFilter === c)}>
                 {productCategoryLabel(c, locale)}
               </button>
@@ -93,7 +101,7 @@ export function ProductsSection({
           </div>
         )}
 
-        {(gendersPresent.length > 1 || brandsPresent.length > 0) && (
+        {(gendersPresent.length > 1 || facets.brands.length > 0) && (
           <div className="flex flex-wrap items-center gap-3">
             {gendersPresent.length > 1 && (
               <div className="flex snap-x snap-proximity gap-2 overflow-x-auto pb-1 scrollbar-none sm:flex-wrap sm:overflow-visible sm:pb-0">
@@ -107,12 +115,12 @@ export function ProductsSection({
                 ))}
               </div>
             )}
-            {brandsPresent.length > 0 && (
+            {facets.brands.length > 0 && (
               <div className="relative">
                 <Search size={14} className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-ink/40" aria-hidden="true" />
                 <input
-                  value={brandQuery}
-                  onChange={(e) => setBrandQuery(e.target.value)}
+                  value={brandInput}
+                  onChange={(e) => setBrandInput(e.target.value)}
                   placeholder={t("searchBrandPlaceholder")}
                   className="rounded-full border border-ink/12 bg-transparent py-2 ps-9 pe-4 text-sm outline-none focus:border-primary dark:border-white/15"
                 />
@@ -122,11 +130,11 @@ export function ProductsSection({
         )}
       </div>
 
-      {filtered.length === 0 ? (
+      {items.length === 0 && !loading ? (
         <p className="text-sm text-ink/50 dark:text-sand/50">{t("noProductsMatchFilters")}</p>
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {filtered.map((product) => (
+          {items.map((product) => (
             <ProductCard
               key={product.id}
               product={product}
@@ -136,6 +144,14 @@ export function ProductsSection({
               variant="compact"
             />
           ))}
+        </div>
+      )}
+
+      {hasMore && (
+        <div className="mt-6 flex justify-center">
+          <SecondaryButton onClick={loadMore} disabled={loading}>
+            {loading ? t("loadingMore") : t("loadMore")}
+          </SecondaryButton>
         </div>
       )}
 

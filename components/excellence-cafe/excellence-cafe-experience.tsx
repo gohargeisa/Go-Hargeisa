@@ -144,13 +144,15 @@ function SectionHeader({
  *
  * `offers` / `myReview` / `isFavorited` / `whatsappFallback` are optional so
  * the private preview route (which has no per-visitor engagement data) can
- * keep passing just `{ locale, restaurant, products }`; the public route
- * passes the real values fetched by restaurants/[slug]/page.tsx.
+ * keep passing just `{ locale, restaurant, initialProducts, productsTotal }`;
+ * the public route passes the real values fetched by
+ * restaurants/[slug]/page.tsx.
  */
 export async function ExcellenceCafeExperience({
   locale,
   restaurant,
-  products,
+  initialProducts,
+  productsTotal,
   offers = [],
   myReview = null,
   isFavorited = false,
@@ -158,7 +160,11 @@ export async function ExcellenceCafeExperience({
 }: {
   locale: Locale;
   restaurant: Restaurant;
-  products: Product[];
+  /** Page 1 of the menu only — see getProductsForListing +
+   * deriveInitialProductsPage in lib/data/products.ts. TextFirstMenuSection
+   * below fetches subsequent pages itself via "Load More". */
+  initialProducts: Product[];
+  productsTotal: number;
   offers?: BusinessOffer[];
   myReview?: Review | null;
   isFavorited?: boolean;
@@ -195,7 +201,7 @@ export async function ExcellenceCafeExperience({
 
   const navTabs: HotelNavTab[] = [
     { id: "overview", label: td("overview") },
-    ...(products.length > 0 ? [{ id: "menu", label: td("orderOnline") }] : []),
+    ...(productsTotal > 0 ? [{ id: "menu", label: td("orderOnline") }] : []),
     ...(restaurant.reservable ? [{ id: "reservation", label: tc("reserveTable") }] : []),
     { id: "reviews", label: tc("reviews") },
     { id: "location", label: td("location") },
@@ -538,7 +544,8 @@ export async function ExcellenceCafeExperience({
           </div>
         </Reveal>
         <TextFirstMenuSection
-          products={products}
+          initialProducts={initialProducts}
+          initialTotal={productsTotal}
           business={business}
           locale={locale}
           storeName={restaurant.name}

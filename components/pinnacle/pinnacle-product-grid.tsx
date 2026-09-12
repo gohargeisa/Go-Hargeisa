@@ -1,24 +1,27 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Search, MessageCircle, X } from "lucide-react";
 import { productLocalizedName } from "@/lib/utils/product-i18n";
 import { toWhatsAppHref } from "@/lib/utils/whatsapp";
+import { usePaginatedProducts } from "@/lib/hooks/use-paginated-products";
 import type { PartnerTheme } from "@/lib/config/partner-themes";
 import type { Locale } from "@/lib/i18n/config";
-import type { Product, ProductGender } from "@/types";
+import type { OrderableListingType, Product, ProductGender } from "@/types";
 
-const PAGE_SIZE = 24;
+const PAGE_SIZE = 48;
 
 /**
- * Client-side search/filter/pagination for Pinnacle's real, verified
- * product catalog (`products` here is already the publicly-visible subset
- * — a handful of rows with no verified image are excluded server-side via
- * is_hidden, never shown as a placeholder). Split out from PinnacleStorefront (a server
- * component) because filtering/search genuinely needs client interactivity
- * — everything else on that page stays server-rendered.
+ * Real server-side pagination/search/filter for Pinnacle's ~190-item real,
+ * verified product catalog (`initialProducts`/`initialTotal` are page 1
+ * only — see getProductsPageForListing/deriveInitialProductsPage). Split
+ * out from PinnacleStorefront (a server component) because filtering/search
+ * genuinely needs client interactivity — everything else on that page
+ * stays server-rendered. `facets.brands`/`facets.genders` (the distinct
+ * values across the WHOLE catalog) come from the server page so the
+ * dropdowns still list every real value, not just whatever's on page 1.
  *
  * No price anywhere on this card, by explicit request: `product.price` is
  * still populated in the database (see the population migration) for
@@ -28,47 +31,53 @@ const PAGE_SIZE = 24;
  */
 export function PinnacleProductGrid({
   theme,
-  products,
+  listingId,
+  listingType,
+  initialProducts,
+  initialTotal,
+  facets,
   whatsappNumber,
   locale,
 }: {
   theme: PartnerTheme;
-  products: Product[];
+  listingId: string;
+  listingType: OrderableListingType;
+  initialProducts: Product[];
+  initialTotal: number;
+  facets: { brands: string[]; genders: ProductGender[] };
   whatsappNumber?: string;
   locale: Locale;
 }) {
   const t = useTranslations("pinnacleStorefront");
+  const [queryInput, setQueryInput] = useState("");
   const [query, setQuery] = useState("");
   const [gender, setGender] = useState<ProductGender | "all">("all");
   const [brand, setBrand] = useState<string>("all");
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
-  const brands = useMemo(() => {
-    const set = new Set<string>();
-    for (const p of products) if (p.brand) set.add(p.brand);
-    return Array.from(set).sort((a, b) => a.localeCompare(b));
-  }, [products]);
+  // Debounced — a fetch on every keystroke would be a real "repeated
+  // Supabase requests" problem; 350ms after the visitor stops typing is
+  // enough to feel instant without querying per character.
+  useEffect(() => {
+    const id = setTimeout(() => setQuery(queryInput.trim()), 350);
+    return () => clearTimeout(id);
+  }, [queryInput]);
 
-  const filtered = useMemo(() => {
-    const needle = query.trim().toLowerCase();
-    return products.filter((p) => {
-      if (gender !== "all" && p.gender !== gender) return false;
-      if (brand !== "all" && p.brand !== brand) return false;
-      if (!needle) return true;
-      const name = productLocalizedName(p, locale).toLowerCase();
-      return name.includes(needle) || (p.brand?.toLowerCase().includes(needle) ?? false);
-    });
-  }, [products, query, gender, brand, locale]);
+  const { items: visible, total, loading, hasMore, loadMore } = usePaginatedProducts({
+    listingId,
+    listingType,
+    initialItems: initialProducts,
+    initialTotal,
+    pageSize: PAGE_SIZE,
+    filters: { gender, brandExact: brand, nameQuery: query },
+  });
 
-  const visible = filtered.slice(0, visibleCount);
-  const hasMore = visibleCount < filtered.length;
-  const hasActiveFilters = query.trim() !== "" || gender !== "all" || brand !== "all";
+  const hasActiveFilters = queryInput.trim() !== "" || gender !== "all" || brand !== "all";
 
   function clearFilters() {
+    setQueryInput("");
     setQuery("");
     setGender("all");
     setBrand("all");
-    setVisibleCount(PAGE_SIZE);
   }
 
   const productWhatsappHref = (productName: string) =>
@@ -82,42 +91,33 @@ export function PinnacleProductGrid({
           <Search size={16} className="pointer-events-none absolute start-3.5 top-1/2 -translate-y-1/2 text-ink/35 dark:text-sand/40" aria-hidden="true" />
           <input
             type="search"
-            value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              setVisibleCount(PAGE_SIZE);
-            }}
+            value={queryInput}
+            onChange={(e) => setQueryInput(e.target.value)}
             placeholder={t("searchPlaceholder")}
             className="w-full rounded-full border border-ink/12 bg-transparent py-2.5 ps-10 pe-4 text-sm outline-none transition-colors focus:border-current dark:border-white/15"
-            style={{ borderColor: query ? theme.accentStrong : undefined }}
+            style={{ borderColor: queryInput ? theme.accentStrong : undefined }}
             aria-label={t("searchPlaceholder")}
           />
         </div>
 
         <select
           value={gender}
-          onChange={(e) => {
-            setGender(e.target.value as ProductGender | "all");
-            setVisibleCount(PAGE_SIZE);
-          }}
+          onChange={(e) => setGender(e.target.value as ProductGender | "all")}
           className="rounded-full border border-ink/12 bg-transparent px-4 py-2.5 text-sm font-semibold outline-none dark:border-white/15"
         >
           <option value="all">{t("filterAllGenders")}</option>
-          <option value="men">{t("categoryMenTitle")}</option>
-          <option value="women">{t("categoryWomenTitle")}</option>
-          <option value="unisex">{t("categoryUnisexTitle")}</option>
+          {facets.genders.includes("men") && <option value="men">{t("categoryMenTitle")}</option>}
+          {facets.genders.includes("women") && <option value="women">{t("categoryWomenTitle")}</option>}
+          {facets.genders.includes("unisex") && <option value="unisex">{t("categoryUnisexTitle")}</option>}
         </select>
 
         <select
           value={brand}
-          onChange={(e) => {
-            setBrand(e.target.value);
-            setVisibleCount(PAGE_SIZE);
-          }}
+          onChange={(e) => setBrand(e.target.value)}
           className="rounded-full border border-ink/12 bg-transparent px-4 py-2.5 text-sm font-semibold outline-none dark:border-white/15"
         >
           <option value="all">{t("filterAllBrands")}</option>
-          {brands.map((b) => (
+          {facets.brands.map((b) => (
             <option key={b} value={b}>
               {b}
             </option>
@@ -135,10 +135,10 @@ export function PinnacleProductGrid({
           </button>
         )}
 
-        <p className="text-sm font-semibold text-ink/50 dark:text-sand/50 sm:ms-auto">{t("productsCount", { count: filtered.length })}</p>
+        <p className="text-sm font-semibold text-ink/50 dark:text-sand/50 sm:ms-auto">{t("productsCount", { count: total })}</p>
       </div>
 
-      {filtered.length === 0 ? (
+      {visible.length === 0 && !loading ? (
         <p className="py-16 text-center text-sm text-ink/50 dark:text-sand/50">{t("noProductsFound")}</p>
       ) : (
         <>
@@ -194,11 +194,12 @@ export function PinnacleProductGrid({
             <div className="mt-10 flex justify-center">
               <button
                 type="button"
-                onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
-                className="rounded-full border px-7 py-3 text-sm font-bold transition-colors"
+                onClick={loadMore}
+                disabled={loading}
+                className="rounded-full border px-7 py-3 text-sm font-bold transition-colors disabled:opacity-60"
                 style={{ borderColor: `rgba(${theme.primaryRgb}, 0.2)`, color: theme.primaryStrong }}
               >
-                {t("loadMoreCta")}
+                {loading ? t("loadingMore") : t("loadMoreCta")}
               </button>
             </div>
           )}
