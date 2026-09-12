@@ -8,34 +8,21 @@
  * external image) for any slug with no entry here, or whose file hasn't
  * been added yet.
  *
- * `auto-repair` has no prepared filename yet — add one (suggested:
- * auto-repair.jpg) and a row here once it exists.
- *
- * "education" and "perfumes-cosmetics" are not real category slugs (there
- * is no `categories` row for either) — they're the purely-presentational
- * Schools+Universities and Perfumes+Cosmetics groupings built in
- * CityServicesPageClient, keyed here the same way so each gets the same
- * premium image treatment as every real category.
+ * Deliberately empty: `public/images/city-services/` was never actually
+ * populated with any of these files (confirmed 2026-09-12 — the directory
+ * doesn't exist on disk, in this repo or in the deployed production build).
+ * Every card below therefore ran the "legacy" tier of useCategoryImage()
+ * on every render, which meant an always-404ing image request (confirmed
+ * live: gohargeisa.com/images/city-services/perfumes.jpg → 404) had to
+ * fail before the same gradient+icon fallback you'd get from an empty map
+ * appeared — on the homepage's category grid and every /city-services
+ * card, for every visitor, on every load. The visual result is identical
+ * either way (the fallback always rendered; no prepared photo was ever
+ * actually shown), so emptying this only removes the wasted failing
+ * request — it does not change what anyone sees. Re-add an entry here only
+ * once its file is actually placed under public/images/city-services/.
  */
-export const CITY_SERVICE_CATEGORY_IMAGE_FILENAME: Record<string, string> = {
-  hospital: "hospital.jpg",
-  clinic: "clinic.jpg",
-  school: "school.jpg",
-  university: "universities.jpg",
-  education: "education.jpg",
-  pharmacy: "pharmacy.jpg",
-  "perfume-shop": "perfumes.jpg",
-  "perfumes-cosmetics": "perfumes.jpg",
-  "kids-family": "kids-family.jpg",
-  "men-barbershop": "mens-barbershops.jpg",
-  "beauty-salon": "beauty-salons.jpg",
-  "car-rental": "car-rental.jpg",
-  "car-wash": "car-wash.jpg",
-  "gym": "gym-sports-clubs.jpg",
-  "park-playground": "parks-playgrounds.jpg",
-  "taxi-service": "taxi-services.jpg",
-  "cosmetics-beauty": "cosmetics-womens-beauty.jpg",
-};
+export const CITY_SERVICE_CATEGORY_IMAGE_FILENAME: Record<string, string> = {};
 
 export function cityServiceCategoryImagePath(slug: string): string | undefined {
   const filename = CITY_SERVICE_CATEGORY_IMAGE_FILENAME[slug];
